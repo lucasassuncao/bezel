@@ -1,0 +1,54 @@
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.out
+coverage.html
+coverage.xml
+
+# Pinned tools installed by the Makefile
+.gobin/
+
+# Supply-chain scan output
+sbom.json
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS specific
+Thumbs.db
+Desktop.ini
+
+.claude
+.superpowers/
+/docs/superpowers
+tmp/
+tmp/*
+# Cross-compiled binary used by demo.tape
+demo-app
+
+# Binaries from running `go build` inside examples/*/ without -o
+examples/*/test
+examples/*/test.exe
+
+# Throwaway working copies created by examples/*/demo.tape recordings
+examples/*/session.yaml
+
+# examples/test's auto-seeded default config (regenerated on first run)
+examples/test/demo.yaml
+
+# Binaries the example tapes build at the root; they delete them when done
+/*.exe
