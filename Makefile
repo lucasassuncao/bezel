@@ -145,12 +145,15 @@ docs: $(GOMARKDOC) ## Generate documentation with gomarkdoc
 		./animation/... \
 		./browser/... \
 		./draw/... \
+		./form/... \
+		./icon/... \
 		./inline/... \
 		./layout/... \
 		./legend/... \
 		./list/... \
 		./overlay/... \
 		./palette/... \
+		./progress/... \
 		./shell/... \
 		./table/... \
 		./textbox/... \

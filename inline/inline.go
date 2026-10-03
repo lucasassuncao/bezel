@@ -5,10 +5,10 @@ package inline
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/progress"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -89,12 +89,7 @@ func (c confirm) View() tea.View {
 }
 
 // Bar is a done/total progress bar width cells wide, for a caller that
-// redraws it in place with \r.
+// redraws it in place with \r. It is progress.Bar, kept here for CLIs.
 func Bar(done, total, width int, th theme.Resolved) string {
-	width = max(width, 1)
-	filled := 0
-	if total > 0 {
-		filled = min(max(done, 0)*width/total, width)
-	}
-	return th.Accent.Render(strings.Repeat("█", filled)) + th.Muted.Render(strings.Repeat("░", width-filled))
+	return progress.Bar(done, total, width, th)
 }

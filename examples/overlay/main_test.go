@@ -98,3 +98,25 @@ func TestOverlayEscClosesAlert(t *testing.T) {
 	_, out = frame(t, m, nil)
 	require.NotContains(t, out, "Disk almost full")
 }
+
+func TestOverlayPagerScrollsALongOutput(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	for range 4 {
+		m = press(t, m, "down")
+	}
+	m = press(t, m, "enter")
+	m, out := frame(t, m, nil)
+	t.Log("\n" + out)
+	require.Contains(t, out, "go test ./...")
+	require.Contains(t, out, "TestCase01")
+	require.NotContains(t, out, "ok  ")
+
+	m = press(t, m, "end")
+	m, out = frame(t, m, nil)
+	require.Contains(t, out, "example.com/app", "end reaches the last line")
+
+	m = press(t, m, "esc")
+	_, out = frame(t, m, nil)
+	require.NotContains(t, out, "go test ./...")
+}

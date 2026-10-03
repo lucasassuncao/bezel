@@ -48,6 +48,12 @@ Package overlay is the stack of modals floating over the panes. The top one gets
 - [type Option](<#Option>)
   - [func Opt\(keys, label string, do tea.Cmd\) Option](<#Opt>)
 - [type Overlay](<#Overlay>)
+- [type Pager](<#Pager>)
+  - [func NewPager\(title, text string, style lipgloss.Style, hint legend.Style\) Pager](<#NewPager>)
+  - [func \(p Pager\) Legend\(\) \[\]legend.Entry](<#Pager.Legend>)
+  - [func \(p Pager\) Offset\(\) int](<#Pager.Offset>)
+  - [func \(p Pager\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Pager.Update>)
+  - [func \(p Pager\) View\(body layout.Rect\) string](<#Pager.View>)
 - [type Pick](<#Pick>)
   - [func NewPick\(title string, rows, notes \[\]string, onPick func\(i int\) tea.Cmd, style lipgloss.Style, hint legend.Style\) Pick](<#NewPick>)
   - [func \(p Pick\) Cursor\(\) int](<#Pick.Cursor>)
@@ -139,7 +145,7 @@ func Open(o Overlay) tea.Cmd
 Open is the command that pushes o on top of the stack.
 
 <a name="Alert"></a>
-## type [Alert](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L24-L30>)
+## type [Alert](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L25-L31>)
 
 Alert is a message box with an OK button; any key dismisses it.
 
@@ -150,7 +156,7 @@ type Alert struct {
 ```
 
 <a name="NewAlert"></a>
-### func [NewAlert](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L32>)
+### func [NewAlert](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L33>)
 
 ```go
 func NewAlert(kind Kind, title, message string, style lipgloss.Style, hint legend.Style) Alert
@@ -159,7 +165,7 @@ func NewAlert(kind Kind, title, message string, style lipgloss.Style, hint legen
 
 
 <a name="Alert.Kind"></a>
-### func \(Alert\) [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L36>)
+### func \(Alert\) [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L37>)
 
 ```go
 func (a Alert) Kind() Kind
@@ -168,7 +174,7 @@ func (a Alert) Kind() Kind
 
 
 <a name="Alert.Legend"></a>
-### func \(Alert\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L45>)
+### func \(Alert\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L46>)
 
 ```go
 func (a Alert) Legend() []legend.Entry
@@ -177,7 +183,7 @@ func (a Alert) Legend() []legend.Entry
 
 
 <a name="Alert.Update"></a>
-### func \(Alert\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L38>)
+### func \(Alert\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L39>)
 
 ```go
 func (a Alert) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -186,7 +192,7 @@ func (a Alert) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Alert.View"></a>
-### func \(Alert\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L47>)
+### func \(Alert\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L48>)
 
 ```go
 func (a Alert) View(body layout.Rect) string
@@ -386,7 +392,7 @@ type Keys struct {
 ```
 
 <a name="Kind"></a>
-## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L14>)
+## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L15>)
 
 Kind is what an alert reports; the app picks the border colour by it.
 
@@ -439,6 +445,62 @@ type Overlay interface {
     Legend() []legend.Entry
 }
 ```
+
+<a name="Pager"></a>
+## type [Pager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L16-L24>)
+
+Pager is a titled block of text taller than a dialog: a command's output, a report. The arrows, pgup/pgdown, home and end scroll it; esc, q or enter closes it.
+
+```go
+type Pager struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewPager"></a>
+### func [NewPager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L32>)
+
+```go
+func NewPager(title, text string, style lipgloss.Style, hint legend.Style) Pager
+```
+
+
+
+<a name="Pager.Legend"></a>
+### func \(Pager\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L72>)
+
+```go
+func (p Pager) Legend() []legend.Entry
+```
+
+
+
+<a name="Pager.Offset"></a>
+### func \(Pager\) [Offset](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L38>)
+
+```go
+func (p Pager) Offset() int
+```
+
+Offset is the index of the first line shown.
+
+<a name="Pager.Update"></a>
+### func \(Pager\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L40>)
+
+```go
+func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd)
+```
+
+
+
+<a name="Pager.View"></a>
+### func \(Pager\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L76>)
+
+```go
+func (p Pager) View(body layout.Rect) string
+```
+
+
 
 <a name="Pick"></a>
 ## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L114-L123>)

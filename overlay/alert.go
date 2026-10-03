@@ -6,6 +6,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
 )
@@ -54,13 +55,9 @@ func accent(style lipgloss.Style) lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(style.GetBorderTopForeground())
 }
 
-// button is a filled label: the dialog's colour when focused, grey otherwise.
+// button is draw.Button in the dialog's colour.
 func button(label string, ink lipgloss.Style, focused bool) string {
-	bg := lipgloss.Color("240")
-	if focused {
-		bg = ink.GetForeground()
-	}
-	return lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("231")).Background(bg).Padding(0, 2).Render("  " + label + "  ")
+	return draw.Button(label, ink, focused)
 }
 
 // dialog is the look every overlay shares: a title in the dialog's colour,

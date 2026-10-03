@@ -37,3 +37,26 @@ func TestDrawScrollsThroughTheSections(t *testing.T) {
 	require.Contains(t, out, "nothing here")
 	require.NotContains(t, out, "HEADER")
 }
+
+func TestDrawShowsBothDividers(t *testing.T) {
+	var m tea.Model = newModel()
+	_, out := frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+
+	require.Contains(t, out, "DIVIDER")
+	require.Contains(t, out, "── Packages ──")
+	require.Contains(t, out, strings.Repeat("─", 40), "the bare rule spans the pane")
+}
+
+func TestDrawShowsACardAndButtons(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	for range 14 {
+		m, _ = m.Update(bezeltest.Key("down"))
+	}
+	_, out := frame(t, m, nil)
+	t.Log("\n" + out)
+	require.Contains(t, out, "─ git ─")
+	require.Contains(t, out, "[u] upgrade")
+	require.Contains(t, out, "Save")
+	require.Contains(t, out, "Cancel")
+}

@@ -32,7 +32,7 @@ A header over two columns. `w` narrows the window below the `Collapse` limit and
 
 ## draw
 
-The helpers the frame is drawn with, one section each: header, tabs, breadcrumb, key-value rows, wrapped and truncated text, numbered lines, and the empty state.
+The helpers the frame is drawn with, one section each: header, tabs, breadcrumb, a divider bare and labelled, a card with its actions in the footer, a focused and an unfocused button, key-value rows, wrapped and truncated text, numbered lines, and the empty state.
 
 <details>
 <summary>Show Example</summary>
@@ -42,6 +42,45 @@ The helpers the frame is drawn with, one section each: header, tabs, breadcrumb,
 </details>
 
 [`examples/draw/main.go`](examples/draw/main.go)
+
+## icon
+
+Every state mark in both sets, side by side, then a list of packages and a source chain drawn as a tree with the set in use. `a` swaps both between Unicode and ASCII, the set `BEZEL_ASCII` or `TERM=dumb` picks on its own.
+
+<details>
+<summary>Show Example</summary>
+
+![icon](examples/icon/icon.gif)
+
+</details>
+
+[`examples/icon/main.go`](examples/icon/main.go)
+
+## form
+
+One of each control in a form: a name typed into an `Input`, an image picked from a `Select` that opens under it, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. tab and shift+tab move between them, and every value starts in one column. Create reports what the form holds on the status row.
+
+<details>
+<summary>Show Example</summary>
+
+![form](examples/form/form.gif)
+
+</details>
+
+[`examples/form/main.go`](examples/form/main.go)
+
+## progress
+
+A count that fills on its own, as a `Line` (label, bar, `done/total`) and as a bare `Bar`, and a wizard's stages in a `Stepper`. `n` and `p` walk the stages; the copy drawn at 30 columns folds to "Step 2 of 4". `r` restarts the count.
+
+<details>
+<summary>Show Example</summary>
+
+![progress](examples/progress/progress.gif)
+
+</details>
+
+[`examples/progress/main.go`](examples/progress/main.go)
 
 ## theme
 
@@ -71,7 +110,7 @@ The table a `--list-themes` flag prints: scrollable in a terminal, plain lines i
 
 ## overlay
 
-The ready-made modals. An alert any key closes, a confirm that answers the app, a prompt that refuses an empty name, and the help list. `esc` closes each one.
+The ready-made modals. An alert any key closes, a confirm that answers the app, a prompt that refuses an empty name, the help list, and a pager over a command's output, scrolled line by line, a page at a time and to the end. `esc` closes each one.
 
 <details>
 <summary>Show Example</summary>

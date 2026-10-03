@@ -17,7 +17,17 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var kinds = []string{"Alert", "Confirm", "Prompt", "Help"}
+var kinds = []string{"Alert", "Confirm", "Prompt", "Help", "Pager"}
+
+// testLog is a command's output, long enough that only a pager shows it whole.
+func testLog() string {
+	var b strings.Builder
+	for i := 1; i <= 48; i++ {
+		fmt.Fprintf(&b, "=== RUN   TestCase%02d\n--- PASS: TestCase%02d (0.0%ds)\n", i, i, i%10)
+	}
+	b.WriteString("PASS\nok  \texample.com/app\t1.284s")
+	return b.String()
+}
 
 type (
 	openMsg struct{}
@@ -66,6 +76,8 @@ func (m model) modal() overlay.Overlay {
 				}
 				return ""
 			})
+	case "Pager":
+		return overlay.NewPager("go test ./...", testLog(), m.th.Modal, m.th.Legend)
 	default:
 		return overlay.NewHelp("Keys", []overlay.HelpSection{
 			{Name: "Navigation", Entries: []legend.Entry{legend.New("↑/↓", "move"), legend.New("enter", "open")}},

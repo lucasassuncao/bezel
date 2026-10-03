@@ -13,11 +13,14 @@ go get github.com/lucasassuncao/bezel
 | Package | What it is |
 | --- | --- |
 | `layout` | Pure. Declare the screen as a tree (`Columns`, `Rows`, `Fixed`, `Fill`) and resolve it to rects. `Collapse` drops a leaf below a width; `Info()` marks a pane that only informs, which tab skips. |
-| `draw` | Pure. ANSI-safe truncate/fit/wrap, titled panels, header, tabs, status line, `Composite` for floating boxes. |
+| `draw` | Pure. ANSI-safe truncate/fit/wrap, titled panels and a `Card` with a footer row, header, tabs, status line, a `Divider` with an optional label, the filled `Button` dialogs and forms draw with, `Composite` for floating boxes. |
 | `shell` | The struct you embed. Handles `WindowSizeMsg`, tabs, focus, status with TTL, a busy spinner (`Busy`/`Idle`), `Copy` to the clipboard off the event loop, overlays and the legend. Keys are `Action`s: prebuilt ones with a fixed meaning (`Help`, `Commands`, `ChangeTab`, `ChangePane`, `Move`, `Scroll`, `Quit`) and `Custom` ones; one declaration drives the legend, the key and the palette. `DisplayOnly` prints a key a component handles itself; `RunWith` gives a prebuilt the app's own behavior. `ChangePane` sends a `FocusMsg{From, To}` so the app can run what entering and leaving a pane mean. |
 | `theme` | Semantic palette (Accent, Success, Danger, ...), presets, and the lipgloss styles every panel, legend and modal draws with. Empty roles follow the terminal's light or dark background: `Resolve(t, dark)`. |
 | `themebrowser` | Inline table of every preset, for a `--list-themes` flag. |
-| `overlay` | Stack of modals. The top one gets the keys, `Esc` pops it. Ready-made `Alert`, `Confirm`, `Help`, and `Prompt` for one line of typed text (a required text, a validation, a live preview). |
+| `overlay` | Stack of modals. The top one gets the keys, `Esc` pops it. Ready-made `Alert`, `Confirm`, `Help`, `Prompt` for one line of typed text (a required text, a validation, a live preview), and `Pager` for text taller than a dialog: a command's output, a report. |
+| `icon` | One set of state marks (`OK`, `Fail`, `Warn`, `Running`, `Pending`, ...) in the theme's colours, Unicode or ASCII (`BEZEL_ASCII`, or `TERM=dumb`), so a check mark means the same in a list, a status line and CLI output. `Connector` and `Indent` draw a tree's `├─`/`└─` branches in the same set. |
+| `form` | Controls that ask for a value: `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, stacked in a `Form` that moves focus with tab and shift+tab and lines every value up in one column. |
+| `progress` | How far along something is, in one row: `Bar` and `Line` (label, bar, `done/total`) for a count, `Stepper` for named stages such as a wizard's, compacting to "Step 2 of 4" when it does not fit. |
 | `legend` | Key entries tagged with a capability, filtered by what the session allows, packed into a few rows. |
 | `palette` | The `:` command line `shell.Commands()` opens: prefix matching, exact name before unique prefix, arrows, tab completion, arguments. |
 | `list` | Cursor list with section headings, `↓ N more`, and a `/` filter. Rows carry your payload. |
@@ -26,7 +29,7 @@ go get github.com/lucasassuncao/bezel
 | `textbox` | The bubbles text area for a multi-line value: no length or line cap, the numbered gutter, theme colours, `SetText` folding CRLF. Height stays yours. |
 | `browser` | Pick-from-a-list screen: labels left, the selected item's detail right, tab to switch. |
 | `animation` | Eased integer tween for panels that slide open. |
-| `inline` | For CLIs that print logs: `Confirm` asks yes/no below the current line, `Bar` draws a progress bar. Nothing takes the screen. |
+| `inline` | For CLIs that print logs: `Confirm` asks yes/no below the current line, `Bar` draws a progress bar (the same as `progress.Bar`). Nothing takes the screen. |
 | `bezeltest` | For tests: `Key("ctrl+s")` is the key press a terminal sends, `Text` included for a plain character, and it reads back as the name it was given. |
 
 ## Shape of an app

@@ -47,6 +47,25 @@ func Tabs(width int, names []string, active int, st ChromeStyle) string {
 	return Fit(strings.Join(parts, " "), width)
 }
 
+// Divider is a horizontal rule width cells long, with label set into it after a
+// short lead when one is given: "── Label ─────".
+func Divider(width int, label string, line, text lipgloss.Style) string {
+	if width < 1 {
+		return ""
+	}
+	const lead = 2
+	// Too narrow for the lead, the two spaces and a cell of label: the bare rule.
+	if label == "" || width < lead+3 {
+		return line.Render(strings.Repeat("─", width))
+	}
+	// Measured rendered: a style with padding takes cells the raw label does not.
+	room := width - lead - 2
+	pad := ansi.StringWidth(text.Render("x")) - 1
+	styled := text.Render(Truncate(label, max(1, room-pad)))
+	rest := max(0, room-ansi.StringWidth(styled))
+	return line.Render(strings.Repeat("─", lead)+" ") + styled + line.Render(" "+strings.Repeat("─", rest))
+}
+
 // StatusLine is one row of text in a style, exactly width cells.
 func StatusLine(width int, text string, style lipgloss.Style) string {
 	return Fit(style.Render(text), width)

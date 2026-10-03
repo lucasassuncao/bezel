@@ -1,8 +1,8 @@
-# draw: a section per helper, scrolled through.
+# progress: a count that fills on its own, and a stepper walked forward and back.
 #
-# Record from the repository root: vhs examples/draw/draw.tape
+# Record from the repository root: vhs examples/progress/progress.tape
 
-Output examples/draw/draw.gif
+Output examples/progress/progress.gif
 
 Require ttyd
 Require ffmpeg
@@ -24,26 +24,32 @@ Hide
 Type "Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue"
 Enter
 Wait
-Type "go build -o draw.exe ./examples/draw"
+Type "go build -o progress.exe ./examples/progress"
 Enter
 Wait
 Type "clear"
 Enter
 Show
 
-Type ".\draw.exe"
+Type ".\progress.exe"
 Sleep 400ms
 Enter
-Wait+Screen /HEADER/
-Sleep 2s
+Wait+Screen /LINE/
+Wait+Screen /40\/40/
+Sleep 1.5s
 
-Down@250ms 16
+# -- The stepper, forward to the end and back ---------------------------------------------
+
+Type@900ms "nnnn"
+Wait+Screen /All 4 steps done/
 Sleep 1.5s
-Down@250ms 14
+Type@700ms "pp"
 Sleep 1.5s
-Down@250ms 12
-Sleep 2s
-Up@120ms 42
+
+# -- The count again --------------------------------------------------------------------------
+
+Type "r"
+Wait+Screen /40\/40/
 Sleep 1.5s
 
 Type "q"
@@ -52,6 +58,6 @@ Sleep 1s
 # -- Clean up, off camera ---------------------------------------------------------
 
 Hide
-Type "Remove-Item draw.exe"
+Type "Remove-Item progress.exe"
 Enter
 Wait

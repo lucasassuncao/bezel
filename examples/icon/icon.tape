@@ -1,8 +1,8 @@
-# draw: a section per helper, scrolled through.
+# icon: every state mark in both sets, and a list swapped between them.
 #
-# Record from the repository root: vhs examples/draw/draw.tape
+# Record from the repository root: vhs examples/icon/icon.tape
 
-Output examples/draw/draw.gif
+Output examples/icon/icon.gif
 
 Require ttyd
 Require ffmpeg
@@ -24,27 +24,27 @@ Hide
 Type "Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue"
 Enter
 Wait
-Type "go build -o draw.exe ./examples/draw"
+Type "go build -o icon.exe ./examples/icon"
 Enter
 Wait
 Type "clear"
 Enter
 Show
 
-Type ".\draw.exe"
+Type ".\icon.exe"
 Sleep 400ms
 Enter
-Wait+Screen /HEADER/
-Sleep 2s
+Wait+Screen /STATES/
+Sleep 3s
 
-Down@250ms 16
-Sleep 1.5s
-Down@250ms 14
-Sleep 1.5s
-Down@250ms 12
+# -- The list in ASCII, then back ------------------------------------------------------------
+
+Type "a"
+Wait+Screen /ASCII/
+Sleep 2.5s
+Type "a"
+Wait+Screen /UNICODE/
 Sleep 2s
-Up@120ms 42
-Sleep 1.5s
 
 Type "q"
 Sleep 1s
@@ -52,6 +52,6 @@ Sleep 1s
 # -- Clean up, off camera ---------------------------------------------------------
 
 Hide
-Type "Remove-Item draw.exe"
+Type "Remove-Item icon.exe"
 Enter
 Wait

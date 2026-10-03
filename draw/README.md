@@ -15,9 +15,12 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [Constants](<#constants>)
 - [func BlockSize\(s string\) \(width, height int\)](<#BlockSize>)
 - [func Breadcrumb\(segs \[\]string\) string](<#Breadcrumb>)
+- [func Button\(label string, ink lipgloss.Style, focused bool\) string](<#Button>)
+- [func Card\(r layout.Rect, title, body, footer string, st PanelStyle\) string](<#Card>)
 - [func Composite\(fg, bg string, x, y int\) string](<#Composite>)
 - [func CompositeCenter\(fg, bg string\) string](<#CompositeCenter>)
 - [func Cut\(s string, width int\) string](<#Cut>)
+- [func Divider\(width int, label string, line, text lipgloss.Style\) string](<#Divider>)
 - [func EmptyState\(r layout.Rect, message, hint string, st ChromeStyle\) string](<#EmptyState>)
 - [func Fit\(s string, width int\) string](<#Fit>)
 - [func FitBlock\(s string, width, height int\) string](<#FitBlock>)
@@ -73,6 +76,24 @@ func Breadcrumb(segs []string) string
 
 Breadcrumb joins path segments the way a header subtitle shows them.
 
+<a name="Button"></a>
+## func [Button](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L13>)
+
+```go
+func Button(label string, ink lipgloss.Style, focused bool) string
+```
+
+Button is a filled label: ink's colour behind it when focused, grey otherwise. Dialogs draw their answers with it; a form draws its submit with it.
+
+<a name="Card"></a>
+## func [Card](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L23>)
+
+```go
+func Card(r layout.Rect, title, body, footer string, st PanelStyle) string
+```
+
+Card is a Panel whose last row is footer, set off from the body by a rule: a block of facts with what can be done about them underneath.
+
 <a name="Composite"></a>
 ## func [Composite](<https://github.com/lucasassuncao/bezel/blob/main/draw/composite.go#L12>)
 
@@ -100,8 +121,17 @@ func Cut(s string, width int) string
 
 Cut is Truncate without the ellipsis: the line ends where the width does.
 
+<a name="Divider"></a>
+## func [Divider](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L52>)
+
+```go
+func Divider(width int, label string, line, text lipgloss.Style) string
+```
+
+Divider is a horizontal rule width cells long, with label set into it after a short lead when one is given: "── Label ─────".
+
 <a name="EmptyState"></a>
-## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L56>)
+## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L75>)
 
 ```go
 func EmptyState(r layout.Rect, message, hint string, st ChromeStyle) string
@@ -263,7 +293,7 @@ func ShortDuration(d time.Duration) string
 ShortDuration renders a lifetime the way a header has room for: the two largest units that say anything, truncated rather than rounded, so a countdown never shows more time than is left.
 
 <a name="StatusLine"></a>
-## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L51>)
+## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L70>)
 
 ```go
 func StatusLine(width int, text string, style lipgloss.Style) string

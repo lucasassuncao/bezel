@@ -32,7 +32,7 @@ var ErrAborted = errors.New("inline: aborted")
 func Bar(done, total, width int, th theme.Resolved) string
 ```
 
-Bar is a done/total progress bar width cells wide, for a caller that redraws it in place with \\r.
+Bar is a done/total progress bar width cells wide, for a caller that redraws it in place with \\r. It is progress.Bar, kept here for CLIs.
 
 <a name="Confirm"></a>
 ## func [Confirm](<https://github.com/lucasassuncao/bezel/blob/main/inline/inline.go#L19>)

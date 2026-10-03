@@ -1,4 +1,4 @@
-# overlay: the ready-made modals: alert, confirm, prompt and help.
+# overlay: the ready-made modals: alert, confirm, prompt, help and pager.
 #
 # Record from the repository root: vhs examples/overlay/overlay.tape
 
@@ -73,6 +73,22 @@ Down
 Enter
 Wait+Screen /Navigation/
 Sleep 2s
+Escape
+Sleep 800ms
+
+# -- Pager: a long output, scrolled and closed --------------------------------------------
+
+Down
+Enter
+Wait+Screen /go test/
+Sleep 1.5s
+Down@200ms 6
+Sleep 800ms
+PageDown
+Sleep 1s
+Type "G"
+Wait+Screen /1.284s/
+Sleep 1.5s
 Escape
 Sleep 800ms
 
