@@ -35,7 +35,7 @@ type Prompt struct {
 
 // NewPrompt builds a prompt with a "> " input; onAccept may be nil.
 func NewPrompt(title string, onAccept func(value string) tea.Cmd, style lipgloss.Style, hint legend.Style) Prompt {
-	in := textinput.New()
+	in := draw.WithCaret(textinput.New())
 	in.Prompt = "> "
 	in.Focus()
 	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, style: style, hint: hint}

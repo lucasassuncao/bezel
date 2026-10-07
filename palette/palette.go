@@ -12,6 +12,7 @@ import (
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
@@ -46,7 +47,7 @@ type Model struct {
 
 // New opens a palette over items, sorted by name.
 func New(items []Item, th theme.Resolved) Model {
-	in := textinput.New()
+	in := draw.WithCaret(textinput.New())
 	in.Prompt = ":"
 	in.Focus()
 	return Model{input: in, cursor: -1, th: th}.SetItems(items)

@@ -13,6 +13,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 ## Index
 
 - [Constants](<#constants>)
+- [Variables](<#variables>)
 - [func BlockSize\(s string\) \(width, height int\)](<#BlockSize>)
 - [func Breadcrumb\(segs \[\]string\) string](<#Breadcrumb>)
 - [func Button\(label string, ink lipgloss.Style, focused bool\) string](<#Button>)
@@ -45,6 +46,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func Truncate\(s string, width int\) string](<#Truncate>)
 - [func ViewportGutter\(style lipgloss.Style\) viewport.GutterFunc](<#ViewportGutter>)
 - [func Width\(s string\) int](<#Width>)
+- [func WithCaret\(in textinput.Model\) textinput.Model](<#WithCaret>)
 - [func Wrap\(s string, width int\) \[\]string](<#Wrap>)
 - [type ChromeStyle](<#ChromeStyle>)
 - [type PanelStyle](<#PanelStyle>)
@@ -56,6 +58,14 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 
 ```go
 const GutterWidth = 7
+```
+
+## Variables
+
+<a name="BlinkSpeed"></a>BlinkSpeed is how often the caret of every input bezel builds flips. A variable so a host's tests can shrink it: each keystroke arms one blink.
+
+```go
+var BlinkSpeed = 530 * time.Millisecond
 ```
 
 <a name="BlockSize"></a>
@@ -345,6 +355,15 @@ func Width(s string) int
 ```
 
 Width is how many cells s takes on screen, escapes ignored.
+
+<a name="WithCaret"></a>
+## func [WithCaret](<https://github.com/lucasassuncao/bezel/blob/main/draw/caret.go#L14>)
+
+```go
+func WithCaret(in textinput.Model) textinput.Model
+```
+
+WithCaret gives in the BlinkSpeed caret.
 
 <a name="Wrap"></a>
 ## func [Wrap](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L47>)

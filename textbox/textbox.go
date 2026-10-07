@@ -22,6 +22,9 @@ func New(th theme.Resolved) textarea.Model {
 	ta.MaxHeight = 0
 	ta.ShowLineNumbers = false
 	ta.EndOfBufferCharacter = '~'
+	s := ta.Styles()
+	s.Cursor.BlinkSpeed = draw.BlinkSpeed
+	ta.SetStyles(s)
 	return Restyle(ta, th)
 }
 

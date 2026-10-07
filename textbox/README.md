@@ -28,7 +28,7 @@ func New(th theme.Resolved) textarea.Model
 New is an empty text area themed with th. The widget's defaults cap a value at 400 characters and 99 lines, and drop the rest without a word.
 
 <a name="Restyle"></a>
-## func [Restyle](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L31>)
+## func [Restyle](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L34>)
 
 ```go
 func Restyle(ta textarea.Model, th theme.Resolved) textarea.Model
@@ -37,7 +37,7 @@ func Restyle(ta textarea.Model, th theme.Resolved) textarea.Model
 Restyle recolours ta, for when the terminal reports its background late. The line under the cursor is left unpainted: highlighted, it reads as a selection. Blurred text is dimmed so the focused widget is the bright one.
 
 <a name="SetText"></a>
-## func [SetText](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L48>)
+## func [SetText](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L51>)
 
 ```go
 func SetText(ta *textarea.Model, s string)
@@ -46,7 +46,7 @@ func SetText(ta *textarea.Model, s string)
 SetText loads s. The widget breaks a line on \\r and on \\n alike, so a CRLF value would come back with every line doubled.
 
 <a name="Update"></a>
-## func [Update](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L53>)
+## func [Update](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L56>)
 
 ```go
 func Update(ta textarea.Model, msg tea.Msg) (textarea.Model, tea.Cmd)

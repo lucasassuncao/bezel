@@ -34,7 +34,7 @@ type Input struct {
 
 // NewInput is an empty field width cells wide, placeholder shown until typed in.
 func NewInput(label, placeholder string, width int, th theme.Resolved) Input {
-	in := textinput.New()
+	in := draw.WithCaret(textinput.New())
 	in.Prompt = ""
 	in.Placeholder = placeholder
 	in.SetWidth(width)

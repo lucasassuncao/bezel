@@ -35,7 +35,7 @@ const Rows = 8
 ```
 
 <a name="DoneMsg"></a>
-## type [DoneMsg](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L30-L33>)
+## type [DoneMsg](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L31-L34>)
 
 DoneMsg is the palette finishing. The owner pops it, then runs Cmd or shows Err; both empty means the line was empty.
 
@@ -47,7 +47,7 @@ type DoneMsg struct {
 ```
 
 <a name="Item"></a>
-## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L22-L26>)
+## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L23-L27>)
 
 Item is one command. Available false keeps it off the list but known, so typing it says "not available here" instead of "unknown command".
 
@@ -60,7 +60,7 @@ type Item struct {
 ```
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L39-L45>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L40-L46>)
 
 Model is the open palette. It is an overlay anchored to the bottom.
 
@@ -71,7 +71,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L48>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L49>)
 
 ```go
 func New(items []Item, th theme.Resolved) Model
@@ -80,7 +80,7 @@ func New(items []Item, th theme.Resolved) Model
 New opens a palette over items, sorted by name.
 
 <a name="Model.AnchorBottom"></a>
-### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L93>)
+### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L94>)
 
 ```go
 func (Model) AnchorBottom() bool
@@ -89,7 +89,7 @@ func (Model) AnchorBottom() bool
 
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L89>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L90>)
 
 ```go
 func (Model) Legend() []legend.Entry
@@ -98,7 +98,7 @@ func (Model) Legend() []legend.Entry
 
 
 <a name="Model.SetItems"></a>
-### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L57>)
+### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L58>)
 
 ```go
 func (m Model) SetItems(items []Item) Model
@@ -116,7 +116,7 @@ func (m Model) StatusLine(width int) string
 StatusLine is the typed line, drawn where the status usually is.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L66>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L67>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
@@ -125,7 +125,7 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
 
 
 <a name="Model.Value"></a>
-### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L96>)
+### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L97>)
 
 ```go
 func (m Model) Value() string
