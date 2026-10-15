@@ -27,7 +27,7 @@ func twoPane() layout.Node {
 }
 
 func newShell(tabs ...Tab) Shell {
-	return New(Config{Layout: twoPane(), Tabs: tabs, Theme: theme.Resolve(theme.ThemePlain, true), Title: "demo"})
+	return New(Config{Layout: twoPane(), Tabs: tabs, Theme: theme.Resolve(theme.Plain, true), Title: "demo"})
 }
 
 func press(k string) tea.KeyPressMsg { return tea.KeyPressMsg{Code: rune(k[0]), Text: k} }
@@ -58,7 +58,7 @@ func TestFocusMovesAlongTheLayoutOrderAndWraps(t *testing.T) {
 func TestTabSkipsInfoPanes(t *testing.T) {
 	s := New(Config{
 		Layout: layout.Columns(layout.Fixed("hint", layout.Ratio(1, 4)).Info(), layout.Fill("list"), layout.Fill("detail")),
-		Theme:  theme.Resolve(theme.ThemePlain, true),
+		Theme:  theme.Resolve(theme.Plain, true),
 	})
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	require.Equal(t, "list", s.Focus())
@@ -127,7 +127,7 @@ func TestLegendLinesIsConfigurable(t *testing.T) {
 	for i := range keys {
 		keys[i] = Custom(string(rune('a'+i)), "a long action description", nil)
 	}
-	one := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.ThemePlain, true), LegendLines: 1})
+	one := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true), LegendLines: 1})
 	one, _, _ = one.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	one = one.SetActions(keys...)
 	require.Equal(t, 24-2-1-1, one.Body().H) // header and blank row, status, legend

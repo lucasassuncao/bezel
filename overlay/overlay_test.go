@@ -14,12 +14,17 @@ import (
 // fake records what it saw and renders a fixed box.
 type fake struct {
 	seen    []string
+	got     []tea.Msg
 	ownsEsc bool
 	closeOn string
 }
 
 func (f *fake) Update(msg tea.Msg) (Overlay, tea.Cmd) {
-	if k, ok := msg.(tea.KeyPressMsg); ok {
+	k, ok := msg.(tea.KeyPressMsg)
+	if !ok {
+		f.got = append(f.got, msg)
+	}
+	if ok {
 		f.seen = append(f.seen, k.String())
 		if k.String() == f.closeOn {
 			return f, Close()
@@ -113,4 +118,30 @@ func TestBottomAnchoredOverlaysSitOnTheBodyFloor(t *testing.T) {
 	require.Equal(t, "XX........", lines[3])
 	require.Equal(t, "XX........", lines[4])
 	require.Equal(t, "..........", lines[2])
+}
+
+type answerMsg struct{}
+
+// An overlay's own command answers through TopMsg, which the stack hands to
+// the top overlay instead of leaving it to the app.
+func TestTopMsgReachesTheTopOverlay(t *testing.T) {
+	under, top := &fake{}, &fake{}
+	s := Stack{}.Push(under).Push(top)
+
+	_, handled, _ := s.Update(ToTop(func() tea.Msg { return answerMsg{} })())
+	require.True(t, handled)
+	require.Equal(t, []tea.Msg{answerMsg{}}, top.got, "the payload arrives unwrapped")
+	require.Empty(t, under.got)
+}
+
+// A late answer for a modal already closed has nobody to go to.
+func TestTopMsgWithoutAnOverlayIsDropped(t *testing.T) {
+	_, handled, cmd := Stack{}.Update(TopMsg{Msg: answerMsg{}})
+	require.True(t, handled)
+	require.Nil(t, cmd)
+}
+
+func TestToTopKeepsNothingAsNothing(t *testing.T) {
+	require.Nil(t, ToTop(nil))
+	require.Nil(t, ToTop(func() tea.Msg { return nil })())
 }

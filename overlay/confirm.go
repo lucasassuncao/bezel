@@ -19,6 +19,7 @@ type Confirm struct {
 	no      bool // focus is on No
 }
 
+// NewConfirm asks message under title; onYes runs on a yes and may be nil.
 func NewConfirm(title, message string, onYes tea.Cmd, style lipgloss.Style, hint legend.Style) Confirm {
 	return Confirm{title: title, message: message, onYes: onYes, style: style, hint: hint}
 }

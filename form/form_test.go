@@ -14,7 +14,7 @@ import (
 
 type submitted struct{}
 
-func th() theme.Resolved { return theme.Resolve(theme.ThemePlain, true) }
+func th() theme.Resolved { return theme.Resolve(theme.Plain, true) }
 
 // sample is one of each control, in the order the tests index them.
 func sample(t *testing.T) Form {
@@ -101,4 +101,28 @@ func TestViewLinesUpTheValues(t *testing.T) {
 		require.Equal(t, col, column(r, "[‹(○─"), "every value starts in one column:\n%s", strings.Join(rows, "\n"))
 	}
 	require.True(t, strings.HasPrefix(rows[0], "› Name"), "the focus marker leads the focused row")
+}
+
+// A Form is a value: updating one must not reach the copy it came from, nor
+// the slice the fields were handed in.
+func TestUpdateLeavesEarlierCopiesAlone(t *testing.T) {
+	fields := []Field{NewCheckbox("a", false, th())}
+	before, _ := New(fields...)
+	after, _ := press(before, "space")
+
+	require.True(t, after.Field(0).(Checkbox).Checked())
+	require.False(t, before.Field(0).(Checkbox).Checked(), "the earlier copy changed")
+	require.False(t, fields[0].(Checkbox).Checked(), "the caller's slice changed")
+}
+
+func TestEmptyChoicesDoNotPanic(t *testing.T) {
+	for _, fl := range []Field{NewSelect("Image", nil, 0, th()), NewRadio("Shell", nil, 0, th())} {
+		f, _ := New(fl)
+		require.NotPanics(t, func() {
+			f, _ = press(f, "enter", "down", "up", "right", "left", "enter")
+			_ = f.View(40)
+		})
+	}
+	require.Empty(t, NewSelect("Image", nil, 0, th()).Value())
+	require.Empty(t, NewRadio("Shell", nil, 0, th()).Value())
 }

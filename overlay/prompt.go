@@ -2,6 +2,7 @@ package overlay
 
 import (
 	"fmt"
+	"slices"
 
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
@@ -51,7 +52,7 @@ func (p Prompt) WithInput(in textinput.Model) Prompt {
 
 // WithLines is the explanation drawn with the input.
 func (p Prompt) WithLines(lines ...string) Prompt {
-	p.lines = lines
+	p.lines = slices.Clone(lines)
 	return p
 }
 
@@ -92,6 +93,7 @@ func (p Prompt) WithAcceptHint(desc string) Prompt {
 	return p
 }
 
+// Value is the text typed so far.
 func (p Prompt) Value() string { return p.input.Value() }
 
 // Problem is why the text cannot be accepted yet, or "".
@@ -105,6 +107,7 @@ func (p Prompt) Problem() string {
 	return ""
 }
 
+// Accepts reports whether enter would accept the text now.
 func (p Prompt) Accepts() bool { return p.Problem() == "" }
 
 func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd) {

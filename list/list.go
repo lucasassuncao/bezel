@@ -41,6 +41,7 @@ type Keys struct {
 	Up, Down, Enter, Filter, Esc key.Binding
 }
 
+// DefaultKeys are the arrows, enter, / and esc.
 func DefaultKeys() Keys {
 	return Keys{
 		Up:     key.NewBinding(key.WithKeys("up")),
@@ -73,15 +74,23 @@ func New(rows []Row, height int) Model {
 	return m
 }
 
+// WithKeys rebinds the list.
 func (m Model) WithKeys(k Keys) Model {
 	m.keys = k
 	return m
 }
 
-func (m Model) Rows() []Row       { return slices.Clone(m.rows) }
-func (m Model) Len() int          { return len(m.rows) }
+// Rows is a copy of every row, headings included.
+func (m Model) Rows() []Row { return slices.Clone(m.rows) }
+
+// Len is how many rows there are, headings included.
+func (m Model) Len() int { return len(m.rows) }
+
+// IsFiltering reports whether the / prompt is open and taking the keys.
 func (m Model) IsFiltering() bool { return m.filtering }
-func (m Model) Filter() string    { return m.filter }
+
+// Filter is the text typed at the / prompt.
+func (m Model) Filter() string { return m.filter }
 
 // SetRows replaces the rows, keeping the cursor on the row with the same
 // label when it survives (at the same index first), else on the first

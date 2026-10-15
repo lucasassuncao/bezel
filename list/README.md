@@ -60,16 +60,16 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L44>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L45>)
 
 ```go
 func DefaultKeys() Keys
 ```
 
-
+DefaultKeys are the arrows, enter, / and esc.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L55-L66>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L56-L67>)
 
 Model is a value: every method returns the new list.
 
@@ -80,7 +80,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L70>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L71>)
 
 ```go
 func New(rows []Row, height int) Model
@@ -89,43 +89,43 @@ func New(rows []Row, height int) Model
 New builds a list height rows tall with the cursor on the first selectable row.
 
 <a name="Model.Filter"></a>
-### func \(Model\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L84>)
+### func \(Model\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L93>)
 
 ```go
 func (m Model) Filter() string
 ```
 
-
+Filter is the text typed at the / prompt.
 
 <a name="Model.IsFiltering"></a>
-### func \(Model\) [IsFiltering](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L83>)
+### func \(Model\) [IsFiltering](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L90>)
 
 ```go
 func (m Model) IsFiltering() bool
 ```
 
-
+IsFiltering reports whether the / prompt is open and taking the keys.
 
 <a name="Model.Len"></a>
-### func \(Model\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L82>)
+### func \(Model\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L87>)
 
 ```go
 func (m Model) Len() int
 ```
 
-
+Len is how many rows there are, headings included.
 
 <a name="Model.Rows"></a>
-### func \(Model\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L81>)
+### func \(Model\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L84>)
 
 ```go
 func (m Model) Rows() []Row
 ```
 
-
+Rows is a copy of every row, headings included.
 
 <a name="Model.Selected"></a>
-### func \(Model\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L116>)
+### func \(Model\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L125>)
 
 ```go
 func (m Model) Selected() *Row
@@ -134,7 +134,7 @@ func (m Model) Selected() *Row
 Selected is the row under the cursor, or nil on a heading or an empty list. While filtering it is the row under the filter cursor.
 
 <a name="Model.SetHeight"></a>
-### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L109>)
+### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L118>)
 
 ```go
 func (m Model) SetHeight(h int) Model
@@ -143,7 +143,7 @@ func (m Model) SetHeight(h int) Model
 SetHeight updates the visible row count and re\-clamps the scroll.
 
 <a name="Model.SetRows"></a>
-### func \(Model\) [SetRows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L89>)
+### func \(Model\) [SetRows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L98>)
 
 ```go
 func (m Model) SetRows(rows []Row) Model
@@ -152,7 +152,7 @@ func (m Model) SetRows(rows []Row) Model
 SetRows replaces the rows, keeping the cursor on the row with the same label when it survives \(at the same index first\), else on the first selectable one.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L134>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L143>)
 
 ```go
 func (m Model) Update(msg tea.KeyPressMsg) (Model, Action)
@@ -161,7 +161,7 @@ func (m Model) Update(msg tea.KeyPressMsg) (Model, Action)
 Update handles one key. Keys the list does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L263>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L272>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
@@ -170,13 +170,13 @@ func (m Model) View(th theme.Resolved) string
 View renders the visible rows, or the filter prompt with its matches.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L76>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L78>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
 ```
 
-
+WithKeys rebinds the list.
 
 <a name="Row"></a>
 ## type [Row](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L23-L29>)

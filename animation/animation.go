@@ -25,13 +25,13 @@ type Tween struct {
 // Active reports whether t is currently in flight.
 func (t Tween) Active() bool { return t.Dur > 0 }
 
-// Advance samples the curve at now into Cur and reports whether it finished.
+// Advance is t with the curve sampled at now into Cur, and whether it finished.
 // The renderer reads Cur, not At, so one frame never mixes two samples and
 // lays the hint panel out a row off from the space the preview left.
-func (t *Tween) Advance(now time.Time) bool {
-	v, done := t.At(now)
-	t.Cur = v
-	return done
+func (t Tween) Advance(now time.Time) (Tween, bool) {
+	var done bool
+	t.Cur, done = t.At(now)
+	return t, done
 }
 
 // At returns the interpolated value at now, and whether the tween has finished.

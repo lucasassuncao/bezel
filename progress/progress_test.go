@@ -10,7 +10,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-func th() theme.Resolved { return theme.Resolve(theme.ThemePlain, true) }
+func th() theme.Resolved { return theme.Resolve(theme.Plain, true) }
 
 func TestBarFillsInProportion(t *testing.T) {
 	require.Equal(t, "█████░░░░░", ansi.Strip(Bar(5, 10, 10, th())))

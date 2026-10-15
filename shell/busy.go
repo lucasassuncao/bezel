@@ -23,6 +23,7 @@ func (s Shell) Idle() Shell {
 	return s
 }
 
+// IsBusy reports whether Busy is in effect.
 func (s Shell) IsBusy() bool { return s.busy != "" }
 
 // Spinner is the current frame, unstyled, for a pane showing the same work.

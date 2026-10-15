@@ -33,7 +33,7 @@ func newModel() model {
 				layout.Fill("main"),
 			).Collapse(72, "main"),
 		),
-		Theme: theme.Resolve(theme.ThemeMint, true),
+		Theme: theme.Resolve(theme.Mint, true),
 		Title: "layout",
 		Actions: []shell.Action{
 			shell.Custom("w", "narrow/wide", shell.Send(toggleWidthMsg{})),

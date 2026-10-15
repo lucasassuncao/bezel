@@ -44,7 +44,7 @@ func shape(h int) layout.Node {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: shape(0),
-		Theme:  theme.Resolve(theme.ThemeMint, true),
+		Theme:  theme.Resolve(theme.Mint, true),
 		Title:  "animation",
 		Actions: []shell.Action{
 			shell.Custom("h", "slide open/shut", shell.Send(toggleMsg{})),
@@ -77,7 +77,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.tween = animation.New(m.height, target, slide)
 		return m, nextFrame()
 	case frameMsg:
-		done := m.tween.Advance(time.Time(msg))
+		var done bool
+		m.tween, done = m.tween.Advance(time.Time(msg))
 		m.height = m.tween.Cur
 		m.sh = m.sh.SetLayout(shape(m.height))
 		if !done {

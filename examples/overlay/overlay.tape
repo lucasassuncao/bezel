@@ -1,4 +1,5 @@
-# overlay: the ready-made modals: alert, confirm, prompt, help and pager.
+# overlay: the ready-made modals: alert, confirm, prompt, help, pager and
+# file picker.
 #
 # Record from the repository root: vhs examples/overlay/overlay.tape
 
@@ -91,6 +92,28 @@ Wait+Screen /1.284s/
 Sleep 1.5s
 Escape
 Sleep 800ms
+
+# -- FilePicker: into examples/browser/, pick its main.go ------------------------------
+
+Down
+Enter
+Wait+Screen /Open a file/
+Sleep 1.5s
+Down@150ms 9
+Sleep 600ms
+Right
+Wait+Screen /demo/
+Sleep 1.2s
+Down@400ms 2
+Sleep 600ms
+Right
+Wait+Screen /browser.tape/
+Sleep 1.2s
+Down@400ms 2
+Sleep 800ms
+Enter
+Wait+Screen /picked main.go/
+Sleep 1.5s
 
 Type "q"
 Sleep 1s

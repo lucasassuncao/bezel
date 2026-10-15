@@ -16,8 +16,10 @@ import (
 var ErrAborted = errors.New("inline: aborted")
 
 // Confirm asks a yes/no question below the current line. The default is No.
-func Confirm(title string, th theme.Resolved) (bool, error) {
-	final, err := tea.NewProgram(newConfirm(title, th)).Run()
+// opts reach the program as given: tea.WithContext to cancel the question,
+// tea.WithInput and tea.WithOutput to answer it from a test.
+func Confirm(title string, th theme.Resolved, opts ...tea.ProgramOption) (bool, error) {
+	final, err := tea.NewProgram(newConfirm(title, th), opts...).Run()
 	if err != nil {
 		return false, err
 	}

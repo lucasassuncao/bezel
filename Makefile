@@ -1,4 +1,4 @@
-.PHONY: help fmt lint test test-watch test-coverage security govulncheck sbom vuln deps docs tag all tools clean-tools clean
+.PHONY: help fmt lint test test-watch test-coverage bench security govulncheck sbom vuln deps docs tag all tools clean-tools clean
 
 # Tool versions
 GOLANGCI_LINT_VERSION := v2.13.2
@@ -108,6 +108,9 @@ test-coverage: $(GOTESTSUM) $(GOCOBERTURA) ## Run tests with coverage (HTML + Co
 	@go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
 	@$(GOCOBERTURA) < $(COVERAGE_OUT) > $(COVERAGE_XML)
 	@echo "Reports: $(COVERAGE_HTML) | $(COVERAGE_XML)"
+
+bench: ## Run benchmarks (tree, list, draw, table)
+	@go test -run '^$$' -bench . -benchmem ./...
 
 security: $(GOSEC) ## Run security analysis with gosec
 	@$(GOSEC) -stdout -severity medium ./...

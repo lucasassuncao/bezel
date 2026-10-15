@@ -3,20 +3,23 @@ package draw
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 // Sanitize renders server-supplied text so drawing it can only draw: OSC 52
 // sets the clipboard, CSI forges a confirmation modal, bidi (CVE-2021-42574)
 // reorders a line. Rendering only - the clipboard still sees the real bytes.
 func Sanitize(s string) string {
-	if !strings.ContainsFunc(s, unsafeToDraw) {
+	if utf8.ValidString(s) && !strings.ContainsFunc(s, unsafeToDraw) {
 		return s
 	}
 
 	var b strings.Builder
 	b.Grow(len(s))
-	for _, r := range s {
+	for i, r := range s {
 		switch {
+		case invalidAt(s, i):
+			fmt.Fprintf(&b, `\x%02x`, s[i])
 		case !unsafeToDraw(r):
 			b.WriteRune(r)
 		case r == '\n':
@@ -45,6 +48,13 @@ func SanitizeLines(s string) []string {
 		lines[i] = Sanitize(strings.TrimSuffix(line, "\r"))
 	}
 	return lines
+}
+
+// invalidAt reports whether s[i] is a byte that is not UTF-8. The terminal
+// draws it as one U+FFFD, but ansi measures it with the cells after it.
+func invalidAt(s string, i int) bool {
+	r, size := utf8.DecodeRuneInString(s[i:])
+	return r == utf8.RuneError && size == 1
 }
 
 // unsafeToDraw reports whether a rune changes the terminal's behaviour or the

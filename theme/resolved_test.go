@@ -20,11 +20,11 @@ func TestResolveThemeZeroValueIsAdaptive(t *testing.T) {
 }
 
 func TestResolveThemeBaseOverride(t *testing.T) {
-	require.Equal(t, "#9B59B6", Resolve(Theme{Base: &ThemeGrape}, true).Colors.Accent)
+	require.Equal(t, "#9B59B6", Resolve(Theme{Base: &Grape}, true).Colors.Accent)
 }
 
 func TestResolveThemeColorOverride(t *testing.T) {
-	rt := Resolve(Theme{Base: &ThemeGrape, Colors: Colors{Accent: "#FF0000"}}, true)
+	rt := Resolve(Theme{Base: &Grape, Colors: Colors{Accent: "#FF0000"}}, true)
 	assert.Equal(t, "#FF0000", rt.Colors.Accent, "Colors.Accent should override Base")
 	assert.Equal(t, "#5DBB63", rt.Colors.Success, "Success should inherit from Grape")
 }
@@ -61,7 +61,7 @@ func TestPresetsKeepTheirColours(t *testing.T) {
 }
 
 func TestResolveFillsTheChromeSlots(t *testing.T) {
-	r := Resolve(ThemeMint, true)
+	r := Resolve(Mint, true)
 	require.Equal(t, "#3EB489", r.Colors.Accent)
 	require.NotEqual(t, r.Panel.Border, r.PanelFocused.Border)
 	require.NotEmpty(t, r.Chrome.TabActive.Render("x"))
@@ -70,7 +70,28 @@ func TestResolveFillsTheChromeSlots(t *testing.T) {
 }
 
 func TestModalForColoursByKind(t *testing.T) {
-	r := Resolve(ThemeMint, true)
+	r := Resolve(Mint, true)
 	require.NotEqual(t, r.ModalFor(overlay.Danger), r.ModalFor(overlay.Info))
 	require.Equal(t, r.Modal, r.ModalFor(overlay.Info))
+}
+
+func TestResolveWalksTheWholeBaseChain(t *testing.T) {
+	bold := lipgloss.NewStyle().Bold(true)
+	root := Theme{Colors: Colors{Border: "#111111"}, Styles: Styles{Muted: &bold}}
+	mid := Theme{Base: &root, Colors: Colors{Accent: "#222222"}}
+	rt := Resolve(Theme{Base: &mid, Colors: Colors{Dim: "#333333"}}, true)
+
+	assert.Equal(t, "#111111", rt.Colors.Border, "the base's base was skipped")
+	assert.Equal(t, "#222222", rt.Colors.Accent)
+	assert.Equal(t, "#333333", rt.Colors.Dim)
+	assert.Equal(t, bold, rt.Muted, "a base's Styles were skipped")
+}
+
+func TestResolveSurvivesABaseCycle(t *testing.T) {
+	a := Theme{Colors: Colors{Accent: "#AAAAAA"}}
+	b := Theme{Base: &a, Colors: Colors{Border: "#BBBBBB"}}
+	a.Base = &b
+	rt := Resolve(a, true)
+	assert.Equal(t, "#AAAAAA", rt.Colors.Accent)
+	assert.Equal(t, "#BBBBBB", rt.Colors.Border)
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
+// Capability is legend.Capability, so an app need not import legend for it.
 type Capability = legend.Capability
 
 // Level is how a status message is drawn: neutral, a success, or an error.
@@ -95,6 +96,8 @@ type Shell struct {
 	actions  []Action        // what the app set with SetActions
 }
 
+// New is a shell over cfg, focused on the first leaf of the focus ring. It
+// draws nothing until the first tea.WindowSizeMsg.
 func New(cfg Config) Shell {
 	if cfg.LegendLines < 1 {
 		cfg.LegendLines = 2
@@ -121,11 +124,13 @@ func New(cfg Config) Shell {
 // entering To and leaving From mean for it.
 type FocusMsg struct{ From, To string }
 
+// Size is the terminal's width and height, zero before the first resize.
 func (s Shell) Size() (int, int) { return s.width, s.height }
 
 // Rect is where a leaf was placed. The zero Rect means it is not on screen.
 func (s Shell) Rect(name string) layout.Rect { return s.rects[name] }
 
+// Focus is the name of the focused leaf on the active tab.
 func (s Shell) Focus() string { return s.focus[s.tab] }
 
 // SetFocus moves focus to a leaf of the layout. Unknown names are ignored.
@@ -145,8 +150,10 @@ func (s Shell) focusOn(name string) Shell {
 	return s
 }
 
+// ActiveTab is the index of the tab on screen.
 func (s Shell) ActiveTab() int { return s.tab }
 
+// SetTab shows tab i. An index out of range is ignored.
 func (s Shell) SetTab(i int) Shell {
 	if i < 0 || i >= len(s.cfg.Tabs) {
 		return s
@@ -155,6 +162,7 @@ func (s Shell) SetTab(i int) Shell {
 	return s.relayout() // the tab's legend may take a different number of rows
 }
 
+// Narrow reports whether a Collapse fired in the current layout.
 func (s Shell) Narrow() bool { return s.collapsed }
 
 // SetLayout swaps the layout tree and re-resolves it. For screens whose
@@ -172,6 +180,7 @@ func (s Shell) SetTheme(th theme.Resolved) Shell {
 	return s.relayout()
 }
 
+// SetSubtitle changes the text after the title in the default header.
 func (s Shell) SetSubtitle(text string) Shell {
 	s.cfg.Subtitle = text
 	return s
@@ -196,18 +205,24 @@ func (s Shell) Status() string { return s.status }
 // ShowHelp opens the Help overlay the ? key would.
 func (s Shell) ShowHelp() Shell { return s.Push(s.helpOverlay()).relayout() }
 
+// Context is what the shell hands tabs and actions about where the user is.
 func (s Shell) Context() Context {
 	return Context{Width: s.width, Height: s.height, Focus: s.Focus(), Narrow: s.collapsed, Can: s.cfg.Can}
 }
 
-func (s Shell) HasOverlay() bool            { return s.overlays.Len() > 0 }
+// HasOverlay reports whether a modal is open.
+func (s Shell) HasOverlay() bool { return s.overlays.Len() > 0 }
+
+// TopOverlay is the modal that gets the keys, or nil.
 func (s Shell) TopOverlay() overlay.Overlay { return s.overlays.Top() }
 
+// Push opens o above any open modal.
 func (s Shell) Push(o overlay.Overlay) Shell {
 	s.overlays = s.overlays.Push(o)
 	return s
 }
 
+// Pop closes the top modal, if any.
 func (s Shell) Pop() Shell {
 	s.overlays = s.overlays.Pop()
 	return s

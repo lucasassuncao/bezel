@@ -39,7 +39,7 @@ func run(w io.Writer, th theme.Resolved, confirm func(string) (bool, error), pau
 }
 
 func main() {
-	th := theme.Resolve(theme.ThemeMint, true)
+	th := theme.Resolve(theme.Mint, true)
 	confirm := func(q string) (bool, error) { return inline.Confirm(q, th) }
 	if err := run(os.Stdout, th, confirm, 120*time.Millisecond); err != nil {
 		fmt.Fprintln(os.Stderr, err)

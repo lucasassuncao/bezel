@@ -120,3 +120,21 @@ func TestOverlayPagerScrollsALongOutput(t *testing.T) {
 	_, out = frame(t, m, nil)
 	require.NotContains(t, out, "go test ./...")
 }
+
+func TestOverlayFilePickerPicksAFile(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	for range 5 {
+		m = press(t, m, "down")
+	}
+	m = press(t, m, "enter")
+	m, out := frame(t, m, nil)
+	t.Log("\n" + out)
+	require.Contains(t, out, "Open a file")
+	require.Contains(t, out, "main.go", "the picker lists the working directory")
+
+	m = press(t, m, "enter")
+	_, out = frame(t, m, nil)
+	require.NotContains(t, out, "Open a file")
+	require.Contains(t, out, "picked main.go")
+}

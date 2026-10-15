@@ -31,8 +31,10 @@ type BottomAnchored interface{ AnchorBottom() bool }
 // top: a command line typed where the status usually is.
 type StatusLiner interface{ StatusLine(width int) string }
 
-// CloseMsg pops the top overlay; PushMsg opens one above it.
+// CloseMsg pops the top overlay.
 type CloseMsg struct{}
+
+// PushMsg opens Overlay above the top one.
 type PushMsg struct{ Overlay Overlay }
 
 // Close is the command an overlay returns to dismiss itself.
@@ -41,9 +43,27 @@ func Close() tea.Cmd { return func() tea.Msg { return CloseMsg{} } }
 // Open is the command that pushes o on top of the stack.
 func Open(o Overlay) tea.Cmd { return func() tea.Msg { return PushMsg{Overlay: o} } }
 
+// TopMsg carries an overlay's own answer back to the top overlay. Other
+// non-key messages pass an open modal by: they are the app's.
+type TopMsg struct{ Msg tea.Msg }
+
+// ToTop wraps cmd so its message returns to the top overlay as a TopMsg.
+func ToTop(cmd tea.Cmd) tea.Cmd {
+	if cmd == nil {
+		return nil
+	}
+	return func() tea.Msg {
+		if msg := cmd(); msg != nil {
+			return TopMsg{Msg: msg}
+		}
+		return nil
+	}
+}
+
 // Stack is a value: every method returns the new stack.
 type Stack struct{ items []Overlay }
 
+// Push is the stack with o on top.
 func (s Stack) Push(o Overlay) Stack {
 	items := make([]Overlay, len(s.items)+1)
 	copy(items, s.items)
@@ -51,6 +71,7 @@ func (s Stack) Push(o Overlay) Stack {
 	return Stack{items: items}
 }
 
+// Pop is the stack without its top overlay; an empty stack stays empty.
 func (s Stack) Pop() Stack {
 	if len(s.items) == 0 {
 		return s
@@ -59,6 +80,7 @@ func (s Stack) Pop() Stack {
 	return Stack{items: s.items[:n:n]}
 }
 
+// Top is the overlay that gets the keys, or nil when the stack is empty.
 func (s Stack) Top() Overlay {
 	if len(s.items) == 0 {
 		return nil
@@ -66,6 +88,7 @@ func (s Stack) Top() Overlay {
 	return s.items[len(s.items)-1]
 }
 
+// Len is how many overlays are open.
 func (s Stack) Len() int { return len(s.items) }
 
 // Update routes msg to the top overlay. handled is false only when the stack
@@ -79,7 +102,11 @@ func (s Stack) Update(msg tea.Msg) (Stack, bool, tea.Cmd) {
 	}
 	top := s.Top()
 	if top == nil {
-		return s, false, nil
+		_, late := msg.(TopMsg)
+		return s, late, nil
+	}
+	if m, ok := msg.(TopMsg); ok {
+		msg = m.Msg
 	}
 	// Esc closes through CloseMsg like every other way out, so the app sees the
 	// dialog go whichever key closed it.

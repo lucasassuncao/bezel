@@ -98,7 +98,7 @@ func tableStyles(c theme.Colors) table.Styles {
 
 // contrastText picks black or white text readable on bg by perceived
 // luminance, since Selection ranges from near-black to pale cream across
-// themes. Non-hex values (ANSI codes such as ThemeTerminal's) get white.
+// themes. Non-hex values (ANSI codes such as Terminal's) get white.
 func contrastText(bg string) color.Color {
 	if len(bg) == 7 && bg[0] == '#' {
 		r, rErr := strconv.ParseInt(bg[1:3], 16, 64)

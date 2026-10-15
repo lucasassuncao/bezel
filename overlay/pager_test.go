@@ -66,3 +66,27 @@ func TestPagerCloses(t *testing.T) {
 		require.Equal(t, CloseMsg{}, cmd())
 	}
 }
+
+// Scrolling is a copy's own: an earlier Pager keeps its place.
+func TestPagerCopiesScrollApart(t *testing.T) {
+	p := NewPager("Output", numbered(40), lipgloss.NewStyle(), legend.Style{})
+	_ = p.View(layout.Rect{W: 60, H: 18})
+	o, _ := p.Update(tea.KeyPressMsg{Code: tea.KeyDown})
+
+	require.Equal(t, 1, o.(Pager).Offset())
+	require.Equal(t, 0, p.Offset(), "the earlier copy scrolled too")
+}
+
+// A dialog keeps the lines it was given, whatever the caller does after.
+func TestDialogsKeepTheirLines(t *testing.T) {
+	lines := []string{"original"}
+	text := NewText("T", lines, lipgloss.NewStyle(), legend.Style{})
+	pick := NewPick("P", lines, lines, nil, lipgloss.NewStyle(), legend.Style{})
+	choice := NewChoice("C", lines, []Option{Opt("y", "yes", nil)}, lipgloss.NewStyle(), legend.Style{})
+	lines[0] = "changed"
+
+	body := layout.Rect{W: 60, H: 18}
+	for _, o := range []Overlay{text, pick, choice} {
+		require.Contains(t, o.View(body), "original")
+	}
+}

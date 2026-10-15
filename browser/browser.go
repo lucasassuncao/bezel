@@ -35,6 +35,7 @@ type Keys struct {
 	Up, Down, PageUp, PageDown, Enter, Esc, Tab key.Binding
 }
 
+// DefaultKeys are the arrows, pgup/pgdown, enter, esc and tab.
 func DefaultKeys() Keys {
 	return Keys{
 		Up:       key.NewBinding(key.WithKeys("up")),
@@ -71,6 +72,7 @@ func New(items []Item, current string) Model {
 	return m
 }
 
+// WithKeys rebinds the browser.
 func (m Model) WithKeys(k Keys) Model {
 	m.keys = k
 	return m
@@ -92,9 +94,14 @@ func (m Model) SetPreviewHeight(h int) Model {
 	return m
 }
 
+// Items is a copy of the rows.
 func (m Model) Items() []Item { return slices.Clone(m.items) }
-func (m Model) Cursor() int   { return m.cursor }
-func (m Model) Len() int      { return len(m.items) }
+
+// Cursor is the index of the row under the cursor.
+func (m Model) Cursor() int { return m.cursor }
+
+// Len is how many rows there are.
+func (m Model) Len() int { return len(m.items) }
 
 // Selected is the item under the cursor, or the zero Item when there is none.
 func (m Model) Selected() Item {

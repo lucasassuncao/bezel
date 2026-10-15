@@ -1,6 +1,8 @@
 package overlay
 
 import (
+	"slices"
+
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
@@ -24,8 +26,9 @@ type Help struct {
 	hint     legend.Style
 }
 
+// NewHelp lists sections under title; an empty title draws none.
 func NewHelp(title string, sections []HelpSection, style lipgloss.Style, hint legend.Style) Help {
-	return Help{title: title, sections: sections, style: style, hint: hint}
+	return Help{title: title, sections: slices.Clone(sections), style: style, hint: hint}
 }
 
 func (h Help) Update(msg tea.Msg) (Overlay, tea.Cmd) {

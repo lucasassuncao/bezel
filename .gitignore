@@ -1,6 +1,9 @@
 # Test binary, built with `go test -c`
 *.test
 
+# Inputs go test -fuzz saves on a failure; keep a regression as an f.Add seed
+**/testdata/fuzz/
+
 # Output of the go coverage tool
 *.out
 coverage.out
@@ -52,3 +55,6 @@ examples/test/demo.yaml
 
 # Binaries the example tapes build at the root; they delete them when done
 /*.exe
+
+# Generated test data for the draw package
+draw\testdata\*

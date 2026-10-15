@@ -30,10 +30,12 @@ type Alert struct {
 	hint    legend.Style
 }
 
+// NewAlert is an alert in style, its keys hinted in hint.
 func NewAlert(kind Kind, title, message string, style lipgloss.Style, hint legend.Style) Alert {
 	return Alert{kind: kind, title: title, message: message, style: style, hint: hint}
 }
 
+// Kind is what the alert reports.
 func (a Alert) Kind() Kind { return a.kind }
 
 func (a Alert) Update(msg tea.Msg) (Overlay, tea.Cmd) {

@@ -28,3 +28,15 @@ func TestCollapseIsRecordedOnTheBox(t *testing.T) {
 	require.Equal(t, 72, b.collapseLimit)
 	require.Equal(t, "b", b.collapseKeep)
 }
+
+// The tree keeps what it was built from, whatever the caller does after.
+func TestConstructorsCopyTheirArguments(t *testing.T) {
+	cs := []Constraint{Lines(3)}
+	children := []Node{Fixed("a", cs...), Fill("b")}
+	tree := Rows(children...)
+	cs[0], children[1] = Lines(9), Fill("c")
+
+	rects, _ := Resolve(tree, Rect{W: 10, H: 10}, nil)
+	require.Equal(t, 3, rects["a"].H)
+	require.Equal(t, []string{"a", "b"}, Order(tree))
+}

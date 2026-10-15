@@ -113,3 +113,15 @@ func abs(n int) int {
 	}
 	return n
 }
+
+// Tween is a value: Advance hands back the sampled tween and leaves its own
+// receiver alone, like every other method on it.
+func TestAdvanceReturnsTheSampledTween(t *testing.T) {
+	start := time.Now()
+	tw := Tween{From: 0, To: 10, Cur: 0, Start: start, Dur: 100 * time.Millisecond}
+
+	next, done := tw.Advance(start.Add(time.Second))
+	assert.True(t, done)
+	assert.Equal(t, 10, next.Cur)
+	assert.Equal(t, 0, tw.Cur, "the receiver changed")
+}

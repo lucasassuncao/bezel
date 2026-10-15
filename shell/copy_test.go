@@ -79,3 +79,24 @@ func TestCopyStatusIsSafeToDraw(t *testing.T) {
 	s = run(t, s, func() any { return cmd() })
 	require.NotContains(t, s.Status(), "\x1b")
 }
+
+// The timeout, like the writer, is read when Copy is called, on the loop.
+func TestCopyUsesTheTimeoutSetWhenItWasCalled(t *testing.T) {
+	old := clipboardTimeout
+	t.Cleanup(func() { clipboardTimeout = old })
+	clipboardTimeout = 20 * time.Millisecond
+
+	block := make(chan struct{})
+	defer close(block)
+	s := sized(New(actionConfig())).WithClipboard(func(string) error { <-block; return nil })
+	cmd := s.Copy("x", "copied", "copy")
+	clipboardTimeout = time.Hour
+
+	done := make(chan any, 1)
+	go func() { done <- cmd() }()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("the copy waited on the timeout set after it was called")
+	}
+}

@@ -11,7 +11,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.ThemePlain, true)
+var th = theme.Resolve(theme.Plain, true)
 
 func rows() []Row {
 	return []Row{

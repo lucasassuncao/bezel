@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	if err := themebrowser.BrowseInTerminal(theme.ThemeMint); err != nil {
+	if err := themebrowser.BrowseInTerminal(theme.Mint); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

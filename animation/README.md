@@ -16,7 +16,7 @@ Package animation is the eased integer tween that drives panel transitions: a hi
 - [type Tween](<#Tween>)
   - [func New\(from, target int, dur time.Duration\) Tween](<#New>)
   - [func \(t Tween\) Active\(\) bool](<#Tween.Active>)
-  - [func \(t \*Tween\) Advance\(now time.Time\) bool](<#Tween.Advance>)
+  - [func \(t Tween\) Advance\(now time.Time\) \(Tween, bool\)](<#Tween.Advance>)
   - [func \(t Tween\) At\(now time.Time\) \(int, bool\)](<#Tween.At>)
 
 
@@ -61,13 +61,13 @@ func (t Tween) Active() bool
 Active reports whether t is currently in flight.
 
 <a name="Tween.Advance"></a>
-### func \(\*Tween\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L31>)
+### func \(Tween\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L31>)
 
 ```go
-func (t *Tween) Advance(now time.Time) bool
+func (t Tween) Advance(now time.Time) (Tween, bool)
 ```
 
-Advance samples the curve at now into Cur and reports whether it finished. The renderer reads Cur, not At, so one frame never mixes two samples and lays the hint panel out a row off from the space the preview left.
+Advance is t with the curve sampled at now into Cur, and whether it finished. The renderer reads Cur, not At, so one frame never mixes two samples and lays the hint panel out a row off from the space the preview left.
 
 <a name="Tween.At"></a>
 ### func \(Tween\) [At](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L40>)

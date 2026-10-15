@@ -57,7 +57,7 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		s, cmd = s.SetStatus(m.Err, Error, s.cfg.StatusTTL)
 		return s.relayout(), true, tea.Batch(cmd, m.Cmd)
 
-	case overlay.CloseMsg, overlay.PushMsg:
+	case overlay.CloseMsg, overlay.PushMsg, overlay.TopMsg:
 		var cmd tea.Cmd
 		s.overlays, _, cmd = s.overlays.Update(msg)
 		return s.relayout(), true, cmd
@@ -121,6 +121,7 @@ func IsStatusExpiry(msg tea.Msg) bool {
 	return ok
 }
 
+// ClearStatus removes the banner now, and makes its pending timer a no-op.
 func (s Shell) ClearStatus() Shell {
 	s.statusSeq++
 	s.status = ""
@@ -134,4 +135,5 @@ func (s Shell) SetInput(m *textinput.Model) Shell {
 	return s
 }
 
+// Input is the input SetInput put on the status row, or nil.
 func (s Shell) Input() *textinput.Model { return s.input }

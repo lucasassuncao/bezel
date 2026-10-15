@@ -1,0 +1,149 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # Repository hygiene, platform-independent and only worth doing once. The
+  # git-diff comparisons would only produce line-ending noise on Windows.
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      # Keyed on the Makefile, where the tool versions are pinned.
+      - name: Cache pinned tools
+        uses: actions/cache@v6
+        with:
+          path: .gobin
+          key: gobin-${{ runner.os }}-${{ hashFiles('Makefile') }}
+
+      - name: Check dependencies
+        run: |
+          go mod tidy
+          if ! git diff --exit-code; then
+            echo ""
+            echo "❌ go.mod or go.sum is out of date. Run 'go mod tidy' locally and commit the result."
+            exit 1
+          fi
+          echo "✅ Dependencies are up to date."
+
+      - name: Check formatting
+        run: |
+          make fmt
+          if ! git diff --exit-code; then
+            echo ""
+            echo "❌ Code is not formatted. Run 'make fmt' locally and commit the result."
+            exit 1
+          fi
+          echo "✅ Code is properly formatted."
+
+      - name: Check docs
+        run: |
+          make docs
+          if ! git diff --exit-code; then
+            echo ""
+            echo "❌ Documentation is out of date. Run 'make docs' locally and commit the result."
+            exit 1
+          fi
+          echo "✅ Documentation is up to date."
+
+  # Consumers build TUIs for all three platforms, and the clipboard helpers and
+  # terminal rendering are where they diverge. Lint and security run in the
+  # matrix so no platform-sensitive analysis is judged by Linux alone.
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Cache pinned tools
+        uses: actions/cache@v6
+        with:
+          path: .gobin
+          key: gobin-${{ runner.os }}-${{ hashFiles('Makefile') }}
+
+      - name: Lint
+        run: make lint
+
+      - name: Security
+        run: make security
+
+      - name: Test
+        run: make test-coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-${{ matrix.os }}
+          path: |
+            coverage.out
+            coverage.html
+            coverage.xml
+          if-no-files-found: warn
+
+  # The dependency graph comes from go.mod and is the same everywhere. Its own
+  # job because it fails differently: a new CVE turns it red with no commit.
+  supply-chain:
+    name: Supply chain
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      # syft and grype are slow to build for a scan that takes seconds.
+      - name: Cache pinned tools
+        uses: actions/cache@v6
+        with:
+          path: .gobin
+          key: gobin-${{ runner.os }}-${{ hashFiles('Makefile') }}
+
+      # Runs first so the reachability answer is in the log even when grype
+      # fails the job on an advisory nothing here can execute.
+      - name: Check reachable vulnerabilities
+        run: make govulncheck
+
+      - name: Scan dependencies
+        run: make vuln
+
+      # Uploaded even on failure: the SBOM is what you triage findings with.
+      - name: Upload SBOM
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sbom
+          path: sbom.json
+          if-no-files-found: warn

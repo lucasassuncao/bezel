@@ -13,7 +13,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-func th() theme.Resolved { return theme.Resolve(theme.ThemePlain, true) }
+func th() theme.Resolved { return theme.Resolve(theme.Plain, true) }
 
 // The widget stops at 99 lines and 400 characters by default, silently.
 func TestALongValueIsKeptWhole(t *testing.T) {

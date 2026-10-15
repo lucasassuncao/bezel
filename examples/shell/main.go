@@ -52,7 +52,7 @@ func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fixed("list", layout.Ratio(1, 3), layout.Min(24)), layout.Fill("detail")),
 		Tabs:   shTabs,
-		Theme:  theme.Resolve(theme.ThemeMint, true),
+		Theme:  theme.Resolve(theme.Mint, true),
 		Title:  "shell",
 		Actions: []shell.Action{
 			shell.Help(), shell.ChangeTab(), shell.ChangePane(), shell.Move(), shell.Quit(),

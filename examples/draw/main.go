@@ -26,7 +26,7 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.ThemeMint, true)
+	th := theme.Resolve(theme.Mint, true)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fill("draw")),
 		Theme:   th,

@@ -41,7 +41,7 @@ sh := shell.New(shell.Config{
         layout.Fill("detail"),
     ).Collapse(72, "detail"),
     Tabs:    tabs, // each implements shell.Tab: Name(), Status(ctx) and Actions(ctx)
-    Theme:   theme.Resolve(theme.ThemeMint, true), // re-resolve on tea.BackgroundColorMsg
+    Theme:   theme.Resolve(theme.Mint, true), // re-resolve on tea.BackgroundColorMsg
     Title:   "my app",
     Actions: []shell.Action{shell.Help(), shell.ChangeTab(), shell.Move(), shell.Quit()},
 })

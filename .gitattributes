@@ -1,0 +1,12 @@
+# gofmt rejects CRLF, and a Windows checkout would convert every text file to
+# it: keep LF everywhere.
+* text=auto eol=lf
+
+# Assets git must never rewrite.
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.exe binary
+*.gz  binary
+*.zip binary

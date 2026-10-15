@@ -59,7 +59,7 @@ func newModel() model {
 	for i, t := range tabs {
 		shTabs[i] = t
 	}
-	th := theme.Resolve(theme.ThemeMint, true)
+	th := theme.Resolve(theme.Mint, true)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fixed("list", layout.Ratio(1, 3), layout.Min(26), layout.Max(52)), layout.Fill("detail")).Collapse(72, "detail"),
 		Tabs:    shTabs,

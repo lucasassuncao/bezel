@@ -5,6 +5,7 @@ package tree
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"charm.land/bubbles/v2/key"
@@ -43,6 +44,7 @@ type Keys struct {
 	Up, Down, Left, Right key.Binding
 }
 
+// DefaultKeys are the four arrows.
 func DefaultKeys() Keys {
 	return Keys{
 		Up:    key.NewBinding(key.WithKeys("up")),
@@ -69,7 +71,7 @@ type Model[N Noder[N]] struct {
 // New builds a tree over nodes, height rows tall, with the cursor on the
 // first row that is not a section.
 func New[N Noder[N]](nodes []N, height int) Model[N] {
-	m := Model[N]{Nodes: nodes, Height: height}
+	m := Model[N]{Nodes: slices.Clone(nodes), Height: height}
 	vis := m.Visible()
 	for m.Cursor < len(vis) && nodes[vis[m.Cursor]].TreeInfo().Section {
 		m.Cursor++
@@ -77,6 +79,7 @@ func New[N Noder[N]](nodes []N, height int) Model[N] {
 	return m
 }
 
+// WithKeys rebinds the tree.
 func (m Model[N]) WithKeys(k Keys) Model[N] {
 	m.keys = &k
 	return m
@@ -92,7 +95,7 @@ func (m Model[N]) bindings() Keys {
 // Visible returns the indices into Nodes that are rendered, honouring each
 // parent's collapsed state.
 func (m Model[N]) Visible() []int {
-	var vis []int
+	vis := make([]int, 0, len(m.Nodes))
 	var collapsed []int // depths of collapsed ancestors: inside one, rows are skipped
 	for i, n := range m.Nodes {
 		in := n.TreeInfo()
@@ -158,9 +161,7 @@ func (m Model[N]) Update(msg tea.KeyPressMsg) (Model[N], Action) {
 
 // move steps the cursor over section rows, clamped at both ends.
 func (m Model[N]) move(dir int, vis []int) Model[N] {
-	if m.Cursor >= len(vis) {
-		m.Cursor = len(vis) - 1
-	}
+	m.Cursor = min(max(m.Cursor, 0), len(vis)-1)
 	start := m.Cursor
 	for next := m.Cursor + dir; next >= 0 && next < len(vis); next += dir {
 		m.Cursor = next
@@ -171,7 +172,7 @@ func (m Model[N]) move(dir int, vis []int) Model[N] {
 	if m.Nodes[vis[m.Cursor]].TreeInfo().Section {
 		m.Cursor = start
 	}
-	return m.ClampOffset()
+	return m.clampOffset(len(vis))
 }
 
 // Move walks delta rows, stepping over section rows and stopping at the
@@ -181,6 +182,7 @@ func (m Model[N]) Move(delta int) Model[N] {
 	if len(vis) == 0 {
 		return m
 	}
+	m.Cursor = min(max(m.Cursor, 0), len(vis)-1)
 	dir := 1
 	if delta < 0 {
 		dir, delta = -1, -delta
@@ -195,7 +197,7 @@ func (m Model[N]) Move(delta int) Model[N] {
 		}
 		m.Cursor = next
 	}
-	return m.ClampOffset()
+	return m.clampOffset(len(vis))
 }
 
 // MoveTo jumps to a visible row, snapping backwards over section rows: the
@@ -213,7 +215,7 @@ func (m Model[N]) MoveTo(i int) Model[N] {
 		i++
 	}
 	m.Cursor = i
-	return m.ClampOffset()
+	return m.clampOffset(len(vis))
 }
 
 // Expand opens the row under the cursor when it is a collapsed parent.
@@ -245,7 +247,7 @@ func (m Model[N]) collapse(vis []int) (Model[N], Action) {
 		for vi := m.Cursor - 1; vi >= 0; vi-- {
 			if m.Nodes[vis[vi]].TreeInfo().Depth == in.Depth-1 {
 				m.Cursor = vi
-				return m.ClampOffset(), None
+				return m.clampOffset(len(vis)), None
 			}
 		}
 	}
@@ -253,11 +255,14 @@ func (m Model[N]) collapse(vis []int) (Model[N], Action) {
 }
 
 // ClampOffset scrolls so the cursor row stays visible.
-func (m Model[N]) ClampOffset() Model[N] {
+func (m Model[N]) ClampOffset() Model[N] { return m.clampOffset(len(m.Visible())) }
+
+// clampOffset is ClampOffset for a caller already holding n visible rows.
+func (m Model[N]) clampOffset(n int) Model[N] {
 	m.Offset = layout.ClampScroll(m.Cursor, m.Offset, m.Height)
 	// The last row becomes "↓ N more" on overflow, so a cursor landing there
 	// needs one more line of offset to stay visible.
-	if m.hasMore(len(m.Visible())) && m.Cursor >= m.Offset+m.Height-1 {
+	if m.hasMore(n) && m.Cursor >= m.Offset+m.Height-1 {
 		m.Offset = m.Cursor - m.Height + 2
 	}
 	return m
@@ -280,10 +285,11 @@ func (m Model[N]) ClampCursor() Model[N] {
 // CursorTo moves the cursor to the first visible row match accepts, or
 // leaves it when none does. Reports whether it moved.
 func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool) {
-	for vi, ni := range m.Visible() {
+	vis := m.Visible()
+	for vi, ni := range vis {
 		if match(m.Nodes[ni]) {
 			m.Cursor = vi
-			return m.ClampOffset(), true
+			return m.clampOffset(len(vis)), true
 		}
 	}
 	return m, false
@@ -338,9 +344,9 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 		return th.Dim.Render(msg)
 	}
 	// Nodes may have shrunk under a scrolled tree; never scroll past the end.
-	m = m.ClampCursor()
+	m.Cursor = min(max(m.Cursor, 0), len(vis)-1)
 	m.Offset = min(m.Offset, max(len(vis)-m.Height, 0))
-	m = m.ClampOffset()
+	m = m.clampOffset(len(vis))
 	visible := m.Height
 	more := m.hasMore(len(vis))
 	if more {

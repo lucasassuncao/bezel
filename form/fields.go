@@ -1,6 +1,7 @@
 package form
 
 import (
+	"slices"
 	"strings"
 
 	"charm.land/bubbles/v2/textinput"
@@ -25,6 +26,14 @@ func keyOf(msg tea.Msg) string {
 	return ""
 }
 
+// optionAt is options[i], or "" when there are none to choose from.
+func optionAt(options []string, i int) string {
+	if i < 0 || i >= len(options) {
+		return ""
+	}
+	return options[i]
+}
+
 // Input is a one-line text field.
 type Input struct {
 	label string
@@ -47,6 +56,7 @@ func (i Input) WithValue(s string) Input {
 	return i
 }
 
+// Value is the text in the field.
 func (i Input) Value() string { return i.in.Value() }
 func (i Input) Label() string { return i.label }
 
@@ -81,11 +91,16 @@ type Checkbox struct {
 	th      theme.Resolved
 }
 
+// NewCheckbox is a box labelled label, ticked when checked.
 func NewCheckbox(label string, checked bool, th theme.Resolved) Checkbox {
 	return Checkbox{label: label, checked: checked, th: th}
 }
 
-func (c Checkbox) Checked() bool           { return c.checked }
+// Checked reports whether the box is ticked.
+func (c Checkbox) Checked() bool { return c.checked }
+
+// Label is empty on purpose: the label is drawn after the box, in the value
+// column, so it must not widen the label column.
 func (c Checkbox) Label() string           { return "" }
 func (c Checkbox) Focus() (Field, tea.Cmd) { return c, nil }
 func (c Checkbox) Blur() Field             { return c }
@@ -120,12 +135,16 @@ type Radio struct {
 	set      icon.Set
 }
 
+// NewRadio offers options with the one at selected chosen, clamped in range.
 func NewRadio(label string, options []string, selected int, th theme.Resolved) Radio {
-	return Radio{label: label, options: options, selected: min(max(selected, 0), max(0, len(options)-1)), th: th, set: icon.Default()}
+	return Radio{label: label, options: slices.Clone(options), selected: min(max(selected, 0), max(0, len(options)-1)), th: th, set: icon.Default()}
 }
 
-func (r Radio) Selected() int           { return r.selected }
-func (r Radio) Value() string           { return r.options[r.selected] }
+// Selected is the index of the chosen option.
+func (r Radio) Selected() int { return r.selected }
+
+// Value is the chosen option, or "" when there are none.
+func (r Radio) Value() string           { return optionAt(r.options, r.selected) }
 func (r Radio) Label() string           { return r.label }
 func (r Radio) Focus() (Field, tea.Cmd) { return r, nil }
 func (r Radio) Blur() Field             { return r }
@@ -135,7 +154,7 @@ func (r Radio) Update(msg tea.Msg) (Field, tea.Cmd) {
 	case "left", "h":
 		r.selected = max(0, r.selected-1)
 	case "right", "l":
-		r.selected = min(len(r.options)-1, r.selected+1)
+		r.selected = max(0, min(len(r.options)-1, r.selected+1))
 	}
 	return r, nil
 }
@@ -160,10 +179,12 @@ type Toggle struct {
 	set   icon.Set
 }
 
+// NewToggle is a switch labelled label, on when on.
 func NewToggle(label string, on bool, th theme.Resolved) Toggle {
 	return Toggle{label: label, on: on, th: th, set: icon.Default()}
 }
 
+// On reports whether the switch is on.
 func (t Toggle) On() bool                { return t.on }
 func (t Toggle) Label() string           { return t.label }
 func (t Toggle) Focus() (Field, tea.Cmd) { return t, nil }
@@ -196,14 +217,20 @@ type Select struct {
 	set      icon.Set
 }
 
+// NewSelect offers options with the one at selected chosen, clamped in range.
 func NewSelect(label string, options []string, selected int, th theme.Resolved) Select {
 	selected = min(max(selected, 0), max(0, len(options)-1))
-	return Select{label: label, options: options, selected: selected, cursor: selected, th: th, set: icon.Default()}
+	return Select{label: label, options: slices.Clone(options), selected: selected, cursor: selected, th: th, set: icon.Default()}
 }
 
-func (s Select) Selected() int           { return s.selected }
-func (s Select) Value() string           { return s.options[s.selected] }
-func (s Select) Label() string           { return s.label }
+// Selected is the index of the chosen option.
+func (s Select) Selected() int { return s.selected }
+
+// Value is the chosen option, or "" when there are none.
+func (s Select) Value() string { return optionAt(s.options, s.selected) }
+func (s Select) Label() string { return s.label }
+
+// Holding reports whether the list is open, keeping tab and esc from the form.
 func (s Select) Holding() bool           { return s.open }
 func (s Select) Focus() (Field, tea.Cmd) { return s, nil }
 
@@ -224,9 +251,12 @@ func (s Select) Update(msg tea.Msg) (Field, tea.Cmd) {
 	case "up", "k":
 		s.cursor = max(0, s.cursor-1)
 	case "down", "j":
-		s.cursor = min(len(s.options)-1, s.cursor+1)
+		s.cursor = max(0, min(len(s.options)-1, s.cursor+1))
 	case "enter", "space":
-		s.selected, s.open = s.cursor, false
+		s.open = false
+		if len(s.options) > 0 {
+			s.selected = s.cursor
+		}
 	case "esc":
 		s.open = false
 	}
@@ -238,7 +268,7 @@ func (s Select) View(focused bool, labelW, width int) string {
 	if focused {
 		edge = s.th.Accent
 	}
-	closed := edge.Render("‹ ") + s.options[s.selected] + edge.Render(" ›")
+	closed := edge.Render("‹ ") + s.Value() + edge.Render(" ›")
 	head := row(s.th, focused, s.label, labelW, width, closed)
 	if !s.open {
 		return head
@@ -262,10 +292,13 @@ type Button struct {
 	th      theme.Resolved
 }
 
+// NewButton is a button labelled label; onPress may be nil.
 func NewButton(label string, onPress tea.Cmd, th theme.Resolved) Button {
 	return Button{label: label, onPress: onPress, th: th}
 }
 
+// Label is empty on purpose: a button sits in the value column and must not
+// widen the label column.
 func (b Button) Label() string           { return "" }
 func (b Button) Focus() (Field, tea.Cmd) { return b, nil }
 func (b Button) Blur() Field             { return b }

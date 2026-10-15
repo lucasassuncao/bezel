@@ -5,6 +5,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var kinds = []string{"Alert", "Confirm", "Prompt", "Help", "Pager"}
+var kinds = []string{"Alert", "Confirm", "Prompt", "Help", "Pager", "FilePicker"}
 
 // testLog is a command's output, long enough that only a pager shows it whole.
 func testLog() string {
@@ -41,7 +42,7 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.ThemeMint, true)
+	th := theme.Resolve(theme.Mint, true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("kinds")),
 		Theme:  th,
@@ -78,6 +79,9 @@ func (m model) modal() overlay.Overlay {
 			})
 	case "Pager":
 		return overlay.NewPager("go test ./...", testLog(), m.th.Modal, m.th.Legend)
+	case "FilePicker":
+		return overlay.NewFilePicker("Open a file", ".", func(path string) tea.Cmd { return done("picked " + filepath.Base(path)) },
+			m.th.Modal, m.th.Legend)
 	default:
 		return overlay.NewHelp("Keys", []overlay.HelpSection{
 			{Name: "Navigation", Entries: []legend.Entry{legend.New("↑/↓", "move"), legend.New("enter", "open")}},
@@ -96,7 +100,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	switch msg := msg.(type) {
 	case openMsg:
-		m.sh = m.sh.Push(m.modal())
+		o := m.modal()
+		m.sh = m.sh.Push(o)
+		// The picker reads its directory once it is on top to receive it.
+		if fp, ok := o.(overlay.FilePicker); ok {
+			return m, fp.Init()
+		}
 	case doneMsg:
 		m.sh, cmd = m.sh.SetStatus(msg.text, shell.OK, 3*time.Second)
 		return m, cmd

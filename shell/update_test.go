@@ -76,3 +76,12 @@ func TestKeysStillReachAnOpenOverlay(t *testing.T) {
 	_, handled, _ := s.Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
 	require.True(t, handled)
 }
+
+// What an overlay's own command answers is the overlay's, even though other
+// non-key messages pass it by for the app.
+func TestTopMsgReachesAnOpenOverlay(t *testing.T) {
+	s := sized(New(actionConfig()))
+	s = s.Push(overlay.NewText("t", []string{"x"}, lipgloss.NewStyle(), legend.Style{}))
+	_, handled, _ := s.Update(overlay.TopMsg{Msg: answer{}})
+	require.True(t, handled)
+}

@@ -131,7 +131,7 @@ func TestInfoStatusUsesTheNeutralStyleAndHelpHasNoEmptySection(t *testing.T) {
 	s, _ = s.SetStatus("just saying", Info, 0)
 	require.Contains(t, ansi.Strip(s.View(demoPanes())), "just saying")
 
-	s = New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.ThemePlain, true)})
+	s = New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true)})
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	s = s.ShowHelp()
 	require.NotContains(t, ansi.Strip(s.View(demoPanes())), "Keys")

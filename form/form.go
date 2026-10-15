@@ -4,6 +4,7 @@
 package form
 
 import (
+	"slices"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -35,7 +36,7 @@ type Form struct {
 
 // New is a form focused on its first field.
 func New(fields ...Field) (Form, tea.Cmd) {
-	f := Form{fields: fields}
+	f := Form{fields: slices.Clone(fields)}
 	if len(fields) == 0 {
 		return f, nil
 	}
@@ -50,6 +51,8 @@ func (f Form) Field(i int) Field { return f.fields[i] }
 // Focused is the index of the field in focus.
 func (f Form) Focused() int { return f.focus }
 
+// Update moves the focus on tab and shift+tab, unless the focused field holds
+// them, and hands every other message to the focused field.
 func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 	if len(f.fields) == 0 {
 		return f, nil
@@ -66,6 +69,7 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 			return f.move(-1)
 		}
 	}
+	f.fields = slices.Clone(f.fields)
 	var cmd tea.Cmd
 	f.fields[f.focus], cmd = f.fields[f.focus].Update(msg)
 	return f, cmd
@@ -73,7 +77,7 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 
 // move hands the focus by steps, wrapping at either end.
 func (f Form) move(by int) (Form, tea.Cmd) {
-	f.fields = append([]Field(nil), f.fields...)
+	f.fields = slices.Clone(f.fields)
 	f.fields[f.focus] = f.fields[f.focus].Blur()
 	f.focus = (f.focus + by + len(f.fields)) % len(f.fields)
 	var cmd tea.Cmd

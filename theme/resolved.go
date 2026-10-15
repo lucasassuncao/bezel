@@ -47,14 +47,18 @@ func Resolve(t Theme, dark bool) Resolved {
 	rt := buildDerivedStyles(c)
 	rt.Colors = c
 
-	if t.Styles.Danger != nil {
-		rt.Danger = *t.Styles.Danger
-	}
-	if t.Styles.Muted != nil {
-		rt.Muted = *t.Styles.Muted
-	}
-	if t.Styles.Cursor != nil {
-		rt.Cursor = *t.Styles.Cursor
+	// Deepest base first, so each layer's Styles override the one under it.
+	for _, layer := range t.chain() {
+		s := layer.Styles
+		if s.Danger != nil {
+			rt.Danger = *s.Danger
+		}
+		if s.Muted != nil {
+			rt.Muted = *s.Muted
+		}
+		if s.Cursor != nil {
+			rt.Cursor = *s.Cursor
+		}
 	}
 	return rt
 }

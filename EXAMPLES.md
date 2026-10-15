@@ -110,7 +110,7 @@ The table a `--list-themes` flag prints: scrollable in a terminal, plain lines i
 
 ## overlay
 
-The ready-made modals. An alert any key closes, a confirm that answers the app, a prompt that refuses an empty name, the help list, and a pager over a command's output, scrolled line by line, a page at a time and to the end. `esc` closes each one.
+The ready-made modals. An alert any key closes, a confirm that answers the app, a prompt that refuses an empty name, the help list, and a pager over a command's output, scrolled line by line, a page at a time and to the end, and a file picker over the working directory. `esc` closes each one.
 
 <details>
 <summary>Show Example</summary>

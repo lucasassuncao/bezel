@@ -20,8 +20,9 @@ type Text struct {
 	hint  legend.Style
 }
 
+// NewText shows lines under title until any key.
 func NewText(title string, lines []string, style lipgloss.Style, hint legend.Style) Text {
-	return Text{title: title, lines: lines, style: style, hint: hint}
+	return Text{title: title, lines: slices.Clone(lines), style: style, hint: hint}
 }
 
 func (t Text) Update(msg tea.Msg) (Overlay, tea.Cmd) {
@@ -60,8 +61,9 @@ type Choice struct {
 	hint    legend.Style
 }
 
+// NewChoice shows lines under title with options as its buttons.
 func NewChoice(title string, lines []string, options []Option, style lipgloss.Style, hint legend.Style) Choice {
-	return Choice{title: title, lines: lines, options: options, style: style, hint: hint}
+	return Choice{title: title, lines: slices.Clone(lines), options: slices.Clone(options), style: style, hint: hint}
 }
 
 func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd) {
@@ -127,14 +129,17 @@ type Keys struct {
 	Up, Down, Enter key.Binding
 }
 
+// NewPick lists rows with the cursor on the first, notes drawn under them.
+// onPick may be nil, which makes enter only close.
 func NewPick(title string, rows, notes []string, onPick func(i int) tea.Cmd, style lipgloss.Style, hint legend.Style) Pick {
-	return Pick{title: title, rows: rows, notes: notes, onPick: onPick, style: style, hint: hint, keys: Keys{
+	return Pick{title: title, rows: slices.Clone(rows), notes: slices.Clone(notes), onPick: onPick, style: style, hint: hint, keys: Keys{
 		Up:    key.NewBinding(key.WithKeys("up")),
 		Down:  key.NewBinding(key.WithKeys("down")),
 		Enter: key.NewBinding(key.WithKeys("enter")),
 	}}
 }
 
+// Cursor is the index of the row under the cursor.
 func (p Pick) Cursor() int { return p.cursor }
 
 func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd) {

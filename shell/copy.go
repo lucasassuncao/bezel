@@ -23,7 +23,7 @@ var clipboardTimeout = 5 * time.Second
 
 // errClipboardTimeout is worded for the status row: a write that hangs is
 // almost always a missing or wedged helper, not anything about the text.
-var errClipboardTimeout = errors.New("the clipboard did not answer - is xclip, wl-copy or pbcopy installed and working?")
+var errClipboardTimeout = errors.New("the clipboard did not answer: check that xclip, wl-copy or pbcopy is installed and working")
 
 // WithClipboard replaces the system clipboard with write, for a test that
 // must not touch the machine's own.
@@ -36,7 +36,7 @@ func (s Shell) WithClipboard(write func(string) error) Shell {
 // status row, or "failed: why". A helper that hangs gives up after 5s
 // instead of freezing the program.
 func (s Shell) Copy(text, done, failed string) tea.Cmd {
-	write := s.cfg.Clipboard // read here, on the loop, never from the command
+	write, timeout := s.cfg.Clipboard, clipboardTimeout // read here, on the loop, never from the command
 	if write == nil {
 		write = clipboard.WriteAll
 	}
@@ -46,7 +46,7 @@ func (s Shell) Copy(text, done, failed string) tea.Cmd {
 		select {
 		case err := <-errc:
 			return copiedMsg{done: done, failed: failed, err: err}
-		case <-time.After(clipboardTimeout):
+		case <-time.After(timeout):
 			return copiedMsg{done: done, failed: failed, err: errClipboardTimeout}
 		}
 	}

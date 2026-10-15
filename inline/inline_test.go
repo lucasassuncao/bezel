@@ -1,17 +1,20 @@
 package inline
 
 import (
+	"context"
+	"io"
 	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.ThemePlain, true)
+var th = theme.Resolve(theme.Plain, true)
 
 func press(c confirm, keys ...string) confirm {
 	for _, k := range keys {
@@ -64,6 +67,33 @@ func TestConfirmIgnoresVimKeys(t *testing.T) {
 func TestConfirmViewShowsAnswerWhenDone(t *testing.T) {
 	c := press(newConfirm("Proceed?", th), "y")
 	assert.Equal(t, "Proceed? Yes\n", ansi.Strip(c.View().Content))
+}
+
+// run answers Confirm through opts instead of a terminal.
+func run(t *testing.T, opts ...tea.ProgramOption) (bool, error) {
+	t.Helper()
+	base := []tea.ProgramOption{tea.WithOutput(io.Discard), tea.WithoutSignals()}
+	return Confirm("Proceed?", th, append(base, opts...)...)
+}
+
+func TestConfirmReadsTheAnswerFromTheGivenInput(t *testing.T) {
+	yes, err := run(t, tea.WithInput(strings.NewReader("y")))
+	require.NoError(t, err)
+	assert.True(t, yes)
+}
+
+func TestConfirmReturnsErrAbortedOnEsc(t *testing.T) {
+	_, err := run(t, tea.WithInput(strings.NewReader("\x1b")))
+	assert.ErrorIs(t, err, ErrAborted)
+}
+
+func TestConfirmStopsWhenTheContextIsCancelled(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	pr, pw := io.Pipe()
+	t.Cleanup(func() { _ = pw.Close() })
+	_, err := run(t, tea.WithInput(pr), tea.WithContext(ctx))
+	assert.ErrorIs(t, err, tea.ErrProgramKilled)
 }
 
 func TestBarWidths(t *testing.T) {

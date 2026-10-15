@@ -2,6 +2,8 @@
 // to rectangles. It knows nothing about what is drawn in them.
 package layout
 
+import "slices"
+
 // Rect is a placed region: X,Y is the top-left corner, W,H the size.
 type Rect struct{ X, Y, W, H int }
 
@@ -41,13 +43,13 @@ func (*Box) node() {}
 func (Leaf) node() {}
 
 // Columns lays children out left to right.
-func Columns(children ...Node) *Box { return &Box{dir: horizontal, children: children} }
+func Columns(children ...Node) *Box { return &Box{dir: horizontal, children: slices.Clone(children)} }
 
 // Rows lays children out top to bottom.
-func Rows(children ...Node) *Box { return &Box{dir: vertical, children: children} }
+func Rows(children ...Node) *Box { return &Box{dir: vertical, children: slices.Clone(children)} }
 
 // Fixed is a leaf sized by its constraints. With none it behaves like Fill.
-func Fixed(name string, cs ...Constraint) Leaf { return Leaf{Name: name, cs: cs} }
+func Fixed(name string, cs ...Constraint) Leaf { return Leaf{Name: name, cs: slices.Clone(cs)} }
 
 // Fill is a leaf that takes what the fixed siblings leave.
 func Fill(name string) Leaf { return Leaf{Name: name} }

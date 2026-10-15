@@ -125,7 +125,7 @@ func TestClampCursorAfterNodesShrink(t *testing.T) {
 }
 
 func TestViewPadsShortTreesAndMarksOverflow(t *testing.T) {
-	th := theme.Resolve(theme.ThemePlain, true)
+	th := theme.Resolve(theme.Plain, true)
 	row := func(n node, _ int, selected bool) string {
 		prefix := "  "
 		if selected {
@@ -198,4 +198,16 @@ func TestViewStaysHeightTallAfterNodesShrink(t *testing.T) {
 	m := New(leaves(20), 5).MoveTo(15)
 	m.Nodes = leaves(3)
 	require.Len(t, strings.Split(m.View(theme.Resolved{}, labelRow), "\n"), 5)
+}
+
+// Cursor is exported, so a caller can leave it out of range.
+func TestOutOfRangeCursorDoesNotPanic(t *testing.T) {
+	for _, c := range []int{-3, 99} {
+		m := newTree(10)
+		m.Cursor = c
+		require.NotPanics(t, func() {
+			m, _ = m.Update(press(tea.KeyDown))
+			m = m.Move(-1)
+		})
+	}
 }
