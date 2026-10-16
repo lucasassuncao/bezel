@@ -62,6 +62,15 @@ func TestPickWithNoRowsKeepsTheCursorAtZero(t *testing.T) {
 	require.Equal(t, 0, o.(Pick).Cursor())
 }
 
+func TestPickWithCursorStartsThereAndClamps(t *testing.T) {
+	p := NewPick("Which?", []string{"a", "b", "c"}, nil, nil, lipgloss.NewStyle(), legend.Style{})
+	require.Equal(t, 1, p.WithCursor(1).Cursor())
+	require.Equal(t, 2, p.WithCursor(9).Cursor())
+	require.Equal(t, 0, p.WithCursor(-1).Cursor())
+	empty := NewPick("Which?", nil, nil, nil, lipgloss.NewStyle(), legend.Style{})
+	require.Equal(t, 0, empty.WithCursor(3).Cursor())
+}
+
 // Pick has no buttons, so it names its keys inside the box.
 func TestPickShowsItsKeysInItsBox(t *testing.T) {
 	p := NewPick("t", []string{"a", "b"}, nil, nil, lipgloss.NewStyle(), legend.Style{})

@@ -74,6 +74,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p Pick\) Legend\(\) \[\]legend.Entry](<#Pick.Legend>)
   - [func \(p Pick\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Pick.Update>)
   - [func \(p Pick\) View\(body layout.Rect\) string](<#Pick.View>)
+  - [func \(p Pick\) WithCursor\(i int\) Pick](<#Pick.WithCursor>)
 - [type Prompt](<#Prompt>)
   - [func NewPrompt\(title string, onAccept func\(value string\) tea.Cmd, style lipgloss.Style, hint legend.Style\) Prompt](<#NewPrompt>)
   - [func \(p Prompt\) Accepts\(\) bool](<#Prompt.Accepts>)
@@ -666,7 +667,7 @@ func NewPick(title string, rows, notes []string, onPick func(i int) tea.Cmd, sty
 NewPick lists rows with the cursor on the first, notes drawn under them. onPick may be nil, which makes enter only close.
 
 <a name="Pick.Cursor"></a>
-### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L143>)
+### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L150>)
 
 ```go
 func (p Pick) Cursor() int
@@ -675,7 +676,7 @@ func (p Pick) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Pick.Legend"></a>
-### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L164>)
+### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L171>)
 
 ```go
 func (p Pick) Legend() []legend.Entry
@@ -684,7 +685,7 @@ func (p Pick) Legend() []legend.Entry
 
 
 <a name="Pick.Update"></a>
-### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L145>)
+### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L152>)
 
 ```go
 func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -693,13 +694,22 @@ func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pick.View"></a>
-### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L168>)
+### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L175>)
 
 ```go
 func (p Pick) View(body layout.Rect) string
 ```
 
 
+
+<a name="Pick.WithCursor"></a>
+### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L144>)
+
+```go
+func (p Pick) WithCursor(i int) Pick
+```
+
+WithCursor starts the cursor on row i, such as the value already chosen; an index outside the rows is clamped to them.
 
 <a name="Prompt"></a>
 ## type [Prompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L22-L35>)

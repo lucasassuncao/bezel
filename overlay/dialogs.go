@@ -139,6 +139,13 @@ func NewPick(title string, rows, notes []string, onPick func(i int) tea.Cmd, sty
 	}}
 }
 
+// WithCursor starts the cursor on row i, such as the value already chosen;
+// an index outside the rows is clamped to them.
+func (p Pick) WithCursor(i int) Pick {
+	p.cursor = max(0, min(len(p.rows)-1, i))
+	return p
+}
+
 // Cursor is the index of the row under the cursor.
 func (p Pick) Cursor() int { return p.cursor }
 
