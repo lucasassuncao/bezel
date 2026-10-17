@@ -29,6 +29,20 @@ func TestCollapseIsRecordedOnTheBox(t *testing.T) {
 	require.Equal(t, "b", b.collapseKeep)
 }
 
+// A box shared by two layouts, as SetLayout swaps them, must not change under either.
+func TestCollapseLeavesTheReceiverAsItWas(t *testing.T) {
+	base := Columns(Fixed("a", Lines(10)), Fill("b"))
+	narrow := base.Collapse(72, "b")
+
+	require.Zero(t, base.collapseLimit)
+	require.Empty(t, base.collapseKeep)
+	require.Equal(t, 72, narrow.collapseLimit)
+
+	rects, collapsed := Resolve(base, Rect{W: 40, H: 5}, nil)
+	require.False(t, collapsed)
+	require.Equal(t, 10, rects["a"].W)
+}
+
 // The tree keeps what it was built from, whatever the caller does after.
 func TestConstructorsCopyTheirArguments(t *testing.T) {
 	cs := []Constraint{Lines(3)}

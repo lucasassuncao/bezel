@@ -48,7 +48,7 @@ func ClampScroll(cursor, offset, height int) int
 ClampScroll moves offset so that cursor stays inside a window of height rows: up when the cursor is above it, down when below. Never negative; a non\-positive height only applies the floor.
 
 <a name="Order"></a>
-## func [Order](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L92>)
+## func [Order](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L95>)
 
 ```go
 func Order(n Node) []string
@@ -137,7 +137,7 @@ func main() {
 </details>
 
 <a name="Ring"></a>
-## func [Ring](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L99>)
+## func [Ring](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L102>)
 
 ```go
 func Ring(n Node) []string
@@ -184,13 +184,13 @@ func Rows(children ...Node) *Box
 Rows lays children out top to bottom.
 
 <a name="Box.Collapse"></a>
-### func \(\*Box\) [Collapse](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L59>)
+### func \(\*Box\) [Collapse](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L60>)
 
 ```go
 func (b *Box) Collapse(limit int, keep string) *Box
 ```
 
-Collapse keeps only the child holding leaf keep when the box's axis is shorter than limit. keep may name a leaf nested deeper in that child.
+Collapse is a copy of b that keeps only the child holding leaf keep when its axis is shorter than limit. keep may name a leaf nested deeper in that child. b itself is left as it was, so a box shared by two layouts is safe.
 
 <details><summary>Example</summary>
 <p>
@@ -224,7 +224,7 @@ true false {X:0 Y:0 W:60 H:20}
 </details>
 
 <a name="Constraint"></a>
-## type [Constraint](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L74-L77>)
+## type [Constraint](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L77-L80>)
 
 Constraint shapes a Fixed leaf along its parent's axis.
 
@@ -235,7 +235,7 @@ type Constraint struct {
 ```
 
 <a name="Lines"></a>
-### func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L89>)
+### func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L92>)
 
 ```go
 func Lines(n int) Constraint
@@ -244,7 +244,7 @@ func Lines(n int) Constraint
 Lines is an exact size: rows in a Rows box, columns in a Columns box.
 
 <a name="Max"></a>
-### func [Max](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L86>)
+### func [Max](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L89>)
 
 ```go
 func Max(n int) Constraint
@@ -253,7 +253,7 @@ func Max(n int) Constraint
 Max caps the leaf's size.
 
 <a name="Min"></a>
-### func [Min](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L83>)
+### func [Min](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L86>)
 
 ```go
 func Min(n int) Constraint
@@ -262,7 +262,7 @@ func Min(n int) Constraint
 Min floors the leaf's size.
 
 <a name="Ratio"></a>
-### func [Ratio](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L80>)
+### func [Ratio](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L83>)
 
 ```go
 func Ratio(num, den int) Constraint

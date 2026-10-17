@@ -54,11 +54,14 @@ func Fixed(name string, cs ...Constraint) Leaf { return Leaf{Name: name, cs: sli
 // Fill is a leaf that takes what the fixed siblings leave.
 func Fill(name string) Leaf { return Leaf{Name: name} }
 
-// Collapse keeps only the child holding leaf keep when the box's axis is
-// shorter than limit. keep may name a leaf nested deeper in that child.
+// Collapse is a copy of b that keeps only the child holding leaf keep when
+// its axis is shorter than limit. keep may name a leaf nested deeper in that
+// child. b itself is left as it was, so a box shared by two layouts is safe.
 func (b *Box) Collapse(limit int, keep string) *Box {
-	b.collapseLimit, b.collapseKeep = limit, keep
-	return b
+	c := *b
+	c.children = slices.Clone(b.children)
+	c.collapseLimit, c.collapseKeep = limit, keep
+	return &c
 }
 
 type constraintKind int
