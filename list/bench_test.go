@@ -9,10 +9,10 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-func bigList(n int) Model {
-	rows := make([]Row, n)
+func bigList(n int) Model[int] {
+	rows := make([]Row[int], n)
 	for i := range rows {
-		rows[i] = Row{Label: fmt.Sprintf("package-%05d", i), Value: i}
+		rows[i] = Row[int]{Label: fmt.Sprintf("package-%05d", i), Value: i}
 	}
 	return New(rows, 40)
 }

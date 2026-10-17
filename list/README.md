@@ -16,22 +16,22 @@ Package list is a cursor list with section headings, a scroll indicator and a / 
 - [type Keys](<#Keys>)
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
 - [type Model](<#Model>)
-  - [func New\(rows \[\]Row, height int\) Model](<#New>)
-  - [func \(m Model\) Filter\(\) string](<#Model.Filter>)
-  - [func \(m Model\) IsFiltering\(\) bool](<#Model.IsFiltering>)
-  - [func \(m Model\) Len\(\) int](<#Model.Len>)
-  - [func \(m Model\) Rows\(\) \[\]Row](<#Model.Rows>)
-  - [func \(m Model\) Selected\(\) \*Row](<#Model.Selected>)
-  - [func \(m Model\) SetHeight\(h int\) Model](<#Model.SetHeight>)
-  - [func \(m Model\) SetRows\(rows \[\]Row\) Model](<#Model.SetRows>)
-  - [func \(m Model\) Update\(msg tea.KeyPressMsg\) \(Model, Action\)](<#Model.Update>)
-  - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
-  - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
+  - [func New\[T any\]\(rows \[\]Row\[T\], height int\) Model\[T\]](<#New>)
+  - [func \(m Model\[T\]\) Filter\(\) string](<#Model[T].Filter>)
+  - [func \(m Model\[T\]\) IsFiltering\(\) bool](<#Model[T].IsFiltering>)
+  - [func \(m Model\[T\]\) Len\(\) int](<#Model[T].Len>)
+  - [func \(m Model\[T\]\) Rows\(\) \[\]Row\[T\]](<#Model[T].Rows>)
+  - [func \(m Model\[T\]\) Selected\(\) \*Row\[T\]](<#Model[T].Selected>)
+  - [func \(m Model\[T\]\) SetHeight\(h int\) Model\[T\]](<#Model[T].SetHeight>)
+  - [func \(m Model\[T\]\) SetRows\(rows \[\]Row\[T\]\) Model\[T\]](<#Model[T].SetRows>)
+  - [func \(m Model\[T\]\) Update\(msg tea.KeyPressMsg\) \(Model\[T\], Action\)](<#Model[T].Update>)
+  - [func \(m Model\[T\]\) View\(th theme.Resolved\) string](<#Model[T].View>)
+  - [func \(m Model\[T\]\) WithKeys\(k Keys\) Model\[T\]](<#Model[T].WithKeys>)
 - [type Row](<#Row>)
 
 
 <a name="Action"></a>
-## type [Action](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L32>)
+## type [Action](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L33>)
 
 Action is what a key did.
 
@@ -49,7 +49,7 @@ const (
 ```
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L40-L42>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L41-L43>)
 
 Keys are the bindings the list answers to.
 
@@ -60,7 +60,7 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L45>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L46>)
 
 ```go
 func DefaultKeys() Keys
@@ -69,127 +69,127 @@ func DefaultKeys() Keys
 DefaultKeys are the arrows, enter, / and esc.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L56-L61>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L57-L62>)
 
 Model is a value: every method returns the new list.
 
 ```go
-type Model struct {
+type Model[T any] struct {
     // contains filtered or unexported fields
 }
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L78>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L79>)
 
 ```go
-func New(rows []Row, height int) Model
+func New[T any](rows []Row[T], height int) Model[T]
 ```
 
 New builds a list height rows tall with the cursor on the first selectable row.
 
-<a name="Model.Filter"></a>
-### func \(Model\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L100>)
+<a name="Model[T].Filter"></a>
+### func \(Model\[T\]\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L101>)
 
 ```go
-func (m Model) Filter() string
+func (m Model[T]) Filter() string
 ```
 
 Filter is the text typed at the / prompt.
 
-<a name="Model.IsFiltering"></a>
-### func \(Model\) [IsFiltering](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L97>)
+<a name="Model[T].IsFiltering"></a>
+### func \(Model\[T\]\) [IsFiltering](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L98>)
 
 ```go
-func (m Model) IsFiltering() bool
+func (m Model[T]) IsFiltering() bool
 ```
 
 IsFiltering reports whether the / prompt is open and taking the keys.
 
-<a name="Model.Len"></a>
-### func \(Model\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L94>)
+<a name="Model[T].Len"></a>
+### func \(Model\[T\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L95>)
 
 ```go
-func (m Model) Len() int
+func (m Model[T]) Len() int
 ```
 
 Len is how many rows there are, headings included.
 
-<a name="Model.Rows"></a>
-### func \(Model\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L91>)
+<a name="Model[T].Rows"></a>
+### func \(Model\[T\]\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L92>)
 
 ```go
-func (m Model) Rows() []Row
+func (m Model[T]) Rows() []Row[T]
 ```
 
 Rows is a copy of every row, headings included.
 
-<a name="Model.Selected"></a>
-### func \(Model\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L133>)
+<a name="Model[T].Selected"></a>
+### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L134>)
 
 ```go
-func (m Model) Selected() *Row
+func (m Model[T]) Selected() *Row[T]
 ```
 
 Selected is the row under the cursor, or nil on a heading or an empty list. While filtering it is the row under the filter cursor.
 
-<a name="Model.SetHeight"></a>
-### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L125>)
+<a name="Model[T].SetHeight"></a>
+### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L126>)
 
 ```go
-func (m Model) SetHeight(h int) Model
+func (m Model[T]) SetHeight(h int) Model[T]
 ```
 
 SetHeight updates the visible row count and re\-clamps the scroll.
 
-<a name="Model.SetRows"></a>
-### func \(Model\) [SetRows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L105>)
+<a name="Model[T].SetRows"></a>
+### func \(Model\[T\]\) [SetRows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L106>)
 
 ```go
-func (m Model) SetRows(rows []Row) Model
+func (m Model[T]) SetRows(rows []Row[T]) Model[T]
 ```
 
 SetRows replaces the rows, keeping the cursor on the row with the same label when it survives \(at the same index first\), else on the first selectable one.
 
-<a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L151>)
+<a name="Model[T].Update"></a>
+### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L152>)
 
 ```go
-func (m Model) Update(msg tea.KeyPressMsg) (Model, Action)
+func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
 ```
 
 Update handles one key. Keys the list does not know return None and leave it unchanged, so the caller can layer its own on top.
 
-<a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L247>)
+<a name="Model[T].View"></a>
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L248>)
 
 ```go
-func (m Model) View(th theme.Resolved) string
+func (m Model[T]) View(th theme.Resolved) string
 ```
 
 View renders the visible rows, or the filter prompt with its matches.
 
-<a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L85>)
+<a name="Model[T].WithKeys"></a>
+### func \(Model\[T\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L86>)
 
 ```go
-func (m Model) WithKeys(k Keys) Model
+func (m Model[T]) WithKeys(k Keys) Model[T]
 ```
 
 WithKeys rebinds the list.
 
 <a name="Row"></a>
-## type [Row](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L23-L29>)
+## type [Row](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L24-L30>)
 
-Row is one line. A Section row is a heading \(or a blank spacer when its Label is empty\) and cannot be selected. Mark is a glyph before the label; Style colours an unselected row, falling back to the theme's Dim.
+Row is one line, carrying a payload of the caller's type T. A Section row is a heading \(or a blank spacer when its Label is empty\) and cannot be selected. Mark is a glyph before the label; Style colours an unselected row, falling back to the theme's Dim.
 
 ```go
-type Row struct {
+type Row[T any] struct {
     Label   string
     Section bool
     Mark    string
     Style   *lipgloss.Style
-    Value   any
+    Value   T
 }
 ```
 

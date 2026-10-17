@@ -21,11 +21,11 @@ type food struct {
 	calories int
 }
 
-func rows() []list.Row {
-	row := func(name string, kcal int) list.Row {
-		return list.Row{Label: name, Mark: "•", Value: food{name, kcal}}
+func rows() []list.Row[food] {
+	row := func(name string, kcal int) list.Row[food] {
+		return list.Row[food]{Label: name, Mark: "•", Value: food{name, kcal}}
 	}
-	return []list.Row{
+	return []list.Row[food]{
 		{Label: "Fruit", Section: true},
 		row("banana", 89), row("mango", 60), row("orange", 47), row("pineapple", 50),
 		{Section: true},
@@ -37,7 +37,7 @@ func rows() []list.Row {
 type model struct {
 	sh     shell.Shell
 	th     theme.Resolved
-	list   list.Model
+	list   list.Model[food]
 	chosen *food
 }
 
@@ -64,7 +64,7 @@ func (m model) toList(key tea.KeyPressMsg) model {
 	var act list.Action
 	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
 	if m.list, act = m.list.Update(key); act == list.Chosen {
-		f := m.list.Selected().Value.(food)
+		f := m.list.Selected().Value
 		m.chosen = &f
 	}
 	return m

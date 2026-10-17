@@ -17,15 +17,16 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-// Row is one line. A Section row is a heading (or a blank spacer when its
-// Label is empty) and cannot be selected. Mark is a glyph before the label;
-// Style colours an unselected row, falling back to the theme's Dim.
-type Row struct {
+// Row is one line, carrying a payload of the caller's type T. A Section row
+// is a heading (or a blank spacer when its Label is empty) and cannot be
+// selected. Mark is a glyph before the label; Style colours an unselected
+// row, falling back to the theme's Dim.
+type Row[T any] struct {
 	Label   string
 	Section bool
 	Mark    string
 	Style   *lipgloss.Style
-	Value   any
+	Value   T
 }
 
 // Action is what a key did.
@@ -53,8 +54,8 @@ func DefaultKeys() Keys {
 }
 
 // Model is a value: every method returns the new list.
-type Model struct {
-	rows []Row
+type Model[T any] struct {
+	rows []Row[T]
 	win  layout.Window
 	keys Keys
 	find filterMode
@@ -75,34 +76,34 @@ func newFilter(height int) filterMode {
 
 // New builds a list height rows tall with the cursor on the first
 // selectable row.
-func New(rows []Row, height int) Model {
-	m := Model{rows: slices.Clone(rows), keys: DefaultKeys()}
+func New[T any](rows []Row[T], height int) Model[T] {
+	m := Model[T]{rows: slices.Clone(rows), keys: DefaultKeys()}
 	m.win = layout.Window{Cursor: firstSelectable(rows), Height: height}
 	return m
 }
 
 // WithKeys rebinds the list.
-func (m Model) WithKeys(k Keys) Model {
+func (m Model[T]) WithKeys(k Keys) Model[T] {
 	m.keys = k
 	return m
 }
 
 // Rows is a copy of every row, headings included.
-func (m Model) Rows() []Row { return slices.Clone(m.rows) }
+func (m Model[T]) Rows() []Row[T] { return slices.Clone(m.rows) }
 
 // Len is how many rows there are, headings included.
-func (m Model) Len() int { return len(m.rows) }
+func (m Model[T]) Len() int { return len(m.rows) }
 
 // IsFiltering reports whether the / prompt is open and taking the keys.
-func (m Model) IsFiltering() bool { return m.find.on }
+func (m Model[T]) IsFiltering() bool { return m.find.on }
 
 // Filter is the text typed at the / prompt.
-func (m Model) Filter() string { return m.find.text }
+func (m Model[T]) Filter() string { return m.find.text }
 
 // SetRows replaces the rows, keeping the cursor on the row with the same
 // label when it survives (at the same index first), else on the first
 // selectable one.
-func (m Model) SetRows(rows []Row) Model {
+func (m Model[T]) SetRows(rows []Row[T]) Model[T] {
 	prev, at := "", m.win.Cursor
 	if r := m.Selected(); r != nil {
 		prev = r.Label
@@ -122,7 +123,7 @@ func (m Model) SetRows(rows []Row) Model {
 }
 
 // SetHeight updates the visible row count and re-clamps the scroll.
-func (m Model) SetHeight(h int) Model {
+func (m Model[T]) SetHeight(h int) Model[T] {
 	m.win.Height = h
 	m.find.win.Height = max(h-1, 0)
 	return m.clampScroll().clampFilter()
@@ -130,7 +131,7 @@ func (m Model) SetHeight(h int) Model {
 
 // Selected is the row under the cursor, or nil on a heading or an empty
 // list. While filtering it is the row under the filter cursor.
-func (m Model) Selected() *Row {
+func (m Model[T]) Selected() *Row[T] {
 	if m.find.on {
 		idx := m.filtered()
 		if m.find.win.Cursor >= len(idx) {
@@ -148,7 +149,7 @@ func (m Model) Selected() *Row {
 
 // Update handles one key. Keys the list does not know return None and
 // leave it unchanged, so the caller can layer its own on top.
-func (m Model) Update(msg tea.KeyPressMsg) (Model, Action) {
+func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action) {
 	if m.find.on {
 		return m.updateFilter(msg)
 	}
@@ -169,7 +170,7 @@ func (m Model) Update(msg tea.KeyPressMsg) (Model, Action) {
 
 // updateFilter is the filter prompt: text edits the filter, arrows walk the
 // matches, enter picks one and leaves, esc leaves with nothing.
-func (m Model) updateFilter(msg tea.KeyPressMsg) (Model, Action) {
+func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 	switch {
 	case key.Matches(msg, m.keys.Esc):
 		m.find = filterMode{}
@@ -204,7 +205,7 @@ func (m Model) updateFilter(msg tea.KeyPressMsg) (Model, Action) {
 
 // filtered is the indices into rows that match the filter, so a pick maps
 // back to its own row even when labels repeat.
-func (m Model) filtered() []int {
+func (m Model[T]) filtered() []int {
 	f := strings.ToLower(m.find.text)
 	var out []int
 	for i, r := range m.rows {
@@ -216,25 +217,25 @@ func (m Model) filtered() []int {
 }
 
 // move steps the cursor over headings, clamped at the ends.
-func (m Model) move(delta int) Model {
+func (m Model[T]) move(delta int) Model[T] {
 	m.win = m.win.Move(delta, len(m.rows), func(i int) bool { return m.rows[i].Section })
 	return m
 }
 
-func (m Model) clampScroll() Model {
+func (m Model[T]) clampScroll() Model[T] {
 	m.win = m.win.Clamp(len(m.rows))
 	return m
 }
 
 // clampFilter keeps the filter's window on its matches after the rows changed.
-func (m Model) clampFilter() Model {
+func (m Model[T]) clampFilter() Model[T] {
 	if m.find.on {
 		m.find.win = m.find.win.Clamp(len(m.filtered()))
 	}
 	return m
 }
 
-func firstSelectable(rows []Row) int {
+func firstSelectable[T any](rows []Row[T]) int {
 	for i, r := range rows {
 		if !r.Section {
 			return i
@@ -244,7 +245,7 @@ func firstSelectable(rows []Row) int {
 }
 
 // View renders the visible rows, or the filter prompt with its matches.
-func (m Model) View(th theme.Resolved) string {
+func (m Model[T]) View(th theme.Resolved) string {
 	if m.find.on {
 		return m.viewFilter(th)
 	}
@@ -275,7 +276,7 @@ func (m Model) View(th theme.Resolved) string {
 }
 
 // viewFilter is the matches in the filter's window, padded to it, then the prompt.
-func (m Model) viewFilter(th theme.Resolved) string {
+func (m Model[T]) viewFilter(th theme.Resolved) string {
 	idx := m.filtered()
 	w := m.find.win.Clamp(len(idx))
 	start, end, below := w.Bounds(len(idx))
@@ -297,7 +298,7 @@ func (m Model) viewFilter(th theme.Resolved) string {
 // moreRow stands in for the last row while n rows are hidden below it.
 func moreRow(n int, th theme.Resolved) string { return th.Dim.Render(fmt.Sprintf("  ↓ %d more", n)) }
 
-func renderRow(r Row, selected bool, th theme.Resolved) string {
+func renderRow[T any](r Row[T], selected bool, th theme.Resolved) string {
 	text := r.Label
 	if r.Mark != "" {
 		text = r.Mark + "  " + r.Label

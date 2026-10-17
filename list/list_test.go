@@ -14,8 +14,8 @@ import (
 
 var th = theme.Resolve(theme.Plain, true)
 
-func rows() []Row {
-	return []Row{
+func rows() []Row[int] {
+	return []Row[int]{
 		{Section: true, Label: "ADDED"},
 		{Label: "server", Mark: "●", Value: 1},
 		{Label: "logging", Mark: "●", Value: 2},
@@ -45,7 +45,7 @@ func TestEnterChoosesASelectableRow(t *testing.T) {
 	m := New(rows(), 10)
 	_, act := m.Update(press(tea.KeyEnter))
 	require.Equal(t, Chosen, act)
-	require.Nil(t, New([]Row{{Section: true, Label: "x"}}, 5).Selected())
+	require.Nil(t, New([]Row[int]{{Section: true, Label: "x"}}, 5).Selected())
 }
 
 func TestFilterNarrowsAndEnterPicksTheMatch(t *testing.T) {
@@ -76,9 +76,9 @@ func TestSetRowsKeepsTheCursorByLabel(t *testing.T) {
 	m := New(rows(), 10)
 	m, _ = m.Update(press(tea.KeyDown))
 	require.Equal(t, "logging", m.Selected().Label)
-	m = m.SetRows([]Row{{Label: "cache"}, {Label: "logging"}})
+	m = m.SetRows([]Row[int]{{Label: "cache"}, {Label: "logging"}})
 	require.Equal(t, "logging", m.Selected().Label)
-	m = m.SetRows([]Row{{Label: "other"}})
+	m = m.SetRows([]Row[int]{{Label: "other"}})
 	require.Equal(t, "other", m.Selected().Label)
 }
 
@@ -107,8 +107,8 @@ func TestOneRowListShowsTheCursorNotTheIndicator(t *testing.T) {
 	require.Contains(t, ansi.Strip(m.View(th)), "logging")
 }
 
-func twins() []Row {
-	return []Row{{Label: "dup", Value: 1}, {Label: "dup", Value: 2}}
+func twins() []Row[int] {
+	return []Row[int]{{Label: "dup", Value: 1}, {Label: "dup", Value: 2}}
 }
 
 func TestFilterPicksTheRowItShowsAmongEqualLabels(t *testing.T) {
@@ -139,10 +139,10 @@ func TestNewAndSetRowsCopyTheSlice(t *testing.T) {
 	require.NotContains(t, ansi.Strip(m.View(th)), "changed")
 }
 
-func numbered(n int) []Row {
-	rs := make([]Row, n)
+func numbered(n int) []Row[int] {
+	rs := make([]Row[int], n)
 	for i := range rs {
-		rs[i] = Row{Label: fmt.Sprintf("item-%02d", i), Value: i}
+		rs[i] = Row[int]{Label: fmt.Sprintf("item-%02d", i), Value: i}
 	}
 	return rs
 }
@@ -162,4 +162,11 @@ func TestFilterScrollsItsMatchesAndCountsTheRest(t *testing.T) {
 	}
 	require.Equal(t, "item-10", m.Selected().Label)
 	require.Contains(t, ansi.Strip(m.View(th)), "▶ item-10")
+}
+
+// The payload keeps its type: nothing to assert between the row and the caller.
+func TestSelectedValueKeepsItsType(t *testing.T) {
+	m := New([]Row[string]{{Label: "a", Value: "payload"}}, 5)
+	// strings.ToUpper compiles only while Value is a string, not an any.
+	require.Equal(t, "PAYLOAD", strings.ToUpper(m.Selected().Value))
 }
