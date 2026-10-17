@@ -1,15 +1,15 @@
 .PHONY: help fmt lint test test-watch test-coverage bench security govulncheck sbom vuln deps docs tag all tools clean-tools clean
 
 # Tool versions
-GOLANGCI_LINT_VERSION := v2.13.2
+GOLANGCI_LINT_VERSION := v2.14.0
 GOMARKDOC_VERSION     := v1.1.0
 GOTESTSUM_VERSION     := v1.13.0
-GOSEC_VERSION         := v2.29.0
+GOSEC_VERSION         := v2.29.1-0.20261012130337-71577268350e
 # gocover-cobertura has no tags: the pin is its last commit.
 GOCOBERTURA_VERSION   := v0.0.0-20180217150009-aaee18c8195c
 SYFT_VERSION          := v1.51.1
 GRYPE_VERSION         := v0.118.0
-GOVULNCHECK_VERSION   := v1.7.0
+GOVULNCHECK_VERSION   := v1.9.0
 
 # Tools are installed into ./.gobin (gitignored) rather than taken from PATH,
 # so every target runs the version pinned above and never whatever happens to
