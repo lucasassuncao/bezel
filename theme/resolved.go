@@ -38,6 +38,7 @@ type Resolved struct {
 	StatusOK     lipgloss.Style
 	StatusErr    lipgloss.Style
 	Modal        lipgloss.Style
+	Button       draw.ButtonStyle
 
 	// CaretBlink is how often every text input built with this theme flips its
 	// caret; zero is draw.DefaultBlink. Tests shrink it, as each key arms one.
@@ -79,6 +80,7 @@ func buildDerivedStyles(c Colors) Resolved {
 	danger := lipgloss.Color(c.Danger)
 	info := lipgloss.Color(c.Info)
 	onAccent := lipgloss.Color(c.OnAccent)
+	text := lipgloss.Color(c.Text)
 
 	r := Resolved{
 		Success:     lipgloss.NewStyle().Foreground(success),
@@ -121,5 +123,9 @@ func buildDerivedStyles(c Colors) Resolved {
 	r.StatusOK = lipgloss.NewStyle().Foreground(success)
 	r.StatusErr = lipgloss.NewStyle().Bold(true).Foreground(danger)
 	r.Modal = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(accent).Padding(0, 1)
+	r.Button = draw.ButtonStyle{
+		Focused: lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(accent).Padding(0, 2),
+		Blurred: lipgloss.NewStyle().Bold(true).Foreground(text).Background(border).Padding(0, 2),
+	}
 	return r
 }

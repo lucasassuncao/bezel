@@ -73,7 +73,7 @@ func (m model) sections(w int) []string {
 	card := draw.Card(layout.Rect{W: min(w, 40), H: 7}, "git", "version  2.47.0\nsource   winget\nscope    machine",
 		m.th.Key.Render("[u]")+" upgrade  "+m.th.Key.Render("[r]")+" remove", m.th.Panel)
 	add("Card", strings.Split(card, "\n")...)
-	add("Button", draw.Button("Save", m.th.Accent, true)+"  "+draw.Button("Cancel", m.th.Accent, false))
+	add("Button", draw.Button("Save", m.th.Button, true)+"  "+draw.Button("Cancel", m.th.Button, false))
 	// KV ends its row with a newline, so rows stack by concatenation.
 	kv := draw.KV("address", "http://127.0.0.1:8200", m.th.Dim, w) +
 		draw.KV("version", "4 (2 deleted)", m.th.Dim, w)

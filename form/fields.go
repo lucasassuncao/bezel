@@ -370,5 +370,5 @@ func (b Button) Update(msg tea.Msg) (Field, tea.Cmd) {
 }
 
 func (b Button) View(focused bool, labelW, width int) string {
-	return row(b.th, focused, "", labelW, width, draw.Button(b.label, b.th.Accent, focused))
+	return row(b.th, focused, "", labelW, width, draw.Button(b.label, b.th.Button, focused))
 }

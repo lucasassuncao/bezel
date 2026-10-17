@@ -16,7 +16,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func Blink\(every time.Duration\) time.Duration](<#Blink>)
 - [func BlockSize\(s string\) \(width, height int\)](<#BlockSize>)
 - [func Breadcrumb\(segs \[\]string\) string](<#Breadcrumb>)
-- [func Button\(label string, ink lipgloss.Style, focused bool\) string](<#Button>)
+- [func Button\(label string, st ButtonStyle, focused bool\) string](<#Button>)
 - [func Card\(r layout.Rect, title, body, footer string, st PanelStyle\) string](<#Card>)
 - [func Composite\(fg, bg string, x, y int\) string](<#Composite>)
 - [func CompositeCenter\(fg, bg string\) string](<#CompositeCenter>)
@@ -48,6 +48,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func Width\(s string\) int](<#Width>)
 - [func WithCaret\(in textinput.Model, every time.Duration\) textinput.Model](<#WithCaret>)
 - [func Wrap\(s string, width int\) \[\]string](<#Wrap>)
+- [type ButtonStyle](<#ButtonStyle>)
 - [type ChromeStyle](<#ChromeStyle>)
 - [type PanelStyle](<#PanelStyle>)
 
@@ -94,16 +95,16 @@ func Breadcrumb(segs []string) string
 Breadcrumb joins path segments the way a header subtitle shows them.
 
 <a name="Button"></a>
-## func [Button](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L13>)
+## func [Button](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L20>)
 
 ```go
-func Button(label string, ink lipgloss.Style, focused bool) string
+func Button(label string, st ButtonStyle, focused bool) string
 ```
 
-Button is a filled label: ink's colour behind it when focused, grey otherwise. Dialogs draw their answers with it; a form draws its submit with it.
+Button is a filled label in st.Focused when focused, st.Blurred otherwise. Dialogs draw their answers with it; a form draws its submit with it.
 
 <a name="Card"></a>
-## func [Card](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L23>)
+## func [Card](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L30>)
 
 ```go
 func Card(r layout.Rect, title, body, footer string, st PanelStyle) string
@@ -501,6 +502,17 @@ func main() {
 
 </p>
 </details>
+
+<a name="ButtonStyle"></a>
+## type [ButtonStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L14-L16>)
+
+ButtonStyle paints a button: Focused the one enter would press, Blurred the rest. The theme fills both from its palette, with the same padding so focus never moves a button.
+
+```go
+type ButtonStyle struct {
+    Focused, Blurred lipgloss.Style
+}
+```
 
 <a name="ChromeStyle"></a>
 ## type [ChromeStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L13-L20>)

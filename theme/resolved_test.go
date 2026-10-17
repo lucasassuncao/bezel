@@ -33,6 +33,15 @@ func TestResolveAccentFillsSelectionAndInfo(t *testing.T) {
 	assert.Equal(t, "#123456", rt.Colors.Info)
 }
 
+// A button is painted from the palette like everything else, never a fixed grey.
+func TestButtonsTakeTheirColoursFromThePalette(t *testing.T) {
+	rt := Resolve(Theme{Colors: Colors{Accent: "#112233", Border: "#445566", Text: "#778899", OnAccent: "#000000"}}, true)
+	assert.Equal(t, lipgloss.Color("#112233"), rt.Button.Focused.GetBackground())
+	assert.Equal(t, lipgloss.Color("#000000"), rt.Button.Focused.GetForeground())
+	assert.Equal(t, lipgloss.Color("#445566"), rt.Button.Blurred.GetBackground())
+	assert.Equal(t, lipgloss.Color("#778899"), rt.Button.Blurred.GetForeground())
+}
+
 func TestResolveThemeStyleOverride(t *testing.T) {
 	custom := lipgloss.NewStyle().Bold(true)
 	rt := Resolve(Theme{Styles: Styles{Danger: &custom}}, true)

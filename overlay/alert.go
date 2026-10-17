@@ -38,7 +38,7 @@ func (a Alert) Legend() []legend.Entry { return []legend.Entry{legend.New("any k
 
 func (a Alert) View(body layout.Rect) string {
 	lines := []string{a.message}
-	return dialog(a.title, lines, okButton(lines, a.style()), a.style(), body)
+	return dialog(a.title, lines, a.okButton(lines), a.style(), body)
 }
 
 // accent is the colour a dialog is drawn in: its border's.
@@ -46,9 +46,12 @@ func accent(style lipgloss.Style) lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(style.GetBorderTopForeground())
 }
 
-// button is draw.Button in the dialog's colour.
-func button(label string, ink lipgloss.Style, focused bool) string {
-	return draw.Button(label, ink, focused)
+// button is the theme's button with the focused one filled in the dialog's
+// colour: its border's, which the dialog's kind tints.
+func (l look) button(label string, focused bool) string {
+	st := l.th.Button
+	st.Focused = st.Focused.Background(l.style().GetBorderTopForeground())
+	return draw.Button(label, st, focused)
 }
 
 // dialog is the look every overlay shares: a title in the dialog's colour,
@@ -65,7 +68,7 @@ func dialog(title string, content []string, buttons string, style lipgloss.Style
 func dialogFrame(style lipgloss.Style) lipgloss.Style { return style.Padding(1, 3) }
 
 // okButton is a focused OK centred under content.
-func okButton(content []string, style lipgloss.Style) string {
+func (l look) okButton(content []string) string {
 	w := lipgloss.Width(strings.Join(content, "\n"))
-	return lipgloss.PlaceHorizontal(w, lipgloss.Center, button("OK", accent(style), true))
+	return lipgloss.PlaceHorizontal(w, lipgloss.Center, l.button("OK", true))
 }

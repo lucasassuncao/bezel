@@ -369,7 +369,7 @@ func ResolveColors(t Theme, dark bool) Colors
 ResolveColors merges t into concrete Colors over the adaptive default for a dark or light terminal. A theme that sets Accent but not Selection or Info uses its accent for them.
 
 <a name="Resolved"></a>
-## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L15-L45>)
+## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L15-L46>)
 
 Resolved is a Theme after the whole cascade has been applied: ready\-to\-use lipgloss styles plus the colors they were derived from. A consumer builds one per instance and only reads it afterwards.
 
@@ -400,6 +400,7 @@ type Resolved struct {
     StatusOK     lipgloss.Style
     StatusErr    lipgloss.Style
     Modal        lipgloss.Style
+    Button       draw.ButtonStyle
 
     // CaretBlink is how often every text input built with this theme flips its
     // caret; zero is draw.DefaultBlink. Tests shrink it, as each key arms one.
@@ -408,7 +409,7 @@ type Resolved struct {
 ```
 
 <a name="Resolve"></a>
-### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L49>)
+### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L50>)
 
 ```go
 func Resolve(t Theme, dark bool) Resolved

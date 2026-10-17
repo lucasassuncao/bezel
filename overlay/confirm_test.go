@@ -4,8 +4,10 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -33,4 +35,13 @@ func TestConfirmIgnoresVimKeys(t *testing.T) {
 	}
 	o, _ := c.Update(tea.KeyPressMsg{Code: tea.KeyRight})
 	require.True(t, o.(Confirm).no, "the arrows still move")
+}
+
+// The button enter would press is filled in the colour the dialog's kind gives its border.
+func TestConfirmFillsItsFocusedButtonInItsKindsColour(t *testing.T) {
+	th := theme.Resolve(theme.Mint, true)
+	c := NewConfirm("Delete?", "gone for good", nil, th).WithKind(Danger)
+	view := c.View(layout.Rect{W: 80, H: 20})
+	require.Contains(t, view, th.Button.Focused.Background(lipgloss.Color(th.Colors.Danger)).Render("  Yes  "))
+	require.Contains(t, view, th.Button.Blurred.Render("  No  "))
 }

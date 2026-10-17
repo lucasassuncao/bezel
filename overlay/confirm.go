@@ -77,7 +77,6 @@ func (c Confirm) Legend() []legend.Entry {
 }
 
 func (c Confirm) View(body layout.Rect) string {
-	ink := accent(c.style())
-	buttons := lipgloss.JoinHorizontal(lipgloss.Top, button("Yes", ink, !c.no), "  ", button("No", ink, c.no))
+	buttons := lipgloss.JoinHorizontal(lipgloss.Top, c.button("Yes", !c.no), "  ", c.button("No", c.no))
 	return dialog(c.title, []string{c.message}, buttons, c.style(), body)
 }

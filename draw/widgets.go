@@ -8,14 +8,21 @@ import (
 	"github.com/lucasassuncao/bezel/layout"
 )
 
-// Button is a filled label: ink's colour behind it when focused, grey otherwise.
+// ButtonStyle paints a button: Focused the one enter would press, Blurred the
+// rest. The theme fills both from its palette, with the same padding so focus
+// never moves a button.
+type ButtonStyle struct {
+	Focused, Blurred lipgloss.Style
+}
+
+// Button is a filled label in st.Focused when focused, st.Blurred otherwise.
 // Dialogs draw their answers with it; a form draws its submit with it.
-func Button(label string, ink lipgloss.Style, focused bool) string {
-	bg := lipgloss.Color("240")
+func Button(label string, st ButtonStyle, focused bool) string {
+	s := st.Blurred
 	if focused {
-		bg = ink.GetForeground()
+		s = st.Focused
 	}
-	return lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("231")).Background(bg).Padding(0, 2).Render("  " + label + "  ")
+	return s.Render("  " + label + "  ")
 }
 
 // Card is a Panel whose last row is footer, set off from the body by a rule:
