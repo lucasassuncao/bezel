@@ -26,7 +26,7 @@ var ErrAborted = errors.New("inline: aborted")
 ```
 
 <a name="Bar"></a>
-## func [Bar](<https://github.com/lucasassuncao/bezel/blob/main/inline/inline.go#L95>)
+## func [Bar](<https://github.com/lucasassuncao/bezel/blob/main/inline/inline.go#L126>)
 
 ```go
 func Bar(done, total, width int, th theme.Resolved) string
@@ -35,7 +35,7 @@ func Bar(done, total, width int, th theme.Resolved) string
 Bar is a done/total progress bar width cells wide, for a caller that redraws it in place with \\r. It is progress.Bar, kept here for CLIs.
 
 <a name="Confirm"></a>
-## func [Confirm](<https://github.com/lucasassuncao/bezel/blob/main/inline/inline.go#L21>)
+## func [Confirm](<https://github.com/lucasassuncao/bezel/blob/main/inline/inline.go#L24>)
 
 ```go
 func Confirm(title string, th theme.Resolved, opts ...tea.ProgramOption) (bool, error)

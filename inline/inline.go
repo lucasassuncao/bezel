@@ -5,9 +5,12 @@ package inline
 import (
 	"errors"
 	"fmt"
+	"strings"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/progress"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -39,9 +42,27 @@ type confirm struct {
 	yes     bool
 	done    bool
 	aborted bool
+	keys    confirmKeys
 }
 
-func newConfirm(title string, th theme.Resolved) confirm { return confirm{title: title, th: th} }
+// confirmKeys are what the question answers to; the hint under it is their help.
+type confirmKeys struct {
+	Toggle, Yes, No, Accept, Abort key.Binding
+}
+
+func defaultConfirmKeys() confirmKeys {
+	return confirmKeys{
+		Toggle: key.NewBinding(key.WithKeys("left", "right", "tab", "shift+tab"), key.WithHelp("←/→", "choose")),
+		Yes:    key.NewBinding(key.WithKeys("y", "Y"), key.WithHelp("y/n", "answer")),
+		No:     key.NewBinding(key.WithKeys("n", "N")),
+		Accept: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "confirm")),
+		Abort:  key.NewBinding(key.WithKeys("esc", "ctrl+c"), key.WithHelp("esc", "cancel")),
+	}
+}
+
+func newConfirm(title string, th theme.Resolved) confirm {
+	return confirm{title: title, th: th, keys: defaultConfirmKeys()}
+}
 
 func (c confirm) Init() tea.Cmd { return nil }
 
@@ -50,16 +71,16 @@ func (c confirm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if !ok {
 		return c, nil
 	}
-	switch k.String() {
-	case "left", "right", "tab", "shift+tab":
+	switch {
+	case key.Matches(k, c.keys.Toggle):
 		c.yes = !c.yes
 		return c, nil
-	case "y", "Y":
+	case key.Matches(k, c.keys.Yes):
 		c.yes = true
-	case "n", "N":
+	case key.Matches(k, c.keys.No):
 		c.yes = false
-	case "enter":
-	case "esc", "ctrl+c":
+	case key.Matches(k, c.keys.Accept):
+	case key.Matches(k, c.keys.Abort):
 		c.aborted = true
 	default:
 		return c, nil
@@ -86,8 +107,18 @@ func (c confirm) View() tea.View {
 		}
 		return c.th.Dim.Padding(0, 2).Render(label)
 	}
-	hint := c.th.Muted.Render("←/→ choose · y/n answer · enter confirm · esc cancel")
+	hint := c.th.Muted.Render(c.hint())
 	return tea.NewView(title + "\n\n  " + button("Yes", c.yes) + " " + button("No", !c.yes) + "\n\n" + hint + "\n")
+}
+
+// hint is every key with help and what it does, on one line.
+func (c confirm) hint() string {
+	km := c.keys
+	var parts []string
+	for _, e := range legend.FromBindings([]key.Binding{km.Toggle, km.Yes, km.No, km.Accept, km.Abort}) {
+		parts = append(parts, e.Help().Key+" "+e.Help().Desc)
+	}
+	return strings.Join(parts, " · ")
 }
 
 // Bar is a done/total progress bar width cells wide, for a caller that

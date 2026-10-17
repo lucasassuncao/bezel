@@ -64,6 +64,10 @@ func TestConfirmIgnoresVimKeys(t *testing.T) {
 	}
 }
 
+func TestConfirmHintNamesItsKeys(t *testing.T) {
+	assert.Contains(t, ansi.Strip(newConfirm("Proceed?", th).View().Content), "←/→ choose · y/n answer · enter confirm · esc cancel")
+}
+
 func TestConfirmViewShowsAnswerWhenDone(t *testing.T) {
 	c := press(newConfirm("Proceed?", th), "y")
 	assert.Equal(t, "Proceed? Yes\n", ansi.Strip(c.View().Content))
