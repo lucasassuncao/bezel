@@ -23,6 +23,19 @@ func TestRingLeavesOutInfoLeaves(t *testing.T) {
 	require.Equal(t, []string{"list", "detail"}, Ring(tree))
 }
 
+func TestLeavesYieldsDepthFirstAndStopsWhenAsked(t *testing.T) {
+	tree := Columns(Fixed("list"), Rows(Fill("detail"), Fixed("hint").Info()), Fill("log"))
+
+	var names []string
+	for l := range Leaves(tree) {
+		names = append(names, l.Name)
+		if l.Name == "hint" {
+			break
+		}
+	}
+	require.Equal(t, []string{"list", "detail", "hint"}, names)
+}
+
 func TestCollapseIsRecordedOnTheBox(t *testing.T) {
 	b := Columns(Fixed("a"), Fill("b")).Collapse(72, "b")
 	require.Equal(t, 72, b.collapseLimit)

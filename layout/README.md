@@ -13,6 +13,7 @@ Package layout declares a screen as a tree of named leaves and resolves it to re
 ## Index
 
 - [func ClampScroll\(cursor, offset, height int\) int](<#ClampScroll>)
+- [func Leaves\(n Node\) iter.Seq\[Leaf\]](<#Leaves>)
 - [func Order\(n Node\) \[\]string](<#Order>)
 - [func Resolve\(n Node, body Rect, present func\(name string\) bool\) \(map\[string\]Rect, bool\)](<#Resolve>)
 - [func Ring\(n Node\) \[\]string](<#Ring>)
@@ -47,8 +48,17 @@ func ClampScroll(cursor, offset, height int) int
 
 ClampScroll moves offset so that cursor stays inside a window of height rows: up when the cursor is above it, down when below. Never negative; a non\-positive height only applies the floor.
 
+<a name="Leaves"></a>
+## func [Leaves](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L118>)
+
+```go
+func Leaves(n Node) iter.Seq[Leaf]
+```
+
+Leaves yields every leaf under n, depth\-first in declaration order.
+
 <a name="Order"></a>
-## func [Order](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L95>)
+## func [Order](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L98>)
 
 ```go
 func Order(n Node) []string
@@ -137,7 +147,7 @@ func main() {
 </details>
 
 <a name="Ring"></a>
-## func [Ring](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L102>)
+## func [Ring](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L107>)
 
 ```go
 func Ring(n Node) []string
@@ -155,7 +165,7 @@ func ScrollStart(cursor, total, height int) int
 ScrollStart keeps the cursor inside a window of height rows without jumping around: centred on it where the list allows.
 
 <a name="Box"></a>
-## type [Box](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L21-L26>)
+## type [Box](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L24-L29>)
 
 Box splits its rect among children along one axis.
 
@@ -166,7 +176,7 @@ type Box struct {
 ```
 
 <a name="Columns"></a>
-### func [Columns](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L46>)
+### func [Columns](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L49>)
 
 ```go
 func Columns(children ...Node) *Box
@@ -175,7 +185,7 @@ func Columns(children ...Node) *Box
 Columns lays children out left to right.
 
 <a name="Rows"></a>
-### func [Rows](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L49>)
+### func [Rows](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L52>)
 
 ```go
 func Rows(children ...Node) *Box
@@ -184,7 +194,7 @@ func Rows(children ...Node) *Box
 Rows lays children out top to bottom.
 
 <a name="Box.Collapse"></a>
-### func \(\*Box\) [Collapse](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L60>)
+### func \(\*Box\) [Collapse](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L63>)
 
 ```go
 func (b *Box) Collapse(limit int, keep string) *Box
@@ -224,7 +234,7 @@ true false {X:0 Y:0 W:60 H:20}
 </details>
 
 <a name="Constraint"></a>
-## type [Constraint](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L77-L80>)
+## type [Constraint](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L80-L83>)
 
 Constraint shapes a Fixed leaf along its parent's axis.
 
@@ -235,7 +245,7 @@ type Constraint struct {
 ```
 
 <a name="Lines"></a>
-### func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L92>)
+### func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L95>)
 
 ```go
 func Lines(n int) Constraint
@@ -244,7 +254,7 @@ func Lines(n int) Constraint
 Lines is an exact size: rows in a Rows box, columns in a Columns box.
 
 <a name="Max"></a>
-### func [Max](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L89>)
+### func [Max](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L92>)
 
 ```go
 func Max(n int) Constraint
@@ -253,7 +263,7 @@ func Max(n int) Constraint
 Max caps the leaf's size.
 
 <a name="Min"></a>
-### func [Min](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L86>)
+### func [Min](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L89>)
 
 ```go
 func Min(n int) Constraint
@@ -262,7 +272,7 @@ func Min(n int) Constraint
 Min floors the leaf's size.
 
 <a name="Ratio"></a>
-### func [Ratio](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L83>)
+### func [Ratio](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L86>)
 
 ```go
 func Ratio(num, den int) Constraint
@@ -271,7 +281,7 @@ func Ratio(num, den int) Constraint
 Ratio is a share of the parent, before Min/Max clamp it.
 
 <a name="Leaf"></a>
-## type [Leaf](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L29-L33>)
+## type [Leaf](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L32-L36>)
 
 Leaf is a named region the app renders into.
 
@@ -283,7 +293,7 @@ type Leaf struct {
 ```
 
 <a name="Fill"></a>
-### func [Fill](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L55>)
+### func [Fill](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L58>)
 
 ```go
 func Fill(name string) Leaf
@@ -292,7 +302,7 @@ func Fill(name string) Leaf
 Fill is a leaf that takes what the fixed siblings leave.
 
 <a name="Fixed"></a>
-### func [Fixed](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L52>)
+### func [Fixed](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L55>)
 
 ```go
 func Fixed(name string, cs ...Constraint) Leaf
@@ -301,7 +311,7 @@ func Fixed(name string, cs ...Constraint) Leaf
 Fixed is a leaf sized by its constraints. With none it behaves like Fill.
 
 <a name="Leaf.Info"></a>
-### func \(Leaf\) [Info](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L37>)
+### func \(Leaf\) [Info](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L40>)
 
 ```go
 func (l Leaf) Info() Leaf
@@ -310,7 +320,7 @@ func (l Leaf) Info() Leaf
 Info marks a pane that only informs: tab skips it, though the app can still focus it on purpose \(to scroll a long hint, say\).
 
 <a name="Node"></a>
-## type [Node](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L11>)
+## type [Node](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L14>)
 
 Node is a Box or a Leaf.
 
@@ -321,7 +331,7 @@ type Node interface {
 ```
 
 <a name="Rect"></a>
-## type [Rect](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L8>)
+## type [Rect](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L11>)
 
 Rect is a placed region: X,Y is the top\-left corner, W,H the size.
 

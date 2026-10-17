@@ -2,7 +2,10 @@
 // to rectangles. It knows nothing about what is drawn in them.
 package layout
 
-import "slices"
+import (
+	"iter"
+	"slices"
+)
 
 // Rect is a placed region: X,Y is the top-left corner, W,H the size.
 type Rect struct{ X, Y, W, H int }
@@ -94,35 +97,49 @@ func Lines(n int) Constraint { return Constraint{kind: exact, num: n} }
 // Order lists leaf names depth-first in declaration order.
 func Order(n Node) []string {
 	var out []string
-	walk(n, func(l Leaf) { out = append(out, l.Name) })
+	for l := range Leaves(n) {
+		out = append(out, l.Name)
+	}
 	return out
 }
 
 // Ring is the focus ring: Order without the Info leaves.
 func Ring(n Node) []string {
 	var out []string
-	walk(n, func(l Leaf) {
+	for l := range Leaves(n) {
 		if !l.info {
 			out = append(out, l.Name)
 		}
-	})
+	}
 	return out
 }
 
-func walk(n Node, f func(Leaf)) {
+// Leaves yields every leaf under n, depth-first in declaration order.
+func Leaves(n Node) iter.Seq[Leaf] {
+	return func(yield func(Leaf) bool) { leaves(n, yield) }
+}
+
+// leaves reports false once yield has asked to stop, so no sibling runs after.
+func leaves(n Node, yield func(Leaf) bool) bool {
 	switch v := n.(type) {
 	case Leaf:
-		f(v)
+		return yield(v)
 	case *Box:
 		for _, c := range v.children {
-			walk(c, f)
+			if !leaves(c, yield) {
+				return false
+			}
 		}
 	}
+	return true
 }
 
 // contains reports whether leaf name is anywhere under n.
 func contains(n Node, name string) bool {
-	found := false
-	walk(n, func(l Leaf) { found = found || l.Name == name })
-	return found
+	for l := range Leaves(n) {
+		if l.Name == name {
+			return true
+		}
+	}
+	return false
 }
