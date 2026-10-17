@@ -39,6 +39,27 @@ func TestNewStartsFocusedOnTheFirstLeaf(t *testing.T) {
 	require.Equal(t, 0, s.ActiveTab())
 }
 
+// A value Tab is fixed at New: SetTabs is how its name and status follow the app.
+func TestSetTabsReplacesWhatTheShellReads(t *testing.T) {
+	s := sized(newShell(stubTab{name: "a"}, stubTab{name: "b"})).SetTab(1)
+	s = s.SetTabs(stubTab{name: "a"}, stubTab{name: "renamed"})
+	require.Equal(t, 1, s.ActiveTab())
+	require.Contains(t, ansi.Strip(s.View(demoPanes())), "status of renamed")
+}
+
+func TestSetTabsKeepsEachTabsFocusAndClampsTheActiveOne(t *testing.T) {
+	a, b, c := stubTab{name: "a"}, stubTab{name: "b"}, stubTab{name: "c"}
+	s := sized(newShell(a, b)).SetFocus("detail")
+
+	s = s.SetTabs(a, b, c)
+	require.Equal(t, "detail", s.Focus())
+	require.Equal(t, "list", s.SetTab(2).Focus())
+
+	s = s.SetTab(2).SetTabs(a)
+	require.Equal(t, 0, s.ActiveTab())
+	require.Equal(t, "detail", s.Focus())
+}
+
 func TestStatusTTLDefaultsToFiveSeconds(t *testing.T) {
 	require.Equal(t, 5*time.Second, New(actionConfig()).cfg.StatusTTL)
 }

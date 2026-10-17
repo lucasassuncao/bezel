@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -21,12 +22,12 @@ type tab struct {
 	items []string
 }
 
-func (t *tab) Name() string { return t.name }
+func (t tab) Name() string { return t.name }
 
-func (t *tab) Status(shell.Context) string { return fmt.Sprintf("%d items", len(t.items)) }
+func (t tab) Status(shell.Context) string { return fmt.Sprintf("%d items", len(t.items)) }
 
 // Actions are this tab's own keys; help, tab, the arrows and quit are global.
-func (t *tab) Actions(ctx shell.Context) []shell.Action {
+func (t tab) Actions(ctx shell.Context) []shell.Action {
 	if ctx.Focus == "list" {
 		return []shell.Action{
 			shell.Custom("enter", "open", shell.Send(openMsg{})),
@@ -39,7 +40,7 @@ func (t *tab) Actions(ctx shell.Context) []shell.Action {
 type model struct {
 	sh     shell.Shell
 	th     theme.Resolved
-	tabs   []*tab
+	tabs   []tab
 	cursor int
 }
 
@@ -51,18 +52,14 @@ type (
 )
 
 func newModel() model {
-	tabs := []*tab{
+	tabs := []tab{
 		{name: "fruits", items: []string{"banana", "mint", "strawberry", "blueberry", "mango"}},
 		{name: "tools", items: []string{"hammer", "wrench", "screwdriver"}},
-	}
-	shTabs := make([]shell.Tab, len(tabs))
-	for i, t := range tabs {
-		shTabs[i] = t
 	}
 	th := theme.Resolve(theme.Mint, true)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fixed("list", layout.Ratio(1, 3), layout.Min(26), layout.Max(52)), layout.Fill("detail")).Collapse(72, "detail"),
-		Tabs:    shTabs,
+		Tabs:    shellTabs(tabs),
 		Theme:   th,
 		Title:   "bezel demo",
 		Version: "v0.1.0",
@@ -70,6 +67,16 @@ func newModel() model {
 		Actions: []shell.Action{shell.Help(), shell.ChangeTab(), shell.Move(), shell.Quit()},
 	})
 	return model{sh: sh, th: th, tabs: tabs}
+}
+
+// shellTabs hands the shell the tabs as they are now; a value Tab goes back
+// through SetTabs each time it changes.
+func shellTabs(tabs []tab) []shell.Tab {
+	out := make([]shell.Tab, len(tabs))
+	for i, t := range tabs {
+		out[i] = t
+	}
+	return out
 }
 
 func (m model) Init() tea.Cmd { return nil }
@@ -92,9 +99,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				func() tea.Msg { return deletedMsg{} }, m.th).WithKind(overlay.Danger))
 		}
 	case deletedMsg:
-		t.items = append(t.items[:m.cursor], t.items[m.cursor+1:]...)
+		t.items = slices.Delete(slices.Clone(t.items), m.cursor, m.cursor+1)
+		m.tabs = slices.Clone(m.tabs)
+		m.tabs[m.sh.ActiveTab()] = t
 		m.cursor = max(0, min(m.cursor, len(t.items)-1))
-		m.sh, cmd = m.sh.SetStatus("deleted", shell.OK, 2*time.Second)
+		m.sh, cmd = m.sh.SetTabs(shellTabs(m.tabs)...).SetStatus("deleted", shell.OK, 2*time.Second)
 		return m, cmd
 	case tea.KeyPressMsg:
 		// Move is display only: the arrows are the list's, here the model's.

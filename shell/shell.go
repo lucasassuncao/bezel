@@ -39,7 +39,8 @@ type Context struct {
 
 // Tab answers for one screen of the app: its name in the strip, the status
 // text and the keys for where the user is. Status and Actions run several
-// times a frame, so keep them cheap and free of side effects.
+// times a frame, so keep them cheap and free of side effects. A Tab that is a
+// value is read as given: hand it back through SetTabs when it changes.
 type Tab interface {
 	Name() string
 	Status(ctx Context) string
@@ -107,15 +108,7 @@ func New(cfg Config) Shell {
 	if cfg.StatusTTL <= 0 {
 		cfg.StatusTTL = defaultStatusTTL
 	}
-	tabs := max(1, len(cfg.Tabs))
-	first := ""
-	if ring := layout.Ring(cfg.Layout); len(ring) > 0 {
-		first = ring[0]
-	}
-	focus := make([]string, tabs)
-	for i := range focus {
-		focus[i] = first
-	}
+	focus := resized(nil, max(1, len(cfg.Tabs)), firstLeaf(cfg.Layout))
 	return Shell{
 		cfg: cfg, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
 		spin: spinner.New(spinner.WithSpinner(spinner.Dot)),
@@ -162,6 +155,17 @@ func (s Shell) SetTab(i int) Shell {
 	}
 	s.tab = i
 	return s.relayout() // its focus may be on a pane a resize dropped meanwhile
+}
+
+// SetTabs replaces the tabs, for an app whose Tab values carry its state. Each
+// tab keeps its focus by position, a new one starts on the first pane, and a
+// shorter list moves the shell to its last tab when the active one is gone.
+func (s Shell) SetTabs(tabs ...Tab) Shell {
+	n, first := max(1, len(tabs)), firstLeaf(s.cfg.Layout)
+	s.cfg.Tabs = slices.Clone(tabs)
+	s.focus, s.ringFocus = resized(s.focus, n, first), resized(s.ringFocus, n, first)
+	s.tab = min(s.tab, n-1)
+	return s.relayout()
 }
 
 // Narrow reports whether a Collapse fired in the current layout.
@@ -280,6 +284,24 @@ func (s Shell) relayout() Shell {
 		}
 	}
 	return s
+}
+
+// firstLeaf is where focus starts: the first leaf of the focus ring.
+func firstLeaf(n layout.Node) string {
+	if ring := layout.Ring(n); len(ring) > 0 {
+		return ring[0]
+	}
+	return ""
+}
+
+// resized is xs cut or grown to n entries, the new ones set to fill.
+func resized(xs []string, n int, fill string) []string {
+	out := make([]string, n)
+	for i := range out {
+		out[i] = fill
+	}
+	copy(out, xs)
+	return out
 }
 
 func withAt(xs []string, i int, v string) []string {

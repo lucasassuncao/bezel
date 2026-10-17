@@ -19,9 +19,9 @@ type tab struct {
 	items []string
 }
 
-func (t *tab) Name() string                { return t.name }
-func (t *tab) Status(shell.Context) string { return fmt.Sprintf("%d items", len(t.items)) }
-func (t *tab) Actions(shell.Context) []shell.Action {
+func (t tab) Name() string                { return t.name }
+func (t tab) Status(shell.Context) string { return fmt.Sprintf("%d items", len(t.items)) }
+func (t tab) Actions(shell.Context) []shell.Action {
 	return []shell.Action{
 		shell.Custom("s", "save", shell.Send(saveMsg{})),
 		shell.Custom("b", "index", shell.Send(indexMsg{})),
@@ -36,12 +36,12 @@ type (
 
 type model struct {
 	sh     shell.Shell
-	tabs   []*tab
+	tabs   []tab
 	cursor int
 }
 
 func newModel() model {
-	tabs := []*tab{
+	tabs := []tab{
 		{name: "files", items: []string{"main.go", "go.mod", "README.md", "Makefile"}},
 		{name: "notes", items: []string{"ideas", "todo", "meeting"}},
 	}

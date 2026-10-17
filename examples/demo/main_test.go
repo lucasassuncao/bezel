@@ -44,3 +44,14 @@ func TestDemoConfirmFloatsOverTheList(t *testing.T) {
 	require.Contains(t, out, "Delete banana?")
 	require.Contains(t, out, "> banana")
 }
+
+// The tabs are values: the count a tab reports follows a delete through SetTabs.
+func TestDemoDeleteUpdatesTheTabsCount(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	m, _ = m.Update(deletedMsg{})
+	m, _ = m.Update(m.(model).sh.StatusExpiry())
+	out := ansi.Strip(m.View().Content)
+	require.Contains(t, out, "4 items")
+	require.NotContains(t, out, "banana")
+}
