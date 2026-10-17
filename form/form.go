@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -27,22 +28,64 @@ type Field interface {
 // open Select keeping tab and esc until it closes.
 type Holder interface{ Holding() bool }
 
+// Keys are the bindings a form and its controls answer to. Each control reads
+// the ones that concern it, and the Form only Next and Prev.
+type Keys struct {
+	Next, Prev  key.Binding // the form: move the focus
+	Press       key.Binding // a checkbox, toggle or button; opens and picks in a select
+	Left, Right key.Binding // a radio; either one flips a toggle
+	Up, Down    key.Binding // an open select
+	Close       key.Binding // an open select, leaving its value as it was
+}
+
+// DefaultKeys are tab and shift+tab, space or enter, the arrows with h/l and
+// k/j, and esc.
+func DefaultKeys() Keys {
+	return Keys{
+		Next:  key.NewBinding(key.WithKeys("tab")),
+		Prev:  key.NewBinding(key.WithKeys("shift+tab")),
+		Press: key.NewBinding(key.WithKeys("space", "enter")),
+		Left:  key.NewBinding(key.WithKeys("left", "h")),
+		Right: key.NewBinding(key.WithKeys("right", "l")),
+		Up:    key.NewBinding(key.WithKeys("up", "k")),
+		Down:  key.NewBinding(key.WithKeys("down", "j")),
+		Close: key.NewBinding(key.WithKeys("esc")),
+	}
+}
+
+// keyed is a bezel control, which Form.WithKeys rebinds along with the form.
+type keyed interface{ rebind(k Keys) Field }
+
 // Form is fields in a column. tab and shift+tab move the focus; every other key
 // goes to the field in focus.
 type Form struct {
 	fields []Field
 	focus  int
+	keys   Keys
 }
 
 // New is a form focused on its first field.
 func New(fields ...Field) (Form, tea.Cmd) {
-	f := Form{fields: slices.Clone(fields)}
+	f := Form{fields: slices.Clone(fields), keys: DefaultKeys()}
 	if len(fields) == 0 {
 		return f, nil
 	}
 	var cmd tea.Cmd
 	f.fields[0], cmd = f.fields[0].Focus()
 	return f, cmd
+}
+
+// WithKeys rebinds the form and every bezel control in it; a Field of the
+// app's own keeps its keys.
+func (f Form) WithKeys(k Keys) Form {
+	f.keys = k
+	f.fields = slices.Clone(f.fields)
+	for i, fl := range f.fields {
+		if kf, ok := fl.(keyed); ok {
+			f.fields[i] = kf.rebind(k)
+		}
+	}
+	return f
 }
 
 // Field is the i-th field as it is now; assert it to read its value.
@@ -62,10 +105,10 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 		held = h.Holding()
 	}
 	if k, ok := msg.(tea.KeyPressMsg); ok && !held {
-		switch k.String() {
-		case "tab":
+		switch {
+		case key.Matches(k, f.keys.Next):
 			return f.move(1)
-		case "shift+tab":
+		case key.Matches(k, f.keys.Prev):
 			return f.move(-1)
 		}
 	}

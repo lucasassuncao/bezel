@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strings"
 
+	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
@@ -12,18 +13,10 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-// pressed reports whether msg is space or enter, the keys that act on a control.
-func pressed(msg tea.Msg) bool {
+// is reports whether msg is a key press any of bs answers to.
+func is(msg tea.Msg, bs ...key.Binding) bool {
 	k, ok := msg.(tea.KeyPressMsg)
-	return ok && (k.String() == "space" || k.String() == "enter")
-}
-
-// keyOf is msg's key name, or "" for anything that is not a key press.
-func keyOf(msg tea.Msg) string {
-	if k, ok := msg.(tea.KeyPressMsg); ok {
-		return k.String()
-	}
-	return ""
+	return ok && key.Matches(k, bs...)
 }
 
 // optionAt is options[i], or "" when there are none to choose from.
@@ -89,12 +82,21 @@ type Checkbox struct {
 	label   string
 	checked bool
 	th      theme.Resolved
+	keys    Keys
 }
 
 // NewCheckbox is a box labelled label, ticked when checked.
 func NewCheckbox(label string, checked bool, th theme.Resolved) Checkbox {
-	return Checkbox{label: label, checked: checked, th: th}
+	return Checkbox{label: label, checked: checked, th: th, keys: DefaultKeys()}
 }
+
+// WithKeys rebinds the box: Press flips it.
+func (c Checkbox) WithKeys(k Keys) Checkbox {
+	c.keys = k
+	return c
+}
+
+func (c Checkbox) rebind(k Keys) Field { return c.WithKeys(k) }
 
 // Checked reports whether the box is ticked.
 func (c Checkbox) Checked() bool { return c.checked }
@@ -106,7 +108,7 @@ func (c Checkbox) Focus() (Field, tea.Cmd) { return c, nil }
 func (c Checkbox) Blur() Field             { return c }
 
 func (c Checkbox) Update(msg tea.Msg) (Field, tea.Cmd) {
-	if pressed(msg) {
+	if is(msg, c.keys.Press) {
 		c.checked = !c.checked
 	}
 	return c, nil
@@ -133,12 +135,22 @@ type Radio struct {
 	selected int
 	th       theme.Resolved
 	set      icon.Set
+	keys     Keys
 }
 
 // NewRadio offers options with the one at selected chosen, clamped in range.
 func NewRadio(label string, options []string, selected int, th theme.Resolved) Radio {
-	return Radio{label: label, options: slices.Clone(options), selected: min(max(selected, 0), max(0, len(options)-1)), th: th, set: icon.FromEnv()}
+	selected = min(max(selected, 0), max(0, len(options)-1))
+	return Radio{label: label, options: slices.Clone(options), selected: selected, th: th, set: icon.FromEnv(), keys: DefaultKeys()}
 }
+
+// WithKeys rebinds the radio: Left and Right move the choice.
+func (r Radio) WithKeys(k Keys) Radio {
+	r.keys = k
+	return r
+}
+
+func (r Radio) rebind(k Keys) Field { return r.WithKeys(k) }
 
 // WithIcons draws the chosen mark from set instead of icon.FromEnv's.
 func (r Radio) WithIcons(set icon.Set) Radio {
@@ -156,10 +168,10 @@ func (r Radio) Focus() (Field, tea.Cmd) { return r, nil }
 func (r Radio) Blur() Field             { return r }
 
 func (r Radio) Update(msg tea.Msg) (Field, tea.Cmd) {
-	switch keyOf(msg) {
-	case "left", "h":
+	switch {
+	case is(msg, r.keys.Left):
 		r.selected = max(0, r.selected-1)
-	case "right", "l":
+	case is(msg, r.keys.Right):
 		r.selected = max(0, min(len(r.options)-1, r.selected+1))
 	}
 	return r, nil
@@ -177,18 +189,27 @@ func (r Radio) View(focused bool, labelW, width int) string {
 	return row(r.th, focused, r.label, labelW, width, strings.Join(parts, "   "))
 }
 
-// Toggle is a switch, on or off; space, enter, left or right flips it.
+// Toggle is a switch, on or off; space, enter, or left and right with h/l flip it.
 type Toggle struct {
 	label string
 	on    bool
 	th    theme.Resolved
 	set   icon.Set
+	keys  Keys
 }
 
 // NewToggle is a switch labelled label, on when on.
 func NewToggle(label string, on bool, th theme.Resolved) Toggle {
-	return Toggle{label: label, on: on, th: th, set: icon.FromEnv()}
+	return Toggle{label: label, on: on, th: th, set: icon.FromEnv(), keys: DefaultKeys()}
 }
+
+// WithKeys rebinds the switch: Press, Left and Right flip it.
+func (t Toggle) WithKeys(k Keys) Toggle {
+	t.keys = k
+	return t
+}
+
+func (t Toggle) rebind(k Keys) Field { return t.WithKeys(k) }
 
 // WithIcons draws the switch from set instead of icon.FromEnv's.
 func (t Toggle) WithIcons(set icon.Set) Toggle {
@@ -203,7 +224,7 @@ func (t Toggle) Focus() (Field, tea.Cmd) { return t, nil }
 func (t Toggle) Blur() Field             { return t }
 
 func (t Toggle) Update(msg tea.Msg) (Field, tea.Cmd) {
-	if pressed(msg) || keyOf(msg) == "left" || keyOf(msg) == "right" {
+	if is(msg, t.keys.Press, t.keys.Left, t.keys.Right) {
 		t.on = !t.on
 	}
 	return t, nil
@@ -227,13 +248,25 @@ type Select struct {
 	open     bool
 	th       theme.Resolved
 	set      icon.Set
+	keys     Keys
 }
 
 // NewSelect offers options with the one at selected chosen, clamped in range.
 func NewSelect(label string, options []string, selected int, th theme.Resolved) Select {
 	selected = min(max(selected, 0), max(0, len(options)-1))
-	return Select{label: label, options: slices.Clone(options), selected: selected, cursor: selected, th: th, set: icon.FromEnv()}
+	return Select{
+		label: label, options: slices.Clone(options), selected: selected, cursor: selected,
+		th: th, set: icon.FromEnv(), keys: DefaultKeys(),
+	}
 }
+
+// WithKeys rebinds the select: Press opens and picks, Up and Down move, Close closes.
+func (s Select) WithKeys(k Keys) Select {
+	s.keys = k
+	return s
+}
+
+func (s Select) rebind(k Keys) Field { return s.WithKeys(k) }
 
 // WithIcons draws the list's marks from set instead of icon.FromEnv's.
 func (s Select) WithIcons(set icon.Set) Select {
@@ -258,24 +291,23 @@ func (s Select) Blur() Field {
 }
 
 func (s Select) Update(msg tea.Msg) (Field, tea.Cmd) {
-	k := keyOf(msg)
 	if !s.open {
-		if k == "enter" || k == "space" {
+		if is(msg, s.keys.Press) {
 			s.open, s.cursor = true, s.selected
 		}
 		return s, nil
 	}
-	switch k {
-	case "up", "k":
+	switch {
+	case is(msg, s.keys.Up):
 		s.cursor = max(0, s.cursor-1)
-	case "down", "j":
+	case is(msg, s.keys.Down):
 		s.cursor = max(0, min(len(s.options)-1, s.cursor+1))
-	case "enter", "space":
+	case is(msg, s.keys.Press):
 		s.open = false
 		if len(s.options) > 0 {
 			s.selected = s.cursor
 		}
-	case "esc":
+	case is(msg, s.keys.Close):
 		s.open = false
 	}
 	return s, nil
@@ -308,12 +340,21 @@ type Button struct {
 	label   string
 	onPress tea.Cmd
 	th      theme.Resolved
+	keys    Keys
 }
 
 // NewButton is a button labelled label; onPress may be nil.
 func NewButton(label string, onPress tea.Cmd, th theme.Resolved) Button {
-	return Button{label: label, onPress: onPress, th: th}
+	return Button{label: label, onPress: onPress, th: th, keys: DefaultKeys()}
 }
+
+// WithKeys rebinds the button: Press presses it.
+func (b Button) WithKeys(k Keys) Button {
+	b.keys = k
+	return b
+}
+
+func (b Button) rebind(k Keys) Field { return b.WithKeys(k) }
 
 // Label is empty on purpose: a button sits in the value column and must not
 // widen the label column.
@@ -322,7 +363,7 @@ func (b Button) Focus() (Field, tea.Cmd) { return b, nil }
 func (b Button) Blur() Field             { return b }
 
 func (b Button) Update(msg tea.Msg) (Field, tea.Cmd) {
-	if pressed(msg) {
+	if is(msg, b.keys.Press) {
 		return b, b.onPress
 	}
 	return b, nil
