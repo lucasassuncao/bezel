@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 
+	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
@@ -36,6 +37,22 @@ type DoneMsg struct {
 // Rows is how many candidates show at once: past this, type, do not scroll.
 const Rows = 8
 
+// Keys are the bindings the palette answers to besides esc and the typing.
+// Down has no help of its own: Up's "↑/↓" names both.
+type Keys struct {
+	Run, Complete, Up, Down key.Binding
+}
+
+// DefaultKeys are enter, tab and the arrows.
+func DefaultKeys() Keys {
+	return Keys{
+		Run:      key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "run")),
+		Complete: key.NewBinding(key.WithKeys("tab"), key.WithHelp("tab", "complete")),
+		Up:       key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "choose")),
+		Down:     key.NewBinding(key.WithKeys("down")),
+	}
+}
+
 // Model is the open palette. It is an overlay anchored to the bottom.
 type Model struct {
 	items  []Item
@@ -43,6 +60,7 @@ type Model struct {
 	cursor int // -1 until an arrow picks, so enter obeys what was typed
 	err    string
 	th     theme.Resolved
+	keys   Keys
 }
 
 // New opens a palette over items, sorted by name.
@@ -50,7 +68,13 @@ func New(items []Item, th theme.Resolved) Model {
 	in := draw.WithCaret(textinput.New(), th.CaretBlink)
 	in.Prompt = ":"
 	in.Focus()
-	return Model{input: in, cursor: -1, th: th}.SetItems(items)
+	return Model{input: in, cursor: -1, th: th, keys: DefaultKeys()}.SetItems(items)
+}
+
+// WithKeys rebinds the palette; its legend follows the bindings' help.
+func (m Model) WithKeys(k Keys) Model {
+	m.keys = k
+	return m
 }
 
 // SetItems replaces the commands, judged again by the owner, keeping the typed
@@ -72,12 +96,14 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd) {
 		m.input, cmd = m.input.Update(msg)
 		return m, cmd
 	}
-	switch k.String() {
-	case "enter":
+	switch {
+	case key.Matches(k, m.keys.Run):
 		return m.run()
-	case "up", "down":
-		return m.pick(k.String() == "up"), nil
-	case "tab":
+	case key.Matches(k, m.keys.Up):
+		return m.pick(true), nil
+	case key.Matches(k, m.keys.Down):
+		return m.pick(false), nil
+	case key.Matches(k, m.keys.Complete):
 		return m.complete(), nil
 	}
 	var cmd tea.Cmd
@@ -87,8 +113,9 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd) {
 	return m, cmd
 }
 
-func (Model) Legend() []legend.Entry {
-	return []legend.Entry{legend.New("enter", "run"), legend.New("tab", "complete"), legend.New("↑/↓", "choose"), legend.New("esc", "cancel")}
+func (m Model) Legend() []legend.Entry {
+	keys := legend.FromBindings([]key.Binding{m.keys.Run, m.keys.Complete, m.keys.Up, m.keys.Down})
+	return append(keys, legend.New("esc", "cancel"))
 }
 
 func (Model) AnchorBottom() bool { return true }

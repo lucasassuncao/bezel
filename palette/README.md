@@ -15,15 +15,18 @@ Package palette is the ":" command line: the typed line on the status row and th
 - [Constants](<#constants>)
 - [type DoneMsg](<#DoneMsg>)
 - [type Item](<#Item>)
+- [type Keys](<#Keys>)
+  - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
 - [type Model](<#Model>)
   - [func New\(items \[\]Item, th theme.Resolved\) Model](<#New>)
   - [func \(Model\) AnchorBottom\(\) bool](<#Model.AnchorBottom>)
-  - [func \(Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
+  - [func \(m Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
   - [func \(m Model\) SetItems\(items \[\]Item\) Model](<#Model.SetItems>)
   - [func \(m Model\) StatusLine\(width int\) string](<#Model.StatusLine>)
   - [func \(m Model\) Update\(msg tea.Msg\) \(overlay.Overlay, tea.Cmd\)](<#Model.Update>)
   - [func \(m Model\) Value\(\) string](<#Model.Value>)
   - [func \(m Model\) View\(body layout.Rect\) string](<#Model.View>)
+  - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
 
 
 ## Constants
@@ -35,7 +38,7 @@ const Rows = 8
 ```
 
 <a name="DoneMsg"></a>
-## type [DoneMsg](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L31-L34>)
+## type [DoneMsg](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L32-L35>)
 
 DoneMsg is the palette finishing. The owner pops it, then runs Cmd or shows Err; both empty means the line was empty.
 
@@ -47,7 +50,7 @@ type DoneMsg struct {
 ```
 
 <a name="Item"></a>
-## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L23-L27>)
+## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L24-L28>)
 
 Item is one command. Available false keeps it off the list but known, so typing it says "not available here" instead of "unknown command".
 
@@ -59,8 +62,28 @@ type Item struct {
 }
 ```
 
+<a name="Keys"></a>
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L42-L44>)
+
+Keys are the bindings the palette answers to besides esc and the typing. Down has no help of its own: Up's "↑/↓" names both.
+
+```go
+type Keys struct {
+    Run, Complete, Up, Down key.Binding
+}
+```
+
+<a name="DefaultKeys"></a>
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L47>)
+
+```go
+func DefaultKeys() Keys
+```
+
+DefaultKeys are enter, tab and the arrows.
+
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L40-L46>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L57-L64>)
 
 Model is the open palette. It is an overlay anchored to the bottom.
 
@@ -71,7 +94,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L49>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L67>)
 
 ```go
 func New(items []Item, th theme.Resolved) Model
@@ -80,7 +103,7 @@ func New(items []Item, th theme.Resolved) Model
 New opens a palette over items, sorted by name.
 
 <a name="Model.AnchorBottom"></a>
-### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L94>)
+### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L121>)
 
 ```go
 func (Model) AnchorBottom() bool
@@ -89,16 +112,16 @@ func (Model) AnchorBottom() bool
 
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L90>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L116>)
 
 ```go
-func (Model) Legend() []legend.Entry
+func (m Model) Legend() []legend.Entry
 ```
 
 
 
 <a name="Model.SetItems"></a>
-### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L58>)
+### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L82>)
 
 ```go
 func (m Model) SetItems(items []Item) Model
@@ -116,7 +139,7 @@ func (m Model) StatusLine(width int) string
 StatusLine is the typed line, drawn where the status usually is.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L67>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L91>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
@@ -125,7 +148,7 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
 
 
 <a name="Model.Value"></a>
-### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L97>)
+### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L124>)
 
 ```go
 func (m Model) Value() string
@@ -141,6 +164,15 @@ func (m Model) View(body layout.Rect) string
 ```
 
 View is the candidate list, a rule above it, every line padded to the full width so the panes do not show through.
+
+<a name="Model.WithKeys"></a>
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L75>)
+
+```go
+func (m Model) WithKeys(k Keys) Model
+```
+
+WithKeys rebinds the palette; its legend follows the bindings' help.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 
