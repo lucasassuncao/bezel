@@ -1,6 +1,7 @@
 package list
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -136,4 +137,29 @@ func TestNewAndSetRowsCopyTheSlice(t *testing.T) {
 	m = m.SetRows(ys)
 	ys[1].Label = "changed"
 	require.NotContains(t, ansi.Strip(m.View(th)), "changed")
+}
+
+func numbered(n int) []Row {
+	rs := make([]Row, n)
+	for i := range rs {
+		rs[i] = Row{Label: fmt.Sprintf("item-%02d", i), Value: i}
+	}
+	return rs
+}
+
+// The matches scroll the way the list does: a window that keeps the cursor
+// in view and counts the rows under it, the prompt on the last row.
+func TestFilterScrollsItsMatchesAndCountsTheRest(t *testing.T) {
+	m := New(numbered(20), 6)
+	m, _ = m.Update(typed("/"))
+	lines := strings.Split(ansi.Strip(m.View(th)), "\n")
+	require.Len(t, lines, 6)
+	require.Contains(t, lines[4], "↓ 16 more")
+	require.Equal(t, "/▋", lines[5])
+
+	for range 10 {
+		m, _ = m.Update(press(tea.KeyDown))
+	}
+	require.Equal(t, "item-10", m.Selected().Label)
+	require.Contains(t, ansi.Strip(m.View(th)), "▶ item-10")
 }
