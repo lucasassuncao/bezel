@@ -72,13 +72,13 @@ func Filter(entries []Entry, can func(Capability) bool) []Entry
 Filter keeps the entries can allows and that are not disabled, in a new slice. A nil can allows every capability.
 
 <a name="FromBindings"></a>
-### func [FromBindings](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L200>)
+### func [FromBindings](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L201>)
 
 ```go
 func FromBindings(bs []key.Binding) []Entry
 ```
 
-FromBindings turns bubbles bindings into entries, skipping disabled ones. For apps that already keep their keys as key.Binding.
+FromBindings turns bubbles bindings into entries, skipping disabled ones and those without help, such as the second of a pair the first names \("↑/↓"\). For apps that already keep their keys as key.Binding.
 
 <a name="New"></a>
 ### func [New](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L32>)

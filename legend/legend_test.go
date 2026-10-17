@@ -90,6 +90,15 @@ func TestFromBindingsSkipsDisabled(t *testing.T) {
 	require.Equal(t, "y", es[0].Help().Key)
 }
 
+// The second of a pair carries no help: the first one's "↑/↓" names both.
+func TestFromBindingsSkipsBindingsWithoutHelp(t *testing.T) {
+	up := key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "move"))
+	down := key.NewBinding(key.WithKeys("down"))
+	es := FromBindings([]key.Binding{up, down})
+	require.Len(t, es, 1)
+	require.Equal(t, "↑/↓", es[0].Help().Key)
+}
+
 func TestPackNamesTheHelpKeyOnlyWhenThereIsOne(t *testing.T) {
 	more := Pack(entries(8), 40, 1, Style{})
 	require.Contains(t, ansi.Strip(more[0]), "more")
