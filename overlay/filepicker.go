@@ -27,11 +27,18 @@ type FilePicker struct {
 	picker  filepicker.Model
 	onPick  func(path string) tea.Cmd
 	problem string
-	// volumes is the drive list shown above a root, nil while browsing.
-	volumes []string
-	volume  int
+	drives  driveList
 	rows    int // the entries that fit at the last Resize, pickerRows before one
 }
+
+// driveList is the drives a ← at a root opened, shown in place of a directory
+// until one is opened. The zero value is closed.
+type driveList struct {
+	roots []string
+	win   layout.Window
+}
+
+func (d driveList) open() bool { return d.roots != nil }
 
 // pickerChrome is the lines a FilePicker spends around its entries: the
 // title, the directory and the hint, and a gap after each of the first two.
@@ -79,6 +86,8 @@ func (p FilePicker) Resize(body layout.Rect) Overlay {
 		// Without AutoHeight a size message only re-anchors the window.
 		p.picker, _ = p.picker.Update(tea.WindowSizeMsg{})
 	}
+	p.drives.win.Height = p.rows
+	p.drives.win = p.drives.win.Clamp(len(p.drives.roots))
 	return p
 }
 
@@ -119,8 +128,8 @@ func (p FilePicker) Dir() string { return p.picker.CurrentDirectory }
 
 // Highlighted is the path under the cursor, or "" in an empty directory.
 func (p FilePicker) Highlighted() string {
-	if p.volumes != nil {
-		return p.volumes[p.volume]
+	if p.drives.open() {
+		return p.drives.roots[p.drives.win.Cursor]
 	}
 	return p.picker.HighlightedPath()
 }
@@ -132,18 +141,18 @@ func (p FilePicker) atRoot(msg tea.Msg) bool {
 	return ok && key.Matches(k, p.picker.KeyMap.Back) && filepath.Dir(dir) == dir
 }
 
-// updateVolumes moves through the drive list; opening one browses it afresh.
-func (p FilePicker) updateVolumes(msg tea.Msg) (Overlay, tea.Cmd) {
+// updateDrives moves through the drive list; opening one browses it afresh.
+func (p FilePicker) updateDrives(msg tea.Msg) (Overlay, tea.Cmd) {
 	k, ok := msg.(tea.KeyPressMsg)
-	km := p.picker.KeyMap
+	km, n := p.picker.KeyMap, len(p.drives.roots)
 	switch {
 	case !ok:
 	case key.Matches(k, km.Up):
-		p.volume = max(p.volume-1, 0)
+		p.drives.win = p.drives.win.Move(-1, n, nil)
 	case key.Matches(k, km.Down):
-		p.volume = min(p.volume+1, len(p.volumes)-1)
+		p.drives.win = p.drives.win.Move(1, n, nil)
 	case key.Matches(k, km.Open, km.Select):
-		return p.browse(p.volumes[p.volume])
+		return p.browse(p.drives.roots[p.drives.win.Cursor])
 	}
 	return p, nil
 }
@@ -157,7 +166,7 @@ func (p FilePicker) browse(dir string) (Overlay, tea.Cmd) {
 	fp.ShowPermissions, fp.ShowSize, fp.ShowHidden = old.ShowPermissions, old.ShowSize, old.ShowHidden
 	fp.DirAllowed, fp.FileAllowed = old.DirAllowed, old.FileAllowed
 	fp.KeyMap, fp.Styles = old.KeyMap, old.Styles
-	p, p.volumes = p.WithPicker(fp), nil
+	p, p.drives = p.WithPicker(fp), driveList{}
 	return p, p.Init()
 }
 
@@ -169,11 +178,13 @@ func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 		p.problem = ""
 	}
 	if m, ok := msg.(volumesMsg); ok && len(m.roots) > 0 {
-		p.volumes, p.volume = m.roots, max(slices.Index(m.roots, p.picker.CurrentDirectory), 0)
+		at := max(slices.Index(m.roots, p.picker.CurrentDirectory), 0)
+		win := layout.Window{Cursor: at, Height: p.rows}.Clamp(len(m.roots))
+		p.drives = driveList{roots: m.roots, win: win}
 		return p, nil
 	}
-	if p.volumes != nil {
-		return p.updateVolumes(msg)
+	if p.drives.open() {
+		return p.updateDrives(msg)
 	}
 	if p.atRoot(msg) {
 		return p, ToTop(func() tea.Msg { return volumesMsg{volumes()} })
@@ -193,7 +204,7 @@ func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 }
 
 func (p FilePicker) Legend() []legend.Entry {
-	if p.volumes != nil {
+	if p.drives.open() {
 		return []legend.Entry{legend.New("↑/↓", "move"), legend.New("→", "open"), legend.New("esc", "cancel")}
 	}
 	return []legend.Entry{
@@ -209,8 +220,8 @@ func (p FilePicker) View(body layout.Rect) string {
 	fp.SetHeight(min(rows, fp.Height()))
 	entries := strings.Split(strings.TrimRight(fp.View(), "\n"), "\n")
 	where := tail(p.Dir(), Inner(body))
-	if p.volumes != nil {
-		entries, where = p.volumeRows(rows), "drives"
+	if p.drives.open() {
+		entries, where = p.driveRows(rows), "drives"
 	}
 
 	lines := []string{accent(p.style()).Bold(true).Render(p.title), p.hint().Text.Render(where), ""}
@@ -222,18 +233,24 @@ func (p FilePicker) View(body layout.Rect) string {
 	return Box(append(lines, "", hint), body, p.style())
 }
 
-// volumeRows draws the drive list in the picker's styles, scrolled so the
-// cursor stays within rows.
-func (p FilePicker) volumeRows(rows int) []string {
-	st := p.picker.Styles
-	first := max(0, p.volume-rows+1)
+// driveRows draws the drive list in the picker's styles, in a window of rows
+// that keeps the cursor in view and counts the drives below it.
+func (p FilePicker) driveRows(rows int) []string {
+	st, roots := p.picker.Styles, p.drives.roots
+	w := p.drives.win
+	w.Height = rows
+	w = w.Clamp(len(roots))
+	start, end, below := w.Bounds(len(roots))
 	var out []string
-	for i, v := range p.volumes[first:min(len(p.volumes), first+rows)] {
-		if first+i == p.volume {
-			out = append(out, st.Cursor.Render(p.picker.Cursor)+st.Selected.Render(" "+v))
+	for i := start; i < end; i++ {
+		if i == w.Cursor {
+			out = append(out, st.Cursor.Render(p.picker.Cursor)+st.Selected.Render(" "+roots[i]))
 			continue
 		}
-		out = append(out, strings.Repeat(" ", draw.Width(p.picker.Cursor))+st.Directory.Render(" "+v))
+		out = append(out, strings.Repeat(" ", draw.Width(p.picker.Cursor))+st.Directory.Render(" "+roots[i]))
+	}
+	if below > 0 {
+		out = append(out, p.hint().Text.Render(fmt.Sprintf("  ↓ %d more", below)))
 	}
 	return out
 }

@@ -1,6 +1,7 @@
 package overlay
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -300,4 +301,27 @@ func TestFilePickerStaysAtARootWithoutDrives(t *testing.T) {
 	p = load(t, p, cmd)
 	require.Equal(t, start, p.Dir())
 	require.NotContains(t, pickerView(p), "drives")
+}
+
+// More drives than fit scroll as a list does: the cursor in view, the rest counted.
+func TestFilePickerScrollsALongDriveList(t *testing.T) {
+	start := rootOf(t.TempDir())
+	drives := []string{start}
+	for i := range 12 {
+		drives = append(drives, fmt.Sprintf("D%02d:%c", i, filepath.Separator))
+	}
+	volumes = func() []string { return drives }
+	t.Cleanup(func() { volumes = listVolumes })
+
+	body := layout.Rect{W: 60, H: 14}
+	p := newPicker(start).Resize(body).(FilePicker)
+	p, cmd := pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyLeft})
+	p = load(t, p, cmd)
+	require.Contains(t, ansi.Strip(p.View(body)), "↓ 6 more")
+
+	for range 8 {
+		p, _ = pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyDown})
+	}
+	require.Equal(t, drives[8], p.Highlighted())
+	require.Contains(t, ansi.Strip(p.View(body)), drives[8])
 }
