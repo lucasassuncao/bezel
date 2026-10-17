@@ -29,7 +29,7 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 	}
 	switch kindOf(a) {
 	case kindHelp:
-		return s.Push(s.helpOverlay()).relayout(), nil
+		return s.Push(s.helpOverlay()), nil
 	case kindCommands:
 		return s.OpenCommands(), nil
 	case kindChangeTab:
@@ -40,7 +40,7 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 			step = -1
 		}
 		from := s.Focus()
-		s = s.nextPane(step).relayout()
+		s = s.nextPane(step).relayout() // so FocusMsg names where focus really lands
 		if to := s.Focus(); to != from {
 			return s, func() tea.Msg { return FocusMsg{From: from, To: to} }
 		}

@@ -18,16 +18,25 @@ type statusExpiredMsg struct{ seq uint }
 // Update handles what is the shell's: resize, status ticks, overlays, the
 // status-row input, help, tabs and focus. handled false means the app's turn.
 func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
+	next, handled, cmd := s.update(msg)
+	if !handled {
+		return s, false, nil
+	}
+	// The one place a message re-resolves the layout, so no branch can forget to.
+	return next.relayout(), true, cmd
+}
+
+func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	switch m := msg.(type) {
 	case tea.WindowSizeMsg:
 		s.width, s.height = m.Width, m.Height
-		return s.relayout(), true, nil
+		return s, true, nil
 
 	case statusExpiredMsg:
 		if m.seq == s.statusSeq {
 			s.status = ""
 		}
-		return s.relayout(), true, nil
+		return s, true, nil
 
 	case spinner.TickMsg:
 		if m.ID == s.spin.ID() {
@@ -37,7 +46,7 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 
 	case copiedMsg:
 		next, cmd := s.copied(m)
-		return next.relayout(), true, cmd
+		return next, true, cmd
 
 	case runMsg:
 		next, cmd := s.run(m.action, m.arg, "")
@@ -51,16 +60,16 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		}
 		s = s.Pop()
 		if m.Err == "" {
-			return s.relayout(), true, m.Cmd
+			return s, true, m.Cmd
 		}
 		var cmd tea.Cmd
 		s, cmd = s.SetStatus(m.Err, Error, s.cfg.StatusTTL)
-		return s.relayout(), true, tea.Batch(cmd, m.Cmd)
+		return s, true, tea.Batch(cmd, m.Cmd)
 
 	case overlay.CloseMsg, overlay.PushMsg, overlay.TopMsg:
 		var cmd tea.Cmd
 		s.overlays, _, cmd = s.overlays.Update(msg)
-		return s.relayout(), true, cmd
+		return s, true, cmd
 	}
 
 	if s.overlays.Len() > 0 {
@@ -72,7 +81,7 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 			}
 			var cmd tea.Cmd
 			s.overlays, _, cmd = s.overlays.Update(msg)
-			return s.relayout(), true, cmd
+			return s, true, cmd
 		}
 		// Anything else is an answer for the app, not the modal.
 		return s, false, nil

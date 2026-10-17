@@ -128,10 +128,11 @@ func (s Shell) Rect(name string) layout.Rect { return s.rects[name] }
 // Focus is the name of the focused leaf on the active tab.
 func (s Shell) Focus() string { return s.focus[s.tab] }
 
-// SetFocus moves focus to a leaf of the layout. Unknown names are ignored.
+// SetFocus moves focus to a leaf of the layout. Unknown names are ignored,
+// and a leaf the layout dropped hands focus to one on screen.
 func (s Shell) SetFocus(name string) Shell {
 	if slices.Contains(layout.Order(s.cfg.Layout), name) {
-		return s.focusOn(name)
+		return s.focusOn(name).relayout() // a Header may size itself by focus
 	}
 	return s
 }
@@ -275,12 +276,19 @@ func (s Shell) relayout() Shell {
 		}
 		return s.present[name]
 	}
-	body := s.Body()
-	s.overlays = s.overlays.Resize(body)
-	s.rects, s.collapsed = layout.Resolve(s.cfg.Layout, body, present)
-	if _, ok := s.rects[s.Focus()]; !ok {
-		if order := s.visibleOrder(); len(order) > 0 {
-			s = s.focusOn(order[0])
+	// A Header sized by focus or Narrow moves the body as they settle: resolve
+	// until it holds still, a few rounds at most for one that never does.
+	for range 3 {
+		body := s.Body()
+		s.overlays = s.overlays.Resize(body)
+		s.rects, s.collapsed = layout.Resolve(s.cfg.Layout, body, present)
+		if _, ok := s.rects[s.Focus()]; !ok {
+			if order := s.visibleOrder(); len(order) > 0 {
+				s = s.focusOn(order[0])
+			}
+		}
+		if s.Body() == body {
+			break
 		}
 	}
 	return s
