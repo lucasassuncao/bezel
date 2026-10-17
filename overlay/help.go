@@ -3,6 +3,7 @@ package overlay
 import (
 	"slices"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -23,11 +24,28 @@ type Help struct {
 	look
 	title    string
 	sections []HelpSection
+	keys     HelpKeys
+}
+
+// HelpKeys are the bindings a Help closes on, besides the stack's esc.
+type HelpKeys struct {
+	Close key.Binding
+}
+
+// DefaultHelpKeys close on ?, esc, q or enter.
+func DefaultHelpKeys() HelpKeys {
+	return HelpKeys{Close: key.NewBinding(key.WithKeys("?", "esc", "q", "enter"), key.WithHelp("esc", "close"))}
 }
 
 // NewHelp lists sections, with no title over them.
 func NewHelp(sections []HelpSection, th theme.Resolved) Help {
-	return Help{look: look{th: th}, sections: slices.Clone(sections)}
+	return Help{look: look{th: th}, sections: slices.Clone(sections), keys: DefaultHelpKeys()}
+}
+
+// WithKeys rebinds the help; the line under the keys follows Close's help.
+func (h Help) WithKeys(k HelpKeys) Help {
+	h.keys = k
+	return h
 }
 
 // WithTitle draws title over the sections.
@@ -37,13 +55,13 @@ func (h Help) WithTitle(title string) Help {
 }
 
 func (h Help) Update(msg tea.Msg) (Overlay, tea.Cmd) {
-	if k, ok := msg.(tea.KeyPressMsg); ok && (k.String() == "?" || k.String() == "esc" || k.String() == "q" || k.String() == "enter") {
+	if k, ok := msg.(tea.KeyPressMsg); ok && key.Matches(k, h.keys.Close) {
 		return h, Close()
 	}
 	return h, nil
 }
 
-func (h Help) Legend() []legend.Entry { return []legend.Entry{legend.New("esc", "close")} }
+func (h Help) Legend() []legend.Entry { return legend.FromBindings([]key.Binding{h.keys.Close}) }
 func (h Help) View(body layout.Rect) string {
 	var lines []string
 	if h.title != "" {
@@ -58,6 +76,6 @@ func (h Help) View(body layout.Rect) string {
 			lines = append(lines, "  "+draw.Pad(e.Help().Key+" ", 16)+" "+e.Help().Desc)
 		}
 	}
-	lines = append(lines, "", h.hint().Text.Render("esc closes"))
+	lines = append(lines, "", h.hint().Text.Render(h.keys.Close.Help().Key+" closes"))
 	return Box(lines, body, h.style().Padding(1, 3))
 }

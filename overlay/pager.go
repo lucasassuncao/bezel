@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/layout"
@@ -19,6 +20,27 @@ type Pager struct {
 	lines  []string
 	offset int
 	rows   int // the lines that fit at the last Resize, every line before one
+	keys   PagerKeys
+}
+
+// PagerKeys are the bindings a Pager scrolls and closes on besides esc. Down
+// and PageDown have no help of their own: Up's and PageUp's name both.
+type PagerKeys struct {
+	Up, Down, PageUp, PageDown, Top, Bottom, Close key.Binding
+}
+
+// DefaultPagerKeys are the arrows and j/k, pgup/pgdown with b, f and space,
+// home/end with g/G, and q or enter to close.
+func DefaultPagerKeys() PagerKeys {
+	return PagerKeys{
+		Up:       key.NewBinding(key.WithKeys("up", "k"), key.WithHelp("↑/↓", "scroll")),
+		Down:     key.NewBinding(key.WithKeys("down", "j")),
+		PageUp:   key.NewBinding(key.WithKeys("pgup", "b"), key.WithHelp("pgup/pgdn", "page")),
+		PageDown: key.NewBinding(key.WithKeys("pgdown", "f", "space")),
+		Top:      key.NewBinding(key.WithKeys("home", "g")),
+		Bottom:   key.NewBinding(key.WithKeys("end", "G")),
+		Close:    key.NewBinding(key.WithKeys("q", "enter")),
+	}
 }
 
 // pagerChrome is the rows a Pager spends around its text: border and padding,
@@ -29,7 +51,13 @@ const pagerChrome = 2 + 2 + 2 + 2
 // blank lines are dropped.
 func NewPager(title, text string, th theme.Resolved) Pager {
 	lines := strings.Split(strings.TrimRight(strings.ReplaceAll(text, "\r\n", "\n"), "\n"), "\n")
-	return Pager{title: title, lines: lines, look: look{th: th}, rows: len(lines)}
+	return Pager{title: title, lines: lines, look: look{th: th}, rows: len(lines), keys: DefaultPagerKeys()}
+}
+
+// WithKeys rebinds the pager; its legend and position line follow the bindings' help.
+func (p Pager) WithKeys(k PagerKeys) Pager {
+	p.keys = k
+	return p
 }
 
 // Resize makes a page as many lines as fit in body.
@@ -49,21 +77,21 @@ func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 	if !ok {
 		return p, nil
 	}
-	page := p.page()
-	switch k.String() {
-	case "q", "enter":
+	page, km := p.page(), p.keys
+	switch {
+	case key.Matches(k, km.Close):
 		return p, Close()
-	case "up", "k":
+	case key.Matches(k, km.Up):
 		p = p.scroll(-1)
-	case "down", "j":
+	case key.Matches(k, km.Down):
 		p = p.scroll(1)
-	case "pgup", "b":
+	case key.Matches(k, km.PageUp):
 		p = p.scroll(-page)
-	case "pgdown", "f", "space":
+	case key.Matches(k, km.PageDown):
 		p = p.scroll(page)
-	case "home", "g":
+	case key.Matches(k, km.Top):
 		p.offset = 0
-	case "end", "G":
+	case key.Matches(k, km.Bottom):
 		p = p.scroll(len(p.lines))
 	}
 	return p, nil
@@ -83,7 +111,9 @@ func (p Pager) page() int { return max(1, p.rows) }
 func (p Pager) lastOffset() int { return max(0, len(p.lines)-p.page()) }
 
 func (p Pager) Legend() []legend.Entry {
-	return []legend.Entry{legend.New("↑/↓", "scroll"), legend.New("pgup/pgdn", "page"), legend.New("esc", "close")}
+	km := p.keys
+	keys := legend.FromBindings([]key.Binding{km.Up, km.Down, km.PageUp, km.PageDown, km.Top, km.Bottom, km.Close})
+	return append(keys, legend.New("esc", "close"))
 }
 
 func (p Pager) View(body layout.Rect) string {
@@ -95,6 +125,7 @@ func (p Pager) View(body layout.Rect) string {
 	out = append(out, p.lines[offset:end]...)
 	// The keys ride on the position line: the screen's legend under a modal is
 	// still the screen's, so nothing else says how to scroll or leave.
-	pos := fmt.Sprintf("lines %d-%d of %d · ↑/↓ pgup/pgdn scroll · esc closes", offset+1, end, len(p.lines))
+	scroll := strings.TrimSpace(p.keys.Up.Help().Key + " " + p.keys.PageUp.Help().Key)
+	pos := fmt.Sprintf("lines %d-%d of %d · %s scroll · esc closes", offset+1, end, len(p.lines), scroll)
 	return Box(append(out, "", p.hint().Text.Render(pos)), body, dialogFrame(p.style()))
 }

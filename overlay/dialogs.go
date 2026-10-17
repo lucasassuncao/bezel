@@ -119,22 +119,34 @@ type Pick struct {
 	notes  []string      // drawn under the rows
 	win    layout.Window // its Height is what fit at the last Resize
 	onPick func(i int) tea.Cmd
-	keys   Keys
+	keys   PickKeys
 }
 
-// Keys are the bindings a Pick answers to besides esc.
-type Keys struct {
+// PickKeys are the bindings a Pick answers to besides esc. Down has no help
+// of its own: Up's "↑/↓" names both.
+type PickKeys struct {
 	Up, Down, Enter key.Binding
+}
+
+// DefaultPickKeys are the arrows and enter.
+func DefaultPickKeys() PickKeys {
+	return PickKeys{
+		Up:    key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "choose")),
+		Down:  key.NewBinding(key.WithKeys("down")),
+		Enter: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "pick")),
+	}
 }
 
 // NewPick lists rows with the cursor on the first. onPick may be nil, which
 // makes enter only close.
 func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick {
-	return Pick{look: look{th: th}, title: title, rows: slices.Clone(rows), onPick: onPick, keys: Keys{
-		Up:    key.NewBinding(key.WithKeys("up")),
-		Down:  key.NewBinding(key.WithKeys("down")),
-		Enter: key.NewBinding(key.WithKeys("enter")),
-	}}
+	return Pick{look: look{th: th}, title: title, rows: slices.Clone(rows), onPick: onPick, keys: DefaultPickKeys()}
+}
+
+// WithKeys rebinds the pick; the keys drawn in its box follow the bindings' help.
+func (p Pick) WithKeys(k PickKeys) Pick {
+	p.keys = k
+	return p
 }
 
 // WithNotes are lines drawn under the rows, such as what the picked one does.
@@ -191,7 +203,8 @@ func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 }
 
 func (p Pick) Legend() []legend.Entry {
-	return []legend.Entry{legend.New("↑/↓", "choose"), legend.New("enter", "pick"), legend.New("esc", "cancel")}
+	keys := legend.FromBindings([]key.Binding{p.keys.Up, p.keys.Down, p.keys.Enter})
+	return append(keys, legend.New("esc", "cancel"))
 }
 
 func (p Pick) View(body layout.Rect) string {

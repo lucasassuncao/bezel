@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
@@ -31,6 +32,18 @@ type Prompt struct {
 	validate func(string) string
 	accept   string
 	onAccept func(value string) tea.Cmd
+	keys     PromptKeys
+}
+
+// PromptKeys are the bindings a Prompt answers to besides esc and the typing.
+// The legend prints Accept's key; what it does is WithAcceptHint's.
+type PromptKeys struct {
+	Accept key.Binding
+}
+
+// DefaultPromptKeys accept on enter.
+func DefaultPromptKeys() PromptKeys {
+	return PromptKeys{Accept: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "accept"))}
 }
 
 // NewPrompt builds a prompt with a "> " input; onAccept may be nil.
@@ -38,7 +51,13 @@ func NewPrompt(title string, onAccept func(value string) tea.Cmd, th theme.Resol
 	in := draw.WithCaret(textinput.New(), th.CaretBlink)
 	in.Prompt = "> "
 	in.Focus()
-	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, look: look{th: th}}
+	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, look: look{th: th}, keys: DefaultPromptKeys()}
+}
+
+// WithKeys rebinds the prompt.
+func (p Prompt) WithKeys(k PromptKeys) Prompt {
+	p.keys = k
+	return p
 }
 
 // WithInput replaces the input, for a caller that configures its own prompt,
@@ -110,7 +129,7 @@ func (p Prompt) Problem() string {
 func (p Prompt) Accepts() bool { return p.Problem() == "" }
 
 func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd) {
-	if k, ok := msg.(tea.KeyPressMsg); ok && k.Code == tea.KeyEnter {
+	if k, ok := msg.(tea.KeyPressMsg); ok && key.Matches(k, p.keys.Accept) {
 		switch {
 		case !p.Accepts():
 			return p, nil
@@ -130,7 +149,7 @@ func (p Prompt) Legend() []legend.Entry {
 	if !p.Accepts() {
 		return []legend.Entry{esc}
 	}
-	return []legend.Entry{legend.New("enter", p.accept), esc}
+	return []legend.Entry{legend.New(p.keys.Accept.Help().Key, p.accept), esc}
 }
 
 func (p Prompt) View(body layout.Rect) string {
