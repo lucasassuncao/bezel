@@ -20,10 +20,7 @@ const hintsHeight = 8
 
 const slide = 300 * time.Millisecond
 
-type (
-	toggleMsg struct{}
-	frameMsg  time.Time
-)
+type toggleMsg struct{}
 
 type model struct {
 	sh    shell.Shell
@@ -54,10 +51,6 @@ func newModel() model {
 	return model{sh: sh}
 }
 
-func nextFrame() tea.Cmd {
-	return tea.Tick(animation.Frame, func(t time.Time) tea.Msg { return frameMsg(t) })
-}
-
 func (m model) Init() tea.Cmd { return nil }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -73,17 +66,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.open {
 			target = hintsHeight
 		}
-		// A toggle mid-slide starts from where the pane is, not where it was going.
+		// A toggle mid-slide starts from where the pane is, not where it was going;
+		// the frame the old tween still has on its way is not this one's.
 		m.tween = animation.New(m.height, target, slide)
-		return m, nextFrame()
-	case frameMsg:
-		var done bool
-		m.tween, done = m.tween.Advance(time.Time(msg))
+		return m, m.tween.Tick()
+	case animation.FrameMsg:
+		m.tween, cmd = m.tween.Update(msg)
 		m.height = m.tween.Cur
 		m.sh = m.sh.SetLayout(shape(m.height))
-		if !done {
-			return m, nextFrame()
-		}
+		return m, cmd
 	case tea.KeyPressMsg:
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit

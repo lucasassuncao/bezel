@@ -59,6 +59,9 @@ func TestNewDeclinesWhenPointless(t *testing.T) {
 	is.False(New(0, 10, 0).Active(), "duration 0 means no animation")
 	is.False(New(7, 7, time.Second).Active(), "no distance means no animation")
 	is.True(New(0, 10, time.Second).Active(), "a real move animates")
+	// An app that draws Cur after every Update must not see a declined tween at 0.
+	is.Equal(10, New(0, 10, 0).Cur, "a declined tween rests at its target")
+	is.Equal(7, New(7, 7, time.Second).Cur)
 }
 
 // TestCurveDoesNotStallOrLurch is the smoothness contract: heights are whole
@@ -124,4 +127,53 @@ func TestAdvanceReturnsTheSampledTween(t *testing.T) {
 	assert.True(t, done)
 	assert.Equal(t, 10, next.Cur)
 	assert.Equal(t, 0, tw.Cur, "the receiver changed")
+}
+
+// New reads no clock: time reaches a tween only through the frames it gets.
+func TestNewLeavesTheClockToTheFirstFrame(t *testing.T) {
+	tw := New(0, 10, 100*time.Millisecond)
+	assert.True(t, tw.Start.IsZero())
+
+	at := time.Unix(1000, 0)
+	tw, done := tw.Advance(at)
+	assert.False(t, done)
+	assert.Equal(t, 0, tw.Cur, "the first frame shows the start value")
+	assert.Equal(t, at, tw.Start)
+}
+
+func TestUpdateFollowsItsOwnFramesUntilItLands(t *testing.T) {
+	start := time.Unix(1000, 0)
+	tw := New(0, 10, 100*time.Millisecond)
+
+	tw, cmd := tw.Update(tw.FrameAt(start))
+	assert.NotNil(t, cmd, "an unfinished tween asks for the next frame")
+	tw, cmd = tw.Update(tw.FrameAt(start.Add(50 * time.Millisecond)))
+	assert.Equal(t, 5, tw.Cur)
+	assert.NotNil(t, cmd)
+	tw, cmd = tw.Update(tw.FrameAt(start.Add(100 * time.Millisecond)))
+	assert.Equal(t, 10, tw.Cur)
+	assert.Nil(t, cmd, "a tween that landed stops its clock")
+}
+
+// A tween replaced mid-flight still has a frame on its way: the new one must not take it.
+func TestUpdateIgnoresAnotherTweensFrames(t *testing.T) {
+	start := time.Unix(1000, 0)
+	old, tw := New(0, 10, time.Second), New(0, 10, time.Second)
+
+	next, cmd := tw.Update(old.FrameAt(start))
+	assert.Nil(t, cmd)
+	assert.Equal(t, tw, next)
+
+	var zero Tween
+	assert.Nil(t, zero.Tick(), "nothing to animate, no clock")
+	next, cmd = zero.Update(old.FrameAt(start))
+	assert.Nil(t, cmd)
+	assert.Equal(t, zero, next)
+}
+
+func TestTickDeliversAFrameForThisTween(t *testing.T) {
+	tw := New(0, 10, time.Second)
+	next, cmd := tw.Update(tw.Tick()())
+	assert.False(t, next.Start.IsZero(), "the tick's frame started the clock")
+	assert.NotNil(t, cmd)
 }

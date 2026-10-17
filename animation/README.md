@@ -13,11 +13,15 @@ Package animation is the eased integer tween that drives panel transitions: a hi
 ## Index
 
 - [Constants](<#constants>)
+- [type FrameMsg](<#FrameMsg>)
 - [type Tween](<#Tween>)
   - [func New\(from, target int, dur time.Duration\) Tween](<#New>)
   - [func \(t Tween\) Active\(\) bool](<#Tween.Active>)
   - [func \(t Tween\) Advance\(now time.Time\) \(Tween, bool\)](<#Tween.Advance>)
   - [func \(t Tween\) At\(now time.Time\) \(int, bool\)](<#Tween.At>)
+  - [func \(t Tween\) FrameAt\(at time.Time\) FrameMsg](<#Tween.FrameAt>)
+  - [func \(t Tween\) Tick\(\) tea.Cmd](<#Tween.Tick>)
+  - [func \(t Tween\) Update\(msg tea.Msg\) \(Tween, tea.Cmd\)](<#Tween.Update>)
 
 
 ## Constants
@@ -28,31 +32,44 @@ Package animation is the eased integer tween that drives panel transitions: a hi
 const Frame = 16 * time.Millisecond
 ```
 
+<a name="FrameMsg"></a>
+## type [FrameMsg](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L31-L34>)
+
+FrameMsg is one tick of a tween's clock, at the time it fired. Hand it to every running tween's Update: each one takes only its own.
+
+```go
+type FrameMsg struct {
+    At time.Time
+    // contains filtered or unexported fields
+}
+```
+
 <a name="Tween"></a>
-## type [Tween](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L18-L23>)
+## type [Tween](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L21-L27>)
 
 Tween eases an int between two values over a duration. Adapted from the minimize animation in github.com/Gaurav\-Gosain/tuios \(MIT\), reduced to one axis. The zero value is inactive: At reports it finished, at To.
 
 ```go
 type Tween struct {
     From, To int
-    Cur      int // value sampled by the last advance; the height the frame draws
-    Start    time.Time
+    Cur      int       // value sampled by the last advance; the height the frame draws
+    Start    time.Time // zero until the first frame, which starts the clock
     Dur      time.Duration
+    // contains filtered or unexported fields
 }
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L68>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L114>)
 
 ```go
 func New(from, target int, dur time.Duration) Tween
 ```
 
-New builds the tween taking a panel from its on\-screen height to target over dur. It returns the zero tween when dur \<= 0 or from == target, so the caller falls through to an instant toggle.
+New builds the tween taking a panel from its on\-screen height to target over dur, its clock started by the first frame Tick delivers. When dur \<= 0 or from == target it is inactive and already at target: the toggle is instant.
 
 <a name="Tween.Active"></a>
-### func \(Tween\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L26>)
+### func \(Tween\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L66>)
 
 ```go
 func (t Tween) Active() bool
@@ -61,7 +78,7 @@ func (t Tween) Active() bool
 Active reports whether t is currently in flight.
 
 <a name="Tween.Advance"></a>
-### func \(Tween\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L31>)
+### func \(Tween\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L71>)
 
 ```go
 func (t Tween) Advance(now time.Time) (Tween, bool)
@@ -70,13 +87,40 @@ func (t Tween) Advance(now time.Time) (Tween, bool)
 Advance is t with the curve sampled at now into Cur, and whether it finished. The renderer reads Cur, not At, so one frame never mixes two samples and lays the hint panel out a row off from the space the preview left.
 
 <a name="Tween.At"></a>
-### func \(Tween\) [At](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L40>)
+### func \(Tween\) [At](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L83>)
 
 ```go
 func (t Tween) At(now time.Time) (int, bool)
 ```
 
-At returns the interpolated value at now, and whether the tween has finished. A finished tween reports its end value exactly, so the panel always lands on the height the static layout would have chosen.
+At returns the interpolated value at now, and whether the tween has finished. A finished tween reports its end value exactly, so the panel always lands on the height the static layout would have chosen. Before its clock starts it is at From.
+
+<a name="Tween.FrameAt"></a>
+### func \(Tween\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L49>)
+
+```go
+func (t Tween) FrameAt(at time.Time) FrameMsg
+```
+
+FrameAt is t's frame for at, for a test harness that delivers frames itself.
+
+<a name="Tween.Tick"></a>
+### func \(Tween\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L40>)
+
+```go
+func (t Tween) Tick() tea.Cmd
+```
+
+Tick is the command for t's next frame, nil for a tween with nothing to do.
+
+<a name="Tween.Update"></a>
+### func \(Tween\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L53>)
+
+```go
+func (t Tween) Update(msg tea.Msg) (Tween, tea.Cmd)
+```
+
+Update samples t on one of its own frames and asks for the next until it lands. Other messages, and frames meant for another tween, leave it alone.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 
