@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -97,7 +98,7 @@ func TestSetActionsFeedsATablessShell(t *testing.T) {
 	s = s.SetActions(Custom("x", "do x", nil), Custom("y", "do y", nil))
 	plain := ansi.Strip(s.View(demoPanes()))
 	require.Contains(t, plain, "[x] do x")
-	require.Equal(t, 24-2-2, s.Body().H) // header and blank row, status, one legend row
+	require.Equal(t, 24-2-3, s.Body().H) // header and blank row, status, both legend rows
 }
 
 func TestSetLayoutReplacesTheTree(t *testing.T) {
@@ -135,4 +136,24 @@ func TestLegendLinesIsConfigurable(t *testing.T) {
 	two := one.SetLegendLines(2)
 	require.Equal(t, 24-2-1-2, two.Body().H)
 	require.Equal(t, 2, New(Config{LegendLines: -3}).cfg.LegendLines)
+}
+
+// Moving focus to a pane with fewer keys must not grow the panes: the legend
+// keeps its rows, and the ones it does not fill stay blank.
+func TestTheBodyKeepsItsHeightWhenTheLegendShrinks(t *testing.T) {
+	keys := make([]Action, 12)
+	for i := range keys {
+		keys[i] = Custom(string(rune('a'+i)), "a long action description", nil)
+	}
+	s := newShell()
+	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	long := s.SetActions(keys...)
+	short := s.SetActions(keys[0])
+	require.Equal(t, long.Body(), short.Body())
+	require.Equal(t, long.Rect("detail"), short.Rect("detail"))
+
+	rows := strings.Split(ansi.Strip(short.View(demoPanes())), "\n")
+	require.Len(t, rows, 24)
+	require.Contains(t, rows[22], "[a] a long action description")
+	require.Empty(t, strings.TrimSpace(rows[23]))
 }

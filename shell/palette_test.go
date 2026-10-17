@@ -56,7 +56,7 @@ func TestCommandsOpensThePaletteOnTheStatusRow(t *testing.T) {
 	screen := ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}}))
 	require.Contains(t, screen, ":reveal")
 	rows := strings.Split(screen, "\n")
-	require.True(t, strings.HasPrefix(rows[len(rows)-2], ":"), "the typed line takes the status row")
+	require.True(t, strings.HasPrefix(rows[statusAt(s)], ":"), "the typed line takes the status row")
 }
 
 func TestThePaletteRunsTheNamedAction(t *testing.T) {

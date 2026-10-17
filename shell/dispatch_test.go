@@ -5,11 +5,9 @@ import (
 
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/layout"
-	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -130,7 +128,7 @@ func TestARefusedActionDoesNotRun(t *testing.T) {
 func TestActionsStandAsideForAnOverlay(t *testing.T) {
 	ran := false
 	s := sized(New(actionConfig()).SetActions(Custom("p", "ping", func(ActionContext) tea.Cmd { ran = true; return nil })))
-	s = s.Push(overlay.NewText("t", []string{"x"}, lipgloss.NewStyle(), legend.Style{}))
+	s = s.Push(overlay.NewText("t", []string{"x"}, theme.Resolved{}))
 	s.Update(keyP)
 	require.False(t, ran)
 }

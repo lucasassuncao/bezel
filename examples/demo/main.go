@@ -89,7 +89,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case askDeleteMsg:
 		if len(t.items) > 0 {
 			m.sh = m.sh.Push(overlay.NewConfirm("Delete "+t.items[m.cursor]+"?", "This only affects the demo.",
-				func() tea.Msg { return deletedMsg{} }, m.th.Modal, m.th.Legend))
+				func() tea.Msg { return deletedMsg{} }, m.th).WithKind(overlay.Danger))
 		}
 	case deletedMsg:
 		t.items = append(t.items[:m.cursor], t.items[m.cursor+1:]...)

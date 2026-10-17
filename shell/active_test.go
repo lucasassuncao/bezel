@@ -20,8 +20,7 @@ func sized(s Shell) Shell {
 	return s
 }
 
-// legendRows is the last two screen rows: the status and a one-line legend,
-// or a two-line legend.
+// legendRows is the last two screen rows: the legend's, filled or not.
 func legendRows(s Shell) string {
 	rows := strings.Split(ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}})), "\n")
 	return strings.Join(rows[len(rows)-2:], "\n")

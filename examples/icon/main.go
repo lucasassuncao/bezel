@@ -80,15 +80,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) set() (icon.Set, string) {
 	if m.ascii {
-		return icon.ASCII, "ASCII"
+		return icon.ASCII(), "ASCII"
 	}
-	return icon.Unicode, "Unicode"
+	return icon.Unicode(), "Unicode"
 }
 
 func (m model) body(r layout.Rect) string {
 	out := []string{draw.Heading("States", m.th.Section, r.W), ""}
 	for _, s := range states {
-		out = append(out, fmt.Sprintf("  %-9s %s   %s", s.name, icon.Unicode.Render(s.st, m.th), icon.ASCII.Render(s.st, m.th)))
+		out = append(out, fmt.Sprintf("  %-9s %s   %s", s.name, icon.Unicode().Render(s.st, m.th), icon.ASCII().Render(s.st, m.th)))
 	}
 	set, name := m.set()
 	out = append(out, "", draw.Heading("Packages · "+name, m.th.Section, r.W), "")

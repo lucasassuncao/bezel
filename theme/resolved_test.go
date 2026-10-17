@@ -8,8 +8,6 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/lucasassuncao/bezel/overlay"
 )
 
 func TestResolveThemeZeroValueIsAdaptive(t *testing.T) {
@@ -67,12 +65,6 @@ func TestResolveFillsTheChromeSlots(t *testing.T) {
 	require.NotEmpty(t, r.Chrome.TabActive.Render("x"))
 	require.NotEmpty(t, r.Legend.Key.Render("x"))
 	require.NotEmpty(t, r.Modal.Render("x"))
-}
-
-func TestModalForColoursByKind(t *testing.T) {
-	r := Resolve(Mint, true)
-	require.NotEqual(t, r.ModalFor(overlay.Danger), r.ModalFor(overlay.Info))
-	require.Equal(t, r.Modal, r.ModalFor(overlay.Info))
 }
 
 func TestResolveWalksTheWholeBaseChain(t *testing.T) {

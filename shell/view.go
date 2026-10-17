@@ -30,7 +30,8 @@ func (s Shell) chromeRows() (top, bottom int, legendLines []string) {
 		st.HelpKey = help.Entry().Help().Key
 	}
 	legendLines = legend.Pack(s.legendEntries(), s.width, s.cfg.LegendLines, st)
-	bottom = 1 + len(legendLines)
+	// Every row the legend may take, filled or not: fewer keys never grow the panes.
+	bottom = 1 + max(s.cfg.LegendLines, len(legendLines))
 	return top, bottom, legendLines
 }
 
@@ -58,7 +59,7 @@ func (s Shell) helpOverlay() overlay.Overlay {
 	if len(keys) > 0 {
 		sections = append(sections, overlay.HelpSection{Name: s.sectionName(), Entries: keys})
 	}
-	return overlay.NewHelp("", sections, s.cfg.Theme.Modal, s.cfg.Theme.Legend)
+	return overlay.NewHelp(sections, s.cfg.Theme)
 }
 
 // sectionName heads the keys of where the user is: the active tab, else the app.
@@ -115,6 +116,9 @@ func (s Shell) View(panes map[string]Pane) string {
 	rows = append(rows, s.statusRow())
 	for _, l := range legendLines {
 		rows = append(rows, draw.Fit(l, s.width))
+	}
+	for range s.cfg.LegendLines - len(legendLines) {
+		rows = append(rows, draw.Fit("", s.width))
 	}
 
 	out := draw.FitBlock(strings.Join(rows, "\n"), s.width, s.height)

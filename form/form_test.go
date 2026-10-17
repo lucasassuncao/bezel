@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
+	"github.com/lucasassuncao/bezel/icon"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -125,4 +126,20 @@ func TestEmptyChoicesDoNotPanic(t *testing.T) {
 	}
 	require.Empty(t, NewSelect("Image", nil, 0, th()).Value())
 	require.Empty(t, NewRadio("Shell", nil, 0, th()).Value())
+}
+
+// The environment only picks the default: a host that chose a set keeps it.
+func TestWithIconsOverridesTheEnvironment(t *testing.T) {
+	t.Setenv("BEZEL_ASCII", "1")
+	r := NewRadio("Shell", []string{"bash"}, 0, th())
+	require.Contains(t, ansi.Strip(r.View(false, 5, 40)), "(*)")
+	require.Contains(t, ansi.Strip(r.WithIcons(icon.Unicode()).View(false, 5, 40)), "(•)")
+
+	sw := NewToggle("Docker", true, th()).WithIcons(icon.Unicode())
+	require.Contains(t, ansi.Strip(sw.View(false, 6, 40)), "──●")
+}
+
+func TestInputCaretFollowsTheTheme(t *testing.T) {
+	in := NewInput("Name", "", 10, theme.Resolved{CaretBlink: 7})
+	require.EqualValues(t, 7, in.in.Styles().Cursor.BlinkSpeed)
 }

@@ -59,8 +59,9 @@ type Config struct {
 	Header func(ctx Context, width int) []string
 	// Can decides which legend entries survive. nil allows everything.
 	Can func(Capability) bool
-	// LegendLines is how many rows the legend may take: 1 for a compact
-	// footer, 2 (the default, also for 0 or less) when the app has many keys.
+	// LegendLines is how many rows the legend keeps, blank when unfilled, so the
+	// panes hold their size as the keys change: 1 for a compact footer, 2 (the
+	// default, also for 0 or less) when the app has many keys.
 	LegendLines int
 	// Actions are active on every screen, before the tab's or SetActions's.
 	Actions []Action
@@ -159,7 +160,7 @@ func (s Shell) SetTab(i int) Shell {
 		return s
 	}
 	s.tab = i
-	return s.relayout() // the tab's legend may take a different number of rows
+	return s.relayout() // its focus may be on a pane a resize dropped meanwhile
 }
 
 // Narrow reports whether a Collapse fired in the current layout.
@@ -187,13 +188,13 @@ func (s Shell) SetSubtitle(text string) Shell {
 }
 
 // SetActions is the current state's own actions, joining the global ones and
-// the tab's. Variadic; the legend rows count against the body.
+// the tab's. Variadic.
 func (s Shell) SetActions(actions ...Action) Shell {
 	s.actions = slices.Clone(actions)
 	return s.relayout()
 }
 
-// SetLegendLines changes how many rows the legend may take, 1 or more.
+// SetLegendLines changes how many rows the legend keeps, 1 or more.
 func (s Shell) SetLegendLines(n int) Shell {
 	s.cfg.LegendLines = max(1, n)
 	return s.relayout()
@@ -257,8 +258,8 @@ func (s Shell) visibleOrder() []string {
 	return out
 }
 
-// relayout re-resolves the layout for the current size and legend, and moves
-// focus off a leaf that vanished.
+// relayout re-resolves the layout for the current size and legend, moves
+// focus off a leaf that vanished, and gives the overlays the new body.
 func (s Shell) relayout() Shell {
 	if s.width <= 0 || s.height <= 0 {
 		return s // not sized yet: a zero body would collapse and steal focus
@@ -269,7 +270,9 @@ func (s Shell) relayout() Shell {
 		}
 		return s.present[name]
 	}
-	s.rects, s.collapsed = layout.Resolve(s.cfg.Layout, s.Body(), present)
+	body := s.Body()
+	s.overlays = s.overlays.Resize(body)
+	s.rects, s.collapsed = layout.Resolve(s.cfg.Layout, body, present)
 	if _, ok := s.rects[s.Focus()]; !ok {
 		if order := s.visibleOrder(); len(order) > 0 {
 			s = s.focusOn(order[0])

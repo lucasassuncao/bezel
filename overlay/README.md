@@ -20,42 +20,48 @@ Package overlay is the stack of modals floating over the panes. The top one gets
 - [func Open\(o Overlay\) tea.Cmd](<#Open>)
 - [func ToTop\(cmd tea.Cmd\) tea.Cmd](<#ToTop>)
 - [type Alert](<#Alert>)
-  - [func NewAlert\(kind Kind, title, message string, style lipgloss.Style, hint legend.Style\) Alert](<#NewAlert>)
+  - [func NewAlert\(kind Kind, title, message string, th theme.Resolved\) Alert](<#NewAlert>)
   - [func \(a Alert\) Kind\(\) Kind](<#Alert.Kind>)
   - [func \(a Alert\) Legend\(\) \[\]legend.Entry](<#Alert.Legend>)
   - [func \(a Alert\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Alert.Update>)
   - [func \(a Alert\) View\(body layout.Rect\) string](<#Alert.View>)
 - [type BottomAnchored](<#BottomAnchored>)
 - [type Choice](<#Choice>)
-  - [func NewChoice\(title string, lines \[\]string, options \[\]Option, style lipgloss.Style, hint legend.Style\) Choice](<#NewChoice>)
+  - [func NewChoice\(title string, lines \[\]string, options \[\]Option, th theme.Resolved\) Choice](<#NewChoice>)
   - [func \(c Choice\) Legend\(\) \[\]legend.Entry](<#Choice.Legend>)
   - [func \(c Choice\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Choice.Update>)
   - [func \(c Choice\) View\(body layout.Rect\) string](<#Choice.View>)
+  - [func \(c Choice\) WithKind\(k Kind\) Choice](<#Choice.WithKind>)
 - [type CloseMsg](<#CloseMsg>)
 - [type Confirm](<#Confirm>)
-  - [func NewConfirm\(title, message string, onYes tea.Cmd, style lipgloss.Style, hint legend.Style\) Confirm](<#NewConfirm>)
+  - [func NewConfirm\(title, message string, onYes tea.Cmd, th theme.Resolved\) Confirm](<#NewConfirm>)
   - [func \(c Confirm\) Legend\(\) \[\]legend.Entry](<#Confirm.Legend>)
   - [func \(c Confirm\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Confirm.Update>)
   - [func \(c Confirm\) View\(body layout.Rect\) string](<#Confirm.View>)
+  - [func \(c Confirm\) WithKind\(k Kind\) Confirm](<#Confirm.WithKind>)
 - [type EscOwner](<#EscOwner>)
 - [type FilePicker](<#FilePicker>)
-  - [func NewFilePicker\(title, dir string, onPick func\(path string\) tea.Cmd, style lipgloss.Style, hint legend.Style\) FilePicker](<#NewFilePicker>)
+  - [func NewFilePicker\(title, dir string, onPick func\(path string\) tea.Cmd, th theme.Resolved\) FilePicker](<#NewFilePicker>)
   - [func \(p FilePicker\) Dir\(\) string](<#FilePicker.Dir>)
   - [func \(p FilePicker\) Highlighted\(\) string](<#FilePicker.Highlighted>)
   - [func \(p FilePicker\) Init\(\) tea.Cmd](<#FilePicker.Init>)
   - [func \(p FilePicker\) Legend\(\) \[\]legend.Entry](<#FilePicker.Legend>)
   - [func \(p FilePicker\) Open\(\) tea.Cmd](<#FilePicker.Open>)
+  - [func \(p FilePicker\) Resize\(body layout.Rect\) Overlay](<#FilePicker.Resize>)
   - [func \(p FilePicker\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#FilePicker.Update>)
   - [func \(p FilePicker\) View\(body layout.Rect\) string](<#FilePicker.View>)
   - [func \(p FilePicker\) WithAllowedTypes\(exts ...string\) FilePicker](<#FilePicker.WithAllowedTypes>)
   - [func \(p FilePicker\) WithDirs\(\) FilePicker](<#FilePicker.WithDirs>)
   - [func \(p FilePicker\) WithHidden\(\) FilePicker](<#FilePicker.WithHidden>)
+  - [func \(p FilePicker\) WithKind\(k Kind\) FilePicker](<#FilePicker.WithKind>)
   - [func \(p FilePicker\) WithPicker\(fp filepicker.Model\) FilePicker](<#FilePicker.WithPicker>)
 - [type Help](<#Help>)
-  - [func NewHelp\(title string, sections \[\]HelpSection, style lipgloss.Style, hint legend.Style\) Help](<#NewHelp>)
+  - [func NewHelp\(sections \[\]HelpSection, th theme.Resolved\) Help](<#NewHelp>)
   - [func \(h Help\) Legend\(\) \[\]legend.Entry](<#Help.Legend>)
   - [func \(h Help\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Help.Update>)
   - [func \(h Help\) View\(body layout.Rect\) string](<#Help.View>)
+  - [func \(h Help\) WithKind\(k Kind\) Help](<#Help.WithKind>)
+  - [func \(h Help\) WithTitle\(title string\) Help](<#Help.WithTitle>)
 - [type HelpSection](<#HelpSection>)
 - [type Keys](<#Keys>)
 - [type Kind](<#Kind>)
@@ -63,20 +69,25 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func Opt\(keys, label string, do tea.Cmd\) Option](<#Opt>)
 - [type Overlay](<#Overlay>)
 - [type Pager](<#Pager>)
-  - [func NewPager\(title, text string, style lipgloss.Style, hint legend.Style\) Pager](<#NewPager>)
+  - [func NewPager\(title, text string, th theme.Resolved\) Pager](<#NewPager>)
   - [func \(p Pager\) Legend\(\) \[\]legend.Entry](<#Pager.Legend>)
   - [func \(p Pager\) Offset\(\) int](<#Pager.Offset>)
+  - [func \(p Pager\) Resize\(body layout.Rect\) Overlay](<#Pager.Resize>)
   - [func \(p Pager\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Pager.Update>)
   - [func \(p Pager\) View\(body layout.Rect\) string](<#Pager.View>)
+  - [func \(p Pager\) WithKind\(k Kind\) Pager](<#Pager.WithKind>)
 - [type Pick](<#Pick>)
-  - [func NewPick\(title string, rows, notes \[\]string, onPick func\(i int\) tea.Cmd, style lipgloss.Style, hint legend.Style\) Pick](<#NewPick>)
+  - [func NewPick\(title string, rows \[\]string, onPick func\(i int\) tea.Cmd, th theme.Resolved\) Pick](<#NewPick>)
   - [func \(p Pick\) Cursor\(\) int](<#Pick.Cursor>)
   - [func \(p Pick\) Legend\(\) \[\]legend.Entry](<#Pick.Legend>)
+  - [func \(p Pick\) Resize\(body layout.Rect\) Overlay](<#Pick.Resize>)
   - [func \(p Pick\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Pick.Update>)
   - [func \(p Pick\) View\(body layout.Rect\) string](<#Pick.View>)
   - [func \(p Pick\) WithCursor\(i int\) Pick](<#Pick.WithCursor>)
+  - [func \(p Pick\) WithKind\(k Kind\) Pick](<#Pick.WithKind>)
+  - [func \(p Pick\) WithNotes\(notes ...string\) Pick](<#Pick.WithNotes>)
 - [type Prompt](<#Prompt>)
-  - [func NewPrompt\(title string, onAccept func\(value string\) tea.Cmd, style lipgloss.Style, hint legend.Style\) Prompt](<#NewPrompt>)
+  - [func NewPrompt\(title string, onAccept func\(value string\) tea.Cmd, th theme.Resolved\) Prompt](<#NewPrompt>)
   - [func \(p Prompt\) Accepts\(\) bool](<#Prompt.Accepts>)
   - [func \(p Prompt\) Legend\(\) \[\]legend.Entry](<#Prompt.Legend>)
   - [func \(p Prompt\) Problem\(\) string](<#Prompt.Problem>)
@@ -85,25 +96,29 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p Prompt\) View\(body layout.Rect\) string](<#Prompt.View>)
   - [func \(p Prompt\) WithAcceptHint\(desc string\) Prompt](<#Prompt.WithAcceptHint>)
   - [func \(p Prompt\) WithInput\(in textinput.Model\) Prompt](<#Prompt.WithInput>)
+  - [func \(p Prompt\) WithKind\(k Kind\) Prompt](<#Prompt.WithKind>)
   - [func \(p Prompt\) WithLabel\(label string\) Prompt](<#Prompt.WithLabel>)
   - [func \(p Prompt\) WithLines\(lines ...string\) Prompt](<#Prompt.WithLines>)
   - [func \(p Prompt\) WithPreview\(label string, preview func\(typed string\) string\) Prompt](<#Prompt.WithPreview>)
   - [func \(p Prompt\) WithRequire\(want string\) Prompt](<#Prompt.WithRequire>)
   - [func \(p Prompt\) WithValidate\(check func\(typed string\) string\) Prompt](<#Prompt.WithValidate>)
 - [type PushMsg](<#PushMsg>)
+- [type Resizer](<#Resizer>)
 - [type Stack](<#Stack>)
   - [func \(s Stack\) Len\(\) int](<#Stack.Len>)
   - [func \(s Stack\) Pop\(\) Stack](<#Stack.Pop>)
   - [func \(s Stack\) Push\(o Overlay\) Stack](<#Stack.Push>)
+  - [func \(s Stack\) Resize\(body layout.Rect\) Stack](<#Stack.Resize>)
   - [func \(s Stack\) Top\(\) Overlay](<#Stack.Top>)
   - [func \(s Stack\) Update\(msg tea.Msg\) \(Stack, bool, tea.Cmd\)](<#Stack.Update>)
   - [func \(s Stack\) View\(body layout.Rect, background string\) string](<#Stack.View>)
 - [type StatusLiner](<#StatusLiner>)
 - [type Text](<#Text>)
-  - [func NewText\(title string, lines \[\]string, style lipgloss.Style, hint legend.Style\) Text](<#NewText>)
+  - [func NewText\(title string, lines \[\]string, th theme.Resolved\) Text](<#NewText>)
   - [func \(t Text\) Legend\(\) \[\]legend.Entry](<#Text.Legend>)
   - [func \(t Text\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Text.Update>)
   - [func \(t Text\) View\(body layout.Rect\) string](<#Text.View>)
+  - [func \(t Text\) WithKind\(k Kind\) Text](<#Text.WithKind>)
 - [type TopMsg](<#TopMsg>)
 
 
@@ -134,7 +149,7 @@ func BoxWidth(lines []string, body layout.Rect, inner int, style lipgloss.Style)
 BoxWidth is Box with the content width chosen by the caller, for a form that reads better narrower than the terminal allows.
 
 <a name="Close"></a>
-## func [Close](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L41>)
+## func [Close](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L48>)
 
 ```go
 func Close() tea.Cmd
@@ -152,7 +167,7 @@ func Inner(body layout.Rect) int
 Inner is the content width a modal gets inside body.
 
 <a name="Open"></a>
-## func [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L44>)
+## func [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L51>)
 
 ```go
 func Open(o Overlay) tea.Cmd
@@ -161,7 +176,7 @@ func Open(o Overlay) tea.Cmd
 Open is the command that pushes o on top of the stack.
 
 <a name="ToTop"></a>
-## func [ToTop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L51>)
+## func [ToTop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L58>)
 
 ```go
 func ToTop(cmd tea.Cmd) tea.Cmd
@@ -170,7 +185,7 @@ func ToTop(cmd tea.Cmd) tea.Cmd
 ToTop wraps cmd so its message returns to the top overlay as a TopMsg.
 
 <a name="Alert"></a>
-## type [Alert](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L25-L31>)
+## type [Alert](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L16-L20>)
 
 Alert is a message box with an OK button; any key dismisses it.
 
@@ -181,16 +196,16 @@ type Alert struct {
 ```
 
 <a name="NewAlert"></a>
-### func [NewAlert](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L34>)
+### func [NewAlert](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L23>)
 
 ```go
-func NewAlert(kind Kind, title, message string, style lipgloss.Style, hint legend.Style) Alert
+func NewAlert(kind Kind, title, message string, th theme.Resolved) Alert
 ```
 
-NewAlert is an alert in style, its keys hinted in hint.
+NewAlert is an alert of kind, its border in that kind's colour.
 
 <a name="Alert.Kind"></a>
-### func \(Alert\) [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L39>)
+### func \(Alert\) [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L28>)
 
 ```go
 func (a Alert) Kind() Kind
@@ -199,7 +214,7 @@ func (a Alert) Kind() Kind
 Kind is what the alert reports.
 
 <a name="Alert.Legend"></a>
-### func \(Alert\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L48>)
+### func \(Alert\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L37>)
 
 ```go
 func (a Alert) Legend() []legend.Entry
@@ -208,7 +223,7 @@ func (a Alert) Legend() []legend.Entry
 
 
 <a name="Alert.Update"></a>
-### func \(Alert\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L41>)
+### func \(Alert\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L30>)
 
 ```go
 func (a Alert) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -217,7 +232,7 @@ func (a Alert) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Alert.View"></a>
-### func \(Alert\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L50>)
+### func \(Alert\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L39>)
 
 ```go
 func (a Alert) View(body layout.Rect) string
@@ -235,7 +250,7 @@ type BottomAnchored interface{ AnchorBottom() bool }
 ```
 
 <a name="Choice"></a>
-## type [Choice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L56-L62>)
+## type [Choice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L56-L61>)
 
 Choice is a dialog with a body and keyed options: apply / dry\-run / cancel. Picking one runs its command and closes the dialog. Esc closes it too.
 
@@ -246,16 +261,16 @@ type Choice struct {
 ```
 
 <a name="NewChoice"></a>
-### func [NewChoice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L65>)
+### func [NewChoice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L64>)
 
 ```go
-func NewChoice(title string, lines []string, options []Option, style lipgloss.Style, hint legend.Style) Choice
+func NewChoice(title string, lines []string, options []Option, th theme.Resolved) Choice
 ```
 
 NewChoice shows lines under title with options as its buttons.
 
 <a name="Choice.Legend"></a>
-### func \(Choice\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L87>)
+### func \(Choice\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L86>)
 
 ```go
 func (c Choice) Legend() []legend.Entry
@@ -264,7 +279,7 @@ func (c Choice) Legend() []legend.Entry
 Legend is the options, plus esc unless an option already names it: esc always closes, the stack sees to that.
 
 <a name="Choice.Update"></a>
-### func \(Choice\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L69>)
+### func \(Choice\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L68>)
 
 ```go
 func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -273,7 +288,7 @@ func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Choice.View"></a>
-### func \(Choice\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L104>)
+### func \(Choice\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L103>)
 
 ```go
 func (c Choice) View(body layout.Rect) string
@@ -281,8 +296,17 @@ func (c Choice) View(body layout.Rect) string
 
 View draws each option as a button naming its keys. The one enter picks is filled in the dialog's colour, since that is what enter will do.
 
+<a name="Choice.WithKind"></a>
+### func \(Choice\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L51>)
+
+```go
+func (c Choice) WithKind(k Kind) Choice
+```
+
+WithKind tints the choice for what it decides.
+
 <a name="CloseMsg"></a>
-## type [CloseMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L35>)
+## type [CloseMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L42>)
 
 CloseMsg pops the top overlay.
 
@@ -291,7 +315,7 @@ type CloseMsg struct{}
 ```
 
 <a name="Confirm"></a>
-## type [Confirm](<https://github.com/lucasassuncao/bezel/blob/main/overlay/confirm.go#L13-L20>)
+## type [Confirm](<https://github.com/lucasassuncao/bezel/blob/main/overlay/confirm.go#L14-L20>)
 
 Confirm asks yes/no with two buttons, Yes focused. ←/→ or tab move the focus, enter or space picks it, y and n answer at once, esc or q cancel.
 
@@ -305,7 +329,7 @@ type Confirm struct {
 ### func [NewConfirm](<https://github.com/lucasassuncao/bezel/blob/main/overlay/confirm.go#L23>)
 
 ```go
-func NewConfirm(title, message string, onYes tea.Cmd, style lipgloss.Style, hint legend.Style) Confirm
+func NewConfirm(title, message string, onYes tea.Cmd, th theme.Resolved) Confirm
 ```
 
 NewConfirm asks message under title; onYes runs on a yes and may be nil.
@@ -337,6 +361,15 @@ func (c Confirm) View(body layout.Rect) string
 
 
 
+<a name="Confirm.WithKind"></a>
+### func \(Confirm\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L45>)
+
+```go
+func (c Confirm) WithKind(k Kind) Confirm
+```
+
+WithKind tints the confirm, such as Danger for one that deletes.
+
 <a name="EscOwner"></a>
 ## type [EscOwner](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L24>)
 
@@ -347,7 +380,7 @@ type EscOwner interface{ OwnsEsc() bool }
 ```
 
 <a name="FilePicker"></a>
-## type [FilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L24-L37>)
+## type [FilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L24-L34>)
 
 FilePicker is the bubbles file picker in a modal. Enter picks a file and closes, running onPick; enter or → opens a directory, ← or backspace goes up, and from a drive's root lists the drives. esc is the stack's. Push it with Open.
 
@@ -358,16 +391,16 @@ type FilePicker struct {
 ```
 
 <a name="NewFilePicker"></a>
-### func [NewFilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L54>)
+### func [NewFilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L51>)
 
 ```go
-func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, style lipgloss.Style, hint legend.Style) FilePicker
+func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, th theme.Resolved) FilePicker
 ```
 
 NewFilePicker browses dir, files only, without hidden entries or permissions. onPick, which may be nil, gets the absolute path.
 
 <a name="FilePicker.Dir"></a>
-### func \(FilePicker\) [Dir](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L106>)
+### func \(FilePicker\) [Dir](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L118>)
 
 ```go
 func (p FilePicker) Dir() string
@@ -376,7 +409,7 @@ func (p FilePicker) Dir() string
 Dir is the directory being browsed.
 
 <a name="FilePicker.Highlighted"></a>
-### func \(FilePicker\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L109>)
+### func \(FilePicker\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L121>)
 
 ```go
 func (p FilePicker) Highlighted() string
@@ -385,7 +418,7 @@ func (p FilePicker) Highlighted() string
 Highlighted is the path under the cursor, or "" in an empty directory.
 
 <a name="FilePicker.Init"></a>
-### func \(FilePicker\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L100>)
+### func \(FilePicker\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L112>)
 
 ```go
 func (p FilePicker) Init() tea.Cmd
@@ -394,7 +427,7 @@ func (p FilePicker) Init() tea.Cmd
 Init reads the first directory, answering through TopMsg. The picker must already be on top of the stack to receive it: push it first, as Open does.
 
 <a name="FilePicker.Legend"></a>
-### func \(FilePicker\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L188>)
+### func \(FilePicker\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L195>)
 
 ```go
 func (p FilePicker) Legend() []legend.Entry
@@ -403,7 +436,7 @@ func (p FilePicker) Legend() []legend.Entry
 
 
 <a name="FilePicker.Open"></a>
-### func \(FilePicker\) [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L103>)
+### func \(FilePicker\) [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L115>)
 
 ```go
 func (p FilePicker) Open() tea.Cmd
@@ -411,8 +444,17 @@ func (p FilePicker) Open() tea.Cmd
 
 Open pushes the picker and then reads its directory, in that order.
 
+<a name="FilePicker.Resize"></a>
+### func \(FilePicker\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L76>)
+
+```go
+func (p FilePicker) Resize(body layout.Rect) Overlay
+```
+
+Resize shows as many entries as fit in body, which moves the picker's window to keep its cursor in view.
+
 <a name="FilePicker.Update"></a>
-### func \(FilePicker\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L152>)
+### func \(FilePicker\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L164>)
 
 ```go
 func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -421,7 +463,7 @@ func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="FilePicker.View"></a>
-### func \(FilePicker\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L198>)
+### func \(FilePicker\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L205>)
 
 ```go
 func (p FilePicker) View(body layout.Rect) string
@@ -430,7 +472,7 @@ func (p FilePicker) View(body layout.Rect) string
 
 
 <a name="FilePicker.WithAllowedTypes"></a>
-### func \(FilePicker\) [WithAllowedTypes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L80>)
+### func \(FilePicker\) [WithAllowedTypes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L92>)
 
 ```go
 func (p FilePicker) WithAllowedTypes(exts ...string) FilePicker
@@ -439,7 +481,7 @@ func (p FilePicker) WithAllowedTypes(exts ...string) FilePicker
 WithAllowedTypes limits the pick to names ending in one of exts, such as ".go"; other files stay listed but enter refuses them and says why.
 
 <a name="FilePicker.WithDirs"></a>
-### func \(FilePicker\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L86>)
+### func \(FilePicker\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L98>)
 
 ```go
 func (p FilePicker) WithDirs() FilePicker
@@ -448,7 +490,7 @@ func (p FilePicker) WithDirs() FilePicker
 WithDirs lets enter pick a directory as well as open it.
 
 <a name="FilePicker.WithHidden"></a>
-### func \(FilePicker\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L93>)
+### func \(FilePicker\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L105>)
 
 ```go
 func (p FilePicker) WithHidden() FilePicker
@@ -456,8 +498,17 @@ func (p FilePicker) WithHidden() FilePicker
 
 WithHidden lists hidden entries too; set it before Init. On Windows bubbles checks the hidden attribute in the working directory, not the one browsed.
 
+<a name="FilePicker.WithKind"></a>
+### func \(FilePicker\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L66>)
+
+```go
+func (p FilePicker) WithKind(k Kind) FilePicker
+```
+
+WithKind tints the picker, repainting its entries in the new colour.
+
 <a name="FilePicker.WithPicker"></a>
-### func \(FilePicker\) [WithPicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L66>)
+### func \(FilePicker\) [WithPicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L62>)
 
 ```go
 func (p FilePicker) WithPicker(fp filepicker.Model) FilePicker
@@ -466,7 +517,7 @@ func (p FilePicker) WithPicker(fp filepicker.Model) FilePicker
 WithPicker replaces the bubbles model, for a caller that sets its own fields. Esc is taken out of its Back keys: here esc closes the modal.
 
 <a name="Help"></a>
-## type [Help](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L22-L27>)
+## type [Help](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L22-L26>)
 
 Help lists every key by section: a heading in the dialog's colour, then one key per row with what it does. ?, esc, q or enter closes it.
 
@@ -477,16 +528,16 @@ type Help struct {
 ```
 
 <a name="NewHelp"></a>
-### func [NewHelp](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L30>)
+### func [NewHelp](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L29>)
 
 ```go
-func NewHelp(title string, sections []HelpSection, style lipgloss.Style, hint legend.Style) Help
+func NewHelp(sections []HelpSection, th theme.Resolved) Help
 ```
 
-NewHelp lists sections under title; an empty title draws none.
+NewHelp lists sections, with no title over them.
 
 <a name="Help.Legend"></a>
-### func \(Help\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L41>)
+### func \(Help\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L46>)
 
 ```go
 func (h Help) Legend() []legend.Entry
@@ -495,7 +546,7 @@ func (h Help) Legend() []legend.Entry
 
 
 <a name="Help.Update"></a>
-### func \(Help\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L34>)
+### func \(Help\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L39>)
 
 ```go
 func (h Help) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -504,13 +555,31 @@ func (h Help) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Help.View"></a>
-### func \(Help\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L42>)
+### func \(Help\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L47>)
 
 ```go
 func (h Help) View(body layout.Rect) string
 ```
 
 
+
+<a name="Help.WithKind"></a>
+### func \(Help\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L57>)
+
+```go
+func (h Help) WithKind(k Kind) Help
+```
+
+WithKind tints the help.
+
+<a name="Help.WithTitle"></a>
+### func \(Help\) [WithTitle](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L34>)
+
+```go
+func (h Help) WithTitle(title string) Help
+```
+
+WithTitle draws title over the sections.
 
 <a name="HelpSection"></a>
 ## type [HelpSection](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L15-L18>)
@@ -525,7 +594,7 @@ type HelpSection struct {
 ```
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L128-L130>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L126-L128>)
 
 Keys are the bindings a Pick answers to besides esc.
 
@@ -536,9 +605,9 @@ type Keys struct {
 ```
 
 <a name="Kind"></a>
-## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L15>)
+## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L11>)
 
-Kind is what an alert reports; the app picks the border colour by it.
+Kind is what a dialog reports; it picks the colour of its border and title.
 
 ```go
 type Kind int
@@ -591,7 +660,7 @@ type Overlay interface {
 ```
 
 <a name="Pager"></a>
-## type [Pager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L17-L26>)
+## type [Pager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L16-L22>)
 
 Pager is a titled block of text taller than a dialog: a command's output, a report. The arrows, pgup/pgdown, home and end scroll it; esc, q or enter closes it.
 
@@ -602,16 +671,16 @@ type Pager struct {
 ```
 
 <a name="NewPager"></a>
-### func [NewPager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L34>)
+### func [NewPager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L30>)
 
 ```go
-func NewPager(title, text string, style lipgloss.Style, hint legend.Style) Pager
+func NewPager(title, text string, th theme.Resolved) Pager
 ```
 
 NewPager shows text from its first line. CRLF reads as LF and trailing blank lines are dropped.
 
 <a name="Pager.Legend"></a>
-### func \(Pager\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L82>)
+### func \(Pager\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L85>)
 
 ```go
 func (p Pager) Legend() []legend.Entry
@@ -620,7 +689,7 @@ func (p Pager) Legend() []legend.Entry
 
 
 <a name="Pager.Offset"></a>
-### func \(Pager\) [Offset](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L42>)
+### func \(Pager\) [Offset](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L45>)
 
 ```go
 func (p Pager) Offset() int
@@ -628,8 +697,17 @@ func (p Pager) Offset() int
 
 Offset is the index of the first line shown.
 
+<a name="Pager.Resize"></a>
+### func \(Pager\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L36>)
+
+```go
+func (p Pager) Resize(body layout.Rect) Overlay
+```
+
+Resize makes a page as many lines as fit in body.
+
 <a name="Pager.Update"></a>
-### func \(Pager\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L44>)
+### func \(Pager\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L47>)
 
 ```go
 func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -638,7 +716,7 @@ func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pager.View"></a>
-### func \(Pager\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L86>)
+### func \(Pager\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L89>)
 
 ```go
 func (p Pager) View(body layout.Rect) string
@@ -646,10 +724,19 @@ func (p Pager) View(body layout.Rect) string
 
 
 
-<a name="Pick"></a>
-## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L116-L125>)
+<a name="Pager.WithKind"></a>
+### func \(Pager\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L60>)
 
-Pick is a dialog that chooses one row of a list with the arrows: which source manages this, which preset to apply. Enter runs OnPick with the cursor; esc closes with nothing.
+```go
+func (p Pager) WithKind(k Kind) Pager
+```
+
+WithKind tints the pager for what its text reports, such as a failed run.
+
+<a name="Pick"></a>
+## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L115-L123>)
+
+Pick is a dialog that chooses one row of a list with the arrows: which source manages this, which preset to apply. Enter runs OnPick with the cursor; esc closes with nothing. A list taller than the body scrolls.
 
 ```go
 type Pick struct {
@@ -658,16 +745,16 @@ type Pick struct {
 ```
 
 <a name="NewPick"></a>
-### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L134>)
+### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L132>)
 
 ```go
-func NewPick(title string, rows, notes []string, onPick func(i int) tea.Cmd, style lipgloss.Style, hint legend.Style) Pick
+func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick
 ```
 
-NewPick lists rows with the cursor on the first, notes drawn under them. onPick may be nil, which makes enter only close.
+NewPick lists rows with the cursor on the first. onPick may be nil, which makes enter only close.
 
 <a name="Pick.Cursor"></a>
-### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L150>)
+### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L155>)
 
 ```go
 func (p Pick) Cursor() int
@@ -676,7 +763,7 @@ func (p Pick) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Pick.Legend"></a>
-### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L171>)
+### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L193>)
 
 ```go
 func (p Pick) Legend() []legend.Entry
@@ -684,8 +771,17 @@ func (p Pick) Legend() []legend.Entry
 
 
 
+<a name="Pick.Resize"></a>
+### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L158>)
+
+```go
+func (p Pick) Resize(body layout.Rect) Overlay
+```
+
+Resize shows as many rows as fit in body, scrolled to keep the cursor's.
+
 <a name="Pick.Update"></a>
-### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L152>)
+### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L174>)
 
 ```go
 func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -694,7 +790,7 @@ func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pick.View"></a>
-### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L175>)
+### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L197>)
 
 ```go
 func (p Pick) View(body layout.Rect) string
@@ -703,7 +799,7 @@ func (p Pick) View(body layout.Rect) string
 
 
 <a name="Pick.WithCursor"></a>
-### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L144>)
+### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L148>)
 
 ```go
 func (p Pick) WithCursor(i int) Pick
@@ -711,8 +807,26 @@ func (p Pick) WithCursor(i int) Pick
 
 WithCursor starts the cursor on row i, such as the value already chosen; an index outside the rows is clamped to them.
 
+<a name="Pick.WithKind"></a>
+### func \(Pick\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L54>)
+
+```go
+func (p Pick) WithKind(k Kind) Pick
+```
+
+WithKind tints the pick for what it decides.
+
+<a name="Pick.WithNotes"></a>
+### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L141>)
+
+```go
+func (p Pick) WithNotes(notes ...string) Pick
+```
+
+WithNotes are lines drawn under the rows, such as what the picked one does.
+
 <a name="Prompt"></a>
-## type [Prompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L22-L35>)
+## type [Prompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L22-L34>)
 
 Prompt asks for one line of text. Enter accepts once the text passes WithRequire and WithValidate, running onAccept and closing; esc is the stack's. A host that owns its keys can drive it with Value and Accepts.
 
@@ -723,16 +837,16 @@ type Prompt struct {
 ```
 
 <a name="NewPrompt"></a>
-### func [NewPrompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L38>)
+### func [NewPrompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L37>)
 
 ```go
-func NewPrompt(title string, onAccept func(value string) tea.Cmd, style lipgloss.Style, hint legend.Style) Prompt
+func NewPrompt(title string, onAccept func(value string) tea.Cmd, th theme.Resolved) Prompt
 ```
 
 NewPrompt builds a prompt with a "\> " input; onAccept may be nil.
 
 <a name="Prompt.Accepts"></a>
-### func \(Prompt\) [Accepts](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L111>)
+### func \(Prompt\) [Accepts](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L110>)
 
 ```go
 func (p Prompt) Accepts() bool
@@ -741,7 +855,7 @@ func (p Prompt) Accepts() bool
 Accepts reports whether enter would accept the text now.
 
 <a name="Prompt.Legend"></a>
-### func \(Prompt\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L129>)
+### func \(Prompt\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L128>)
 
 ```go
 func (p Prompt) Legend() []legend.Entry
@@ -750,7 +864,7 @@ func (p Prompt) Legend() []legend.Entry
 Legend offers enter only when it would do something.
 
 <a name="Prompt.Problem"></a>
-### func \(Prompt\) [Problem](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L100>)
+### func \(Prompt\) [Problem](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L99>)
 
 ```go
 func (p Prompt) Problem() string
@@ -759,7 +873,7 @@ func (p Prompt) Problem() string
 Problem is why the text cannot be accepted yet, or "".
 
 <a name="Prompt.Update"></a>
-### func \(Prompt\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L113>)
+### func \(Prompt\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L112>)
 
 ```go
 func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -768,7 +882,7 @@ func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Prompt.Value"></a>
-### func \(Prompt\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L97>)
+### func \(Prompt\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L96>)
 
 ```go
 func (p Prompt) Value() string
@@ -777,7 +891,7 @@ func (p Prompt) Value() string
 Value is the text typed so far.
 
 <a name="Prompt.View"></a>
-### func \(Prompt\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L137>)
+### func \(Prompt\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L136>)
 
 ```go
 func (p Prompt) View(body layout.Rect) string
@@ -786,7 +900,7 @@ func (p Prompt) View(body layout.Rect) string
 
 
 <a name="Prompt.WithAcceptHint"></a>
-### func \(Prompt\) [WithAcceptHint](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L91>)
+### func \(Prompt\) [WithAcceptHint](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L90>)
 
 ```go
 func (p Prompt) WithAcceptHint(desc string) Prompt
@@ -795,7 +909,7 @@ func (p Prompt) WithAcceptHint(desc string) Prompt
 WithAcceptHint is what the hint says enter does; "confirm" by default.
 
 <a name="Prompt.WithInput"></a>
-### func \(Prompt\) [WithInput](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L47>)
+### func \(Prompt\) [WithInput](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L46>)
 
 ```go
 func (p Prompt) WithInput(in textinput.Model) Prompt
@@ -803,8 +917,17 @@ func (p Prompt) WithInput(in textinput.Model) Prompt
 
 WithInput replaces the input, for a caller that configures its own prompt, placeholder, width or caret.
 
+<a name="Prompt.WithKind"></a>
+### func \(Prompt\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L63>)
+
+```go
+func (p Prompt) WithKind(k Kind) Prompt
+```
+
+WithKind tints the prompt, such as Danger for a typed confirmation.
+
 <a name="Prompt.WithLabel"></a>
-### func \(Prompt\) [WithLabel](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L61>)
+### func \(Prompt\) [WithLabel](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L60>)
 
 ```go
 func (p Prompt) WithLabel(label string) Prompt
@@ -813,7 +936,7 @@ func (p Prompt) WithLabel(label string) Prompt
 WithLabel draws the input as a labelled row leading the prompt; without a label the input follows the lines, the way a typed confirmation reads.
 
 <a name="Prompt.WithLines"></a>
-### func \(Prompt\) [WithLines](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L54>)
+### func \(Prompt\) [WithLines](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L53>)
 
 ```go
 func (p Prompt) WithLines(lines ...string) Prompt
@@ -822,7 +945,7 @@ func (p Prompt) WithLines(lines ...string) Prompt
 WithLines is the explanation drawn with the input.
 
 <a name="Prompt.WithPreview"></a>
-### func \(Prompt\) [WithPreview](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L68>)
+### func \(Prompt\) [WithPreview](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L67>)
 
 ```go
 func (p Prompt) WithPreview(label string, preview func(typed string) string) Prompt
@@ -831,7 +954,7 @@ func (p Prompt) WithPreview(label string, preview func(typed string) string) Pro
 WithPreview draws a labelled row under the input computed from the text, such as the path a name will create. It needs WithLabel to be drawn.
 
 <a name="Prompt.WithRequire"></a>
-### func \(Prompt\) [WithRequire](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L75>)
+### func \(Prompt\) [WithRequire](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L74>)
 
 ```go
 func (p Prompt) WithRequire(want string) Prompt
@@ -840,7 +963,7 @@ func (p Prompt) WithRequire(want string) Prompt
 WithRequire accepts only want, typed exactly: the friction for an action that cannot be undone.
 
 <a name="Prompt.WithValidate"></a>
-### func \(Prompt\) [WithValidate](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L85>)
+### func \(Prompt\) [WithValidate](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L84>)
 
 ```go
 func (p Prompt) WithValidate(check func(typed string) string) Prompt
@@ -849,7 +972,7 @@ func (p Prompt) WithValidate(check func(typed string) string) Prompt
 WithValidate refuses text for which check returns a problem, shown in place of the hint.
 
 <a name="PushMsg"></a>
-## type [PushMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L38>)
+## type [PushMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L45>)
 
 PushMsg opens Overlay above the top one.
 
@@ -857,8 +980,19 @@ PushMsg opens Overlay above the top one.
 type PushMsg struct{ Overlay Overlay }
 ```
 
+<a name="Resizer"></a>
+## type [Resizer](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L37-L39>)
+
+Resizer is implemented by overlays that size what they show to the body, such as how far a page scrolls. The stack calls Resize when it pushes one and whenever its body changes, so Update knows before anything is drawn.
+
+```go
+type Resizer interface {
+    Resize(body layout.Rect) Overlay
+}
+```
+
 <a name="Stack"></a>
-## type [Stack](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L64>)
+## type [Stack](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L71-L74>)
 
 Stack is a value: every method returns the new stack.
 
@@ -869,7 +1003,7 @@ type Stack struct {
 ```
 
 <a name="Stack.Len"></a>
-### func \(Stack\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L92>)
+### func \(Stack\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L125>)
 
 ```go
 func (s Stack) Len() int
@@ -878,7 +1012,7 @@ func (s Stack) Len() int
 Len is how many overlays are open.
 
 <a name="Stack.Pop"></a>
-### func \(Stack\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L75>)
+### func \(Stack\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L85>)
 
 ```go
 func (s Stack) Pop() Stack
@@ -887,16 +1021,25 @@ func (s Stack) Pop() Stack
 Pop is the stack without its top overlay; an empty stack stays empty.
 
 <a name="Stack.Push"></a>
-### func \(Stack\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L67>)
+### func \(Stack\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L77>)
 
 ```go
 func (s Stack) Push(o Overlay) Stack
 ```
 
-Push is the stack with o on top.
+Push is the stack with o on top, sized to the stack's body when it has one.
+
+<a name="Stack.Resize"></a>
+### func \(Stack\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L95>)
+
+```go
+func (s Stack) Resize(body layout.Rect) Stack
+```
+
+Resize hands body to every Resizer layer, the hidden ones too. A shell does it on each layout; an app driving a Stack itself calls it on every resize.
 
 <a name="Stack.Top"></a>
-### func \(Stack\) [Top](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L84>)
+### func \(Stack\) [Top](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L117>)
 
 ```go
 func (s Stack) Top() Overlay
@@ -905,7 +1048,7 @@ func (s Stack) Top() Overlay
 Top is the overlay that gets the keys, or nil when the stack is empty.
 
 <a name="Stack.Update"></a>
-### func \(Stack\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L96>)
+### func \(Stack\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L129>)
 
 ```go
 func (s Stack) Update(msg tea.Msg) (Stack, bool, tea.Cmd)
@@ -914,7 +1057,7 @@ func (s Stack) Update(msg tea.Msg) (Stack, bool, tea.Cmd)
 Update routes msg to the top overlay. handled is false only when the stack is empty and msg is not a stack message.
 
 <a name="Stack.View"></a>
-### func \(Stack\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L130>)
+### func \(Stack\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L163>)
 
 ```go
 func (s Stack) View(body layout.Rect, background string) string
@@ -932,7 +1075,7 @@ type StatusLiner interface{ StatusLine(width int) string }
 ```
 
 <a name="Text"></a>
-## type [Text](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L16-L21>)
+## type [Text](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L17-L21>)
 
 Text is a titled block of lines any key dismisses: a help screen, a notice.
 
@@ -946,7 +1089,7 @@ type Text struct {
 ### func [NewText](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L24>)
 
 ```go
-func NewText(title string, lines []string, style lipgloss.Style, hint legend.Style) Text
+func NewText(title string, lines []string, th theme.Resolved) Text
 ```
 
 NewText shows lines under title until any key.
@@ -978,8 +1121,17 @@ func (t Text) View(body layout.Rect) string
 
 
 
+<a name="Text.WithKind"></a>
+### func \(Text\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L48>)
+
+```go
+func (t Text) WithKind(k Kind) Text
+```
+
+WithKind tints the text for what it reports.
+
 <a name="TopMsg"></a>
-## type [TopMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L48>)
+## type [TopMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L55>)
 
 TopMsg carries an overlay's own answer back to the top overlay. Other non\-key messages pass an open modal by: they are the app's.
 

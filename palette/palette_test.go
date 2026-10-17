@@ -152,3 +152,7 @@ func TestSetItemsKeepsTheLineAndClampsThePick(t *testing.T) {
 	require.Contains(t, view(m), ":copy")
 	require.NotPanics(t, func() { m.View(layout.Rect{W: 80, H: 20}) })
 }
+
+func TestCaretFollowsTheTheme(t *testing.T) {
+	require.EqualValues(t, 7, New(items(), theme.Resolved{CaretBlink: 7}).input.Styles().Cursor.BlinkSpeed)
+}

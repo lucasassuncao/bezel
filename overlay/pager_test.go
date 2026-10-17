@@ -6,12 +6,11 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/layout"
-	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 func numbered(n int) string {
@@ -24,7 +23,7 @@ func numbered(n int) string {
 
 func TestPagerShowsOnePageAndScrolls(t *testing.T) {
 	body := layout.Rect{W: 60, H: 18} // 10 rows of text once the chrome is paid
-	p := NewPager("Output", numbered(40), lipgloss.NewStyle(), legend.Style{})
+	p := NewPager("Output", numbered(40), theme.Resolved{}).Resize(body)
 
 	view := ansi.Strip(p.View(body))
 	require.Contains(t, view, "line 1")
@@ -40,8 +39,7 @@ func TestPagerShowsOnePageAndScrolls(t *testing.T) {
 
 func TestPagerStopsAtTheLastPage(t *testing.T) {
 	body := layout.Rect{W: 60, H: 18}
-	p := NewPager("Output", numbered(40), lipgloss.NewStyle(), legend.Style{})
-	_ = p.View(body)
+	p := NewPager("Output", numbered(40), theme.Resolved{}).Resize(body)
 
 	o, _ := p.Update(tea.KeyPressMsg{Code: tea.KeyEnd})
 	require.Equal(t, 30, o.(Pager).Offset(), "end shows the last page full, not one line")
@@ -53,7 +51,7 @@ func TestPagerStopsAtTheLastPage(t *testing.T) {
 }
 
 func TestPagerCloses(t *testing.T) {
-	p := NewPager("Output", "one\r\ntwo\r\n", lipgloss.NewStyle(), legend.Style{})
+	p := NewPager("Output", "one\r\ntwo\r\n", theme.Resolved{})
 	require.NotContains(t, p.View(layout.Rect{W: 60, H: 18}), "\r")
 
 	for _, k := range []string{"q", "enter"} {
@@ -69,8 +67,7 @@ func TestPagerCloses(t *testing.T) {
 
 // Scrolling is a copy's own: an earlier Pager keeps its place.
 func TestPagerCopiesScrollApart(t *testing.T) {
-	p := NewPager("Output", numbered(40), lipgloss.NewStyle(), legend.Style{})
-	_ = p.View(layout.Rect{W: 60, H: 18})
+	p := NewPager("Output", numbered(40), theme.Resolved{}).Resize(layout.Rect{W: 60, H: 18}).(Pager)
 	o, _ := p.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 
 	require.Equal(t, 1, o.(Pager).Offset())
@@ -80,9 +77,9 @@ func TestPagerCopiesScrollApart(t *testing.T) {
 // A dialog keeps the lines it was given, whatever the caller does after.
 func TestDialogsKeepTheirLines(t *testing.T) {
 	lines := []string{"original"}
-	text := NewText("T", lines, lipgloss.NewStyle(), legend.Style{})
-	pick := NewPick("P", lines, lines, nil, lipgloss.NewStyle(), legend.Style{})
-	choice := NewChoice("C", lines, []Option{Opt("y", "yes", nil)}, lipgloss.NewStyle(), legend.Style{})
+	text := NewText("T", lines, theme.Resolved{})
+	pick := NewPick("P", lines, nil, theme.Resolved{}).WithNotes(lines...)
+	choice := NewChoice("C", lines, []Option{Opt("y", "yes", nil)}, theme.Resolved{})
 	lines[0] = "changed"
 
 	body := layout.Rect{W: 60, H: 18}

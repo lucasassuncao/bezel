@@ -43,7 +43,7 @@ type Input struct {
 
 // NewInput is an empty field width cells wide, placeholder shown until typed in.
 func NewInput(label, placeholder string, width int, th theme.Resolved) Input {
-	in := draw.WithCaret(textinput.New())
+	in := draw.WithCaret(textinput.New(), th.CaretBlink)
 	in.Prompt = ""
 	in.Placeholder = placeholder
 	in.SetWidth(width)
@@ -137,7 +137,13 @@ type Radio struct {
 
 // NewRadio offers options with the one at selected chosen, clamped in range.
 func NewRadio(label string, options []string, selected int, th theme.Resolved) Radio {
-	return Radio{label: label, options: slices.Clone(options), selected: min(max(selected, 0), max(0, len(options)-1)), th: th, set: icon.Default()}
+	return Radio{label: label, options: slices.Clone(options), selected: min(max(selected, 0), max(0, len(options)-1)), th: th, set: icon.FromEnv()}
+}
+
+// WithIcons draws the chosen mark from set instead of icon.FromEnv's.
+func (r Radio) WithIcons(set icon.Set) Radio {
+	r.set = set
+	return r
 }
 
 // Selected is the index of the chosen option.
@@ -181,7 +187,13 @@ type Toggle struct {
 
 // NewToggle is a switch labelled label, on when on.
 func NewToggle(label string, on bool, th theme.Resolved) Toggle {
-	return Toggle{label: label, on: on, th: th, set: icon.Default()}
+	return Toggle{label: label, on: on, th: th, set: icon.FromEnv()}
+}
+
+// WithIcons draws the switch from set instead of icon.FromEnv's.
+func (t Toggle) WithIcons(set icon.Set) Toggle {
+	t.set = set
+	return t
 }
 
 // On reports whether the switch is on.
@@ -220,7 +232,13 @@ type Select struct {
 // NewSelect offers options with the one at selected chosen, clamped in range.
 func NewSelect(label string, options []string, selected int, th theme.Resolved) Select {
 	selected = min(max(selected, 0), max(0, len(options)-1))
-	return Select{label: label, options: slices.Clone(options), selected: selected, cursor: selected, th: th, set: icon.Default()}
+	return Select{label: label, options: slices.Clone(options), selected: selected, cursor: selected, th: th, set: icon.FromEnv()}
+}
+
+// WithIcons draws the list's marks from set instead of icon.FromEnv's.
+func (s Select) WithIcons(set icon.Set) Select {
+	s.set = set
+	return s
 }
 
 // Selected is the index of the chosen option.

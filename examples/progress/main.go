@@ -100,10 +100,10 @@ func (m model) body(r layout.Rect) string {
 		" " + progress.Bar(m.done, total, min(w, 30), m.th),
 		"",
 		draw.Heading("Stepper", m.th.Section, r.W),
-		" " + progress.Stepper(steps, m.step, w, m.th, icon.Unicode),
+		" " + progress.Stepper(steps, m.step, w, m.th, icon.Unicode()),
 		"",
 		" " + m.th.Muted.Render("at 30 columns"),
-		" " + progress.Stepper(steps, m.step, 30, m.th, icon.Unicode),
+		" " + progress.Stepper(steps, m.step, 30, m.th, icon.Unicode()),
 	}
 	return strings.Join(out, "\n")
 }

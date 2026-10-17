@@ -47,7 +47,7 @@ type Model struct {
 
 // New opens a palette over items, sorted by name.
 func New(items []Item, th theme.Resolved) Model {
-	in := draw.WithCaret(textinput.New())
+	in := draw.WithCaret(textinput.New(), th.CaretBlink)
 	in.Prompt = ":"
 	in.Focus()
 	return Model{input: in, cursor: -1, th: th}.SetItems(items)

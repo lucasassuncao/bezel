@@ -13,7 +13,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 ## Index
 
 - [Constants](<#constants>)
-- [Variables](<#variables>)
+- [func Blink\(every time.Duration\) time.Duration](<#Blink>)
 - [func BlockSize\(s string\) \(width, height int\)](<#BlockSize>)
 - [func Breadcrumb\(segs \[\]string\) string](<#Breadcrumb>)
 - [func Button\(label string, ink lipgloss.Style, focused bool\) string](<#Button>)
@@ -46,7 +46,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func Truncate\(s string, width int\) string](<#Truncate>)
 - [func ViewportGutter\(style lipgloss.Style\) viewport.GutterFunc](<#ViewportGutter>)
 - [func Width\(s string\) int](<#Width>)
-- [func WithCaret\(in textinput.Model\) textinput.Model](<#WithCaret>)
+- [func WithCaret\(in textinput.Model, every time.Duration\) textinput.Model](<#WithCaret>)
 - [func Wrap\(s string, width int\) \[\]string](<#Wrap>)
 - [type ChromeStyle](<#ChromeStyle>)
 - [type PanelStyle](<#PanelStyle>)
@@ -54,19 +54,26 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 
 ## Constants
 
+<a name="DefaultBlink"></a>DefaultBlink is how often a caret flips when nothing says otherwise.
+
+```go
+const DefaultBlink = 530 * time.Millisecond
+```
+
 <a name="GutterWidth"></a>GutterWidth is the columns Gutter and NumberLines take: "%4d │ ".
 
 ```go
 const GutterWidth = 7
 ```
 
-## Variables
-
-<a name="BlinkSpeed"></a>BlinkSpeed is how often the caret of every input bezel builds flips. A variable so a host's tests can shrink it: each keystroke arms one blink.
+<a name="Blink"></a>
+## func [Blink](<https://github.com/lucasassuncao/bezel/blob/main/draw/caret.go#L14>)
 
 ```go
-var BlinkSpeed = 530 * time.Millisecond
+func Blink(every time.Duration) time.Duration
 ```
+
+Blink is every, or DefaultBlink when every is zero.
 
 <a name="BlockSize"></a>
 ## func [BlockSize](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L58>)
@@ -446,13 +453,13 @@ func Width(s string) int
 Width is how many cells s takes on screen, escapes ignored.
 
 <a name="WithCaret"></a>
-## func [WithCaret](<https://github.com/lucasassuncao/bezel/blob/main/draw/caret.go#L14>)
+## func [WithCaret](<https://github.com/lucasassuncao/bezel/blob/main/draw/caret.go#L18>)
 
 ```go
-func WithCaret(in textinput.Model) textinput.Model
+func WithCaret(in textinput.Model, every time.Duration) textinput.Model
 ```
 
-WithCaret gives in the BlinkSpeed caret.
+WithCaret gives in a caret that flips every Blink\(every\). Each keystroke arms one blink, so a host's tests pass a short one through the theme.
 
 <a name="Wrap"></a>
 ## func [Wrap](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L47>)

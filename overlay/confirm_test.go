@@ -4,16 +4,15 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 	"github.com/stretchr/testify/require"
 
-	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 func TestConfirmRunsOnYesAndClosesOnNo(t *testing.T) {
 	fired := false
 	onYes := func() tea.Msg { fired = true; return nil }
-	c := NewConfirm("Delete?", "this cannot be undone", onYes, lipgloss.NewStyle(), legend.Style{})
+	c := NewConfirm("Delete?", "this cannot be undone", onYes, theme.Resolved{})
 
 	_, cmd := c.Update(press("n"))
 	require.IsType(t, CloseMsg{}, cmd())
@@ -27,7 +26,7 @@ func TestConfirmRunsOnYesAndClosesOnNo(t *testing.T) {
 }
 
 func TestConfirmIgnoresVimKeys(t *testing.T) {
-	c := NewConfirm("Delete?", "", nil, lipgloss.NewStyle(), legend.Style{})
+	c := NewConfirm("Delete?", "", nil, theme.Resolved{})
 	for _, k := range []string{"h", "l"} {
 		o, _ := c.Update(press(k))
 		require.False(t, o.(Confirm).no, k)

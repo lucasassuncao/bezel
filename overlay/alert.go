@@ -9,30 +9,19 @@ import (
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
-)
-
-// Kind is what an alert reports; the app picks the border colour by it.
-type Kind int
-
-const (
-	Info Kind = iota
-	Success
-	Warning
-	Danger
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // Alert is a message box with an OK button; any key dismisses it.
 type Alert struct {
-	kind    Kind
+	look
 	title   string
 	message string
-	style   lipgloss.Style
-	hint    legend.Style
 }
 
-// NewAlert is an alert in style, its keys hinted in hint.
-func NewAlert(kind Kind, title, message string, style lipgloss.Style, hint legend.Style) Alert {
-	return Alert{kind: kind, title: title, message: message, style: style, hint: hint}
+// NewAlert is an alert of kind, its border in that kind's colour.
+func NewAlert(kind Kind, title, message string, th theme.Resolved) Alert {
+	return Alert{look: look{th: th, kind: kind}, title: title, message: message}
 }
 
 // Kind is what the alert reports.
@@ -49,7 +38,7 @@ func (a Alert) Legend() []legend.Entry { return []legend.Entry{legend.New("any k
 
 func (a Alert) View(body layout.Rect) string {
 	lines := []string{a.message}
-	return dialog(a.title, lines, okButton(lines, a.style), a.style, body)
+	return dialog(a.title, lines, okButton(lines, a.style()), a.style(), body)
 }
 
 // accent is the colour a dialog is drawn in: its border's.
@@ -69,8 +58,11 @@ func dialog(title string, content []string, buttons string, style lipgloss.Style
 	if buttons != "" {
 		lines = append(lines, "", buttons)
 	}
-	return Box(lines, body, style.Padding(1, 3))
+	return Box(lines, body, dialogFrame(style))
 }
+
+// dialogFrame is the box a dialog draws in: style, padded clear of its border.
+func dialogFrame(style lipgloss.Style) lipgloss.Style { return style.Padding(1, 3) }
 
 // okButton is a focused OK centred under content.
 func okButton(content []string, style lipgloss.Style) string {

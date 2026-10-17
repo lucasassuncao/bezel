@@ -1,27 +1,49 @@
 package shell
 
 import (
+	"strings"
 	"testing"
 	"time"
 
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 	"github.com/stretchr/testify/require"
 
-	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/overlay"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 func TestOverlayConsumesKeysBeforeTheApp(t *testing.T) {
 	s := newShell()
-	s = s.Push(overlay.NewAlert(overlay.Info, "hi", "there", lipgloss.NewStyle(), legend.Style{}))
+	s = s.Push(overlay.NewAlert(overlay.Info, "hi", "there", theme.Resolved{}))
 	s, handled, cmd := s.Update(press("x"))
 	require.True(t, handled)
 	require.NotNil(t, cmd)
 	s, handled, _ = s.Update(cmd()) // CloseMsg
 	require.True(t, handled)
 	require.False(t, s.HasOverlay())
+}
+
+// An overlay knows the body it floats in from the moment it is pushed, and
+// again after a resize, before anything has drawn it.
+func TestOverlaysAreSizedToTheBody(t *testing.T) {
+	pgdown := tea.KeyPressMsg{Code: tea.KeyPgDown}
+	pager := overlay.NewPager("Out", strings.Repeat("line\n", 200), theme.Resolved{})
+	// page is how far one pgdown goes in a pager sized by hand.
+	page := func(body layout.Rect) int {
+		o, _ := pager.Resize(body).Update(pgdown)
+		return o.(overlay.Pager).Offset()
+	}
+
+	s := sized(newShell()).Push(pager)
+	s, _, _ = s.Update(pgdown)
+	first := page(s.Body())
+	require.Equal(t, first, s.TopOverlay().(overlay.Pager).Offset())
+
+	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 120, Height: 16})
+	s, _, _ = s.Update(pgdown)
+	require.Equal(t, first+page(s.Body()), s.TopOverlay().(overlay.Pager).Offset())
 }
 
 // Without actions the shell handles no key: not even tab or "?".
@@ -65,14 +87,14 @@ type answer struct{}
 // An async answer landing while a modal is up belongs to the app.
 func TestForeignMessagesPassAnOpenOverlay(t *testing.T) {
 	s := sized(New(actionConfig()))
-	s = s.Push(overlay.NewText("t", []string{"x"}, lipgloss.NewStyle(), legend.Style{}))
+	s = s.Push(overlay.NewText("t", []string{"x"}, theme.Resolved{}))
 	_, handled, _ := s.Update(answer{})
 	require.False(t, handled)
 }
 
 func TestKeysStillReachAnOpenOverlay(t *testing.T) {
 	s := sized(New(actionConfig()))
-	s = s.Push(overlay.NewText("t", []string{"x"}, lipgloss.NewStyle(), legend.Style{}))
+	s = s.Push(overlay.NewText("t", []string{"x"}, theme.Resolved{}))
 	_, handled, _ := s.Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
 	require.True(t, handled)
 }
@@ -81,7 +103,7 @@ func TestKeysStillReachAnOpenOverlay(t *testing.T) {
 // non-key messages pass it by for the app.
 func TestTopMsgReachesAnOpenOverlay(t *testing.T) {
 	s := sized(New(actionConfig()))
-	s = s.Push(overlay.NewText("t", []string{"x"}, lipgloss.NewStyle(), legend.Style{}))
+	s = s.Push(overlay.NewText("t", []string{"x"}, theme.Resolved{}))
 	_, handled, _ := s.Update(overlay.TopMsg{Msg: answer{}})
 	require.True(t, handled)
 }

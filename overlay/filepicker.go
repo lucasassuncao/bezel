@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"sync/atomic"
 
 	"charm.land/bubbles/v2/filepicker"
 	"charm.land/bubbles/v2/key"
@@ -16,31 +15,29 @@ import (
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // FilePicker is the bubbles file picker in a modal. Enter picks a file and
 // closes, running onPick; enter or → opens a directory, ← or backspace goes up,
 // and from a drive's root lists the drives. esc is the stack's. Push it with Open.
 type FilePicker struct {
+	look
 	title   string
 	picker  filepicker.Model
 	onPick  func(path string) tea.Cmd
-	style   lipgloss.Style
-	hint    legend.Style
 	problem string
 	// volumes is the drive list shown above a root, nil while browsing.
 	volumes []string
 	volume  int
-	// rows is the one thing copies share: View measures how many entries fit,
-	// and the picker scrolls in Update. Atomic, as View may run anywhere.
-	rows *atomic.Int64
+	rows    int // the entries that fit at the last Resize, pickerRows before one
 }
 
 // pickerChrome is the lines a FilePicker spends around its entries: the
 // title, the directory and the hint, and a gap after each of the first two.
 const pickerChrome = 6
 
-// pickerRows is how many entries a FilePicker shows before View measures.
+// pickerRows is how many entries a FilePicker shows before its first Resize.
 const pickerRows = 10
 
 // volumesMsg answers the drive list a ← at a root asked for.
@@ -51,13 +48,12 @@ var volumes = listVolumes
 
 // NewFilePicker browses dir, files only, without hidden entries or
 // permissions. onPick, which may be nil, gets the absolute path.
-func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, style lipgloss.Style, hint legend.Style) FilePicker {
+func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, th theme.Resolved) FilePicker {
 	fp := filepicker.New()
 	fp.CurrentDirectory = dir
 	fp.ShowPermissions = false
-	fp.Styles = pickerStyles(style, hint)
-	p := FilePicker{title: title, onPick: onPick, style: style, hint: hint, rows: new(atomic.Int64)}
-	p.rows.Store(pickerRows)
+	p := FilePicker{look: look{th: th}, title: title, onPick: onPick, rows: pickerRows}
+	fp.Styles = pickerStyles(p.look)
 	return p.WithPicker(fp)
 }
 
@@ -70,9 +66,25 @@ func (p FilePicker) WithPicker(fp filepicker.Model) FilePicker {
 	}
 	fp.AutoHeight = false
 	fp.KeyMap.Back = withoutKey(fp.KeyMap.Back, "esc")
-	fp.SetHeight(int(p.rows.Load()))
+	fp.SetHeight(p.rows)
 	p.picker = fp
 	return p
+}
+
+// Resize shows as many entries as fit in body, which moves the picker's
+// window to keep its cursor in view.
+func (p FilePicker) Resize(body layout.Rect) Overlay {
+	if p.rows = p.fit(body); p.rows != p.picker.Height() {
+		p.picker.SetHeight(p.rows)
+		// Without AutoHeight a size message only re-anchors the window.
+		p.picker, _ = p.picker.Update(tea.WindowSizeMsg{})
+	}
+	return p
+}
+
+// fit is how many entries body leaves room for, at least one.
+func (p FilePicker) fit(body layout.Rect) int {
+	return max(1, body.H-p.style().GetVerticalFrameSize()-pickerChrome)
 }
 
 // WithAllowedTypes limits the pick to names ending in one of exts, such as
@@ -150,11 +162,6 @@ func (p FilePicker) browse(dir string) (Overlay, tea.Cmd) {
 }
 
 func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd) {
-	if rows := int(p.rows.Load()); rows != p.picker.Height() {
-		p.picker.SetHeight(rows)
-		// Without AutoHeight a size message only re-anchors the window.
-		p.picker, _ = p.picker.Update(tea.WindowSizeMsg{})
-	}
 	if m, ok := msg.(TopMsg); ok {
 		msg = m.Msg
 	}
@@ -196,9 +203,8 @@ func (p FilePicker) Legend() []legend.Entry {
 }
 
 func (p FilePicker) View(body layout.Rect) string {
-	rows := max(1, body.H-p.style.GetVerticalFrameSize()-pickerChrome)
-	p.rows.Store(int64(rows))
-	// A shorter body than the last Update saw: draw the window that fits.
+	rows := p.fit(body)
+	// A shorter body than the last Resize gave: draw the window that fits.
 	fp := p.picker
 	fp.SetHeight(min(rows, fp.Height()))
 	entries := strings.Split(strings.TrimRight(fp.View(), "\n"), "\n")
@@ -207,13 +213,13 @@ func (p FilePicker) View(body layout.Rect) string {
 		entries, where = p.volumeRows(rows), "drives"
 	}
 
-	lines := []string{accent(p.style).Bold(true).Render(p.title), p.hint.Text.Render(where), ""}
+	lines := []string{accent(p.style()).Bold(true).Render(p.title), p.hint().Text.Render(where), ""}
 	lines = append(lines, entries[:min(len(entries), rows)]...)
-	hint := legend.HintLine(p.Legend(), p.hint)
+	hint := legend.HintLine(p.Legend(), p.hint())
 	if p.problem != "" {
-		hint = p.hint.Text.Render(p.problem) + "   " + hint
+		hint = p.hint().Text.Render(p.problem) + "   " + hint
 	}
-	return Box(append(lines, "", hint), body, p.style)
+	return Box(append(lines, "", hint), body, p.style())
 }
 
 // volumeRows draws the drive list in the picker's styles, scrolled so the
@@ -242,8 +248,8 @@ func tail(path string, width int) string {
 
 // pickerStyles paints the bubbles picker in the dialog's colours instead of
 // its own fixed palette.
-func pickerStyles(style lipgloss.Style, hint legend.Style) filepicker.Styles {
-	ink := accent(style)
+func pickerStyles(l look) filepicker.Styles {
+	ink, hint := accent(l.style()), l.hint()
 	s := filepicker.DefaultStyles()
 	s.Cursor, s.Selected, s.Directory, s.Symlink = ink, ink.Bold(true), ink, ink
 	s.File = lipgloss.NewStyle()

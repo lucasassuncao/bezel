@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/layout"
-	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 type filePickedMsg struct{ path string }
@@ -33,7 +33,7 @@ func pickerTree(t *testing.T) string {
 func newPicker(dir string) FilePicker {
 	return NewFilePicker("Open file", dir, func(path string) tea.Cmd {
 		return func() tea.Msg { return filePickedMsg{path} }
-	}, lipgloss.NewStyle(), legend.Style{})
+	}, theme.Resolved{})
 }
 
 // load runs a command the picker returned and feeds its message back, the
@@ -146,7 +146,7 @@ func TestFilePickerFitsAShortBody(t *testing.T) {
 	p := newPicker(dir)
 	p = load(t, p, p.Init())
 	body := layout.Rect{W: 80, H: 16}
-	_ = p.View(body)
+	p = p.Resize(body).(FilePicker)
 	for range 30 {
 		p, _ = pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyDown})
 	}
@@ -211,7 +211,7 @@ func TestFilePickerWithHiddenListsDotfiles(t *testing.T) {
 // Without onPick, picking still closes: the caller reads nothing back.
 func TestFilePickerWithoutOnPickJustCloses(t *testing.T) {
 	dir := pickerTree(t)
-	p := NewFilePicker("Open", dir, nil, lipgloss.NewStyle(), legend.Style{})
+	p := NewFilePicker("Open", dir, nil, theme.Resolved{})
 	p = load(t, p, p.Init())
 	p, _ = pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyDown})
 

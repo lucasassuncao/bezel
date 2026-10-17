@@ -63,13 +63,12 @@ func (m model) modal() overlay.Overlay {
 	switch kinds[m.cursor] {
 	case "Alert":
 		return overlay.NewAlert(overlay.Warning, "Disk almost full",
-			"91% of /var is in use.", m.th.ModalFor(overlay.Warning), m.th.Legend)
+			"91% of /var is in use.", m.th)
 	case "Confirm":
 		return overlay.NewConfirm("Delete notes.txt?", "It cannot be restored.",
-			done("deleted notes.txt"), m.th.ModalFor(overlay.Danger), m.th.Legend)
+			done("deleted notes.txt"), m.th).WithKind(overlay.Danger)
 	case "Prompt":
-		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return done("created " + v) },
-			m.th.Modal, m.th.Legend).
+		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return done("created " + v) }, m.th).
 			WithLabel("name").
 			WithValidate(func(s string) string {
 				if strings.TrimSpace(s) == "" {
@@ -78,15 +77,15 @@ func (m model) modal() overlay.Overlay {
 				return ""
 			})
 	case "Pager":
-		return overlay.NewPager("go test ./...", testLog(), m.th.Modal, m.th.Legend)
+		return overlay.NewPager("go test ./...", testLog(), m.th)
 	case "FilePicker":
 		return overlay.NewFilePicker("Open a file", ".", func(path string) tea.Cmd { return done("picked " + filepath.Base(path)) },
-			m.th.Modal, m.th.Legend)
+			m.th)
 	default:
-		return overlay.NewHelp("Keys", []overlay.HelpSection{
+		return overlay.NewHelp([]overlay.HelpSection{
 			{Name: "Navigation", Entries: []legend.Entry{legend.New("↑/↓", "move"), legend.New("enter", "open")}},
 			{Name: "App", Entries: []legend.Entry{legend.New("q", "quit")}},
-		}, m.th.Modal, m.th.Legend)
+		}, m.th).WithTitle("Keys")
 	}
 }
 

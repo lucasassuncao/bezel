@@ -11,7 +11,7 @@ import (
 )
 
 func TestEveryStateHasAMarkInBothSets(t *testing.T) {
-	for _, set := range []Set{Unicode, ASCII} {
+	for _, set := range []Set{Unicode(), ASCII()} {
 		seen := map[string]State{}
 		for st := OK; st <= Skipped; st++ {
 			mark := set.Mark(st)
@@ -26,7 +26,7 @@ func TestEveryStateHasAMarkInBothSets(t *testing.T) {
 
 func TestASCIIStaysASCII(t *testing.T) {
 	for st := OK; st <= Skipped; st++ {
-		for _, r := range ASCII.Mark(st) {
+		for _, r := range ASCII().Mark(st) {
 			require.Less(t, r, rune(128), "state %d", st)
 		}
 	}
@@ -35,20 +35,20 @@ func TestASCIIStaysASCII(t *testing.T) {
 func TestDefaultFallsBackToASCII(t *testing.T) {
 	t.Setenv("BEZEL_ASCII", "")
 	t.Setenv("TERM", "xterm-256color")
-	require.Equal(t, Unicode, Default())
+	require.Equal(t, Unicode(), FromEnv())
 
 	t.Setenv("TERM", "dumb")
-	require.Equal(t, ASCII, Default())
+	require.Equal(t, ASCII(), FromEnv())
 
 	t.Setenv("TERM", "xterm-256color")
 	t.Setenv("BEZEL_ASCII", "1")
-	require.Equal(t, ASCII, Default())
+	require.Equal(t, ASCII(), FromEnv())
 }
 
 func TestRenderKeepsTheMark(t *testing.T) {
 	th := theme.Resolve(theme.Plain, true)
-	require.Equal(t, "✓", ansi.Strip(Unicode.Render(OK, th)))
-	require.Equal(t, "x", ansi.Strip(ASCII.Render(Fail, th)))
+	require.Equal(t, "✓", ansi.Strip(Unicode().Render(OK, th)))
+	require.Equal(t, "x", ansi.Strip(ASCII().Render(Fail, th)))
 }
 
 func TestConnectorsDrawATree(t *testing.T) {
@@ -61,10 +61,10 @@ func TestConnectorsDrawATree(t *testing.T) {
 			s.Indent(true) + s.Connector(true) + "tui",
 		}, "\n")
 	}
-	require.Equal(t, "src\n├─ cmd\n└─ internal\n   └─ tui", tree(Unicode))
-	require.Equal(t, "src\n|- cmd\n`- internal\n   `- tui", tree(ASCII))
-	require.Equal(t, "│  ", Unicode.Indent(false))
-	for _, s := range []Set{Unicode, ASCII} {
+	require.Equal(t, "src\n├─ cmd\n└─ internal\n   └─ tui", tree(Unicode()))
+	require.Equal(t, "src\n|- cmd\n`- internal\n   `- tui", tree(ASCII()))
+	require.Equal(t, "│  ", Unicode().Indent(false))
+	for _, s := range []Set{Unicode(), ASCII()} {
 		for _, g := range []string{s.Branch, s.LastBranch, s.Pipe, s.Indent(true)} {
 			require.Equal(t, 3, ansi.StringWidth(g), "%q keeps rows aligned", g)
 		}

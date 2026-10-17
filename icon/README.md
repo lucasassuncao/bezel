@@ -12,37 +12,16 @@ Package icon is the set of marks that say what state something is in: done, fail
 
 ## Index
 
-- [Variables](<#variables>)
 - [type Set](<#Set>)
-  - [func Default\(\) Set](<#Default>)
+  - [func ASCII\(\) Set](<#ASCII>)
+  - [func FromEnv\(\) Set](<#FromEnv>)
+  - [func Unicode\(\) Set](<#Unicode>)
   - [func \(s Set\) Connector\(last bool\) string](<#Set.Connector>)
   - [func \(s Set\) Indent\(last bool\) string](<#Set.Indent>)
   - [func \(s Set\) Mark\(st State\) string](<#Set.Mark>)
   - [func \(s Set\) Render\(st State, th theme.Resolved\) string](<#Set.Render>)
 - [type State](<#State>)
 
-
-## Variables
-
-<a name="ASCII"></a>ASCII is for terminals and logs that cannot show the Unicode set.
-
-```go
-var ASCII = Set{
-    OK: "+", Fail: "x", Warn: "!", Info: "i", Pending: "o", Running: "*", Skipped: "-",
-    Bullet: "*", Arrow: ">", Line: "-",
-    Branch: "|- ", LastBranch: "`- ", Pipe: "|  ",
-}
-```
-
-<a name="Unicode"></a>Unicode is the default set.
-
-```go
-var Unicode = Set{
-    OK: "✓", Fail: "✗", Warn: "!", Info: "i", Pending: "○", Running: "●", Skipped: "–",
-    Bullet: "•", Arrow: "→", Line: "─",
-    Branch: "├─ ", LastBranch: "└─ ", Pipe: "│  ",
-}
-```
 
 <a name="Set"></a>
 ## type [Set](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L28-L32>)
@@ -57,17 +36,35 @@ type Set struct {
 }
 ```
 
-<a name="Default"></a>
-### func [Default](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L67>)
+<a name="ASCII"></a>
+### func [ASCII](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L44>)
 
 ```go
-func Default() Set
+func ASCII() Set
 ```
 
-Default is ASCII when BEZEL\_ASCII is set or TERM is "dumb", Unicode otherwise.
+ASCII is for terminals and logs that cannot show the Unicode set.
+
+<a name="FromEnv"></a>
+### func [FromEnv](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L72>)
+
+```go
+func FromEnv() Set
+```
+
+FromEnv is ASCII when BEZEL\_ASCII is set or TERM is "dumb", Unicode otherwise. The one place bezel reads the environment, and only when called.
+
+<a name="Unicode"></a>
+### func [Unicode](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L35>)
+
+```go
+func Unicode() Set
+```
+
+Unicode is the set for a terminal that can show it, which is most.
 
 <a name="Set.Connector"></a>
-### func \(Set\) [Connector](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L50>)
+### func \(Set\) [Connector](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L54>)
 
 ```go
 func (s Set) Connector(last bool) string
@@ -76,7 +73,7 @@ func (s Set) Connector(last bool) string
 Connector is the prefix that hangs an item off its parent: a branch, or the closing one when the item is the last of its siblings.
 
 <a name="Set.Indent"></a>
-### func \(Set\) [Indent](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L59>)
+### func \(Set\) [Indent](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L63>)
 
 ```go
 func (s Set) Indent(last bool) string
@@ -85,7 +82,7 @@ func (s Set) Indent(last bool) string
 Indent is what an item's children carry under its connector: the pipe while siblings follow it, blank once it was the last.
 
 <a name="Set.Mark"></a>
-### func \(Set\) [Mark](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L75>)
+### func \(Set\) [Mark](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L80>)
 
 ```go
 func (s Set) Mark(st State) string
@@ -94,7 +91,7 @@ func (s Set) Mark(st State) string
 Mark is the bare glyph for st.
 
 <a name="Set.Render"></a>
-### func \(Set\) [Render](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L94>)
+### func \(Set\) [Render](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L99>)
 
 ```go
 func (s Set) Render(st State, th theme.Resolved) string

@@ -56,3 +56,8 @@ func TestHeightIsLeftToTheCaller(t *testing.T) {
 	SetText(&ta, strings.Repeat("line\n", 20))
 	require.Equal(t, 7, ta.Height())
 }
+
+func TestCaretFollowsTheTheme(t *testing.T) {
+	require.EqualValues(t, 7, New(theme.Resolved{CaretBlink: 7}).Styles().Cursor.BlinkSpeed)
+	require.Equal(t, draw.DefaultBlink, New(th()).Styles().Cursor.BlinkSpeed)
+}

@@ -1,19 +1,23 @@
 package draw
 
 import (
+	"cmp"
 	"time"
 
 	"charm.land/bubbles/v2/textinput"
 )
 
-// BlinkSpeed is how often the caret of every input bezel builds flips. A
-// variable so a host's tests can shrink it: each keystroke arms one blink.
-var BlinkSpeed = 530 * time.Millisecond
+// DefaultBlink is how often a caret flips when nothing says otherwise.
+const DefaultBlink = 530 * time.Millisecond
 
-// WithCaret gives in the BlinkSpeed caret.
-func WithCaret(in textinput.Model) textinput.Model {
+// Blink is every, or DefaultBlink when every is zero.
+func Blink(every time.Duration) time.Duration { return cmp.Or(every, DefaultBlink) }
+
+// WithCaret gives in a caret that flips every Blink(every). Each keystroke
+// arms one blink, so a host's tests pass a short one through the theme.
+func WithCaret(in textinput.Model, every time.Duration) textinput.Model {
 	s := in.Styles()
-	s.Cursor.BlinkSpeed = BlinkSpeed
+	s.Cursor.BlinkSpeed = Blink(every)
 	in.SetStyles(s)
 	return in
 }

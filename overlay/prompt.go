@@ -6,11 +6,11 @@ import (
 
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // unlockHint is the problem an unmatched WithRequire reports.
@@ -20,6 +20,7 @@ const unlockHint = "type the exact text to unlock"
 // WithRequire and WithValidate, running onAccept and closing; esc is the
 // stack's. A host that owns its keys can drive it with Value and Accepts.
 type Prompt struct {
+	look
 	title    string
 	lines    []string
 	input    textinput.Model
@@ -30,16 +31,14 @@ type Prompt struct {
 	validate func(string) string
 	accept   string
 	onAccept func(value string) tea.Cmd
-	style    lipgloss.Style
-	hint     legend.Style
 }
 
 // NewPrompt builds a prompt with a "> " input; onAccept may be nil.
-func NewPrompt(title string, onAccept func(value string) tea.Cmd, style lipgloss.Style, hint legend.Style) Prompt {
-	in := draw.WithCaret(textinput.New())
+func NewPrompt(title string, onAccept func(value string) tea.Cmd, th theme.Resolved) Prompt {
+	in := draw.WithCaret(textinput.New(), th.CaretBlink)
 	in.Prompt = "> "
 	in.Focus()
-	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, style: style, hint: hint}
+	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, look: look{th: th}}
 }
 
 // WithInput replaces the input, for a caller that configures its own prompt,
@@ -135,7 +134,7 @@ func (p Prompt) Legend() []legend.Entry {
 }
 
 func (p Prompt) View(body layout.Rect) string {
-	lines := []string{accent(p.style).Bold(true).Render(p.title), ""}
+	lines := []string{accent(p.style()).Bold(true).Render(p.title), ""}
 	if p.label != "" {
 		w := max(draw.Width(p.label), draw.Width(p.previewL))
 		lines = append(lines, p.row(p.label, w, p.input.View()))
@@ -148,18 +147,18 @@ func (p Prompt) View(body layout.Rect) string {
 	if p.label == "" {
 		lines = append(lines, "", p.input.View())
 	}
-	return Box(append(lines, "", p.hintLine()), body, p.style)
+	return Box(append(lines, "", p.hintLine()), body, p.style())
 }
 
 // row is one labelled line, the labels padded to one column.
 func (p Prompt) row(label string, width int, content string) string {
-	return p.hint.Key.Render(fmt.Sprintf("  %-*s  ", width, label)) + content
+	return p.hint().Key.Render(fmt.Sprintf("  %-*s  ", width, label)) + content
 }
 
 // hintLine says what the keys do, or what stands in the way of enter.
 func (p Prompt) hintLine() string {
 	if problem := p.Problem(); problem != "" {
-		return p.hint.Text.Render(problem) + "   " + legend.HintLine(p.Legend(), p.hint)
+		return p.hint().Text.Render(problem) + "   " + legend.HintLine(p.Legend(), p.hint())
 	}
-	return legend.HintLine(p.Legend(), p.hint)
+	return legend.HintLine(p.Legend(), p.hint())
 }

@@ -22,13 +22,10 @@ func New(th theme.Resolved) textarea.Model {
 	ta.MaxHeight = 0
 	ta.ShowLineNumbers = false
 	ta.EndOfBufferCharacter = '~'
-	s := ta.Styles()
-	s.Cursor.BlinkSpeed = draw.BlinkSpeed
-	ta.SetStyles(s)
 	return Restyle(ta, th)
 }
 
-// Restyle recolours ta, for when the terminal reports its background late.
+// Restyle recolours ta and sets its caret's blink, for a theme resolved late.
 // The line under the cursor is left unpainted: highlighted, it reads as a
 // selection. Blurred text is dimmed so the focused widget is the bright one.
 func Restyle(ta textarea.Model, th theme.Resolved) textarea.Model {
@@ -42,6 +39,7 @@ func Restyle(ta textarea.Model, th theme.Resolved) textarea.Model {
 		st.EndOfBuffer, st.Placeholder = th.Muted, th.Muted
 	}
 	s.Blurred.Text = th.Dim
+	s.Cursor.BlinkSpeed = draw.Blink(th.CaretBlink)
 	ta.SetStyles(s)
 	return ta
 }

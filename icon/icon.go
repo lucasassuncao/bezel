@@ -31,18 +31,22 @@ type Set struct {
 	Branch, LastBranch, Pipe                        string
 }
 
-// Unicode is the default set.
-var Unicode = Set{
-	OK: "✓", Fail: "✗", Warn: "!", Info: "i", Pending: "○", Running: "●", Skipped: "–",
-	Bullet: "•", Arrow: "→", Line: "─",
-	Branch: "├─ ", LastBranch: "└─ ", Pipe: "│  ",
+// Unicode is the set for a terminal that can show it, which is most.
+func Unicode() Set {
+	return Set{
+		OK: "✓", Fail: "✗", Warn: "!", Info: "i", Pending: "○", Running: "●", Skipped: "–",
+		Bullet: "•", Arrow: "→", Line: "─",
+		Branch: "├─ ", LastBranch: "└─ ", Pipe: "│  ",
+	}
 }
 
 // ASCII is for terminals and logs that cannot show the Unicode set.
-var ASCII = Set{
-	OK: "+", Fail: "x", Warn: "!", Info: "i", Pending: "o", Running: "*", Skipped: "-",
-	Bullet: "*", Arrow: ">", Line: "-",
-	Branch: "|- ", LastBranch: "`- ", Pipe: "|  ",
+func ASCII() Set {
+	return Set{
+		OK: "+", Fail: "x", Warn: "!", Info: "i", Pending: "o", Running: "*", Skipped: "-",
+		Bullet: "*", Arrow: ">", Line: "-",
+		Branch: "|- ", LastBranch: "`- ", Pipe: "|  ",
+	}
 }
 
 // Connector is the prefix that hangs an item off its parent: a branch, or the
@@ -63,12 +67,13 @@ func (s Set) Indent(last bool) string {
 	return s.Pipe
 }
 
-// Default is ASCII when BEZEL_ASCII is set or TERM is "dumb", Unicode otherwise.
-func Default() Set {
+// FromEnv is ASCII when BEZEL_ASCII is set or TERM is "dumb", Unicode
+// otherwise. The one place bezel reads the environment, and only when called.
+func FromEnv() Set {
 	if os.Getenv("BEZEL_ASCII") != "" || os.Getenv("TERM") == "dumb" {
-		return ASCII
+		return ASCII()
 	}
-	return Unicode
+	return Unicode()
 }
 
 // Mark is the bare glyph for st.

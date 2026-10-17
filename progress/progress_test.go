@@ -30,20 +30,20 @@ func TestLineIsExactlyTheWidth(t *testing.T) {
 
 func TestStepperMarksEachStage(t *testing.T) {
 	steps := []string{"Source", "Options", "Review"}
-	got := ansi.Strip(Stepper(steps, 1, 80, th(), icon.Unicode))
+	got := ansi.Strip(Stepper(steps, 1, 80, th(), icon.Unicode()))
 	require.Contains(t, got, "✓ Source ─ ● Options ─ ○ Review")
-	require.Equal(t, 80, ansi.StringWidth(Stepper(steps, 1, 80, th(), icon.Unicode)))
+	require.Equal(t, 80, ansi.StringWidth(Stepper(steps, 1, 80, th(), icon.Unicode())))
 
-	done := ansi.Strip(Stepper(steps, len(steps), 80, th(), icon.ASCII))
+	done := ansi.Strip(Stepper(steps, len(steps), 80, th(), icon.ASCII()))
 	require.Contains(t, done, "+ Source - + Options - + Review", "the ASCII set joins with ASCII too")
 }
 
 func TestStepperCompactsWhenItDoesNotFit(t *testing.T) {
 	steps := []string{"Choose a template", "Pick the features", "Review and write"}
-	got := ansi.Strip(Stepper(steps, 1, 40, th(), icon.Unicode))
+	got := ansi.Strip(Stepper(steps, 1, 40, th(), icon.Unicode()))
 	require.Equal(t, 40, ansi.StringWidth(got))
 	require.Contains(t, got, "Step 2 of 3 · Pick the features")
 
-	require.Contains(t, ansi.Strip(Stepper(steps, 3, 30, th(), icon.Unicode)), "All 3 steps done")
-	require.Empty(t, Stepper(nil, 0, 30, th(), icon.Unicode))
+	require.Contains(t, ansi.Strip(Stepper(steps, 3, 30, th(), icon.Unicode())), "All 3 steps done")
+	require.Empty(t, Stepper(nil, 0, 30, th(), icon.Unicode()))
 }

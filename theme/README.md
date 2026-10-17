@@ -21,7 +21,6 @@ Package theme is the palette and the lipgloss styles every bezel app draws with.
   - [func ResolveColors\(t Theme, dark bool\) Colors](<#ResolveColors>)
 - [type Resolved](<#Resolved>)
   - [func Resolve\(t Theme, dark bool\) Resolved](<#Resolve>)
-  - [func \(r Resolved\) ModalFor\(kind overlay.Kind\) lipgloss.Style](<#Resolved.ModalFor>)
 - [type Styles](<#Styles>)
 - [type Theme](<#Theme>)
   - [func Lookup\(name string\) \(Theme, error\)](<#Lookup>)
@@ -370,7 +369,7 @@ func ResolveColors(t Theme, dark bool) Colors
 ResolveColors merges t into concrete Colors over the adaptive default for a dark or light terminal. A theme that sets Accent but not Selection or Info uses its accent for them.
 
 <a name="Resolved"></a>
-## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L14-L40>)
+## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L15-L45>)
 
 Resolved is a Theme after the whole cascade has been applied: ready\-to\-use lipgloss styles plus the colors they were derived from. A consumer builds one per instance and only reads it afterwards.
 
@@ -401,26 +400,21 @@ type Resolved struct {
     StatusOK     lipgloss.Style
     StatusErr    lipgloss.Style
     Modal        lipgloss.Style
+
+    // CaretBlink is how often every text input built with this theme flips its
+    // caret; zero is draw.DefaultBlink. Tests shrink it, as each key arms one.
+    CaretBlink time.Duration
 }
 ```
 
 <a name="Resolve"></a>
-### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L44>)
+### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L49>)
 
 ```go
 func Resolve(t Theme, dark bool) Resolved
 ```
 
 Resolve turns t into styles for a dark or light terminal. Steps: the colour cascade \(ResolveColors\), the derived styles, then t.Styles overrides.
-
-<a name="Resolved.ModalFor"></a>
-### func \(Resolved\) [ModalFor](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L68>)
-
-```go
-func (r Resolved) ModalFor(kind overlay.Kind) lipgloss.Style
-```
-
-ModalFor is the modal box coloured by what it reports: the accent for information, the palette's success/warning/danger inks otherwise.
 
 <a name="Styles"></a>
 ## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L31-L35>)

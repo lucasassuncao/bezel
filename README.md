@@ -16,8 +16,8 @@ go get github.com/lucasassuncao/bezel
 | `draw` | Pure. ANSI-safe truncate/fit/wrap, titled panels and a `Card` with a footer row, header, tabs, status line, a `Divider` with an optional label, the filled `Button` dialogs and forms draw with, `Composite` for floating boxes. |
 | `shell` | The struct you embed. Handles `WindowSizeMsg`, tabs, focus, status with TTL, a busy spinner (`Busy`/`Idle`), `Copy` to the clipboard off the event loop, overlays and the legend. Keys are `Action`s: prebuilt ones with a fixed meaning (`Help`, `Commands`, `ChangeTab`, `ChangePane`, `Move`, `Scroll`, `Quit`) and `Custom` ones; one declaration drives the legend, the key and the palette. `DisplayOnly` prints a key a component handles itself; `RunWith` gives a prebuilt the app's own behavior. `ChangePane` sends a `FocusMsg{From, To}` so the app can run what entering and leaving a pane mean. |
 | `theme` | Semantic palette (Accent, Success, Danger, ...), presets, and the lipgloss styles every panel, legend and modal draws with. Empty roles follow the terminal's light or dark background: `Resolve(t, dark)`. |
-| `themebrowser` | Inline table of every preset, for a `--list-themes` flag. |
-| `overlay` | Stack of modals. The top one gets the keys, `Esc` pops it. Ready-made `Alert`, `Confirm`, `Help`, `Prompt` for one line of typed text (a required text, a validation, a live preview), and `Pager` for text taller than a dialog: a command's output, a report. |
+| `themebrowser` | Inline table of every preset and its palette, for a `--list-themes` flag. |
+| `overlay` | Stack of modals. The top one gets the keys, `Esc` pops it. Ready-made `Alert`, `Confirm`, `Help`, `Prompt` for one line of typed text (a required text, a validation, a live preview), `Pager` for text taller than a dialog, `Pick` and `Choice` to choose, and `FilePicker`. Each takes the theme and `WithKind(overlay.Danger)` tints it. |
 | `icon` | One set of state marks (`OK`, `Fail`, `Warn`, `Running`, `Pending`, ...) in the theme's colours, Unicode or ASCII (`BEZEL_ASCII`, or `TERM=dumb`), so a check mark means the same in a list, a status line and CLI output. `Connector` and `Indent` draw a tree's `├─`/`└─` branches in the same set. |
 | `form` | Controls that ask for a value: `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, stacked in a `Form` that moves focus with tab and shift+tab and lines every value up in one column. |
 | `progress` | How far along something is, in one row: `Bar` and `Line` (label, bar, `done/total`) for a count, `Stepper` for named stages such as a wizard's, compacting to "Step 2 of 4" when it does not fit. |
@@ -66,6 +66,8 @@ func (m model) View() tea.View {
 A leaf missing from the map gives its space back that frame. The focused pane wears a thick border and a filled title, so focus reads even without colour.
 
 The legend comes from whoever is in front: the top overlay, else the active actions (`Config.Actions`, the tab's, then `SetActions`'s, prebuilt first). It is filtered by `Config.Can`, packed to width, and keeps `?` pinned wherever `Help()` is active.
+
+Every package takes its styles from one `theme.Resolved` and shapes its API the same way; [CONVENTIONS.md](CONVENTIONS.md) has the rules: where the theme goes, the three forms of `Update`, and when a setting is a constructor argument, a `With` or a `Set`.
 
 ## Demo
 

@@ -31,6 +31,13 @@ type BottomAnchored interface{ AnchorBottom() bool }
 // top: a command line typed where the status usually is.
 type StatusLiner interface{ StatusLine(width int) string }
 
+// Resizer is implemented by overlays that size what they show to the body,
+// such as how far a page scrolls. The stack calls Resize when it pushes one
+// and whenever its body changes, so Update knows before anything is drawn.
+type Resizer interface {
+	Resize(body layout.Rect) Overlay
+}
+
 // CloseMsg pops the top overlay.
 type CloseMsg struct{}
 
@@ -61,14 +68,17 @@ func ToTop(cmd tea.Cmd) tea.Cmd {
 }
 
 // Stack is a value: every method returns the new stack.
-type Stack struct{ items []Overlay }
+type Stack struct {
+	items []Overlay
+	body  layout.Rect // what Resize last gave, zero before
+}
 
-// Push is the stack with o on top.
+// Push is the stack with o on top, sized to the stack's body when it has one.
 func (s Stack) Push(o Overlay) Stack {
 	items := make([]Overlay, len(s.items)+1)
 	copy(items, s.items)
-	items[len(s.items)] = o
-	return Stack{items: items}
+	items[len(s.items)] = s.fit(o)
+	return Stack{items: items, body: s.body}
 }
 
 // Pop is the stack without its top overlay; an empty stack stays empty.
@@ -77,7 +87,30 @@ func (s Stack) Pop() Stack {
 		return s
 	}
 	n := len(s.items) - 1
-	return Stack{items: s.items[:n:n]}
+	return Stack{items: s.items[:n:n], body: s.body}
+}
+
+// Resize hands body to every Resizer layer, the hidden ones too. A shell does
+// it on each layout; an app driving a Stack itself calls it on every resize.
+func (s Stack) Resize(body layout.Rect) Stack {
+	if body == s.body {
+		return s
+	}
+	s.body = body
+	items := make([]Overlay, len(s.items))
+	for i, o := range s.items {
+		items[i] = s.fit(o)
+	}
+	s.items = items
+	return s
+}
+
+// fit is o sized to the body, or o as it is without a body or a Resize.
+func (s Stack) fit(o Overlay) Overlay {
+	if r, ok := o.(Resizer); ok && s.body.W > 0 && s.body.H > 0 {
+		return r.Resize(s.body)
+	}
+	return o
 }
 
 // Top is the overlay that gets the keys, or nil when the stack is empty.
@@ -123,7 +156,7 @@ func (s Stack) replaceTop(o Overlay) Stack {
 	items := make([]Overlay, len(s.items))
 	copy(items, s.items)
 	items[len(items)-1] = o
-	return Stack{items: items}
+	return Stack{items: items, body: s.body}
 }
 
 // View composites every layer, bottom first, centred over background.

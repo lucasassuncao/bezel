@@ -13,7 +13,6 @@ import (
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
-	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -25,10 +24,14 @@ func demoPanes() map[string]Pane {
 	}
 }
 
-func lastRow(s Shell) string {
+// legendRow is the legend's first row, right under the status row.
+func legendRow(s Shell) string {
 	rows := strings.Split(s.View(map[string]Pane{"list": {}, "detail": {}}), "\n")
-	return ansi.Strip(rows[len(rows)-1])
+	return ansi.Strip(rows[statusAt(s)+1])
 }
+
+// statusAt is the index of the status row, the first under the panes.
+func statusAt(s Shell) int { return s.Body().Y + s.Body().H }
 
 func TestBodyIsTheTerminalMinusTheChrome(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Help()}})
@@ -36,9 +39,9 @@ func TestBodyIsTheTerminalMinusTheChrome(t *testing.T) {
 
 	body := s.Body()
 	require.Equal(t, 100, body.W)
-	// header 1 + tabs 1 + blank 1 above; status 1 + legend 1 below.
+	// header 1 + tabs 1 + blank 1 above; status 1 + legend 2 below.
 	require.Equal(t, 3, body.Y)
-	require.Equal(t, 30-3-2, body.H)
+	require.Equal(t, 30-3-3, body.H)
 
 	require.Equal(t, 33, s.Rect("list").W)
 	require.Equal(t, body.H, s.Rect("list").H)
@@ -93,7 +96,7 @@ func TestAMissingPaneVanishesAndItsSpaceIsReused(t *testing.T) {
 func TestOverlayFloatsOverThePanes(t *testing.T) {
 	s := newShell()
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
-	s = s.Push(overlay.NewAlert(overlay.Info, "Saved", "written", lipgloss.NewStyle().Border(lipgloss.NormalBorder()), legend.Style{}))
+	s = s.Push(overlay.NewAlert(overlay.Info, "Saved", "written", theme.Resolved{Modal: lipgloss.NewStyle().Border(lipgloss.NormalBorder())}))
 	out := ansi.Strip(s.View(demoPanes()))
 	require.Contains(t, out, "written")
 	require.Contains(t, out, "item one") // background still there
@@ -149,7 +152,7 @@ func TestHelpListsOnlyActionsWithAKey(t *testing.T) {
 func TestLegendPinsTheShellHelpKey(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Custom("x", "do x", nil), Help()}})
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
-	require.Contains(t, lastRow(s), "[?] help")
+	require.Contains(t, legendRow(s), "[?] help")
 }
 
 // No overlay changes the legend: it is always the screen's. A modal draws its
@@ -157,28 +160,28 @@ func TestLegendPinsTheShellHelpKey(t *testing.T) {
 func TestNoOverlayChangesTheLegend(t *testing.T) {
 	st := lipgloss.NewStyle()
 	for name, o := range map[string]overlay.Overlay{
-		"alert":   overlay.NewAlert(overlay.Info, "t", "m", st, legend.Style{}),
-		"text":    overlay.NewText("t", []string{"body"}, st, legend.Style{}),
-		"confirm": overlay.NewConfirm("t", "m", nil, st, legend.Style{}),
-		"pick":    overlay.NewPick("t", []string{"a", "b"}, nil, nil, st, legend.Style{}),
-		"prompt":  overlay.NewPrompt("t", nil, st, legend.Style{}),
+		"alert":   overlay.NewAlert(overlay.Info, "t", "m", theme.Resolved{Modal: st}),
+		"text":    overlay.NewText("t", []string{"body"}, theme.Resolved{Modal: st}),
+		"confirm": overlay.NewConfirm("t", "m", nil, theme.Resolved{Modal: st}),
+		"pick":    overlay.NewPick("t", []string{"a", "b"}, nil, theme.Resolved{Modal: st}),
+		"prompt":  overlay.NewPrompt("t", nil, theme.Resolved{Modal: st}),
 	} {
 		s := newShell(stubTab{name: "a", actions: []Action{Custom("x", "do x", nil), Help()}})
 		s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
-		before := lastRow(s)
-		require.Equal(t, before, lastRow(s.Push(o)), name)
+		before := legendRow(s)
+		require.Equal(t, before, legendRow(s.Push(o)), name)
 	}
 	s := newShell(stubTab{name: "a", actions: []Action{Custom("x", "do x", nil), Help()}})
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
-	require.Equal(t, lastRow(s), lastRow(s.ShowHelp()), "help")
-	require.Equal(t, lastRow(s), lastRow(s.OpenCommands()), "command palette")
+	require.Equal(t, legendRow(s), legendRow(s.ShowHelp()), "help")
+	require.Equal(t, legendRow(s), legendRow(s.OpenCommands()), "command palette")
 }
 
 // An app that opens its own help still pins "?" through a display-only Help.
 func TestADisplayOnlyHelpIsPinnedButNotHandled(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Help(DisplayOnly())}})
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
-	require.Contains(t, lastRow(s), "[?] help")
+	require.Contains(t, legendRow(s), "[?] help")
 	_, handled, _ := s.Update(press("?"))
 	require.False(t, handled)
 }
@@ -188,7 +191,7 @@ func TestLegendDropsHelpWhileAnInputHasTheKeys(t *testing.T) {
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	in := textinput.New()
 	s = s.SetInput(&in)
-	require.NotContains(t, lastRow(s), "[?] help")
+	require.NotContains(t, legendRow(s), "[?] help")
 }
 
 // A blank row separates the tab strip from the panes below it.
@@ -208,6 +211,6 @@ func TestTheStatusRowIsFlushLeft(t *testing.T) {
 	for _, lvl := range []Level{Info, OK, Error} {
 		s, _ = s.SetStatus("copied: kv/app", lvl, 0)
 		rows := strings.Split(ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}})), "\n")
-		require.True(t, strings.HasPrefix(rows[len(rows)-2], "copied: kv/app"), "level %d: %q", lvl, rows[len(rows)-2])
+		require.True(t, strings.HasPrefix(rows[statusAt(s)], "copied: kv/app"), "level %d: %q", lvl, rows[statusAt(s)])
 	}
 }

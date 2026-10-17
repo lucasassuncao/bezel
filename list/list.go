@@ -54,11 +54,9 @@ func DefaultKeys() Keys {
 
 // Model is a value: every method returns the new list.
 type Model struct {
-	rows   []Row
-	cursor int
-	height int
-	offset int
-	keys   Keys
+	rows []Row
+	win  layout.Window
+	keys Keys
 
 	filter    string
 	filtering bool
@@ -69,8 +67,8 @@ type Model struct {
 // New builds a list height rows tall with the cursor on the first
 // selectable row.
 func New(rows []Row, height int) Model {
-	m := Model{rows: slices.Clone(rows), height: height, keys: DefaultKeys()}
-	m.cursor = firstSelectable(rows)
+	m := Model{rows: slices.Clone(rows), keys: DefaultKeys()}
+	m.win = layout.Window{Cursor: firstSelectable(rows), Height: height}
 	return m
 }
 
@@ -96,7 +94,7 @@ func (m Model) Filter() string { return m.filter }
 // label when it survives (at the same index first), else on the first
 // selectable one.
 func (m Model) SetRows(rows []Row) Model {
-	prev, at := "", m.cursor
+	prev, at := "", m.win.Cursor
 	if r := m.Selected(); r != nil {
 		prev = r.Label
 	}
@@ -104,10 +102,10 @@ func (m Model) SetRows(rows []Row) Model {
 	if at < len(m.rows) && !m.rows[at].Section && m.rows[at].Label == prev {
 		return m.clampScroll().clampFilterCursor()
 	}
-	m.cursor = firstSelectable(m.rows)
+	m.win.Cursor = firstSelectable(m.rows)
 	for i, r := range m.rows {
 		if !r.Section && r.Label == prev {
-			m.cursor = i
+			m.win.Cursor = i
 			break
 		}
 	}
@@ -116,7 +114,7 @@ func (m Model) SetRows(rows []Row) Model {
 
 // SetHeight updates the visible row count and re-clamps the scroll.
 func (m Model) SetHeight(h int) Model {
-	m.height = h
+	m.win.Height = h
 	return m.clampScroll()
 }
 
@@ -131,10 +129,10 @@ func (m Model) Selected() *Row {
 		r := m.rows[idx[m.fCursor]]
 		return &r
 	}
-	if m.cursor >= len(m.rows) || m.rows[m.cursor].Section {
+	if m.win.Cursor >= len(m.rows) || m.rows[m.win.Cursor].Section {
 		return nil
 	}
-	r := m.rows[m.cursor]
+	r := m.rows[m.win.Cursor]
 	return &r
 }
 
@@ -171,7 +169,7 @@ func (m Model) updateFilter(msg tea.KeyPressMsg) (Model, Action) {
 		if m.fCursor >= len(idx) {
 			return m, None
 		}
-		m.cursor = idx[m.fCursor]
+		m.win.Cursor = idx[m.fCursor]
 		return m.clampScroll(), Chosen
 	case msg.String() == "backspace" || msg.String() == "ctrl+h":
 		if m.filter != "" {
@@ -208,13 +206,8 @@ func (m Model) filtered() []int {
 
 // move steps the cursor over headings, clamped at the ends.
 func (m Model) move(delta int) Model {
-	for i := m.cursor + delta; i >= 0 && i < len(m.rows); i += delta {
-		if !m.rows[i].Section {
-			m.cursor = i
-			break
-		}
-	}
-	return m.clampScroll()
+	m.win = m.win.Move(delta, len(m.rows), func(i int) bool { return m.rows[i].Section })
+	return m
 }
 
 func (m Model) moveFilter(delta int) Model {
@@ -227,20 +220,12 @@ func (m Model) moveFilter(delta int) Model {
 }
 
 func (m Model) clampScroll() Model {
-	if m.height <= 0 {
-		return m
-	}
-	m.offset = layout.ClampScroll(m.cursor, m.offset, m.height)
-	// The last row becomes the "↓ N more" indicator when rows overflow below,
-	// so a cursor landing there needs one more line of offset to stay visible.
-	if m.hasMore() && m.cursor >= m.offset+m.height-1 {
-		m.offset = m.cursor - m.height + 2
-	}
+	m.win = m.win.Clamp(len(m.rows))
 	return m
 }
 
 func (m Model) clampFilterScroll() Model {
-	if visible := m.height - 1; visible > 0 {
+	if visible := m.win.Height - 1; visible > 0 {
 		m.fOffset = layout.ClampScroll(m.fCursor, m.fOffset, visible)
 	}
 	return m
@@ -273,49 +258,38 @@ func (m Model) View(th theme.Resolved) string {
 	if m.filtering {
 		return m.viewFilter(th)
 	}
-	if m.height <= 0 {
+	if m.win.Height <= 0 {
 		return ""
 	}
-	visible := m.height
-	more := m.hasMore()
-	if more {
-		visible--
-	}
-	end := min(m.offset+visible, len(m.rows))
+	start, end, below := m.win.Bounds(len(m.rows))
 
 	var sb strings.Builder
-	for i := m.offset; i < end; i++ {
-		if i > m.offset {
+	for i := start; i < end; i++ {
+		if i > start {
 			sb.WriteByte('\n')
 		}
 		r := m.rows[i]
 		if r.Section {
 			sb.WriteString(th.Section.Render(r.Label))
 		} else {
-			sb.WriteString(renderRow(r, i == m.cursor, th))
+			sb.WriteString(renderRow(r, i == m.win.Cursor, th))
 		}
 	}
-	if more {
+	if below > 0 {
 		if sb.Len() > 0 {
 			sb.WriteByte('\n')
 		}
-		sb.WriteString(th.Dim.Render(fmt.Sprintf("  ↓ %d more", len(m.rows)-end)))
+		sb.WriteString(th.Dim.Render(fmt.Sprintf("  ↓ %d more", below)))
 	}
 	return sb.String()
 }
 
-// hasMore reports whether rows overflow below the window. A one-row window
-// never trades its only row for the indicator.
-func (m Model) hasMore() bool {
-	return m.height > 1 && m.offset+m.height < len(m.rows)
-}
-
 func (m Model) viewFilter(th theme.Resolved) string {
 	idx := m.filtered()
-	visible := max(m.height-1, 0)
+	visible := max(m.win.Height-1, 0)
 	end := min(m.fOffset+visible, len(idx))
 
-	lines := make([]string, 0, m.height)
+	lines := make([]string, 0, m.win.Height)
 	for i := m.fOffset; i < end; i++ {
 		lines = append(lines, renderRow(m.rows[idx[i]], i == m.fCursor, th))
 	}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // fake records what it saw and renders a fixed box.
@@ -139,6 +140,25 @@ func TestTopMsgWithoutAnOverlayIsDropped(t *testing.T) {
 	_, handled, cmd := Stack{}.Update(TopMsg{Msg: answerMsg{}})
 	require.True(t, handled)
 	require.Nil(t, cmd)
+}
+
+// The stack sizes what it holds, on a push and on every new body, so Update
+// knows what fits before anything has been drawn.
+func TestStackSizesItsOverlays(t *testing.T) {
+	pgdown := tea.KeyPressMsg{Code: tea.KeyPgDown}
+	pager := NewPager("Out", numbered(60), theme.Resolved{})
+
+	s := Stack{}.Resize(layout.Rect{W: 60, H: 18}).Push(pager)
+	s, _, _ = s.Update(pgdown)
+	require.Equal(t, 10, s.Top().(Pager).Offset(), "pushed onto a sized stack")
+
+	s = s.Push(NewText("t", nil, theme.Resolved{})).Resize(layout.Rect{W: 60, H: 13}).Pop()
+	s, _, _ = s.Update(pgdown)
+	require.Equal(t, 15, s.Top().(Pager).Offset(), "a layer under the top was resized too")
+
+	s = Stack{}.Push(pager).Resize(layout.Rect{W: 60, H: 18})
+	s, _, _ = s.Update(pgdown)
+	require.Equal(t, 10, s.Top().(Pager).Offset(), "pushed before the stack had a body")
 }
 
 func TestToTopKeepsNothingAsNothing(t *testing.T) {

@@ -13,9 +13,15 @@
 //   - [github.com/lucasassuncao/bezel/theme]: the semantic palette, presets and
 //     the lipgloss styles everything draws with.
 //   - [github.com/lucasassuncao/bezel/themebrowser]: an inline table of every
-//     preset, for a --list-themes flag.
+//     preset and its palette, for a --list-themes flag.
 //   - [github.com/lucasassuncao/bezel/overlay]: the stack of modals. Ready-made
-//     Alert, Confirm, Help and Prompt.
+//     Alert, Confirm, Text, Choice, Pick, Help, Prompt, Pager and FilePicker.
+//   - [github.com/lucasassuncao/bezel/form]: Input, Select, Checkbox, Radio,
+//     Toggle and Button, stacked in a Form that moves focus with tab.
+//   - [github.com/lucasassuncao/bezel/progress]: Bar, Line and Stepper, how far
+//     along something is in one row.
+//   - [github.com/lucasassuncao/bezel/icon]: one set of state marks, Unicode or
+//     ASCII, in the theme's colours.
 //   - [github.com/lucasassuncao/bezel/legend]: key entries filtered by capability
 //     and packed into a few rows.
 //   - [github.com/lucasassuncao/bezel/palette]: the ":" command line, with prefix
@@ -36,4 +42,7 @@
 //     for CLIs that print logs, without taking the screen.
 //   - [github.com/lucasassuncao/bezel/bezeltest]: builds the key presses a
 //     terminal sends, for tests that drive a model.
+//
+// CONVENTIONS.md, at the module's root, is how the packages share one shape:
+// where the theme goes, the three forms of Update, constructor or With.
 package bezel

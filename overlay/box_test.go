@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/layout"
-	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // A dialog's padding counts against the body too, and the cut spares its last
@@ -21,7 +21,7 @@ func TestAClippedDialogFitsAndKeepsItsButtons(t *testing.T) {
 		lines = append(lines, fmt.Sprintf("row %d", i))
 	}
 	style := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(1, 3)
-	c := NewChoice("Apply?", lines, []Option{Opt("enter/y", "apply", nil)}, style, legend.Style{})
+	c := NewChoice("Apply?", lines, []Option{Opt("enter/y", "apply", nil)}, theme.Resolved{Modal: style})
 	got := ansi.Strip(c.View(layout.Rect{W: 80, H: 20}))
 	require.LessOrEqual(t, len(strings.Split(got, "\n")), 20, "the dialog is taller than the body")
 	require.Contains(t, got, "apply (enter/y)", "the cut took the buttons")

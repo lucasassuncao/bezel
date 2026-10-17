@@ -53,6 +53,7 @@ Package form is the controls that ask for a value: a text input, a select, check
   - [func \(r Radio\) Update\(msg tea.Msg\) \(Field, tea.Cmd\)](<#Radio.Update>)
   - [func \(r Radio\) Value\(\) string](<#Radio.Value>)
   - [func \(r Radio\) View\(focused bool, labelW, width int\) string](<#Radio.View>)
+  - [func \(r Radio\) WithIcons\(set icon.Set\) Radio](<#Radio.WithIcons>)
 - [type Select](<#Select>)
   - [func NewSelect\(label string, options \[\]string, selected int, th theme.Resolved\) Select](<#NewSelect>)
   - [func \(s Select\) Blur\(\) Field](<#Select.Blur>)
@@ -63,6 +64,7 @@ Package form is the controls that ask for a value: a text input, a select, check
   - [func \(s Select\) Update\(msg tea.Msg\) \(Field, tea.Cmd\)](<#Select.Update>)
   - [func \(s Select\) Value\(\) string](<#Select.Value>)
   - [func \(s Select\) View\(focused bool, labelW, width int\) string](<#Select.View>)
+  - [func \(s Select\) WithIcons\(set icon.Set\) Select](<#Select.WithIcons>)
 - [type Toggle](<#Toggle>)
   - [func NewToggle\(label string, on bool, th theme.Resolved\) Toggle](<#NewToggle>)
   - [func \(t Toggle\) Blur\(\) Field](<#Toggle.Blur>)
@@ -71,10 +73,11 @@ Package form is the controls that ask for a value: a text input, a select, check
   - [func \(t Toggle\) On\(\) bool](<#Toggle.On>)
   - [func \(t Toggle\) Update\(msg tea.Msg\) \(Field, tea.Cmd\)](<#Toggle.Update>)
   - [func \(t Toggle\) View\(focused bool, labelW, width int\) string](<#Toggle.View>)
+  - [func \(t Toggle\) WithIcons\(set icon.Set\) Toggle](<#Toggle.WithIcons>)
 
 
 <a name="Button"></a>
-## type [Button](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L289-L293>)
+## type [Button](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L307-L311>)
 
 Button runs onPress on space or enter; a form's submit is one.
 
@@ -85,7 +88,7 @@ type Button struct {
 ```
 
 <a name="NewButton"></a>
-### func [NewButton](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L296>)
+### func [NewButton](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L314>)
 
 ```go
 func NewButton(label string, onPress tea.Cmd, th theme.Resolved) Button
@@ -94,7 +97,7 @@ func NewButton(label string, onPress tea.Cmd, th theme.Resolved) Button
 NewButton is a button labelled label; onPress may be nil.
 
 <a name="Button.Blur"></a>
-### func \(Button\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L304>)
+### func \(Button\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L322>)
 
 ```go
 func (b Button) Blur() Field
@@ -103,7 +106,7 @@ func (b Button) Blur() Field
 
 
 <a name="Button.Focus"></a>
-### func \(Button\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L303>)
+### func \(Button\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L321>)
 
 ```go
 func (b Button) Focus() (Field, tea.Cmd)
@@ -112,7 +115,7 @@ func (b Button) Focus() (Field, tea.Cmd)
 
 
 <a name="Button.Label"></a>
-### func \(Button\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L302>)
+### func \(Button\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L320>)
 
 ```go
 func (b Button) Label() string
@@ -121,7 +124,7 @@ func (b Button) Label() string
 Label is empty on purpose: a button sits in the value column and must not widen the label column.
 
 <a name="Button.Update"></a>
-### func \(Button\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L306>)
+### func \(Button\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L324>)
 
 ```go
 func (b Button) Update(msg tea.Msg) (Field, tea.Cmd)
@@ -130,7 +133,7 @@ func (b Button) Update(msg tea.Msg) (Field, tea.Cmd)
 
 
 <a name="Button.View"></a>
-### func \(Button\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L313>)
+### func \(Button\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L331>)
 
 ```go
 func (b Button) View(focused bool, labelW, width int) string
@@ -396,7 +399,7 @@ func NewRadio(label string, options []string, selected int, th theme.Resolved) R
 NewRadio offers options with the one at selected chosen, clamped in range.
 
 <a name="Radio.Blur"></a>
-### func \(Radio\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L150>)
+### func \(Radio\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L156>)
 
 ```go
 func (r Radio) Blur() Field
@@ -405,7 +408,7 @@ func (r Radio) Blur() Field
 
 
 <a name="Radio.Focus"></a>
-### func \(Radio\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L149>)
+### func \(Radio\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L155>)
 
 ```go
 func (r Radio) Focus() (Field, tea.Cmd)
@@ -414,7 +417,7 @@ func (r Radio) Focus() (Field, tea.Cmd)
 
 
 <a name="Radio.Label"></a>
-### func \(Radio\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L148>)
+### func \(Radio\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L154>)
 
 ```go
 func (r Radio) Label() string
@@ -423,7 +426,7 @@ func (r Radio) Label() string
 
 
 <a name="Radio.Selected"></a>
-### func \(Radio\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L144>)
+### func \(Radio\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L150>)
 
 ```go
 func (r Radio) Selected() int
@@ -432,7 +435,7 @@ func (r Radio) Selected() int
 Selected is the index of the chosen option.
 
 <a name="Radio.Update"></a>
-### func \(Radio\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L152>)
+### func \(Radio\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L158>)
 
 ```go
 func (r Radio) Update(msg tea.Msg) (Field, tea.Cmd)
@@ -441,7 +444,7 @@ func (r Radio) Update(msg tea.Msg) (Field, tea.Cmd)
 
 
 <a name="Radio.Value"></a>
-### func \(Radio\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L147>)
+### func \(Radio\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L153>)
 
 ```go
 func (r Radio) Value() string
@@ -450,7 +453,7 @@ func (r Radio) Value() string
 Value is the chosen option, or "" when there are none.
 
 <a name="Radio.View"></a>
-### func \(Radio\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L162>)
+### func \(Radio\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L168>)
 
 ```go
 func (r Radio) View(focused bool, labelW, width int) string
@@ -458,8 +461,17 @@ func (r Radio) View(focused bool, labelW, width int) string
 
 
 
+<a name="Radio.WithIcons"></a>
+### func \(Radio\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L144>)
+
+```go
+func (r Radio) WithIcons(set icon.Set) Radio
+```
+
+WithIcons draws the chosen mark from set instead of icon.FromEnv's.
+
 <a name="Select"></a>
-## type [Select](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L210-L218>)
+## type [Select](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L222-L230>)
 
 Select is one value out of a list that opens under it: enter opens it, the arrows move, enter picks and esc closes without changing it.
 
@@ -470,7 +482,7 @@ type Select struct {
 ```
 
 <a name="NewSelect"></a>
-### func [NewSelect](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L221>)
+### func [NewSelect](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L233>)
 
 ```go
 func NewSelect(label string, options []string, selected int, th theme.Resolved) Select
@@ -479,7 +491,7 @@ func NewSelect(label string, options []string, selected int, th theme.Resolved) 
 NewSelect offers options with the one at selected chosen, clamped in range.
 
 <a name="Select.Blur"></a>
-### func \(Select\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L237>)
+### func \(Select\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L255>)
 
 ```go
 func (s Select) Blur() Field
@@ -488,7 +500,7 @@ func (s Select) Blur() Field
 
 
 <a name="Select.Focus"></a>
-### func \(Select\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L235>)
+### func \(Select\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L253>)
 
 ```go
 func (s Select) Focus() (Field, tea.Cmd)
@@ -497,7 +509,7 @@ func (s Select) Focus() (Field, tea.Cmd)
 
 
 <a name="Select.Holding"></a>
-### func \(Select\) [Holding](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L234>)
+### func \(Select\) [Holding](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L252>)
 
 ```go
 func (s Select) Holding() bool
@@ -506,7 +518,7 @@ func (s Select) Holding() bool
 Holding reports whether the list is open, keeping tab and esc from the form.
 
 <a name="Select.Label"></a>
-### func \(Select\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L231>)
+### func \(Select\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L249>)
 
 ```go
 func (s Select) Label() string
@@ -515,7 +527,7 @@ func (s Select) Label() string
 
 
 <a name="Select.Selected"></a>
-### func \(Select\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L227>)
+### func \(Select\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L245>)
 
 ```go
 func (s Select) Selected() int
@@ -524,7 +536,7 @@ func (s Select) Selected() int
 Selected is the index of the chosen option.
 
 <a name="Select.Update"></a>
-### func \(Select\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L242>)
+### func \(Select\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L260>)
 
 ```go
 func (s Select) Update(msg tea.Msg) (Field, tea.Cmd)
@@ -533,7 +545,7 @@ func (s Select) Update(msg tea.Msg) (Field, tea.Cmd)
 
 
 <a name="Select.Value"></a>
-### func \(Select\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L230>)
+### func \(Select\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L248>)
 
 ```go
 func (s Select) Value() string
@@ -542,7 +554,7 @@ func (s Select) Value() string
 Value is the chosen option, or "" when there are none.
 
 <a name="Select.View"></a>
-### func \(Select\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L266>)
+### func \(Select\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L284>)
 
 ```go
 func (s Select) View(focused bool, labelW, width int) string
@@ -550,8 +562,17 @@ func (s Select) View(focused bool, labelW, width int) string
 
 
 
+<a name="Select.WithIcons"></a>
+### func \(Select\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L239>)
+
+```go
+func (s Select) WithIcons(set icon.Set) Select
+```
+
+WithIcons draws the list's marks from set instead of icon.FromEnv's.
+
 <a name="Toggle"></a>
-## type [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L175-L180>)
+## type [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L181-L186>)
 
 Toggle is a switch, on or off; space, enter, left or right flips it.
 
@@ -562,7 +583,7 @@ type Toggle struct {
 ```
 
 <a name="NewToggle"></a>
-### func [NewToggle](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L183>)
+### func [NewToggle](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L189>)
 
 ```go
 func NewToggle(label string, on bool, th theme.Resolved) Toggle
@@ -571,7 +592,7 @@ func NewToggle(label string, on bool, th theme.Resolved) Toggle
 NewToggle is a switch labelled label, on when on.
 
 <a name="Toggle.Blur"></a>
-### func \(Toggle\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L191>)
+### func \(Toggle\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L203>)
 
 ```go
 func (t Toggle) Blur() Field
@@ -580,7 +601,7 @@ func (t Toggle) Blur() Field
 
 
 <a name="Toggle.Focus"></a>
-### func \(Toggle\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L190>)
+### func \(Toggle\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L202>)
 
 ```go
 func (t Toggle) Focus() (Field, tea.Cmd)
@@ -589,7 +610,7 @@ func (t Toggle) Focus() (Field, tea.Cmd)
 
 
 <a name="Toggle.Label"></a>
-### func \(Toggle\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L189>)
+### func \(Toggle\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L201>)
 
 ```go
 func (t Toggle) Label() string
@@ -598,7 +619,7 @@ func (t Toggle) Label() string
 
 
 <a name="Toggle.On"></a>
-### func \(Toggle\) [On](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L188>)
+### func \(Toggle\) [On](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L200>)
 
 ```go
 func (t Toggle) On() bool
@@ -607,7 +628,7 @@ func (t Toggle) On() bool
 On reports whether the switch is on.
 
 <a name="Toggle.Update"></a>
-### func \(Toggle\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L193>)
+### func \(Toggle\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L205>)
 
 ```go
 func (t Toggle) Update(msg tea.Msg) (Field, tea.Cmd)
@@ -616,13 +637,22 @@ func (t Toggle) Update(msg tea.Msg) (Field, tea.Cmd)
 
 
 <a name="Toggle.View"></a>
-### func \(Toggle\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L200>)
+### func \(Toggle\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L212>)
 
 ```go
 func (t Toggle) View(focused bool, labelW, width int) string
 ```
 
 
+
+<a name="Toggle.WithIcons"></a>
+### func \(Toggle\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L194>)
+
+```go
+func (t Toggle) WithIcons(set icon.Set) Toggle
+```
+
+WithIcons draws the switch from set instead of icon.FromEnv's.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 

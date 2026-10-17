@@ -5,7 +5,8 @@ GOLANGCI_LINT_VERSION := v2.13.2
 GOMARKDOC_VERSION     := v1.1.0
 GOTESTSUM_VERSION     := v1.13.0
 GOSEC_VERSION         := v2.29.0
-GOCOBERTURA_VERSION   := latest
+# gocover-cobertura has no tags: the pin is its last commit.
+GOCOBERTURA_VERSION   := v0.0.0-20180217150009-aaee18c8195c
 SYFT_VERSION          := v1.51.1
 GRYPE_VERSION         := v0.118.0
 GOVULNCHECK_VERSION   := v1.7.0

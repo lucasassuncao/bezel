@@ -161,18 +161,7 @@ func (m Model[N]) Update(msg tea.KeyPressMsg) (Model[N], Action) {
 
 // move steps the cursor over section rows, clamped at both ends.
 func (m Model[N]) move(dir int, vis []int) Model[N] {
-	m.Cursor = min(max(m.Cursor, 0), len(vis)-1)
-	start := m.Cursor
-	for next := m.Cursor + dir; next >= 0 && next < len(vis); next += dir {
-		m.Cursor = next
-		if !m.Nodes[vis[next]].TreeInfo().Section {
-			break
-		}
-	}
-	if m.Nodes[vis[m.Cursor]].TreeInfo().Section {
-		m.Cursor = start
-	}
-	return m.clampOffset(len(vis))
+	return m.withWindow(m.window().Move(dir, len(vis), m.isSection(vis)))
 }
 
 // Move walks delta rows, stepping over section rows and stopping at the
@@ -182,22 +171,23 @@ func (m Model[N]) Move(delta int) Model[N] {
 	if len(vis) == 0 {
 		return m
 	}
-	m.Cursor = min(max(m.Cursor, 0), len(vis)-1)
-	dir := 1
-	if delta < 0 {
-		dir, delta = -1, -delta
-	}
-	for ; delta > 0; delta-- {
-		next := m.Cursor + dir
-		for next >= 0 && next < len(vis) && m.Nodes[vis[next]].TreeInfo().Section {
-			next += dir
-		}
-		if next < 0 || next >= len(vis) {
-			break
-		}
-		m.Cursor = next
-	}
-	return m.clampOffset(len(vis))
+	return m.withWindow(m.window().Move(delta, len(vis), m.isSection(vis)))
+}
+
+// isSection reports the visible rows the cursor passes over.
+func (m Model[N]) isSection(vis []int) func(int) bool {
+	return func(i int) bool { return m.Nodes[vis[i]].TreeInfo().Section }
+}
+
+// window is the tree's scroll as a layout.Window. Cursor, Offset and Height
+// stay fields of their own: callers read and set them.
+func (m Model[N]) window() layout.Window {
+	return layout.Window{Cursor: m.Cursor, Offset: m.Offset, Height: m.Height}
+}
+
+func (m Model[N]) withWindow(w layout.Window) Model[N] {
+	m.Cursor, m.Offset = w.Cursor, w.Offset
+	return m
 }
 
 // MoveTo jumps to a visible row, snapping backwards over section rows: the
@@ -254,25 +244,12 @@ func (m Model[N]) collapse(vis []int) (Model[N], Action) {
 	return m, None
 }
 
-// ClampOffset scrolls so the cursor row stays visible.
+// ClampOffset scrolls so the cursor row stays visible, moving a cursor past
+// the last row back onto it.
 func (m Model[N]) ClampOffset() Model[N] { return m.clampOffset(len(m.Visible())) }
 
 // clampOffset is ClampOffset for a caller already holding n visible rows.
-func (m Model[N]) clampOffset(n int) Model[N] {
-	m.Offset = layout.ClampScroll(m.Cursor, m.Offset, m.Height)
-	// The last row becomes "↓ N more" on overflow, so a cursor landing there
-	// needs one more line of offset to stay visible.
-	if m.hasMore(n) && m.Cursor >= m.Offset+m.Height-1 {
-		m.Offset = m.Cursor - m.Height + 2
-	}
-	return m
-}
-
-// hasMore reports whether n visible rows overflow below the window. A one-row
-// window never trades its only row for the indicator.
-func (m Model[N]) hasMore(n int) bool {
-	return m.Height > 1 && m.Offset+m.Height < n
-}
+func (m Model[N]) clampOffset(n int) Model[N] { return m.withWindow(m.window().Clamp(n)) }
 
 // ClampCursor forces the cursor back into the visible range, for state
 // restores whose cursor may no longer be valid against the restored nodes.
@@ -343,26 +320,19 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 		}
 		return th.Dim.Render(msg)
 	}
-	// Nodes may have shrunk under a scrolled tree; never scroll past the end.
-	m.Cursor = min(max(m.Cursor, 0), len(vis)-1)
-	m.Offset = min(m.Offset, max(len(vis)-m.Height, 0))
-	m = m.clampOffset(len(vis))
-	visible := m.Height
-	more := m.hasMore(len(vis))
-	if more {
-		visible--
-	}
-	end := min(m.Offset+visible, len(vis))
+	// Nodes may have shrunk under a scrolled tree; Clamp never scrolls past the end.
+	w := m.window().Clamp(len(vis))
+	start, end, below := w.Bounds(len(vis))
 
 	var sb strings.Builder
-	for vi := m.Offset; vi < end; vi++ {
-		sb.WriteString(row(m.Nodes[vis[vi]], vis[vi], vi == m.Cursor))
+	for vi := start; vi < end; vi++ {
+		sb.WriteString(row(m.Nodes[vis[vi]], vis[vi], vi == w.Cursor))
 		sb.WriteByte('\n')
 	}
-	if more {
-		sb.WriteString(th.Dim.Render(fmt.Sprintf("  ↓ %d more", len(vis)-end)))
+	if below > 0 {
+		sb.WriteString(th.Dim.Render(fmt.Sprintf("  ↓ %d more", below)))
 	} else {
-		for i := end - m.Offset; i < m.Height; i++ {
+		for i := end - start; i < m.Height; i++ {
 			sb.WriteByte('\n')
 		}
 	}

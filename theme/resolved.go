@@ -1,11 +1,12 @@
 package theme
 
 import (
+	"time"
+
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/legend"
-	"github.com/lucasassuncao/bezel/overlay"
 )
 
 // Resolved is a Theme after the whole cascade has been applied: ready-to-use
@@ -37,6 +38,10 @@ type Resolved struct {
 	StatusOK     lipgloss.Style
 	StatusErr    lipgloss.Style
 	Modal        lipgloss.Style
+
+	// CaretBlink is how often every text input built with this theme flips its
+	// caret; zero is draw.DefaultBlink. Tests shrink it, as each key arms one.
+	CaretBlink time.Duration
 }
 
 // Resolve turns t into styles for a dark or light terminal. Steps: the
@@ -61,20 +66,6 @@ func Resolve(t Theme, dark bool) Resolved {
 		}
 	}
 	return rt
-}
-
-// ModalFor is the modal box coloured by what it reports: the accent for
-// information, the palette's success/warning/danger inks otherwise.
-func (r Resolved) ModalFor(kind overlay.Kind) lipgloss.Style {
-	switch kind {
-	case overlay.Success:
-		return r.Modal.BorderForeground(lipgloss.Color(r.Colors.Success))
-	case overlay.Warning:
-		return r.Modal.BorderForeground(lipgloss.Color(r.Colors.Warning))
-	case overlay.Danger:
-		return r.Modal.BorderForeground(lipgloss.Color(r.Colors.Danger))
-	}
-	return r.Modal
 }
 
 // buildDerivedStyles creates the lipgloss styles from the resolved palette.

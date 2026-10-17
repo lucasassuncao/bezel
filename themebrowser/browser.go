@@ -1,5 +1,5 @@
 // Package themebrowser provides a small, inline (not full-screen) terminal
-// table listing bezel's built-in theme names next to their category.
+// table listing bezel's built-in theme names next to their category and palette.
 package themebrowser
 
 import (
@@ -30,20 +30,28 @@ type browserModel struct {
 	colors theme.Colors
 }
 
-func newBrowserModel(colors theme.Colors) *browserModel {
+// newBrowserModel lists the built-in themes in th's colours. dark picks the
+// variant of the adaptive default, for the table and for each palette.
+func newBrowserModel(th theme.Theme, dark bool) *browserModel {
 	const (
 		colTheme    = "Theme"
 		colCategory = "Category"
+		colPalette  = "Palette"
 	)
+	colors := theme.ResolveColors(th, dark)
 	themeW := lipgloss.Width(colTheme)
 	catW := lipgloss.Width(colCategory)
+	palW := lipgloss.Width(colPalette)
 
-	var names [][2]string // theme name, category name
+	all := theme.All()
+	var names [][3]string // theme name, category name, palette
 	for _, cat := range theme.Categories() {
 		for _, name := range cat.Themes {
-			names = append(names, [2]string{name, cat.Name})
+			pal := palette(all[name], dark)
+			names = append(names, [3]string{name, cat.Name, pal})
 			themeW = max(themeW, lipgloss.Width(name))
 			catW = max(catW, lipgloss.Width(cat.Name))
+			palW = max(palW, lipgloss.Width(pal))
 		}
 	}
 
@@ -53,7 +61,7 @@ func newBrowserModel(colors theme.Colors) *browserModel {
 	}
 	rows := make([]table.Row, len(names))
 	for i, n := range names {
-		rows[i] = table.Row{strconv.Itoa(i + 1), n[0], n[1]}
+		rows[i] = table.Row{strconv.Itoa(i + 1), n[0], n[1], n[2]}
 	}
 
 	visibleRows := len(rows)
@@ -69,14 +77,27 @@ func newBrowserModel(colors theme.Colors) *browserModel {
 			{Title: colID, Width: idW},
 			{Title: colTheme, Width: themeW},
 			{Title: colCategory, Width: catW},
+			{Title: colPalette, Width: palW},
 		}),
 		table.WithRows(rows),
 		table.WithStyles(tableStyles(colors)),
-		table.WithWidth((idW+2)+(themeW+2)+(catW+2)),
+		table.WithWidth((idW+2)+(themeW+2)+(catW+2)+(palW+2)),
 		table.WithHeight(visibleRows+1), // +1: WithHeight subtracts the 1-line header row internally
 	)
 
 	return &browserModel{tbl: tbl, colors: colors}
+}
+
+// palette is one block per colour that tells themes apart: accent, selection,
+// border, dim, success and danger, as t resolves on this background. The
+// blocks' resets end the cursor row's highlight, so the column goes last.
+func palette(t theme.Theme, dark bool) string {
+	c := theme.ResolveColors(t, dark)
+	blocks := make([]string, 0, 6)
+	for _, hex := range []string{c.Accent, c.Selection, c.Border, c.Dim, c.Success, c.Danger} {
+		blocks = append(blocks, lipgloss.NewStyle().Foreground(lipgloss.Color(hex)).Render("██"))
+	}
+	return strings.Join(blocks, " ")
 }
 
 // tableStyles keeps Padding off Selected: renderRow pads each cell, then
@@ -167,7 +188,7 @@ func BrowseInTerminal(t ...theme.Theme) error {
 	if len(t) > 0 {
 		th = t[0]
 	}
-	m := newBrowserModel(theme.ResolveColors(th, theme.DarkTerminal()))
+	m := newBrowserModel(th, theme.DarkTerminal())
 	p := tea.NewProgram(m)
 	if _, err := p.Run(); err != nil {
 		return fmt.Errorf("failed to run theme browser: %w", err)

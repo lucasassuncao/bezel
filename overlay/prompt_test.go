@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 type acceptedMsg struct{ value string }
@@ -18,7 +18,7 @@ type acceptedMsg struct{ value string }
 func newPrompt() Prompt {
 	return NewPrompt("New secret", func(v string) tea.Cmd {
 		return func() tea.Msg { return acceptedMsg{v} }
-	}, lipgloss.NewStyle(), legend.Style{})
+	}, theme.Resolved{})
 }
 
 func typeInto(p Prompt, s string) Prompt {
