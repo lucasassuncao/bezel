@@ -55,10 +55,21 @@ func DefaultKeys() Keys {
 
 // Model is a value: every method returns the new list.
 type Model[T any] struct {
-	rows []Row[T]
-	win  layout.Window
-	keys Keys
-	find filterMode
+	rows  []Row[T]
+	win   layout.Window
+	keys  Keys
+	find  filterMode
+	match func(query, label string) bool // nil is Contains
+}
+
+// Contains is the filter's default match: the label holds the query, in any case.
+func Contains(query, label string) bool {
+	return strings.Contains(strings.ToLower(label), strings.ToLower(query))
+}
+
+// Prefix is a match for the label starting with the query, in any case.
+func Prefix(query, label string) bool {
+	return strings.HasPrefix(strings.ToLower(label), strings.ToLower(query))
 }
 
 // filterMode is the / prompt while it is open: the text typed, and a window
@@ -80,6 +91,13 @@ func New[T any](rows []Row[T], height int) Model[T] {
 	m := Model[T]{rows: slices.Clone(rows), keys: DefaultKeys()}
 	m.win = layout.Window{Cursor: firstSelectable(rows), Height: height}
 	return m
+}
+
+// WithMatch filters with match, which gets the typed text and each label:
+// Prefix, a fuzzy match of the app's own. nil is Contains again.
+func (m Model[T]) WithMatch(match func(query, label string) bool) Model[T] {
+	m.match = match
+	return m.clampFilter()
 }
 
 // WithKeys rebinds the list.
@@ -206,10 +224,15 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 // filtered is the indices into rows that match the filter, so a pick maps
 // back to its own row even when labels repeat.
 func (m Model[T]) filtered() []int {
-	f := strings.ToLower(m.find.text)
+	query, match := m.find.text, m.match
+	if match == nil {
+		// Contains, with the query lowered once rather than once per row.
+		q := strings.ToLower(query)
+		match = func(_, label string) bool { return strings.Contains(strings.ToLower(label), q) }
+	}
 	var out []int
 	for i, r := range m.rows {
-		if !r.Section && (f == "" || strings.Contains(strings.ToLower(r.Label), f)) {
+		if !r.Section && (query == "" || match(query, r.Label)) {
 			out = append(out, i)
 		}
 	}

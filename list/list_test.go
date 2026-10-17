@@ -170,3 +170,25 @@ func TestSelectedValueKeepsItsType(t *testing.T) {
 	// strings.ToUpper compiles only while Value is a string, not an any.
 	require.Equal(t, "PAYLOAD", strings.ToUpper(m.Selected().Value))
 }
+
+func TestWithMatchDecidesWhatTheFilterKeeps(t *testing.T) {
+	filter := func(m Model[int], text string) Model[int] {
+		m, _ = m.Update(typed("/"))
+		for _, r := range text {
+			m, _ = m.Update(typed(string(r)))
+		}
+		return m
+	}
+	require.Equal(t, "server", filter(New(rows(), 10), "e").Selected().Label, "the default keeps any label holding the text")
+
+	prefix := New(rows(), 10).WithMatch(Prefix)
+	require.Nil(t, filter(prefix, "e").Selected(), "no label starts with e")
+	require.Equal(t, "cache", filter(prefix, "c").Selected().Label)
+	require.Equal(t, "server", filter(prefix.WithMatch(nil), "e").Selected().Label, "nil is the default again")
+}
+
+func TestTheMatchersIgnoreCase(t *testing.T) {
+	require.True(t, Contains("RV", "server"))
+	require.True(t, Prefix("SER", "server"))
+	require.False(t, Prefix("rv", "server"))
+}
