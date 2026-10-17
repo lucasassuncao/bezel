@@ -39,6 +39,21 @@ func press(f Form, keys ...string) (Form, tea.Cmd) {
 	return f, cmd
 }
 
+// Get reads a field by its type; a wrong index or type is false, not a panic.
+func TestGetReadsAFieldAsItsType(t *testing.T) {
+	f, _ := press(sample(t), "h", "i")
+	in, ok := Get[Input](f, 0)
+	require.True(t, ok)
+	require.Equal(t, "hi", in.Value())
+
+	_, ok = Get[Select](f, 0)
+	require.False(t, ok, "field 0 is an Input")
+	_, ok = Get[Input](f, 99)
+	require.False(t, ok)
+	_, ok = Get[Input](f, -1)
+	require.False(t, ok)
+}
+
 func TestTabMovesTheFocusAndWraps(t *testing.T) {
 	f := sample(t)
 	require.Equal(t, 0, f.Focused())

@@ -60,15 +60,18 @@ func (m model) Init() tea.Cmd { return m.init }
 
 // summary is what Create reports: every value the form holds.
 func (m model) summary() string {
-	name := m.form.Field(fName).(form.Input).Value()
+	// Get is false for a wrong index or type, and a zero control reads as empty.
+	in, _ := form.Get[form.Input](m.form, fName)
+	image, _ := form.Get[form.Select](m.form, fImage)
+	sh, _ := form.Get[form.Radio](m.form, fShell)
+	docker, _ := form.Get[form.Toggle](m.form, fDocker)
+	port, _ := form.Get[form.Checkbox](m.form, fPort)
+	name := in.Value()
 	if name == "" {
 		name = "my-project"
 	}
 	return fmt.Sprintf("created %s: %s, %s, docker %v, port 3000 %v", name,
-		m.form.Field(fImage).(form.Select).Value(),
-		m.form.Field(fShell).(form.Radio).Value(),
-		m.form.Field(fDocker).(form.Toggle).On(),
-		m.form.Field(fPort).(form.Checkbox).Checked())
+		image.Value(), sh.Value(), docker.On(), port.Checked())
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

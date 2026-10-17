@@ -12,6 +12,7 @@ Package form is the controls that ask for a value: a text input, a select, check
 
 ## Index
 
+- [func Get\[T Field\]\(f Form, i int\) \(T, bool\)](<#Get>)
 - [type Button](<#Button>)
   - [func NewButton\(label string, onPress tea.Cmd, th theme.Resolved\) Button](<#NewButton>)
   - [func \(b Button\) Blur\(\) Field](<#Button.Blur>)
@@ -83,6 +84,15 @@ Package form is the controls that ask for a value: a text input, a select, check
   - [func \(t Toggle\) WithIcons\(set icon.Set\) Toggle](<#Toggle.WithIcons>)
   - [func \(t Toggle\) WithKeys\(k Keys\) Toggle](<#Toggle.WithKeys>)
 
+
+<a name="Get"></a>
+## func [Get](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L96>)
+
+```go
+func Get[T Field](f Form, i int) (T, bool)
+```
+
+Get is the i\-th field as a T, and false when i is out of range or the field is of another type: a reordered form fails a check instead of a panic.
 
 <a name="Button"></a>
 ## type [Button](<https://github.com/lucasassuncao/bezel/blob/main/form/fields.go#L339-L344>)
@@ -283,10 +293,10 @@ New is a form focused on its first field.
 func (f Form) Field(i int) Field
 ```
 
-Field is the i\-th field as it is now; assert it to read its value.
+Field is the i\-th field as it is now; assert it to read its value, or use Get.
 
 <a name="Form.Focused"></a>
-### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L95>)
+### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L106>)
 
 ```go
 func (f Form) Focused() int
@@ -295,7 +305,7 @@ func (f Form) Focused() int
 Focused is the index of the field in focus.
 
 <a name="Form.Update"></a>
-### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L99>)
+### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L110>)
 
 ```go
 func (f Form) Update(msg tea.Msg) (Form, tea.Cmd)
@@ -304,7 +314,7 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd)
 Update moves the focus on tab and shift\+tab, unless the focused field holds them, and hands every other message to the focused field.
 
 <a name="Form.View"></a>
-### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L132>)
+### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L143>)
 
 ```go
 func (f Form) View(width int) string

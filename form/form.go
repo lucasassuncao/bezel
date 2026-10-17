@@ -88,8 +88,19 @@ func (f Form) WithKeys(k Keys) Form {
 	return f
 }
 
-// Field is the i-th field as it is now; assert it to read its value.
+// Field is the i-th field as it is now; assert it to read its value, or use Get.
 func (f Form) Field(i int) Field { return f.fields[i] }
+
+// Get is the i-th field as a T, and false when i is out of range or the field
+// is of another type: a reordered form fails a check instead of a panic.
+func Get[T Field](f Form, i int) (T, bool) {
+	if i < 0 || i >= len(f.fields) {
+		var zero T
+		return zero, false
+	}
+	v, ok := f.fields[i].(T)
+	return v, ok
+}
 
 // Focused is the index of the field in focus.
 func (f Form) Focused() int { return f.focus }
