@@ -26,7 +26,7 @@ func (s Shell) chromeRows() (top, bottom int, legendLines []string) {
 	// active and not while the input has the keys.
 	st := s.cfg.Theme.Legend
 	st.HelpKey = ""
-	if help := s.helpAction(); help != nil && s.input == nil {
+	if help := s.helpAction(); help != nil && !s.typing {
 		st.HelpKey = help.Entry().Help().Key
 	}
 	legendLines = legend.Pack(s.legendEntries(), s.width, s.cfg.LegendLines, st)
@@ -45,7 +45,7 @@ func (s Shell) headerRows() int {
 // legendEntries is the screen's keys, filtered by Can. An overlay never
 // replaces them: a modal draws its own keys inside its box.
 func (s Shell) legendEntries() []legend.Entry {
-	return legend.Filter(s.actionEntries(s.input == nil), s.cfg.Can)
+	return legend.Filter(s.actionEntries(!s.typing), s.cfg.Can)
 }
 
 // helpOverlay lists every key for where the user is, unpacked: the top
@@ -176,7 +176,7 @@ func (s Shell) statusRow() string {
 	switch {
 	case s.statusLiner() != nil:
 		return s.statusLiner().StatusLine(s.width)
-	case s.input != nil:
+	case s.typing:
 		return draw.Fit(s.input.View(), s.width)
 	case s.status != "" && s.level == OK:
 		return draw.StatusLine(s.width, s.status, th.StatusOK)

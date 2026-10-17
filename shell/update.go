@@ -83,9 +83,9 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		return s, false, nil
 	}
 
-	if s.input != nil {
-		updated, cmd := s.input.Update(k)
-		*s.input = updated
+	if s.typing {
+		var cmd tea.Cmd
+		s.input, cmd = s.input.Update(k)
 		return s, true, cmd
 	}
 
@@ -128,12 +128,18 @@ func (s Shell) ClearStatus() Shell {
 	return s
 }
 
-// SetInput puts a text input on the status row; while set it takes every
-// key, and edits land in *m for the app to read back. nil removes it.
-func (s Shell) SetInput(m *textinput.Model) Shell {
-	s.input = m
+// SetInput puts a text input on the status row. While it is there it takes
+// every key; the app reads the edits back with Input after each Update.
+func (s Shell) SetInput(m textinput.Model) Shell {
+	s.input, s.typing = m, true
 	return s
 }
 
-// Input is the input SetInput put on the status row, or nil.
-func (s Shell) Input() *textinput.Model { return s.input }
+// ClearInput takes the input off the status row and gives the keys back.
+func (s Shell) ClearInput() Shell {
+	s.input, s.typing = textinput.Model{}, false
+	return s
+}
+
+// Input is the status row's input as edited so far, and false when none is set.
+func (s Shell) Input() (textinput.Model, bool) { return s.input, s.typing }

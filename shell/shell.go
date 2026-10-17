@@ -87,7 +87,8 @@ type Shell struct {
 	status    string
 	level     Level
 	statusSeq uint
-	input     *textinput.Model
+	input     textinput.Model // the status row's line, while typing
+	typing    bool
 
 	busy string // what the spinner says, empty when idle
 	spin spinner.Model

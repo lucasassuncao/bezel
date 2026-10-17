@@ -114,7 +114,7 @@ func TestStatusRowShowsInputThenBannerThenTabStatus(t *testing.T) {
 	in := textinput.New()
 	in.Prompt = ":"
 	in.SetValue("cmd")
-	s = s.SetInput(&in)
+	s = s.SetInput(in)
 	plain := ansi.Strip(s.View(demoPanes()))
 	require.Contains(t, plain, ":cmd")
 	require.NotContains(t, plain, "saved!")
@@ -190,7 +190,7 @@ func TestLegendDropsHelpWhileAnInputHasTheKeys(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Help()}})
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	in := textinput.New()
-	s = s.SetInput(&in)
+	s = s.SetInput(in)
 	require.NotContains(t, legendRow(s), "[?] help")
 }
 

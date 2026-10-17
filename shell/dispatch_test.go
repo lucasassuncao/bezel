@@ -138,8 +138,8 @@ func TestActionsStandAsideForTheInput(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Custom("p", "ping", func(ActionContext) tea.Cmd { ran = true; return nil })))
 	in := textinput.New()
 	in.Focus()
-	s = s.SetInput(&in)
-	s.Update(keyP)
+	s, _, _ = s.SetInput(in).Update(keyP)
 	require.False(t, ran)
-	require.Equal(t, "p", in.Value())
+	got, _ := s.Input()
+	require.Equal(t, "p", got.Value())
 }

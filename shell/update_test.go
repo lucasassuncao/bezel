@@ -73,13 +73,31 @@ func TestStatusExpiresOnlyForItsOwnTick(t *testing.T) {
 func TestStatusInputTakesTheKeys(t *testing.T) {
 	in := textinput.New()
 	in.Focus()
-	s := newShell().SetInput(&in)
+	s := newShell().SetInput(in)
 	s, handled, _ := s.Update(press("a"))
 	require.True(t, handled)
-	require.Equal(t, "a", s.Input().Value())
-	s = s.SetInput(nil)
+	got, ok := s.Input()
+	require.True(t, ok)
+	require.Equal(t, "a", got.Value())
+	s = s.ClearInput()
+	_, ok = s.Input()
+	require.False(t, ok)
 	_, handled, _ = s.Update(press("a"))
 	require.False(t, handled)
+}
+
+// The input is the shell's own copy: an edit shows only in the shell Update returned.
+func TestStatusInputIsAValue(t *testing.T) {
+	in := textinput.New()
+	in.Focus()
+	before := newShell().SetInput(in)
+	after, _, _ := before.Update(press("a"))
+
+	got, _ := after.Input()
+	require.Equal(t, "a", got.Value())
+	old, _ := before.Input()
+	require.Empty(t, old.Value())
+	require.Empty(t, in.Value())
 }
 
 type answer struct{}
