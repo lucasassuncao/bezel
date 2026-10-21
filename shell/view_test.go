@@ -214,3 +214,23 @@ func TestTheStatusRowIsFlushLeft(t *testing.T) {
 		require.True(t, strings.HasPrefix(rows[statusAt(s)], "copied: kv/app"), "level %d: %q", lvl, rows[statusAt(s)])
 	}
 }
+
+// openSGR is the sequence that starts text in st, to find where it was used.
+func openSGR(st lipgloss.Style) string { return strings.Split(st.Render("x"), "x")[0] }
+
+func TestAPaneCarriesRightTextAndItsOwnBorderColour(t *testing.T) {
+	s := newShell()
+	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	red := lipgloss.Color("#FF0000")
+
+	plain := strings.Split(s.View(demoPanes()), "\n")[s.Body().Y]
+	out := strings.Split(s.View(map[string]Pane{
+		"list":   {Title: "List"},
+		"detail": {Title: "Detail", Right: "3 items", Accent: red},
+	}), "\n")[s.Body().Y]
+
+	require.Contains(t, ansi.Strip(out), "3 items")
+	require.Equal(t, 100, ansi.StringWidth(out))
+	require.Contains(t, out, openSGR(lipgloss.NewStyle().Foreground(red)))
+	require.NotContains(t, plain, openSGR(lipgloss.NewStyle().Foreground(red)))
+}

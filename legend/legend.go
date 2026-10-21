@@ -65,10 +65,18 @@ type Style struct {
 	Key     lipgloss.Style
 	Text    lipgloss.Style
 	HelpKey string
+	Bare    bool // keys without their brackets: "r run" for "[r] run"
 }
 
 func (s Style) pair(e Entry) string {
-	return s.Key.Render("["+e.Help().Key+"]") + " " + s.Text.Render(e.Help().Desc)
+	return s.Key.Render(s.key(e.Help().Key)) + " " + s.Text.Render(e.Help().Desc)
+}
+
+func (s Style) key(k string) string {
+	if s.Bare {
+		return k
+	}
+	return "[" + k + "]"
 }
 
 // HintLine is every entry on one line, for a modal's own footer.
@@ -112,7 +120,7 @@ func Pack(entries []Entry, width, maxLines int, st Style) []string {
 		if st.HelpKey == "" {
 			return st.Text.Render(fmt.Sprintf("  +%d more", dropped))
 		}
-		return st.Text.Render(fmt.Sprintf("  +%d in [%s]", dropped, st.HelpKey))
+		return st.Text.Render(fmt.Sprintf("  +%d in %s", dropped, st.key(st.HelpKey)))
 	}
 
 	if width <= 0 || maxLines < 1 {

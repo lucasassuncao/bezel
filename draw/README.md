@@ -43,6 +43,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func StatusLine\(width int, text string, style lipgloss.Style\) string](<#StatusLine>)
 - [func Tabs\(width int, names \[\]string, active int, st ChromeStyle\) string](<#Tabs>)
 - [func Tail\(lines \[\]string, height int\) \[\]string](<#Tail>)
+- [func TitledPanel\(r layout.Rect, title, right, body string, st PanelStyle\) string](<#TitledPanel>)
 - [func Truncate\(s string, width int\) string](<#Truncate>)
 - [func ViewportGutter\(style lipgloss.Style\) viewport.GutterFunc](<#ViewportGutter>)
 - [func Width\(s string\) int](<#Width>)
@@ -327,7 +328,7 @@ func PadHeight(s string, height int) string
 PadHeight grows a block to height lines so a Composite has rows to land on.
 
 <a name="Panel"></a>
-## func [Panel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L31>)
+## func [Panel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L32>)
 
 ```go
 func Panel(r layout.Rect, title, body string, st PanelStyle) string
@@ -425,6 +426,15 @@ func Tail(lines []string, height int) []string
 ```
 
 Tail is a copy of the last height lines of lines, the way a log scrolls. A copy, so holding it does not keep the whole log alive.
+
+<a name="TitledPanel"></a>
+## func [TitledPanel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L38>)
+
+```go
+func TitledPanel(r layout.Rect, title, right, body string, st PanelStyle) string
+```
+
+TitledPanel is Panel with right at the end of the top edge, as a count or a rate, dropped before the title is cut.
 
 <a name="Truncate"></a>
 ## func [Truncate](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L21>)
@@ -531,14 +541,15 @@ type ChromeStyle struct {
 ```
 
 <a name="PanelStyle"></a>
-## type [PanelStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L15-L19>)
+## type [PanelStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L15-L20>)
 
-PanelStyle colours a panel: Border inks the edges, Title the label in the top edge. Edge is the box\-drawing set, rounded when zero; a focused panel can wear a thicker one so focus survives a terminal without colour.
+PanelStyle colours a panel: Border inks the edges, Title the label in the top edge, Right the text at its other end. Edge is the box\-drawing set, rounded when zero; a focused panel can wear a thicker one.
 
 ```go
 type PanelStyle struct {
     Border lipgloss.Style
     Title  lipgloss.Style
+    Right  lipgloss.Style
     Edge   lipgloss.Border
 }
 ```

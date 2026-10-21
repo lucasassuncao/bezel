@@ -10,11 +10,12 @@ import (
 )
 
 // PanelStyle colours a panel: Border inks the edges, Title the label in the
-// top edge. Edge is the box-drawing set, rounded when zero; a focused panel
-// can wear a thicker one so focus survives a terminal without colour.
+// top edge, Right the text at its other end. Edge is the box-drawing set,
+// rounded when zero; a focused panel can wear a thicker one.
 type PanelStyle struct {
 	Border lipgloss.Style
 	Title  lipgloss.Style
+	Right  lipgloss.Style
 	Edge   lipgloss.Border
 }
 
@@ -29,6 +30,12 @@ func (st PanelStyle) edge() lipgloss.Border {
 // Below three rows only the title edge is drawn; below four columns
 // nothing is.
 func Panel(r layout.Rect, title, body string, st PanelStyle) string {
+	return TitledPanel(r, title, "", body, st)
+}
+
+// TitledPanel is Panel with right at the end of the top edge, as a count or
+// a rate, dropped before the title is cut.
+func TitledPanel(r layout.Rect, title, right, body string, st PanelStyle) string {
 	if r.W < 4 || r.H < 1 {
 		return ""
 	}
@@ -39,8 +46,16 @@ func Panel(r layout.Rect, title, body string, st PanelStyle) string {
 	if maxLabel := innerW - 1; ansi.StringWidth(label) > maxLabel {
 		label = ansi.Truncate(label, maxLabel, "… ")
 	}
-	fill := max(0, innerW-1-ansi.StringWidth(label))
-	top := st.Border.Render(e.TopLeft+e.Top) + label + st.Border.Render(strings.Repeat(e.Top, fill)+e.TopRight)
+	tail := ""
+	if right != "" {
+		tail = st.Right.Render(" " + right + " ")
+	}
+	top := st.Border.Render(e.TopLeft+e.Top) + label
+	if fill := innerW - 2 - ansi.StringWidth(label) - ansi.StringWidth(tail); tail != "" && fill > 0 {
+		top += st.Border.Render(strings.Repeat(e.Top, fill)) + tail + st.Border.Render(e.Top+e.TopRight)
+	} else {
+		top += st.Border.Render(strings.Repeat(e.Top, max(0, innerW-1-ansi.StringWidth(label))) + e.TopRight)
+	}
 	if r.H < 3 {
 		return top
 	}

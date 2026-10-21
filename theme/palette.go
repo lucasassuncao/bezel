@@ -24,6 +24,10 @@ type Colors struct {
 	Danger    string // errors, unknown items
 	Info      string // counts, badges, neutral highlights
 	OnAccent  string // text drawn on a filled accent, success, warning or danger
+	// Series tells apart things of one kind, such as a dashboard's panels;
+	// Ramp climbs from low to high, as a meter or a graph fills.
+	Series [6]string
+	Ramp   [3]string
 }
 
 // Styles holds optional per-element lipgloss overrides. Nil fields are ignored
@@ -49,6 +53,7 @@ type adaptive struct{ light, dark string }
 
 var defaults = struct {
 	accent, selection, border, dim, text, success, warning, danger, info, onAccent adaptive
+	series                                                                         [6]adaptive
 }{
 	accent:    adaptive{"#5f00af", "#c39bff"},
 	selection: adaptive{"#5f00af", "#c39bff"},
@@ -60,6 +65,10 @@ var defaults = struct {
 	danger:    adaptive{"#af0000", "#ff6b6b"},
 	info:      adaptive{"#5f00af", "#c39bff"},
 	onAccent:  adaptive{"#ffffff", "#1c1c1c"},
+	series: [6]adaptive{
+		{"#2e7d32", "#87d787"}, {"#00838f", "#5fd7d7"}, {"#d35400", "#ffaf5f"},
+		{"#1565c0", "#87afff"}, {"#9a7b00", "#ffd75f"}, {"#8e24aa", "#d787d7"},
+	},
 }
 
 // defaultColors is the adaptive default resolved for one background.
@@ -71,17 +80,21 @@ func defaultColors(dark bool) Colors {
 		return a.light
 	}
 	d := defaults
-	return Colors{
+	c := Colors{
 		Accent: pick(d.accent), Selection: pick(d.selection), Border: pick(d.border),
 		Dim: pick(d.dim), Text: pick(d.text), Success: pick(d.success),
 		Warning: pick(d.warning), Danger: pick(d.danger), Info: pick(d.info),
 		OnAccent: pick(d.onAccent),
 	}
+	for i, a := range d.series {
+		c.Series[i] = pick(a)
+	}
+	return c
 }
 
 // ResolveColors merges t into concrete Colors over the adaptive default for
 // a dark or light terminal. A theme that sets Accent but not Selection or
-// Info uses its accent for them.
+// Info uses its accent for them; one without a Ramp climbs its states.
 func ResolveColors(t Theme, dark bool) Colors {
 	var c Colors
 	for _, layer := range t.chain() {
@@ -90,7 +103,14 @@ func ResolveColors(t Theme, dark bool) Colors {
 	if c.Accent != "" {
 		c = mergeColors(Colors{Selection: c.Accent, Info: c.Accent}, c)
 	}
-	return mergeColors(defaultColors(dark), c)
+	c = mergeColors(defaultColors(dark), c)
+	states := [3]string{c.Success, c.Warning, c.Danger}
+	for i := range c.Ramp {
+		if c.Ramp[i] == "" {
+			c.Ramp[i] = states[i]
+		}
+	}
+	return c
 }
 
 // chain is t and its Bases, deepest first. A Base met twice ends the walk,
@@ -122,6 +142,12 @@ func mergeColors(base, over Colors) Colors {
 	set(&base.Danger, over.Danger)
 	set(&base.Info, over.Info)
 	set(&base.OnAccent, over.OnAccent)
+	for i := range base.Series {
+		set(&base.Series[i], over.Series[i])
+	}
+	for i := range base.Ramp {
+		set(&base.Ramp[i], over.Ramp[i])
+	}
 	return base
 }
 
@@ -143,6 +169,7 @@ var themeRegistry = []struct {
 		{"default", &Default},
 		{"plain", &Plain},
 		{"terminal", &Terminal},
+		{"gruvbox", &Gruvbox},
 	}},
 	{"Fruit", []namedTheme{
 		{"banana", &Banana}, {"mint", &Mint}, {"strawberry", &Strawberry},
@@ -328,6 +355,7 @@ var (
 		Danger:    "1", // ANSI red
 		Warning:   "3", // ANSI yellow
 		Info:      "6", // ANSI cyan
+		Series:    [6]string{"2", "6", "3", "4", "5", "1"},
 	}}
 	// Terminal takes every colour from the terminal's own palette, so
 	// the interface matches whatever scheme the user already runs.
@@ -340,6 +368,14 @@ var (
 		Danger:    "9",
 		Warning:   "3",
 		Info:      "6",
+		Series:    [6]string{"10", "14", "11", "12", "13", "9"},
+	}}
+	// Gruvbox is morhetz's retro palette, for a dark terminal.
+	Gruvbox = Theme{Colors: Colors{
+		Accent: "#FE8019", Selection: "#FABD2F", Border: "#7C6F64", Dim: "#A89984", Text: "#EBDBB2",
+		Success: "#B8BB26", Warning: "#FABD2F", Danger: "#FB4934", Info: "#83A598", OnAccent: "#282828",
+		Series: [6]string{"#B8BB26", "#8EC07C", "#FE8019", "#83A598", "#FABD2F", "#D3869B"},
+		Ramp:   [3]string{"#B8BB26", "#FABD2F", "#FE8019"},
 	}}
 	Guarana = Theme{Colors: Colors{
 		Accent: "#A83220", Selection: "#D4503C", Border: "#5C2A1A", Dim: "#3A1408", Success: "#4A7C2F", Danger: "#C0392B",

@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"image/color"
 	"strings"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -76,8 +77,10 @@ func (s Shell) sectionName() string {
 // Pane is what the app hands the shell for one leaf: a title for the border
 // and a body drawn into the inner rect the shell computed.
 type Pane struct {
-	Title string
-	Body  func(inner layout.Rect) string
+	Title  string
+	Right  string      // at the end of the top edge, while it fits beside Title
+	Accent color.Color // the edges' colour, focused or not; nil keeps the theme's
+	Body   func(inner layout.Rect) string
 }
 
 // withPresent re-resolves the layout for exactly these panes. View uses it so
@@ -160,11 +163,14 @@ func (s Shell) paneCanvas(panes map[string]Pane, body layout.Rect) string {
 		if name == s.Focus() {
 			st = s.cfg.Theme.PanelFocused
 		}
+		if p.Accent != nil {
+			st.Border = st.Border.Foreground(p.Accent)
+		}
 		content := ""
 		if p.Body != nil {
 			content = p.Body(draw.InnerRect(r))
 		}
-		canvas = draw.Composite(draw.Panel(r, p.Title, content, st), canvas, r.X, r.Y-body.Y)
+		canvas = draw.Composite(draw.TitledPanel(r, p.Title, p.Right, content, st), canvas, r.X, r.Y-body.Y)
 	}
 	return canvas
 }

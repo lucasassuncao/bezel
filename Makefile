@@ -148,6 +148,7 @@ docs: $(GOMARKDOC) ## Generate documentation with gomarkdoc
 		-o '{{.Dir}}/README.md' \
 		./animation/... \
 		./browser/... \
+		./chart/... \
 		./draw/... \
 		./form/... \
 		./icon/... \

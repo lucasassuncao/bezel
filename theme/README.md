@@ -123,6 +123,7 @@ var (
         Danger:    "1",
         Warning:   "3",
         Info:      "6",
+        Series:    [6]string{"2", "6", "3", "4", "5", "1"},
     }}
     // Terminal takes every colour from the terminal's own palette, so
     // the interface matches whatever scheme the user already runs.
@@ -135,6 +136,14 @@ var (
         Danger:    "9",
         Warning:   "3",
         Info:      "6",
+        Series:    [6]string{"10", "14", "11", "12", "13", "9"},
+    }}
+    // Gruvbox is morhetz's retro palette, for a dark terminal.
+    Gruvbox = Theme{Colors: Colors{
+        Accent: "#FE8019", Selection: "#FABD2F", Border: "#7C6F64", Dim: "#A89984", Text: "#EBDBB2",
+        Success: "#B8BB26", Warning: "#FABD2F", Danger: "#FB4934", Info: "#83A598", OnAccent: "#282828",
+        Series: [6]string{"#B8BB26", "#8EC07C", "#FE8019", "#83A598", "#FABD2F", "#D3869B"},
+        Ramp:   [3]string{"#B8BB26", "#FABD2F", "#FE8019"},
     }}
     Guarana = Theme{Colors: Colors{
         Accent: "#A83220", Selection: "#D4503C", Border: "#5C2A1A", Dim: "#3A1408", Success: "#4A7C2F", Danger: "#C0392B",
@@ -301,7 +310,7 @@ var (
 ```
 
 <a name="All"></a>
-## func [All](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L199>)
+## func [All](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L226>)
 
 ```go
 func All() map[string]Theme
@@ -310,7 +319,7 @@ func All() map[string]Theme
 All returns all built\-in theme presets keyed by their CLI name. Useful for \-\-theme flag validation and \-\-list\-themes output in host CLIs.
 
 <a name="DarkTerminal"></a>
-## func [DarkTerminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L509>)
+## func [DarkTerminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L545>)
 
 ```go
 func DarkTerminal() bool
@@ -319,7 +328,7 @@ func DarkTerminal() bool
 DarkTerminal asks the terminal on stdin/stdout whether its background is dark, for code that resolves a theme outside a running bubbletea program.
 
 <a name="Category"></a>
-## type [Category](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L222-L225>)
+## type [Category](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L249-L252>)
 
 Category groups a set of related built\-in theme names for display purposes \- e.g. a \-\-list\-themes command that wants headings instead of one flat list.
 
@@ -331,7 +340,7 @@ type Category struct {
 ```
 
 <a name="Categories"></a>
-### func [Categories](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L230>)
+### func [Categories](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L257>)
 
 ```go
 func Categories() []Category
@@ -340,7 +349,7 @@ func Categories() []Category
 Categories returns the built\-in themes grouped for display. Every theme in All\(\) belongs to exactly one category \- "plain" has no siblings of its own, so it lives under "Miscellaneous" rather than being left ungrouped.
 
 <a name="Colors"></a>
-## type [Colors](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L16-L27>)
+## type [Colors](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L16-L31>)
 
 Colors names what a colour is for, not where one app happens to use it. Each value is a lipgloss colour string: a hex value \("\#7C3AED"\) or an ANSI code \("63"\). Empty means the adaptive default for that role.
 
@@ -356,20 +365,24 @@ type Colors struct {
     Danger    string // errors, unknown items
     Info      string // counts, badges, neutral highlights
     OnAccent  string // text drawn on a filled accent, success, warning or danger
+    // Series tells apart things of one kind, such as a dashboard's panels;
+    // Ramp climbs from low to high, as a meter or a graph fills.
+    Series [6]string
+    Ramp   [3]string
 }
 ```
 
 <a name="ResolveColors"></a>
-### func [ResolveColors](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L85>)
+### func [ResolveColors](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L98>)
 
 ```go
 func ResolveColors(t Theme, dark bool) Colors
 ```
 
-ResolveColors merges t into concrete Colors over the adaptive default for a dark or light terminal. A theme that sets Accent but not Selection or Info uses its accent for them.
+ResolveColors merges t into concrete Colors over the adaptive default for a dark or light terminal. A theme that sets Accent but not Selection or Info uses its accent for them; one without a Ramp climbs its states.
 
 <a name="Resolved"></a>
-## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L15-L46>)
+## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L15-L49>)
 
 Resolved is a Theme after the whole cascade has been applied: ready\-to\-use lipgloss styles plus the colors they were derived from. A consumer builds one per instance and only reads it afterwards.
 
@@ -405,11 +418,14 @@ type Resolved struct {
     // CaretBlink is how often every text input built with this theme flips its
     // caret; zero is draw.DefaultBlink. Tests shrink it, as each key arms one.
     CaretBlink time.Duration
+    // Series and Ramp are Colors' own, as foreground styles.
+    Series [6]lipgloss.Style
+    Ramp   [3]lipgloss.Style
 }
 ```
 
 <a name="Resolve"></a>
-### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L50>)
+### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L53>)
 
 ```go
 func Resolve(t Theme, dark bool) Resolved
@@ -418,7 +434,7 @@ func Resolve(t Theme, dark bool) Resolved
 Resolve turns t into styles for a dark or light terminal. Steps: the colour cascade \(ResolveColors\), the derived styles, then t.Styles overrides.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L31-L35>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L35-L39>)
 
 Styles holds optional per\-element lipgloss overrides. Nil fields are ignored during theme resolution and the default derived from Colors is used instead.
 
@@ -431,7 +447,7 @@ type Styles struct {
 ```
 
 <a name="Theme"></a>
-## type [Theme](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L40-L44>)
+## type [Theme](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L44-L48>)
 
 Theme layers an appearance: Base is an optional preset \(nil → adaptive default\) that may have a Base of its own; Colors and Styles override every layer under them.
 
@@ -444,7 +460,7 @@ type Theme struct {
 ```
 
 <a name="Lookup"></a>
-### func [Lookup](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L209>)
+### func [Lookup](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L236>)
 
 ```go
 func Lookup(name string) (Theme, error)

@@ -23,7 +23,7 @@ Package legend is the key legend: entries tagged with the capability they need, 
 
 
 <a name="HintLine"></a>
-## func [HintLine](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L75>)
+## func [HintLine](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L83>)
 
 ```go
 func HintLine(entries []Entry, st Style) string
@@ -32,7 +32,7 @@ func HintLine(entries []Entry, st Style) string
 HintLine is every entry on one line, for a modal's own footer.
 
 <a name="Pack"></a>
-## func [Pack](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L87>)
+## func [Pack](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L95>)
 
 ```go
 func Pack(entries []Entry, width, maxLines int, st Style) []string
@@ -72,7 +72,7 @@ func Filter(entries []Entry, can func(Capability) bool) []Entry
 Filter keeps the entries can allows and that are not disabled, in a new slice. A nil can allows every capability.
 
 <a name="FromBindings"></a>
-### func [FromBindings](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L201>)
+### func [FromBindings](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L209>)
 
 ```go
 func FromBindings(bs []key.Binding) []Entry
@@ -90,7 +90,7 @@ func New(keys, desc string, needs ...Capability) Entry
 New builds an entry from the key label, its description and, optionally, the capability it needs. keys is what the legend prints, e.g. "↑/↓".
 
 <a name="Style"></a>
-## type [Style](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L64-L68>)
+## type [Style](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L64-L69>)
 
 Style colours the bracketed key and the action text. HelpKey is the key that opens the full list: when set, "\[HelpKey\] help" opens the legend and the dropped\-count mark names it. Empty means the app has none.
 
@@ -99,6 +99,7 @@ type Style struct {
     Key     lipgloss.Style
     Text    lipgloss.Style
     HelpKey string
+    Bare    bool // keys without their brackets: "r run" for "[r] run"
 }
 ```
 

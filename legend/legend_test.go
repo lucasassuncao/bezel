@@ -182,3 +182,11 @@ func TestAnEmptyGroupTakesNoRow(t *testing.T) {
 	in := []Entry{grouped("a", 0), grouped("c", 2)}
 	require.Equal(t, []string{"[a] do a", "[c] do c"}, strip(Pack(in, 80, 3, Style{})))
 }
+
+func TestPackBareLeavesTheBracketsOut(t *testing.T) {
+	lines := Pack(entries(8), 40, 2, Style{HelpKey: "?", Bare: true})
+	got := ansi.Strip(strings.Join(lines, "\n"))
+	require.Contains(t, got, "a action number a")
+	require.NotContains(t, got, "[")
+	require.Contains(t, got, "in ?")
+}

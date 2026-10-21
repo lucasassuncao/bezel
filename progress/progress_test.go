@@ -47,3 +47,25 @@ func TestStepperCompactsWhenItDoesNotFit(t *testing.T) {
 	require.Contains(t, ansi.Strip(Stepper(steps, 3, 30, th(), icon.Unicode())), "All 3 steps done")
 	require.Empty(t, Stepper(nil, 0, 30, th(), icon.Unicode()))
 }
+
+func gruvbox() theme.Resolved { return theme.Resolve(theme.Gruvbox, true) }
+
+func TestMeterIsSquaresFilledAlongTheRamp(t *testing.T) {
+	require.Equal(t, "■■■■■□□□□□", ansi.Strip(Meter(5, 10, 10, th())))
+	require.Equal(t, "□□□□", ansi.Strip(Meter(1, 0, 4, th())), "zero total is nothing done")
+	full := Meter(9, 9, 9, gruvbox())
+	for _, st := range gruvbox().Ramp {
+		require.Contains(t, full, st.Render("■■■"))
+	}
+}
+
+func TestSmoothSplitsACellInEighths(t *testing.T) {
+	require.Equal(t, "█▌░░", ansi.Strip(Smooth(3, 8, 4, th())))
+	require.Equal(t, "▏░", ansi.Strip(Smooth(1, 16, 2, th())))
+	require.Equal(t, "░░░░", ansi.Strip(Smooth(0, 0, 4, th())), "zero total is nothing done")
+	require.Equal(t, "████", ansi.Strip(Smooth(9, 8, 4, th())), "overshoot stays in the bar")
+}
+
+func TestSmoothInASeriesColour(t *testing.T) {
+	require.Contains(t, Smooth(8, 8, 2, gruvbox(), InSeries(4)), gruvbox().Series[4].Render("██"))
+}

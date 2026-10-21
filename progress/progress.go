@@ -70,3 +70,58 @@ func Stepper(steps []string, current, width int, th theme.Resolved, set icon.Set
 	compact := fmt.Sprintf("Step %d of %d · ", current+1, len(steps))
 	return draw.Fit(set.Render(icon.Running, th)+" "+th.Dim.Render(compact)+th.Bold.Render(steps[current]), width)
 }
+
+// Meter is done/total as width squares: the filled ones coloured along the
+// theme's ramp from the left, the rest hollow, so it reads without colour.
+func Meter(done, total, width int, th theme.Resolved) string {
+	width = max(width, 1)
+	filled := 0
+	if total > 0 {
+		filled = min(max(done, 0)*width/total, width)
+	}
+	var b strings.Builder
+	for i := 0; i < filled; {
+		step := i * len(th.Ramp) / width
+		j := i
+		for j < filled && j*len(th.Ramp)/width == step {
+			j++
+		}
+		b.WriteString(th.Ramp[step].Render(strings.Repeat("■", j-i)))
+		i = j
+	}
+	return b.String() + th.Muted.Render(strings.Repeat("□", width-filled))
+}
+
+// Option changes how Smooth draws its bar.
+type Option func(*look)
+
+type look struct{ series int }
+
+// InSeries fills the bar in the theme's i-th series colour instead of the accent.
+func InSeries(i int) Option { return func(l *look) { l.series = i } }
+
+// eighths are a cell filled from the left, one eighth at a time.
+var eighths = []rune("▏▎▍▌▋▊▉")
+
+// Smooth is done/total as a bar width cells wide whose edge is cut to an
+// eighth of a cell, over a muted track as Bar's.
+func Smooth(done, total, width int, th theme.Resolved, opts ...Option) string {
+	l := look{series: -1}
+	for _, o := range opts {
+		o(&l)
+	}
+	fill := th.Accent
+	if l.series >= 0 {
+		fill = th.Series[l.series%len(th.Series)]
+	}
+	width = max(width, 1)
+	n := 0
+	if total > 0 {
+		n = min(max(done, 0)*width*8/total, width*8)
+	}
+	cells := strings.Repeat("█", n/8)
+	if n%8 > 0 {
+		cells += string(eighths[n%8-1])
+	}
+	return fill.Render(cells) + th.Muted.Render(strings.Repeat("░", width-ansi.StringWidth(cells)))
+}

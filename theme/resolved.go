@@ -43,6 +43,9 @@ type Resolved struct {
 	// CaretBlink is how often every text input built with this theme flips its
 	// caret; zero is draw.DefaultBlink. Tests shrink it, as each key arms one.
 	CaretBlink time.Duration
+	// Series and Ramp are Colors' own, as foreground styles.
+	Series [6]lipgloss.Style
+	Ramp   [3]lipgloss.Style
 }
 
 // Resolve turns t into styles for a dark or light terminal. Steps: the
@@ -97,15 +100,23 @@ func buildDerivedStyles(c Colors) Resolved {
 		Cursor:      lipgloss.NewStyle().Bold(true).Foreground(selection),
 		Badge:       lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(accent),
 	}
+	for i, s := range c.Series {
+		r.Series[i] = lipgloss.NewStyle().Foreground(lipgloss.Color(s))
+	}
+	for i, s := range c.Ramp {
+		r.Ramp[i] = lipgloss.NewStyle().Foreground(lipgloss.Color(s))
+	}
 	r.Panel = draw.PanelStyle{
 		Border: lipgloss.NewStyle().Foreground(border),
 		Title:  lipgloss.NewStyle().Foreground(dim),
+		Right:  lipgloss.NewStyle().Foreground(dim),
 	}
 	// Focus rides on the thick edge and the filled title as well as the colour,
 	// so it survives a monochrome terminal.
 	r.PanelFocused = draw.PanelStyle{
 		Border: lipgloss.NewStyle().Foreground(accent),
 		Title:  lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(selection),
+		Right:  lipgloss.NewStyle().Foreground(dim),
 		Edge:   lipgloss.ThickBorder(),
 	}
 	r.Chrome = draw.ChromeStyle{

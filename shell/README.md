@@ -390,14 +390,16 @@ func WithKey(keys ...string) Option
 WithKey rebinds the action. A prebuilt, or a Command that had no key, prints the first key; a custom keeps the label it was given.
 
 <a name="Pane"></a>
-## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L78-L81>)
+## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L79-L84>)
 
 Pane is what the app hands the shell for one leaf: a title for the border and a body drawn into the inner rect the shell computed.
 
 ```go
 type Pane struct {
-    Title string
-    Body  func(inner layout.Rect) string
+    Title  string
+    Right  string      // at the end of the top edge, while it fits beside Title
+    Accent color.Color // the edges' colour, focused or not; nil keeps the theme's
+    Body   func(inner layout.Rect) string
 }
 ```
 
@@ -431,7 +433,7 @@ func (s Shell) ActiveTab() int
 ActiveTab is the index of the tab on screen.
 
 <a name="Shell.Body"></a>
-### func \(Shell\) [Body](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L14>)
+### func \(Shell\) [Body](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L15>)
 
 ```go
 func (s Shell) Body() layout.Rect
@@ -737,7 +739,7 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd)
 Update handles what is the shell's: resize, status ticks, overlays, the status\-row input, help, tabs and focus. handled false means the app's turn.
 
 <a name="Shell.View"></a>
-### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L95>)
+### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L98>)
 
 ```go
 func (s Shell) View(panes map[string]Pane) string

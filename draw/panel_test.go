@@ -49,3 +49,20 @@ func TestPanelEdgeSurvivesAMonochromeTerminal(t *testing.T) {
 		require.Equal(t, 20, ansi.StringWidth(l))
 	}
 }
+
+func TestPanelPutsTheRightTextAtTheEndOfTheTopEdge(t *testing.T) {
+	got := TitledPanel(layout.Rect{W: 30, H: 3}, "files", "35/152", "", PanelStyle{})
+	top := ansi.Strip(strings.Split(got, "\n")[0])
+	require.Equal(t, 30, ansi.StringWidth(top))
+	require.True(t, strings.HasPrefix(top, "╭─ files ─"), top)
+	require.True(t, strings.HasSuffix(top, "─ 35/152 ─╮"), top)
+}
+
+// The title says what the panel is; the right text only adds to it.
+func TestPanelDropsTheRightTextBeforeTheTitle(t *testing.T) {
+	got := TitledPanel(layout.Rect{W: 18, H: 3}, "files", "35/152", "", PanelStyle{})
+	top := ansi.Strip(strings.Split(got, "\n")[0])
+	require.Equal(t, 18, ansi.StringWidth(top))
+	require.Contains(t, top, "files")
+	require.NotContains(t, top, "35/152")
+}

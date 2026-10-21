@@ -96,3 +96,44 @@ func TestResolveSurvivesABaseCycle(t *testing.T) {
 	assert.Equal(t, "#AAAAAA", rt.Colors.Accent)
 	assert.Equal(t, "#BBBBBB", rt.Colors.Border)
 }
+
+func TestSeriesDefaultsToSixDistinctColours(t *testing.T) {
+	for _, dark := range []bool{true, false} {
+		seen := map[string]bool{}
+		for _, s := range ResolveColors(Theme{}, dark).Series {
+			require.NotEmpty(t, s)
+			seen[s] = true
+		}
+		assert.Len(t, seen, 6, "dark %v", dark)
+	}
+}
+
+func TestAThemeOverridesPartOfItsSeries(t *testing.T) {
+	c := ResolveColors(Theme{Base: &Gruvbox, Colors: Colors{Series: [6]string{2: "#FF0000"}}}, true)
+	assert.Equal(t, "#FF0000", c.Series[2])
+	assert.Equal(t, Gruvbox.Colors.Series[0], c.Series[0], "the rest is the base's")
+}
+
+// A theme that names no ramp climbs through its own success, warning and danger.
+func TestRampFollowsTheThemesStates(t *testing.T) {
+	c := ResolveColors(Mint, true)
+	assert.Equal(t, [3]string{c.Success, c.Warning, c.Danger}, c.Ramp)
+}
+
+func TestResolveStylesTheSeriesAndTheRamp(t *testing.T) {
+	r := Resolve(Gruvbox, true)
+	assert.Equal(t, lipgloss.Color(Gruvbox.Colors.Series[3]), r.Series[3].GetForeground())
+	assert.Equal(t, lipgloss.Color(Gruvbox.Colors.Ramp[2]), r.Ramp[2].GetForeground())
+}
+
+func TestPlainKeepsItsSeriesInTheTerminalsColours(t *testing.T) {
+	for _, s := range ResolveColors(Plain, true).Series {
+		assert.NotContains(t, s, "#", "Plain uses ANSI codes only")
+	}
+}
+
+func TestLookupFindsGruvbox(t *testing.T) {
+	got, err := Lookup("Gruvbox")
+	require.NoError(t, err)
+	assert.Equal(t, Gruvbox.Colors, got.Colors)
+}
