@@ -4,11 +4,9 @@
 # Inputs go test -fuzz saves on a failure; keep a regression as an f.Add seed
 **/testdata/fuzz/
 
-# Output of the go coverage tool
+# Output of the go coverage tool; `make test-coverage` writes into coverage/
 *.out
-coverage.out
-coverage.html
-coverage.xml
+coverage/
 
 # Pinned tools installed by the Makefile
 .gobin/

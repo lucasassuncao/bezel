@@ -24,12 +24,12 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
-      # Keyed on the Makefile, where the tool versions are pinned.
+      # Keyed on scripts/make/tools.mk, where the tool versions are pinned.
       - name: Cache pinned tools
         uses: actions/cache@v6
         with:
           path: .gobin
-          key: gobin-${{ runner.os }}-${{ hashFiles('Makefile') }}
+          key: gobin-${{ runner.os }}-${{ hashFiles('scripts/make/tools.mk') }}
 
       - name: Check dependencies
         run: |
@@ -86,7 +86,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .gobin
-          key: gobin-${{ runner.os }}-${{ hashFiles('Makefile') }}
+          key: gobin-${{ runner.os }}-${{ hashFiles('scripts/make/tools.mk') }}
 
       - name: Lint
         run: make lint
@@ -102,10 +102,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.os }}
-          path: |
-            coverage.out
-            coverage.html
-            coverage.xml
+          path: coverage/
           if-no-files-found: warn
 
   # The dependency graph comes from go.mod and is the same everywhere. Its own
@@ -129,7 +126,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .gobin
-          key: gobin-${{ runner.os }}-${{ hashFiles('Makefile') }}
+          key: gobin-${{ runner.os }}-${{ hashFiles('scripts/make/tools.mk') }}
 
       # Runs first so the reachability answer is in the log even when grype
       # fails the job on an advisory nothing here can execute.

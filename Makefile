@@ -1,178 +1,55 @@
-.PHONY: help fmt lint test test-watch test-coverage bench security govulncheck sbom vuln deps docs tag all tools clean-tools clean
+.PHONY: help all clean
 
-# Tool versions
-GOLANGCI_LINT_VERSION := v2.14.0
-GOMARKDOC_VERSION     := v1.1.0
-GOTESTSUM_VERSION     := v1.13.0
-GOSEC_VERSION         := v2.29.1-0.20261012130337-71577268350e
-# gocover-cobertura has no tags: the pin is its last commit.
-GOCOBERTURA_VERSION   := v0.0.0-20180217150009-aaee18c8195c
-SYFT_VERSION          := v1.51.1
-GRYPE_VERSION         := v0.118.0
-GOVULNCHECK_VERSION   := v1.9.0
+# Targets live in scripts/make/*.mk, one file per area. A recipe that needs more
+# than portable commands calls a script instead, and every script exists in both
+# scripts/bash and scripts/pwsh with the same name and arguments.
 
-# Tools are installed into ./.gobin (gitignored) rather than taken from PATH,
-# so every target runs the version pinned above and never whatever happens to
-# be installed system-wide. Each tool is a file target: the first target that
-# needs it installs it, later runs reuse it. Bumping a version above does not
-# invalidate an already installed binary - run `make clean-tools` first.
-GOBIN_DIR := $(CURDIR)/.gobin
+# The includes are read before any target of this file, so without this the
+# first target of tools.mk would become the default goal.
+.DEFAULT_GOAL := help
 
+# On Windows make may run recipes under cmd.exe or sh, and $(SHELL) does not
+# say which, so recipes stay shell-neutral and shell logic goes in a script.
 ifeq ($(OS),Windows_NT)
-EXE := .exe
+EXE        := .exe
+SCRIPT_DIR := scripts/pwsh
+SCRIPT_EXT := .ps1
+SCRIPT_RUN := pwsh -NoProfile -ExecutionPolicy Bypass -File
 else
-EXE :=
+EXE        :=
+SCRIPT_DIR := scripts/bash
+SCRIPT_EXT := .sh
+SCRIPT_RUN := bash
 endif
 
-GOLANGCI    := $(GOBIN_DIR)/golangci-lint$(EXE)
-GOMARKDOC   := $(GOBIN_DIR)/gomarkdoc$(EXE)
-GOTESTSUM   := $(GOBIN_DIR)/gotestsum$(EXE)
-GOSEC       := $(GOBIN_DIR)/gosec$(EXE)
-GOCOBERTURA := $(GOBIN_DIR)/gocover-cobertura$(EXE)
-SYFT        := $(GOBIN_DIR)/syft$(EXE)
-GRYPE       := $(GOBIN_DIR)/grype$(EXE)
-GOVULNCHECK := $(GOBIN_DIR)/govulncheck$(EXE)
-
-TOOLS := $(GOLANGCI) $(GOMARKDOC) $(GOTESTSUM) $(GOSEC) $(GOCOBERTURA) $(SYFT) $(GRYPE) $(GOVULNCHECK)
-
-# `go install` takes its destination from GOBIN in the environment and has no
-# flag for it, so the tool rules - and only those - export it.
-$(TOOLS): export GOBIN = $(GOBIN_DIR)
-
-$(GOLANGCI):
-	@echo "Installing golangci-lint $(GOLANGCI_LINT_VERSION)..."
-	@go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
-
-$(GOMARKDOC):
-	@echo "Installing gomarkdoc $(GOMARKDOC_VERSION)..."
-	@go install github.com/princjef/gomarkdoc/cmd/gomarkdoc@$(GOMARKDOC_VERSION)
-
-$(GOTESTSUM):
-	@echo "Installing gotestsum $(GOTESTSUM_VERSION)..."
-	@go install gotest.tools/gotestsum@$(GOTESTSUM_VERSION)
-
-$(GOSEC):
-	@echo "Installing gosec $(GOSEC_VERSION)..."
-	@go install github.com/securego/gosec/v2/cmd/gosec@$(GOSEC_VERSION)
-
-$(GOCOBERTURA):
-	@echo "Installing gocover-cobertura $(GOCOBERTURA_VERSION)..."
-	@go install github.com/t-yuki/gocover-cobertura@$(GOCOBERTURA_VERSION)
-
-$(SYFT):
-	@echo "Installing syft $(SYFT_VERSION)..."
-	@go install github.com/anchore/syft/cmd/syft@$(SYFT_VERSION)
-
-$(GRYPE):
-	@echo "Installing grype $(GRYPE_VERSION)..."
-	@go install github.com/anchore/grype/cmd/grype@$(GRYPE_VERSION)
-
-$(GOVULNCHECK):
-	@echo "Installing govulncheck $(GOVULNCHECK_VERSION)..."
-	@go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)
-
-# Coverage
-COVERAGE_OUT  := coverage.out
-COVERAGE_HTML := coverage.html
-COVERAGE_XML  := coverage.xml
+# $(call script,name) is the command that runs this OS's version of a script.
+script = $(SCRIPT_RUN) $(SCRIPT_DIR)/$(1)$(SCRIPT_EXT)
 
 # Project variables
-MODULE_NAME := bezel
-SBOM_FILE   := sbom.json
+MODULE_NAME  := bezel
+SBOM_FILE    := sbom.json
+COVERAGE_DIR := coverage
 
-# Recipes run through whatever shell make finds, and on Windows that is sh.exe
-# only when one is on PATH - cmd.exe otherwise. A recipe line has to be valid
-# in both, which is why the help text is branched rather than written once with
-# grep and awk.
-help: ## Show this help message
-ifeq ($(OS),Windows_NT)
-	@powershell -NoProfile -Command "Select-String -Path $(MAKEFILE_LIST) -Pattern '^([a-zA-Z_-]+):.*## (.+)' | Sort-Object { $$_.Matches[0].Groups[1].Value } | ForEach-Object { Write-Host -NoNewline -ForegroundColor Cyan ('{0,-20}' -f $$_.Matches[0].Groups[1].Value); Write-Host (' ' + $$_.Matches[0].Groups[2].Value) }"
-else
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
-endif
+MAKE_DIR := scripts/make
 
-fmt: ## Format code
-	@go fmt ./...
+# tools.mk first: the others name $(GOLANGCI), $(GOTESTSUM) and friends as
+# prerequisites, and a prerequisite is expanded when its rule is read.
+include $(MAKE_DIR)/tools.mk
+include $(MAKE_DIR)/go.mk
+include $(MAKE_DIR)/docs.mk
+include $(MAKE_DIR)/test.mk
+include $(MAKE_DIR)/security.mk
+include $(MAKE_DIR)/release.mk
 
-lint: $(GOLANGCI) ## Run linter checks
-	@$(GOLANGCI) -v run ./...
 
-test: $(GOTESTSUM) ## Run tests with gotestsum (testdox format)
-	@$(GOTESTSUM) --format testdox -- -race ./...
+# A `##@ text` line starts a help section and a `## text` line right above a
+# target is its entry. make appends every included file to MAKEFILE_LIST, in
+# include order, so help shows the sections of all of them in that order.
+##@ General
 
-test-watch: $(GOTESTSUM) ## Run tests in watch mode (reruns on file changes)
-	@$(GOTESTSUM) --format testdox --watch -- -race ./...
-
-test-coverage: $(GOTESTSUM) $(GOCOBERTURA) ## Run tests with coverage (HTML + Cobertura XML)
-	@$(GOTESTSUM) --format testdox -- -race -coverprofile=$(COVERAGE_OUT) -covermode=atomic ./...
-	@go tool cover -func=$(COVERAGE_OUT) | tail -1
-	@go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
-	@$(GOCOBERTURA) < $(COVERAGE_OUT) > $(COVERAGE_XML)
-	@echo "Reports: $(COVERAGE_HTML) | $(COVERAGE_XML)"
-
-bench: ## Run benchmarks (tree, list, draw, table)
-	@go test -run '^$$' -bench . -benchmem ./...
-
-security: $(GOSEC) ## Run security analysis with gosec
-	@$(GOSEC) -stdout -severity medium ./...
-
-# gosec reads this repository's code; govulncheck reads the dependency tree the
-# way the compiler does, so it only reports advisories whose vulnerable symbol
-# is actually reachable from this module. For a library that matters twice
-# over: every consumer inherits this dependency tree.
-govulncheck: $(GOVULNCHECK) ## Report vulnerabilities reachable from this code
-	@echo "Checking for reachable vulnerabilities..."
-	@$(GOVULNCHECK) ./...
-
-# examples/ is excluded because its dependencies are the example apps', not
-# this library's, and a stale test.exe left there would put whatever it was
-# built against into the report. What consumers inherit is the tree ./go.mod
-# declares, and nothing else.
-sbom: $(SYFT) ## Generate a CycloneDX SBOM of the dependency tree
-	@echo "Generating SBOM..."
-	@$(SYFT) . --source-name $(MODULE_NAME) --exclude './.gobin/**' --exclude './examples/**' -o cyclonedx-json=$(SBOM_FILE)
-
-vuln: $(GRYPE) sbom ## Scan the SBOM for known vulnerabilities with grype
-	@echo "Scanning for vulnerabilities..."
-	@$(GRYPE) sbom:$(SBOM_FILE) --fail-on medium
-
-deps: ## Download and tidy dependencies
-	@go mod download
-	@go mod tidy
-
-docs: $(GOMARKDOC) ## Generate documentation with gomarkdoc
-	@$(GOMARKDOC) -e \
-		--repository.url https://github.com/lucasassuncao/bezel \
-		--repository.default-branch main \
-		--repository.path / \
-		-o '{{.Dir}}/README.md' \
-		./animation/... \
-		./browser/... \
-		./chart/... \
-		./draw/... \
-		./form/... \
-		./icon/... \
-		./inline/... \
-		./layout/... \
-		./legend/... \
-		./list/... \
-		./overlay/... \
-		./palette/... \
-		./progress/... \
-		./shell/... \
-		./table/... \
-		./textbox/... \
-		./theme/... \
-		./themebrowser/... \
-		./tree/...
-
-tag: ## Create and push an annotated git tag (usage: make tag VERSION=v1.2.3)
-ifndef VERSION
-	$(error Usage: make tag VERSION=v1.2.3)
-endif
-	git diff --exit-code --quiet
-	git tag -a $(VERSION) -m "Release $(VERSION)"
-	git push origin $(VERSION)
+## Show this help message
+help:
+	@$(call script,help) $(MAKEFILE_LIST)
 
 # Local, deterministic checks first, so a failure points at the code. The
 # supply-chain scans go last because they are the only steps that need the
@@ -180,15 +57,11 @@ endif
 # hiccup there should not mask a lint or test failure. govulncheck runs before
 # grype so the reachability answer is printed even when grype fails the build
 # on an advisory nothing here can execute.
-all: deps fmt docs lint security test-coverage govulncheck sbom vuln ## Run every check
+## Run every check: deps, fmt, docs, lint, security, tests and vulnerability scans
+all: deps fmt docs lint security test-coverage govulncheck sbom vuln
 
-tools: $(TOOLS) ## Install every pinned tool into ./.gobin
-	@echo "Tools installed in $(GOBIN_DIR)"
-
-clean-tools: ## Remove ./.gobin so the next target reinstalls the pinned tools
-	@echo "Removing $(GOBIN_DIR)..."
-	@rm -rf $(GOBIN_DIR)
-
-clean: clean-tools ## Remove coverage artifacts, installed tools and cache
-	@rm -rf $(COVERAGE_OUT) $(COVERAGE_HTML) $(COVERAGE_XML) $(SBOM_FILE)
+## Remove coverage artifacts, installed tools and cache
+clean: clean-tools
+	@$(call script,remove) $(COVERAGE_DIR) $(SBOM_FILE)
+	@echo "Cleaning Go build and test cache..."
 	@go clean -cache -testcache

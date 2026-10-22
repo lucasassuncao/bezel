@@ -1,7 +1,7 @@
-<p align="center">
+<p align="left">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/icons/bezel_horizontal_on_dark.png">
-    <img src="docs/icons/bezel_horizontal_on_light.png" alt="bezel logo" width="1200" height="401">
+    <img src="docs/icons/bezel_horizontal_on_light.png" alt="bezel logo" width="60%" height="60%">
   </picture>
 </p>
 
