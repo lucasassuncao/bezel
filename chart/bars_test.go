@@ -1,6 +1,7 @@
 package chart
 
 import (
+	"math"
 	"strings"
 	"testing"
 
@@ -58,4 +59,9 @@ func TestBarsColour(t *testing.T) {
 func TestBarsOfNothing(t *testing.T) {
 	require.Empty(t, Bars(nil, 8, 20, th()))
 	require.Empty(t, Bars([]Bar{{Label: "a", Value: 1}}, 8, 0, th()))
+}
+
+// A value that is not a number, as 0/0, draws no bar and never panics.
+func TestBarsTakeANaNAsNothing(t *testing.T) {
+	require.Equal(t, []string{"x       NaN"}, barLines([]Bar{{Label: "x", Value: math.NaN()}}, 10, 11))
 }

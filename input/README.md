@@ -193,7 +193,7 @@ func (m Model) Value() string
 Value is the text in the field.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L311>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L315>)
 
 ```go
 func (m Model) View() string

@@ -30,7 +30,7 @@ func Area(values []float64, top float64, width, height int, th theme.Resolved, o
 Area is the last width values as columns height rows tall, scaled so top fills them, each row coloured along the theme's ramp from the bottom up. Fewer values than columns leave the left blank.
 
 <a name="Bars"></a>
-## func [Bars](<https://github.com/lucasassuncao/bezel/blob/main/chart/bars.go#L29>)
+## func [Bars](<https://github.com/lucasassuncao/bezel/blob/main/chart/bars.go#L30>)
 
 ```go
 func Bars(bars []Bar, top float64, width int, th theme.Resolved, opts ...Option) string
@@ -48,7 +48,7 @@ func Spark(values []float64, top float64, width int, th theme.Resolved, opts ...
 Spark is the last width values as one row, scaled to top, in the accent.
 
 <a name="Bar"></a>
-## type [Bar](<https://github.com/lucasassuncao/bezel/blob/main/chart/bars.go#L16-L21>)
+## type [Bar](<https://github.com/lucasassuncao/bezel/blob/main/chart/bars.go#L17-L22>)
 
 Bar is one row of Bars: what it measures, how much, and the text after it, Value printed when empty. Style paints this bar alone, as a threshold would; nil keeps the chart's colour.
 

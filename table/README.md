@@ -169,7 +169,7 @@ Cursor is the index of the row under the cursor.
 func (m Model[T]) Items() []Item[T]
 ```
 
-Items is a copy of every row.
+Items is a copy of every row, cells included.
 
 <a name="Model[T].Len"></a>
 ### func \(Model\[T\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L81>)
@@ -181,7 +181,7 @@ func (m Model[T]) Len() int
 Len is how many rows there are.
 
 <a name="Model[T].Scroll"></a>
-### func \(Model\[T\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L96>)
+### func \(Model\[T\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L97>)
 
 ```go
 func (m Model[T]) Scroll() layout.Scroll
@@ -199,7 +199,7 @@ func (m Model[T]) Selected() *Item[T]
 Selected is the row under the cursor, or nil when there are none.
 
 <a name="Model[T].SetHeight"></a>
-### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L122>)
+### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L123>)
 
 ```go
 func (m Model[T]) SetHeight(h int) Model[T]
@@ -208,7 +208,7 @@ func (m Model[T]) SetHeight(h int) Model[T]
 SetHeight updates the rows the table takes, header included.
 
 <a name="Model[T].SetItems"></a>
-### func \(Model\[T\]\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L103>)
+### func \(Model\[T\]\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L104>)
 
 ```go
 func (m Model[T]) SetItems(items []Item[T]) Model[T]
@@ -217,7 +217,7 @@ func (m Model[T]) SetItems(items []Item[T]) Model[T]
 SetItems replaces the rows, keeping the cursor on the row with the same first cell when it survives \(at the same index first\), else at the same index: a refresh that drops a row lands on the one that took its place.
 
 <a name="Model[T].Update"></a>
-### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L130>)
+### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L131>)
 
 ```go
 func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
@@ -226,7 +226,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
 Update handles one key. Keys the table does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L164>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L165>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved, width int) string

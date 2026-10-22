@@ -1,6 +1,7 @@
 package input
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -192,4 +193,15 @@ func TestCtrlVPastesTheClipboard(t *testing.T) {
 
 	_, cmd = focused().Blur().WithClipboard(func() (string, error) { return "x", nil }).Update(press('v', tea.ModCtrl))
 	require.Nil(t, cmd, "a blurred field reads nothing")
+}
+
+// Home and End on a long value: the window is found from the caret, so the
+// cost follows the field's width, not the value's length.
+func BenchmarkJumpingAcrossALongValue(b *testing.B) {
+	m := focused().WithWidth(40).WithValue(strings.Repeat("a", 40_000))
+	home, end := press(tea.KeyHome, 0), press(tea.KeyEnd, 0)
+	for b.Loop() {
+		m, _ = m.Update(home)
+		m, _ = m.Update(end)
+	}
 }

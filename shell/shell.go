@@ -67,6 +67,9 @@ type Config struct {
 	// StatusTTL is how long the palette's errors and Copy's result stay on the
 	// status row; 5s when zero. An app with its own banner clock passes that.
 	StatusTTL time.Duration
+	// SpinEvery is how long each frame of the busy spinner shows; a tenth of a
+	// second when zero. A test passes a nanosecond so it never waits on one.
+	SpinEvery time.Duration
 	// Clipboard is what Copy writes to; nil means the system clipboard.
 	Clipboard func(string) error
 }
@@ -106,10 +109,13 @@ func New(cfg Config) Shell {
 	if cfg.StatusTTL <= 0 {
 		cfg.StatusTTL = defaultStatusTTL
 	}
+	if cfg.SpinEvery <= 0 {
+		cfg.SpinEvery = defaultSpinEvery
+	}
 	focus := resized(nil, max(1, len(cfg.Tabs)), firstLeaf(cfg.Layout))
 	return Shell{
 		cfg: cfg, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
-		spin: spinner{id: shellIDs.Add(1)},
+		spin: spinner{id: shellIDs.Add(1), every: cfg.SpinEvery},
 	}
 }
 

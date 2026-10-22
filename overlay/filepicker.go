@@ -2,7 +2,6 @@ package overlay
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"path/filepath"
 	"slices"
@@ -451,16 +450,19 @@ func tail(path string, width int) string {
 }
 
 // humanBytes is a size in SI units the way a listing shows one: "12B",
-// "1.5kB", "640MB", one decimal below ten.
+// "1.5kB", "640MB", one decimal below ten. A value that would round up to
+// 1000 of a unit is shown as the next one: 999,950 is "1.0MB".
 func humanBytes(n int64) string {
 	if n < 1000 {
 		return fmt.Sprintf("%dB", max(n, 0))
 	}
 	units := []string{"kB", "MB", "GB", "TB", "PB", "EB"}
-	exp := min(int(math.Log(float64(n))/math.Log(1000)), len(units))
-	v := float64(n) / math.Pow(1000, float64(exp))
-	if v < 10 {
-		return fmt.Sprintf("%.1f%s", v, units[exp-1])
+	v, u := float64(n)/1000, 0
+	for v >= 999.5 && u < len(units)-1 {
+		v, u = v/1000, u+1
 	}
-	return fmt.Sprintf("%.0f%s", v, units[exp-1])
+	if v < 9.95 {
+		return fmt.Sprintf("%.1f%s", v, units[u])
+	}
+	return fmt.Sprintf("%.0f%s", v, units[u])
 }

@@ -326,6 +326,7 @@ func TestHumanBytesReadsLikeAListing(t *testing.T) {
 	for n, want := range map[int64]string{
 		0: "0B", 999: "999B", 1000: "1.0kB", 1500: "1.5kB", 12_345: "12kB",
 		640_000_000: "640MB", 3_200_000_000: "3.2GB",
+		999_950: "1.0MB", 999_999_999: "1.0GB", 9_960: "10kB", 1_000_000_000_000: "1.0TB",
 	} {
 		require.Equal(t, want, humanBytes(n), "%d", n)
 	}

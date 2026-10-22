@@ -128,3 +128,21 @@ func TestModelCopiesTheSlices(t *testing.T) {
 	got[1].Value = 99
 	require.Equal(t, 1, m.Items()[1].Value)
 }
+
+// The cells are the table's own: writing to the slice handed in, or to one
+// handed out, changes nothing it shows.
+func TestModelCopiesTheCells(t *testing.T) {
+	items := pkgs(2)
+	m := New(pkgCols, items, 5)
+	items[0].Cells[0] = "changed"
+	require.Equal(t, "pkg-0", m.Items()[0].Cells[0])
+
+	m.Items()[0].Cells[0] = "changed"
+	m.Selected().Cells[0] = "changed"
+	require.Equal(t, "pkg-0", m.Selected().Cells[0])
+
+	more := pkgs(3)
+	m = m.SetItems(more)
+	more[2].Cells[0] = "changed"
+	require.Equal(t, "pkg-2", m.Items()[2].Cells[0])
+}

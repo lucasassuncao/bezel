@@ -253,35 +253,44 @@ func (m Model) arm() (Model, tea.Cmd) {
 	return m, tea.Tick(draw.Blink(m.th.CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
+// spaced turns line breaks and tabs into spaces; a Replacer is safe to share.
+var spaced = strings.NewReplacer("\r\n", " ", "\r", " ", "\n", " ", "\t", " ")
+
 // oneLine is s fit for one line: a line break or a tab is a space, and what
 // would draw nothing goes.
-func oneLine(s string) string {
-	return edit.Printable(strings.NewReplacer("\r\n", " ", "\r", " ", "\n", " ", "\t", " ").Replace(s))
-}
+func oneLine(s string) string { return edit.Printable(spaced.Replace(s)) }
 
 // show is how grapheme i is drawn: itself, or the mask.
-func (m Model) show(i int) string {
+func (m *Model) show(i int) string {
 	if m.mask != "" {
 		return m.mask
 	}
 	return m.line.At(i)
 }
 
-// cells is how wide the graphemes [from, to) are drawn.
-func (m Model) cells(from, to int) int {
-	if m.mask != "" {
-		return max(to-from, 0) * ansi.StringWidth(m.mask)
-	}
-	return m.line.Width(from, to)
-}
+// cell is how wide grapheme i is drawn. The helpers a loop calls take a
+// pointer: a Model holds a 29KB theme, which a value receiver copies each call.
+func (m *Model) cell(i int) int { return edit.Cells(m.show(i)) }
 
 // caretCells is the width of the cell the caret covers: its grapheme, or one
 // past the end.
-func (m Model) caretCells() int {
+func (m *Model) caretCells() int {
 	if c := m.line.Cursor(); c < m.line.Len() {
-		return m.cells(c, c+1)
+		return m.cell(c)
 	}
 	return 1
+}
+
+// fits is the first grapheme from which the ones up to end, and used cells
+// more, still fit the width: found walking back from end, never past what
+// the width holds, so a long value costs no more than a short one.
+func (m *Model) fits(end, used int) int {
+	start := end
+	for start > 0 && used+m.cell(start-1) <= m.width {
+		start--
+		used += m.cell(start)
+	}
+	return start
 }
 
 // scroll moves the window to show the caret, and back left while the text
@@ -292,17 +301,12 @@ func (m Model) scroll() Model {
 		return m
 	}
 	c, n := m.line.Cursor(), m.line.Len()
-	m.offset = min(m.offset, c)
-	for m.offset < c && m.cells(m.offset, c)+m.caretCells() > m.width {
-		m.offset++
-	}
+	m.offset = max(min(m.offset, c), m.fits(c, m.caretCells()))
 	end := 0
 	if c == n {
 		end = 1 // the caret's own cell
 	}
-	for m.offset > 0 && m.cells(m.offset-1, n)+end <= m.width {
-		m.offset--
-	}
+	m.offset = min(m.offset, m.fits(n, end))
 	return m
 }
 

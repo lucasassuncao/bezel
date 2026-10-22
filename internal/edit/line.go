@@ -4,56 +4,99 @@
 package edit
 
 import (
+	"math"
 	"slices"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/x/ansi"
 )
 
 // Line is one line of text and the caret in it, which sits before the
-// grapheme at Cursor; at Len it is after the last one.
+// grapheme at Cursor; at Len it is after the last one. It keeps the text
+// whole and where each grapheme starts, four bytes each, not a string apiece.
 type Line struct {
-	g      []string
+	s      string
+	b      []int32 // each grapheme's start in s, then len(s); nil when s is empty
 	cursor int
 }
 
-// Graphemes splits s into what a user sees as characters: a flag, an emoji
-// with its modifiers or a letter with its accents is one.
+// bounds is where each grapheme of s starts, then len(s): what a user sees
+// as one character, a flag, an emoji with its modifiers or an accented letter.
+func bounds(s string) []int32 {
+	if s == "" {
+		return nil
+	}
+	b := make([]int32, 1, len(s)+1)
+	for off := 0; off < len(s); {
+		c, _ := ansi.FirstGraphemeCluster(s[off:], ansi.GraphemeWidth)
+		off += max(len(c), 1) // never loop forever on a cluster that came back empty
+		b = append(b, at32(off))
+	}
+	return b
+}
+
+// Cells is how many cells grapheme g takes. A printable ASCII byte is one,
+// answered without the full measure, which costs a microsecond a call.
+func Cells(g string) int {
+	if len(g) == 1 && g[0] >= 0x20 && g[0] < 0x7f {
+		return 1
+	}
+	return ansi.StringWidth(g)
+}
+
+// at32 is a byte offset as Line keeps it. No line typed or pasted nears
+// 2GiB, but one past it is clamped there rather than wrapped to a negative.
+func at32(off int) int32 {
+	switch {
+	case off > math.MaxInt32:
+		return math.MaxInt32
+	case off < 0:
+		return 0
+	}
+	return int32(off)
+}
+
+// Graphemes splits s into what a user sees as characters.
 func Graphemes(s string) []string {
-	var out []string
-	for s != "" {
-		c, _ := ansi.FirstGraphemeCluster(s, ansi.GraphemeWidth)
-		if c == "" { // not expected; never loop forever on it
-			c = s[:1]
-		}
-		out = append(out, c)
-		s = s[len(c):]
+	b := bounds(s)
+	out := make([]string, max(len(b)-1, 0))
+	for i := range out {
+		out[i] = s[b[i]:b[i+1]]
 	}
 	return out
 }
 
-// NewLine is s with the caret at its end.
+// NewLine is s with the caret at its end. s is copied: a line cut from a
+// large text would otherwise keep the whole text alive.
 func NewLine(s string) Line {
-	g := Graphemes(s)
-	return Line{g: g, cursor: len(g)}
+	return rebuild(strings.Clone(s), "")
 }
 
 // String is the text of the line.
-func (l Line) String() string { return strings.Join(l.g, "") }
+func (l Line) String() string { return l.s }
 
 // Len is how many graphemes the line has.
-func (l Line) Len() int { return len(l.g) }
+func (l Line) Len() int { return max(len(l.b)-1, 0) }
 
 // Cursor is the index of the grapheme the caret sits before.
 func (l Line) Cursor() int { return l.cursor }
 
+// off is the byte where grapheme i starts, i kept within the line.
+func (l Line) off(i int) int {
+	if l.b == nil {
+		return 0
+	}
+	return int(l.b[l.clamp(i)])
+}
+
 // At is the grapheme at i, or "" past the end.
 func (l Line) At(i int) string {
-	if i < 0 || i >= len(l.g) {
+	if i < 0 || i >= l.Len() {
 		return ""
 	}
-	return l.g[i]
+	return l.s[l.b[i]:l.b[i+1]]
 }
 
 // Slice is the text of the graphemes [from, to).
@@ -62,7 +105,7 @@ func (l Line) Slice(from, to int) string {
 	if from >= to {
 		return ""
 	}
-	return strings.Join(l.g[from:to], "")
+	return l.s[l.off(from):l.off(to)]
 }
 
 // Width is how many cells the graphemes [from, to) take.
@@ -72,17 +115,17 @@ func (l Line) Width(from, to int) int { return ansi.StringWidth(l.Slice(from, to
 // start: the caret a click or a move up lands on. Past the end it is Len.
 func (l Line) IndexAt(col int) int {
 	at := 0
-	for i, g := range l.g {
-		w := ansi.StringWidth(g)
+	for i := range l.Len() {
+		w := Cells(l.At(i))
 		if col < at+w {
 			return i
 		}
 		at += w
 	}
-	return len(l.g)
+	return l.Len()
 }
 
-func (l Line) clamp(i int) int { return min(max(i, 0), len(l.g)) }
+func (l Line) clamp(i int) int { return min(max(i, 0), l.Len()) }
 
 // SetCursor moves the caret to i, kept within the line.
 func (l Line) SetCursor(i int) Line {
@@ -96,7 +139,8 @@ func (l Line) Insert(s string) Line {
 	if s == "" {
 		return l
 	}
-	return rebuild(l.Slice(0, l.cursor)+s, l.Slice(l.cursor, len(l.g)))
+	at := l.off(l.cursor)
+	return rebuild(l.s[:at]+s, l.s[at:])
 }
 
 // remove drops the graphemes [from, to) and leaves the caret at from.
@@ -105,22 +149,20 @@ func (l Line) remove(from, to int) Line {
 	if from >= to {
 		return l.SetCursor(from)
 	}
-	return rebuild(l.Slice(0, from), l.Slice(to, len(l.g)))
+	return rebuild(l.s[:l.off(from)], l.s[l.off(to):])
 }
 
 // rebuild is head and tail split afresh, the caret after the last grapheme
 // that ends within head: an edit can join or part its neighbours, as a mark
 // typed after a letter does.
 func rebuild(head, tail string) Line {
-	g := Graphemes(head + tail)
-	cursor, n := 0, 0
-	for i, c := range g {
-		if n += len(c); n > len(head) {
-			break
-		}
-		cursor = i + 1
+	s := head + tail
+	b := bounds(s)
+	cursor, found := slices.BinarySearch(b, at32(len(head)))
+	if !found {
+		cursor-- // head ends inside a grapheme: the caret goes before it
 	}
-	return Line{g: g, cursor: cursor}
+	return Line{s: s, b: b, cursor: max(cursor, 0)}
 }
 
 // DeleteBack removes the grapheme before the caret.
@@ -133,7 +175,7 @@ func (l Line) DeleteForward() Line { return l.remove(l.cursor, l.cursor+1) }
 func (l Line) KillToStart() Line { return l.remove(0, l.cursor) }
 
 // KillToEnd removes everything after the caret.
-func (l Line) KillToEnd() Line { return l.remove(l.cursor, len(l.g)) }
+func (l Line) KillToEnd() Line { return l.remove(l.cursor, l.Len()) }
 
 // DeleteWordBack removes from the start of the word before the caret.
 func (l Line) DeleteWordBack() Line { return l.remove(l.wordLeft(), l.cursor) }
@@ -148,8 +190,8 @@ func (l Line) WordLeft() Line { return l.SetCursor(l.wordLeft()) }
 func (l Line) WordRight() Line { return l.SetCursor(l.wordRight()) }
 
 func (l Line) space(i int) bool {
-	r := []rune(l.g[i])
-	return len(r) > 0 && unicode.IsSpace(r[0])
+	r, _ := utf8.DecodeRuneInString(l.At(i))
+	return unicode.IsSpace(r)
 }
 
 // wordLeft passes the spaces before the caret, then the word before them.
@@ -166,26 +208,25 @@ func (l Line) wordLeft() int {
 
 // wordRight passes the spaces after the caret, then the word after them.
 func (l Line) wordRight() int {
-	i := l.cursor
-	for i < len(l.g) && l.space(i) {
+	i, n := l.cursor, l.Len()
+	for i < n && l.space(i) {
 		i++
 	}
-	for i < len(l.g) && !l.space(i) {
+	for i < n && !l.space(i) {
 		i++
 	}
 	return i
 }
 
 // Split cuts the line at the caret: what was before it, and what was after,
-// with the caret at its start.
+// with the caret at its start. Each half is a copy of its own text.
 func (l Line) Split() (before, after Line) {
-	before = Line{g: slices.Clone(l.g[:l.cursor]), cursor: l.cursor}
-	after = Line{g: slices.Clone(l.g[l.cursor:])}
-	return before, after
+	at := l.off(l.cursor)
+	return rebuild(strings.Clone(l.s[:at]), ""), rebuild("", strings.Clone(l.s[at:]))
 }
 
 // Join appends next to the line, the caret where the two meet.
-func (l Line) Join(next Line) Line { return rebuild(l.String(), next.String()) }
+func (l Line) Join(next Line) Line { return rebuild(l.s, next.s) }
 
 // Printable is s without the characters that would draw nothing or redraw
 // the rest: controls, and format marks bar the joiners emoji and flags need.

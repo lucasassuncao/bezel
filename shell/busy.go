@@ -1,16 +1,18 @@
 package shell
 
 import (
+	"cmp"
 	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
 )
 
-// spinFrames turn once a second, each wide enough to set the text apart.
+// spinFrames are the busy mark, each wide enough to set the text apart.
 var spinFrames = []string{"⣾ ", "⣽ ", "⣻ ", "⢿ ", "⡿ ", "⣟ ", "⣯ ", "⣷ "}
 
-const spinEvery = time.Second / 10
+// defaultSpinEvery is Config.SpinEvery when the app sets none.
+const defaultSpinEvery = time.Second / 10
 
 // shellIDs tells apart the spinners of two shells in one program.
 var shellIDs atomic.Int64
@@ -19,15 +21,17 @@ var shellIDs atomic.Int64
 // a tick from a loop Idle ended never doubles a newer one.
 type spinTickMsg struct{ id, seq int64 }
 
-// spinner is the busy mark: which frame shows, and which loop drives it.
+// spinner is the busy mark: which frame shows, which loop drives it, and
+// how long a frame lasts.
 type spinner struct {
 	id, seq int64
 	frame   int
+	every   time.Duration
 }
 
 func (sp spinner) tick() tea.Cmd {
 	msg := spinTickMsg{id: sp.id, seq: sp.seq}
-	return tea.Tick(spinEvery, func(time.Time) tea.Msg { return msg })
+	return tea.Tick(cmp.Or(sp.every, defaultSpinEvery), func(time.Time) tea.Msg { return msg })
 }
 
 // Busy shows a spinner and text on the status row until Idle; a banner set

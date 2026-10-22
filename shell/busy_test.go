@@ -8,12 +8,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// busyShell is a sized shell whose spinner turns every nanosecond, so a
+// test that runs a tick never waits on one.
+func busyShell(tabs ...Tab) Shell {
+	c := actionConfig(tabs...)
+	c.SpinEvery = time.Nanosecond
+	return sized(New(c))
+}
+
 func view(s Shell) string {
 	return ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}}))
 }
 
 func TestBusyShowsTheSpinnerAndTextOnTheStatusRow(t *testing.T) {
-	s := sized(New(actionConfig(stubTab{name: "a"})))
+	s := busyShell(stubTab{name: "a"})
 	require.Contains(t, view(s), "status of a")
 
 	s, cmd := s.Busy("refreshing…")
@@ -35,7 +43,7 @@ func TestBusyShowsTheSpinnerAndTextOnTheStatusRow(t *testing.T) {
 // A banner set while busy must not be lost to the spinner, and the spinner
 // comes back once the banner expires.
 func TestABannerShowsOverBusyAndBusyReturns(t *testing.T) {
-	s := sized(New(actionConfig()))
+	s := busyShell()
 	s, _ = s.Busy("refreshing…")
 	s, _ = s.SetStatus("could not reach scoop", Error, time.Second)
 	require.Contains(t, view(s), "could not reach scoop")
@@ -47,7 +55,7 @@ func TestABannerShowsOverBusyAndBusyReturns(t *testing.T) {
 
 // The tick loop runs only while busy: after Idle the next tick ends it.
 func TestTheSpinnerTicksOnlyWhileBusy(t *testing.T) {
-	s := sized(New(actionConfig()))
+	s := busyShell()
 	s, cmd := s.Busy("refreshing…")
 	tick := cmd()
 	require.IsType(t, spinTickMsg{}, tick)
@@ -65,9 +73,9 @@ func TestTheSpinnerTicksOnlyWhileBusy(t *testing.T) {
 }
 
 func TestAnotherShellsTickIsTheApps(t *testing.T) {
-	s := sized(New(actionConfig()))
+	s := busyShell()
 	s, _ = s.Busy("refreshing…")
-	_, cmd := sized(New(actionConfig())).Busy("elsewhere")
+	_, cmd := busyShell().Busy("elsewhere")
 	_, handled, _ := s.Update(cmd())
 	require.False(t, handled)
 }
@@ -75,7 +83,7 @@ func TestAnotherShellsTickIsTheApps(t *testing.T) {
 // Idle then Busy again before the old loop's tick lands: that tick ends,
 // or the spinner would turn twice as fast.
 func TestAStaleLoopsTickDoesNotDoubleTheSpinner(t *testing.T) {
-	s := sized(New(actionConfig()))
+	s := busyShell()
 	s, first := s.Busy("refreshing…")
 	s, second := s.Idle().Busy("again")
 	before := s.Spinner()
@@ -90,7 +98,12 @@ func TestAStaleLoopsTickDoesNotDoubleTheSpinner(t *testing.T) {
 }
 
 func TestIdleLeavesABannerAlone(t *testing.T) {
-	s := sized(New(actionConfig()))
+	s := busyShell()
 	s, _ = s.SetStatus("saved", OK, 0)
 	require.Contains(t, view(s.Idle()), "saved")
+}
+
+func TestTheSpinnerTurnsAtTheConfiguredPace(t *testing.T) {
+	require.Equal(t, defaultSpinEvery, New(actionConfig()).spin.every, "zero is a tenth of a second")
+	require.Equal(t, time.Nanosecond, busyShell().spin.every)
 }

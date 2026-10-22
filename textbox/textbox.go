@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"time"
 	"unicode"
+	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/clip"
@@ -99,8 +99,9 @@ func New(th theme.Resolved) Model {
 	return Model{lines: []line{{starts: []int{0}}}, goal: -1, id: ids.Add(1), keys: DefaultKeys(), th: th, caretOn: true}
 }
 
-// wrap is l with its rows worked out at the field's width.
-func (m Model) wrap(l edit.Line) line { return line{Line: l, starts: segments(l, m.textWidth())} }
+// wrap is l with its rows worked out at the field's width. The helpers a loop
+// calls take a pointer: a Model holds a 29KB theme, copied per call by value.
+func (m *Model) wrap(l edit.Line) line { return line{Line: l, starts: segments(l, m.textWidth())} }
 
 // WithClipboard reads the clipboard through read on a paste key, for a test
 // that must not touch the machine's own; nil is the system's.
@@ -313,11 +314,14 @@ func (m Model) tick() tea.Cmd {
 	return tea.Tick(draw.Blink(m.th.CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
+// breaks folds every line break to "\n" and turns tabs into spaces; a
+// Replacer is safe to share.
+var breaks = strings.NewReplacer("\r\n", "\n", "\r", "\n", "\t", strings.Repeat(" ", tabWidth))
+
 // clean folds every line break to "\n", turns tabs into spaces and drops
 // what would draw nothing, line by line.
 func clean(s string) string {
-	s = strings.NewReplacer("\r\n", "\n", "\r", "\n", "\t", strings.Repeat(" ", tabWidth)).Replace(s)
-	parts := strings.Split(s, "\n")
+	parts := strings.Split(breaks.Replace(s), "\n")
 	for i, p := range parts {
 		parts[i] = edit.Printable(p)
 	}
@@ -396,7 +400,7 @@ func (m Model) right() Model {
 
 // textWidth is the cells a row of text gets: the width less the gutter, less
 // one cell kept for a caret at the end of a full row.
-func (m Model) textWidth() int {
+func (m *Model) textWidth() int {
 	if m.width == 0 {
 		return 0
 	}
@@ -412,7 +416,7 @@ func segments(l edit.Line, width int) []int {
 	}
 	start, used, afterSpace := 0, 0, -1
 	for i := range l.Len() {
-		w, space := ansi.StringWidth(l.At(i)), isSpace(l.At(i))
+		w, space := edit.Cells(l.At(i)), isSpace(l.At(i))
 		if used+w > width && i > start {
 			if space { // it hangs past the edge, in the cell kept for the caret
 				starts = append(starts, i+1)
@@ -435,8 +439,8 @@ func segments(l edit.Line, width int) []int {
 }
 
 func isSpace(g string) bool {
-	r := []rune(g)
-	return len(r) > 0 && unicode.IsSpace(r[0])
+	r, _ := utf8.DecodeRuneInString(g)
+	return unicode.IsSpace(r)
 }
 
 // span is the graphemes [from, to) of segment k of starts on a line of n.
@@ -578,7 +582,7 @@ func (m Model) View() string {
 
 // piece is the graphemes [from, to) of l in style, the caret painted on its
 // cell when this row holds it, padded to the text's width.
-func (m Model) piece(l edit.Line, from, to int, onCaret bool, style lipgloss.Style) string {
+func (m *Model) piece(l edit.Line, from, to int, onCaret bool, style lipgloss.Style) string {
 	var b strings.Builder
 	c := l.Cursor()
 	if !onCaret {
@@ -595,7 +599,7 @@ func (m Model) piece(l edit.Line, from, to int, onCaret bool, style lipgloss.Sty
 }
 
 // pad fills a row of text out to the width set, or leaves it be without one.
-func (m Model) pad(s string) string {
+func (m *Model) pad(s string) string {
 	if m.width == 0 {
 		return s
 	}

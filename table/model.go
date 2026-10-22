@@ -64,7 +64,7 @@ type Model[T any] struct {
 // New builds a table height rows tall, header included, with the cursor on
 // the first row.
 func New[T any](cols []Column, items []Item[T], height int) Model[T] {
-	m := Model[T]{cols: slices.Clone(cols), items: slices.Clone(items), keys: DefaultKeys()}
+	m := Model[T]{cols: slices.Clone(cols), items: cloneItems(items), keys: DefaultKeys()}
 	return m.SetHeight(height)
 }
 
@@ -74,8 +74,8 @@ func (m Model[T]) WithKeys(k Keys) Model[T] {
 	return m
 }
 
-// Items is a copy of every row.
-func (m Model[T]) Items() []Item[T] { return slices.Clone(m.items) }
+// Items is a copy of every row, cells included.
+func (m Model[T]) Items() []Item[T] { return cloneItems(m.items) }
 
 // Len is how many rows there are.
 func (m Model[T]) Len() int { return len(m.items) }
@@ -89,6 +89,7 @@ func (m Model[T]) Selected() *Item[T] {
 		return nil
 	}
 	it := m.items[m.win.Cursor]
+	it.Cells = slices.Clone(it.Cells)
 	return &it
 }
 
@@ -105,7 +106,7 @@ func (m Model[T]) SetItems(items []Item[T]) Model[T] {
 	if it := m.Selected(); it != nil {
 		prev = first(*it)
 	}
-	m.items = slices.Clone(items)
+	m.items = cloneItems(items)
 	if at < len(m.items) && first(m.items[at]) == prev {
 		return m.clamp()
 	}
@@ -207,4 +208,14 @@ func first[T any](it Item[T]) string {
 		return ""
 	}
 	return it.Cells[0]
+}
+
+// cloneItems copies items down to their cells, so neither side's later
+// writes to a Cells slice reach the other. The payload is the caller's.
+func cloneItems[T any](items []Item[T]) []Item[T] {
+	out := make([]Item[T], len(items))
+	for i, it := range items {
+		out[i] = Item[T]{Cells: slices.Clone(it.Cells), Value: it.Value}
+	}
+	return out
 }

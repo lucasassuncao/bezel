@@ -1,8 +1,10 @@
 package edit
 
 import (
+	"math"
 	"testing"
 
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 )
 
@@ -113,6 +115,41 @@ func FuzzLineEditsNeverPanic(f *testing.F) {
 			if got.Cursor() < 0 || got.Cursor() > got.Len() {
 				t.Fatalf("caret %d outside 0..%d", got.Cursor(), got.Len())
 			}
+			// The offsets the line keeps are the graphemes its text splits into.
+			g := Graphemes(got.String())
+			if got.Len() != len(g) {
+				t.Fatalf("%d graphemes kept, the text has %d", got.Len(), len(g))
+			}
+			for i, c := range g {
+				if got.At(i) != c {
+					t.Fatalf("grapheme %d is %q, the text's is %q", i, got.At(i), c)
+				}
+			}
 		}
 	})
+}
+
+// Split's halves are each a whole line of their own: joined, they are the
+// line again, and an edit to one leaves the other as it was.
+func TestSplitHalvesStandAlone(t *testing.T) {
+	before, after := at("héllo wörld", 5).Split()
+	require.Equal(t, "héllo", before.String())
+	require.Equal(t, " wörld", after.String())
+	require.Equal(t, "héllo!", before.Insert("!").String())
+	require.Equal(t, " wörld", after.String())
+	require.Equal(t, 5, NewLine("").Join(before).Join(after).Cursor(), "the caret where the last two met")
+}
+
+// The ASCII shortcut answers as the full measure does.
+func TestCellsAgreesWithTheFullMeasure(t *testing.T) {
+	for _, g := range []string{"a", " ", "~", "中", "👍🏽", "é", "\x7f", ""} {
+		require.Equal(t, ansi.StringWidth(g), Cells(g), "%q", g)
+	}
+}
+
+// An offset is kept in four bytes: one outside them is clamped, never wrapped.
+func TestAt32ClampsWhatFourBytesCannotHold(t *testing.T) {
+	require.Equal(t, int32(7), at32(7))
+	require.Equal(t, int32(0), at32(-1))
+	require.Equal(t, int32(math.MaxInt32), at32(math.MaxInt32+1))
 }

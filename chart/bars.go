@@ -1,6 +1,7 @@
 package chart
 
 import (
+	"math"
 	"strconv"
 	"strings"
 
@@ -69,8 +70,8 @@ func (b Bar) text() string {
 // bar is v of top as width cells, the filled ones in st and the rest blank.
 func bar(v, top float64, width int, st lipgloss.Style) string {
 	n := 0
-	if top > 0 {
-		n = int(min(max(v/top, 0), 1)*float64(width*8) + 0.5)
+	if frac := v / top; top > 0 && !math.IsNaN(frac) { // a NaN would turn into a count below zero
+		n = int(min(max(frac, 0), 1)*float64(width*8) + 0.5)
 	}
 	cells := strings.Repeat("█", n/8)
 	if n%8 > 0 {

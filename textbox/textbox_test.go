@@ -231,11 +231,15 @@ func benchField(lines int) Model {
 	return m.MoveTo(lines/2, 10)
 }
 
-// A keystroke is an Update and the frame it causes.
+// A keystroke is an Update and the frame it causes. Each loop types and
+// deletes, so the text is the same on every pass whatever b.N is.
 func BenchmarkTypingInALongText(b *testing.B) {
 	m := benchField(5000)
+	back := press(tea.KeyBackspace, 0)
 	for b.Loop() {
 		m, _ = m.Update(typed("x"))
+		_ = m.View()
+		m, _ = m.Update(back)
 		_ = m.View()
 	}
 }
