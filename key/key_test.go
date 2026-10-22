@@ -30,21 +30,22 @@ func TestADisabledOrEmptyBindingNeverMatches(t *testing.T) {
 	require.False(t, off.Enabled())
 	require.False(t, Matches(press('q', 0), off))
 
-	off.SetEnabled(true)
+	off.Disabled = false
 	require.True(t, Matches(press('q', 0), off), "switched back on")
 
 	require.False(t, NewBinding().Enabled(), "no keys: not enabled")
 }
 
-func TestSettersChangeTheBindingInPlace(t *testing.T) {
-	b := NewBinding(WithKeys("a"), WithHelp("a", "add"))
-	b.SetKeys("n")
-	b.SetHelp("n", "new")
-	require.Equal(t, []string{"n"}, b.Keys())
-	require.Equal(t, "new", b.Help().Desc)
+// A binding is a value: switching off a copy leaves the one it came from on,
+// and a new key or help is a new binding.
+func TestABindingIsAValue(t *testing.T) {
+	keys := struct{ Save Binding }{Save: NewBinding(WithKeys("ctrl+s"), WithHelp("ctrl+s", "save"))}
+	off := keys.Save
+	off.Disabled = true
+	require.False(t, off.Enabled())
+	require.True(t, keys.Save.Enabled(), "the copy was switched off, not the field")
 
-	b.Unbind()
-	require.Nil(t, b.Keys())
-	require.Equal(t, Help{}, b.Help())
-	require.False(t, Matches(press('n', 0), b))
+	keys.Save.Disabled = true
+	require.False(t, Matches(press('s', tea.ModCtrl), keys.Save))
+	require.Equal(t, Help{Key: "ctrl+s", Desc: "save"}, keys.Save.Help(), "switched off, its help stays")
 }

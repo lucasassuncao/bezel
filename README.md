@@ -86,7 +86,7 @@ go run ./examples/demo
 - [`overlay`](overlay): a stack of modals: `Alert`, `Confirm`, `Prompt`, `Pick`, `Choice`, `Help`, `Pager`, `FilePicker`.
 - [`draw`](draw): ANSI-safe text fitting, panels (text and a scrollbar in their edges), cards, header, tabs, dividers and buttons.
 - [`legend`](legend): key hints, filtered by what the session allows and packed into a few rows.
-- [`key`](key): key bindings, with the help the legend prints; bubbles' `key` API, so moving over is an import path.
+- [`key`](key): key bindings, with the help the legend prints; bubbles' `key` API, but a `Binding` is a value switched off with its `Disabled` field instead of setters.
 - [`palette`](palette): the `:` command line, with completion and arguments.
 
 **Inside the panes**

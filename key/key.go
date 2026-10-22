@@ -1,16 +1,17 @@
 // Package key binds keys to what they do: the keys that fire a binding, the
-// help the legend shows for it, and whether it is on. Its API is bubbles'
-// key package's, so moving a program over is a change of import path.
+// help the legend shows for it, and whether it is on. It reads like bubbles'
+// key package, but a Binding is a value: switch one off with its field.
 package key
 
 import "fmt"
 
 // Binding is a set of keys and their help. A Binding with no keys matches
-// nothing and reads as not enabled.
+// nothing and reads as not enabled. Disabled switches it off, keys and help
+// kept: k.Save.Disabled = true. There are no setters to call and lose.
 type Binding struct {
+	Disabled bool
 	keys     []string
 	help     Help
-	disabled bool
 }
 
 // Help is what the legend prints for a binding: its key and what it does.
@@ -22,7 +23,8 @@ type Help struct {
 // BindingOpt sets one part of a binding being built.
 type BindingOpt func(*Binding)
 
-// NewBinding is a binding built from opts.
+// NewBinding is a binding built from opts. Its keys or help change by
+// building another: a binding read elsewhere never changes under its reader.
 func NewBinding(opts ...BindingOpt) Binding {
 	var b Binding
 	for _, opt := range opts {
@@ -44,7 +46,7 @@ func WithHelp(key, desc string) BindingOpt {
 
 // WithDisabled builds the binding switched off.
 func WithDisabled() BindingOpt {
-	return func(b *Binding) { b.disabled = true }
+	return func(b *Binding) { b.Disabled = true }
 }
 
 // Keys are the keys that fire b.
@@ -54,22 +56,7 @@ func (b Binding) Keys() []string { return b.keys }
 func (b Binding) Help() Help { return b.help }
 
 // Enabled reports whether b can fire: it has keys and is not switched off.
-func (b Binding) Enabled() bool { return !b.disabled && b.keys != nil }
-
-// SetKeys replaces b's keys.
-func (b *Binding) SetKeys(keys ...string) { b.keys = keys }
-
-// SetHelp replaces b's help.
-func (b *Binding) SetHelp(key, desc string) { b.help = Help{Key: key, Desc: desc} }
-
-// SetEnabled switches b on or off; its keys and help stay.
-func (b *Binding) SetEnabled(v bool) { b.disabled = !v }
-
-// Unbind drops b's keys and help, so it fires on nothing and shows nowhere.
-func (b *Binding) Unbind() {
-	b.keys = nil
-	b.help = Help{}
-}
+func (b Binding) Enabled() bool { return !b.Disabled && b.keys != nil }
 
 // Matches reports whether k is one of the keys of an enabled binding in b.
 func Matches[Key fmt.Stringer](k Key, b ...Binding) bool {

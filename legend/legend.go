@@ -37,13 +37,13 @@ func New(keys, desc string, needs ...Capability) Entry {
 	return e
 }
 
-// disabled reports an entry switched off with SetEnabled(false). Enabled()
-// is also false for an entry with no keys, which still shows, so check both.
-func (e Entry) disabled() bool { return len(e.Keys()) > 0 && !e.Enabled() }
+// switchedOff reports an entry whose Disabled is set. Enabled() is also
+// false for an entry with no keys, which still shows, so check both.
+func (e Entry) switchedOff() bool { return len(e.Keys()) > 0 && !e.Enabled() }
 
-// shown drops the disabled entries, in a new slice.
+// shown drops the switched-off entries, in a new slice.
 func shown(entries []Entry) []Entry {
-	return slices.DeleteFunc(slices.Clone(entries), Entry.disabled)
+	return slices.DeleteFunc(slices.Clone(entries), Entry.switchedOff)
 }
 
 // Filter keeps the entries can allows and that are not disabled, in a new

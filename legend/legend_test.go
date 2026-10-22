@@ -67,10 +67,10 @@ func TestHintLineJoinsWithDots(t *testing.T) {
 	require.Equal(t, "[a] action number a · [b] action number b", got)
 }
 
-// SetEnabled(false) on an Entry must hide it, as FromBindings already does.
+// An Entry with Disabled set is hidden, as FromBindings already does.
 func TestDisabledEntriesStayOutOfEveryView(t *testing.T) {
 	off := New("x", "off")
-	off.SetEnabled(false)
+	off.Disabled = true
 	es := []Entry{off, New("y", "on")}
 
 	for name, can := range map[string]func(Capability) bool{"nil can": nil, "some can": func(Capability) bool { return true }} {
@@ -83,8 +83,7 @@ func TestDisabledEntriesStayOutOfEveryView(t *testing.T) {
 }
 
 func TestFromBindingsSkipsDisabled(t *testing.T) {
-	off := key.NewBinding(key.WithKeys("x"), key.WithHelp("x", "off"))
-	off.SetEnabled(false)
+	off := key.NewBinding(key.WithKeys("x"), key.WithHelp("x", "off"), key.WithDisabled())
 	on := key.NewBinding(key.WithKeys("y"), key.WithHelp("y", "on"))
 	es := FromBindings([]key.Binding{off, on})
 	require.Len(t, es, 1)
