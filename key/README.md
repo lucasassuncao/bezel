@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/key"
 ```
 
-Package key binds keys to what they do: the keys that fire a binding, the help the legend shows for it, and whether it is on. It reads like bubbles' key package, but a Binding is a value: switch one off with its field.
+Package key binds keys to what they do: the keys that fire a binding, the help the legend shows for it, and whether it is on. A Binding is a value, built with NewBinding and its options and switched off by its Disabled field.
 
 ## Index
 

@@ -42,7 +42,7 @@ func TestWithKindTintsEveryDialog(t *testing.T) {
 	}
 }
 
-// The picker's entries are drawn by bubbles, so a new kind must reach them too.
+// The picker draws its entries in the dialog's colour, so a new kind repaints them.
 func TestFilePickerWithKindRepaintsEntries(t *testing.T) {
 	th := theme.Resolve(theme.Mint, true)
 	dir := t.TempDir()

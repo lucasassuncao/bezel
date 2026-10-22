@@ -46,12 +46,12 @@ func TestTableDescriptionGivesWayFirst(t *testing.T) {
 func TestTableCursorScrollsAndTheEdgesFollow(t *testing.T) {
 	var m tea.Model = newModel()
 	m, out := frame(t, m, tea.WindowSizeMsg{Width: 100, Height: 24}, 100)
-	require.Contains(t, out, " 1/20 ")
+	require.Contains(t, out, " 1/18 ")
 
 	m, out = frame(t, m, bezeltest.Key("end"), 100)
 	t.Log("\n" + out)
 	require.Contains(t, out, "▶ x/sync")
-	require.Contains(t, out, " 20/20 ")
+	require.Contains(t, out, " 18/18 ")
 	require.Contains(t, out, "NAME", "the header stays put")
 
 	_, cmd := m.Update(bezeltest.Key("enter"))

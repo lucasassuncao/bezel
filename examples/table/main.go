@@ -31,7 +31,6 @@ var cols = []table.Column{
 var rows = [][]string{
 	{"bubbletea", "v2.0.9", "MIT", "A framework for terminal apps, after The Elm Architecture"},
 	{"lipgloss", "v2.0.6", "MIT", "Style definitions for nice terminal layouts"},
-	{"bubbles", "v2.2.1", "MIT", "Components for Bubble Tea: text inputs, viewports, spinners"},
 	{"testify", "v1.11.1", "MIT", "Assertions and mocks for Go tests"},
 	{"clipboard", "v0.1.4", "BSD-3", "Clipboard access for Go"},
 	{"x/ansi", "v0.11.9", "MIT", "Parse, measure and cut strings with ANSI escapes"},
@@ -41,7 +40,6 @@ var rows = [][]string{
 	{"colorprofile", "v0.4.3", "MIT", "The colours a terminal can show"},
 	{"displaywidth", "v0.11.0", "MIT", "How many cells a string takes on screen"},
 	{"uax29", "v2.7.0", "MIT", "Unicode text segmentation"},
-	{"go-humanize", "v1.1.0", "MIT", "Numbers and times for humans"},
 	{"go-colorful", "v1.4.1", "MIT", "Colour spaces and blending"},
 	{"go-runewidth", "v0.0.31", "MIT", "Cell width of runes and strings"},
 	{"cancelreader", "v0.2.2", "MIT", "A reader that can be cancelled"},
