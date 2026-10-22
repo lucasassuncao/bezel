@@ -15,6 +15,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/clip"
 	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/theme"
@@ -28,10 +29,11 @@ type Keys struct {
 	Newline, DeleteBack, DeleteForward key.Binding
 	DeleteWordBack, DeleteWordForward  key.Binding
 	KillToStart, KillToEnd             key.Binding
+	Paste                              key.Binding // reads the clipboard
 }
 
 // DefaultKeys are the arrows, pgup/pgdown, ctrl+home/end for the ends of the
-// text, and the readline keys an input answers to.
+// text, and the readline keys an input answers to, ctrl+v to paste.
 func DefaultKeys() Keys {
 	return Keys{
 		Left:              key.NewBinding(key.WithKeys("left", "ctrl+b")),
@@ -53,6 +55,7 @@ func DefaultKeys() Keys {
 		DeleteWordForward: key.NewBinding(key.WithKeys("alt+delete", "alt+d", "ctrl+delete")),
 		KillToStart:       key.NewBinding(key.WithKeys("ctrl+u")),
 		KillToEnd:         key.NewBinding(key.WithKeys("ctrl+k")),
+		Paste:             key.NewBinding(key.WithKeys("ctrl+v")),
 	}
 }
 
@@ -67,25 +70,43 @@ type BlinkMsg struct{ id, tag int64 }
 // terminal agrees on.
 const tabWidth = 4
 
+// line is a line of the text and where its wrapped rows start at the field's
+// width, kept together so an edit rewraps only the line it changed.
+type line struct {
+	edit.Line
+	starts []int
+}
+
 // Model is a value: every method returns the new field.
 type Model struct {
-	lines   []edit.Line // never empty: an empty field is one empty line
-	row     int         // the line the caret is on
-	goal    int         // the column up and down aim for; -1 is the caret's own
-	top     int         // the first wrapped row shown
-	width   int
-	height  int
-	focused bool
-	caretOn bool
-	id, tag int64
-	keys    Keys
-	th      theme.Resolved
+	lines     []line // never empty: an empty field is one empty line
+	row       int    // the line the caret is on
+	goal      int    // the column up and down aim for; -1 is the caret's own
+	top       int    // the first wrapped row shown
+	width     int
+	height    int
+	focused   bool
+	caretOn   bool
+	id, tag   int64
+	keys      Keys
+	clipboard func() (string, error) // nil is the system's
+	th        theme.Resolved
 }
 
 // New is an empty field, not focused, sized by its text until SetWidth and
 // SetHeight say otherwise.
 func New(th theme.Resolved) Model {
-	return Model{lines: []edit.Line{{}}, goal: -1, id: ids.Add(1), keys: DefaultKeys(), th: th, caretOn: true}
+	return Model{lines: []line{{starts: []int{0}}}, goal: -1, id: ids.Add(1), keys: DefaultKeys(), th: th, caretOn: true}
+}
+
+// wrap is l with its rows worked out at the field's width.
+func (m Model) wrap(l edit.Line) line { return line{Line: l, starts: segments(l, m.textWidth())} }
+
+// WithClipboard reads the clipboard through read on a paste key, for a test
+// that must not touch the machine's own; nil is the system's.
+func (m Model) WithClipboard(read func() (string, error)) Model {
+	m.clipboard = read
+	return m
 }
 
 // WithKeys rebinds the editing keys.
@@ -104,9 +125,9 @@ func (m Model) SetTheme(th theme.Resolved) Model {
 // read as line breaks, so a Windows file comes back one line per line.
 func (m Model) WithValue(s string) Model {
 	parts := strings.Split(clean(s), "\n")
-	m.lines = make([]edit.Line, len(parts))
+	m.lines = make([]line, len(parts))
 	for i, p := range parts {
-		m.lines[i] = edit.NewLine(p)
+		m.lines[i] = m.wrap(edit.NewLine(p))
 	}
 	m.row, m.goal = len(m.lines)-1, -1
 	return m.scroll()
@@ -146,7 +167,14 @@ func (m Model) MoveTo(line, col int) Model {
 // SetWidth is the field's width in cells, the gutter included; zero draws
 // each line whole.
 func (m Model) SetWidth(w int) Model {
-	m.width = max(w, 0)
+	if w = max(w, 0); w != m.width {
+		m.width = w
+		lines := make([]line, len(m.lines))
+		for i, l := range m.lines {
+			lines[i] = m.wrap(l.Line)
+		}
+		m.lines = lines
+	}
 	return m.scroll()
 }
 
@@ -249,6 +277,8 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 		m = m.setLine(l.KillToStart())
 	case key.Matches(k, keys.KillToEnd):
 		m = m.setLine(l.KillToEnd())
+	case key.Matches(k, keys.Paste):
+		return m, clip.Paste(m.clipboard) // it comes back as a tea.PasteMsg
 	default:
 		text := edit.Printable(k.Key().Text)
 		if text == "" || k.Mod&typingMods != 0 {
@@ -298,7 +328,7 @@ func clean(s string) string {
 // older copy of the field still reads.
 func (m Model) setLine(l edit.Line) Model {
 	m.lines = slices.Clone(m.lines)
-	m.lines[m.row] = l
+	m.lines[m.row] = m.wrap(l)
 	return m
 }
 
@@ -310,12 +340,12 @@ func (m Model) insert(s string) Model {
 	if len(parts) == 1 {
 		return m.setLine(m.lines[m.row].Insert(parts[0]))
 	}
-	added := make([]edit.Line, 0, len(parts))
-	added = append(added, before.Insert(parts[0]))
+	added := make([]line, 0, len(parts))
+	added = append(added, m.wrap(before.Insert(parts[0])))
 	for _, p := range parts[1 : len(parts)-1] {
-		added = append(added, edit.NewLine(p))
+		added = append(added, m.wrap(edit.NewLine(p)))
 	}
-	added = append(added, edit.NewLine(parts[len(parts)-1]).Join(after))
+	added = append(added, m.wrap(edit.NewLine(parts[len(parts)-1]).Join(after)))
 	m.lines = slices.Concat(m.lines[:m.row], added, m.lines[m.row+1:])
 	m.row += len(parts) - 1
 	return m
@@ -325,10 +355,10 @@ func (m Model) insert(s string) Model {
 // line above, the caret where they meet.
 func (m Model) deleteBack(del func(edit.Line) edit.Line) Model {
 	if l := m.lines[m.row]; l.Cursor() > 0 || m.row == 0 {
-		return m.setLine(del(l))
+		return m.setLine(del(l.Line))
 	}
-	joined := m.lines[m.row-1].Join(m.lines[m.row])
-	m.lines = slices.Concat(m.lines[:m.row-1], []edit.Line{joined}, m.lines[m.row+1:])
+	joined := m.lines[m.row-1].Join(m.lines[m.row].Line)
+	m.lines = slices.Concat(m.lines[:m.row-1], []line{m.wrap(joined)}, m.lines[m.row+1:])
 	m.row--
 	return m
 }
@@ -337,10 +367,10 @@ func (m Model) deleteBack(del func(edit.Line) edit.Line) Model {
 // below to it.
 func (m Model) deleteForward(del func(edit.Line) edit.Line) Model {
 	if l := m.lines[m.row]; l.Cursor() < l.Len() || m.row == len(m.lines)-1 {
-		return m.setLine(del(l))
+		return m.setLine(del(l.Line))
 	}
-	joined := m.lines[m.row].Join(m.lines[m.row+1])
-	m.lines = slices.Concat(m.lines[:m.row], []edit.Line{joined}, m.lines[m.row+2:])
+	joined := m.lines[m.row].Join(m.lines[m.row+1].Line)
+	m.lines = slices.Concat(m.lines[:m.row], []line{m.wrap(joined)}, m.lines[m.row+2:])
 	return m
 }
 
@@ -429,12 +459,12 @@ func segmentOf(starts []int, c int) int {
 
 // caretRow is the wrapped row the caret shows on, counted from the first.
 func (m Model) caretRow() int {
-	width, rows := m.textWidth(), 0
-	for i := range m.row {
-		rows += len(segments(m.lines[i], width))
+	rows := 0
+	for _, l := range m.lines[:m.row] {
+		rows += len(l.starts)
 	}
 	l := m.lines[m.row]
-	return rows + segmentOf(segments(l, width), l.Cursor())
+	return rows + segmentOf(l.starts, l.Cursor())
 }
 
 // Rows is how many rows the text takes at the width set, its wrapped lines
@@ -443,9 +473,9 @@ func (m Model) Rows() int { return m.rowCount() }
 
 // rowCount is how many wrapped rows the text takes.
 func (m Model) rowCount() int {
-	n, width := 0, m.textWidth()
+	n := 0
 	for _, l := range m.lines {
-		n += len(segments(l, width))
+		n += len(l.starts)
 	}
 	return n
 }
@@ -453,17 +483,15 @@ func (m Model) rowCount() int {
 // vertical moves the caret n wrapped rows down (or up), keeping the column
 // it aimed for when the move began.
 func (m Model) vertical(down bool, n int) Model {
-	width := m.textWidth()
 	l := m.lines[m.row]
-	segs := segments(l, width)
-	k := segmentOf(segs, l.Cursor())
+	k := segmentOf(l.starts, l.Cursor())
 	if m.goal < 0 {
-		m.goal = l.Width(segs[k], l.Cursor())
+		m.goal = l.Width(l.starts[k], l.Cursor())
 	}
 	row := m.row
 	for range n {
 		switch {
-		case down && k+1 < len(segments(m.lines[row], width)):
+		case down && k+1 < len(m.lines[row].starts):
 			k++
 		case down && row+1 < len(m.lines):
 			row, k = row+1, 0
@@ -471,11 +499,11 @@ func (m Model) vertical(down bool, n int) Model {
 			k--
 		case !down && row > 0:
 			row--
-			k = len(segments(m.lines[row], width)) - 1
+			k = len(m.lines[row].starts) - 1
 		}
 	}
 	target := m.lines[row]
-	segs = segments(target, width)
+	segs := target.starts
 	from, to := span(segs, k, target.Len())
 	at := from + edit.NewLine(target.Slice(from, to)).IndexAt(m.goal)
 	if k+1 < len(segs) {
@@ -483,6 +511,15 @@ func (m Model) vertical(down bool, n int) Model {
 	}
 	m.row = row
 	return m.setLine(target.SetCursor(at))
+}
+
+// window is the rows [m.top, end) the view shows, end past the text when the
+// field is taller than it; every row when no height is set.
+func (m Model) window() (start, end int) {
+	if m.height == 0 {
+		return 0, m.rowCount()
+	}
+	return m.top, m.top + m.height
 }
 
 // scroll moves the window to show the caret's row, and back up while rows
@@ -504,24 +541,31 @@ func (m Model) scroll() Model {
 // View is the rows in the window, each a gutter and a wrapped piece of a
 // line, exactly the width and height set; rows past the text show "~".
 func (m Model) View() string {
-	width, caret := m.textWidth(), m.focused && m.caretOn
+	caret := m.focused && m.caretOn
 	text := lipgloss.NewStyle()
 	if !m.focused {
 		text = m.th.Dim
 	}
+	start, end := m.window()
 	var rows []string
 	n := 0
 	for i, l := range m.lines {
-		segs := segments(l, width)
-		for k := range segs {
-			if n >= m.top && (m.height == 0 || n < m.top+m.height) {
-				from, to := span(segs, k, l.Len())
+		if n >= end {
+			break
+		}
+		if n+len(l.starts) <= start { // wholly above the window
+			n += len(l.starts)
+			continue
+		}
+		for k := range l.starts {
+			if n >= start && n < end {
+				from, to := span(l.starts, k, l.Len())
 				gutter := draw.Gutter(i+1, m.th.Muted)
 				if k > 0 {
 					gutter = m.th.Muted.Render(strings.Repeat(" ", draw.GutterWidth-2) + "│ ")
 				}
-				onCaret := caret && i == m.row && segmentOf(segs, l.Cursor()) == k
-				rows = append(rows, gutter+m.piece(l, from, to, onCaret, text))
+				onCaret := caret && i == m.row && segmentOf(l.starts, l.Cursor()) == k
+				rows = append(rows, gutter+m.piece(l.Line, from, to, onCaret, text))
 			}
 			n++
 		}

@@ -1,6 +1,7 @@
 package textbox
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -196,6 +197,11 @@ func FuzzTextboxStaysInItsBox(f *testing.F) {
 		if m.Line() < 0 || m.Line() >= m.LineCount() {
 			t.Fatalf("caret on line %d of %d", m.Line(), m.LineCount())
 		}
+		for i, l := range m.lines {
+			if want := segments(l.Line, m.textWidth()); !slices.Equal(l.starts, want) {
+				t.Fatalf("line %d is cached as wrapping at %v, wraps at %v", i, l.starts, want)
+			}
+		}
 	})
 }
 
@@ -204,4 +210,55 @@ func TestRowsCountsTheWrappedRows(t *testing.T) {
 	m := New(th()).SetValue("alpha beta gamma\nend")
 	require.Equal(t, 2, m.Rows(), "no width: one row a line")
 	require.Equal(t, 3, m.SetWidth(draw.GutterWidth+11).Rows())
+}
+
+// longText is lines lines of prose, every third long enough to wrap at 80.
+func longText(lines int) string {
+	var b strings.Builder
+	for i := range lines {
+		b.WriteString("key: value with some words in it")
+		if i%3 == 0 {
+			b.WriteString(" and a tail long enough to wrap past eighty columns of text")
+		}
+		b.WriteByte('\n')
+	}
+	return b.String()
+}
+
+// benchField is a focused field of lines lines, 80 by 40, the caret mid-text.
+func benchField(lines int) Model {
+	m, _ := New(th()).SetWidth(80).SetHeight(40).SetValue(longText(lines)).Focus()
+	return m.MoveTo(lines/2, 10)
+}
+
+// A keystroke is an Update and the frame it causes.
+func BenchmarkTypingInALongText(b *testing.B) {
+	m := benchField(5000)
+	for b.Loop() {
+		m, _ = m.Update(typed("x"))
+		_ = m.View()
+	}
+}
+
+func BenchmarkMovingDownALongText(b *testing.B) {
+	m := benchField(5000)
+	down := press(tea.KeyDown, 0)
+	for b.Loop() {
+		m, _ = m.Update(down)
+		_ = m.View()
+		if m.Line() == m.LineCount()-1 {
+			m = m.MoveTo(0, 10)
+		}
+	}
+}
+
+// ctrl+v reads the clipboard off the loop and comes back as a paste, its
+// lines kept.
+func TestCtrlVPastesTheClipboard(t *testing.T) {
+	m := focused("").WithClipboard(func() (string, error) { return "a\r\nb", nil })
+	m, cmd := m.Update(press('v', tea.ModCtrl))
+	require.Empty(t, m.Value(), "nothing until the read answers")
+	m = run(m, cmd())
+	require.Equal(t, "a\nb", m.Value())
+	require.Equal(t, []int{1, 1}, []int{m.Line(), m.Column()})
 }

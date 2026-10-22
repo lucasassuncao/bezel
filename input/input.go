@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/clip"
 	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/theme"
@@ -23,10 +24,11 @@ type Keys struct {
 	DeleteBack, DeleteForward                   key.Binding
 	DeleteWordBack, DeleteWordForward           key.Binding
 	KillToStart, KillToEnd                      key.Binding
+	Paste                                       key.Binding // reads the clipboard
 }
 
 // DefaultKeys are the arrows and the readline keys: ctrl+a/e, alt+b/f,
-// ctrl+w, ctrl+k and ctrl+u, with ctrl and alt arrows for words.
+// ctrl+w, ctrl+k and ctrl+u, ctrl and alt arrows for words, ctrl+v to paste.
 func DefaultKeys() Keys {
 	return Keys{
 		Left:              key.NewBinding(key.WithKeys("left", "ctrl+b")),
@@ -41,6 +43,7 @@ func DefaultKeys() Keys {
 		DeleteWordForward: key.NewBinding(key.WithKeys("alt+delete", "alt+d", "ctrl+delete")),
 		KillToStart:       key.NewBinding(key.WithKeys("ctrl+u")),
 		KillToEnd:         key.NewBinding(key.WithKeys("ctrl+k")),
+		Paste:             key.NewBinding(key.WithKeys("ctrl+v")),
 	}
 }
 
@@ -63,6 +66,7 @@ type Model struct {
 	caretOn     bool  // false for the dark half of a blink
 	id, tag     int64 // tag counts the blinks armed; only the newest flips
 	keys        Keys
+	clipboard   func() (string, error) // nil is the system's
 	th          theme.Resolved
 }
 
@@ -104,6 +108,13 @@ func (m Model) SetTheme(th theme.Resolved) Model {
 func (m Model) WithMask(mask rune) Model {
 	m.mask = string(mask)
 	return m.scroll()
+}
+
+// WithClipboard reads the clipboard through read on a paste key, for a test
+// that must not touch the machine's own; nil is the system's.
+func (m Model) WithClipboard(read func() (string, error)) Model {
+	m.clipboard = read
+	return m
 }
 
 // WithKeys rebinds the editing keys.
@@ -209,6 +220,8 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 		l = l.DeleteWordBack()
 	case key.Matches(k, m.keys.DeleteWordForward):
 		l = l.DeleteWordForward()
+	case key.Matches(k, m.keys.Paste):
+		return m, clip.Paste(m.clipboard) // it comes back as a tea.PasteMsg
 	default:
 		text := oneLine(k.Key().Text)
 		if text == "" || k.Mod&typingMods != 0 {

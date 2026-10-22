@@ -179,3 +179,17 @@ func TestBlinkRestartsAFocusedCaretOnly(t *testing.T) {
 	require.NotNil(t, next, "the tick is the field's own")
 	require.NotContains(t, m.View(), short.Caret.Render(" "))
 }
+
+// ctrl+v reads the clipboard off the loop and comes back as a paste, which
+// the field then takes as one line.
+func TestCtrlVPastesTheClipboard(t *testing.T) {
+	m := focused().WithClipboard(func() (string, error) { return "from\nthe clipboard", nil })
+	m, cmd := m.Update(press('v', tea.ModCtrl))
+	require.Empty(t, m.Value(), "nothing until the read answers")
+	paste := cmd()
+	require.Equal(t, tea.PasteMsg{Content: "from\nthe clipboard"}, paste)
+	require.Equal(t, "from the clipboard", run(m, paste).Value())
+
+	_, cmd = focused().Blur().WithClipboard(func() (string, error) { return "x", nil }).Update(press('v', tea.ModCtrl))
+	require.Nil(t, cmd, "a blurred field reads nothing")
+}

@@ -29,6 +29,7 @@ Package input is a one\-line text field: the caret moves and kills a shell's lin
   - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
   - [func \(m Model\) Value\(\) string](<#Model.Value>)
   - [func \(m Model\) View\(\) string](<#Model.View>)
+  - [func \(m Model\) WithClipboard\(read func\(\) \(string, error\)\) Model](<#Model.WithClipboard>)
   - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
   - [func \(m Model\) WithMask\(mask rune\) Model](<#Model.WithMask>)
   - [func \(m Model\) WithPlaceholder\(s string\) Model](<#Model.WithPlaceholder>)
@@ -38,7 +39,7 @@ Package input is a one\-line text field: the caret moves and kills a shell's lin
 
 
 <a name="BlinkMsg"></a>
-## type [BlinkMsg](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L52>)
+## type [BlinkMsg](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L55>)
 
 BlinkMsg flips the caret of the input that armed it. A host hands it on the way it hands on keys; an input ignores every other input's.
 
@@ -49,7 +50,7 @@ type BlinkMsg struct {
 ```
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L21-L26>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L22-L28>)
 
 Keys are the editing bindings. Any other key that types text inserts it.
 
@@ -59,20 +60,21 @@ type Keys struct {
     DeleteBack, DeleteForward                   key.Binding
     DeleteWordBack, DeleteWordForward           key.Binding
     KillToStart, KillToEnd                      key.Binding
+    Paste                                       key.Binding // reads the clipboard
 }
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L30>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L32>)
 
 ```go
 func DefaultKeys() Keys
 ```
 
-DefaultKeys are the arrows and the readline keys: ctrl\+a/e, alt\+b/f, ctrl\+w, ctrl\+k and ctrl\+u, with ctrl and alt arrows for words.
+DefaultKeys are the arrows and the readline keys: ctrl\+a/e, alt\+b/f, ctrl\+w, ctrl\+k and ctrl\+u, ctrl and alt arrows for words, ctrl\+v to paste.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L55-L67>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L58-L71>)
 
 Model is a value: every method returns the new field.
 
@@ -83,7 +85,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L70>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L74>)
 
 ```go
 func New(th theme.Resolved) Model
@@ -92,7 +94,7 @@ func New(th theme.Resolved) Model
 New is an empty field, not focused, as wide as its text.
 
 <a name="Model.Blink"></a>
-### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L152>)
+### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L163>)
 
 ```go
 func (m Model) Blink() tea.Cmd
@@ -101,7 +103,7 @@ func (m Model) Blink() tea.Cmd
 Blink is the command that keeps a focused caret blinking, for a host that focused the field before it could hand on a command; nil while blurred.
 
 <a name="Model.Blur"></a>
-### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L145>)
+### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L156>)
 
 ```go
 func (m Model) Blur() Model
@@ -110,7 +112,7 @@ func (m Model) Blur() Model
 Blur takes the keys away and hides the caret.
 
 <a name="Model.Cursor"></a>
-### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L133>)
+### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L144>)
 
 ```go
 func (m Model) Cursor() int
@@ -119,7 +121,7 @@ func (m Model) Cursor() int
 Cursor is how many characters sit before the caret.
 
 <a name="Model.Focus"></a>
-### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L139>)
+### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L150>)
 
 ```go
 func (m Model) Focus() (Model, tea.Cmd)
@@ -128,7 +130,7 @@ func (m Model) Focus() (Model, tea.Cmd)
 Focus gives the field the keys and starts its caret blinking.
 
 <a name="Model.Focused"></a>
-### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L136>)
+### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L147>)
 
 ```go
 func (m Model) Focused() bool
@@ -137,7 +139,7 @@ func (m Model) Focused() bool
 Focused reports whether the field takes keys and shows its caret.
 
 <a name="Model.Placeholder"></a>
-### func \(Model\) [Placeholder](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L130>)
+### func \(Model\) [Placeholder](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L141>)
 
 ```go
 func (m Model) Placeholder() string
@@ -146,7 +148,7 @@ func (m Model) Placeholder() string
 Placeholder is what an empty field shows.
 
 <a name="Model.SetTheme"></a>
-### func \(Model\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L97>)
+### func \(Model\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L101>)
 
 ```go
 func (m Model) SetTheme(th theme.Resolved) Model
@@ -155,7 +157,7 @@ func (m Model) SetTheme(th theme.Resolved) Model
 SetTheme repaints the field after the terminal's background was learned.
 
 <a name="Model.SetValue"></a>
-### func \(Model\) [SetValue](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L124>)
+### func \(Model\) [SetValue](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L135>)
 
 ```go
 func (m Model) SetValue(s string) Model
@@ -164,7 +166,7 @@ func (m Model) SetValue(s string) Model
 SetValue replaces the text after something happened, a completion say, with the caret at its end.
 
 <a name="Model.SetWidth"></a>
-### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L94>)
+### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L98>)
 
 ```go
 func (m Model) SetWidth(w int) Model
@@ -173,7 +175,7 @@ func (m Model) SetWidth(w int) Model
 SetWidth changes the width after a resize, keeping the caret in view.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L162>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L173>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
@@ -182,7 +184,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
 Update edits on a key or a paste while focused, and flips the caret on its own BlinkMsg. A key it has no use for leaves it as it was, with no command.
 
 <a name="Model.Value"></a>
-### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L127>)
+### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L138>)
 
 ```go
 func (m Model) Value() string
@@ -191,7 +193,7 @@ func (m Model) Value() string
 Value is the text in the field.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L298>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L311>)
 
 ```go
 func (m Model) View() string
@@ -199,8 +201,17 @@ func (m Model) View() string
 
 View is the prompt and the text, the caret on the cell it covers, exactly the width set \(or as wide as the text, and the caret, without one\).
 
+<a name="Model.WithClipboard"></a>
+### func \(Model\) [WithClipboard](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L115>)
+
+```go
+func (m Model) WithClipboard(read func() (string, error)) Model
+```
+
+WithClipboard reads the clipboard through read on a paste key, for a test that must not touch the machine's own; nil is the system's.
+
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L110>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L121>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
@@ -209,7 +220,7 @@ func (m Model) WithKeys(k Keys) Model
 WithKeys rebinds the editing keys.
 
 <a name="Model.WithMask"></a>
-### func \(Model\) [WithMask](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L104>)
+### func \(Model\) [WithMask](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L108>)
 
 ```go
 func (m Model) WithMask(mask rune) Model
@@ -218,7 +229,7 @@ func (m Model) WithMask(mask rune) Model
 WithMask draws every character as mask, for a password; word moves and kills then run to the ends, giving away no word boundary.
 
 <a name="Model.WithPlaceholder"></a>
-### func \(Model\) [WithPlaceholder](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L81>)
+### func \(Model\) [WithPlaceholder](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L85>)
 
 ```go
 func (m Model) WithPlaceholder(s string) Model
@@ -227,7 +238,7 @@ func (m Model) WithPlaceholder(s string) Model
 WithPlaceholder shows s, muted, while the field is empty.
 
 <a name="Model.WithPrompt"></a>
-### func \(Model\) [WithPrompt](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L75>)
+### func \(Model\) [WithPrompt](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L79>)
 
 ```go
 func (m Model) WithPrompt(p string) Model
@@ -236,7 +247,7 @@ func (m Model) WithPrompt(p string) Model
 WithPrompt is drawn before the text in the accent, as ":" or "\> ".
 
 <a name="Model.WithValue"></a>
-### func \(Model\) [WithValue](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L117>)
+### func \(Model\) [WithValue](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L128>)
 
 ```go
 func (m Model) WithValue(s string) Model
@@ -245,7 +256,7 @@ func (m Model) WithValue(s string) Model
 WithValue is the field holding s, the caret at its end, as a form opens on a saved value.
 
 <a name="Model.WithWidth"></a>
-### func \(Model\) [WithWidth](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L88>)
+### func \(Model\) [WithWidth](<https://github.com/lucasassuncao/bezel/blob/main/input/input.go#L92>)
 
 ```go
 func (m Model) WithWidth(w int) Model
