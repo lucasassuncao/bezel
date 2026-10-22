@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
@@ -131,4 +132,16 @@ func TestTextClosesOnAnyKey(t *testing.T) {
 	require.Contains(t, ansi.Strip(x.View(layout.Rect{W: 40, H: 10})), "a line")
 	_, cmd := x.Update(press("q"))
 	require.IsType(t, CloseMsg{}, cmd())
+}
+
+func TestPickAnswersToTheKeysItWasGiven(t *testing.T) {
+	keys := DefaultPickKeys()
+	keys.Up, keys.Down = bind("k", "move"), key.NewBinding(key.WithKeys("j"))
+	p := NewPick("t", []string{"a", "b"}, nil, theme.Resolved{}).WithKeys(keys)
+
+	o, _ := p.Update(press("j"))
+	require.Equal(t, 1, o.(Pick).Cursor())
+	o, _ = o.Update(tea.KeyPressMsg{Code: tea.KeyUp})
+	require.Equal(t, 1, o.(Pick).Cursor(), "the arrow is no longer bound")
+	require.Contains(t, ansi.Strip(p.View(layout.Rect{W: 60, H: 20})), "[k] move")
 }

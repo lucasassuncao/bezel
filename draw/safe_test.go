@@ -23,6 +23,15 @@ func TestSanitizeEscapesInvalidUTF8(t *testing.T) {
 	}
 }
 
+// Control sequences from untrusted text are shown, never executed: an OSC 52
+// that would set the clipboard comes out as its escaped bytes.
+func TestSanitizeShowsControlSequences(t *testing.T) {
+	in, want := "name\x1b]52;c;aGk=\x07\n", `name\e]52;c;aGk=\x07\n`
+	if got := Sanitize(in); got != want {
+		t.Errorf("Sanitize(%q) = %q, want %q", in, got, want)
+	}
+}
+
 // Whatever bytes a value carries, what comes out of sanitize is safe to draw:
 // no rune the terminal would act on, and nothing lost that was safe to begin
 // with. Invalid UTF-8 is included, because a secret is not obliged to be text.
@@ -41,6 +50,21 @@ func FuzzSanitizeIsSafeToDraw(f *testing.F) {
 		}
 		if Sanitize(out) != out {
 			t.Fatalf("sanitize is not idempotent on %q", s)
+		}
+	})
+}
+
+func BenchmarkSanitize(b *testing.B) {
+	clean := strings.Repeat("a plain line of server text ", 40)
+	dirty := strings.Repeat("evil \x1b]52;c;aGk=\x07 text \u202e ", 40)
+	b.Run("clean", func(b *testing.B) {
+		for b.Loop() {
+			_ = Sanitize(clean)
+		}
+	})
+	b.Run("dirty", func(b *testing.B) {
+		for b.Loop() {
+			_ = Sanitize(dirty)
 		}
 	})
 }

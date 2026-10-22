@@ -36,49 +36,6 @@ func Fit(cols []Column, rows [][]string, width int) []int
 
 Fit returns each column's width: its widest cell \(title included\) capped at Max, then shrunk to fit width \- Flex first down to Min, then the widest, never below minCell. Min is a floor for shrinking, not a width to grow to.
 
-<details><summary>Example</summary>
-<p>
-
-The Flex column gives way first when the rows do not fit.
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/lucasassuncao/bezel/table"
-)
-
-func main() {
-	cols := []table.Column{
-		{Title: "Name", Min: 4, Flex: true},
-		{Title: "Source"},
-		{Title: "Version"},
-	}
-	rows := [][]string{
-		{"Google Chrome", "winget", "126.0.6478.127"},
-		{"Visual Studio Code", "scoop", "1.91"},
-	}
-	widths := table.Fit(cols, rows, 38)
-	fmt.Println(table.Titles(cols, widths))
-	for _, r := range rows {
-		fmt.Println(table.Row(widths, r))
-	}
-}
-```
-
-#### Output
-
-```
-Name            Source  Version
-Google Chrome   winget  126.0.6478.127
-Visual Studio…  scoop   1.91
-```
-
-</p>
-</details>
-
 <a name="Row"></a>
 ## func [Row](<https://github.com/lucasassuncao/bezel/blob/main/table/table.go#L85>)
 

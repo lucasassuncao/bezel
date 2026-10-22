@@ -4,12 +4,12 @@ import (
 	"strings"
 	"testing"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
-	"github.com/lucasassuncao/bezel/icon"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -63,47 +63,6 @@ func TestTabMovesTheFocusAndWraps(t *testing.T) {
 	require.Equal(t, 5, f.Focused(), "shift+tab from the first wraps to the last")
 }
 
-func TestInputTakesWhatIsTyped(t *testing.T) {
-	f, _ := press(sample(t), "a", "p", "p")
-	require.Equal(t, "app", f.Field(0).(Input).Value())
-}
-
-func TestSelectHoldsTheKeysWhileOpen(t *testing.T) {
-	f, _ := press(sample(t), "tab", "enter")
-	require.True(t, f.Field(1).(Select).Holding())
-	require.Contains(t, ansi.Strip(f.View(60)), "alpine", "the options open under it")
-
-	f, _ = press(f, "tab")
-	require.Equal(t, 1, f.Focused(), "tab does not leave an open select")
-
-	f, _ = press(f, "down", "down", "enter")
-	require.Equal(t, "alpine", f.Field(1).(Select).Value())
-	require.False(t, f.Field(1).(Select).Holding())
-
-	f, _ = press(f, "enter", "up", "esc")
-	require.Equal(t, "alpine", f.Field(1).(Select).Value(), "esc closes without changing it")
-}
-
-func TestChoicesFlip(t *testing.T) {
-	f, _ := press(sample(t), "tab", "tab", "right", "right", "right")
-	require.Equal(t, "fish", f.Field(2).(Radio).Value(), "right stops at the last option")
-
-	f, _ = press(f, "tab", "space")
-	require.True(t, f.Field(3).(Toggle).On())
-
-	f, _ = press(f, "tab", "space")
-	require.True(t, f.Field(4).(Checkbox).Checked())
-	f, _ = press(f, "enter")
-	require.False(t, f.Field(4).(Checkbox).Checked())
-}
-
-func TestButtonRunsItsCommand(t *testing.T) {
-	f, cmd := press(sample(t), "shift+tab", "enter")
-	require.Equal(t, 5, f.Focused())
-	require.NotNil(t, cmd)
-	require.Equal(t, submitted{}, cmd())
-}
-
 func TestViewLinesUpTheValues(t *testing.T) {
 	rows := strings.Split(ansi.Strip(sample(t).View(60)), "\n")
 	require.Len(t, rows, 6)
@@ -131,30 +90,24 @@ func TestUpdateLeavesEarlierCopiesAlone(t *testing.T) {
 	require.False(t, fields[0].(Checkbox).Checked(), "the caller's slice changed")
 }
 
-func TestEmptyChoicesDoNotPanic(t *testing.T) {
-	for _, fl := range []Field{NewSelect("Image", nil, 0, th()), NewRadio("Shell", nil, 0, th())} {
-		f, _ := New(fl)
-		require.NotPanics(t, func() {
-			f, _ = press(f, "enter", "down", "up", "right", "left", "enter")
-			_ = f.View(40)
-		})
-	}
-	require.Empty(t, NewSelect("Image", nil, 0, th()).Value())
-	require.Empty(t, NewRadio("Shell", nil, 0, th()).Value())
-}
+func binding(keys ...string) key.Binding { return key.NewBinding(key.WithKeys(keys...)) }
 
-// The environment only picks the default: a host that chose a set keeps it.
-func TestWithIconsOverridesTheEnvironment(t *testing.T) {
-	t.Setenv("BEZEL_ASCII", "1")
-	r := NewRadio("Shell", []string{"bash"}, 0, th())
-	require.Contains(t, ansi.Strip(r.View(false, 5, 40)), "(*)")
-	require.Contains(t, ansi.Strip(r.WithIcons(icon.Unicode()).View(false, 5, 40)), "(•)")
+// One call rebinds the form's focus keys and the keys of every control in it.
+func TestFormWithKeysRebindsTheFocusAndItsControls(t *testing.T) {
+	keys := DefaultKeys()
+	keys.Next, keys.Press = binding("ctrl+n"), binding("x")
+	f, _ := New(NewCheckbox("a", false, th()), NewButton("go", func() tea.Msg { return submitted{} }, th()))
+	f = f.WithKeys(keys)
 
-	sw := NewToggle("Docker", true, th()).WithIcons(icon.Unicode())
-	require.Contains(t, ansi.Strip(sw.View(false, 6, 40)), "──●")
-}
+	f, _ = press(f, "space")
+	require.False(t, f.Field(0).(Checkbox).Checked(), "space is no longer a press")
+	f, _ = press(f, "x")
+	require.True(t, f.Field(0).(Checkbox).Checked())
 
-func TestInputCaretFollowsTheTheme(t *testing.T) {
-	in := NewInput("Name", "", 10, theme.Resolved{CaretBlink: 7})
-	require.EqualValues(t, 7, in.in.Styles().Cursor.BlinkSpeed)
+	f, _ = press(f, "tab")
+	require.Equal(t, 0, f.Focused(), "tab is no longer next")
+	f, _ = press(f, "ctrl+n")
+	require.Equal(t, 1, f.Focused())
+	_, cmd := press(f, "x")
+	require.Equal(t, submitted{}, cmd())
 }

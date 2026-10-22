@@ -4,7 +4,9 @@ import (
 	"strings"
 	"testing"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/layout"
@@ -164,4 +166,24 @@ func TestStackSizesItsOverlays(t *testing.T) {
 func TestToTopKeepsNothingAsNothing(t *testing.T) {
 	require.Nil(t, ToTop(nil))
 	require.Nil(t, ToTop(func() tea.Msg { return nil })())
+}
+
+func hint(o Overlay) string { return ansi.Strip(legend.HintLine(o.Legend(), legend.Style{})) }
+
+// What each dialog lists for its keys, as the help overlay prints it.
+func TestDialogLegendsNameTheirKeys(t *testing.T) {
+	th := theme.Resolved{}
+	for want, o := range map[string]Overlay{
+		"[←/→] choose · [enter] pick · [y/n] answer · [esc] cancel": NewConfirm("t", "m", nil, th),
+		"[↑/↓] choose · [enter] pick · [esc] cancel":                NewPick("t", []string{"a"}, nil, th),
+		"[esc] close": NewHelp(nil, th),
+		"[↑/↓] scroll · [pgup/pgdn] page · [esc] close": NewPager("t", "x", th),
+		"[enter] confirm · [esc] cancel":                NewPrompt("t", nil, th),
+	} {
+		require.Equal(t, want, hint(o))
+	}
+}
+
+func bind(keys, help string) key.Binding {
+	return key.NewBinding(key.WithKeys(strings.Split(keys, "/")...), key.WithHelp(keys, help))
 }

@@ -3,6 +3,7 @@ package draw
 import (
 	"strings"
 	"testing"
+	"unicode"
 
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
@@ -116,4 +117,35 @@ func TestWrapEdgeWidthsAndInput(t *testing.T) {
 	require.Equal(t, []string{"a long line"}, Wrap("a long line", -3))
 	require.Equal(t, []string{"   "}, Wrap("   ", 5))
 	require.NotPanics(t, func() { Wrap("日本", 1) })
+}
+
+// Fit is what every pane cell goes through: whatever the text, the cell is
+// exactly width wide, or the columns beside it shift.
+func FuzzFitIsExactlyWidth(f *testing.F) {
+	for _, s := range []string{"", "plain", "a\x1b[31mred\x1b[0m", "日本語", "e\u0301", "tab\there", "\xff", "0\xe8"} {
+		f.Add(s, uint8(5))
+	}
+	f.Fuzz(func(t *testing.T, s string, w uint8) {
+		s = Sanitize(s)
+		// Format runes such as U+0600 glue to the next cluster, padding
+		// included: the width is the terminal's guess, not a promise.
+		if strings.ContainsFunc(s, func(r rune) bool { return unicode.Is(unicode.Cf, r) }) {
+			t.Skip()
+		}
+		width := int(w)
+		got := Fit(s, width)
+		if Width(got) != width {
+			t.Fatalf("Fit(%q, %d) = %q is %d wide", s, width, got, Width(got))
+		}
+		if Width(Truncate(s, width)) > max(width, 0) && width > 0 {
+			t.Fatalf("Truncate(%q, %d) overflows", s, width)
+		}
+	})
+}
+
+func BenchmarkFit(b *testing.B) {
+	s := lipgloss.NewStyle().Bold(true).Render(strings.Repeat("wide text ", 30))
+	for b.Loop() {
+		_ = Fit(s, 80)
+	}
 }

@@ -75,77 +75,6 @@ func Resolve(n Node, body Rect, present func(name string) bool) (map[string]Rect
 
 Resolve places the tree inside body. Leaves that present rejects are pruned first, so their space goes to their siblings. collapsed reports whether any Collapse fired, which is what a legend needs to change its wording.
 
-<details><summary>Example</summary>
-<p>
-
-
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/lucasassuncao/bezel/layout"
-)
-
-func main() {
-	screen := layout.Rows(
-		layout.Fixed("header", layout.Lines(1)),
-		layout.Columns(
-			layout.Fixed("sidebar", layout.Ratio(1, 4), layout.Min(20)),
-			layout.Fill("main"),
-		),
-	)
-	rects, _ := layout.Resolve(screen, layout.Rect{W: 100, H: 30}, nil)
-	for _, name := range layout.Order(screen) {
-		fmt.Printf("%-7s %+v\n", name, rects[name])
-	}
-}
-```
-
-#### Output
-
-```
-header  {X:0 Y:0 W:100 H:1}
-sidebar {X:0 Y:1 W:25 H:29}
-main    {X:25 Y:1 W:75 H:29}
-```
-
-</p>
-</details>
-
-<details><summary>Example (Present)</summary>
-<p>
-
-A leaf the present func rejects gives its space to its siblings.
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/lucasassuncao/bezel/layout"
-)
-
-func main() {
-	screen := layout.Columns(layout.Fixed("sidebar", layout.Lines(30)), layout.Fill("main"))
-	noSidebar := func(name string) bool { return name != "sidebar" }
-	rects, _ := layout.Resolve(screen, layout.Rect{W: 100, H: 30}, noSidebar)
-	fmt.Printf("%+v\n", rects["main"])
-}
-```
-
-#### Output
-
-```
-{X:0 Y:0 W:100 H:30}
-```
-
-</p>
-</details>
-
 <a name="Ring"></a>
 ## func [Ring](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L107>)
 
@@ -201,37 +130,6 @@ func (b *Box) Collapse(limit int, keep string) *Box
 ```
 
 Collapse is a copy of b that keeps only the child holding leaf keep when its axis is shorter than limit. keep may name a leaf nested deeper in that child. b itself is left as it was, so a box shared by two layouts is safe.
-
-<details><summary>Example</summary>
-<p>
-
-
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/lucasassuncao/bezel/layout"
-)
-
-func main() {
-	screen := layout.Columns(layout.Fill("list"), layout.Fill("detail")).Collapse(80, "detail")
-	rects, collapsed := layout.Resolve(screen, layout.Rect{W: 60, H: 20}, nil)
-	_, hasList := rects["list"]
-	fmt.Println(collapsed, hasList, fmt.Sprintf("%+v", rects["detail"]))
-}
-```
-
-#### Output
-
-```
-true false {X:0 Y:0 W:60 H:20}
-```
-
-</p>
-</details>
 
 <a name="Constraint"></a>
 ## type [Constraint](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L80-L83>)

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
@@ -86,4 +87,16 @@ func TestDialogsKeepTheirLines(t *testing.T) {
 	for _, o := range []Overlay{text, pick, choice} {
 		require.Contains(t, o.View(body), "original")
 	}
+}
+
+func TestPagerScrollsOnTheKeysItWasGiven(t *testing.T) {
+	keys := DefaultPagerKeys()
+	keys.Down = key.NewBinding(key.WithKeys("n"))
+	p := NewPager("t", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12", theme.Resolved{}).WithKeys(keys)
+	o := p.Resize(layout.Rect{W: 60, H: 12})
+
+	o, _ = o.Update(press("j"))
+	require.Equal(t, 0, o.(Pager).Offset(), "j is no longer bound")
+	o, _ = o.Update(press("n"))
+	require.Equal(t, 1, o.(Pager).Offset())
 }

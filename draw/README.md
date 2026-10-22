@@ -122,37 +122,6 @@ func Composite(fg, bg string, x, y int) string
 
 Composite draws fg over bg at \(x, y\), replacing only the cells it covers and keeping the rest of each bg line, escapes included. This is what lets a modal float over the panes instead of blanking them.
 
-<details><summary>Example</summary>
-<p>
-
-
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/lucasassuncao/bezel/draw"
-)
-
-func main() {
-	bg := "..........\n..........\n.........."
-	fmt.Println(draw.Composite("[ok]", bg, 3, 1))
-}
-```
-
-#### Output
-
-```
-..........
-...[ok]...
-..........
-```
-
-</p>
-</details>
-
 <a name="CompositeCenter"></a>
 ## func [CompositeCenter](<https://github.com/lucasassuncao/bezel/blob/main/draw/composite.go#L35>)
 
@@ -197,36 +166,6 @@ func Fit(s string, width int) string
 ```
 
 Fit makes s exactly width cells: cut when longer, padded when shorter.
-
-<details><summary>Example</summary>
-<p>
-
-
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/lucasassuncao/bezel/draw"
-)
-
-func main() {
-	fmt.Printf("[%s]\n", draw.Fit("a long title", 8))
-	fmt.Printf("[%s]\n", draw.Fit("short", 8))
-}
-```
-
-#### Output
-
-```
-[a long …]
-[short   ]
-```
-
-</p>
-</details>
 
 <a name="FitBlock"></a>
 ## func [FitBlock](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L76>)
@@ -345,34 +284,6 @@ func Sanitize(s string) string
 
 Sanitize renders server\-supplied text so drawing it can only draw: OSC 52 sets the clipboard, CSI forges a confirmation modal, bidi \(CVE\-2021\-42574\) reorders a line. Rendering only \- the clipboard still sees the real bytes.
 
-<details><summary>Example</summary>
-<p>
-
-Control sequences from untrusted text are shown, never executed.
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/lucasassuncao/bezel/draw"
-)
-
-func main() {
-	fmt.Println(draw.Sanitize("name\x1b]52;c;aGk=\x07\n"))
-}
-```
-
-#### Output
-
-```
-name\e]52;c;aGk=\x07\n
-```
-
-</p>
-</details>
-
 <a name="SanitizeLines"></a>
 ## func [SanitizeLines](<https://github.com/lucasassuncao/bezel/blob/main/draw/safe.go#L45>)
 
@@ -480,38 +391,6 @@ func Wrap(s string, width int) []string
 ```
 
 Wrap folds plain text into rows of at most width cells, breaking after spaces and hyphens and cutting a word wider than a row. Newlines stay; style the rows after wrapping, since a style is not re\-opened per row.
-
-<details><summary>Example</summary>
-<p>
-
-
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/lucasassuncao/bezel/draw"
-)
-
-func main() {
-	for _, line := range draw.Wrap("the quick brown fox jumps over the lazy dog", 15) {
-		fmt.Printf("[%s]\n", line)
-	}
-}
-```
-
-#### Output
-
-```
-[the quick brown]
-[fox jumps over]
-[the lazy dog]
-```
-
-</p>
-</details>
 
 <a name="ButtonStyle"></a>
 ## type [ButtonStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L14-L16>)

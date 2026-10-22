@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
@@ -39,4 +40,16 @@ func TestHelpAlignsWideKeysByCells(t *testing.T) {
 		}
 	}
 	require.Equal(t, col["wide"], col["narrow"])
+}
+
+func TestHelpClosesOnTheKeysItWasGiven(t *testing.T) {
+	keys := DefaultHelpKeys()
+	keys.Close = bind("x", "close")
+	h := NewHelp(nil, theme.Resolved{}).WithKeys(keys)
+
+	_, cmd := h.Update(press("q"))
+	require.Nil(t, cmd)
+	_, cmd = h.Update(press("x"))
+	require.Equal(t, tea.Msg(CloseMsg{}), cmd())
+	require.Contains(t, ansi.Strip(h.View(layout.Rect{W: 60, H: 20})), "x closes")
 }

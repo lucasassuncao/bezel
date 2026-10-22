@@ -1,12 +1,16 @@
 package palette
 
 import (
+	"strings"
 	"testing"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/layout"
+	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -155,4 +159,44 @@ func TestSetItemsKeepsTheLineAndClampsThePick(t *testing.T) {
 
 func TestCaretFollowsTheTheme(t *testing.T) {
 	require.EqualValues(t, 7, New(items(), theme.Resolved{CaretBlink: 7}).input.Styles().Cursor.BlinkSpeed)
+}
+
+func TestTheLegendNamesThePalettesKeys(t *testing.T) {
+	line := ansi.Strip(legend.HintLine(open().Legend(), legend.Style{}))
+	require.Equal(t, "[enter] run · [tab] complete · [↑/↓] choose · [esc] cancel", line)
+}
+
+func TestThePaletteAnswersToTheKeysItWasGiven(t *testing.T) {
+	keys := DefaultKeys()
+	keys.Up = key.NewBinding(key.WithKeys("ctrl+p"), key.WithHelp("ctrl+p/n", "choose"))
+	keys.Down = key.NewBinding(key.WithKeys("ctrl+n"))
+	m := open().WithKeys(keys)
+
+	m, _ = press(m, tea.KeyDown)
+	require.Equal(t, -1, m.cursor, "the arrow is no longer bound")
+	o, _ := m.Update(tea.KeyPressMsg{Code: 'n', Mod: tea.ModCtrl})
+	require.Equal(t, 0, o.(Model).cursor)
+	require.Contains(t, ansi.Strip(legend.HintLine(m.Legend(), legend.Style{})), "[ctrl+p/n] choose")
+}
+
+// Whatever is typed, the palette resolves to an available item the name
+// leads to, or to an error: never to a refused item, never to a panic.
+func FuzzResolveOnlyRunsWhatTheNameLeadsTo(f *testing.F) {
+	for _, s := range []string{"", ":", "goto /a b", "  :c  ", "copy", "delete", "co", "::x", "\t:goto\t"} {
+		f.Add(s)
+	}
+	m := open()
+	f.Fuzz(func(t *testing.T, line string) {
+		name, arg := splitLine(line)
+		if strings.Contains(name, " ") || arg != strings.TrimSpace(arg) {
+			t.Fatalf("splitLine(%q) = %q, %q", line, name, arg)
+		}
+		it, gotArg, err := m.resolve(line)
+		if err != nil {
+			return
+		}
+		if !it.Available || !strings.HasPrefix(it.Name, name) || gotArg != arg {
+			t.Fatalf("resolve(%q) = %q (available %v), arg %q", line, it.Name, it.Available, gotArg)
+		}
+	})
 }

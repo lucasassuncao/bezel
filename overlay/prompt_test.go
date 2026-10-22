@@ -105,3 +105,15 @@ func TestPromptLegendNamesTheAcceptHint(t *testing.T) {
 	require.Contains(t, line, "[enter] open the editor")
 	require.Contains(t, line, "[esc] cancel")
 }
+
+func TestPromptAcceptsOnTheKeyItWasGiven(t *testing.T) {
+	keys := DefaultPromptKeys()
+	keys.Accept = bind("ctrl+s", "save")
+	p := newPrompt().WithKeys(keys)
+
+	_, cmd := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	require.Nil(t, cmd)
+	_, cmd = p.Update(tea.KeyPressMsg{Code: 's', Mod: tea.ModCtrl})
+	require.Contains(t, drain(cmd()), tea.Msg(CloseMsg{}))
+	require.Contains(t, hint(p), "[ctrl+s] confirm", "the key from the binding, what it does from the hint")
+}

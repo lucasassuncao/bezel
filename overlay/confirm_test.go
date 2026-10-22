@@ -45,3 +45,15 @@ func TestConfirmFillsItsFocusedButtonInItsKindsColour(t *testing.T) {
 	require.Contains(t, view, th.Button.Focused.Background(lipgloss.Color(th.Colors.Danger)).Render("  Yes  "))
 	require.Contains(t, view, th.Button.Blurred.Render("  No  "))
 }
+
+func TestConfirmAnswersToTheKeysItWasGiven(t *testing.T) {
+	keys := DefaultConfirmKeys()
+	keys.Yes = bind("s", "sim")
+	c := NewConfirm("Apagar?", "", func() tea.Msg { return nil }, theme.Resolved{}).WithKeys(keys)
+
+	_, cmd := c.Update(press("y"))
+	require.Nil(t, cmd, "y is no longer an answer")
+	_, cmd = c.Update(press("s"))
+	require.Contains(t, drain(cmd()), tea.Msg(CloseMsg{}))
+	require.Contains(t, hint(c), "[s] sim")
+}
