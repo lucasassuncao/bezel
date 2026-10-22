@@ -91,6 +91,15 @@ type Model struct {
 	keys      Keys
 	clipboard func() (string, error) // nil is the system's
 	th        *theme.Resolved        // shared by every copy and never written
+	highlight func(string) [][]Span
+	marks     [][]Span // highlight's answer for painted
+	painted   string
+}
+
+// Span styles bytes [Start, End) of one line of the text.
+type Span struct {
+	Start, End int
+	Style      lipgloss.Style
 }
 
 // New is an empty field, not focused, sized by its text until SetWidth and
@@ -128,6 +137,25 @@ func (m Model) WithKeys(k Keys) Model {
 	return m
 }
 
+// WithHighlight colours the text while focused: fn takes the whole value and
+// gives each line its spans. It runs again only when the text changes.
+func (m Model) WithHighlight(fn func(value string) [][]Span) Model {
+	m.highlight, m.painted = fn, ""
+	return m.repaint(true)
+}
+
+// repaint asks the highlighter again when the text is no longer what it painted.
+func (m Model) repaint(force bool) Model {
+	if m.highlight == nil {
+		m.marks = nil
+		return m
+	}
+	if v := m.Value(); force || v != m.painted {
+		m.marks, m.painted = m.highlight(v), v
+	}
+	return m
+}
+
 // SetTheme repaints the field after the terminal's background was learned.
 func (m Model) SetTheme(th theme.Resolved) Model {
 	m.th = &th
@@ -143,7 +171,7 @@ func (m Model) WithValue(s string) Model {
 		m.lines[i] = m.wrap(edit.NewLine(p))
 	}
 	m.row, m.goal = len(m.lines)-1, -1
-	return m.scroll()
+	return m.scroll().repaint(false)
 }
 
 // SetValue replaces the text after something happened, a reload say, with
@@ -307,7 +335,7 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 
 // edited keeps the caret in view and lights it for a full blink: a caret
 // that went dark while typing would seem to lag.
-func (m Model) edited() (Model, tea.Cmd) { return m.scroll().lit() }
+func (m Model) edited() (Model, tea.Cmd) { return m.scroll().repaint(false).lit() }
 
 func (m Model) lit() (Model, tea.Cmd) {
 	m.caretOn = true
@@ -581,7 +609,11 @@ func (m Model) View() string {
 					gutter = m.styles().Muted.Render(strings.Repeat(" ", draw.GutterWidth-2) + "│ ")
 				}
 				onCaret := caret && i == m.row && segmentOf(l.starts, l.Cursor()) == k
-				rows = append(rows, gutter+m.piece(l.Line, from, to, onCaret, text))
+				var spans []Span
+				if m.focused && i < len(m.marks) {
+					spans = m.marks[i]
+				}
+				rows = append(rows, gutter+m.piece(l.Line, spans, from, to, onCaret, text))
 			}
 			n++
 		}
@@ -594,20 +626,57 @@ func (m Model) View() string {
 
 // piece is the graphemes [from, to) of l in style, the caret painted on its
 // cell when this row holds it, padded to the text's width.
-func (m *Model) piece(l edit.Line, from, to int, onCaret bool, style lipgloss.Style) string {
+func (m *Model) piece(l edit.Line, spans []Span, from, to int, onCaret bool, style lipgloss.Style) string {
 	var b strings.Builder
 	c := l.Cursor()
 	if !onCaret {
-		return m.pad(style.Render(l.Slice(from, to)))
+		return m.pad(paint(l, spans, from, to, style))
 	}
-	b.WriteString(style.Render(l.Slice(from, c)))
+	b.WriteString(paint(l, spans, from, c, style))
 	if c < to {
 		b.WriteString(m.styles().Caret.Render(l.At(c)))
-		b.WriteString(style.Render(l.Slice(c+1, to)))
+		b.WriteString(paint(l, spans, c+1, to, style))
 	} else {
 		b.WriteString(m.styles().Caret.Render(" "))
 	}
 	return m.pad(b.String())
+}
+
+// paint is the graphemes [from, to) of l, each run in the span holding its
+// first byte, the rest in base.
+func paint(l edit.Line, spans []Span, from, to int, base lipgloss.Style) string {
+	if len(spans) == 0 || from >= to {
+		return base.Render(l.Slice(from, to))
+	}
+	var b strings.Builder
+	at := len(l.Slice(0, from))
+	run, cur := from, spanAt(spans, at)
+	flush := func(end int) {
+		st := base
+		if cur >= 0 {
+			st = spans[cur].Style
+		}
+		b.WriteString(st.Render(l.Slice(run, end)))
+	}
+	for i := from; i < to; i++ {
+		if s := spanAt(spans, at); s != cur {
+			flush(i)
+			run, cur = i, s
+		}
+		at += len(l.At(i))
+	}
+	flush(to)
+	return b.String()
+}
+
+// spanAt is the first span holding byte at, -1 for none.
+func spanAt(spans []Span, at int) int {
+	for i, s := range spans {
+		if at >= s.Start && at < s.End {
+			return i
+		}
+	}
+	return -1
 }
 
 // pad fills a row of text out to the width set, or leaves it be without one.

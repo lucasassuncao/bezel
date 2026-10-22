@@ -7,6 +7,7 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
@@ -265,4 +266,44 @@ func TestCtrlVPastesTheClipboard(t *testing.T) {
 	m = run(m, cmd())
 	require.Equal(t, "a\nb", m.Value())
 	require.Equal(t, []int{1, 1}, []int{m.Line(), m.Column()})
+}
+
+// keysBold makes every YAML-ish key bold, counting its own calls.
+func keysBold(calls *int) func(string) [][]Span {
+	return func(v string) [][]Span {
+		*calls++
+		var out [][]Span
+		for _, l := range strings.Split(v, "\n") {
+			var spans []Span
+			if i := strings.Index(l, ":"); i > 0 {
+				spans = append(spans, Span{Start: 0, End: i, Style: lipgloss.NewStyle().Bold(true)})
+			}
+			out = append(out, spans)
+		}
+		return out
+	}
+}
+
+func TestHighlightPaintsTheSpansItIsGiven(t *testing.T) {
+	bold := lipgloss.NewStyle().Bold(true)
+	calls := 0
+	m, _ := New(th()).WithHighlight(keysBold(&calls)).WithValue("café: x\nkey: y").Focus()
+	require.Contains(t, m.View(), bold.Render("café"), "spans are bytes; é is two")
+	require.Contains(t, m.View(), bold.Render("key"))
+
+	before := calls
+	m = run(m, press(tea.KeyUp, 0), press(tea.KeyHome, 0))
+	require.Equal(t, before, calls, "moving the caret does not run the highlighter")
+	require.Contains(t, m.View(), bold.Render("afé"), "the caret takes its cell over the span")
+
+	m = run(m, typed("x"))
+	require.Equal(t, before+1, calls, "an edit runs it again")
+	require.Contains(t, m.View(), bold.Render("x"), "the new text is painted too")
+	require.Equal(t, "xcafé: x\nkey: y", m.Value())
+}
+
+func TestABlurredFieldIsDimmedNotHighlighted(t *testing.T) {
+	calls := 0
+	m := New(th()).WithHighlight(keysBold(&calls)).WithValue("key: y")
+	require.NotContains(t, m.View(), lipgloss.NewStyle().Bold(true).Render("key"))
 }
