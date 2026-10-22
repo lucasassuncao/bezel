@@ -110,6 +110,14 @@ A multi-line value with its lines numbered. Every key is text, so the app quits 
 
 ![textbox](examples/textbox/textbox.gif)
 
+### Viewport
+
+Source: [`examples/viewport/main.go`](examples/viewport/main.go)
+
+An access log, numbered in a gutter, with its error lines in red and every `ERROR` highlighted. The arrows, `pgup`/`pgdown` and `home`/`end` scroll, `←` and `→` pan the long lines, `n` and `N` go from error to error, `w` wraps the lines, and the mouse wheel scrolls.
+
+![viewport](examples/viewport/viewport.gif)
+
 ### Cursor
 
 Source: [`examples/cursor/main.go`](examples/cursor/main.go)

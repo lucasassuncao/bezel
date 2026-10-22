@@ -46,6 +46,8 @@
 //     within a width, and a cursor over rows under a fixed header.
 //   - [github.com/lucasassuncao/bezel/textbox]: a multi-line text field with
 //     numbered lines that wrap at its width.
+//   - [github.com/lucasassuncao/bezel/viewport]: scrollable text, wrapped or
+//     panned sideways, with a gutter and search highlights.
 //   - [github.com/lucasassuncao/bezel/timer]: a countdown that says when time
 //     is up.
 //   - [github.com/lucasassuncao/bezel/browser]: a pick-from-a-list screen, labels

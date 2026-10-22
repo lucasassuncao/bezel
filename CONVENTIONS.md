@@ -20,7 +20,7 @@ A component that draws takes a `theme.Resolved`; loose lipgloss styles reach it 
 | Who calls `View` | Where the theme goes | Packages |
 | --- | --- | --- |
 | bezel, through a fixed interface (`overlay.Overlay`, `form.Field`), or a field that needs the theme before it draws (a caret's blink pace) | the constructor's last parameter | `overlay`, `form`, `palette`, `textbox`, `input`, `cursor` |
-| the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch` |
+| the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport` |
 | nobody: it is a plain function | after the data it draws | `progress`, `chart`, `inline`, `icon.Set.Render` |
 | `shell` | `shell.Config.Theme`, replaced with `SetTheme` | `shell` |
 
@@ -43,13 +43,13 @@ The theme sets how everything looks; a component's own styles let an app recolou
 | --- | --- | --- |
 | `Update(tea.Msg) (T, bool, tea.Cmd)` | `shell.Shell`, `overlay.Stack` | They route: `handled` false means the message is still the app's. |
 | `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model`, `paginator` | They only move a cursor. The `Action` says what a key did (`list.Chosen`, `tree.Expanded`), the app decides what it means, and they never produce a command. |
-| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model`, `cursor.Model`, `spinner.Model`, `timer.Model`, `stopwatch.Model` and `animation.Tween` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
+| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model`, `cursor.Model`, `spinner.Model`, `timer.Model`, `stopwatch.Model`, `viewport.Model` and `animation.Tween` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
 
 A new component picks the row whose "Why" fits it, not a fourth shape.
 
 ## Keys
 
-- Bindings live in a struct: `Keys` where a package has one component (`list`, `tree`, `browser`, `palette`, `form`), `XKeys` where it has several (`overlay.ConfirmKeys`, `overlay.PickKeys`, ...). `DefaultKeys()` or `DefaultXKeys()` builds them and `WithKeys` replaces them. `form.Keys` serves the form and every control in it, and `Form.WithKeys` rebinds them all.
+- Bindings live in a struct: `Keys` where a package has one component (`list`, `tree`, `browser`, `palette`, `form`, `paginator`, `viewport`), `XKeys` where it has several (`overlay.ConfirmKeys`, `overlay.PickKeys`, ...). `DefaultKeys()` or `DefaultXKeys()` builds them and `WithKeys` replaces them. `form.Keys` serves the form and every control in it, and `Form.WithKeys` rebinds them all.
 - `Update` matches with `key.Matches`, never a key string, and `Legend` comes from the same bindings through `legend.FromBindings`, so a component lists exactly what it answers to.
 - A pair that reads as one entry gives its help to the first binding (`Up` as "↑/↓") and none to the second, which `FromBindings` then leaves out.
 - Esc belongs to the stack, which closes the top dialog before the dialog sees the key. A dialog still lists it; its own binding for it only reaches a host that drives the dialog without a stack.

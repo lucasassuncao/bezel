@@ -138,3 +138,10 @@ func TestLookupFindsGruvbox(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, Gruvbox.Colors, got.Colors)
 }
+
+func TestResolveDerivesTheMatchStyles(t *testing.T) {
+	r := Resolve(Mint, true)
+	c := r.Colors
+	require.Equal(t, lipgloss.NewStyle().Foreground(lipgloss.Color(c.OnAccent)).Background(lipgloss.Color(c.Info)), r.Match)
+	require.Equal(t, lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color(c.OnAccent)).Background(lipgloss.Color(c.Warning)), r.MatchCurrent)
+}

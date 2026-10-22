@@ -16,20 +16,22 @@ type Resolved struct {
 	Colors Colors
 
 	// Text styles for content that says what kind of thing it is.
-	Success     lipgloss.Style
-	Warning     lipgloss.Style
-	Danger      lipgloss.Style
-	Info        lipgloss.Style
-	Accent      lipgloss.Style
-	Dim         lipgloss.Style // secondary text
-	Muted       lipgloss.Style // hints and gutters, quieter than Dim
-	Key         lipgloss.Style // a key name in running text
-	Bold        lipgloss.Style
-	Section     lipgloss.Style // a heading inside a list
-	TableHeader lipgloss.Style
-	Cursor      lipgloss.Style // the row under the cursor
-	Caret       lipgloss.Style // the cell under a text field's caret
-	Badge       lipgloss.Style // a filled label; recolour its background per kind
+	Success      lipgloss.Style
+	Warning      lipgloss.Style
+	Danger       lipgloss.Style
+	Info         lipgloss.Style
+	Accent       lipgloss.Style
+	Dim          lipgloss.Style // secondary text
+	Muted        lipgloss.Style // hints and gutters, quieter than Dim
+	Key          lipgloss.Style // a key name in running text
+	Bold         lipgloss.Style
+	Section      lipgloss.Style // a heading inside a list
+	TableHeader  lipgloss.Style
+	Cursor       lipgloss.Style // the row under the cursor
+	Caret        lipgloss.Style // the cell under a text field's caret
+	Badge        lipgloss.Style // a filled label; recolour its background per kind
+	Match        lipgloss.Style // every search match in a text
+	MatchCurrent lipgloss.Style // the match the reader is on
 
 	// Chrome styles the shell draws with. Derived from Colors like the rest.
 	Panel        draw.PanelStyle
@@ -101,6 +103,10 @@ func buildDerivedStyles(c Colors) Resolved {
 		Cursor:      lipgloss.NewStyle().Bold(true).Foreground(selection),
 		Caret:       lipgloss.NewStyle().Foreground(onAccent).Background(selection),
 		Badge:       lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(accent),
+		// Warning, not accent, for the current match: Info falls back to the
+		// accent in many themes, and the two must still tell apart.
+		Match:        lipgloss.NewStyle().Foreground(onAccent).Background(info),
+		MatchCurrent: lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(warning),
 	}
 	for i, s := range c.Series {
 		r.Series[i] = lipgloss.NewStyle().Foreground(lipgloss.Color(s))

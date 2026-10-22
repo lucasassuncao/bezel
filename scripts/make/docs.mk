@@ -30,7 +30,8 @@ DOC_PACKAGES := \
 	./theme/... \
 	./themebrowser/... \
 	./timer/... \
-	./tree/...
+	./tree/... \
+	./viewport/...
 
 ## Generate documentation with gomarkdoc
 docs: $(GOMARKDOC)

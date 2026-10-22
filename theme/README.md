@@ -382,7 +382,7 @@ func ResolveColors(t Theme, dark bool) Colors
 ResolveColors merges t into concrete Colors over the adaptive default for a dark or light terminal. A theme that sets Accent but not Selection or Info uses its accent for them; one without a Ramp climbs its states.
 
 <a name="Resolved"></a>
-## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L15-L50>)
+## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L15-L52>)
 
 Resolved is a Theme after the whole cascade has been applied: ready\-to\-use lipgloss styles plus the colors they were derived from. A consumer builds one per instance and only reads it afterwards.
 
@@ -391,20 +391,22 @@ type Resolved struct {
     Colors Colors
 
     // Text styles for content that says what kind of thing it is.
-    Success     lipgloss.Style
-    Warning     lipgloss.Style
-    Danger      lipgloss.Style
-    Info        lipgloss.Style
-    Accent      lipgloss.Style
-    Dim         lipgloss.Style // secondary text
-    Muted       lipgloss.Style // hints and gutters, quieter than Dim
-    Key         lipgloss.Style // a key name in running text
-    Bold        lipgloss.Style
-    Section     lipgloss.Style // a heading inside a list
-    TableHeader lipgloss.Style
-    Cursor      lipgloss.Style // the row under the cursor
-    Caret       lipgloss.Style // the cell under a text field's caret
-    Badge       lipgloss.Style // a filled label; recolour its background per kind
+    Success      lipgloss.Style
+    Warning      lipgloss.Style
+    Danger       lipgloss.Style
+    Info         lipgloss.Style
+    Accent       lipgloss.Style
+    Dim          lipgloss.Style // secondary text
+    Muted        lipgloss.Style // hints and gutters, quieter than Dim
+    Key          lipgloss.Style // a key name in running text
+    Bold         lipgloss.Style
+    Section      lipgloss.Style // a heading inside a list
+    TableHeader  lipgloss.Style
+    Cursor       lipgloss.Style // the row under the cursor
+    Caret        lipgloss.Style // the cell under a text field's caret
+    Badge        lipgloss.Style // a filled label; recolour its background per kind
+    Match        lipgloss.Style // every search match in a text
+    MatchCurrent lipgloss.Style // the match the reader is on
 
     // Chrome styles the shell draws with. Derived from Colors like the rest.
     Panel        draw.PanelStyle
@@ -426,7 +428,7 @@ type Resolved struct {
 ```
 
 <a name="Resolve"></a>
-### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L54>)
+### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L56>)
 
 ```go
 func Resolve(t Theme, dark bool) Resolved
