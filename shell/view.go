@@ -194,7 +194,7 @@ func (s Shell) statusRow() string {
 	case s.status != "":
 		return draw.StatusLine(s.width, s.status, th.Chrome.Status)
 	case s.busy != "":
-		return draw.StatusLine(s.width, th.Accent.Render(s.Spinner())+" "+s.busy, th.Chrome.Status)
+		return draw.StatusLine(s.width, s.spin.View(*th)+" "+s.busy, th.Chrome.Status)
 	case len(s.cfg.Tabs) > 0:
 		return draw.StatusLine(s.width, s.cfg.Tabs[s.tab].Status(s.Context()), th.Chrome.Status)
 	}

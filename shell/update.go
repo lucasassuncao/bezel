@@ -8,6 +8,7 @@ import (
 	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/palette"
+	"github.com/lucasassuncao/bezel/spinner"
 )
 
 // statusExpiredMsg clears the status whose sequence it carries. A stale one,
@@ -37,8 +38,8 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		}
 		return s, true, nil
 
-	case spinTickMsg:
-		if m.id == s.spin.id {
+	case spinner.TickMsg:
+		if m.ID == s.spin.ID() {
 			next, cmd := s.tick(m)
 			return next, true, cmd
 		}

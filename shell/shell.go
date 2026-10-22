@@ -11,6 +11,7 @@ import (
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
+	"github.com/lucasassuncao/bezel/spinner"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -67,9 +68,9 @@ type Config struct {
 	// StatusTTL is how long the palette's errors and Copy's result stay on the
 	// status row; 5s when zero. An app with its own banner clock passes that.
 	StatusTTL time.Duration
-	// SpinEvery is how long each frame of the busy spinner shows; a tenth of a
-	// second when zero. A test passes a nanosecond so it never waits on one.
-	SpinEvery time.Duration
+	// Spinner is what Busy shows; without frames it turns spinner.Dot's at its
+	// own Every. A test sets an Every of a nanosecond, never to wait on a tick.
+	Spinner spinner.Spinner
 	// Clipboard is what Copy writes to; nil means the system clipboard.
 	Clipboard func(string) error
 }
@@ -93,7 +94,7 @@ type Shell struct {
 	typing    bool
 
 	busy string // what the spinner says, empty when idle
-	spin spinner
+	spin spinner.Model
 
 	overlays overlay.Stack
 	present  map[string]bool // leaves the last View was given
@@ -109,13 +110,13 @@ func New(cfg Config) Shell {
 	if cfg.StatusTTL <= 0 {
 		cfg.StatusTTL = defaultStatusTTL
 	}
-	if cfg.SpinEvery <= 0 {
-		cfg.SpinEvery = defaultSpinEvery
+	if len(cfg.Spinner.Frames) == 0 {
+		cfg.Spinner.Frames = spinner.Dot().Frames
 	}
 	focus := resized(nil, max(1, len(cfg.Tabs)), firstLeaf(cfg.Layout))
 	return Shell{
 		cfg: &cfg, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
-		spin: spinner{id: shellIDs.Add(1), every: cfg.SpinEvery},
+		spin: spinner.New(cfg.Spinner),
 	}
 }
 

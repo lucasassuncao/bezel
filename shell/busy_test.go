@@ -6,13 +6,15 @@ import (
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel/spinner"
 )
 
 // busyShell is a sized shell whose spinner turns every nanosecond, so a
 // test that runs a tick never waits on one.
 func busyShell(tabs ...Tab) Shell {
 	c := actionConfig(tabs...)
-	c.SpinEvery = time.Nanosecond
+	c.Spinner = spinner.Spinner{Frames: spinner.Dot().Frames, Every: time.Nanosecond}
 	return sized(New(c))
 }
 
@@ -58,7 +60,7 @@ func TestTheSpinnerTicksOnlyWhileBusy(t *testing.T) {
 	s := busyShell()
 	s, cmd := s.Busy("refreshing…")
 	tick := cmd()
-	require.IsType(t, spinTickMsg{}, tick)
+	require.IsType(t, spinner.TickMsg{}, tick)
 
 	before := s.Spinner()
 	s, handled, next := s.Update(tick)
@@ -103,7 +105,38 @@ func TestIdleLeavesABannerAlone(t *testing.T) {
 	require.Contains(t, view(s.Idle()), "saved")
 }
 
-func TestTheSpinnerTurnsAtTheConfiguredPace(t *testing.T) {
-	require.Equal(t, defaultSpinEvery, New(actionConfig()).spin.every, "zero is a tenth of a second")
-	require.Equal(t, time.Nanosecond, busyShell().spin.every)
+func TestAZeroSpinnerIsTheDot(t *testing.T) {
+	s, _ := sized(New(actionConfig())).Busy("x")
+	require.Equal(t, "⣾ ", s.Spinner())
+}
+
+func TestConfigSpinnerPicksTheBusyMark(t *testing.T) {
+	c := actionConfig()
+	c.Spinner = spinner.Line()
+	s, _ := sized(New(c)).Busy("refreshing…")
+	require.Contains(t, view(s), "| refreshing…")
+}
+
+func TestAnotherSpinnersTickIsTheApps(t *testing.T) {
+	_, cmd := spinner.New(spinner.Spinner{Frames: []string{"a"}, Every: time.Nanosecond}).Start()
+	s, _ := busyShell(stubTab{name: "a"}).Busy("x")
+	_, handled, _ := s.Update(cmd())
+	require.False(t, handled)
+}
+
+func TestBusyWithNoTextGoesIdleAndEndsTheLoop(t *testing.T) {
+	s, cmd := busyShell().Busy("refreshing…")
+	s, _ = s.Busy("")
+	require.False(t, s.IsBusy())
+	_, handled, next := s.Update(cmd())
+	require.True(t, handled)
+	require.Nil(t, next, "idle: the loop stops")
+}
+
+func TestAConfigSpinnerWithOnlyAPaceKeepsIt(t *testing.T) {
+	c := actionConfig()
+	c.Spinner = spinner.Spinner{Every: time.Nanosecond}
+	sp := New(c).spin.Spinner()
+	require.Equal(t, time.Nanosecond, sp.Every)
+	require.Equal(t, spinner.Dot().Frames, sp.Frames)
 }
