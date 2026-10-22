@@ -8,11 +8,11 @@ import (
 	"slices"
 	"strings"
 
-	"charm.land/bubbles/v2/key"
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/key"
 )
 
 // Capability names something a session may refuse: "write", "apply", ...
@@ -203,9 +203,9 @@ func packGreedy(parts []string, sep string, width, maxLines, reserveOnLast int) 
 	return lines, placed
 }
 
-// FromBindings turns bubbles bindings into entries, skipping disabled ones and
-// those without help, such as the second of a pair the first names ("↑/↓").
-// For apps that already keep their keys as key.Binding.
+// FromBindings turns bindings into entries, skipping disabled ones and those
+// without help, such as the second of a pair the first names ("↑/↓"). For
+// apps that already keep their keys as key.Binding.
 func FromBindings(bs []key.Binding) []Entry {
 	out := make([]Entry, 0, len(bs))
 	for _, b := range bs {

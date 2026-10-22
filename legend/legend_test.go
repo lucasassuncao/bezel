@@ -4,9 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"charm.land/bubbles/v2/key"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel/key"
 )
 
 // A nil can must not hand back the caller's own slice.

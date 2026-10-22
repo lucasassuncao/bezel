@@ -24,6 +24,8 @@
 //     ASCII, in the theme's colours.
 //   - [github.com/lucasassuncao/bezel/legend]: key entries filtered by capability
 //     and packed into a few rows.
+//   - [github.com/lucasassuncao/bezel/key]: key bindings, with the help the
+//     legend prints and a switch to turn them off.
 //   - [github.com/lucasassuncao/bezel/palette]: the ":" command line, with prefix
 //     matching, completion and arguments.
 //   - [github.com/lucasassuncao/bezel/list]: a cursor list with section headings
@@ -31,7 +33,7 @@
 //   - [github.com/lucasassuncao/bezel/tree]: a flat depth-first tree with
 //     expand/collapse, generic over the node type.
 //   - [github.com/lucasassuncao/bezel/table]: sizes columns to their contents
-//     within a width.
+//     within a width, and a cursor over rows under a fixed header.
 //   - [github.com/lucasassuncao/bezel/textbox]: the bubbles text area set up for
 //     a multi-line value.
 //   - [github.com/lucasassuncao/bezel/browser]: a pick-from-a-list screen, labels

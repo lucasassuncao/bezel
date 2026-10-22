@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
 )
 

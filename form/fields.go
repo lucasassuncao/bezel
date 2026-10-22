@@ -4,12 +4,12 @@ import (
 	"slices"
 	"strings"
 
-	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/icon"
+	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/theme"
 )
 

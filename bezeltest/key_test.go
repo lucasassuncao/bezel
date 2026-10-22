@@ -3,9 +3,10 @@ package bezeltest
 import (
 	"testing"
 
-	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel/key"
 )
 
 // What Key builds must read back as the name it was given, since that

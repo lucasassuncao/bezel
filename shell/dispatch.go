@@ -1,8 +1,9 @@
 package shell
 
 import (
-	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/key"
 )
 
 // runKey runs the first live action bound to k. Display-only actions never

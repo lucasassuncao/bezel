@@ -12,6 +12,7 @@ DOC_PACKAGES := \
 	./form/... \
 	./icon/... \
 	./inline/... \
+	./key/... \
 	./layout/... \
 	./legend/... \
 	./list/... \
