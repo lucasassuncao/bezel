@@ -49,7 +49,7 @@ func DefaultPromptKeys() PromptKeys {
 // NewPrompt builds a prompt with a "> " input; onAccept may be nil.
 func NewPrompt(title string, onAccept func(value string) tea.Cmd, th theme.Resolved) Prompt {
 	in, _ := input.New(th).WithPrompt("> ").Focus()
-	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, look: look{th: th}, keys: DefaultPromptKeys()}
+	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, look: lookOf(th), keys: DefaultPromptKeys()}
 }
 
 // WithKeys rebinds the prompt.

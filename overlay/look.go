@@ -18,28 +18,44 @@ const (
 )
 
 // look is what every dialog draws with: the theme, and the Kind tinting it.
+// The theme is held by pointer, shared by every copy and never written, so
+// copying a dialog costs a word, not the 29KB a theme.Resolved takes.
 type look struct {
-	th   theme.Resolved
+	th   *theme.Resolved
 	kind Kind
+}
+
+// lookOf is a look at th, untinted.
+func lookOf(th theme.Resolved) look { return look{th: &th} }
+
+// noTheme is what a zero look draws with; it is never written.
+var noTheme theme.Resolved
+
+// styles is the look's theme, or the zero one for a dialog never built.
+func (l look) styles() *theme.Resolved {
+	if l.th == nil {
+		return &noTheme
+	}
+	return l.th
 }
 
 // style is the theme's modal box, its border in the kind's colour: the accent
 // for information, the palette's success, warning or danger otherwise.
 func (l look) style() lipgloss.Style {
-	c := l.th.Colors
+	c := l.styles().Colors
 	switch l.kind {
 	case Success:
-		return l.th.Modal.BorderForeground(lipgloss.Color(c.Success))
+		return l.styles().Modal.BorderForeground(lipgloss.Color(c.Success))
 	case Warning:
-		return l.th.Modal.BorderForeground(lipgloss.Color(c.Warning))
+		return l.styles().Modal.BorderForeground(lipgloss.Color(c.Warning))
 	case Danger:
-		return l.th.Modal.BorderForeground(lipgloss.Color(c.Danger))
+		return l.styles().Modal.BorderForeground(lipgloss.Color(c.Danger))
 	}
-	return l.th.Modal
+	return l.styles().Modal
 }
 
 // hint is how a dialog draws the keys it lists inside its box.
-func (l look) hint() legend.Style { return l.th.Legend }
+func (l look) hint() legend.Style { return l.styles().Legend }
 
 // WithKind tints the confirm, such as Danger for one that deletes.
 func (c Confirm) WithKind(k Kind) Confirm { c.kind = k; return c }

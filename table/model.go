@@ -178,7 +178,7 @@ func (m Model[T]) View(th theme.Resolved, width int) string {
 	start, end, below := w.Bounds(len(m.items))
 	for i := start; i < end; i++ {
 		if i == w.Cursor {
-			lines = append(lines, th.Cursor.Render(marker)+Row(widths, cursorCells(cells[i], th)))
+			lines = append(lines, th.Cursor.Render(marker)+Row(widths, cursorCells(cells[i], &th)))
 		} else {
 			lines = append(lines, pad+Row(widths, cells[i]))
 		}
@@ -191,7 +191,7 @@ func (m Model[T]) View(th theme.Resolved, width int) string {
 
 // cursorCells paints each plain cell in the cursor's style, one by one, so a
 // coloured cell keeps its colour and its reset ends nothing but itself.
-func cursorCells(cells []string, th theme.Resolved) []string {
+func cursorCells(cells []string, th *theme.Resolved) []string {
 	out := make([]string, len(cells))
 	for i, c := range cells {
 		out[i] = c

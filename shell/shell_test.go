@@ -249,3 +249,14 @@ func TestEveryChangeLeavesTheLayoutResolved(t *testing.T) {
 		}
 	}
 }
+
+// The Config is shared between copies until one changes it: the change is
+// that copy's alone.
+func TestAConfigChangeIsTheCopysAlone(t *testing.T) {
+	before, _, _ := newShell().Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	after := before.SetSubtitle("reloaded").SetLegendLines(1).SetTheme(theme.Resolve(theme.Mint, true))
+	require.Contains(t, ansi.Strip(after.View(demoPanes())), "reloaded")
+	require.NotContains(t, ansi.Strip(before.View(demoPanes())), "reloaded")
+	require.Equal(t, 2, before.cfg.LegendLines)
+	require.Equal(t, theme.Resolve(theme.Plain, true).Colors, before.cfg.Theme.Colors)
+}

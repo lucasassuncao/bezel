@@ -67,12 +67,24 @@ type Model struct {
 	id, tag     int64 // tag counts the blinks armed; only the newest flips
 	keys        Keys
 	clipboard   func() (string, error) // nil is the system's
-	th          theme.Resolved
+	th          *theme.Resolved        // shared by every copy and never written
 }
 
 // New is an empty field, not focused, as wide as its text.
 func New(th theme.Resolved) Model {
-	return Model{id: ids.Add(1), keys: DefaultKeys(), th: th, caretOn: true}
+	return Model{id: ids.Add(1), keys: DefaultKeys(), th: &th, caretOn: true}
+}
+
+// noTheme is what a zero Model draws with; it is never written.
+var noTheme theme.Resolved
+
+// styles is the theme, held by pointer so a copy of the Model costs a word,
+// not the 29KB a theme.Resolved takes; the zero one for a Model never built.
+func (m *Model) styles() *theme.Resolved {
+	if m.th == nil {
+		return &noTheme
+	}
+	return m.th
 }
 
 // WithPrompt is drawn before the text in the accent, as ":" or "> ".
@@ -99,7 +111,7 @@ func (m Model) SetWidth(w int) Model { return m.WithWidth(w) }
 
 // SetTheme repaints the field after the terminal's background was learned.
 func (m Model) SetTheme(th theme.Resolved) Model {
-	m.th = th
+	m.th = &th
 	return m
 }
 
@@ -165,7 +177,7 @@ func (m Model) Blink() tea.Cmd {
 		return nil
 	}
 	msg := BlinkMsg{id: m.id, tag: m.tag}
-	return tea.Tick(draw.Blink(m.th.CaretBlink), func(time.Time) tea.Msg { return msg })
+	return tea.Tick(draw.Blink(m.styles().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
 // Update edits on a key or a paste while focused, and flips the caret on its
@@ -250,7 +262,7 @@ func (m Model) lit() (Model, tea.Cmd) {
 func (m Model) arm() (Model, tea.Cmd) {
 	m.tag++
 	msg := BlinkMsg{id: m.id, tag: m.tag}
-	return m, tea.Tick(draw.Blink(m.th.CaretBlink), func(time.Time) tea.Msg { return msg })
+	return m, tea.Tick(draw.Blink(m.styles().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
 // spaced turns line breaks and tabs into spaces; a Replacer is safe to share.
@@ -269,7 +281,7 @@ func (m *Model) show(i int) string {
 }
 
 // cell is how wide grapheme i is drawn. The helpers a loop calls take a
-// pointer: a Model holds a 29KB theme, which a value receiver copies each call.
+// pointer, which stays cheaper than a copy of the whole Model.
 func (m *Model) cell(i int) int { return edit.Cells(m.show(i)) }
 
 // caretCells is the width of the cell the caret covers: its grapheme, or one
@@ -315,7 +327,7 @@ func (m Model) scroll() Model {
 func (m Model) View() string {
 	prompt := ""
 	if m.prompt != "" {
-		prompt = m.th.Accent.Render(m.prompt)
+		prompt = m.styles().Accent.Render(m.prompt)
 	}
 	if m.line.Len() == 0 && m.placeholder != "" {
 		return prompt + m.placeholderView()
@@ -329,7 +341,7 @@ func (m Model) View() string {
 			break
 		}
 		if i == c && caret {
-			g = m.th.Caret.Render(g)
+			g = m.styles().Caret.Render(g)
 		}
 		b.WriteString(g)
 		used += w
@@ -337,7 +349,7 @@ func (m Model) View() string {
 	if c == m.line.Len() && m.focused && (m.width == 0 || used < m.width) {
 		end := " "
 		if caret {
-			end = m.th.Caret.Render(end)
+			end = m.styles().Caret.Render(end)
 		}
 		b.WriteString(end)
 		used++
@@ -356,8 +368,8 @@ func (m Model) placeholderView() string {
 		text = draw.Fit(text, m.width)
 	}
 	if !m.focused || !m.caretOn {
-		return m.th.Muted.Render(text)
+		return m.styles().Muted.Render(text)
 	}
 	g := edit.Graphemes(text)
-	return m.th.Caret.Render(g[0]) + m.th.Muted.Render(strings.Join(g[1:], ""))
+	return m.styles().Caret.Render(g[0]) + m.styles().Muted.Render(strings.Join(g[1:], ""))
 }

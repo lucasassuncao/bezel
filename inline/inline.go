@@ -38,7 +38,7 @@ func Confirm(title string, th theme.Resolved, opts ...tea.ProgramOption) (bool, 
 
 type confirm struct {
 	title   string
-	th      theme.Resolved
+	th      *theme.Resolved // shared by every copy and never written
 	yes     bool
 	done    bool
 	aborted bool
@@ -61,7 +61,19 @@ func defaultConfirmKeys() confirmKeys {
 }
 
 func newConfirm(title string, th theme.Resolved) confirm {
-	return confirm{title: title, th: th, keys: defaultConfirmKeys()}
+	return confirm{title: title, th: &th, keys: defaultConfirmKeys()}
+}
+
+// noTheme is what a zero confirm draws with; it is never written.
+var noTheme theme.Resolved
+
+// styles is the theme, held by pointer so a copy of the confirm costs a word,
+// not the 29KB a theme.Resolved takes; the zero one for a confirm never built.
+func (c *confirm) styles() *theme.Resolved {
+	if c.th == nil {
+		return &noTheme
+	}
+	return c.th
 }
 
 func (c confirm) Init() tea.Cmd { return nil }
@@ -90,7 +102,7 @@ func (c confirm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (c confirm) View() tea.View {
-	title := c.th.Bold.Render(c.title)
+	title := c.styles().Bold.Render(c.title)
 	if c.done {
 		answer := "No"
 		if c.yes {
@@ -99,15 +111,15 @@ func (c confirm) View() tea.View {
 		if c.aborted {
 			answer = "cancelled"
 		}
-		return tea.NewView(title + " " + c.th.Dim.Render(answer) + "\n")
+		return tea.NewView(title + " " + c.styles().Dim.Render(answer) + "\n")
 	}
 	button := func(label string, on bool) string {
 		if on {
-			return c.th.Badge.Padding(0, 2).Render(label)
+			return c.styles().Badge.Padding(0, 2).Render(label)
 		}
-		return c.th.Dim.Padding(0, 2).Render(label)
+		return c.styles().Dim.Padding(0, 2).Render(label)
 	}
-	hint := c.th.Muted.Render(c.hint())
+	hint := c.styles().Muted.Render(c.hint())
 	return tea.NewView(title + "\n\n  " + button("Yes", c.yes) + " " + button("No", !c.yes) + "\n\n" + hint + "\n")
 }
 

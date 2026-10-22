@@ -51,7 +51,7 @@ const pagerChrome = 2 + 2 + 2 + 2
 // blank lines are dropped.
 func NewPager(title, text string, th theme.Resolved) Pager {
 	lines := strings.Split(strings.TrimRight(strings.ReplaceAll(text, "\r\n", "\n"), "\n"), "\n")
-	return Pager{title: title, lines: lines, look: look{th: th}, rows: len(lines), keys: DefaultPagerKeys()}
+	return Pager{title: title, lines: lines, look: lookOf(th), rows: len(lines), keys: DefaultPagerKeys()}
 }
 
 // WithKeys rebinds the pager; its legend and position line follow the bindings' help.

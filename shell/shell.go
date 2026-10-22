@@ -76,7 +76,7 @@ type Config struct {
 
 // Shell is a value: every mutation returns the new shell.
 type Shell struct {
-	cfg Config
+	cfg *Config // shared by every copy and never written: see withCfg
 
 	width, height int
 	rects         map[string]layout.Rect
@@ -114,9 +114,19 @@ func New(cfg Config) Shell {
 	}
 	focus := resized(nil, max(1, len(cfg.Tabs)), firstLeaf(cfg.Layout))
 	return Shell{
-		cfg: cfg, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
+		cfg: &cfg, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
 		spin: spinner{id: shellIDs.Add(1), every: cfg.SpinEvery},
 	}
+}
+
+// withCfg is s holding a changed copy of its Config. The one it held is
+// shared with every other copy of the shell, so it is replaced, never written:
+// a copy of the shell then costs a word, not the 29KB the theme in it takes.
+func (s Shell) withCfg(change func(*Config)) Shell {
+	c := *s.cfg
+	change(&c)
+	s.cfg = &c
+	return s
 }
 
 // FocusMsg is sent when ChangePane moves focus, so the app can run what
@@ -167,7 +177,7 @@ func (s Shell) SetTab(i int) Shell {
 // shorter list moves the shell to its last tab when the active one is gone.
 func (s Shell) SetTabs(tabs ...Tab) Shell {
 	n, first := max(1, len(tabs)), firstLeaf(s.cfg.Layout)
-	s.cfg.Tabs = slices.Clone(tabs)
+	s = s.withCfg(func(c *Config) { c.Tabs = slices.Clone(tabs) })
 	s.focus, s.ringFocus = resized(s.focus, n, first), resized(s.ringFocus, n, first)
 	s.tab = min(s.tab, n-1)
 	return s.relayout()
@@ -179,7 +189,7 @@ func (s Shell) Narrow() bool { return s.collapsed }
 // SetLayout swaps the layout tree and re-resolves it. For screens whose
 // shape changes at runtime, such as a panel that animates open.
 func (s Shell) SetLayout(n layout.Node) Shell {
-	s.cfg.Layout = n
+	s = s.withCfg(func(c *Config) { c.Layout = n })
 	s.present = nil // the old frame's panes say nothing about the new tree
 	return s.relayout()
 }
@@ -187,13 +197,13 @@ func (s Shell) SetLayout(n layout.Node) Shell {
 // SetTheme swaps the styles, for a terminal that answered light or dark
 // after the shell was built.
 func (s Shell) SetTheme(th theme.Resolved) Shell {
-	s.cfg.Theme = th
+	s = s.withCfg(func(c *Config) { c.Theme = th })
 	return s.relayout()
 }
 
 // SetSubtitle changes the text after the title in the default header.
 func (s Shell) SetSubtitle(text string) Shell {
-	s.cfg.Subtitle = text
+	s = s.withCfg(func(c *Config) { c.Subtitle = text })
 	return s
 }
 
@@ -206,7 +216,7 @@ func (s Shell) SetActions(actions ...Action) Shell {
 
 // SetLegendLines changes how many rows the legend keeps, 1 or more.
 func (s Shell) SetLegendLines(n int) Shell {
-	s.cfg.LegendLines = max(1, n)
+	s = s.withCfg(func(c *Config) { c.LegendLines = max(1, n) })
 	return s.relayout()
 }
 

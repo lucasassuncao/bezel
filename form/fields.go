@@ -31,13 +31,13 @@ func optionAt(options []string, i int) string {
 type Input struct {
 	label string
 	in    input.Model
-	th    theme.Resolved
+	th    *theme.Resolved
 }
 
 // NewInput is an empty field width cells wide, placeholder shown until typed in.
 func NewInput(label, placeholder string, width int, th theme.Resolved) Input {
 	in := input.New(th).WithPlaceholder(placeholder).WithWidth(width)
-	return Input{label: label, in: in, th: th}
+	return Input{label: label, in: in, th: &th}
 }
 
 // WithValue is the field holding s, the way a form opens on saved values.
@@ -74,24 +74,24 @@ func (i Input) Blur() Field {
 }
 
 func (i Input) View(focused bool, labelW, width int) string {
-	edge := i.th.Muted
+	edge := styles(i.th).Muted
 	if focused {
-		edge = i.th.Accent
+		edge = styles(i.th).Accent
 	}
-	return row(i.th, focused, i.label, labelW, width, edge.Render("[")+i.in.View()+edge.Render("]"))
+	return row(styles(i.th), focused, i.label, labelW, width, edge.Render("[")+i.in.View()+edge.Render("]"))
 }
 
 // Checkbox is a yes/no choice; space or enter flips it.
 type Checkbox struct {
 	label   string
 	checked bool
-	th      theme.Resolved
+	th      *theme.Resolved
 	keys    Keys
 }
 
 // NewCheckbox is a box labelled label, ticked when checked.
 func NewCheckbox(label string, checked bool, th theme.Resolved) Checkbox {
-	return Checkbox{label: label, checked: checked, th: th, keys: DefaultKeys()}
+	return Checkbox{label: label, checked: checked, th: &th, keys: DefaultKeys()}
 }
 
 // WithKeys rebinds the box: Press flips it.
@@ -121,15 +121,15 @@ func (c Checkbox) Update(msg tea.Msg) (Field, tea.Cmd) {
 // View draws the box before the label, the way a list of options reads; the
 // label sits in the value column so boxes line up under the other controls.
 func (c Checkbox) View(focused bool, labelW, width int) string {
-	box := c.th.Muted.Render("[ ]")
+	box := styles(c.th).Muted.Render("[ ]")
 	if c.checked {
-		box = c.th.Accent.Render("[x]")
+		box = styles(c.th).Accent.Render("[x]")
 	}
 	name := c.label
 	if focused {
-		name = c.th.Bold.Render(name)
+		name = styles(c.th).Bold.Render(name)
 	}
-	return row(c.th, focused, "", labelW, width, box+" "+name)
+	return row(styles(c.th), focused, "", labelW, width, box+" "+name)
 }
 
 // Radio is one choice out of a few, all shown on the row; left and right move it.
@@ -137,7 +137,7 @@ type Radio struct {
 	label    string
 	options  []string
 	selected int
-	th       theme.Resolved
+	th       *theme.Resolved
 	set      icon.Set
 	keys     Keys
 }
@@ -145,7 +145,7 @@ type Radio struct {
 // NewRadio offers options with the one at selected chosen, clamped in range.
 func NewRadio(label string, options []string, selected int, th theme.Resolved) Radio {
 	selected = min(max(selected, 0), max(0, len(options)-1))
-	return Radio{label: label, options: slices.Clone(options), selected: selected, th: th, set: icon.FromEnv(), keys: DefaultKeys()}
+	return Radio{label: label, options: slices.Clone(options), selected: selected, th: &th, set: icon.FromEnv(), keys: DefaultKeys()}
 }
 
 // WithKeys rebinds the radio: Left and Right move the choice.
@@ -185,26 +185,26 @@ func (r Radio) View(focused bool, labelW, width int) string {
 	parts := make([]string, len(r.options))
 	for i, o := range r.options {
 		if i == r.selected {
-			parts[i] = r.th.Accent.Render("("+r.set.Bullet+")") + " " + o
+			parts[i] = styles(r.th).Accent.Render("("+r.set.Bullet+")") + " " + o
 			continue
 		}
-		parts[i] = r.th.Muted.Render("( )") + " " + r.th.Dim.Render(o)
+		parts[i] = styles(r.th).Muted.Render("( )") + " " + styles(r.th).Dim.Render(o)
 	}
-	return row(r.th, focused, r.label, labelW, width, strings.Join(parts, "   "))
+	return row(styles(r.th), focused, r.label, labelW, width, strings.Join(parts, "   "))
 }
 
 // Toggle is a switch, on or off; space, enter, or left and right with h/l flip it.
 type Toggle struct {
 	label string
 	on    bool
-	th    theme.Resolved
+	th    *theme.Resolved
 	set   icon.Set
 	keys  Keys
 }
 
 // NewToggle is a switch labelled label, on when on.
 func NewToggle(label string, on bool, th theme.Resolved) Toggle {
-	return Toggle{label: label, on: on, th: th, set: icon.FromEnv(), keys: DefaultKeys()}
+	return Toggle{label: label, on: on, th: &th, set: icon.FromEnv(), keys: DefaultKeys()}
 }
 
 // WithKeys rebinds the switch: Press, Left and Right flip it.
@@ -235,11 +235,11 @@ func (t Toggle) Update(msg tea.Msg) (Field, tea.Cmd) {
 }
 
 func (t Toggle) View(focused bool, labelW, width int) string {
-	sw := t.th.Muted.Render(t.set.Pending+t.set.Line+t.set.Line) + " " + t.th.Dim.Render("off")
+	sw := styles(t.th).Muted.Render(t.set.Pending+t.set.Line+t.set.Line) + " " + styles(t.th).Dim.Render("off")
 	if t.on {
-		sw = t.th.Success.Render(t.set.Line+t.set.Line+t.set.Running) + " " + t.th.Success.Render("on")
+		sw = styles(t.th).Success.Render(t.set.Line+t.set.Line+t.set.Running) + " " + styles(t.th).Success.Render("on")
 	}
-	return row(t.th, focused, t.label, labelW, width, sw)
+	return row(styles(t.th), focused, t.label, labelW, width, sw)
 }
 
 // Select is one value out of a list that opens under it: enter opens it, the
@@ -250,7 +250,7 @@ type Select struct {
 	selected int
 	cursor   int
 	open     bool
-	th       theme.Resolved
+	th       *theme.Resolved
 	set      icon.Set
 	keys     Keys
 }
@@ -260,7 +260,7 @@ func NewSelect(label string, options []string, selected int, th theme.Resolved) 
 	selected = min(max(selected, 0), max(0, len(options)-1))
 	return Select{
 		label: label, options: slices.Clone(options), selected: selected, cursor: selected,
-		th: th, set: icon.FromEnv(), keys: DefaultKeys(),
+		th: &th, set: icon.FromEnv(), keys: DefaultKeys(),
 	}
 }
 
@@ -318,12 +318,12 @@ func (s Select) Update(msg tea.Msg) (Field, tea.Cmd) {
 }
 
 func (s Select) View(focused bool, labelW, width int) string {
-	edge := s.th.Muted
+	edge := styles(s.th).Muted
 	if focused {
-		edge = s.th.Accent
+		edge = styles(s.th).Accent
 	}
 	closed := edge.Render("‹ ") + s.Value() + edge.Render(" ›")
-	head := row(s.th, focused, s.label, labelW, width, closed)
+	head := row(styles(s.th), focused, s.label, labelW, width, closed)
 	if !s.open {
 		return head
 	}
@@ -331,10 +331,10 @@ func (s Select) View(focused bool, labelW, width int) string {
 	lines := []string{head}
 	for i, o := range s.options {
 		if i == s.cursor {
-			lines = append(lines, draw.Fit(indent+s.th.Accent.Render(s.set.Arrow+" ")+s.th.Bold.Render(o), width))
+			lines = append(lines, draw.Fit(indent+styles(s.th).Accent.Render(s.set.Arrow+" ")+styles(s.th).Bold.Render(o), width))
 			continue
 		}
-		lines = append(lines, draw.Fit(indent+"  "+s.th.Dim.Render(o), width))
+		lines = append(lines, draw.Fit(indent+"  "+styles(s.th).Dim.Render(o), width))
 	}
 	return strings.Join(lines, "\n")
 }
@@ -343,13 +343,13 @@ func (s Select) View(focused bool, labelW, width int) string {
 type Button struct {
 	label   string
 	onPress tea.Cmd
-	th      theme.Resolved
+	th      *theme.Resolved
 	keys    Keys
 }
 
 // NewButton is a button labelled label; onPress may be nil.
 func NewButton(label string, onPress tea.Cmd, th theme.Resolved) Button {
-	return Button{label: label, onPress: onPress, th: th, keys: DefaultKeys()}
+	return Button{label: label, onPress: onPress, th: &th, keys: DefaultKeys()}
 }
 
 // WithKeys rebinds the button: Press presses it.
@@ -374,5 +374,5 @@ func (b Button) Update(msg tea.Msg) (Field, tea.Cmd) {
 }
 
 func (b Button) View(focused bool, labelW, width int) string {
-	return row(b.th, focused, "", labelW, width, draw.Button(b.label, b.th.Button, focused))
+	return row(styles(b.th), focused, "", labelW, width, draw.Button(b.label, styles(b.th).Button, focused))
 }

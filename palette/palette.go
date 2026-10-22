@@ -58,14 +58,26 @@ type Model struct {
 	input  input.Model
 	cursor int // -1 until an arrow picks, so enter obeys what was typed
 	err    string
-	th     theme.Resolved
+	th     *theme.Resolved // shared by every copy and never written
 	keys   Keys
 }
 
 // New opens a palette over items, sorted by name.
 func New(items []Item, th theme.Resolved) Model {
 	in, _ := input.New(th).WithPrompt(":").Focus()
-	return Model{input: in, cursor: -1, th: th, keys: DefaultKeys()}.SetItems(items)
+	return Model{input: in, cursor: -1, th: &th, keys: DefaultKeys()}.SetItems(items)
+}
+
+// noTheme is what a zero Model draws with; it is never written.
+var noTheme theme.Resolved
+
+// styles is the theme, held by pointer so a copy of the Model costs a word,
+// not the 29KB a theme.Resolved takes; the zero one for a Model never built.
+func (m *Model) styles() *theme.Resolved {
+	if m.th == nil {
+		return &noTheme
+	}
+	return m.th
 }
 
 // WithKeys rebinds the palette; its legend follows the bindings' help.

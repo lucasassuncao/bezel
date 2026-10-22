@@ -107,7 +107,7 @@ func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, th theme
 		dir = abs
 	}
 	return FilePicker{
-		look: look{th: th}, title: title, dir: dir, onPick: onPick,
+		look: lookOf(th), title: title, dir: dir, onPick: onPick,
 		win: layout.Window{Height: pickerRows}, keys: DefaultFilePickerKeys(),
 	}
 }

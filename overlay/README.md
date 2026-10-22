@@ -313,7 +313,7 @@ func (c Choice) View(body layout.Rect) string
 View draws each option as a button naming its keys. The one enter picks is filled in the dialog's colour, since that is what enter will do.
 
 <a name="Choice.WithKind"></a>
-### func \(Choice\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L51>)
+### func \(Choice\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L67>)
 
 ```go
 func (c Choice) WithKind(k Kind) Choice
@@ -387,7 +387,7 @@ func (c Confirm) WithKeys(k ConfirmKeys) Confirm
 WithKeys rebinds the confirm; its legend follows the bindings' help.
 
 <a name="Confirm.WithKind"></a>
-### func \(Confirm\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L45>)
+### func \(Confirm\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L61>)
 
 ```go
 func (c Confirm) WithKind(k Kind) Confirm
@@ -553,7 +553,7 @@ func (p FilePicker) WithKeys(k FilePickerKeys) FilePicker
 WithKeys rebinds the picker.
 
 <a name="FilePicker.WithKind"></a>
-### func \(FilePicker\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L66>)
+### func \(FilePicker\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L82>)
 
 ```go
 func (p FilePicker) WithKind(k Kind) FilePicker
@@ -639,7 +639,7 @@ func (h Help) WithKeys(k HelpKeys) Help
 WithKeys rebinds the help; the line under the keys follows Close's help.
 
 <a name="Help.WithKind"></a>
-### func \(Help\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L57>)
+### func \(Help\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L73>)
 
 ```go
 func (h Help) WithKind(k Kind) Help
@@ -818,7 +818,7 @@ func (p Pager) WithKeys(k PagerKeys) Pager
 WithKeys rebinds the pager; its legend and position line follow the bindings' help.
 
 <a name="Pager.WithKind"></a>
-### func \(Pager\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L60>)
+### func \(Pager\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L76>)
 
 ```go
 func (p Pager) WithKind(k Kind) Pager
@@ -930,7 +930,7 @@ func (p Pick) WithKeys(k PickKeys) Pick
 WithKeys rebinds the pick; the keys drawn in its box follow the bindings' help.
 
 <a name="Pick.WithKind"></a>
-### func \(Pick\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L54>)
+### func \(Pick\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L70>)
 
 ```go
 func (p Pick) WithKind(k Kind) Pick
@@ -1069,7 +1069,7 @@ func (p Prompt) WithKeys(k PromptKeys) Prompt
 WithKeys rebinds the prompt.
 
 <a name="Prompt.WithKind"></a>
-### func \(Prompt\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L63>)
+### func \(Prompt\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L79>)
 
 ```go
 func (p Prompt) WithKind(k Kind) Prompt
@@ -1293,7 +1293,7 @@ func (t Text) View(body layout.Rect) string
 
 
 <a name="Text.WithKind"></a>
-### func \(Text\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L48>)
+### func \(Text\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L64>)
 
 ```go
 func (t Text) WithKind(k Kind) Text

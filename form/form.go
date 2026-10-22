@@ -152,8 +152,20 @@ func (f Form) View(width int) string {
 	return strings.Join(rows, "\n")
 }
 
+// noTheme is what a zero field draws with; it is never written.
+var noTheme theme.Resolved
+
+// styles is a field's theme, held by pointer so a copy of the field costs a
+// word, not the 29KB a theme.Resolved takes; the zero one for a field never built.
+func styles(th *theme.Resolved) *theme.Resolved {
+	if th == nil {
+		return &noTheme
+	}
+	return th
+}
+
 // row is a field's frame: the focus marker, the label in its column, the control.
-func row(th theme.Resolved, focused bool, label string, labelW, width int, control string) string {
+func row(th *theme.Resolved, focused bool, label string, labelW, width int, control string) string {
 	mark := "  "
 	if focused {
 		mark = th.Accent.Render("›") + " "

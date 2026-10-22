@@ -102,7 +102,7 @@ func (s Shell) View(panes map[string]Pane) string {
 		return ""
 	}
 	s = s.withPresent(panes)
-	th := s.cfg.Theme
+	th := &s.cfg.Theme
 	_, _, legendLines := s.chromeRows()
 	body := s.Body()
 
@@ -181,7 +181,7 @@ func (s Shell) paneCanvas(panes map[string]Pane, body layout.Rect) string {
 // statusRow: the input outranks the banner, the banner outranks busy, and
 // busy outranks the tab's own status text.
 func (s Shell) statusRow() string {
-	th := s.cfg.Theme
+	th := &s.cfg.Theme
 	switch {
 	case s.statusLiner() != nil:
 		return s.statusLiner().StatusLine(s.width)

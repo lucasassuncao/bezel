@@ -103,7 +103,7 @@ func New(items []Item, th theme.Resolved) Model
 New opens a palette over items, sorted by name.
 
 <a name="Model.AnchorBottom"></a>
-### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L118>)
+### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L130>)
 
 ```go
 func (Model) AnchorBottom() bool
@@ -112,7 +112,7 @@ func (Model) AnchorBottom() bool
 
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L113>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L125>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -121,7 +121,7 @@ func (m Model) Legend() []legend.Entry
 
 
 <a name="Model.SetItems"></a>
-### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L79>)
+### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L91>)
 
 ```go
 func (m Model) SetItems(items []Item) Model
@@ -139,7 +139,7 @@ func (m Model) StatusLine(width int) string
 StatusLine is the typed line, drawn where the status usually is.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L88>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L100>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
@@ -148,7 +148,7 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
 
 
 <a name="Model.Value"></a>
-### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L121>)
+### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L133>)
 
 ```go
 func (m Model) Value() string
@@ -166,7 +166,7 @@ func (m Model) View(body layout.Rect) string
 View is the candidate list, a rule above it, every line padded to the full width so the panes do not show through.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L72>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L84>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model

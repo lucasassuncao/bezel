@@ -39,7 +39,7 @@ func DefaultHelpKeys() HelpKeys {
 
 // NewHelp lists sections, with no title over them.
 func NewHelp(sections []HelpSection, th theme.Resolved) Help {
-	return Help{look: look{th: th}, sections: slices.Clone(sections), keys: DefaultHelpKeys()}
+	return Help{look: lookOf(th), sections: slices.Clone(sections), keys: DefaultHelpKeys()}
 }
 
 // WithKeys rebinds the help; the line under the keys follows Close's help.

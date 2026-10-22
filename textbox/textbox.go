@@ -90,17 +90,29 @@ type Model struct {
 	id, tag   int64
 	keys      Keys
 	clipboard func() (string, error) // nil is the system's
-	th        theme.Resolved
+	th        *theme.Resolved        // shared by every copy and never written
 }
 
 // New is an empty field, not focused, sized by its text until SetWidth and
 // SetHeight say otherwise.
 func New(th theme.Resolved) Model {
-	return Model{lines: []line{{starts: []int{0}}}, goal: -1, id: ids.Add(1), keys: DefaultKeys(), th: th, caretOn: true}
+	return Model{lines: []line{{starts: []int{0}}}, goal: -1, id: ids.Add(1), keys: DefaultKeys(), th: &th, caretOn: true}
+}
+
+// noTheme is what a zero Model draws with; it is never written.
+var noTheme theme.Resolved
+
+// styles is the theme, held by pointer so a copy of the Model costs a word,
+// not the 29KB a theme.Resolved takes; the zero one for a Model never built.
+func (m *Model) styles() *theme.Resolved {
+	if m.th == nil {
+		return &noTheme
+	}
+	return m.th
 }
 
 // wrap is l with its rows worked out at the field's width. The helpers a loop
-// calls take a pointer: a Model holds a 29KB theme, copied per call by value.
+// calls take a pointer, which stays cheaper than a copy of the whole Model.
 func (m *Model) wrap(l edit.Line) line { return line{Line: l, starts: segments(l, m.textWidth())} }
 
 // WithClipboard reads the clipboard through read on a paste key, for a test
@@ -118,7 +130,7 @@ func (m Model) WithKeys(k Keys) Model {
 
 // SetTheme repaints the field after the terminal's background was learned.
 func (m Model) SetTheme(th theme.Resolved) Model {
-	m.th = th
+	m.th = &th
 	return m
 }
 
@@ -311,7 +323,7 @@ func (m Model) arm() (Model, tea.Cmd) {
 
 func (m Model) tick() tea.Cmd {
 	msg := BlinkMsg{id: m.id, tag: m.tag}
-	return tea.Tick(draw.Blink(m.th.CaretBlink), func(time.Time) tea.Msg { return msg })
+	return tea.Tick(draw.Blink(m.styles().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
 // breaks folds every line break to "\n" and turns tabs into spaces; a
@@ -548,7 +560,7 @@ func (m Model) View() string {
 	caret := m.focused && m.caretOn
 	text := lipgloss.NewStyle()
 	if !m.focused {
-		text = m.th.Dim
+		text = m.styles().Dim
 	}
 	start, end := m.window()
 	var rows []string
@@ -564,9 +576,9 @@ func (m Model) View() string {
 		for k := range l.starts {
 			if n >= start && n < end {
 				from, to := span(l.starts, k, l.Len())
-				gutter := draw.Gutter(i+1, m.th.Muted)
+				gutter := draw.Gutter(i+1, m.styles().Muted)
 				if k > 0 {
-					gutter = m.th.Muted.Render(strings.Repeat(" ", draw.GutterWidth-2) + "│ ")
+					gutter = m.styles().Muted.Render(strings.Repeat(" ", draw.GutterWidth-2) + "│ ")
 				}
 				onCaret := caret && i == m.row && segmentOf(l.starts, l.Cursor()) == k
 				rows = append(rows, gutter+m.piece(l.Line, from, to, onCaret, text))
@@ -575,7 +587,7 @@ func (m Model) View() string {
 		}
 	}
 	for len(rows) < m.height {
-		rows = append(rows, m.th.Muted.Render(strings.Repeat(" ", draw.GutterWidth-4)+"~ │ ")+m.pad(""))
+		rows = append(rows, m.styles().Muted.Render(strings.Repeat(" ", draw.GutterWidth-4)+"~ │ ")+m.pad(""))
 	}
 	return strings.Join(rows, "\n")
 }
@@ -590,10 +602,10 @@ func (m *Model) piece(l edit.Line, from, to int, onCaret bool, style lipgloss.St
 	}
 	b.WriteString(style.Render(l.Slice(from, c)))
 	if c < to {
-		b.WriteString(m.th.Caret.Render(l.At(c)))
+		b.WriteString(m.styles().Caret.Render(l.At(c)))
 		b.WriteString(style.Render(l.Slice(c+1, to)))
 	} else {
-		b.WriteString(m.th.Caret.Render(" "))
+		b.WriteString(m.styles().Caret.Render(" "))
 	}
 	return m.pad(b.String())
 }

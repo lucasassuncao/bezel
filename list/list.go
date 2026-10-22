@@ -280,7 +280,7 @@ func firstSelectable[T any](rows []Row[T]) int {
 // View renders the visible rows, or the filter prompt with its matches.
 func (m Model[T]) View(th theme.Resolved) string {
 	if m.find.on {
-		return m.viewFilter(th)
+		return m.viewFilter(&th)
 	}
 	if m.win.Height <= 0 {
 		return ""
@@ -296,20 +296,20 @@ func (m Model[T]) View(th theme.Resolved) string {
 		if r.Section {
 			sb.WriteString(th.Section.Render(r.Label))
 		} else {
-			sb.WriteString(renderRow(r, i == m.win.Cursor, th))
+			sb.WriteString(renderRow(r, i == m.win.Cursor, &th))
 		}
 	}
 	if below > 0 {
 		if sb.Len() > 0 {
 			sb.WriteByte('\n')
 		}
-		sb.WriteString(moreRow(below, th))
+		sb.WriteString(moreRow(below, &th))
 	}
 	return sb.String()
 }
 
 // viewFilter is the matches in the filter's window, padded to it, then the prompt.
-func (m Model[T]) viewFilter(th theme.Resolved) string {
+func (m Model[T]) viewFilter(th *theme.Resolved) string {
 	idx := m.filtered()
 	w := m.find.win.Clamp(len(idx))
 	start, end, below := w.Bounds(len(idx))
@@ -329,9 +329,9 @@ func (m Model[T]) viewFilter(th theme.Resolved) string {
 }
 
 // moreRow stands in for the last row while n rows are hidden below it.
-func moreRow(n int, th theme.Resolved) string { return th.Dim.Render(fmt.Sprintf("  ↓ %d more", n)) }
+func moreRow(n int, th *theme.Resolved) string { return th.Dim.Render(fmt.Sprintf("  ↓ %d more", n)) }
 
-func renderRow[T any](r Row[T], selected bool, th theme.Resolved) string {
+func renderRow[T any](r Row[T], selected bool, th *theme.Resolved) string {
 	text := r.Label
 	if r.Mark != "" {
 		text = r.Mark + "  " + r.Label

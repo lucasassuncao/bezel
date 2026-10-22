@@ -239,3 +239,11 @@ func BenchmarkFilter(b *testing.B) {
 		}
 	})
 }
+
+// A frame of a list that fills a 40-row pane.
+func BenchmarkListFrame(b *testing.B) {
+	m := New(numbered(500), 40)
+	for b.Loop() {
+		_ = m.View(th)
+	}
+}

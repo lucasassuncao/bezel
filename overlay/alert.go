@@ -21,7 +21,7 @@ type Alert struct {
 
 // NewAlert is an alert of kind, its border in that kind's colour.
 func NewAlert(kind Kind, title, message string, th theme.Resolved) Alert {
-	return Alert{look: look{th: th, kind: kind}, title: title, message: message}
+	return Alert{look: look{th: &th, kind: kind}, title: title, message: message}
 }
 
 // Kind is what the alert reports.
@@ -49,7 +49,7 @@ func accent(style lipgloss.Style) lipgloss.Style {
 // button is the theme's button with the focused one filled in the dialog's
 // colour: its border's, which the dialog's kind tints.
 func (l look) button(label string, focused bool) string {
-	st := l.th.Button
+	st := l.styles().Button
 	st.Focused = st.Focused.Background(l.style().GetBorderTopForeground())
 	return draw.Button(label, st, focused)
 }

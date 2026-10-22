@@ -111,3 +111,14 @@ func TestFormWithKeysRebindsTheFocusAndItsControls(t *testing.T) {
 	_, cmd := press(f, "x")
 	require.Equal(t, submitted{}, cmd())
 }
+
+// A keystroke into the focused input and the form's frame.
+func BenchmarkTypingInAForm(b *testing.B) {
+	f, _ := New(NewInput("Name", "", 30, th()), NewCheckbox("Port", false, th()), NewToggle("Docker", false, th()))
+	back := tea.KeyPressMsg{Code: tea.KeyBackspace}
+	for b.Loop() {
+		f, _ = f.Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
+		f, _ = f.Update(back)
+		_ = f.View(60)
+	}
+}

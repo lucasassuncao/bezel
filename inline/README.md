@@ -26,7 +26,7 @@ var ErrAborted = errors.New("inline: aborted")
 ```
 
 <a name="Bar"></a>
-## func [Bar](<https://github.com/lucasassuncao/bezel/blob/main/inline/inline.go#L126>)
+## func [Bar](<https://github.com/lucasassuncao/bezel/blob/main/inline/inline.go#L138>)
 
 ```go
 func Bar(done, total, width int, th theme.Resolved) string

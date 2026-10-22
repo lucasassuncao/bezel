@@ -155,3 +155,15 @@ func TestTopMsgReachesAnOpenOverlay(t *testing.T) {
 	_, handled, _ := s.Update(overlay.TopMsg{Msg: answer{}})
 	require.True(t, handled)
 }
+
+// A key the shell hands back to the app, and the frame after it: what every
+// keystroke in a running app costs the shell.
+func BenchmarkKeyAndFrame(b *testing.B) {
+	s := newShell()
+	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
+	panes, key := demoPanes(), press("z")
+	for b.Loop() {
+		s, _, _ = s.Update(key)
+		_ = s.View(panes)
+	}
+}

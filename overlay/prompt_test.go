@@ -117,3 +117,15 @@ func TestPromptAcceptsOnTheKeyItWasGiven(t *testing.T) {
 	require.Contains(t, drain(cmd()), tea.Msg(CloseMsg{}))
 	require.Contains(t, hint(p), "[ctrl+s] confirm", "the key from the binding, what it does from the hint")
 }
+
+// A keystroke into a prompt and its frame.
+func BenchmarkTypingInAPrompt(b *testing.B) {
+	var p Overlay = newPrompt()
+	body := layout.Rect{W: 100, H: 30}
+	back := tea.KeyPressMsg{Code: tea.KeyBackspace}
+	for b.Loop() {
+		p, _ = p.Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
+		p, _ = p.Update(back)
+		_ = p.View(body)
+	}
+}

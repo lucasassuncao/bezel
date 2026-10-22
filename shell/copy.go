@@ -28,7 +28,7 @@ var errClipboardTimeout = errors.New("the clipboard did not answer: check that x
 // WithClipboard replaces the system clipboard with write, for a test that
 // must not touch the machine's own.
 func (s Shell) WithClipboard(write func(string) error) Shell {
-	s.cfg.Clipboard = write
+	s = s.withCfg(func(c *Config) { c.Clipboard = write })
 	return s
 }
 

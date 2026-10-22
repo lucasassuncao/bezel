@@ -22,7 +22,7 @@ type Text struct {
 
 // NewText shows lines under title until any key.
 func NewText(title string, lines []string, th theme.Resolved) Text {
-	return Text{title: title, lines: slices.Clone(lines), look: look{th: th}}
+	return Text{title: title, lines: slices.Clone(lines), look: lookOf(th)}
 }
 
 func (t Text) Update(msg tea.Msg) (Overlay, tea.Cmd) {
@@ -62,7 +62,7 @@ type Choice struct {
 
 // NewChoice shows lines under title with options as its buttons.
 func NewChoice(title string, lines []string, options []Option, th theme.Resolved) Choice {
-	return Choice{title: title, lines: slices.Clone(lines), options: slices.Clone(options), look: look{th: th}}
+	return Choice{title: title, lines: slices.Clone(lines), options: slices.Clone(options), look: lookOf(th)}
 }
 
 func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd) {
@@ -139,7 +139,7 @@ func DefaultPickKeys() PickKeys {
 // NewPick lists rows with the cursor on the first. onPick may be nil, which
 // makes enter only close.
 func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick {
-	return Pick{look: look{th: th}, title: title, rows: slices.Clone(rows), onPick: onPick, keys: DefaultPickKeys()}
+	return Pick{look: lookOf(th), title: title, rows: slices.Clone(rows), onPick: onPick, keys: DefaultPickKeys()}
 }
 
 // WithKeys rebinds the pick; the keys drawn in its box follow the bindings' help.

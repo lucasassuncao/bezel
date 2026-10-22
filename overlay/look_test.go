@@ -19,10 +19,10 @@ func border(l look) any { return l.style().GetBorderTopForeground() }
 
 func TestKindPicksTheBorderColour(t *testing.T) {
 	th := theme.Resolve(theme.Mint, true)
-	require.Equal(t, th.Modal, look{th: th}.style(), "Info is the theme's own modal")
-	require.Equal(t, lipgloss.Color(th.Colors.Danger), border(look{th: th, kind: Danger}))
-	require.Equal(t, lipgloss.Color(th.Colors.Success), border(look{th: th, kind: Success}))
-	require.Equal(t, lipgloss.Color(th.Colors.Warning), border(look{th: th, kind: Warning}))
+	require.Equal(t, th.Modal, lookOf(th).style(), "Info is the theme's own modal")
+	require.Equal(t, lipgloss.Color(th.Colors.Danger), border(look{th: &th, kind: Danger}))
+	require.Equal(t, lipgloss.Color(th.Colors.Success), border(look{th: &th, kind: Success}))
+	require.Equal(t, lipgloss.Color(th.Colors.Warning), border(look{th: &th, kind: Warning}))
 }
 
 func TestWithKindTintsEveryDialog(t *testing.T) {
