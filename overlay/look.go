@@ -62,9 +62,5 @@ func (p Pager) WithKind(k Kind) Pager { p.kind = k; return p }
 // WithKind tints the prompt, such as Danger for a typed confirmation.
 func (p Prompt) WithKind(k Kind) Prompt { p.kind = k; return p }
 
-// WithKind tints the picker, repainting its entries in the new colour.
-func (p FilePicker) WithKind(k Kind) FilePicker {
-	p.kind = k
-	p.picker.Styles = pickerStyles(p.look)
-	return p
-}
+// WithKind tints the picker, its entries in the new colour.
+func (p FilePicker) WithKind(k Kind) FilePicker { p.kind = k; return p }

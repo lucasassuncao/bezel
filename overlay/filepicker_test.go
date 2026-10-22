@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -54,7 +53,7 @@ func pressPicker(t *testing.T, p FilePicker, key tea.KeyPressMsg) (FilePicker, t
 
 func pickerView(p FilePicker) string { return ansi.Strip(p.View(layout.Rect{W: 80, H: 30})) }
 
-// Directories come first, as the bubbles picker sorts them.
+// Directories come first, then files, each by name.
 func TestFilePickerListsTheDirectory(t *testing.T) {
 	dir := pickerTree(t)
 	p := newPicker(dir)
@@ -124,8 +123,8 @@ func TestFilePickerCutsALongDirectoryFromTheLeft(t *testing.T) {
 	require.Contains(t, dirLine, string(filepath.Separator)+filepath.Base(p.Dir()))
 }
 
-// esc belongs to the stack, which closes the picker; inside it, esc must not
-// mean "parent directory" the way it does in a bare bubbles picker.
+// esc belongs to the stack, which closes the picker; inside it, esc never
+// means "parent directory".
 func TestFilePickerLeavesEscToTheStack(t *testing.T) {
 	dir := pickerTree(t)
 	p := newPicker(dir)
@@ -191,12 +190,9 @@ func TestFilePickerWithDirsPicksADirectory(t *testing.T) {
 	require.Contains(t, drain(cmd()), tea.Msg(filePickedMsg{filepath.Join(dir, "sub")}))
 }
 
-// On Windows bubbles asks for the hidden attribute by bare name, relative to
-// the working directory, so only Unix dotfiles are testable here.
+// A dotfile is hidden on every system; Windows' own hidden mark is
+// hidden_windows_test.go's.
 func TestFilePickerWithHiddenListsDotfiles(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("bubbles' IsHidden on Windows ignores the directory being browsed")
-	}
 	dir := pickerTree(t)
 	require.NoError(t, os.WriteFile(filepath.Join(dir, ".env"), nil, 0o600))
 
@@ -324,4 +320,48 @@ func TestFilePickerScrollsALongDriveList(t *testing.T) {
 	}
 	require.Equal(t, drives[8], p.Highlighted())
 	require.Contains(t, ansi.Strip(p.View(body)), drives[8])
+}
+
+func TestHumanBytesReadsLikeAListing(t *testing.T) {
+	for n, want := range map[int64]string{
+		0: "0B", 999: "999B", 1000: "1.0kB", 1500: "1.5kB", 12_345: "12kB",
+		640_000_000: "640MB", 3_200_000_000: "3.2GB",
+	} {
+		require.Equal(t, want, humanBytes(n), "%d", n)
+	}
+}
+
+func TestFilePickerShowsFileSizesAndMarksTheCursor(t *testing.T) {
+	p := newPicker(pickerTree(t))
+	p = load(t, p, p.Init())
+	t.Log("\n" + pickerView(p))
+	var lines []string
+	for _, l := range strings.Split(pickerView(p), "\n") {
+		lines = append(lines, strings.TrimRight(l, " "))
+	}
+	require.Contains(t, lines, ">        sub")
+	require.Contains(t, lines, "      2B notes.txt")
+}
+
+// A listing that lands after the picker moved on is for a directory it left.
+func TestFilePickerDropsALateListing(t *testing.T) {
+	dir := pickerTree(t)
+	p := newPicker(dir)
+	first := p.Init()
+	p = load(t, p, first)
+	p, cmd := pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyEnter})
+
+	p = load(t, p, first)
+	require.Equal(t, filepath.Join(dir, "sub"), p.Dir())
+	require.Empty(t, p.Highlighted(), "still waiting for its own listing")
+	p = load(t, p, cmd)
+	require.Contains(t, pickerView(p), "inner.md")
+}
+
+func TestFilePickerOpenLeavesAFileAlone(t *testing.T) {
+	p := newPicker(pickerTree(t))
+	p = load(t, p, p.Init())
+	p, _ = pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyDown})
+	_, cmd := pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyRight})
+	require.Nil(t, cmd, "→ opens directories; enter picks")
 }

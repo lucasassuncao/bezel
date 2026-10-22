@@ -75,5 +75,5 @@ A new component reaches for one of these before it invents a shape.
 | Functional options | `shell.Option` on the prebuilt actions, `With` on every model: optional settings without a growing constructor. |
 | Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `form.Holder`: an overlay or field opts into a behaviour by implementing one small interface. |
 | Strategy | `tree.View`'s row, `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies the answer. |
-| Adapter | `overlay.FilePicker`, `textbox`: a bubbles component with bezel's theme, keys and legend. |
+| Adapter | `textbox`: a bubbles component with bezel's theme, keys and legend. |
 | Cascade | `theme.Theme.Base`: each layer overrides the one under it, so a preset is a base to build on. |

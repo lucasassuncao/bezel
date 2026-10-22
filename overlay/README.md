@@ -56,8 +56,10 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p FilePicker\) WithAllowedTypes\(exts ...string\) FilePicker](<#FilePicker.WithAllowedTypes>)
   - [func \(p FilePicker\) WithDirs\(\) FilePicker](<#FilePicker.WithDirs>)
   - [func \(p FilePicker\) WithHidden\(\) FilePicker](<#FilePicker.WithHidden>)
+  - [func \(p FilePicker\) WithKeys\(k FilePickerKeys\) FilePicker](<#FilePicker.WithKeys>)
   - [func \(p FilePicker\) WithKind\(k Kind\) FilePicker](<#FilePicker.WithKind>)
-  - [func \(p FilePicker\) WithPicker\(fp filepicker.Model\) FilePicker](<#FilePicker.WithPicker>)
+- [type FilePickerKeys](<#FilePickerKeys>)
+  - [func DefaultFilePickerKeys\(\) FilePickerKeys](<#DefaultFilePickerKeys>)
 - [type Help](<#Help>)
   - [func NewHelp\(sections \[\]HelpSection, th theme.Resolved\) Help](<#NewHelp>)
   - [func \(h Help\) Legend\(\) \[\]legend.Entry](<#Help.Legend>)
@@ -423,9 +425,9 @@ type EscOwner interface{ OwnsEsc() bool }
 ```
 
 <a name="FilePicker"></a>
-## type [FilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L24-L32>)
+## type [FilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L25-L39>)
 
-FilePicker is the bubbles file picker in a modal. Enter picks a file and closes, running onPick; enter or → opens a directory, ← or backspace goes up, and from a drive's root lists the drives. esc is the stack's. Push it with Open.
+FilePicker browses directories in a modal. Enter picks a file and closes, running onPick; enter or → opens a directory, ← or backspace goes up, and from a drive's root lists the drives. esc is the stack's. Push it with Open.
 
 ```go
 type FilePicker struct {
@@ -434,16 +436,16 @@ type FilePicker struct {
 ```
 
 <a name="NewFilePicker"></a>
-### func [NewFilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L58>)
+### func [NewFilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L106>)
 
 ```go
 func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, th theme.Resolved) FilePicker
 ```
 
-NewFilePicker browses dir, files only, without hidden entries or permissions. onPick, which may be nil, gets the absolute path.
+NewFilePicker browses dir, files only, without hidden entries. onPick, which may be nil, gets the absolute path.
 
 <a name="FilePicker.Dir"></a>
-### func \(FilePicker\) [Dir](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L127>)
+### func \(FilePicker\) [Dir](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L164>)
 
 ```go
 func (p FilePicker) Dir() string
@@ -452,7 +454,7 @@ func (p FilePicker) Dir() string
 Dir is the directory being browsed.
 
 <a name="FilePicker.Highlighted"></a>
-### func \(FilePicker\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L130>)
+### func \(FilePicker\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L167>)
 
 ```go
 func (p FilePicker) Highlighted() string
@@ -461,7 +463,7 @@ func (p FilePicker) Highlighted() string
 Highlighted is the path under the cursor, or "" in an empty directory.
 
 <a name="FilePicker.Init"></a>
-### func \(FilePicker\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L121>)
+### func \(FilePicker\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L158>)
 
 ```go
 func (p FilePicker) Init() tea.Cmd
@@ -470,7 +472,7 @@ func (p FilePicker) Init() tea.Cmd
 Init reads the first directory, answering through TopMsg. The picker must already be on top of the stack to receive it: push it first, as Open does.
 
 <a name="FilePicker.Legend"></a>
-### func \(FilePicker\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L206>)
+### func \(FilePicker\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L346>)
 
 ```go
 func (p FilePicker) Legend() []legend.Entry
@@ -479,7 +481,7 @@ func (p FilePicker) Legend() []legend.Entry
 
 
 <a name="FilePicker.Open"></a>
-### func \(FilePicker\) [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L124>)
+### func \(FilePicker\) [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L161>)
 
 ```go
 func (p FilePicker) Open() tea.Cmd
@@ -488,16 +490,16 @@ func (p FilePicker) Open() tea.Cmd
 Open pushes the picker and then reads its directory, in that order.
 
 <a name="FilePicker.Resize"></a>
-### func \(FilePicker\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L83>)
+### func \(FilePicker\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L123>)
 
 ```go
 func (p FilePicker) Resize(body layout.Rect) Overlay
 ```
 
-Resize shows as many entries as fit in body, which moves the picker's window to keep its cursor in view.
+Resize shows as many entries as fit in body.
 
 <a name="FilePicker.Update"></a>
-### func \(FilePicker\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L173>)
+### func \(FilePicker\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L242>)
 
 ```go
 func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -506,7 +508,7 @@ func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="FilePicker.View"></a>
-### func \(FilePicker\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L216>)
+### func \(FilePicker\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L354>)
 
 ```go
 func (p FilePicker) View(body layout.Rect) string
@@ -515,7 +517,7 @@ func (p FilePicker) View(body layout.Rect) string
 
 
 <a name="FilePicker.WithAllowedTypes"></a>
-### func \(FilePicker\) [WithAllowedTypes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L101>)
+### func \(FilePicker\) [WithAllowedTypes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L138>)
 
 ```go
 func (p FilePicker) WithAllowedTypes(exts ...string) FilePicker
@@ -524,22 +526,31 @@ func (p FilePicker) WithAllowedTypes(exts ...string) FilePicker
 WithAllowedTypes limits the pick to names ending in one of exts, such as ".go"; other files stay listed but enter refuses them and says why.
 
 <a name="FilePicker.WithDirs"></a>
-### func \(FilePicker\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L107>)
+### func \(FilePicker\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L144>)
 
 ```go
 func (p FilePicker) WithDirs() FilePicker
 ```
 
-WithDirs lets enter pick a directory as well as open it.
+WithDirs lets enter pick a directory; → still opens one.
 
 <a name="FilePicker.WithHidden"></a>
-### func \(FilePicker\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L114>)
+### func \(FilePicker\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L151>)
 
 ```go
 func (p FilePicker) WithHidden() FilePicker
 ```
 
-WithHidden lists hidden entries too; set it before Init. On Windows bubbles checks the hidden attribute in the working directory, not the one browsed.
+WithHidden lists hidden entries too: dotfiles, and on Windows the ones marked hidden. Set it before Init.
+
+<a name="FilePicker.WithKeys"></a>
+### func \(FilePicker\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L117>)
+
+```go
+func (p FilePicker) WithKeys(k FilePickerKeys) FilePicker
+```
+
+WithKeys rebinds the picker.
 
 <a name="FilePicker.WithKind"></a>
 ### func \(FilePicker\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L66>)
@@ -548,16 +559,28 @@ WithHidden lists hidden entries too; set it before Init. On Windows bubbles chec
 func (p FilePicker) WithKind(k Kind) FilePicker
 ```
 
-WithKind tints the picker, repainting its entries in the new colour.
+WithKind tints the picker, its entries in the new colour.
 
-<a name="FilePicker.WithPicker"></a>
-### func \(FilePicker\) [WithPicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L69>)
+<a name="FilePickerKeys"></a>
+## type [FilePickerKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L60-L63>)
+
+FilePickerKeys are the bindings a FilePicker answers to besides esc. Pick shares enter with Open: on a directory it opens it, unless WithDirs.
 
 ```go
-func (p FilePicker) WithPicker(fp filepicker.Model) FilePicker
+type FilePickerKeys struct {
+    Up, Down, PageUp, PageDown, Top, Bottom key.Binding
+    Back, Open, Pick                        key.Binding
+}
 ```
 
-WithPicker replaces the bubbles model, for a caller that sets its own fields. Esc is taken out of its Back keys: here esc closes the modal.
+<a name="DefaultFilePickerKeys"></a>
+### func [DefaultFilePickerKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L67>)
+
+```go
+func DefaultFilePickerKeys() FilePickerKeys
+```
+
+DefaultFilePickerKeys are the arrows and hjkl, pgup/pgdown, home/end with g/G, backspace to go up and enter to pick.
 
 <a name="Help"></a>
 ## type [Help](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L23-L28>)

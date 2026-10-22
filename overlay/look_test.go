@@ -1,6 +1,8 @@
 package overlay
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/input"
+	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -42,8 +45,12 @@ func TestWithKindTintsEveryDialog(t *testing.T) {
 // The picker's entries are drawn by bubbles, so a new kind must reach them too.
 func TestFilePickerWithKindRepaintsEntries(t *testing.T) {
 	th := theme.Resolve(theme.Mint, true)
-	p := NewFilePicker("t", t.TempDir(), nil, th).WithKind(Danger)
-	require.Equal(t, lipgloss.Color(th.Colors.Danger), p.picker.Styles.Cursor.GetForeground())
+	dir := t.TempDir()
+	require.NoError(t, os.Mkdir(filepath.Join(dir, "sub"), 0o750))
+	p := NewFilePicker("t", dir, nil, th).WithKind(Danger)
+	o, _ := p.Update(p.Init()())
+	danger := lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Danger))
+	require.Contains(t, o.View(layout.Rect{W: 80, H: 30}), danger.Render(">"))
 }
 
 // The caret's blink, at the theme's pace, comes back to the prompt on top.
