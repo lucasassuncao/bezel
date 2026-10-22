@@ -232,7 +232,7 @@ Update handles one key. Keys the table does not know return None and leave it un
 func (m Model[T]) View(th theme.Resolved, width int) string
 ```
 
-View is the header and the rows in its window, width cells wide. Columns are sized over every row, not the ones shown, so scrolling never moves them. The cursor row drops its cells' own colours to wear the cursor's.
+View is the header and the rows in its window, width cells wide. Columns are sized over every row, not the ones shown, so scrolling never moves them. On the cursor row a cell with no colour of its own wears the cursor's.
 
 <a name="Model[T].WithKeys"></a>
 ### func \(Model\[T\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/table/model.go#L72>)

@@ -7,7 +7,6 @@ import (
 	"slices"
 	"time"
 
-	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/textinput"
 
 	"github.com/lucasassuncao/bezel/layout"
@@ -92,7 +91,7 @@ type Shell struct {
 	typing    bool
 
 	busy string // what the spinner says, empty when idle
-	spin spinner.Model
+	spin spinner
 
 	overlays overlay.Stack
 	present  map[string]bool // leaves the last View was given
@@ -111,7 +110,7 @@ func New(cfg Config) Shell {
 	focus := resized(nil, max(1, len(cfg.Tabs)), firstLeaf(cfg.Layout))
 	return Shell{
 		cfg: cfg, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
-		spin: spinner.New(spinner.WithSpinner(spinner.Dot)),
+		spin: spinner{id: shellIDs.Add(1)},
 	}
 }
 

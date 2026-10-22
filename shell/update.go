@@ -3,7 +3,6 @@ package shell
 import (
 	"time"
 
-	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
@@ -38,8 +37,8 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		}
 		return s, true, nil
 
-	case spinner.TickMsg:
-		if m.ID == s.spin.ID() {
+	case spinTickMsg:
+		if m.id == s.spin.id {
 			next, cmd := s.tick(m)
 			return next, true, cmd
 		}

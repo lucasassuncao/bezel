@@ -80,33 +80,23 @@ func TestBrowserModel_NoOverflowTruncation(t *testing.T) {
 	}
 }
 
-// TestBrowserModel_SelectedRowHighlightSpansFullRow guards that the cursor
-// row is one unbroken highlight. It used to stop after the first column
-// because Cell's own Foreground reset cut off Selected's Background.
-func TestBrowserModel_SelectedRowHighlightSpansFullRow(t *testing.T) {
+// The cursor row is marked and painted, and keeps its palette's colours.
+func TestBrowserModel_MarksTheCursorRow(t *testing.T) {
 	m := newBrowserModel(theme.Theme{}, true)
-	lines := strings.Split(m.View().Content, "\n")
-
-	var selectedLine string
-	for _, l := range lines {
-		if strings.Contains(ansi.Strip(l), "plain") {
-			selectedLine = l
-			break
-		}
+	t.Log("\n" + ansi.Strip(m.View().Content))
+	first := m.tbl.Selected()
+	if first == nil {
+		t.Fatal("no row under the cursor")
 	}
-	if selectedLine == "" {
-		t.Fatal("could not find the row containing the initially-selected theme (plain)")
+	row := rowOf(t, m, first.Value)
+	if !strings.Contains(ansi.Strip(row), "▶ ") {
+		t.Errorf("the cursor row has no marker: %q", ansi.Strip(row))
 	}
-
-	// No reset may sit between the first and last column's text: a mid-row
-	// "[m" means the highlight broke at a column boundary.
-	start := strings.Index(selectedLine, "plain")
-	end := strings.Index(selectedLine, "Miscellaneous")
-	if start < 0 || end < 0 || end < start {
-		t.Fatalf("could not locate both column values in the selected row: %q", selectedLine)
+	if !strings.Contains(row, m.th.Cursor.Render(first.Value)) {
+		t.Errorf("the cursor row's name is not in the cursor's style: %q", row)
 	}
-	if between := selectedLine[start:end]; strings.Contains(between, "\x1b[m") {
-		t.Errorf("selected row resets its style between columns - the highlight does not span the full row:\n%q", between)
+	if !strings.Contains(row, sgr(theme.ResolveColors(theme.All()[first.Value], true).Accent)) {
+		t.Errorf("the cursor row lost its palette: %q", row)
 	}
 }
 

@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"charm.land/bubbles/v2/spinner"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 )
@@ -51,7 +50,7 @@ func TestTheSpinnerTicksOnlyWhileBusy(t *testing.T) {
 	s := sized(New(actionConfig()))
 	s, cmd := s.Busy("refreshing…")
 	tick := cmd()
-	require.IsType(t, spinner.TickMsg{}, tick)
+	require.IsType(t, spinTickMsg{}, tick)
 
 	before := s.Spinner()
 	s, handled, next := s.Update(tick)
@@ -65,11 +64,29 @@ func TestTheSpinnerTicksOnlyWhileBusy(t *testing.T) {
 	require.Nil(t, next, "idle: the loop stops")
 }
 
-func TestAnotherSpinnersTickIsTheApps(t *testing.T) {
+func TestAnotherShellsTickIsTheApps(t *testing.T) {
 	s := sized(New(actionConfig()))
 	s, _ = s.Busy("refreshing…")
-	_, handled, _ := s.Update(spinner.New().Tick())
+	_, cmd := sized(New(actionConfig())).Busy("elsewhere")
+	_, handled, _ := s.Update(cmd())
 	require.False(t, handled)
+}
+
+// Idle then Busy again before the old loop's tick lands: that tick ends,
+// or the spinner would turn twice as fast.
+func TestAStaleLoopsTickDoesNotDoubleTheSpinner(t *testing.T) {
+	s := sized(New(actionConfig()))
+	s, first := s.Busy("refreshing…")
+	s, second := s.Idle().Busy("again")
+	before := s.Spinner()
+
+	s, handled, next := s.Update(first())
+	require.True(t, handled)
+	require.Nil(t, next, "the old loop stops")
+	require.Equal(t, before, s.Spinner())
+
+	_, _, next = s.Update(second())
+	require.NotNil(t, next, "the new loop runs on")
 }
 
 func TestIdleLeavesABannerAlone(t *testing.T) {

@@ -100,7 +100,7 @@ func TestModelSizesColumnsOverEveryRow(t *testing.T) {
 	require.Equal(t, "  NAME                VERSION", before)
 }
 
-func TestModelCursorRowWearsTheCursorNotItsCells(t *testing.T) {
+func TestModelCursorRowPaintsThePlainCells(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000"))
 	mint := theme.Resolve(theme.Mint, true)
 	items := []Item[int]{
@@ -108,9 +108,10 @@ func TestModelCursorRowWearsTheCursorNotItsCells(t *testing.T) {
 		{Cells: []string{"web", red.Render("Failed")}},
 	}
 	lines := strings.Split(New(pkgCols, items, 5).View(mint, 40), "\n")
-	require.NotContains(t, lines[1], red.Render("Failed"), "the cell's reset would end the cursor")
-	require.Contains(t, lines[1], mint.Cursor.Render("▶ api   Failed"))
-	require.Contains(t, lines[2], red.Render("Failed"), "off the cursor, a cell keeps its colour")
+	require.Contains(t, lines[1], mint.Cursor.Render("▶ ")+mint.Cursor.Render("api"))
+	require.Contains(t, lines[1], red.Render("Failed"), "a coloured cell keeps its colour under the cursor")
+	require.Equal(t, "  web   Failed", ansi.Strip(lines[2]))
+	require.NotContains(t, lines[2], mint.Cursor.Render("web"), "off the cursor, plain stays plain")
 }
 
 func TestModelViewIsEmptyBeforeSized(t *testing.T) {

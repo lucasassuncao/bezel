@@ -4,93 +4,53 @@ package themebrowser
 
 import (
 	"fmt"
-	"image/color"
 	"io"
 	"os"
 	"slices"
 	"strconv"
 	"strings"
 
-	"charm.land/bubbles/v2/table"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/term"
 
+	"github.com/lucasassuncao/bezel/table"
 	"github.com/lucasassuncao/bezel/theme"
 )
-
-const colID = "ID"
 
 // maxVisibleRows caps the table's height before it scrolls, so the ~50
 // built-in themes don't grow the box past a reasonable size.
 const maxVisibleRows = 15
 
+// wide is more than any row of the table needs: each line ends where its
+// last cell does, and the box sizes itself to the longest.
+const wide = 512
+
+var cols = []table.Column{{Title: "ID"}, {Title: "Theme"}, {Title: "Category"}, {Title: "Palette"}}
+
 type browserModel struct {
-	tbl    table.Model
-	colors theme.Colors
+	tbl table.Model[string]
+	th  theme.Resolved
 }
 
 // newBrowserModel lists the built-in themes in th's colours. dark picks the
 // variant of the adaptive default, for the table and for each palette.
 func newBrowserModel(th theme.Theme, dark bool) *browserModel {
-	const (
-		colTheme    = "Theme"
-		colCategory = "Category"
-		colPalette  = "Palette"
-	)
-	colors := theme.ResolveColors(th, dark)
-	themeW := lipgloss.Width(colTheme)
-	catW := lipgloss.Width(colCategory)
-	palW := lipgloss.Width(colPalette)
-
 	all := theme.All()
-	var names [][3]string // theme name, category name, palette
+	var items []table.Item[string]
 	for _, cat := range theme.Categories() {
 		for _, name := range cat.Themes {
-			pal := palette(all[name], dark)
-			names = append(names, [3]string{name, cat.Name, pal})
-			themeW = max(themeW, lipgloss.Width(name))
-			catW = max(catW, lipgloss.Width(cat.Name))
-			palW = max(palW, lipgloss.Width(pal))
+			id := strconv.Itoa(len(items) + 1)
+			cells := []string{id, name, cat.Name, palette(all[name], dark)}
+			items = append(items, table.Item[string]{Cells: cells, Value: name})
 		}
 	}
-
-	idW := len(strconv.Itoa(len(names)))
-	if idW < len(colID) {
-		idW = len(colID)
-	}
-	rows := make([]table.Row, len(names))
-	for i, n := range names {
-		rows[i] = table.Row{strconv.Itoa(i + 1), n[0], n[1], n[2]}
-	}
-
-	visibleRows := len(rows)
-	if visibleRows > maxVisibleRows {
-		visibleRows = maxVisibleRows
-	}
-	if visibleRows < 1 {
-		visibleRows = 1
-	}
-
-	tbl := table.New(
-		table.WithColumns([]table.Column{
-			{Title: colID, Width: idW},
-			{Title: colTheme, Width: themeW},
-			{Title: colCategory, Width: catW},
-			{Title: colPalette, Width: palW},
-		}),
-		table.WithRows(rows),
-		table.WithStyles(tableStyles(colors)),
-		table.WithWidth((idW+2)+(themeW+2)+(catW+2)+(palW+2)),
-		table.WithHeight(visibleRows+1), // +1: WithHeight subtracts the 1-line header row internally
-	)
-
-	return &browserModel{tbl: tbl, colors: colors}
+	height := min(max(len(items), 1), maxVisibleRows) + 1 // and the header
+	return &browserModel{tbl: table.New(cols, items, height), th: theme.Resolve(th, dark)}
 }
 
 // palette is one block per colour that tells themes apart: accent, selection,
-// border, dim, success and danger, as t resolves on this background. The
-// blocks' resets end the cursor row's highlight, so the column goes last.
+// border, dim, success and danger, as t resolves on this background.
 func palette(t theme.Theme, dark bool) string {
 	c := theme.ResolveColors(t, dark)
 	blocks := make([]string, 0, 6)
@@ -100,46 +60,9 @@ func palette(t theme.Theme, dark bool) string {
 	return strings.Join(blocks, " ")
 }
 
-// tableStyles keeps Padding off Selected: renderRow pads each cell, then
-// wraps the row in Selected, so padding there widens the cursor row. Selected
-// gets a Background too, since a text-color-only cue is easy to miss on a wide row.
-func tableStyles(c theme.Colors) table.Styles {
-	selected := lipgloss.NewStyle().Bold(true).
-		Background(lipgloss.Color(c.Selection)).
-		Foreground(contrastText(c.Selection))
-	return table.Styles{
-		Header: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color(c.Border)).Padding(0, 1),
-		// Cell carries no Foreground: its reset code would cut Selected's
-		// Background at every cell boundary, highlighting only the first column.
-		// Padding emits no ANSI codes, so the highlight spans the whole row.
-		Cell:     lipgloss.NewStyle().Padding(0, 1),
-		Selected: selected,
-	}
-}
-
-// contrastText picks black or white text readable on bg by perceived
-// luminance, since Selection ranges from near-black to pale cream across
-// themes. Non-hex values (ANSI codes such as Terminal's) get white.
-func contrastText(bg string) color.Color {
-	if len(bg) == 7 && bg[0] == '#' {
-		r, rErr := strconv.ParseInt(bg[1:3], 16, 64)
-		g, gErr := strconv.ParseInt(bg[3:5], 16, 64)
-		b, bErr := strconv.ParseInt(bg[5:7], 16, 64)
-		if rErr == nil && gErr == nil && bErr == nil {
-			luminance := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
-			if luminance > 140 {
-				return lipgloss.Color("#000000")
-			}
-		}
-	}
-	return lipgloss.Color("#FFFFFF")
-}
-
 func (m *browserModel) Init() tea.Cmd { return nil }
 
-// Update handles navigation directly via table.Model's MoveUp/MoveDown
-// rather than forwarding to table.Model.Update - one less layer (and its
-// focus-state gate) between a keypress and the cursor actually moving.
+// Update quits on q or ctrl+c and hands every other key to the table.
 func (m *browserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	keyMsg, ok := msg.(tea.KeyPressMsg)
 	if !ok {
@@ -148,11 +71,8 @@ func (m *browserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch keyMsg.String() {
 	case "q", "ctrl+c":
 		return m, tea.Quit
-	case "up":
-		m.tbl.MoveUp(1)
-	case "down":
-		m.tbl.MoveDown(1)
 	}
+	m.tbl, _ = m.tbl.Update(keyMsg)
 	return m, nil
 }
 
@@ -161,8 +81,9 @@ func (m *browserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *browserModel) View() tea.View {
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color(m.colors.Border))
-	return tea.NewView(box.Render(m.tbl.View()))
+		BorderForeground(lipgloss.Color(m.th.Colors.Border)).
+		Padding(0, 1)
+	return tea.NewView(box.Render(m.tbl.View(m.th, wide)))
 }
 
 // List writes the built-in themes, one line per category: what --list-themes

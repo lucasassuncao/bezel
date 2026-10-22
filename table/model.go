@@ -160,7 +160,7 @@ func (m Model[T]) clamp() Model[T] {
 
 // View is the header and the rows in its window, width cells wide. Columns
 // are sized over every row, not the ones shown, so scrolling never moves
-// them. The cursor row drops its cells' own colours to wear the cursor's.
+// them. On the cursor row a cell with no colour of its own wears the cursor's.
 func (m Model[T]) View(th theme.Resolved, width int) string {
 	if m.height <= 0 {
 		return ""
@@ -177,7 +177,7 @@ func (m Model[T]) View(th theme.Resolved, width int) string {
 	start, end, below := w.Bounds(len(m.items))
 	for i := start; i < end; i++ {
 		if i == w.Cursor {
-			lines = append(lines, th.Cursor.Render(marker+Row(widths, plain(cells[i]))))
+			lines = append(lines, th.Cursor.Render(marker)+Row(widths, cursorCells(cells[i], th)))
 		} else {
 			lines = append(lines, pad+Row(widths, cells[i]))
 		}
@@ -188,11 +188,15 @@ func (m Model[T]) View(th theme.Resolved, width int) string {
 	return strings.Join(lines, "\n")
 }
 
-// plain is cells without their escapes, which would end the cursor's style.
-func plain(cells []string) []string {
+// cursorCells paints each plain cell in the cursor's style, one by one, so a
+// coloured cell keeps its colour and its reset ends nothing but itself.
+func cursorCells(cells []string, th theme.Resolved) []string {
 	out := make([]string, len(cells))
 	for i, c := range cells {
-		out[i] = ansi.Strip(c)
+		out[i] = c
+		if c != "" && ansi.Strip(c) == c {
+			out[i] = th.Cursor.Render(c)
+		}
 	}
 	return out
 }

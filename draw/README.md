@@ -46,7 +46,6 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func Tail\(lines \[\]string, height int\) \[\]string](<#Tail>)
 - [func TitledPanel\(r layout.Rect, title, right, body string, st PanelStyle\) string](<#TitledPanel>)
 - [func Truncate\(s string, width int\) string](<#Truncate>)
-- [func ViewportGutter\(style lipgloss.Style\) viewport.GutterFunc](<#ViewportGutter>)
 - [func Width\(s string\) int](<#Width>)
 - [func WithCaret\(in textinput.Model, every time.Duration\) textinput.Model](<#WithCaret>)
 - [func Wrap\(s string, width int\) \[\]string](<#Wrap>)
@@ -366,15 +365,6 @@ func Truncate(s string, width int) string
 ```
 
 Truncate cuts s to width cells with an ellipsis. width \<= 0 leaves s alone.
-
-<a name="ViewportGutter"></a>
-## func [ViewportGutter](<https://github.com/lucasassuncao/bezel/blob/main/draw/gutter.go#L11>)
-
-```go
-func ViewportGutter(style lipgloss.Style) viewport.GutterFunc
-```
-
-ViewportGutter is a viewport line\-number column with the same shape as Gutter, so a viewport and a NumberLines block line up side by side. The viewport probes the width with a zero context, hence the fixed format.
 
 <a name="Width"></a>
 ## func [Width](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L130>)

@@ -17,7 +17,7 @@ Package themebrowser provides a small, inline \(not full\-screen\) terminal tabl
 
 
 <a name="BrowseInTerminal"></a>
-## func [BrowseInTerminal](<https://github.com/lucasassuncao/bezel/blob/main/themebrowser/browser.go#L183>)
+## func [BrowseInTerminal](<https://github.com/lucasassuncao/bezel/blob/main/themebrowser/browser.go#L104>)
 
 ```go
 func BrowseInTerminal(t ...theme.Theme) error
@@ -26,7 +26,7 @@ func BrowseInTerminal(t ...theme.Theme) error
 BrowseInTerminal renders an inline, scrollable table \(↑/↓, q/ctrl\+c to quit\) of every built\-in theme and its theme.Categories\(\) category. An optional theme.Theme sets colors; without a terminal on stdout it Lists.
 
 <a name="List"></a>
-## func [List](<https://github.com/lucasassuncao/bezel/blob/main/themebrowser/browser.go#L170>)
+## func [List](<https://github.com/lucasassuncao/bezel/blob/main/themebrowser/browser.go#L91>)
 
 ```go
 func List(w io.Writer) error
