@@ -89,7 +89,7 @@ Down@200ms 6
 Sleep 800ms
 PageDown
 Sleep 1s
-Type "G"
+PageDown@500ms 6
 Wait+Screen /1.284s/
 Sleep 1.5s
 Escape

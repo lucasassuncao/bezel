@@ -100,3 +100,19 @@ func TestPagerScrollsOnTheKeysItWasGiven(t *testing.T) {
 	o, _ = o.Update(press("n"))
 	require.Equal(t, 1, o.(Pager).Offset())
 }
+
+func TestPagerPansALongLine(t *testing.T) {
+	body := layout.Rect{W: 60, H: 18}
+	o := NewPager("t", strings.Repeat("x", 100)+"END", theme.Resolved{}).Resize(body)
+	require.NotContains(t, ansi.Strip(o.View(body)), "END")
+	for range 20 {
+		o, _ = o.Update(tea.KeyPressMsg{Code: tea.KeyRight})
+	}
+	require.Contains(t, ansi.Strip(o.View(body)), "END")
+}
+
+func TestPagerScrollsOnTheWheel(t *testing.T) {
+	body := layout.Rect{W: 60, H: 18}
+	o, _ := NewPager("Output", numbered(40), theme.Resolved{}).Resize(body).Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.Equal(t, 3, o.(Pager).Offset())
+}

@@ -177,8 +177,8 @@ func TestDialogLegendsNameTheirKeys(t *testing.T) {
 		"[←/→] choose · [enter] pick · [y/n] answer · [esc] cancel": NewConfirm("t", "m", nil, th),
 		"[↑/↓] choose · [enter] pick · [esc] cancel":                NewPick("t", []string{"a"}, nil, th),
 		"[esc] close": NewHelp(nil, th),
-		"[↑/↓] scroll · [pgup/pgdn] page · [esc] close": NewPager("t", "x", th),
-		"[enter] confirm · [esc] cancel":                NewPrompt("t", nil, th),
+		"[↑/↓] scroll · [←/→] pan · [pgup/pgdn] page · [esc] close": NewPager("t", "x", th),
+		"[enter] confirm · [esc] cancel":                            NewPrompt("t", nil, th),
 	} {
 		require.Equal(t, want, hint(o))
 	}

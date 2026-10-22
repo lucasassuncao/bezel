@@ -744,9 +744,9 @@ type Overlay interface {
 ```
 
 <a name="Pager"></a>
-## type [Pager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L17-L24>)
+## type [Pager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L20-L26>)
 
-Pager is a titled block of text taller than a dialog: a command's output, a report. The arrows, pgup/pgdown, home and end scroll it; esc, q or enter closes it.
+Pager is a titled block of text taller than a dialog: a command's output, a report. The arrows, pgup/pgdown, home and end scroll it, ← and → pan a long line, and the wheel scrolls; esc, q or enter closes it.
 
 ```go
 type Pager struct {
@@ -755,7 +755,7 @@ type Pager struct {
 ```
 
 <a name="NewPager"></a>
-### func [NewPager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L52>)
+### func [NewPager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L45>)
 
 ```go
 func NewPager(title, text string, th theme.Resolved) Pager
@@ -764,7 +764,7 @@ func NewPager(title, text string, th theme.Resolved) Pager
 NewPager shows text from its first line. CRLF reads as LF and trailing blank lines are dropped.
 
 <a name="Pager.Legend"></a>
-### func \(Pager\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L113>)
+### func \(Pager\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L86>)
 
 ```go
 func (p Pager) Legend() []legend.Entry
@@ -773,7 +773,7 @@ func (p Pager) Legend() []legend.Entry
 
 
 <a name="Pager.Offset"></a>
-### func \(Pager\) [Offset](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L73>)
+### func \(Pager\) [Offset](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L76>)
 
 ```go
 func (p Pager) Offset() int
@@ -782,16 +782,16 @@ func (p Pager) Offset() int
 Offset is the index of the first line shown.
 
 <a name="Pager.Resize"></a>
-### func \(Pager\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L64>)
+### func \(Pager\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L63>)
 
 ```go
 func (p Pager) Resize(body layout.Rect) Overlay
 ```
 
-Resize makes a page as many lines as fit in body.
+Resize sizes the viewport to what fits in body.
 
 <a name="Pager.Update"></a>
-### func \(Pager\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L75>)
+### func \(Pager\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L78>)
 
 ```go
 func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -800,7 +800,7 @@ func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pager.View"></a>
-### func \(Pager\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L119>)
+### func \(Pager\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L91>)
 
 ```go
 func (p Pager) View(body layout.Rect) string
@@ -809,7 +809,7 @@ func (p Pager) View(body layout.Rect) string
 
 
 <a name="Pager.WithKeys"></a>
-### func \(Pager\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L58>)
+### func \(Pager\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L56>)
 
 ```go
 func (p Pager) WithKeys(k PagerKeys) Pager
@@ -827,24 +827,25 @@ func (p Pager) WithKind(k Kind) Pager
 WithKind tints the pager for what its text reports, such as a failed run.
 
 <a name="PagerKeys"></a>
-## type [PagerKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L28-L30>)
+## type [PagerKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L29-L32>)
 
-PagerKeys are the bindings a Pager scrolls and closes on besides esc. Down and PageDown have no help of their own: Up's and PageUp's name both.
+PagerKeys are the viewport's scrolling keys, and Close besides esc.
 
 ```go
 type PagerKeys struct {
-    Up, Down, PageUp, PageDown, Top, Bottom, Close key.Binding
+    viewport.Keys
+    Close key.Binding
 }
 ```
 
 <a name="DefaultPagerKeys"></a>
-### func [DefaultPagerKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L34>)
+### func [DefaultPagerKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L35>)
 
 ```go
 func DefaultPagerKeys() PagerKeys
 ```
 
-DefaultPagerKeys are the arrows and j/k, pgup/pgdown with b, f and space, home/end with g/G, and q or enter to close.
+DefaultPagerKeys are the viewport's own, and q or enter to close.
 
 <a name="Pick"></a>
 ## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L114-L122>)
