@@ -92,13 +92,18 @@ go run ./examples/demo
 **Inside the panes**
 
 - [`list`](list): a cursor list with sections and a `/` filter.
+- [`paginator`](paginator): pages as dots or "2/5", and the slice of items each page shows.
 - [`tree`](tree): an expandable tree, generic over your node type.
 - [`table`](table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header.
 - [`form`](form): `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
 - [`input`](input): a one-line text field with readline keys, a placeholder and a mask for secrets.
 - [`textbox`](textbox): a multi-line text field with line numbers.
+- [`cursor`](cursor): a caret that blinks, stays or hides, for fields of your own.
 - [`browser`](browser): a list on the left, the selected item's detail on the right.
 - [`progress`](progress): `Bar`, `Line`, `Smooth`, `Meter` and `Stepper`, each one row.
+- [`spinner`](spinner): twelve spinners and your own frames, each ticking on its own.
+- [`timer`](timer): a countdown that says when time is up.
+- [`stopwatch`](stopwatch): time counted up, paused and reset.
 - [`chart`](chart): `Area` and `Spark` charts of a run of numbers, and labelled `Bars` side by side.
 - [`icon`](icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
 

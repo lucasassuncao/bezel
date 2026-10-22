@@ -15,12 +15,12 @@ The shell keeps what it is handed by value too: `SetInput` takes the status row'
 
 ## The theme
 
-A component that draws takes a `theme.Resolved`, never loose lipgloss styles. Where it goes depends on who calls `View`:
+A component that draws takes a `theme.Resolved`; loose lipgloss styles reach it only through `WithStyles`, below. Where the theme goes depends on who calls `View`:
 
 | Who calls `View` | Where the theme goes | Packages |
 | --- | --- | --- |
-| bezel, through a fixed interface (`overlay.Overlay`, `form.Field`) | the constructor's last parameter | `overlay`, `form`, `palette`, `textbox`, `input` |
-| the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model` |
+| bezel, through a fixed interface (`overlay.Overlay`, `form.Field`), or a field that needs the theme before it draws (a caret's blink pace) | the constructor's last parameter | `overlay`, `form`, `palette`, `textbox`, `input`, `cursor` |
+| the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch` |
 | nobody: it is a plain function | after the data it draws | `progress`, `chart`, `inline`, `icon.Set.Render` |
 | `shell` | `shell.Config.Theme`, replaced with `SetTheme` | `shell` |
 
@@ -28,13 +28,22 @@ A component that draws takes a `theme.Resolved`, never loose lipgloss styles. Wh
 - `draw`, `legend` and `overlay.Box` sit below the theme and take the lipgloss style they paint with: `theme` imports them, so they cannot import it.
 - How an input looks travels with the theme too, the caret's blink included: `Resolved.CaretBlink`, zero for `draw.DefaultBlink`. Tests shrink it there; there is no package variable to set.
 
+## Styles
+
+The theme sets how everything looks; a component's own styles let an app recolour that one component without touching the theme.
+
+- `Styles` holds one lipgloss style per part the component paints; `XStyles` where a package has several components.
+- `DefaultStyles(th)` derives them from the theme, and is the only place that does.
+- `WithStyles(edit)` stores `edit func(Styles) Styles` and applies it to `DefaultStyles(th)` whenever the component has a theme: when built, on `SetTheme`, or in `View(th, ...)`. The app's change outlives a theme switch. A second `WithStyles` replaces the first edit.
+- A part that no role in `theme.Resolved` fits gets a new role there, derived in `buildDerivedStyles`, never a colour written into the component.
+
 ## Three shapes of Update
 
 | Shape | Who | Why |
 | --- | --- | --- |
 | `Update(tea.Msg) (T, bool, tea.Cmd)` | `shell.Shell`, `overlay.Stack` | They route: `handled` false means the message is still the app's. |
-| `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model` | They only move a cursor. The `Action` says what a key did (`list.Chosen`, `tree.Expanded`), the app decides what it means, and they never produce a command. |
-| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model` and `animation.Tween` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
+| `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model`, `paginator` | They only move a cursor. The `Action` says what a key did (`list.Chosen`, `tree.Expanded`), the app decides what it means, and they never produce a command. |
+| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model`, `cursor.Model`, `spinner.Model`, `timer.Model`, `stopwatch.Model` and `animation.Tween` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
 
 A new component picks the row whose "Why" fits it, not a fourth shape.
 

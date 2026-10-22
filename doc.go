@@ -20,8 +20,14 @@
 //     Toggle and Button, stacked in a Form that moves focus with tab.
 //   - [github.com/lucasassuncao/bezel/input]: a one-line text field with
 //     readline keys, a placeholder and a mask for secrets.
+//   - [github.com/lucasassuncao/bezel/cursor]: a text field's caret on its own,
+//     blinking, steady or hidden.
 //   - [github.com/lucasassuncao/bezel/progress]: Bar, Line and Stepper, how far
 //     along something is in one row.
+//   - [github.com/lucasassuncao/bezel/spinner]: twelve spinners or frames of
+//     your own, each ticking on its own.
+//   - [github.com/lucasassuncao/bezel/stopwatch]: time counted up, paused and
+//     reset.
 //   - [github.com/lucasassuncao/bezel/icon]: one set of state marks, Unicode or
 //     ASCII, in the theme's colours.
 //   - [github.com/lucasassuncao/bezel/legend]: key entries filtered by capability
@@ -32,12 +38,16 @@
 //     matching, completion and arguments.
 //   - [github.com/lucasassuncao/bezel/list]: a cursor list with section headings
 //     and a / filter.
+//   - [github.com/lucasassuncao/bezel/paginator]: pages over a run of items,
+//     drawn as dots or as "2/5".
 //   - [github.com/lucasassuncao/bezel/tree]: a flat depth-first tree with
 //     expand/collapse, generic over the node type.
 //   - [github.com/lucasassuncao/bezel/table]: sizes columns to their contents
 //     within a width, and a cursor over rows under a fixed header.
 //   - [github.com/lucasassuncao/bezel/textbox]: a multi-line text field with
 //     numbered lines that wrap at its width.
+//   - [github.com/lucasassuncao/bezel/timer]: a countdown that says when time
+//     is up.
 //   - [github.com/lucasassuncao/bezel/browser]: a pick-from-a-list screen, labels
 //     left and the selected item's detail right.
 //   - [github.com/lucasassuncao/bezel/animation]: an eased integer tween for

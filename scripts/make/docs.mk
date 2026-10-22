@@ -8,6 +8,7 @@ DOC_PACKAGES := \
 	./animation/... \
 	./browser/... \
 	./chart/... \
+	./cursor/... \
 	./draw/... \
 	./form/... \
 	./icon/... \
@@ -18,13 +19,17 @@ DOC_PACKAGES := \
 	./legend/... \
 	./list/... \
 	./overlay/... \
+	./paginator/... \
 	./palette/... \
 	./progress/... \
 	./shell/... \
+	./spinner/... \
+	./stopwatch/... \
 	./table/... \
 	./textbox/... \
 	./theme/... \
 	./themebrowser/... \
+	./timer/... \
 	./tree/...
 
 ## Generate documentation with gomarkdoc

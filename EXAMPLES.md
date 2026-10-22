@@ -70,6 +70,14 @@ Rows under section headings the cursor skips, `enter` showing the payload a row 
 
 ![list](examples/list/list.gif)
 
+### Paginator
+
+Source: [`examples/paginator/main.go`](examples/paginator/main.go)
+
+Forty-two items, eight to a page, with the page under them. `←` and `→` turn the page, as do `pgup`/`pgdown` and `h`/`l`, and `t` switches between "2/6" and a row of dots.
+
+![paginator](examples/paginator/paginator.gif)
+
 ### Tree
 
 Source: [`examples/tree/main.go`](examples/tree/main.go)
@@ -102,6 +110,14 @@ A multi-line value with its lines numbered. Every key is text, so the app quits 
 
 ![textbox](examples/textbox/textbox.gif)
 
+### Cursor
+
+Source: [`examples/cursor/main.go`](examples/cursor/main.go)
+
+Three cursors, one per mode, each on the first letter of a word. `tab` moves the focus down the rows, and `m` turns the focused cursor from blinking to steady to hidden and around again.
+
+![cursor](examples/cursor/cursor.gif)
+
 ### Browser
 
 Source: [`examples/browser/main.go`](examples/browser/main.go)
@@ -117,6 +133,30 @@ Source: [`examples/progress/main.go`](examples/progress/main.go)
 A count that fills on its own, as a `Line` and as a bare `Bar`, and a wizard's stages in a `Stepper`. `n` and `p` walk the stages; the copy drawn at 30 columns folds to "Step 2 of 4". `r` restarts the count.
 
 ![progress](examples/progress/progress.gif)
+
+### Spinner
+
+Source: [`examples/spinner/main.go`](examples/spinner/main.go)
+
+The twelve presets side by side, each turning at its own pace. `space` stops them all and starts them again.
+
+![spinner](examples/spinner/spinner.gif)
+
+### Timer
+
+Source: [`examples/timer/main.go`](examples/timer/main.go)
+
+Ten seconds counted down a tenth at a time, written to a tenth with `WithFormat`. `space` stops and resumes it, `r` starts it over, and the status row says when time is up.
+
+![timer](examples/timer/timer.gif)
+
+### Stopwatch
+
+Source: [`examples/stopwatch/main.go`](examples/stopwatch/main.go)
+
+Time counted up a tenth at a time. `space` starts and stops it, and `r` puts it back to zero, running or not.
+
+![stopwatch](examples/stopwatch/stopwatch.gif)
 
 ### Icon
 
