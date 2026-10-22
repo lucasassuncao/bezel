@@ -94,7 +94,7 @@ func Check(actions ...Action) error
 Check reports every key two actions share, display\-only ones included. Apps call it in a test over each screen's set; at runtime the first match runs.
 
 <a name="IsStatusExpiry"></a>
-## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L130>)
+## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L134>)
 
 ```go
 func IsStatusExpiry(msg tea.Msg) bool
@@ -453,7 +453,7 @@ func (s Shell) Busy(text string) (Shell, tea.Cmd)
 Busy shows a spinner and text on the status row until Idle; a banner set meanwhile shows over it and busy returns when it expires. The command starts the spinner, and is nil when it is already spinning.
 
 <a name="Shell.ClearInput"></a>
-### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L150>)
+### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L154>)
 
 ```go
 func (s Shell) ClearInput() Shell
@@ -462,7 +462,7 @@ func (s Shell) ClearInput() Shell
 ClearInput takes the input off the status row and gives the keys back.
 
 <a name="Shell.ClearStatus"></a>
-### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L136>)
+### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L140>)
 
 ```go
 func (s Shell) ClearStatus() Shell
@@ -516,7 +516,7 @@ func (s Shell) Idle() Shell
 Idle ends Busy. A banner on the status row is left alone.
 
 <a name="Shell.Input"></a>
-### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L156>)
+### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L160>)
 
 ```go
 func (s Shell) Input() (input.Model, bool)
@@ -597,7 +597,7 @@ func (s Shell) SetFocus(name string) Shell
 SetFocus moves focus to a leaf of the layout. Unknown names are ignored, and a leaf the layout dropped hands focus to one on screen.
 
 <a name="Shell.SetInput"></a>
-### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L144>)
+### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L148>)
 
 ```go
 func (s Shell) SetInput(m input.Model) Shell
@@ -624,7 +624,7 @@ func (s Shell) SetLegendLines(n int) Shell
 SetLegendLines changes how many rows the legend keeps, 1 or more.
 
 <a name="Shell.SetStatus"></a>
-### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L111>)
+### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L115>)
 
 ```go
 func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, tea.Cmd)
@@ -705,7 +705,7 @@ func (s Shell) Status() string
 Status is the banner text currently set, empty when none.
 
 <a name="Shell.StatusExpiry"></a>
-### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L126>)
+### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L130>)
 
 ```go
 func (s Shell) StatusExpiry() tea.Msg
@@ -714,7 +714,7 @@ func (s Shell) StatusExpiry() tea.Msg
 StatusExpiry is the message that would clear the current status, for a test harness that drops timers and delivers them itself.
 
 <a name="Shell.StatusLevel"></a>
-### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L122>)
+### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L126>)
 
 ```go
 func (s Shell) StatusLevel() Level

@@ -137,7 +137,7 @@ func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 	}
 	var cmd tea.Cmd
 	p.input, cmd = p.input.Update(msg)
-	return p, ToTop(cmd) // the caret's blink comes back to this prompt
+	return p, cmd
 }
 
 // Legend offers enter only when it would do something.

@@ -91,7 +91,7 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd) {
 		// A paste: the input's own business.
 		var cmd tea.Cmd
 		m.input, cmd = m.input.Update(msg)
-		return m, overlay.ToTop(cmd)
+		return m, cmd
 	}
 	switch {
 	case key.Matches(k, m.keys.Run):
@@ -107,7 +107,7 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd) {
 	m.input, cmd = m.input.Update(k)
 	// The list under a pick changed, and the last error was about the old line.
 	m.cursor, m.err = -1, ""
-	return m, overlay.ToTop(cmd) // the caret's blink comes back to the palette
+	return m, cmd
 }
 
 func (m Model) Legend() []legend.Entry {

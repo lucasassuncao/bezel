@@ -437,6 +437,10 @@ func (m Model) caretRow() int {
 	return rows + segmentOf(segments(l, width), l.Cursor())
 }
 
+// Rows is how many rows the text takes at the width set, its wrapped lines
+// counted: a form that grows the field sets its height from it.
+func (m Model) Rows() int { return m.rowCount() }
+
 // rowCount is how many wrapped rows the text takes.
 func (m Model) rowCount() int {
 	n, width := 0, m.textWidth()

@@ -198,3 +198,10 @@ func FuzzTextboxStaysInItsBox(f *testing.F) {
 		}
 	})
 }
+
+// A form grows the field from Rows: wrapped lines count, as the field draws them.
+func TestRowsCountsTheWrappedRows(t *testing.T) {
+	m := New(th()).SetValue("alpha beta gamma\nend")
+	require.Equal(t, 2, m.Rows(), "no width: one row a line")
+	require.Equal(t, 3, m.SetWidth(draw.GutterWidth+11).Rows())
+}

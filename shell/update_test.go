@@ -103,6 +103,21 @@ func TestStatusInputTakesAPasteAndItsBlink(t *testing.T) {
 	require.False(t, handled)
 }
 
+// A dialog's caret blinks through the shell; a blink no field of the shell's
+// armed belongs to an input the app drives itself.
+func TestABlinkReachesTheFieldThatArmedIt(t *testing.T) {
+	fast := theme.Resolved{CaretBlink: time.Nanosecond}
+	s := newShell().Push(overlay.NewPrompt("name", nil, fast))
+	s, _, cmd := s.Update(press("a"))
+	_, handled, next := s.Update(cmd())
+	require.True(t, handled)
+	require.NotNil(t, next, "the prompt's blink re-arms")
+
+	_, own := input.New(fast).Focus()
+	_, handled, _ = s.Update(own())
+	require.False(t, handled, "the app's own field")
+}
+
 func TestStatusInputIsAValue(t *testing.T) {
 	in, _ := input.New(theme.Resolved{}).Focus()
 	before := newShell().SetInput(in)

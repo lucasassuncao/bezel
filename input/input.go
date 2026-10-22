@@ -90,6 +90,15 @@ func (m Model) WithWidth(w int) Model {
 	return m.scroll()
 }
 
+// SetWidth changes the width after a resize, keeping the caret in view.
+func (m Model) SetWidth(w int) Model { return m.WithWidth(w) }
+
+// SetTheme repaints the field after the terminal's background was learned.
+func (m Model) SetTheme(th theme.Resolved) Model {
+	m.th = th
+	return m
+}
+
 // WithMask draws every character as mask, for a password; word moves and
 // kills then run to the ends, giving away no word boundary.
 func (m Model) WithMask(mask rune) Model {
@@ -136,6 +145,16 @@ func (m Model) Focus() (Model, tea.Cmd) {
 func (m Model) Blur() Model {
 	m.focused = false
 	return m
+}
+
+// Blink is the command that keeps a focused caret blinking, for a host that
+// focused the field before it could hand on a command; nil while blurred.
+func (m Model) Blink() tea.Cmd {
+	if !m.focused {
+		return nil
+	}
+	msg := BlinkMsg{id: m.id, tag: m.tag}
+	return tea.Tick(draw.Blink(m.th.CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
 // Update edits on a key or a paste while focused, and flips the caret on its

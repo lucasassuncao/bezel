@@ -160,3 +160,22 @@ func FuzzInputNeverOutgrowsItsWidth(f *testing.F) {
 		}
 	})
 }
+
+func TestSetWidthAndSetThemeChangeALiveField(t *testing.T) {
+	m := focused().WithValue("abcdefgh").SetWidth(4)
+	require.Equal(t, "fgh ", ansi.Strip(m.View()), "narrowed, the caret stays in view")
+
+	plain := theme.Resolve(theme.Plain, true)
+	m = New(theme.Resolved{}).WithPlaceholder("x").SetTheme(plain)
+	require.Equal(t, plain.Muted.Render("x"), m.View(), "drawn in the theme learned late")
+}
+
+func TestBlinkRestartsAFocusedCaretOnly(t *testing.T) {
+	require.Nil(t, New(th).Blink(), "blurred: nothing to blink")
+	short := th
+	short.CaretBlink = time.Nanosecond
+	m, _ := New(short).Focus()
+	m, next := m.Update(m.Blink()())
+	require.NotNil(t, next, "the tick is the field's own")
+	require.NotContains(t, m.View(), short.Caret.Render(" "))
+}

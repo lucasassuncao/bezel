@@ -13,7 +13,6 @@ import (
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
-	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -160,12 +159,10 @@ func TestSetItemsKeepsTheLineAndClampsThePick(t *testing.T) {
 	require.NotPanics(t, func() { m.View(layout.Rect{W: 80, H: 20}) })
 }
 
-// The caret's blink, at the theme's pace, comes back to the palette on top.
-func TestTheCaretsBlinkReturnsToThePalette(t *testing.T) {
+// The caret's blink comes back bare, at the theme's pace; the shell routes it.
+func TestTheCaretBlinksAtTheThemesPace(t *testing.T) {
 	_, cmd := New(items(), theme.Resolved{CaretBlink: time.Nanosecond}).Update(tea.KeyPressMsg{Code: 'c', Text: "c"})
-	top, ok := cmd().(overlay.TopMsg)
-	require.True(t, ok)
-	require.IsType(t, input.BlinkMsg{}, top.Msg)
+	require.IsType(t, input.BlinkMsg{}, cmd())
 }
 
 func TestTheLegendNamesThePalettesKeys(t *testing.T) {

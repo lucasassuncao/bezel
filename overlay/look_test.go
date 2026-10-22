@@ -53,11 +53,13 @@ func TestFilePickerWithKindRepaintsEntries(t *testing.T) {
 	require.Contains(t, o.View(layout.Rect{W: 80, H: 30}), danger.Render(">"))
 }
 
-// The caret's blink, at the theme's pace, comes back to the prompt on top.
-func TestPromptCaretsBlinkReturnsToThePrompt(t *testing.T) {
+// The caret's blink comes back bare, at the theme's pace: a host that drives
+// the prompt hands it on, and the shell routes it to the dialog that armed it.
+func TestPromptCaretBlinksAtTheThemesPace(t *testing.T) {
 	th := theme.Resolved{CaretBlink: time.Nanosecond}
-	_, cmd := NewPrompt("t", nil, th).Update(tea.KeyPressMsg{Code: 'a', Text: "a"})
-	top, ok := cmd().(TopMsg)
-	require.True(t, ok)
-	require.IsType(t, input.BlinkMsg{}, top.Msg)
+	p, cmd := NewPrompt("t", nil, th).Update(tea.KeyPressMsg{Code: 'a', Text: "a"})
+	blink := cmd()
+	require.IsType(t, input.BlinkMsg{}, blink)
+	_, next := p.Update(blink)
+	require.NotNil(t, next, "the prompt's own blink re-arms")
 }

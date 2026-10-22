@@ -26,6 +26,7 @@ Package textbox is a multi\-line text field: its lines numbered in draw's gutter
   - [func \(m Model\) Line\(\) int](<#Model.Line>)
   - [func \(m Model\) LineCount\(\) int](<#Model.LineCount>)
   - [func \(m Model\) MoveTo\(line, col int\) Model](<#Model.MoveTo>)
+  - [func \(m Model\) Rows\(\) int](<#Model.Rows>)
   - [func \(m Model\) SetHeight\(h int\) Model](<#Model.SetHeight>)
   - [func \(m Model\) SetTheme\(th theme.Resolved\) Model](<#Model.SetTheme>)
   - [func \(m Model\) SetValue\(s string\) Model](<#Model.SetValue>)
@@ -175,6 +176,15 @@ func (m Model) MoveTo(line, col int) Model
 
 MoveTo puts the caret on line at column col, both kept within the text, and scrolls it into view.
 
+<a name="Model.Rows"></a>
+### func \(Model\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L442>)
+
+```go
+func (m Model) Rows() int
+```
+
+Rows is how many rows the text takes at the width set, its wrapped lines counted: a form that grows the field sets its height from it.
+
 <a name="Model.SetHeight"></a>
 ### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L154>)
 
@@ -230,7 +240,7 @@ func (m Model) Value() string
 Value is the text, its lines joined by "\\n".
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L502>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L506>)
 
 ```go
 func (m Model) View() string

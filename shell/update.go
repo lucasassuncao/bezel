@@ -71,6 +71,10 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		return s, true, cmd
 	}
 
+	if b, ok := msg.(input.BlinkMsg); ok {
+		return s.blink(b)
+	}
+
 	if s.overlays.Len() > 0 {
 		switch msg.(type) {
 		case tea.KeyPressMsg, tea.PasteMsg:
@@ -88,7 +92,7 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 
 	if s.typing {
 		switch msg.(type) {
-		case tea.KeyPressMsg, tea.PasteMsg, input.BlinkMsg:
+		case tea.KeyPressMsg, tea.PasteMsg:
 			var cmd tea.Cmd
 			s.input, cmd = s.input.Update(msg)
 			return s, true, cmd
@@ -154,3 +158,22 @@ func (s Shell) ClearInput() Shell {
 
 // Input is the status row's input as edited so far, and false when none is set.
 func (s Shell) Input() (input.Model, bool) { return s.input, s.typing }
+
+// blink hands a caret's blink to the field that armed it: an open dialog's
+// or the status row's, which re-arm it. A blink neither knows is the app's,
+// for a field it drives itself, so handled is false.
+func (s Shell) blink(msg input.BlinkMsg) (Shell, bool, tea.Cmd) {
+	if s.overlays.Len() > 0 {
+		if next, _, cmd := s.overlays.Update(msg); cmd != nil {
+			s.overlays = next
+			return s, true, cmd
+		}
+	}
+	if s.typing {
+		if in, cmd := s.input.Update(msg); cmd != nil {
+			s.input = in
+			return s, true, cmd
+		}
+	}
+	return s, false, nil
+}
