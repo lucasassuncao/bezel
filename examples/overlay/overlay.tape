@@ -9,9 +9,10 @@ Require ttyd
 Require ffmpeg
 
 Set Shell         "powershell"
-Set FontSize      14
-Set Width         1200
-Set Height        700
+Set FontSize      16
+Set FontFamily    "JetBrainsMono Nerd Font"
+Set Width         1000
+Set Height        640
 Set Theme         "Catppuccin Mocha"
 Set Framerate     30
 Set PlaybackSpeed 1.0
@@ -30,12 +31,13 @@ Enter
 Wait
 Type "clear"
 Enter
-Show
-
-Type ".\overlay.exe"
-Sleep 400ms
+# From examples/, so the file picker opens on a listing only tracked files make.
+Type "cd examples"
+Enter
+Type "..\overlay.exe"
 Enter
 Wait+Screen /Confirm/
+Show
 Sleep 1.2s
 
 # -- Alert: any key closes it ----------------------------------------------------------
@@ -99,11 +101,6 @@ Down
 Enter
 Wait+Screen /Open a file/
 Sleep 1.5s
-Down@150ms 9
-Sleep 600ms
-Right
-Wait+Screen /demo/
-Sleep 1.2s
 Down@400ms 2
 Sleep 600ms
 Right
@@ -115,12 +112,15 @@ Enter
 Wait+Screen /picked main.go/
 Sleep 1.5s
 
+Hide
 Type "q"
 Sleep 1s
 
 # -- Clean up, off camera ---------------------------------------------------------
 
 Hide
+Type "cd .."
+Enter
 Type "Remove-Item overlay.exe"
 Enter
 Wait

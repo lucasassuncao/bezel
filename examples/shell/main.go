@@ -55,7 +55,7 @@ func newModel() model {
 		Theme:  theme.Resolve(theme.Mint, true),
 		Title:  "shell",
 		Actions: []shell.Action{
-			shell.Help(), shell.ChangeTab(), shell.ChangePane(), shell.Move(), shell.Quit(),
+			shell.Help(), shell.ChangeTab(), shell.Move(), shell.Quit(),
 		},
 	})
 	return model{sh: sh, tabs: tabs}

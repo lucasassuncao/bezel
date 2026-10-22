@@ -8,9 +8,10 @@ Require ttyd
 Require ffmpeg
 
 Set Shell         "powershell"
-Set FontSize      14
-Set Width         1200
-Set Height        700
+Set FontSize      16
+Set FontFamily    "JetBrainsMono Nerd Font"
+Set Width         1000
+Set Height        640
 Set Theme         "Catppuccin Mocha"
 Set Framerate     30
 Set PlaybackSpeed 1.0
@@ -29,12 +30,10 @@ Enter
 Wait
 Type "clear"
 Enter
-Show
-
 Type ".\list.exe"
-Sleep 400ms
 Enter
 Wait+Screen /Fruit/
+Show
 Sleep 1.5s
 
 # -- Across a section heading --------------------------------------------------------
@@ -52,6 +51,7 @@ Sleep 2s
 Escape
 Sleep 1.5s
 
+Hide
 Type "q"
 Sleep 1s
 

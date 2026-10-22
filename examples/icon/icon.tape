@@ -8,9 +8,10 @@ Require ttyd
 Require ffmpeg
 
 Set Shell         "powershell"
-Set FontSize      14
-Set Width         1200
-Set Height        700
+Set FontSize      16
+Set FontFamily    "JetBrainsMono Nerd Font"
+Set Width         1000
+Set Height        900
 Set Theme         "Catppuccin Mocha"
 Set Framerate     30
 Set PlaybackSpeed 1.0
@@ -29,12 +30,10 @@ Enter
 Wait
 Type "clear"
 Enter
-Show
-
 Type ".\icon.exe"
-Sleep 400ms
 Enter
 Wait+Screen /STATES/
+Show
 Sleep 3s
 
 # -- The list in ASCII, then back ------------------------------------------------------------
@@ -46,6 +45,7 @@ Type "a"
 Wait+Screen /UNICODE/
 Sleep 2s
 
+Hide
 Type "q"
 Sleep 1s
 

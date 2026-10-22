@@ -8,9 +8,10 @@ Require ttyd
 Require ffmpeg
 
 Set Shell         "powershell"
-Set FontSize      14
-Set Width         1200
-Set Height        700
+Set FontSize      16
+Set FontFamily    "JetBrainsMono Nerd Font"
+Set Width         1000
+Set Height        640
 Set Theme         "Catppuccin Mocha"
 Set Framerate     30
 Set PlaybackSpeed 1.0
@@ -29,12 +30,10 @@ Enter
 Wait
 Type "clear"
 Enter
-Show
-
 Type ".\draw.exe"
-Sleep 400ms
 Enter
 Wait+Screen /HEADER/
+Show
 Sleep 2s
 
 Down@250ms 16
@@ -43,9 +42,8 @@ Down@250ms 14
 Sleep 1.5s
 Down@250ms 12
 Sleep 2s
-Up@120ms 42
-Sleep 1.5s
 
+Hide
 Type "q"
 Sleep 1s
 

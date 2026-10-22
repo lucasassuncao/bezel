@@ -1,37 +1,15 @@
 <p align="center">
-  <img src="logo.png" alt="bezel logo" width="313" height="313">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/icons/bezel_horizontal_on_dark.png">
+    <img src="docs/icons/bezel_horizontal_on_light.png" alt="bezel logo" width="1200" height="401">
+  </picture>
 </p>
 
-The frame around a [Bubble Tea](https://github.com/charmbracelet/bubbletea) v2 app: layout, panels, theme, overlays, and a shell that owns resize, tabs, focus, status and the key legend, so the app only draws what goes *inside* the panes.
+The frame around a [Bubble Tea](https://github.com/charmbracelet/bubbletea) v2. bezel owns resize, tabs, focus, overlays, the status row and the key legend; your app only draws what goes *inside* the panes.
 
 ```sh
 go get github.com/lucasassuncao/bezel
 ```
-
-## Packages
-
-| Package | What it is |
-| --- | --- |
-| `layout` | Pure. Declare the screen as a tree (`Columns`, `Rows`, `Fixed`, `Fill`) and resolve it to rects. `Collapse` drops a leaf below a width; `Info()` marks a pane that only informs, which tab skips. |
-| `draw` | Pure. ANSI-safe truncate/fit/wrap, titled panels and a `Card` with a footer row, header, tabs, status line, a `Divider` with an optional label, the filled `Button` dialogs and forms draw with, `Composite` for floating boxes. |
-| `shell` | The struct you embed. Handles `WindowSizeMsg`, tabs, focus, status with TTL, a busy spinner (`Busy`/`Idle`), `Copy` to the clipboard off the event loop, overlays and the legend. Keys are `Action`s: prebuilt ones with a fixed meaning (`Help`, `Commands`, `ChangeTab`, `ChangePane`, `Move`, `Scroll`, `Quit`) and `Custom` ones; one declaration drives the legend, the key and the palette. `DisplayOnly` prints a key a component handles itself; `RunWith` gives a prebuilt the app's own behavior. `ChangePane` sends a `FocusMsg{From, To}` so the app can run what entering and leaving a pane mean. |
-| `theme` | Semantic palette (Accent, Success, Danger, ...), a `Series` of six colours to tell panels apart and a `Ramp` from low to high, presets, and the lipgloss styles every panel, legend and modal draws with. Empty roles follow the terminal's light or dark background: `Resolve(t, dark)`. |
-| `themebrowser` | Inline table of every preset and its palette, for a `--list-themes` flag. |
-| `overlay` | Stack of modals. The top one gets the keys, `Esc` pops it. Ready-made `Alert`, `Confirm`, `Help`, `Prompt` for one line of typed text (a required text, a validation, a live preview), `Pager` for text taller than a dialog, `Pick` and `Choice` to choose, and `FilePicker`. Each takes the theme and `WithKind(overlay.Danger)` tints it. |
-| `icon` | One set of state marks (`OK`, `Fail`, `Warn`, `Running`, `Pending`, ...) in the theme's colours, Unicode or ASCII (`BEZEL_ASCII`, or `TERM=dumb`), so a check mark means the same in a list, a status line and CLI output. `Connector` and `Indent` draw a tree's `├─`/`└─` branches in the same set. |
-| `form` | Controls that ask for a value: `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, stacked in a `Form` that moves focus with tab and shift+tab and lines every value up in one column. |
-| `progress` | How far along something is, in one row: `Bar` and `Line` (label, bar, `done/total`) for a count, `Smooth` for a bar cut to an eighth of a cell, `Meter` for squares coloured along the theme's ramp, `Stepper` for named stages such as a wizard's, compacting to "Step 2 of 4" when it does not fit. |
-| `chart` | A run of numbers over time, newest on the right: `Area` as columns several rows tall coloured along the theme's ramp, `Spark` as one row. |
-| `legend` | Key entries tagged with a capability, filtered by what the session allows, packed into a few rows. |
-| `palette` | The `:` command line `shell.Commands()` opens: prefix matching, exact name before unique prefix, arrows, tab completion, arguments. |
-| `list` | Cursor list with section headings, `↓ N more`, and a `/` filter. Rows carry your payload. |
-| `tree` | Flat depth-first tree: visibility under collapsed parents, cursor over headings, expand/collapse, `Reveal`. Generic over your node type. |
-| `table` | Sizes columns to their contents within a width (`Fit`) and lays out header and rows. |
-| `textbox` | The bubbles text area for a multi-line value: no length or line cap, the numbered gutter, theme colours, `SetText` folding CRLF. Height stays yours. |
-| `browser` | Pick-from-a-list screen: labels left, the selected item's detail right, tab to switch. |
-| `animation` | Eased integer tween for panels that slide open. |
-| `inline` | For CLIs that print logs: `Confirm` asks yes/no below the current line, `Bar` draws a progress bar (the same as `progress.Bar`). Nothing takes the screen. |
-| `bezeltest` | For tests: `Key("ctrl+s")` is the key press a terminal sends, `Text` included for a plain character, and it reads back as the name it was given. |
 
 ## Shape of an app
 
@@ -64,18 +42,69 @@ func (m model) View() tea.View {
 }
 ```
 
-A leaf missing from the map gives its space back that frame. The focused pane wears a thick border and a filled title, so focus reads even without colour.
+A pane missing from the map gives its space back that frame.
 
-The legend comes from whoever is in front: the top overlay, else the active actions (`Config.Actions`, the tab's, then `SetActions`'s, prebuilt first). It is filtered by `Config.Can`, packed to width, and keeps `?` pinned wherever `Help()` is active.
+## Examples
 
-Every package takes its styles from one `theme.Resolved` and shapes its API the same way; [CONVENTIONS.md](CONVENTIONS.md) has the rules: where the theme goes, the three forms of `Update`, and when a setting is a constructor argument, a `With` or a `Set`.
+### Shell
 
-## Demo
+Source: [`examples/shell/main.go`](examples/shell/main.go)
+
+Two tabs and two panes. `s` sets a status that clears itself, `b` shows the busy spinner until the work is done, `tab` switches tab and `?` lists every key.
+
+![shell](examples/shell/shell.gif)
+
+### Overlay
+
+Source: [`examples/overlay/main.go`](examples/overlay/main.go)
+
+The ready-made modals, one per row: an alert, a confirm that answers the app, a prompt that refuses an empty name, the help list, a pager over a command's output and a file picker. `enter` opens the one under the cursor and `esc` closes it.
+
+![overlay](examples/overlay/overlay.gif)
+
+### Form
+
+Source: [`examples/form/main.go`](examples/form/main.go)
+
+One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
+
+![form](examples/form/form.gif)
+
+Every package has its own example and recording in [EXAMPLES.md](EXAMPLES.md). For all of them at once, run the demo; `DEMO_RW=1` turns on its write-gated key:
 
 ```sh
 go run ./examples/demo
 ```
 
-Set `DEMO_RW=1` to enable the write-gated key.
+## Packages
 
-Every package also has its own small program and a recording of it: see [EXAMPLES.md](EXAMPLES.md).
+**The frame**
+
+- [`shell`](shell): the struct you embed. Tabs, focus, status, a busy spinner, overlays and the legend; keys are `Action`s that drive the key, the legend and the palette at once.
+- [`layout`](layout): the screen as a tree of `Columns`, `Rows`, `Fixed` and `Fill`, resolved to rects. `Collapse` drops a pane below a width.
+- [`theme`](theme): semantic colours, 59 presets, and the styles every package draws with.
+- [`overlay`](overlay): a stack of modals: `Alert`, `Confirm`, `Prompt`, `Pick`, `Choice`, `Help`, `Pager`, `FilePicker`.
+- [`draw`](draw): ANSI-safe text fitting, panels, cards, header, tabs, dividers and buttons.
+- [`legend`](legend): key hints, filtered by what the session allows and packed into a few rows.
+- [`palette`](palette): the `:` command line, with completion and arguments.
+
+**Inside the panes**
+
+- [`list`](list): a cursor list with sections and a `/` filter.
+- [`tree`](tree): an expandable tree, generic over your node type.
+- [`table`](table): columns sized to their contents within a width.
+- [`form`](form): `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
+- [`textbox`](textbox): a multi-line text field with line numbers.
+- [`browser`](browser): a list on the left, the selected item's detail on the right.
+- [`progress`](progress): `Bar`, `Line`, `Smooth`, `Meter` and `Stepper`, each one row.
+- [`chart`](chart): `Area` and `Spark` charts of a run of numbers.
+- [`icon`](icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
+
+**Around it**
+
+- [`inline`](inline): a yes/no question and a progress bar for CLIs that print logs.
+- [`themebrowser`](themebrowser): the preset table behind a `--list-themes` flag.
+- [`animation`](animation): an eased tween for panels that slide open.
+- [`bezeltest`](bezeltest): key presses for tests that drive a model.
+
+Every package follows the same rules for where the theme goes and how `Update` looks: see [CONVENTIONS.md](CONVENTIONS.md).

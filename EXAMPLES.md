@@ -1,255 +1,169 @@
 # Examples
 
-One small program per package, each with a recording of it running. Every GIF is a real session of the program beside it: the keystrokes are in the `.tape` next to it, and re-recording them is how they stay true. Run any of them with `go run ./examples/<name>`.
+One small program per package, each with a recording of it running. Every GIF is a real session of the program beside it, recorded from the `.tape` next to it. Run any of them with `go run ./examples/<name>`; for everything at once, `go run ./examples/demo`.
 
-For everything at once, see [`examples/demo`](examples/demo/main.go).
+## The frame
 
-## shell
+### Shell
 
-The struct an app embeds. Two tabs and two panes; `s` sets a status that clears itself, `b` shows the busy spinner until the work is done, `tab` switches tab and `?` lists every key.
+Source: [`examples/shell/main.go`](examples/shell/main.go)
 
-<details>
-<summary>Show Example</summary>
+Two tabs and two panes. `s` sets a status that clears itself, `b` shows the busy spinner until the work is done, `tab` switches tab and `?` lists every key.
 
 ![shell](examples/shell/shell.gif)
 
-</details>
+### Layout
 
-[`examples/shell/main.go`](examples/shell/main.go)
+Source: [`examples/layout/main.go`](examples/layout/main.go)
 
-## layout
-
-A header over two columns. `w` narrows the window below the `Collapse` limit and the side column drops out, then brings it back. Each pane prints the rect it was given.
-
-<details>
-<summary>Show Example</summary>
+A header over two columns, each pane printing the rect it was given. `w` narrows the window below the `Collapse` limit and the side column drops out, then comes back.
 
 ![layout](examples/layout/layout.gif)
 
-</details>
+### Theme
 
-[`examples/layout/main.go`](examples/layout/main.go)
+Source: [`examples/theme/main.go`](examples/theme/main.go)
 
-## draw
-
-The helpers the frame is drawn with, one section each: header, tabs, breadcrumb, a divider bare and labelled, a card with its actions in the footer, a focused and an unfocused button, key-value rows, wrapped and truncated text, numbered lines, and the empty state.
-
-<details>
-<summary>Show Example</summary>
-
-![draw](examples/draw/draw.gif)
-
-</details>
-
-[`examples/draw/main.go`](examples/draw/main.go)
-
-## icon
-
-Every state mark in both sets, side by side, then a list of packages and a source chain drawn as a tree with the set in use. `a` swaps both between Unicode and ASCII, the set `BEZEL_ASCII` or `TERM=dumb` picks on its own.
-
-<details>
-<summary>Show Example</summary>
-
-![icon](examples/icon/icon.gif)
-
-</details>
-
-[`examples/icon/main.go`](examples/icon/main.go)
-
-## form
-
-One of each control in a form: a name typed into an `Input`, an image picked from a `Select` that opens under it, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. tab and shift+tab move between them, and every value starts in one column. Create reports what the form holds on the status row.
-
-<details>
-<summary>Show Example</summary>
-
-![form](examples/form/form.gif)
-
-</details>
-
-[`examples/form/main.go`](examples/form/main.go)
-
-## progress
-
-A count that fills on its own, as a `Line` (label, bar, `done/total`) and as a bare `Bar`, and a wizard's stages in a `Stepper`. `n` and `p` walk the stages; the copy drawn at 30 columns folds to "Step 2 of 4". `r` restarts the count.
-
-<details>
-<summary>Show Example</summary>
-
-![progress](examples/progress/progress.gif)
-
-</details>
-
-[`examples/progress/main.go`](examples/progress/main.go)
-
-## theme
-
-Every colour role and a list drawn with it, stepped through a few presets with `n` and `p`. `SetTheme` swaps them on a running shell.
-
-<details>
-<summary>Show Example</summary>
+Every colour role and a list drawn with it. `n` and `p` step through a few presets, and `SetTheme` swaps them on the running shell.
 
 ![theme](examples/theme/theme.gif)
 
-</details>
+### Overlay
 
-[`examples/theme/main.go`](examples/theme/main.go)
+Source: [`examples/overlay/main.go`](examples/overlay/main.go)
 
-## themebrowser
-
-The table a `--list-themes` flag prints: scrollable in a terminal, plain lines in a pipe.
-
-<details>
-<summary>Show Example</summary>
-
-![themebrowser](examples/themebrowser/themebrowser.gif)
-
-</details>
-
-[`examples/themebrowser/main.go`](examples/themebrowser/main.go)
-
-## overlay
-
-The ready-made modals. An alert any key closes, a confirm that answers the app, a prompt that refuses an empty name, the help list, and a pager over a command's output, scrolled line by line, a page at a time and to the end, and a file picker over the working directory. `esc` closes each one.
-
-<details>
-<summary>Show Example</summary>
+The ready-made modals, one per row: an alert, a confirm that answers the app, a prompt that refuses an empty name, the help list, a pager over a command's output and a file picker. `enter` opens the one under the cursor and `esc` closes it.
 
 ![overlay](examples/overlay/overlay.gif)
 
-</details>
+### Draw
 
-[`examples/overlay/main.go`](examples/overlay/main.go)
+Source: [`examples/draw/main.go`](examples/draw/main.go)
 
-## legend
+One scrolling pane with a section per helper: header, tabs, breadcrumb, dividers, a card with its actions in the footer, buttons, key-value rows, wrapped and truncated text, numbered lines and the empty state.
 
-More keys than one row holds: the ones cut are counted, and `?` lists them all. Five keys need a write capability; `w` grants it, and they join the legend and the count.
+![draw](examples/draw/draw.gif)
 
-<details>
-<summary>Show Example</summary>
+### Legend
+
+Source: [`examples/legend/main.go`](examples/legend/main.go)
+
+More keys than one row holds: the ones cut are counted and `?` lists them all. Five keys need a write capability; `w` grants it and they join the legend.
 
 ![legend](examples/legend/legend.gif)
 
-</details>
+### Palette
 
-[`examples/legend/main.go`](examples/legend/main.go)
-
-## palette
+Source: [`examples/palette/main.go`](examples/palette/main.go)
 
 The `:` command line. A name completes with `tab`, a command takes an argument, and one that is unknown or not allowed says so on the status row.
 
-<details>
-<summary>Show Example</summary>
-
 ![palette](examples/palette/palette.gif)
 
-</details>
+## Inside the panes
 
-[`examples/palette/main.go`](examples/palette/main.go)
+### List
 
-## list
+Source: [`examples/list/main.go`](examples/list/main.go)
 
-Rows under section headings the cursor skips, a `/` filter that takes every key (`q` included), and `enter` showing the payload the row carries.
-
-<details>
-<summary>Show Example</summary>
+Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included.
 
 ![list](examples/list/list.gif)
 
-</details>
+### Tree
 
-[`examples/list/main.go`](examples/list/main.go)
-
-## tree
+Source: [`examples/tree/main.go`](examples/tree/main.go)
 
 A directory tree over the app's own node type. The arrows expand and collapse; `:reveal` opens every parent on the way down to a path.
 
-<details>
-<summary>Show Example</summary>
-
 ![tree](examples/tree/tree.gif)
 
-</details>
+### Table
 
-[`examples/tree/main.go`](examples/tree/main.go)
-
-## table
+Source: [`examples/table/main.go`](examples/table/main.go)
 
 Columns sized to their contents. `w` narrows the window: the description gives way first, and the version and licence stay whole.
 
-<details>
-<summary>Show Example</summary>
-
 ![table](examples/table/table.gif)
 
-</details>
+### Form
 
-[`examples/table/main.go`](examples/table/main.go)
+Source: [`examples/form/main.go`](examples/form/main.go)
 
-## textbox
+One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
+
+![form](examples/form/form.gif)
+
+### Textbox
+
+Source: [`examples/textbox/main.go`](examples/textbox/main.go)
 
 A multi-line value with its lines numbered. Every key is text, so the app quits on `esc`; `ctrl+s` counts the lines.
 
-<details>
-<summary>Show Example</summary>
-
 ![textbox](examples/textbox/textbox.gif)
 
-</details>
+### Browser
 
-[`examples/textbox/main.go`](examples/textbox/main.go)
-
-## browser
+Source: [`examples/browser/main.go`](examples/browser/main.go)
 
 Recipe names on the left, the selected recipe on the right. `tab` moves the keys to the recipe so it scrolls, and back.
 
-<details>
-<summary>Show Example</summary>
-
 ![browser](examples/browser/browser.gif)
 
-</details>
+### Progress
 
-[`examples/browser/main.go`](examples/browser/main.go)
+Source: [`examples/progress/main.go`](examples/progress/main.go)
 
-## animation
+A count that fills on its own, as a `Line` and as a bare `Bar`, and a wizard's stages in a `Stepper`. `n` and `p` walk the stages; the copy drawn at 30 columns folds to "Step 2 of 4". `r` restarts the count.
 
-A hints pane that slides open and shut on `h`: a tween eases its height and the layout follows it frame by frame.
+![progress](examples/progress/progress.gif)
 
-<details>
-<summary>Show Example</summary>
+### Icon
 
-![animation](examples/animation/animation.gif)
+Source: [`examples/icon/main.go`](examples/icon/main.go)
 
-</details>
+Every state mark in both sets, then a list of packages and a source chain drawn as a tree. `a` swaps them between Unicode and ASCII, the set `BEZEL_ASCII` or `TERM=dumb` picks on its own.
 
-[`examples/animation/main.go`](examples/animation/main.go)
+![icon](examples/icon/icon.gif)
 
-## inline
+## Around it
 
-For a CLI that prints logs: one question below them, then a progress bar redrawn in place. Nothing takes over the screen.
+### Inline
 
-<details>
-<summary>Show Example</summary>
+Source: [`examples/inline/main.go`](examples/inline/main.go)
+
+A CLI that prints logs, asks one question below them, then redraws a progress bar in place. Nothing takes over the screen.
 
 ![inline](examples/inline/inline.gif)
 
-</details>
+### Themebrowser
 
-[`examples/inline/main.go`](examples/inline/main.go)
+Source: [`examples/themebrowser/main.go`](examples/themebrowser/main.go)
 
-## bezeltest
+The table a `--list-themes` flag prints: scrollable in a terminal, plain lines in a pipe.
+
+![themebrowser](examples/themebrowser/themebrowser.gif)
+
+### Animation
+
+Source: [`examples/animation/main.go`](examples/animation/main.go)
+
+A hints pane that slides open and shut on `h`: a tween eases its height and the layout follows it frame by frame.
+
+![animation](examples/animation/animation.gif)
+
+### Bezeltest
+
+Source: [`examples/bezeltest/main_test.go`](examples/bezeltest/main_test.go)
 
 No recording: this one is a test. A counter, and the test that drives it with the key presses a terminal would send.
 
-[`examples/bezeltest/main_test.go`](examples/bezeltest/main_test.go)
-
 ## Recording
 
-The tapes are written for Windows: each sets `Set Shell "powershell"` and builds a `.exe`. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH`, from the repository root:
+The tapes are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. A full-screen example also starts and quits off camera, so its GIF opens and loops on the program; `inline` and `themebrowser` keep the command on camera, because the prompt is part of what they show. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
 
 ```sh
 vhs examples/list/list.tape
 ```
 
-From the root, always: `Output` resolves against the working directory, not against the tape. Each tape builds its program off camera and deletes the binary when it is done.
+From the root, always: `Output` resolves against the working directory, not against the tape. Without the font, VHS falls back to another monospace and the recording drifts from the others.
