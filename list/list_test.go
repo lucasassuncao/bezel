@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -95,6 +96,17 @@ func TestViewShowsHeadingsMarksAndTheOverflowIndicator(t *testing.T) {
 	m, _ = m.Update(press(tea.KeyDown))
 	m, _ = m.Update(press(tea.KeyDown))
 	require.Contains(t, ansi.Strip(m.View(th)), "▶ +  cache", "scrolled to keep the cursor visible")
+}
+
+func TestScrollIsWhereTheWindowSits(t *testing.T) {
+	m := New(rows(), 4)
+	require.Equal(t, layout.Scroll{Visible: 3, Total: 7}, m.Scroll(), "the more row is not a row shown")
+	m, _ = m.Update(press(tea.KeyDown))
+	m, _ = m.Update(press(tea.KeyDown))
+	require.Equal(t, layout.Scroll{Offset: 3, Visible: 4, Total: 7}, m.Scroll())
+
+	f, _ := New(numbered(20), 6).Update(typed("/"))
+	require.Equal(t, layout.Scroll{Visible: 4, Total: 20}, f.Scroll(), "filtering: the matches' window")
 }
 
 func TestViewIsEmptyBeforeSized(t *testing.T) {

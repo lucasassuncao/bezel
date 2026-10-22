@@ -71,6 +71,7 @@ func TestResolveFillsTheChromeSlots(t *testing.T) {
 	r := Resolve(Mint, true)
 	require.Equal(t, "#3EB489", r.Colors.Accent)
 	require.NotEqual(t, r.Panel.Border, r.PanelFocused.Border)
+	require.NotEqual(t, r.PanelFocused.Border.GetForeground(), r.PanelFocused.Thumb.GetForeground(), "focused, the thumb stands out from its track")
 	require.NotEmpty(t, r.Chrome.TabActive.Render("x"))
 	require.NotEmpty(t, r.Legend.Key.Render("x"))
 	require.NotEmpty(t, r.Modal.Render("x"))

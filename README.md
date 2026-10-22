@@ -84,7 +84,7 @@ go run ./examples/demo
 - [`layout`](layout): the screen as a tree of `Columns`, `Rows`, `Fixed` and `Fill`, resolved to rects. `Collapse` drops a pane below a width.
 - [`theme`](theme): semantic colours, 59 presets, and the styles every package draws with.
 - [`overlay`](overlay): a stack of modals: `Alert`, `Confirm`, `Prompt`, `Pick`, `Choice`, `Help`, `Pager`, `FilePicker`.
-- [`draw`](draw): ANSI-safe text fitting, panels, cards, header, tabs, dividers and buttons.
+- [`draw`](draw): ANSI-safe text fitting, panels (text and a scrollbar in their edges), cards, header, tabs, dividers and buttons.
 - [`legend`](legend): key hints, filtered by what the session allows and packed into a few rows.
 - [`palette`](palette): the `:` command line, with completion and arguments.
 
@@ -92,12 +92,12 @@ go run ./examples/demo
 
 - [`list`](list): a cursor list with sections and a `/` filter.
 - [`tree`](tree): an expandable tree, generic over your node type.
-- [`table`](table): columns sized to their contents within a width.
+- [`table`](table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header.
 - [`form`](form): `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
 - [`textbox`](textbox): a multi-line text field with line numbers.
 - [`browser`](browser): a list on the left, the selected item's detail on the right.
 - [`progress`](progress): `Bar`, `Line`, `Smooth`, `Meter` and `Stepper`, each one row.
-- [`chart`](chart): `Area` and `Spark` charts of a run of numbers.
+- [`chart`](chart): `Area` and `Spark` charts of a run of numbers, and labelled `Bars` side by side.
 - [`icon`](icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
 
 **Around it**

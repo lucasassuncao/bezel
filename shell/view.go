@@ -78,8 +78,10 @@ func (s Shell) sectionName() string {
 // and a body drawn into the inner rect the shell computed.
 type Pane struct {
 	Title  string
-	Right  string      // at the end of the top edge, while it fits beside Title
-	Accent color.Color // the edges' colour, focused or not; nil keeps the theme's
+	Right  string        // at the end of the top edge, while it fits beside Title
+	Bottom string        // at the end of the bottom edge, while it fits
+	Scroll layout.Scroll // a scrollbar's thumb down the right edge, from list.Scroll and the like
+	Accent color.Color   // the edges' colour, focused or not; nil keeps the theme's
 	Body   func(inner layout.Rect) string
 }
 
@@ -170,7 +172,8 @@ func (s Shell) paneCanvas(panes map[string]Pane, body layout.Rect) string {
 		if p.Body != nil {
 			content = p.Body(draw.InnerRect(r))
 		}
-		canvas = draw.Composite(draw.TitledPanel(r, p.Title, p.Right, content, st), canvas, r.X, r.Y-body.Y)
+		edges := draw.Edges{Title: p.Title, Right: p.Right, Bottom: p.Bottom, Scroll: p.Scroll}
+		canvas = draw.Composite(draw.FramedPanel(r, edges, content, st), canvas, r.X, r.Y-body.Y)
 	}
 	return canvas
 }

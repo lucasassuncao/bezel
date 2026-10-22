@@ -66,3 +66,43 @@ func TestPanelDropsTheRightTextBeforeTheTitle(t *testing.T) {
 	require.Contains(t, top, "files")
 	require.NotContains(t, top, "35/152")
 }
+
+func TestFramedPanelPutsTheBottomTextAtTheEndOfTheBottomEdge(t *testing.T) {
+	got := FramedPanel(layout.Rect{W: 30, H: 4}, Edges{Title: "files", Bottom: "12/340"}, "", PanelStyle{})
+	bottom := ansi.Strip(strings.Split(got, "\n")[3])
+	require.Equal(t, 30, ansi.StringWidth(bottom))
+	require.True(t, strings.HasPrefix(bottom, "╰─"), bottom)
+	require.True(t, strings.HasSuffix(bottom, "─ 12/340 ─╯"), bottom)
+}
+
+func TestFramedPanelDropsABottomTextThatDoesNotFit(t *testing.T) {
+	got := FramedPanel(layout.Rect{W: 10, H: 3}, Edges{Bottom: "a long position"}, "", PanelStyle{})
+	require.Equal(t, "╰────────╯", ansi.Strip(strings.Split(got, "\n")[2]))
+}
+
+// rightEdge is the last cell of every body row of a framed panel.
+func rightEdge(t *testing.T, r layout.Rect, s layout.Scroll) string {
+	t.Helper()
+	lines := strings.Split(ansi.Strip(FramedPanel(r, Edges{Scroll: s}, "", PanelStyle{})), "\n")
+	require.Len(t, lines, r.H)
+	var edge strings.Builder
+	for _, l := range lines[1 : len(lines)-1] {
+		require.Equal(t, r.W, ansi.StringWidth(l), "%q", l)
+		edge.WriteString(ansi.TruncateLeft(l, r.W-1, ""))
+	}
+	return edge.String()
+}
+
+func TestFramedPanelDrawsTheThumbDownTheRightEdge(t *testing.T) {
+	r := layout.Rect{W: 12, H: 7} // five body rows: the track
+	require.Equal(t, "█││││", rightEdge(t, r, layout.Scroll{Visible: 5, Total: 25}))
+	require.Equal(t, "││││█", rightEdge(t, r, layout.Scroll{Offset: 20, Visible: 5, Total: 25}))
+	require.Equal(t, "││██│", rightEdge(t, r, layout.Scroll{Offset: 5, Visible: 5, Total: 12}))
+	require.Equal(t, "│││││", rightEdge(t, r, layout.Scroll{Visible: 5, Total: 5}), "nothing hidden, no thumb")
+}
+
+func TestFramedPanelThumbWearsItsOwnStyle(t *testing.T) {
+	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000"))
+	got := FramedPanel(layout.Rect{W: 12, H: 5}, Edges{Scroll: layout.Scroll{Visible: 3, Total: 9}}, "", PanelStyle{Thumb: red})
+	require.Contains(t, got, red.Render("█"))
+}

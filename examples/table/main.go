@@ -1,14 +1,17 @@
-// Table: columns sized to their contents; w narrows the window and the
-// description gives way first, while version and licence stay whole.
+// Table: a cursor over rows that scroll under a fixed header, with the position
+// and a scrollbar in the pane's edges and the row's detail below. w narrows the
+// window: the description gives way first, version and licence stay whole.
 package main
 
 import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/table"
@@ -31,6 +34,30 @@ var rows = [][]string{
 	{"bubbles", "v2.2.1", "MIT", "Components for Bubble Tea: text inputs, viewports, spinners"},
 	{"testify", "v1.11.1", "MIT", "Assertions and mocks for Go tests"},
 	{"clipboard", "v0.1.4", "BSD-3", "Clipboard access for Go"},
+	{"x/ansi", "v0.11.9", "MIT", "Parse, measure and cut strings with ANSI escapes"},
+	{"x/term", "v0.2.2", "MIT", "Terminal size and raw mode"},
+	{"x/termios", "v0.1.1", "MIT", "termios for Unix terminals"},
+	{"x/windows", "v0.2.2", "MIT", "Windows console calls"},
+	{"colorprofile", "v0.4.3", "MIT", "The colours a terminal can show"},
+	{"displaywidth", "v0.11.0", "MIT", "How many cells a string takes on screen"},
+	{"uax29", "v2.7.0", "MIT", "Unicode text segmentation"},
+	{"go-humanize", "v1.1.0", "MIT", "Numbers and times for humans"},
+	{"go-colorful", "v1.4.1", "MIT", "Colour spaces and blending"},
+	{"go-runewidth", "v0.0.31", "MIT", "Cell width of runes and strings"},
+	{"cancelreader", "v0.2.2", "MIT", "A reader that can be cancelled"},
+	{"uniseg", "v0.4.7", "MIT", "Unicode grapheme clusters and line breaks"},
+	{"terminfo", "v1.2.0", "MIT", "A terminfo database reader"},
+	{"x/sys", "v0.49.0", "BSD-3", "Low-level operating system calls"},
+	{"x/sync", "v0.24.0", "BSD-3", "errgroup, semaphore and singleflight"},
+}
+
+// items carry each row's name, for the status enter sets.
+func items() []table.Item[string] {
+	out := make([]table.Item[string], len(rows))
+	for i, r := range rows {
+		out[i] = table.Item[string]{Cells: r, Value: r[0]}
+	}
+	return out
 }
 
 type toggleWidthMsg struct{}
@@ -38,6 +65,7 @@ type toggleWidthMsg struct{}
 type model struct {
 	sh           shell.Shell
 	th           theme.Resolved
+	tbl          table.Model[string]
 	realW, realH int
 	narrow       bool
 }
@@ -45,15 +73,17 @@ type model struct {
 func newModel() model {
 	th := theme.Resolve(theme.Mint, true)
 	sh := shell.New(shell.Config{
-		Layout: layout.Columns(layout.Fill("table")),
+		Layout: layout.Rows(layout.Fixed("table", layout.Ratio(3, 5)), layout.Fill("detail").Info()),
 		Theme:  th,
 		Title:  "table",
 		Actions: []shell.Action{
+			shell.Move(),
+			shell.Custom("enter", "choose", nil, shell.DisplayOnly()),
 			shell.Custom("w", "narrow/wide", shell.Send(toggleWidthMsg{})),
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th}
+	return model{sh: sh, th: th, tbl: table.New(cols, items(), 0)}
 }
 
 func (m model) Init() tea.Cmd { return nil }
@@ -66,6 +96,7 @@ func (m model) resize() model {
 		w = min(narrowWidth, m.realW)
 	}
 	m.sh, _, _ = m.sh.Update(tea.WindowSizeMsg{Width: w, Height: m.realH})
+	m.tbl = m.tbl.SetHeight(draw.InnerRect(m.sh.Rect("table")).H)
 	return m
 }
 
@@ -87,23 +118,35 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
+		var act table.Action
+		if m.tbl, act = m.tbl.Update(msg); act == table.Chosen {
+			m.sh, cmd = m.sh.SetStatus("chose "+m.tbl.Selected().Value, shell.OK, 2*time.Second)
+			return m, cmd
+		}
 	}
 	return m, nil
 }
 
-// render fits the columns to width and lays out the header and every row.
-func (m model) render(width int) string {
-	widths := table.Fit(cols, rows, width)
-	lines := []string{m.th.TableHeader.Render(table.Titles(cols, widths))}
-	for _, r := range rows {
-		lines = append(lines, table.Row(widths, r))
+// detail is the row under the cursor, its description wrapped to the pane.
+func (m model) detail(r layout.Rect) string {
+	it := m.tbl.Selected()
+	if it == nil {
+		return ""
 	}
-	return strings.Join(lines, "\n")
+	c := it.Cells
+	out := draw.KV("version", c[1], m.th.Dim, r.W) + draw.KV("licence", c[2], m.th.Dim, r.W) + "\n"
+	return out + "  " + strings.Join(draw.Wrap(c[3], r.W-2), "\n  ")
 }
 
 func (m model) View() tea.View {
 	v := tea.NewView(m.sh.View(map[string]shell.Pane{
-		"table": {Title: "dependencies", Body: func(r layout.Rect) string { return m.render(r.W) }},
+		"table": {
+			Title:  "dependencies",
+			Bottom: fmt.Sprintf("%d/%d", m.tbl.Cursor()+1, m.tbl.Len()),
+			Scroll: m.tbl.Scroll(),
+			Body:   func(r layout.Rect) string { return m.tbl.View(m.th, r.W) },
+		},
+		"detail": {Title: m.tbl.Selected().Value, Body: m.detail},
 	}))
 	v.AltScreen = true
 	return v

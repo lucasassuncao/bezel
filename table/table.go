@@ -1,6 +1,6 @@
-// Package table sizes columns to their contents and lays cells out in them:
-// a row is as narrow as its widest values allow, and when even that is too
-// wide, the columns give way in a declared order rather than all at once.
+// Package table sizes columns to their contents, giving way in a declared
+// order when even that is too wide, and lays cells out in them. Model adds a
+// cursor over the rows, which scroll under a fixed header.
 package table
 
 import (

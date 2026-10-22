@@ -185,6 +185,12 @@ func (m Model[N]) window() layout.Window {
 	return layout.Window{Cursor: m.Cursor, Offset: m.Offset, Height: m.Height}
 }
 
+// Scroll is where the tree shows its visible rows from, for a pane's scrollbar.
+func (m Model[N]) Scroll() layout.Scroll {
+	n := len(m.Visible())
+	return m.window().Clamp(n).Scroll(n)
+}
+
 func (m Model[N]) withWindow(w layout.Window) Model[N] {
 	m.Cursor, m.Offset = w.Cursor, w.Offset
 	return m

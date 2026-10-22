@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -187,6 +188,15 @@ func TestCursorNeverHidesBehindMoreIndicator(t *testing.T) {
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	require.Contains(t, m.View(theme.Resolved{}, labelRow), "> c")
+}
+
+func TestScrollIsWhereTheWindowSits(t *testing.T) {
+	m := New(leaves(5), 3)
+	require.Equal(t, layout.Scroll{Visible: 2, Total: 5}, m.Scroll(), "the more row is not a row shown")
+	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
+	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
+	require.Equal(t, layout.Scroll{Offset: 1, Visible: 2, Total: 5}, m.Scroll())
+	require.Equal(t, layout.Scroll{}, New[node](nil, 5).Scroll())
 }
 
 func TestOneRowTreeShowsTheCursorNotTheIndicator(t *testing.T) {

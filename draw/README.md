@@ -25,6 +25,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func EmptyState\(r layout.Rect, message, hint string, st ChromeStyle\) string](<#EmptyState>)
 - [func Fit\(s string, width int\) string](<#Fit>)
 - [func FitBlock\(s string, width, height int\) string](<#FitBlock>)
+- [func FramedPanel\(r layout.Rect, edges Edges, body string, st PanelStyle\) string](<#FramedPanel>)
 - [func Gutter\(n int, style lipgloss.Style\) string](<#Gutter>)
 - [func Header\(width int, title, subtitle, right string, st ChromeStyle\) string](<#Header>)
 - [func Heading\(name string, style lipgloss.Style, width int\) string](<#Heading>)
@@ -51,6 +52,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func Wrap\(s string, width int\) \[\]string](<#Wrap>)
 - [type ButtonStyle](<#ButtonStyle>)
 - [type ChromeStyle](<#ChromeStyle>)
+- [type Edges](<#Edges>)
 - [type PanelStyle](<#PanelStyle>)
 
 
@@ -176,6 +178,15 @@ func FitBlock(s string, width, height int) string
 
 FitBlock cuts a block to height rows and width cells per row. A too\-wide line would wrap inside lipgloss and push a border down, so cut first.
 
+<a name="FramedPanel"></a>
+## func [FramedPanel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L55>)
+
+```go
+func FramedPanel(r layout.Rect, edges Edges, body string, st PanelStyle) string
+```
+
+FramedPanel is a Panel with edges drawn into its border: a position at the end of the bottom edge, a scrollbar's thumb down the right one.
+
 <a name="Gutter"></a>
 ## func [Gutter](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L117>)
 
@@ -267,7 +278,7 @@ func PadHeight(s string, height int) string
 PadHeight grows a block to height lines so a Composite has rows to land on.
 
 <a name="Panel"></a>
-## func [Panel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L32>)
+## func [Panel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L43>)
 
 ```go
 func Panel(r layout.Rect, title, body string, st PanelStyle) string
@@ -339,7 +350,7 @@ func Tail(lines []string, height int) []string
 Tail is a copy of the last height lines of lines, the way a log scrolls. A copy, so holding it does not keep the whole log alive.
 
 <a name="TitledPanel"></a>
-## func [TitledPanel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L38>)
+## func [TitledPanel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L49>)
 
 ```go
 func TitledPanel(r layout.Rect, title, right, body string, st PanelStyle) string
@@ -419,16 +430,30 @@ type ChromeStyle struct {
 }
 ```
 
-<a name="PanelStyle"></a>
-## type [PanelStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L15-L20>)
+<a name="Edges"></a>
+## type [Edges](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L27-L31>)
 
-PanelStyle colours a panel: Border inks the edges, Title the label in the top edge, Right the text at its other end. Edge is the box\-drawing set, rounded when zero; a focused panel can wear a thicker one.
+Edges is what a panel draws into its border besides the lines.
+
+```go
+type Edges struct {
+    Title, Right string        // the top edge; Right is dropped before Title is cut
+    Bottom       string        // the far end of the bottom edge, dropped when it does not fit
+    Scroll       layout.Scroll // a thumb on the right edge; the zero value draws none
+}
+```
+
+<a name="PanelStyle"></a>
+## type [PanelStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L15-L21>)
+
+PanelStyle colours a panel: Border inks the edges, Title the label in the top edge, Right the text at the far end of either edge, Thumb a scrollbar's thumb. Edge is the box\-drawing set, rounded when zero.
 
 ```go
 type PanelStyle struct {
     Border lipgloss.Style
     Title  lipgloss.Style
     Right  lipgloss.Style
+    Thumb  lipgloss.Style
     Edge   lipgloss.Border
 }
 ```

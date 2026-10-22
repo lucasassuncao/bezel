@@ -110,6 +110,7 @@ func buildDerivedStyles(c Colors) Resolved {
 		Border: lipgloss.NewStyle().Foreground(border),
 		Title:  lipgloss.NewStyle().Foreground(dim),
 		Right:  lipgloss.NewStyle().Foreground(dim),
+		Thumb:  lipgloss.NewStyle().Foreground(border), // the solid cell tells it from the line
 	}
 	// Focus rides on the thick edge and the filled title as well as the colour,
 	// so it survives a monochrome terminal.
@@ -117,6 +118,7 @@ func buildDerivedStyles(c Colors) Resolved {
 		Border: lipgloss.NewStyle().Foreground(accent),
 		Title:  lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(selection),
 		Right:  lipgloss.NewStyle().Foreground(dim),
+		Thumb:  lipgloss.NewStyle().Foreground(selection),
 		Edge:   lipgloss.ThickBorder(),
 	}
 	r.Chrome = draw.ChromeStyle{

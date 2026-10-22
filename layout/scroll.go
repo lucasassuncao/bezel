@@ -83,3 +83,39 @@ func (w Window) Bounds(n int) (start, end, below int) {
 // more reports rows overflowing below w. A one-row window never trades its
 // only row for the count.
 func (w Window) more(n int) bool { return w.Height > 1 && w.Offset+w.Height < n }
+
+// Scroll is how much of Total rows a window shows, from Offset: what a
+// scrollbar draws. The zero value draws none.
+type Scroll struct{ Offset, Visible, Total int }
+
+// Scroll is w over n rows, as a scrollbar sees it: the "more" row is not one
+// of the rows shown. Clamp w first.
+func (w Window) Scroll(n int) Scroll {
+	start, end, _ := w.Bounds(n)
+	return Scroll{Offset: start, Visible: end - start, Total: n}
+}
+
+// Thumb places a scrollbar's thumb on a track rows long: from pos, size rows,
+// and size 0 when every row shows. The thumb touches an end of the track only
+// while the window does, so it never reads as the top when it is not.
+func (s Scroll) Thumb(track int) (pos, size int) {
+	if track <= 0 || s.Visible <= 0 || s.Total <= s.Visible {
+		return 0, 0
+	}
+	size = max(1, (track*s.Visible+s.Total/2)/s.Total)
+	if track > 1 {
+		size = min(size, track-1) // a full track would say nothing is hidden
+	}
+	room, last := track-size, s.Total-s.Visible
+	off := min(max(s.Offset, 0), last)
+	pos = (off*room + last/2) / last
+	if room >= 2 {
+		if off > 0 {
+			pos = max(pos, 1)
+		}
+		if off < last {
+			pos = min(pos, room-1)
+		}
+	}
+	return pos, size
+}

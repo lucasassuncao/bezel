@@ -234,3 +234,18 @@ func TestAPaneCarriesRightTextAndItsOwnBorderColour(t *testing.T) {
 	require.Contains(t, out, openSGR(lipgloss.NewStyle().Foreground(red)))
 	require.NotContains(t, plain, openSGR(lipgloss.NewStyle().Foreground(red)))
 }
+
+func TestAPaneCarriesABottomTextAndAScrollbar(t *testing.T) {
+	s := newShell()
+	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	r := s.Rect("detail")
+	lines := strings.Split(ansi.Strip(s.View(map[string]Pane{
+		"list":   {Title: "List"},
+		"detail": {Title: "Detail", Bottom: "1/40", Scroll: layout.Scroll{Visible: 5, Total: 40}},
+	})), "\n")
+	cell := func(row int) string { return ansi.TruncateLeft(ansi.Truncate(lines[row], r.X+r.W, ""), r.X+r.W-1, "") }
+
+	require.True(t, strings.HasSuffix(ansi.Truncate(lines[r.Y+r.H-1], r.X+r.W, ""), " 1/40 ─╯"))
+	require.Equal(t, "█", cell(r.Y+1), "the thumb at the top of the track")
+	require.Equal(t, "│", cell(r.Y+r.H-2), "the track below it")
+}

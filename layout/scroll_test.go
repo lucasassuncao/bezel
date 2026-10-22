@@ -64,3 +64,42 @@ func TestWindowMoveScrolls(t *testing.T) {
 	require.Equal(t, Window{Cursor: 2, Offset: 1, Height: 3}, Window{Cursor: 1, Height: 3}.Move(1, 5, nil))
 	require.Equal(t, Window{Height: 3}, Window{Cursor: 2, Height: 3}.Move(1, 0, nil))
 }
+
+func TestWindowScrollLeavesTheMoreRowOut(t *testing.T) {
+	require.Equal(t, Scroll{Offset: 1, Visible: 9, Total: 30}, Window{Offset: 1, Height: 10}.Scroll(30))
+	require.Equal(t, Scroll{Offset: 20, Visible: 10, Total: 30}, Window{Offset: 20, Height: 10}.Scroll(30))
+	require.Equal(t, Scroll{Visible: 4, Total: 4}, Window{Height: 10}.Scroll(4))
+}
+
+func TestScrollThumbSizesToTheShareShown(t *testing.T) {
+	pos, size := Scroll{Visible: 10, Total: 100}.Thumb(10)
+	require.Equal(t, []int{0, 1}, []int{pos, size})
+	pos, size = Scroll{Visible: 50, Total: 100}.Thumb(10)
+	require.Equal(t, []int{0, 5}, []int{pos, size})
+	pos, size = Scroll{Visible: 29, Total: 30}.Thumb(10)
+	require.Equal(t, []int{0, 9}, []int{pos, size}, "a full track would say nothing is hidden")
+}
+
+func TestScrollThumbTouchesAnEndOnlyAtThatEnd(t *testing.T) {
+	thumb := func(offset int) int {
+		pos, _ := Scroll{Offset: offset, Visible: 10, Total: 100}.Thumb(10)
+		return pos
+	}
+	require.Equal(t, 0, thumb(0))
+	require.Equal(t, 1, thumb(1), "scrolled at all: off the top")
+	require.Equal(t, 5, thumb(50))
+	require.Equal(t, 8, thumb(89), "not at the end: off the bottom")
+	require.Equal(t, 9, thumb(90))
+	require.Equal(t, 9, thumb(500), "an offset past the end reads as the end")
+}
+
+func TestScrollThumbIsNoneWhenEverythingShows(t *testing.T) {
+	for _, s := range []Scroll{{}, {Visible: 10, Total: 10}, {Visible: 10, Total: 4}, {Total: 30}} {
+		_, size := s.Thumb(10)
+		require.Zero(t, size, "%+v", s)
+	}
+	_, size := Scroll{Visible: 10, Total: 100}.Thumb(0)
+	require.Zero(t, size, "no track, no thumb")
+	pos, size := Scroll{Offset: 5, Visible: 10, Total: 100}.Thumb(1)
+	require.Equal(t, []int{0, 1}, []int{pos, size}, "a one-row track is all thumb")
+}

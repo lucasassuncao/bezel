@@ -118,6 +118,16 @@ func (m Model[T]) IsFiltering() bool { return m.find.on }
 // Filter is the text typed at the / prompt.
 func (m Model[T]) Filter() string { return m.find.text }
 
+// Scroll is where the list shows its rows from, for a pane's scrollbar; while
+// filtering, where the matches show from.
+func (m Model[T]) Scroll() layout.Scroll {
+	if m.find.on {
+		n := len(m.filtered())
+		return m.find.win.Clamp(n).Scroll(n)
+	}
+	return m.win.Clamp(len(m.rows)).Scroll(len(m.rows))
+}
+
 // SetRows replaces the rows, keeping the cursor on the row with the same
 // label when it survives (at the same index first), else on the first
 // selectable one.

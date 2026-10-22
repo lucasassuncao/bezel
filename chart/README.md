@@ -8,12 +8,14 @@
 import "github.com/lucasassuncao/bezel/chart"
 ```
 
-Package chart draws a run of numbers over time in cells: Area as columns several rows tall, Spark as one row, the newest value on the right. Each cell is cut to an eighth, so a column grows smoothly.
+Package chart draws numbers in cells: Area and Spark a run of them over time, the newest on the right, and Bars a few side by side, one row each. Every cell is cut to an eighth, so a bar or a column grows smoothly.
 
 ## Index
 
 - [func Area\(values \[\]float64, top float64, width, height int, th theme.Resolved, opts ...Option\) string](<#Area>)
+- [func Bars\(bars \[\]Bar, top float64, width int, th theme.Resolved, opts ...Option\) string](<#Bars>)
 - [func Spark\(values \[\]float64, top float64, width int, th theme.Resolved, opts ...Option\) string](<#Spark>)
+- [type Bar](<#Bar>)
 - [type Option](<#Option>)
   - [func InSeries\(i int\) Option](<#InSeries>)
 
@@ -27,6 +29,15 @@ func Area(values []float64, top float64, width, height int, th theme.Resolved, o
 
 Area is the last width values as columns height rows tall, scaled so top fills them, each row coloured along the theme's ramp from the bottom up. Fewer values than columns leave the left blank.
 
+<a name="Bars"></a>
+## func [Bars](<https://github.com/lucasassuncao/bezel/blob/main/chart/bars.go#L29>)
+
+```go
+func Bars(bars []Bar, top float64, width int, th theme.Resolved, opts ...Option) string
+```
+
+Bars is one row per bar, width cells wide: the labels in a column, each bar scaled so top fills it, its edge cut to an eighth, and its text right\-aligned at the end. A long label is cut before the bars give up any room.
+
 <a name="Spark"></a>
 ## func [Spark](<https://github.com/lucasassuncao/bezel/blob/main/chart/chart.go#L63>)
 
@@ -35,6 +46,20 @@ func Spark(values []float64, top float64, width int, th theme.Resolved, opts ...
 ```
 
 Spark is the last width values as one row, scaled to top, in the accent.
+
+<a name="Bar"></a>
+## type [Bar](<https://github.com/lucasassuncao/bezel/blob/main/chart/bars.go#L16-L21>)
+
+Bar is one row of Bars: what it measures, how much, and the text after it, Value printed when empty. Style paints this bar alone, as a threshold would; nil keeps the chart's colour.
+
+```go
+type Bar struct {
+    Label string
+    Value float64
+    Text  string
+    Style *lipgloss.Style
+}
+```
 
 <a name="Option"></a>
 ## type [Option](<https://github.com/lucasassuncao/bezel/blob/main/chart/chart.go#L16>)

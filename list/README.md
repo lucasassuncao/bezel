@@ -23,6 +23,7 @@ Package list is a cursor list with section headings, a scroll indicator and a / 
   - [func \(m Model\[T\]\) IsFiltering\(\) bool](<#Model[T].IsFiltering>)
   - [func \(m Model\[T\]\) Len\(\) int](<#Model[T].Len>)
   - [func \(m Model\[T\]\) Rows\(\) \[\]Row\[T\]](<#Model[T].Rows>)
+  - [func \(m Model\[T\]\) Scroll\(\) layout.Scroll](<#Model[T].Scroll>)
   - [func \(m Model\[T\]\) Selected\(\) \*Row\[T\]](<#Model[T].Selected>)
   - [func \(m Model\[T\]\) SetHeight\(h int\) Model\[T\]](<#Model[T].SetHeight>)
   - [func \(m Model\[T\]\) SetRows\(rows \[\]Row\[T\]\) Model\[T\]](<#Model[T].SetRows>)
@@ -145,8 +146,17 @@ func (m Model[T]) Rows() []Row[T]
 
 Rows is a copy of every row, headings included.
 
+<a name="Model[T].Scroll"></a>
+### func \(Model\[T\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L123>)
+
+```go
+func (m Model[T]) Scroll() layout.Scroll
+```
+
+Scroll is where the list shows its rows from, for a pane's scrollbar; while filtering, where the matches show from.
+
 <a name="Model[T].Selected"></a>
-### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L152>)
+### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L162>)
 
 ```go
 func (m Model[T]) Selected() *Row[T]
@@ -155,7 +165,7 @@ func (m Model[T]) Selected() *Row[T]
 Selected is the row under the cursor, or nil on a heading or an empty list. While filtering it is the row under the filter cursor.
 
 <a name="Model[T].SetHeight"></a>
-### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L144>)
+### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L154>)
 
 ```go
 func (m Model[T]) SetHeight(h int) Model[T]
@@ -164,7 +174,7 @@ func (m Model[T]) SetHeight(h int) Model[T]
 SetHeight updates the visible row count and re\-clamps the scroll.
 
 <a name="Model[T].SetRows"></a>
-### func \(Model\[T\]\) [SetRows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L124>)
+### func \(Model\[T\]\) [SetRows](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L134>)
 
 ```go
 func (m Model[T]) SetRows(rows []Row[T]) Model[T]
@@ -173,7 +183,7 @@ func (m Model[T]) SetRows(rows []Row[T]) Model[T]
 SetRows replaces the rows, keeping the cursor on the row with the same label when it survives \(at the same index first\), else on the first selectable one.
 
 <a name="Model[T].Update"></a>
-### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L170>)
+### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L180>)
 
 ```go
 func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
@@ -182,7 +192,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
 Update handles one key. Keys the list does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L271>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/list/list.go#L281>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved) string

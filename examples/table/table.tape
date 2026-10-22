@@ -1,4 +1,4 @@
-# table: columns sized to their contents; w narrows and the description gives way first.
+# table: rows scroll under the header with a scrollbar; w narrows and the description gives way first.
 #
 # Record from the repository root: vhs examples/table/table.tape
 
@@ -35,6 +35,15 @@ Enter
 Wait+Screen /DESCRIPTION/
 Show
 Sleep 2s
+
+Down@250ms 6
+Sleep 800ms
+PageDown@600ms 2
+Sleep 1.5s
+Enter
+Sleep 1.5s
+PageUp@600ms 3
+Sleep 1s
 
 Type "w"
 Sleep 2.5s
