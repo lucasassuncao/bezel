@@ -11,7 +11,7 @@ p = p.WithCursor(2)            // p before the call still has its old cursor
 sh, handled, cmd := sh.Update(msg)
 ```
 
-The shell keeps what it is handed by value too: `SetInput` takes the status row's input and `Input` reads it back after `Update`; a `Tab` that changes goes back through `SetTabs`. The one exception is `textbox`, which follows bubbles' own `textarea.Model`, `SetText(&ta, s)` included.
+The shell keeps what it is handed by value too: `SetInput` takes the status row's input and `Input` reads it back after `Update`; a `Tab` that changes goes back through `SetTabs`.
 
 ## The theme
 
@@ -34,7 +34,7 @@ A component that draws takes a `theme.Resolved`, never loose lipgloss styles. Wh
 | --- | --- | --- |
 | `Update(tea.Msg) (T, bool, tea.Cmd)` | `shell.Shell`, `overlay.Stack` | They route: `handled` false means the message is still the app's. |
 | `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model` | They only move a cursor. The `Action` says what a key did (`list.Chosen`, `tree.Expanded`), the app decides what it means, and they never produce a command. |
-| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model` and `animation.Tween` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
+| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model` and `animation.Tween` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
 
 A new component picks the row whose "Why" fits it, not a fourth shape.
 
@@ -75,5 +75,4 @@ A new component reaches for one of these before it invents a shape.
 | Functional options | `shell.Option` on the prebuilt actions, `With` on every model: optional settings without a growing constructor. |
 | Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `form.Holder`: an overlay or field opts into a behaviour by implementing one small interface. |
 | Strategy | `tree.View`'s row, `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies the answer. |
-| Adapter | `textbox`: a bubbles component with bezel's theme, keys and legend. |
 | Cascade | `theme.Theme.Base`: each layer overrides the one under it, so a preset is a base to build on. |

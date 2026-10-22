@@ -8,51 +8,262 @@
 import "github.com/lucasassuncao/bezel/textbox"
 ```
 
-Package textbox is the bubbles text area set up for a multi\-line value: no length or line cap, the numbered gutter NumberLines draws, and the theme's colours. Height stays the caller's: a panel sizes it, a form grows it.
+Package textbox is a multi\-line text field: its lines numbered in draw's gutter, a long one wrapped at the field's width, the caret moved by the readline keys, and no cap on what it holds.
 
 ## Index
 
-- [func New\(th theme.Resolved\) textarea.Model](<#New>)
-- [func Restyle\(ta textarea.Model, th theme.Resolved\) textarea.Model](<#Restyle>)
-- [func SetText\(ta \*textarea.Model, s string\)](<#SetText>)
-- [func Update\(ta textarea.Model, msg tea.Msg\) \(textarea.Model, tea.Cmd\)](<#Update>)
+- [type BlinkMsg](<#BlinkMsg>)
+- [type Keys](<#Keys>)
+  - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
+- [type Model](<#Model>)
+  - [func New\(th theme.Resolved\) Model](<#New>)
+  - [func \(m Model\) Blink\(\) tea.Cmd](<#Model.Blink>)
+  - [func \(m Model\) Blur\(\) Model](<#Model.Blur>)
+  - [func \(m Model\) Column\(\) int](<#Model.Column>)
+  - [func \(m Model\) Focus\(\) \(Model, tea.Cmd\)](<#Model.Focus>)
+  - [func \(m Model\) Focused\(\) bool](<#Model.Focused>)
+  - [func \(m Model\) Height\(\) int](<#Model.Height>)
+  - [func \(m Model\) Line\(\) int](<#Model.Line>)
+  - [func \(m Model\) LineCount\(\) int](<#Model.LineCount>)
+  - [func \(m Model\) MoveTo\(line, col int\) Model](<#Model.MoveTo>)
+  - [func \(m Model\) SetHeight\(h int\) Model](<#Model.SetHeight>)
+  - [func \(m Model\) SetTheme\(th theme.Resolved\) Model](<#Model.SetTheme>)
+  - [func \(m Model\) SetValue\(s string\) Model](<#Model.SetValue>)
+  - [func \(m Model\) SetWidth\(w int\) Model](<#Model.SetWidth>)
+  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
+  - [func \(m Model\) Value\(\) string](<#Model.Value>)
+  - [func \(m Model\) View\(\) string](<#Model.View>)
+  - [func \(m Model\) Width\(\) int](<#Model.Width>)
+  - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
+  - [func \(m Model\) WithValue\(s string\) Model](<#Model.WithValue>)
 
+
+<a name="BlinkMsg"></a>
+## type [BlinkMsg](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L64>)
+
+BlinkMsg flips the caret of the field that armed it. A host hands it on the way it hands on keys; a field ignores every other field's.
+
+```go
+type BlinkMsg struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="Keys"></a>
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L24-L31>)
+
+Keys are the editing bindings. Any other key that types text inserts it.
+
+```go
+type Keys struct {
+    Left, Right, WordLeft, WordRight   key.Binding
+    Up, Down, PageUp, PageDown         key.Binding
+    LineStart, LineEnd, Top, Bottom    key.Binding
+    Newline, DeleteBack, DeleteForward key.Binding
+    DeleteWordBack, DeleteWordForward  key.Binding
+    KillToStart, KillToEnd             key.Binding
+}
+```
+
+<a name="DefaultKeys"></a>
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L35>)
+
+```go
+func DefaultKeys() Keys
+```
+
+DefaultKeys are the arrows, pgup/pgdown, ctrl\+home/end for the ends of the text, and the readline keys an input answers to.
+
+<a name="Model"></a>
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L71-L83>)
+
+Model is a value: every method returns the new field.
+
+```go
+type Model struct {
+    // contains filtered or unexported fields
+}
+```
 
 <a name="New"></a>
-## func [New](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L19>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L87>)
 
 ```go
-func New(th theme.Resolved) textarea.Model
+func New(th theme.Resolved) Model
 ```
 
-New is an empty text area themed with th. The widget's defaults cap a value at 400 characters and 99 lines, and drop the rest without a word.
+New is an empty field, not focused, sized by its text until SetWidth and SetHeight say otherwise.
 
-<a name="Restyle"></a>
-## func [Restyle](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L31>)
+<a name="Model.Blink"></a>
+### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L182>)
 
 ```go
-func Restyle(ta textarea.Model, th theme.Resolved) textarea.Model
+func (m Model) Blink() tea.Cmd
 ```
 
-Restyle recolours ta and sets its caret's blink, for a theme resolved late. The line under the cursor is left unpainted: highlighted, it reads as a selection. Blurred text is dimmed so the focused widget is the bright one.
+Blink is the command that keeps a focused caret blinking, for a host's Init; Focus and every edit arm their own.
 
-<a name="SetText"></a>
-## func [SetText](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L49>)
+<a name="Model.Blur"></a>
+### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L175>)
 
 ```go
-func SetText(ta *textarea.Model, s string)
+func (m Model) Blur() Model
 ```
 
-SetText loads s. The widget breaks a line on \\r and on \\n alike, so a CRLF value would come back with every line doubled.
+Blur takes the keys away, hides the caret and dims the text.
 
-<a name="Update"></a>
-## func [Update](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L54>)
+<a name="Model.Column"></a>
+### func \(Model\) [Column](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L135>)
 
 ```go
-func Update(ta textarea.Model, msg tea.Msg) (textarea.Model, tea.Cmd)
+func (m Model) Column() int
 ```
 
-Update is ta.Update with a paste's CRLF folded first, for the same reason.
+Column is how many characters sit before the caret on its line.
+
+<a name="Model.Focus"></a>
+### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L169>)
+
+```go
+func (m Model) Focus() (Model, tea.Cmd)
+```
+
+Focus gives the field the keys and starts its caret blinking.
+
+<a name="Model.Focused"></a>
+### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L166>)
+
+```go
+func (m Model) Focused() bool
+```
+
+Focused reports whether the field takes keys and shows its caret.
+
+<a name="Model.Height"></a>
+### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L163>)
+
+```go
+func (m Model) Height() int
+```
+
+Height is how many rows the field shows.
+
+<a name="Model.Line"></a>
+### func \(Model\) [Line](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L132>)
+
+```go
+func (m Model) Line() int
+```
+
+Line is the line the caret is on, from 0.
+
+<a name="Model.LineCount"></a>
+### func \(Model\) [LineCount](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L129>)
+
+```go
+func (m Model) LineCount() int
+```
+
+LineCount is how many lines the text has; an empty one has one.
+
+<a name="Model.MoveTo"></a>
+### func \(Model\) [MoveTo](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L139>)
+
+```go
+func (m Model) MoveTo(line, col int) Model
+```
+
+MoveTo puts the caret on line at column col, both kept within the text, and scrolls it into view.
+
+<a name="Model.SetHeight"></a>
+### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L154>)
+
+```go
+func (m Model) SetHeight(h int) Model
+```
+
+SetHeight is how many rows the field shows; zero shows every one.
+
+<a name="Model.SetTheme"></a>
+### func \(Model\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L98>)
+
+```go
+func (m Model) SetTheme(th theme.Resolved) Model
+```
+
+SetTheme repaints the field after the terminal's background was learned.
+
+<a name="Model.SetValue"></a>
+### func \(Model\) [SetValue](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L117>)
+
+```go
+func (m Model) SetValue(s string) Model
+```
+
+SetValue replaces the text after something happened, a reload say, with the caret at its end.
+
+<a name="Model.SetWidth"></a>
+### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L148>)
+
+```go
+func (m Model) SetWidth(w int) Model
+```
+
+SetWidth is the field's width in cells, the gutter included; zero draws each line whole.
+
+<a name="Model.Update"></a>
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L191>)
+
+```go
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
+```
+
+Update edits on a key or a paste while focused, and flips the caret on its own BlinkMsg. A key it has no use for leaves it as it was, with no command.
+
+<a name="Model.Value"></a>
+### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L120>)
+
+```go
+func (m Model) Value() string
+```
+
+Value is the text, its lines joined by "\\n".
+
+<a name="Model.View"></a>
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L502>)
+
+```go
+func (m Model) View() string
+```
+
+View is the rows in the window, each a gutter and a wrapped piece of a line, exactly the width and height set; rows past the text show "\~".
+
+<a name="Model.Width"></a>
+### func \(Model\) [Width](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L160>)
+
+```go
+func (m Model) Width() int
+```
+
+Width is the field's width in cells, the gutter included.
+
+<a name="Model.WithKeys"></a>
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L92>)
+
+```go
+func (m Model) WithKeys(k Keys) Model
+```
+
+WithKeys rebinds the editing keys.
+
+<a name="Model.WithValue"></a>
+### func \(Model\) [WithValue](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L105>)
+
+```go
+func (m Model) WithValue(s string) Model
+```
+
+WithValue is the field holding s, the caret at its end. CRLF and lone CRs read as line breaks, so a Windows file comes back one line per line.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 

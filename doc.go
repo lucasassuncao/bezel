@@ -36,8 +36,8 @@
 //     expand/collapse, generic over the node type.
 //   - [github.com/lucasassuncao/bezel/table]: sizes columns to their contents
 //     within a width, and a cursor over rows under a fixed header.
-//   - [github.com/lucasassuncao/bezel/textbox]: the bubbles text area set up for
-//     a multi-line value.
+//   - [github.com/lucasassuncao/bezel/textbox]: a multi-line text field with
+//     numbered lines that wrap at its width.
 //   - [github.com/lucasassuncao/bezel/browser]: a pick-from-a-list screen, labels
 //     left and the selected item's detail right.
 //   - [github.com/lucasassuncao/bezel/animation]: an eased integer tween for

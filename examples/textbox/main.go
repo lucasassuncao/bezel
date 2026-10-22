@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"charm.land/bubbles/v2/textarea"
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -17,13 +16,13 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-const seed = "# notes\r\nThe seed uses CRLF; SetText folds it,\r\nso no line comes back doubled.\r\n"
+const seed = "# notes\r\nThe seed uses CRLF; SetValue folds it,\r\nso no line comes back doubled.\r\n"
 
 type countMsg struct{}
 
 type model struct {
 	sh shell.Shell
-	ta textarea.Model
+	ta textbox.Model
 }
 
 func newModel() model {
@@ -38,19 +37,16 @@ func newModel() model {
 			shell.Quit(shell.WithKey("esc")),
 		},
 	})
-	ta := textbox.New(th)
-	textbox.SetText(&ta, seed)
-	ta.Focus()
+	ta, _ := textbox.New(th).SetValue(seed).Focus()
 	return model{sh: sh, ta: ta}
 }
 
-func (m model) Init() tea.Cmd { return textarea.Blink }
+func (m model) Init() tea.Cmd { return m.ta.Blink() }
 
 // fit sizes the text area to the pane the shell placed.
 func (m model) fit() model {
 	r := draw.InnerRect(m.sh.Rect("text"))
-	m.ta.SetWidth(r.W)
-	m.ta.SetHeight(r.H)
+	m.ta = m.ta.SetWidth(r.W).SetHeight(r.H)
 	return m
 }
 
@@ -70,7 +66,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	m.ta, cmd = textbox.Update(m.ta, msg)
+	m.ta, cmd = m.ta.Update(msg)
 	return m, cmd
 }
 
