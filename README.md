@@ -95,6 +95,7 @@ go run ./examples/demo
 - [`tree`](tree): an expandable tree, generic over your node type.
 - [`table`](table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header.
 - [`form`](form): `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
+- [`input`](input): a one-line text field with readline keys, a placeholder and a mask for secrets.
 - [`textbox`](textbox): a multi-line text field with line numbers.
 - [`browser`](browser): a list on the left, the selected item's detail on the right.
 - [`progress`](progress): `Bar`, `Line`, `Smooth`, `Meter` and `Stepper`, each one row.

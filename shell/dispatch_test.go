@@ -3,10 +3,10 @@ package shell
 import (
 	"testing"
 
-	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
@@ -136,8 +136,7 @@ func TestActionsStandAsideForAnOverlay(t *testing.T) {
 func TestActionsStandAsideForTheInput(t *testing.T) {
 	ran := false
 	s := sized(New(actionConfig()).SetActions(Custom("p", "ping", func(ActionContext) tea.Cmd { ran = true; return nil })))
-	in := textinput.New()
-	in.Focus()
+	in, _ := input.New(theme.Resolved{}).Focus()
 	s, _, _ = s.SetInput(in).Update(keyP)
 	require.False(t, ran)
 	got, _ := s.Input()

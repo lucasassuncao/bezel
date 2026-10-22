@@ -2,10 +2,13 @@ package overlay
 
 import (
 	"testing"
+	"time"
 
+	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -43,7 +46,11 @@ func TestFilePickerWithKindRepaintsEntries(t *testing.T) {
 	require.Equal(t, lipgloss.Color(th.Colors.Danger), p.picker.Styles.Cursor.GetForeground())
 }
 
-func TestPromptCaretFollowsTheTheme(t *testing.T) {
-	th := theme.Resolved{CaretBlink: 7}
-	require.EqualValues(t, 7, NewPrompt("t", nil, th).input.Styles().Cursor.BlinkSpeed)
+// The caret's blink, at the theme's pace, comes back to the prompt on top.
+func TestPromptCaretsBlinkReturnsToThePrompt(t *testing.T) {
+	th := theme.Resolved{CaretBlink: time.Nanosecond}
+	_, cmd := NewPrompt("t", nil, th).Update(tea.KeyPressMsg{Code: 'a', Text: "a"})
+	top, ok := cmd().(TopMsg)
+	require.True(t, ok)
+	require.IsType(t, input.BlinkMsg{}, top.Msg)
 }

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"slices"
 
-	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -24,7 +24,7 @@ type Prompt struct {
 	look
 	title    string
 	lines    []string
-	input    textinput.Model
+	input    input.Model
 	label    string
 	preview  func(string) string
 	previewL string
@@ -48,9 +48,7 @@ func DefaultPromptKeys() PromptKeys {
 
 // NewPrompt builds a prompt with a "> " input; onAccept may be nil.
 func NewPrompt(title string, onAccept func(value string) tea.Cmd, th theme.Resolved) Prompt {
-	in := draw.WithCaret(textinput.New(), th.CaretBlink)
-	in.Prompt = "> "
-	in.Focus()
+	in, _ := input.New(th).WithPrompt("> ").Focus()
 	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, look: look{th: th}, keys: DefaultPromptKeys()}
 }
 
@@ -61,10 +59,9 @@ func (p Prompt) WithKeys(k PromptKeys) Prompt {
 }
 
 // WithInput replaces the input, for a caller that configures its own prompt,
-// placeholder, width or caret.
-func (p Prompt) WithInput(in textinput.Model) Prompt {
-	in.Focus()
-	p.input = in
+// placeholder, width or mask.
+func (p Prompt) WithInput(in input.Model) Prompt {
+	p.input, _ = in.Focus()
 	return p
 }
 
@@ -92,8 +89,8 @@ func (p Prompt) WithPreview(label string, preview func(typed string) string) Pro
 // that cannot be undone.
 func (p Prompt) WithRequire(want string) Prompt {
 	p.require = want
-	if p.input.Placeholder == "" {
-		p.input.Placeholder = want
+	if p.input.Placeholder() == "" {
+		p.input = p.input.WithPlaceholder(want)
 	}
 	return p
 }
@@ -140,7 +137,7 @@ func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 	}
 	var cmd tea.Cmd
 	p.input, cmd = p.input.Update(msg)
-	return p, cmd
+	return p, ToTop(cmd) // the caret's blink comes back to this prompt
 }
 
 // Legend offers enter only when it would do something.

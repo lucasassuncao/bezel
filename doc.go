@@ -18,6 +18,8 @@
 //     Alert, Confirm, Text, Choice, Pick, Help, Prompt, Pager and FilePicker.
 //   - [github.com/lucasassuncao/bezel/form]: Input, Select, Checkbox, Radio,
 //     Toggle and Button, stacked in a Form that moves focus with tab.
+//   - [github.com/lucasassuncao/bezel/input]: a one-line text field with
+//     readline keys, a placeholder and a mask for secrets.
 //   - [github.com/lucasassuncao/bezel/progress]: Bar, Line and Stepper, how far
 //     along something is in one row.
 //   - [github.com/lucasassuncao/bezel/icon]: one set of state marks, Unicode or

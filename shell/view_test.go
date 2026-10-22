@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
@@ -111,9 +111,7 @@ func TestStatusRowShowsInputThenBannerThenTabStatus(t *testing.T) {
 	s, _ = s.SetStatus("saved!", OK, 0)
 	require.Contains(t, ansi.Strip(s.View(demoPanes())), "saved!")
 
-	in := textinput.New()
-	in.Prompt = ":"
-	in.SetValue("cmd")
+	in := input.New(theme.Resolved{}).WithPrompt(":").WithValue("cmd")
 	s = s.SetInput(in)
 	plain := ansi.Strip(s.View(demoPanes()))
 	require.Contains(t, plain, ":cmd")
@@ -189,7 +187,7 @@ func TestADisplayOnlyHelpIsPinnedButNotHandled(t *testing.T) {
 func TestLegendDropsHelpWhileAnInputHasTheKeys(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Help()}})
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
-	in := textinput.New()
+	in := input.New(theme.Resolved{})
 	s = s.SetInput(in)
 	require.NotContains(t, legendRow(s), "[?] help")
 }

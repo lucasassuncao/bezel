@@ -3,14 +3,17 @@ package palette
 import (
 	"strings"
 	"testing"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -157,8 +160,12 @@ func TestSetItemsKeepsTheLineAndClampsThePick(t *testing.T) {
 	require.NotPanics(t, func() { m.View(layout.Rect{W: 80, H: 20}) })
 }
 
-func TestCaretFollowsTheTheme(t *testing.T) {
-	require.EqualValues(t, 7, New(items(), theme.Resolved{CaretBlink: 7}).input.Styles().Cursor.BlinkSpeed)
+// The caret's blink, at the theme's pace, comes back to the palette on top.
+func TestTheCaretsBlinkReturnsToThePalette(t *testing.T) {
+	_, cmd := New(items(), theme.Resolved{CaretBlink: time.Nanosecond}).Update(tea.KeyPressMsg{Code: 'c', Text: "c"})
+	top, ok := cmd().(overlay.TopMsg)
+	require.True(t, ok)
+	require.IsType(t, input.BlinkMsg{}, top.Msg)
 }
 
 func TestTheLegendNamesThePalettesKeys(t *testing.T) {

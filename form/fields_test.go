@@ -2,6 +2,7 @@ package form
 
 import (
 	"testing"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
@@ -76,9 +77,19 @@ func TestWithIconsOverridesTheEnvironment(t *testing.T) {
 	require.Contains(t, ansi.Strip(sw.View(false, 6, 40)), "──●")
 }
 
-func TestInputCaretFollowsTheTheme(t *testing.T) {
-	in := NewInput("Name", "", 10, theme.Resolved{CaretBlink: 7})
-	require.EqualValues(t, 7, in.in.Styles().Cursor.BlinkSpeed)
+func TestInputCaretBlinksAtTheThemesPace(t *testing.T) {
+	_, cmd := NewInput("Name", "", 10, theme.Resolved{CaretBlink: time.Nanosecond}).Focus()
+	start := time.Now()
+	cmd()
+	require.Less(t, time.Since(start), time.Second, "the blink came from the theme, not the half-second default")
+}
+
+func TestInputMaskHidesTheValue(t *testing.T) {
+	in := NewInput("Token", "", 10, th()).WithValue("s3cret").WithMask('*')
+	view := ansi.Strip(in.View(false, 6, 40))
+	require.Contains(t, view, "******")
+	require.NotContains(t, view, "s3cret")
+	require.Equal(t, "s3cret", in.Value())
 }
 
 func TestEachControlTakesItsOwnKeys(t *testing.T) {

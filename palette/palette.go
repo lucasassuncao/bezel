@@ -9,10 +9,9 @@ import (
 	"slices"
 	"strings"
 
-	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
@@ -56,7 +55,7 @@ func DefaultKeys() Keys {
 // Model is the open palette. It is an overlay anchored to the bottom.
 type Model struct {
 	items  []Item
-	input  textinput.Model
+	input  input.Model
 	cursor int // -1 until an arrow picks, so enter obeys what was typed
 	err    string
 	th     theme.Resolved
@@ -65,9 +64,7 @@ type Model struct {
 
 // New opens a palette over items, sorted by name.
 func New(items []Item, th theme.Resolved) Model {
-	in := draw.WithCaret(textinput.New(), th.CaretBlink)
-	in.Prompt = ":"
-	in.Focus()
+	in, _ := input.New(th).WithPrompt(":").Focus()
 	return Model{input: in, cursor: -1, th: th, keys: DefaultKeys()}.SetItems(items)
 }
 
@@ -94,7 +91,7 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd) {
 		// A paste: the input's own business.
 		var cmd tea.Cmd
 		m.input, cmd = m.input.Update(msg)
-		return m, cmd
+		return m, overlay.ToTop(cmd)
 	}
 	switch {
 	case key.Matches(k, m.keys.Run):
@@ -110,7 +107,7 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd) {
 	m.input, cmd = m.input.Update(k)
 	// The list under a pick changed, and the last error was about the old line.
 	m.cursor, m.err = -1, ""
-	return m, cmd
+	return m, overlay.ToTop(cmd) // the caret's blink comes back to the palette
 }
 
 func (m Model) Legend() []legend.Entry {
@@ -178,8 +175,7 @@ func (m Model) complete() Model {
 			line += arg
 		}
 	}
-	m.input.SetValue(line)
-	m.input.CursorEnd()
+	m.input = m.input.SetValue(line)
 	m.cursor = -1
 	return m
 }

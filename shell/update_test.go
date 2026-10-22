@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
@@ -71,8 +71,7 @@ func TestStatusExpiresOnlyForItsOwnTick(t *testing.T) {
 }
 
 func TestStatusInputTakesTheKeys(t *testing.T) {
-	in := textinput.New()
-	in.Focus()
+	in, _ := input.New(theme.Resolved{}).Focus()
 	s := newShell().SetInput(in)
 	s, handled, _ := s.Update(press("a"))
 	require.True(t, handled)
@@ -87,9 +86,25 @@ func TestStatusInputTakesTheKeys(t *testing.T) {
 }
 
 // The input is the shell's own copy: an edit shows only in the shell Update returned.
+// A paste and the caret's blink are the input's too while it is up; after
+// ClearInput they are the app's again.
+func TestStatusInputTakesAPasteAndItsBlink(t *testing.T) {
+	in, _ := input.New(theme.Resolved{CaretBlink: time.Nanosecond}).Focus()
+	s, handled, blink := newShell().SetInput(in).Update(tea.PasteMsg{Content: "pasted"})
+	require.True(t, handled)
+	got, _ := s.Input()
+	require.Equal(t, "pasted", got.Value())
+
+	_, handled, next := s.Update(blink())
+	require.True(t, handled)
+	require.NotNil(t, next, "the blink runs on")
+
+	_, handled, _ = s.ClearInput().Update(tea.PasteMsg{Content: "x"})
+	require.False(t, handled)
+}
+
 func TestStatusInputIsAValue(t *testing.T) {
-	in := textinput.New()
-	in.Focus()
+	in, _ := input.New(theme.Resolved{}).Focus()
 	before := newShell().SetInput(in)
 	after, _, _ := before.Update(press("a"))
 

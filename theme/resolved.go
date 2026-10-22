@@ -28,6 +28,7 @@ type Resolved struct {
 	Section     lipgloss.Style // a heading inside a list
 	TableHeader lipgloss.Style
 	Cursor      lipgloss.Style // the row under the cursor
+	Caret       lipgloss.Style // the cell under a text field's caret
 	Badge       lipgloss.Style // a filled label; recolour its background per kind
 
 	// Chrome styles the shell draws with. Derived from Colors like the rest.
@@ -98,6 +99,7 @@ func buildDerivedStyles(c Colors) Resolved {
 		Section:     lipgloss.NewStyle().Bold(true).Foreground(accent).PaddingLeft(1),
 		TableHeader: lipgloss.NewStyle().Bold(true).Foreground(border),
 		Cursor:      lipgloss.NewStyle().Bold(true).Foreground(selection),
+		Caret:       lipgloss.NewStyle().Foreground(onAccent).Background(selection),
 		Badge:       lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(accent),
 	}
 	for i, s := range c.Series {

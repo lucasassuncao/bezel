@@ -382,7 +382,7 @@ func ResolveColors(t Theme, dark bool) Colors
 ResolveColors merges t into concrete Colors over the adaptive default for a dark or light terminal. A theme that sets Accent but not Selection or Info uses its accent for them; one without a Ramp climbs its states.
 
 <a name="Resolved"></a>
-## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L15-L49>)
+## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L15-L50>)
 
 Resolved is a Theme after the whole cascade has been applied: ready\-to\-use lipgloss styles plus the colors they were derived from. A consumer builds one per instance and only reads it afterwards.
 
@@ -403,6 +403,7 @@ type Resolved struct {
     Section     lipgloss.Style // a heading inside a list
     TableHeader lipgloss.Style
     Cursor      lipgloss.Style // the row under the cursor
+    Caret       lipgloss.Style // the cell under a text field's caret
     Badge       lipgloss.Style // a filled label; recolour its background per kind
 
     // Chrome styles the shell draws with. Derived from Colors like the rest.
@@ -425,7 +426,7 @@ type Resolved struct {
 ```
 
 <a name="Resolve"></a>
-### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L53>)
+### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L54>)
 
 ```go
 func Resolve(t Theme, dark bool) Resolved

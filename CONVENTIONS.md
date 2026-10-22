@@ -19,7 +19,7 @@ A component that draws takes a `theme.Resolved`, never loose lipgloss styles. Wh
 
 | Who calls `View` | Where the theme goes | Packages |
 | --- | --- | --- |
-| bezel, through a fixed interface (`overlay.Overlay`, `form.Field`) | the constructor's last parameter | `overlay`, `form`, `palette`, `textbox` |
+| bezel, through a fixed interface (`overlay.Overlay`, `form.Field`) | the constructor's last parameter | `overlay`, `form`, `palette`, `textbox`, `input` |
 | the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model` |
 | nobody: it is a plain function | after the data it draws | `progress`, `chart`, `inline`, `icon.Set.Render` |
 | `shell` | `shell.Config.Theme`, replaced with `SetTheme` | `shell` |
@@ -34,7 +34,7 @@ A component that draws takes a `theme.Resolved`, never loose lipgloss styles. Wh
 | --- | --- | --- |
 | `Update(tea.Msg) (T, bool, tea.Cmd)` | `shell.Shell`, `overlay.Stack` | They route: `handled` false means the message is still the app's. |
 | `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model` | They only move a cursor. The `Action` says what a key did (`list.Chosen`, `tree.Expanded`), the app decides what it means, and they never produce a command. |
-| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form` and `animation.Tween` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
+| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model` and `animation.Tween` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
 
 A new component picks the row whose "Why" fits it, not a fourth shape.
 
@@ -75,5 +75,5 @@ A new component reaches for one of these before it invents a shape.
 | Functional options | `shell.Option` on the prebuilt actions, `With` on every model: optional settings without a growing constructor. |
 | Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `form.Holder`: an overlay or field opts into a behaviour by implementing one small interface. |
 | Strategy | `tree.View`'s row, `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies the answer. |
-| Adapter | `overlay.FilePicker`, `textbox`, `form.Input`: a bubbles component with bezel's theme, keys and legend. |
+| Adapter | `overlay.FilePicker`, `textbox`: a bubbles component with bezel's theme, keys and legend. |
 | Cascade | `theme.Theme.Base`: each layer overrides the one under it, so a preset is a base to build on. |

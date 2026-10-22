@@ -7,8 +7,7 @@ import (
 	"slices"
 	"time"
 
-	"charm.land/bubbles/v2/textinput"
-
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
@@ -87,7 +86,7 @@ type Shell struct {
 	status    string
 	level     Level
 	statusSeq uint
-	input     textinput.Model // the status row's line, while typing
+	input     input.Model // the status row's line, while typing
 	typing    bool
 
 	busy string // what the spinner says, empty when idle

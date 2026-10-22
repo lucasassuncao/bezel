@@ -47,7 +47,6 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func TitledPanel\(r layout.Rect, title, right, body string, st PanelStyle\) string](<#TitledPanel>)
 - [func Truncate\(s string, width int\) string](<#Truncate>)
 - [func Width\(s string\) int](<#Width>)
-- [func WithCaret\(in textinput.Model, every time.Duration\) textinput.Model](<#WithCaret>)
 - [func Wrap\(s string, width int\) \[\]string](<#Wrap>)
 - [type ButtonStyle](<#ButtonStyle>)
 - [type ChromeStyle](<#ChromeStyle>)
@@ -70,7 +69,7 @@ const GutterWidth = 7
 ```
 
 <a name="Blink"></a>
-## func [Blink](<https://github.com/lucasassuncao/bezel/blob/main/draw/caret.go#L14>)
+## func [Blink](<https://github.com/lucasassuncao/bezel/blob/main/draw/caret.go#L12>)
 
 ```go
 func Blink(every time.Duration) time.Duration
@@ -374,15 +373,6 @@ func Width(s string) int
 ```
 
 Width is how many cells s takes on screen, escapes ignored.
-
-<a name="WithCaret"></a>
-## func [WithCaret](<https://github.com/lucasassuncao/bezel/blob/main/draw/caret.go#L18>)
-
-```go
-func WithCaret(in textinput.Model, every time.Duration) textinput.Model
-```
-
-WithCaret gives in a caret that flips every Blink\(every\). Each keystroke arms one blink, so a host's tests pass a short one through the theme.
 
 <a name="Wrap"></a>
 ## func [Wrap](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L47>)

@@ -4,11 +4,11 @@ import (
 	"slices"
 	"strings"
 
-	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/icon"
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -30,22 +30,25 @@ func optionAt(options []string, i int) string {
 // Input is a one-line text field.
 type Input struct {
 	label string
-	in    textinput.Model
+	in    input.Model
 	th    theme.Resolved
 }
 
 // NewInput is an empty field width cells wide, placeholder shown until typed in.
 func NewInput(label, placeholder string, width int, th theme.Resolved) Input {
-	in := draw.WithCaret(textinput.New(), th.CaretBlink)
-	in.Prompt = ""
-	in.Placeholder = placeholder
-	in.SetWidth(width)
+	in := input.New(th).WithPlaceholder(placeholder).WithWidth(width)
 	return Input{label: label, in: in, th: th}
 }
 
 // WithValue is the field holding s, the way a form opens on saved values.
 func (i Input) WithValue(s string) Input {
-	i.in.SetValue(s)
+	i.in = i.in.WithValue(s)
+	return i
+}
+
+// WithMask draws every character as mask, for a password or a token.
+func (i Input) WithMask(mask rune) Input {
+	i.in = i.in.WithMask(mask)
 	return i
 }
 
@@ -60,12 +63,13 @@ func (i Input) Update(msg tea.Msg) (Field, tea.Cmd) {
 }
 
 func (i Input) Focus() (Field, tea.Cmd) {
-	cmd := i.in.Focus()
+	var cmd tea.Cmd
+	i.in, cmd = i.in.Focus()
 	return i, cmd
 }
 
 func (i Input) Blur() Field {
-	i.in.Blur()
+	i.in = i.in.Blur()
 	return i
 }
 

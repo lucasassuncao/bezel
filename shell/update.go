@@ -3,9 +3,9 @@ package shell
 import (
 	"time"
 
-	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/palette"
 )
@@ -86,15 +86,18 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		return s, false, nil
 	}
 
+	if s.typing {
+		switch msg.(type) {
+		case tea.KeyPressMsg, tea.PasteMsg, input.BlinkMsg:
+			var cmd tea.Cmd
+			s.input, cmd = s.input.Update(msg)
+			return s, true, cmd
+		}
+	}
+
 	k, isKey := msg.(tea.KeyPressMsg)
 	if !isKey {
 		return s, false, nil
-	}
-
-	if s.typing {
-		var cmd tea.Cmd
-		s.input, cmd = s.input.Update(k)
-		return s, true, cmd
 	}
 
 	if next, cmd, ok := s.runKey(k); ok {
@@ -138,16 +141,16 @@ func (s Shell) ClearStatus() Shell {
 
 // SetInput puts a text input on the status row. While it is there it takes
 // every key; the app reads the edits back with Input after each Update.
-func (s Shell) SetInput(m textinput.Model) Shell {
+func (s Shell) SetInput(m input.Model) Shell {
 	s.input, s.typing = m, true
 	return s
 }
 
 // ClearInput takes the input off the status row and gives the keys back.
 func (s Shell) ClearInput() Shell {
-	s.input, s.typing = textinput.Model{}, false
+	s.input, s.typing = input.Model{}, false
 	return s
 }
 
 // Input is the status row's input as edited so far, and false when none is set.
-func (s Shell) Input() (textinput.Model, bool) { return s.input, s.typing }
+func (s Shell) Input() (input.Model, bool) { return s.input, s.typing }
