@@ -43,7 +43,7 @@ The theme sets how everything looks; a component's own styles let an app recolou
 | --- | --- | --- |
 | `Update(tea.Msg) (T, bool, tea.Cmd)` | `shell.Shell`, `overlay.Stack` | They route: `handled` false means the message is still the app's. |
 | `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model`, `paginator` | They only move a cursor. The `Action` says what a key did (`list.Chosen`, `tree.Expanded`), the app decides what it means, and they never produce a command. |
-| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model`, `cursor.Model`, `spinner.Model`, `timer.Model`, `stopwatch.Model`, `viewport.Model` and `animation.Tween` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
+| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model`, `cursor.Model`, `spinner.Model`, `timer.Model`, `stopwatch.Model`, `viewport.Model` and the `animation` types return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
 
 A new component picks the row whose "Why" fits it, not a fourth shape.
 
@@ -68,7 +68,7 @@ An argument most callers would pass as `nil` or `""` is a `With`, not a construc
 
 - No package variable is meant to be changed by an app. The environment is read in one place, `icon.FromEnv()` (ASCII for `BEZEL_ASCII` or `TERM=dumb`); the controls that draw marks default to it and take `WithIcons(set)`. Everything else that varies per app arrives through a constructor, a `With`, the theme or `shell.Config`.
 - `View` never writes back. An overlay that needs its size in `Update` implements `overlay.Resizer`, and the stack hands it the body when pushed and on every new layout. Whatever scrolls keeps its cursor and offset in a `layout.Window`, and hands a pane's scrollbar its position through `Scroll()`.
-- Time arrives as a message, like keys. `animation.New` reads no clock: the first `FrameMsg` its `Tick` delivers starts it, and each tween takes only its own frames.
+- Time arrives as a message, like keys. No animation reads the clock: the first `FrameMsg` its `Tick` delivers starts it, each one takes only its own frames, and a `Clock` hands one frame's time to several at once.
 - The presets (`theme.Mint`, `theme.Plain`, ...) are values to build on: point a `Theme`'s `Base` at one, or copy it, and never change the preset itself.
 
 ## Patterns by name

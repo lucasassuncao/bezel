@@ -1,4 +1,4 @@
-# animation: h slides a hints pane open and shut.
+# animation: every kind of animation, side by side.
 #
 # Record from the repository root: vhs examples/animation/animation.tape
 
@@ -32,18 +32,29 @@ Type "clear"
 Enter
 Type ".\animation.exe"
 Enter
-Wait+Screen /press h/
+Wait+Screen /every animation/
 Show
+Sleep 2.5s
+
+Right@400ms 2
+Sleep 1.5s
+Left
 Sleep 1.5s
 
+Type "f"
+Sleep 1.8s
+Type "t"
+Sleep 2s
+Type "s"
+Sleep 1.2s
+
 Type "h"
-Sleep 1.5s
+Sleep 1.2s
 Type "h"
-Sleep 1.5s
-Type "h"
-Sleep 1.5s
-Type "h"
-Sleep 1.5s
+Sleep 1s
+
+Type "r"
+Sleep 2.5s
 
 Hide
 Type "q"

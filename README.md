@@ -112,7 +112,7 @@ go run ./examples/demo
 
 - [`inline`](inline): a yes/no question and a progress bar for CLIs that print logs.
 - [`themebrowser`](themebrowser): the preset table behind a `--list-themes` flag.
-- [`animation`](animation): an eased tween for panels that slide open.
+- [`animation`](animation): eased tweens, springs, colour fades, typed and scrolling text, a shake, and one clock to drive them.
 - [`bezeltest`](bezeltest): key presses for tests that drive a model.
 
 Every package follows the same rules for where the theme goes and how `Update` looks: see [CONVENTIONS.md](CONVENTIONS.md).

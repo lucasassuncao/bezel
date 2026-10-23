@@ -1,5 +1,6 @@
-// Package animation is the eased integer tween that drives panel
-// transitions: a hint pane sliding open, a column growing.
+// Package animation moves things on frames that arrive as messages: eased
+// tweens, springs, colour fades, typed and scrolling text, a shake, and a
+// Clock that drives several of them on one chain of ticks.
 package animation
 
 import (
@@ -23,6 +24,7 @@ type Tween struct {
 	Cur      int       // value sampled by the last advance; the height the frame draws
 	Start    time.Time // zero until the first frame, which starts the clock
 	Dur      time.Duration
+	ease     Ease  // nil is EaseInOut
 	id       int64 // which FrameMsg values are this tween's
 	tag      int64 // which step: a twin frame from a second Tick is dropped
 }
@@ -100,18 +102,7 @@ func (t Tween) At(now time.Time) (int, bool) {
 	if p < 0 {
 		p = 0
 	}
-	return t.From + int(math.Round(float64(t.To-t.From)*easeInOutQuad(p))), false
-}
-
-// easeInOutQuad maps progress in [0,1] onto a quadratic ease-in-out, gentler
-// than tuios' cubic on purpose: on whole cells a cubic freezes, then skips
-// rows, while this never repeats a height more than once over 180ms.
-func easeInOutQuad(t float64) float64 {
-	if t < 0.5 {
-		return 2 * t * t
-	}
-	p := -2*t + 2
-	return 1 - p*p/2
+	return t.From + int(math.Round(float64(t.To-t.From)*t.ease.or()(p))), false
 }
 
 // New builds the tween taking a panel from its on-screen height to target
@@ -122,4 +113,10 @@ func New(from, target int, dur time.Duration) Tween {
 		return Tween{From: target, To: target, Cur: target}
 	}
 	return Tween{From: from, To: target, Cur: from, Dur: dur, id: lastID.Add(1)}
+}
+
+// WithEase is t following e instead of EaseInOut.
+func (t Tween) WithEase(e Ease) Tween {
+	t.ease = e
+	return t
 }

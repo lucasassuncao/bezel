@@ -196,7 +196,7 @@ The table a `--list-themes` flag prints: scrollable in a terminal, plain lines i
 
 Source: [`examples/animation/main.go`](examples/animation/main.go)
 
-A hints pane that slides open and shut on `h`: a tween eases its height and the layout follows it frame by frame.
+Every kind of animation, one per row. `r` races four bars on the four easings, with a sub-cell bar and a counter beside them; `←` and `→` move a steady spring and a bouncy one; `f` fades a status, `t` types a headline and `s` shakes a field. A long path scrolls in a marquee all along, and `h` slides a hints pane open and shut. The timed ones share one `Clock`; the marquee and the pane keep their own ticks.
 
 ![animation](examples/animation/animation.gif)
 
