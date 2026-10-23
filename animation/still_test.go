@@ -1,6 +1,7 @@
 package animation
 
 import (
+	"image/color"
 	"os"
 	"testing"
 	"time"
@@ -57,4 +58,14 @@ func TestMain(m *testing.M) {
 	_ = os.Setenv("BEZEL_NO_MOTION", "")
 	_ = os.Setenv("TERM", "xterm-256color")
 	os.Exit(m.Run())
+}
+
+func TestStillEffectsAreBornAtTheirEnd(t *testing.T) {
+	t.Setenv("BEZEL_NO_MOTION", "1")
+	assert.False(t, NewShimmer("abc", black, white, time.Second).Active())
+	assert.Equal(t, "ab-cd", NewScramble("ab-cd", time.Second).View())
+	assert.Equal(t, "123", NewOdometer(0, 123, time.Second).View())
+	g := NewGradient("abcd", []color.Color{black, white}, time.Second)
+	assert.False(t, g.Active())
+	assert.Equal(t, white, g.colorAt(2), "a still gradient is drawn, only not moved")
 }

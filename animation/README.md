@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/animation"
 ```
 
-Package animation moves things on frames that arrive as messages: tweens that delay, repeat and yoyo, springs, fades, typed and scrolling text, a shake, and a Clock for several at once. BEZEL\_NO\_MOTION or TERM=dumb lands them all at once.
+Package animation moves things on frames that arrive as messages: tweens, springs, points, fades, shimmers, gradients and text effects, alone or on a shared Clock. BEZEL\_NO\_MOTION or TERM=dumb lands them all at once.
 
 ## Index
 
@@ -52,7 +52,28 @@ Package animation moves things on frames that arrive as messages: tweens that de
   - [func \(f Float\) WithEase\(e Ease\) Float](<#Float.WithEase>)
   - [func \(f Float\) WithRepeat\(n int\) Float](<#Float.WithRepeat>)
   - [func \(f Float\) WithYoyo\(\) Float](<#Float.WithYoyo>)
+- [type Follow](<#Follow>)
+  - [func NewFollow\(at Point\) Follow](<#NewFollow>)
+  - [func \(f Follow\) Active\(\) bool](<#Follow.Active>)
+  - [func \(f Follow\) Advance\(now time.Time\) \(Follow, bool\)](<#Follow.Advance>)
+  - [func \(f Follow\) FrameAt\(at time.Time\) FrameMsg](<#Follow.FrameAt>)
+  - [func \(f Follow\) Pos\(\) Point](<#Follow.Pos>)
+  - [func \(f Follow\) Tick\(\) tea.Cmd](<#Follow.Tick>)
+  - [func \(f Follow\) To\(p Point\) \(Follow, tea.Cmd\)](<#Follow.To>)
+  - [func \(f Follow\) Update\(msg tea.Msg\) \(Follow, tea.Cmd\)](<#Follow.Update>)
+  - [func \(f Follow\) WithDamping\(d float64\) Follow](<#Follow.WithDamping>)
+  - [func \(f Follow\) WithFreq\(w float64\) Follow](<#Follow.WithFreq>)
 - [type FrameMsg](<#FrameMsg>)
+- [type Gradient](<#Gradient>)
+  - [func NewGradient\(text string, colors \[\]color.Color, dur time.Duration\) Gradient](<#NewGradient>)
+  - [func \(g Gradient\) Active\(\) bool](<#Gradient.Active>)
+  - [func \(g Gradient\) Advance\(now time.Time\) \(Gradient, bool\)](<#Gradient.Advance>)
+  - [func \(g Gradient\) FrameAt\(at time.Time\) FrameMsg](<#Gradient.FrameAt>)
+  - [func \(g Gradient\) Tick\(\) tea.Cmd](<#Gradient.Tick>)
+  - [func \(g Gradient\) Update\(msg tea.Msg\) \(Gradient, tea.Cmd\)](<#Gradient.Update>)
+  - [func \(g Gradient\) View\(\) string](<#Gradient.View>)
+  - [func \(g Gradient\) WithRepeat\(n int\) Gradient](<#Gradient.WithRepeat>)
+  - [func \(g Gradient\) WithYoyo\(\) Gradient](<#Gradient.WithYoyo>)
 - [type Marquee](<#Marquee>)
   - [func NewMarquee\(text string, width int\) Marquee](<#NewMarquee>)
   - [func \(m Marquee\) Active\(\) bool](<#Marquee.Active>)
@@ -64,6 +85,39 @@ Package animation moves things on frames that arrive as messages: tweens that de
   - [func \(m Marquee\) Update\(msg tea.Msg\) \(Marquee, tea.Cmd\)](<#Marquee.Update>)
   - [func \(m Marquee\) View\(\) string](<#Marquee.View>)
   - [func \(m Marquee\) WithEvery\(d time.Duration\) Marquee](<#Marquee.WithEvery>)
+- [type Move](<#Move>)
+  - [func NewMove\(from, to Point, dur time.Duration\) Move](<#NewMove>)
+  - [func \(m Move\) Active\(\) bool](<#Move.Active>)
+  - [func \(m Move\) Advance\(now time.Time\) \(Move, bool\)](<#Move.Advance>)
+  - [func \(m Move\) FrameAt\(at time.Time\) FrameMsg](<#Move.FrameAt>)
+  - [func \(m Move\) Tick\(\) tea.Cmd](<#Move.Tick>)
+  - [func \(m Move\) Update\(msg tea.Msg\) \(Move, tea.Cmd\)](<#Move.Update>)
+  - [func \(m Move\) WithDelay\(d time.Duration\) Move](<#Move.WithDelay>)
+  - [func \(m Move\) WithEase\(e Ease\) Move](<#Move.WithEase>)
+  - [func \(m Move\) WithRepeat\(n int\) Move](<#Move.WithRepeat>)
+  - [func \(m Move\) WithYoyo\(\) Move](<#Move.WithYoyo>)
+- [type Odometer](<#Odometer>)
+  - [func NewOdometer\(from, to int, dur time.Duration\) Odometer](<#NewOdometer>)
+  - [func \(o Odometer\) Active\(\) bool](<#Odometer.Active>)
+  - [func \(o Odometer\) Advance\(now time.Time\) \(Odometer, bool\)](<#Odometer.Advance>)
+  - [func \(o Odometer\) FrameAt\(at time.Time\) FrameMsg](<#Odometer.FrameAt>)
+  - [func \(o Odometer\) Tick\(\) tea.Cmd](<#Odometer.Tick>)
+  - [func \(o Odometer\) To\(n int\) \(Odometer, tea.Cmd\)](<#Odometer.To>)
+  - [func \(o Odometer\) Update\(msg tea.Msg\) \(Odometer, tea.Cmd\)](<#Odometer.Update>)
+  - [func \(o Odometer\) Value\(\) int](<#Odometer.Value>)
+  - [func \(o Odometer\) View\(\) string](<#Odometer.View>)
+- [type Point](<#Point>)
+  - [func \(p Point\) Round\(\) \(x, y int\)](<#Point.Round>)
+- [type Scramble](<#Scramble>)
+  - [func NewScramble\(text string, dur time.Duration\) Scramble](<#NewScramble>)
+  - [func \(s Scramble\) Active\(\) bool](<#Scramble.Active>)
+  - [func \(s Scramble\) Advance\(now time.Time\) \(Scramble, bool\)](<#Scramble.Advance>)
+  - [func \(s Scramble\) FrameAt\(at time.Time\) FrameMsg](<#Scramble.FrameAt>)
+  - [func \(s Scramble\) Tick\(\) tea.Cmd](<#Scramble.Tick>)
+  - [func \(s Scramble\) Update\(msg tea.Msg\) \(Scramble, tea.Cmd\)](<#Scramble.Update>)
+  - [func \(s Scramble\) View\(\) string](<#Scramble.View>)
+  - [func \(s Scramble\) WithCharset\(chars string\) Scramble](<#Scramble.WithCharset>)
+  - [func \(s Scramble\) WithDelay\(d time.Duration\) Scramble](<#Scramble.WithDelay>)
 - [type Shake](<#Shake>)
   - [func NewShake\(amp int, dur time.Duration\) Shake](<#NewShake>)
   - [func \(s Shake\) Active\(\) bool](<#Shake.Active>)
@@ -75,6 +129,18 @@ Package animation moves things on frames that arrive as messages: tweens that de
   - [func \(s Shake\) View\(block string\) string](<#Shake.View>)
   - [func \(s Shake\) WithDelay\(d time.Duration\) Shake](<#Shake.WithDelay>)
   - [func \(s Shake\) WithRepeat\(n int\) Shake](<#Shake.WithRepeat>)
+- [type Shimmer](<#Shimmer>)
+  - [func NewShimmer\(text string, base, glow color.Color, dur time.Duration\) Shimmer](<#NewShimmer>)
+  - [func \(s Shimmer\) Active\(\) bool](<#Shimmer.Active>)
+  - [func \(s Shimmer\) Advance\(now time.Time\) \(Shimmer, bool\)](<#Shimmer.Advance>)
+  - [func \(s Shimmer\) FrameAt\(at time.Time\) FrameMsg](<#Shimmer.FrameAt>)
+  - [func \(s Shimmer\) Tick\(\) tea.Cmd](<#Shimmer.Tick>)
+  - [func \(s Shimmer\) Update\(msg tea.Msg\) \(Shimmer, tea.Cmd\)](<#Shimmer.Update>)
+  - [func \(s Shimmer\) View\(\) string](<#Shimmer.View>)
+  - [func \(s Shimmer\) WithBand\(n int\) Shimmer](<#Shimmer.WithBand>)
+  - [func \(s Shimmer\) WithDelay\(d time.Duration\) Shimmer](<#Shimmer.WithDelay>)
+  - [func \(s Shimmer\) WithRepeat\(n int\) Shimmer](<#Shimmer.WithRepeat>)
+  - [func \(s Shimmer\) WithYoyo\(\) Shimmer](<#Shimmer.WithYoyo>)
 - [type Spring](<#Spring>)
   - [func NewSpring\(pos float64\) Spring](<#NewSpring>)
   - [func \(s Spring\) Active\(\) bool](<#Spring.Active>)
@@ -485,6 +551,107 @@ func (f Float) WithYoyo() Float
 
 WithYoyo sends every other run of f back the way it came.
 
+<a name="Follow"></a>
+## type [Follow](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L101-L104>)
+
+Follow springs a point after a target on both axes, on one chain of frames.
+
+```go
+type Follow struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewFollow"></a>
+### func [NewFollow](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L107>)
+
+```go
+func NewFollow(at Point) Follow
+```
+
+NewFollow is a point at rest at at, each axis a NewSpring.
+
+<a name="Follow.Active"></a>
+### func \(Follow\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L143>)
+
+```go
+func (f Follow) Active() bool
+```
+
+Active reports whether either axis is still moving.
+
+<a name="Follow.Advance"></a>
+### func \(Follow\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L171>)
+
+```go
+func (f Follow) Advance(now time.Time) (Follow, bool)
+```
+
+Advance is f moved to now, and whether it came to rest.
+
+<a name="Follow.FrameAt"></a>
+### func \(Follow\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L155>)
+
+```go
+func (f Follow) FrameAt(at time.Time) FrameMsg
+```
+
+FrameAt is f's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Follow.Pos"></a>
+### func \(Follow\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L140>)
+
+```go
+func (f Follow) Pos() Point
+```
+
+Pos is where the point is now.
+
+<a name="Follow.Tick"></a>
+### func \(Follow\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L146>)
+
+```go
+func (f Follow) Tick() tea.Cmd
+```
+
+Tick is the command for f's next frame, nil at rest.
+
+<a name="Follow.To"></a>
+### func \(Follow\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L125>)
+
+```go
+func (f Follow) To(p Point) (Follow, tea.Cmd)
+```
+
+To aims f at p. A point at rest starts its frames; a moving one keeps them, and its speed. When motion is Still it jumps there.
+
+<a name="Follow.Update"></a>
+### func \(Follow\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L158>)
+
+```go
+func (f Follow) Update(msg tea.Msg) (Follow, tea.Cmd)
+```
+
+Update moves f on its own frames and asks for the next until it rests.
+
+<a name="Follow.WithDamping"></a>
+### func \(Follow\) [WithDamping](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L118>)
+
+```go
+func (f Follow) WithDamping(d float64) Follow
+```
+
+WithDamping is f with damping d on both axes: 1 settles, below it bounces.
+
+<a name="Follow.WithFreq"></a>
+### func \(Follow\) [WithFreq](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L112>)
+
+```go
+func (f Follow) WithFreq(w float64) Follow
+```
+
+WithFreq is f with stiffness w on both axes, in radians a second.
+
 <a name="FrameMsg"></a>
 ## type [FrameMsg](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L35-L38>)
 
@@ -496,6 +663,98 @@ type FrameMsg struct {
     // contains filtered or unexported fields
 }
 ```
+
+<a name="Gradient"></a>
+## type [Gradient](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L17-L22>)
+
+Gradient spreads colours round a text and lets them flow along it: a title or a banner that is alive while the screen waits.
+
+```go
+type Gradient struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewGradient"></a>
+### func [NewGradient](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L27>)
+
+```go
+func NewGradient(text string, colors []color.Color, dur time.Duration) Gradient
+```
+
+NewGradient spreads colors evenly round text, back to the first at the end, and turns them once every dur for as long as it lives. Still, it is drawn without moving.
+
+<a name="Gradient.Active"></a>
+### func \(Gradient\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L68>)
+
+```go
+func (g Gradient) Active() bool
+```
+
+Active reports whether the colours are still flowing.
+
+<a name="Gradient.Advance"></a>
+### func \(Gradient\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L91>)
+
+```go
+func (g Gradient) Advance(now time.Time) (Gradient, bool)
+```
+
+Advance is g at now, and whether it stopped.
+
+<a name="Gradient.FrameAt"></a>
+### func \(Gradient\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L74>)
+
+```go
+func (g Gradient) FrameAt(at time.Time) FrameMsg
+```
+
+FrameAt is g's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Gradient.Tick"></a>
+### func \(Gradient\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L71>)
+
+```go
+func (g Gradient) Tick() tea.Cmd
+```
+
+Tick is the command for g's next frame, nil once it stopped.
+
+<a name="Gradient.Update"></a>
+### func \(Gradient\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L77>)
+
+```go
+func (g Gradient) Update(msg tea.Msg) (Gradient, tea.Cmd)
+```
+
+Update flows on its own frames and asks for the next while it runs.
+
+<a name="Gradient.View"></a>
+### func \(Gradient\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L46>)
+
+```go
+func (g Gradient) View() string
+```
+
+View is the text, each grapheme in its colour now.
+
+<a name="Gradient.WithRepeat"></a>
+### func \(Gradient\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L34>)
+
+```go
+func (g Gradient) WithRepeat(n int) Gradient
+```
+
+WithRepeat turns g n more times after the first instead of forever.
+
+<a name="Gradient.WithYoyo"></a>
+### func \(Gradient\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/gradient.go#L40>)
+
+```go
+func (g Gradient) WithYoyo() Gradient
+```
+
+WithYoyo sends every other turn back the way it came.
 
 <a name="Marquee"></a>
 ## type [Marquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L99-L107>)
@@ -598,6 +857,311 @@ func (m Marquee) WithEvery(d time.Duration) Marquee
 
 WithEvery steps the text once every d instead of every 120ms.
 
+<a name="Move"></a>
+## type [Move](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L18-L22>)
+
+Move eases a point from one place to another over a duration: an overlay that drops in, a marker that travels.
+
+```go
+type Move struct {
+    From, To Point
+    Cur      Point // where the last frame put it
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewMove"></a>
+### func [NewMove](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L26>)
+
+```go
+func NewMove(from, to Point, dur time.Duration) Move
+```
+
+NewMove goes from from to to over dur. When dur \<= 0, from == to or motion is Still it is inactive and already at to.
+
+<a name="Move.Active"></a>
+### func \(Move\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L58>)
+
+```go
+func (m Move) Active() bool
+```
+
+Active reports whether m is still moving.
+
+<a name="Move.Advance"></a>
+### func \(Move\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L81>)
+
+```go
+func (m Move) Advance(now time.Time) (Move, bool)
+```
+
+Advance is m at now, and whether it landed.
+
+<a name="Move.FrameAt"></a>
+### func \(Move\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L64>)
+
+```go
+func (m Move) FrameAt(at time.Time) FrameMsg
+```
+
+FrameAt is m's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Move.Tick"></a>
+### func \(Move\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L61>)
+
+```go
+func (m Move) Tick() tea.Cmd
+```
+
+Tick is the command for m's next frame, nil once it landed.
+
+<a name="Move.Update"></a>
+### func \(Move\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L67>)
+
+```go
+func (m Move) Update(msg tea.Msg) (Move, tea.Cmd)
+```
+
+Update moves on its own frames and asks for the next until it lands.
+
+<a name="Move.WithDelay"></a>
+### func \(Move\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L40>)
+
+```go
+func (m Move) WithDelay(d time.Duration) Move
+```
+
+WithDelay holds m at From for d after its first frame.
+
+<a name="Move.WithEase"></a>
+### func \(Move\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L34>)
+
+```go
+func (m Move) WithEase(e Ease) Move
+```
+
+WithEase is m following e instead of EaseInOut.
+
+<a name="Move.WithRepeat"></a>
+### func \(Move\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L46>)
+
+```go
+func (m Move) WithRepeat(n int) Move
+```
+
+WithRepeat runs m n more times after the first, or without end for Forever.
+
+<a name="Move.WithYoyo"></a>
+### func \(Move\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L52>)
+
+```go
+func (m Move) WithYoyo() Move
+```
+
+WithYoyo sends every other run of m back the way it came.
+
+<a name="Odometer"></a>
+## type [Odometer](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L14-L20>)
+
+Odometer rolls a whole number to a new value digit by digit, each column turning through the digits between, the right\-hand ones spinning most: a counter that changes often and should be seen to change.
+
+```go
+type Odometer struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewOdometer"></a>
+### func [NewOdometer](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L24>)
+
+```go
+func NewOdometer(from, to int, dur time.Duration) Odometer
+```
+
+NewOdometer rolls from from to to over dur, easing out. Values below zero read as zero.
+
+<a name="Odometer.Active"></a>
+### func \(Odometer\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L68>)
+
+```go
+func (o Odometer) Active() bool
+```
+
+Active reports whether the columns are still turning.
+
+<a name="Odometer.Advance"></a>
+### func \(Odometer\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L91>)
+
+```go
+func (o Odometer) Advance(now time.Time) (Odometer, bool)
+```
+
+Advance is o at now, and whether it came to rest.
+
+<a name="Odometer.FrameAt"></a>
+### func \(Odometer\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L74>)
+
+```go
+func (o Odometer) FrameAt(at time.Time) FrameMsg
+```
+
+FrameAt is o's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Odometer.Tick"></a>
+### func \(Odometer\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L71>)
+
+```go
+func (o Odometer) Tick() tea.Cmd
+```
+
+Tick is the command for o's next frame, nil at rest.
+
+<a name="Odometer.To"></a>
+### func \(Odometer\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L35>)
+
+```go
+func (o Odometer) To(n int) (Odometer, tea.Cmd)
+```
+
+To rolls on from the value o is heading for to n, over the same duration.
+
+<a name="Odometer.Update"></a>
+### func \(Odometer\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L77>)
+
+```go
+func (o Odometer) Update(msg tea.Msg) (Odometer, tea.Cmd)
+```
+
+Update turns on its own frames and asks for the next until it rests.
+
+<a name="Odometer.Value"></a>
+### func \(Odometer\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L41>)
+
+```go
+func (o Odometer) Value() int
+```
+
+Value is the number o is rolling to, or resting on.
+
+<a name="Odometer.View"></a>
+### func \(Odometer\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L44>)
+
+```go
+func (o Odometer) View() string
+```
+
+View is the number as the columns show it now, zero\-padded to the width.
+
+<a name="Point"></a>
+## type [Point](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L11>)
+
+Point is a place on the screen in cells, fractional while it moves.
+
+```go
+type Point struct{ X, Y float64 }
+```
+
+<a name="Point.Round"></a>
+### func \(Point\) [Round](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L14>)
+
+```go
+func (p Point) Round() (x, y int)
+```
+
+Round is the cell p is drawn in.
+
+<a name="Scramble"></a>
+## type [Scramble](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L19-L25>)
+
+Scramble shows text as churning noise that settles from the left, letter by letter: a token, a hash or a code that seems decoded rather than printed.
+
+```go
+type Scramble struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewScramble"></a>
+### func [NewScramble](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L29>)
+
+```go
+func NewScramble(text string, dur time.Duration) Scramble
+```
+
+NewScramble settles text over dur. Letters and digits churn; spaces and punctuation stand still, so the shape of the text reads from the start.
+
+<a name="Scramble.Active"></a>
+### func \(Scramble\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L84>)
+
+```go
+func (s Scramble) Active() bool
+```
+
+Active reports whether any letter is still churning.
+
+<a name="Scramble.Advance"></a>
+### func \(Scramble\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L107>)
+
+```go
+func (s Scramble) Advance(now time.Time) (Scramble, bool)
+```
+
+Advance is s at now, and whether it settled.
+
+<a name="Scramble.FrameAt"></a>
+### func \(Scramble\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L90>)
+
+```go
+func (s Scramble) FrameAt(at time.Time) FrameMsg
+```
+
+FrameAt is s's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Scramble.Tick"></a>
+### func \(Scramble\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L87>)
+
+```go
+func (s Scramble) Tick() tea.Cmd
+```
+
+Tick is the command for s's next frame, nil once it settled.
+
+<a name="Scramble.Update"></a>
+### func \(Scramble\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L93>)
+
+```go
+func (s Scramble) Update(msg tea.Msg) (Scramble, tea.Cmd)
+```
+
+Update churns on its own frames and asks for the next until it settles.
+
+<a name="Scramble.View"></a>
+### func \(Scramble\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L50>)
+
+```go
+func (s Scramble) View() string
+```
+
+View is the text with its unsettled letters drawn from the charset.
+
+<a name="Scramble.WithCharset"></a>
+### func \(Scramble\) [WithCharset](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L36>)
+
+```go
+func (s Scramble) WithCharset(chars string) Scramble
+```
+
+WithCharset draws the noise from chars instead of letters and digits.
+
+<a name="Scramble.WithDelay"></a>
+### func \(Scramble\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/scramble.go#L44>)
+
+```go
+func (s Scramble) WithDelay(d time.Duration) Scramble
+```
+
+WithDelay holds every letter in noise for d before the first settles.
+
 <a name="Shake"></a>
 ## type [Shake](<https://github.com/lucasassuncao/bezel/blob/main/animation/shake.go#L16-L20>)
 
@@ -698,6 +1262,116 @@ func (s Shake) WithRepeat(n int) Shake
 ```
 
 WithRepeat shakes s n more times after the first, or without end for Forever.
+
+<a name="Shimmer"></a>
+## type [Shimmer](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L17-L23>)
+
+Shimmer sweeps a glow across text over and over: a placeholder that says something is loading, livelier than a spinner beside it.
+
+```go
+type Shimmer struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewShimmer"></a>
+### func [NewShimmer](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L27>)
+
+```go
+func NewShimmer(text string, base, glow color.Color, dur time.Duration) Shimmer
+```
+
+NewShimmer is text in base with a glow sweeping across it once every dur, for as long as it lives. Plain text only; WithRepeat gives it an end.
+
+<a name="Shimmer.Active"></a>
+### func \(Shimmer\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L80>)
+
+```go
+func (s Shimmer) Active() bool
+```
+
+Active reports whether the glow is still sweeping.
+
+<a name="Shimmer.Advance"></a>
+### func \(Shimmer\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L103>)
+
+```go
+func (s Shimmer) Advance(now time.Time) (Shimmer, bool)
+```
+
+Advance is s at now, and whether its sweeps are over.
+
+<a name="Shimmer.FrameAt"></a>
+### func \(Shimmer\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L86>)
+
+```go
+func (s Shimmer) FrameAt(at time.Time) FrameMsg
+```
+
+FrameAt is s's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Shimmer.Tick"></a>
+### func \(Shimmer\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L83>)
+
+```go
+func (s Shimmer) Tick() tea.Cmd
+```
+
+Tick is the command for s's next frame, nil once it ended.
+
+<a name="Shimmer.Update"></a>
+### func \(Shimmer\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L89>)
+
+```go
+func (s Shimmer) Update(msg tea.Msg) (Shimmer, tea.Cmd)
+```
+
+Update sweeps on its own frames and asks for the next while it runs.
+
+<a name="Shimmer.View"></a>
+### func \(Shimmer\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L58>)
+
+```go
+func (s Shimmer) View() string
+```
+
+View is the text, each grapheme coloured by how near the glow it is.
+
+<a name="Shimmer.WithBand"></a>
+### func \(Shimmer\) [WithBand](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L34>)
+
+```go
+func (s Shimmer) WithBand(n int) Shimmer
+```
+
+WithBand widens or narrows the glow to n cells either side of its centre.
+
+<a name="Shimmer.WithDelay"></a>
+### func \(Shimmer\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L40>)
+
+```go
+func (s Shimmer) WithDelay(d time.Duration) Shimmer
+```
+
+WithDelay holds the glow off the text for d before each first sweep.
+
+<a name="Shimmer.WithRepeat"></a>
+### func \(Shimmer\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L46>)
+
+```go
+func (s Shimmer) WithRepeat(n int) Shimmer
+```
+
+WithRepeat sweeps n more times after the first instead of forever.
+
+<a name="Shimmer.WithYoyo"></a>
+### func \(Shimmer\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/shimmer.go#L52>)
+
+```go
+func (s Shimmer) WithYoyo() Shimmer
+```
+
+WithYoyo sends every other sweep back from the right.
 
 <a name="Spring"></a>
 ## type [Spring](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L17-L26>)

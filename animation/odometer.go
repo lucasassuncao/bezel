@@ -1,0 +1,97 @@
+package animation
+
+import (
+	"fmt"
+	"strconv"
+	"time"
+
+	tea "charm.land/bubbletea/v2"
+)
+
+// Odometer rolls a whole number to a new value digit by digit, each column
+// turning through the digits between, the right-hand ones spinning most: a
+// counter that changes often and should be seen to change.
+type Odometer struct {
+	from, to int
+	width    int // digits, the wider of the two values, zero-padded
+	dur      time.Duration
+	p        float64
+	run      run
+}
+
+// NewOdometer rolls from from to to over dur, easing out. Values below zero
+// read as zero.
+func NewOdometer(from, to int, dur time.Duration) Odometer {
+	from, to = max(from, 0), max(to, 0)
+	o := Odometer{from: from, to: to, dur: dur, width: max(len(strconv.Itoa(from)), len(strconv.Itoa(to)))}
+	if from != to {
+		o.run = newRun(dur)
+		o.run.ease = EaseOut
+	}
+	return o
+}
+
+// To rolls on from the value o is heading for to n, over the same duration.
+func (o Odometer) To(n int) (Odometer, tea.Cmd) {
+	next := NewOdometer(o.to, n, o.dur)
+	return next, next.Tick()
+}
+
+// Value is the number o is rolling to, or resting on.
+func (o Odometer) Value() int { return o.to }
+
+// View is the number as the columns show it now, zero-padded to the width.
+func (o Odometer) View() string {
+	if !o.Active() {
+		return fmt.Sprintf("%0*d", o.width, o.to)
+	}
+	ease := o.run.ease.or()
+	out := make([]byte, o.width)
+	for j := range out {
+		k := o.width - 1 - j // the column's power of ten
+		a, b := digit(o.from, k), digit(o.to, k)
+		steps := (b-a+10)%10 + 10*j // the right-hand columns spin more full turns
+		out[j] = byte('0' + (a+int(float64(steps)*ease(o.p)))%10)
+	}
+	return string(out)
+}
+
+// digit is n's digit for 10^k.
+func digit(n, k int) int {
+	for range k {
+		n /= 10
+	}
+	return n % 10
+}
+
+// Active reports whether the columns are still turning.
+func (o Odometer) Active() bool { return o.run.active() }
+
+// Tick is the command for o's next frame, nil at rest.
+func (o Odometer) Tick() tea.Cmd { return o.run.tick() }
+
+// FrameAt is o's frame for at, for a test or a host that delivers frames itself.
+func (o Odometer) FrameAt(at time.Time) FrameMsg { return o.run.frameAt(at) }
+
+// Update turns on its own frames and asks for the next until it rests.
+func (o Odometer) Update(msg tea.Msg) (Odometer, tea.Cmd) {
+	f, ok := o.run.own(msg)
+	if !ok {
+		return o, nil
+	}
+	if o, _ = o.Advance(f.At); !o.Active() {
+		return o, nil
+	}
+	var cmd tea.Cmd
+	o.run, cmd = o.run.next()
+	return o, cmd
+}
+
+// Advance is o at now, and whether it came to rest.
+func (o Odometer) Advance(now time.Time) (Odometer, bool) {
+	if !o.Active() {
+		return o, true
+	}
+	o.run, o.p = o.run.advance(now)
+	return o, !o.Active()
+}

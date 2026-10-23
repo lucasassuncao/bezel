@@ -61,6 +61,19 @@ Sleep 800ms
 Type "r"
 Sleep 2.5s
 
+Tab
+Sleep 1.5s
+Type "x"
+Sleep 1.5s
+Type "o"
+Sleep 1.5s
+Type "m"
+Sleep 1.5s
+Type "m"
+Sleep 1.5s
+Type "o"
+Sleep 1.5s
+
 Hide
 Type "q"
 Sleep 1s

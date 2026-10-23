@@ -1,5 +1,5 @@
-// Animation: every kind the animation package has, side by side. The timed
-// ones share one Clock; the marquee and the sliding hints pane keep their own.
+// Animation: every kind the animation package has, on two tabs. The timed
+// ones share one Clock; the looping ones and the hints pane keep their own.
 package main
 
 import (
@@ -50,6 +50,16 @@ type (
 	pulseMsg  struct{}
 )
 
+// page is a tab of the gallery: its name and the keys that act on it.
+type page struct {
+	name    string
+	actions []shell.Action
+}
+
+func (p page) Name() string                         { return p.name }
+func (p page) Status(shell.Context) string          { return "" }
+func (p page) Actions(shell.Context) []shell.Action { return p.actions }
+
 // eases are the curves the bars race on, in the order they are drawn.
 var eases = []struct {
 	name string
@@ -76,6 +86,7 @@ type model struct {
 	pulse          animation.Fade
 	cascade        []animation.Tween
 	marquee        animation.Marquee
+	fx             effects // the second tab's
 
 	open   bool
 	tween  animation.Tween // the hints pane's height, on its own frames
@@ -96,13 +107,23 @@ func newModel() model {
 		Layout: shape(0),
 		Theme:  th,
 		Title:  "animation",
+		Tabs: []shell.Tab{
+			page{"basics", []shell.Action{
+				shell.Custom("r", "replay", shell.Send(replayMsg{})),
+				shell.Custom("←/→", "spring", nil, shell.DisplayOnly()),
+				shell.Custom("f", "fade", shell.Send(fadeMsg{})),
+				shell.Custom("t", "type", shell.Send(typeMsg{})),
+				shell.Custom("s", "shake", shell.Send(shakeMsg{})),
+				shell.Custom("p", "pulse", shell.Send(pulseMsg{})),
+			}},
+			page{"effects", []shell.Action{
+				shell.Custom("x", "scramble", shell.Send(scrambleMsg{})),
+				shell.Custom("o", "odometer", shell.Send(odometerMsg{})),
+				shell.Custom("m", "move", shell.Send(moveMsg{})),
+			}},
+		},
 		Actions: []shell.Action{
-			shell.Custom("r", "replay", shell.Send(replayMsg{})),
-			shell.Custom("←/→", "spring", nil, shell.DisplayOnly()),
-			shell.Custom("f", "fade", shell.Send(fadeMsg{})),
-			shell.Custom("t", "type", shell.Send(typeMsg{})),
-			shell.Custom("s", "shake", shell.Send(shakeMsg{})),
-			shell.Custom("p", "pulse", shell.Send(pulseMsg{})),
+			shell.ChangeTab(),
 			shell.Custom("h", "hints", shell.Send(toggleMsg{})),
 			shell.Quit(),
 		},
@@ -116,6 +137,7 @@ func newModel() model {
 		shake:   animation.NewShake(3, 0),
 		pulse:   animation.NewFade(muted, muted, 0),
 		marquee: animation.NewMarquee(longPath, 30),
+		fx:      newEffects(th),
 	}
 }
 
@@ -130,9 +152,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	switch msg := msg.(type) {
 	case startMsg:
+		var fxCmd tea.Cmd
 		m.marquee, cmd = m.marquee.Start()
-		m = m.replay()
-		return m.run(cmd)
+		m.fx, fxCmd = m.fx.start()
+		return m.replay().run(tea.Batch(cmd, fxCmd))
+	case scrambleMsg:
+		m.fx = m.fx.decode()
+		return m.run(nil)
+	case odometerMsg:
+		m.fx = m.fx.roll()
+		return m.run(nil)
+	case moveMsg:
+		m.fx = m.fx.travel()
+		return m.run(nil)
 	case replayMsg:
 		return m.replay().run(nil)
 	case fadeMsg:
@@ -208,12 +240,13 @@ func (m model) run(cmd tea.Cmd) (tea.Model, tea.Cmd) {
 // frame hands a frame to whoever owns it: the hints tween and the marquee
 // take their own, and the clock's moves everything else to its time.
 func (m model) frame(msg animation.FrameMsg) (tea.Model, tea.Cmd) {
-	var slideCmd, marqueeCmd, clockCmd tea.Cmd
+	var slideCmd, marqueeCmd, fxCmd, clockCmd tea.Cmd
 	if m.tween, slideCmd = m.tween.Update(msg); m.tween.Cur != m.height {
 		m.height = m.tween.Cur
 		m.sh = m.sh.SetLayout(shape(m.height))
 	}
 	m.marquee, marqueeCmd = m.marquee.Update(msg)
+	m.fx, fxCmd = m.fx.update(msg)
 	if at, ok := m.clock.Frame(msg); ok {
 		m = m.advance(at)
 		if m.moving() {
@@ -222,7 +255,7 @@ func (m model) frame(msg animation.FrameMsg) (tea.Model, tea.Cmd) {
 			m.clock = m.clock.Stop()
 		}
 	}
-	return m, tea.Batch(slideCmd, marqueeCmd, clockCmd)
+	return m, tea.Batch(slideCmd, marqueeCmd, fxCmd, clockCmd)
 }
 
 // advance moves every animation on the shared clock to at.
@@ -241,6 +274,7 @@ func (m model) advance(at time.Time) model {
 	for i := range m.cascade {
 		m.cascade[i], _ = m.cascade[i].Advance(at)
 	}
+	m.fx = m.fx.advance(at)
 	return m
 }
 
@@ -252,12 +286,17 @@ func (m model) moving() bool {
 		}
 	}
 	return m.steady.Active() || m.bouncy.Active() || m.smooth.Active() || m.count.Active() ||
-		m.fade.Active() || m.typed.Active() || m.shake.Active() || m.pulse.Active()
+		m.fade.Active() || m.typed.Active() || m.shake.Active() || m.pulse.Active() || m.fx.moving()
 }
 
 func (m model) View() tea.View {
 	v := tea.NewView(m.sh.View(map[string]shell.Pane{
-		"main": {Title: "every animation", Right: still(), Body: func(layout.Rect) string { return m.gallery() }},
+		"main": {Title: "every animation", Right: still(), Body: func(layout.Rect) string {
+			if m.sh.ActiveTab() == 1 {
+				return m.fx.rows(m.th, m.label)
+			}
+			return m.gallery()
+		}},
 		"hints": {Title: "hints", Body: func(layout.Rect) string {
 			return "This pane slides on a Tween of its own.\nThe marquee steps on its own ticks too;\neverything else shares one Clock."
 		}},
@@ -268,9 +307,7 @@ func (m model) View() tea.View {
 
 // gallery is one row per animation, its kind and variant on the left.
 func (m model) gallery() string {
-	label := func(kind, variant string) string {
-		return m.th.Accent.Render(fmt.Sprintf("%-11s", kind)) + m.th.Muted.Render(fmt.Sprintf("%-13s", variant))
-	}
+	label := m.label
 	var rows []string
 	for i, e := range eases {
 		kind := ""
@@ -348,4 +385,9 @@ func still() string {
 		return "motion off"
 	}
 	return ""
+}
+
+// label is a row's kind and variant, in two fixed columns.
+func (m model) label(kind, variant string) string {
+	return m.th.Accent.Render(fmt.Sprintf("%-11s", kind)) + m.th.Muted.Render(fmt.Sprintf("%-14s", variant))
 }

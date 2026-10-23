@@ -196,7 +196,7 @@ The table a `--list-themes` flag prints: scrollable in a terminal, plain lines i
 
 Source: [`examples/animation/main.go`](examples/animation/main.go)
 
-Every kind of animation, one per row. `r` races four bars on the four easings, with a sub-cell bar and a counter beside them; `←` and `→` move a steady spring and a bouncy one; `f` fades a status, `t` types a headline, `s` shakes a field and `p` starts and stops a pulse that runs back and forth without end. `r` also sets a cascade of blocks off, each a little after the one before. A long path scrolls in a marquee all along, and `h` slides a hints pane open and shut. With `BEZEL_NO_MOTION` set, every row is drawn at its end. The timed ones share one `Clock`; the marquee and the pane keep their own ticks.
+Every kind of animation, one per row. `r` races four bars on the four easings, with a sub-cell bar and a counter beside them; `←` and `→` move a steady spring and a bouncy one; `f` fades a status, `t` types a headline, `s` shakes a field and `p` starts and stops a pulse that runs back and forth without end. `r` also sets a cascade of blocks off, each a little after the one before. A long path scrolls in a marquee all along, and `h` slides a hints pane open and shut. `tab` turns to the effects: a shimmer and a gradient that loop on their own, `x` scrambling a token until it settles, `o` rolling an odometer on to the next reading and `m` sending two points to the next corner, one eased and one on a spring. With `BEZEL_NO_MOTION` set, every row is drawn at its end. The timed ones share one `Clock`; the marquee and the pane keep their own ticks.
 
 ![animation](examples/animation/animation.gif)
 
