@@ -196,9 +196,9 @@ The table a `--list-themes` flag prints: scrollable in a terminal, plain lines i
 
 Source: [`examples/animation/main.go`](examples/animation/main.go)
 
-Every kind of animation, one per row. Changing tab slides the new one in, through the shell's `Transition`. `r` races four bars on the four easings, with a sub-cell bar and a counter beside them; `←` and `→` move a steady spring and a bouncy one; `f` fades a status, `t` types a headline, `s` shakes a field and `p` starts and stops a pulse that runs back and forth without end. `r` also sets a cascade of blocks off, each a little after the one before. A long path scrolls in a marquee all along, and `h` slides a hints pane open and shut. `tab` turns to the effects: a shimmer and a gradient that loop on their own, `x` scrambling a token until it settles, `o` rolling an odometer on to the next reading and `m` sending two points to the next corner, one eased and one on a spring. A third `tab` races a dot on each of the twelve curves, `i` turning them from out to in to in-out, with the start and end marked so the ones that overshoot show it. The fourth `tab` plays an effect on a card lipgloss drew, read back from its escape codes cell by cell: `e` steps through fade in and out, dissolve, coalesce, sweep, slide in and out, evolve, explode, expand, stretch, a hue shift and a desaturation, and `p` through the orders the cells are reached in, radial, diamond, spiral, wave and the rest. With `BEZEL_NO_MOTION` set, every row is drawn at its end. The timed ones share one `Clock`; the marquee and the pane keep their own ticks.
+Every kind the package has, on four tabs that slide into each other: tweens, springs, fades and typed text; shimmer, scramble, an odometer and points; every easing curve, raced; and effects played over a card that is already drawn. Each tab is recorded, with how to use the package, in [ANIMATION.md](ANIMATION.md).
 
-![animation](examples/animation/animation.gif)
+![animation](examples/animation/basics.gif)
 
 ### Bezeltest
 
@@ -208,7 +208,7 @@ No recording: this one is a test. A counter, and the test that drives it with th
 
 ## Recording
 
-The tapes are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. A full-screen example also starts and quits off camera, so its GIF opens and loops on the program; `inline` and `themebrowser` keep the command on camera, because the prompt is part of what they show. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
+The tapes are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the two that print into the terminal rather than take it over, `inline` and `themebrowser`, run behind a `clear` so their command line never shows. The animation gallery has a tape per tab. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
 
 ```sh
 vhs examples/list/list.tape

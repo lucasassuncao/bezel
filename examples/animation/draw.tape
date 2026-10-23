@@ -1,8 +1,8 @@
-# animation: every kind of animation, side by side.
+# animation, draw: the draw tab: effects over a card that is already drawn
 #
-# Record from the repository root: vhs examples/animation/animation.tape
+# Record from the repository root: vhs examples/animation/draw.tape
 
-Output examples/animation/animation.gif
+Output examples/animation/draw.gif
 
 Require ttyd
 Require ffmpeg
@@ -18,7 +18,7 @@ Set PlaybackSpeed 1.0
 Set TypingSpeed   45ms
 Set Padding       20
 
-# -- Build, off camera ----------------------------------------------------------
+# -- Build and start, off camera -------------------------------------------------
 
 Hide
 # A NO_COLOR inherited from the parent shell would record in monochrome.
@@ -33,86 +33,57 @@ Enter
 Type ".\animation.exe"
 Enter
 Wait+Screen /every animation/
+Tab@600ms 3
+Wait+Screen /pattern/
+Sleep 1.5s
 Show
-Sleep 2.5s
-
-Right@400ms 2
-Sleep 1.5s
-Left
-Sleep 1.5s
-
-Type "f"
-Sleep 1.8s
-Type "t"
-Sleep 2s
-Type "s"
-Sleep 1.2s
-
-Type "h"
-Sleep 1.2s
-Type "h"
 Sleep 1s
 
-Type "p"
-Sleep 2.5s
-Type "p"
-Sleep 800ms
-
 Type "r"
-Sleep 2.5s
-
-Tab
-Sleep 1.5s
-Type "x"
-Sleep 1.5s
-Type "o"
-Sleep 1.5s
-Type "m"
-Sleep 1.5s
-Type "m"
-Sleep 1.5s
-Type "o"
-Sleep 1.5s
-
-Tab
-Sleep 2s
-Type "i"
-Sleep 2s
-Type "i"
-Sleep 2s
-
-Tab
 Sleep 1.5s
 Type "e"
 Sleep 2.6s
+Type "e"
+Sleep 2.6s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 2.6s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 2.6s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 2.6s
+Type "e"
+Sleep 2.6s
+
 Type "e"
 Sleep 1.5s
 Type "p"
 Sleep 1.5s
 Type "p"
 Sleep 1.5s
-Type "e"
+Type "p"
 Sleep 1.5s
-Type "e"
+Type "p"
 Sleep 1.5s
-Type "e"
+Type "p"
 Sleep 1.5s
-Type "e"
-Sleep 2.6s
-Type "e"
-Sleep 1.5s
-Type "e"
-Sleep 1.5s
-Type "e"
-Sleep 2.6s
+
+# -- Quit and clean up, off camera ------------------------------------------------
 
 Hide
 Type "q"
 Sleep 1s
-
-# -- Clean up, off camera ---------------------------------------------------------
-
-Hide
 Type "Remove-Item animation.exe"
 Enter
 Wait

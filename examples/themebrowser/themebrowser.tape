@@ -18,7 +18,7 @@ Set PlaybackSpeed 1.0
 Set TypingSpeed   45ms
 Set Padding       20
 
-# -- Build, off camera ----------------------------------------------------------
+# -- Build and start, off camera -------------------------------------------------
 
 Hide
 # A NO_COLOR inherited from the parent shell would record in monochrome.
@@ -28,23 +28,21 @@ Wait
 Type "go build -o themebrowser.exe ./examples/themebrowser"
 Enter
 Wait
-Type "clear"
-Enter
-Show
-
-Type ".\themebrowser.exe"
-Sleep 400ms
+# clear runs first, so the command line is gone before the camera rolls.
+Type "clear; .\themebrowser.exe"
 Enter
 Wait+Screen /Fruit/
+Show
+
 Sleep 1.5s
 Down@250ms 8
 Sleep 1.5s
-Type "q"
-Sleep 1.5s
 
-# -- Clean up, off camera ---------------------------------------------------------
+# -- Quit and clean up, off camera ------------------------------------------------
 
 Hide
+Type "q"
+Sleep 1s
 Type "Remove-Item themebrowser.exe"
 Enter
 Wait

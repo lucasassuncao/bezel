@@ -70,7 +70,7 @@ One of each control: a name typed into an `Input`, an image picked from a `Selec
 
 ![form](examples/form/form.gif)
 
-Every package has its own example and recording in [EXAMPLES.md](EXAMPLES.md). For all of them at once, run the demo; `DEMO_RW=1` turns on its write-gated key:
+Every package has its own example and recording in [EXAMPLES.md](EXAMPLES.md). The animations have a page of their own, [ANIMATION.md](ANIMATION.md). For all of them at once, run the demo; `DEMO_RW=1` turns on its write-gated key:
 
 ```sh
 go run ./examples/demo

@@ -18,7 +18,7 @@ Set PlaybackSpeed 1.0
 Set TypingSpeed   45ms
 Set Padding       20
 
-# -- Build, off camera ----------------------------------------------------------
+# -- Build and start, off camera -------------------------------------------------
 
 Hide
 # A NO_COLOR inherited from the parent shell would record in monochrome.
@@ -28,13 +28,13 @@ Wait
 Type "go build -o inline.exe ./examples/inline"
 Enter
 Wait
-Type "clear"
+# clear runs first, so the command line is gone before the camera rolls, and
+# the sleep after holds the last frame without a prompt under it.
+Type "clear; .\inline.exe; Start-Sleep 60"
 Enter
+Wait+Screen /fetching index/
 Show
 
-Type ".\inline.exe"
-Sleep 400ms
-Enter
 Wait+Screen /Download them now/
 Sleep 1.5s
 Type "y"
@@ -44,6 +44,8 @@ Sleep 2.5s
 # -- Clean up, off camera ---------------------------------------------------------
 
 Hide
+Ctrl+C
+Sleep 500ms
 Type "Remove-Item inline.exe"
 Enter
 Wait
