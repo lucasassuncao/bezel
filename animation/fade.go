@@ -70,3 +70,21 @@ func Blend(a, b color.Color, p float64) color.Color {
 	}
 	return color.RGBA{mix(ar, br), mix(ag, bg), mix(ab, bb), 255}
 }
+
+// WithDelay holds f at its first colour for d after its first frame.
+func (f Fade) WithDelay(d time.Duration) Fade {
+	f.mix = f.mix.WithDelay(d)
+	return f
+}
+
+// WithRepeat runs f n more times after the first, or without end for Forever.
+func (f Fade) WithRepeat(n int) Fade {
+	f.mix = f.mix.WithRepeat(n)
+	return f
+}
+
+// WithYoyo sends every other run of f back: with Forever, a pulse.
+func (f Fade) WithYoyo() Fade {
+	f.mix = f.mix.WithYoyo()
+	return f
+}

@@ -1,6 +1,6 @@
-// Package animation moves things on frames that arrive as messages: eased
-// tweens, springs, colour fades, typed and scrolling text, a shake, and a
-// Clock that drives several of them on one chain of ticks.
+// Package animation moves things on frames that arrive as messages: tweens that
+// delay, repeat and yoyo, springs, fades, typed and scrolling text, a shake, and
+// a Clock for several at once. BEZEL_NO_MOTION or TERM=dumb lands them all at once.
 package animation
 
 import (
@@ -24,9 +24,10 @@ type Tween struct {
 	Cur      int       // value sampled by the last advance; the height the frame draws
 	Start    time.Time // zero until the first frame, which starts the clock
 	Dur      time.Duration
-	ease     Ease  // nil is EaseInOut
-	id       int64 // which FrameMsg values are this tween's
-	tag      int64 // which step: a twin frame from a second Tick is dropped
+	loop
+	ease Ease  // nil is EaseInOut
+	id   int64 // which FrameMsg values are this tween's
+	tag  int64 // which step: a twin frame from a second Tick is dropped
 }
 
 // FrameMsg is one tick of a tween's clock, at the time it fired. Hand it to
@@ -71,7 +72,7 @@ func (t Tween) Update(msg tea.Msg) (Tween, tea.Cmd) {
 func (t Tween) Active() bool { return t.Dur > 0 }
 
 // Advance is t sampled at now into Cur, and whether it finished, coming back
-// inactive at To. The renderer reads Cur, not At, so one frame never mixes two
+// inactive where it landed. The renderer reads Cur, not At, so one frame never mixes two
 // samples and lays the hint panel out a row off from the space the preview left.
 func (t Tween) Advance(now time.Time) (Tween, bool) {
 	if t.Start.IsZero() {
@@ -80,14 +81,14 @@ func (t Tween) Advance(now time.Time) (Tween, bool) {
 	var done bool
 	t.Cur, done = t.At(now)
 	if done {
-		return Tween{From: t.To, To: t.To, Cur: t.To}, true
+		return Tween{From: t.Cur, To: t.Cur, Cur: t.Cur}, true
 	}
 	return t, false
 }
 
 // At returns the interpolated value at now, and whether the tween has finished.
-// A finished tween reports its end value exactly, so the panel always lands on
-// the height the static layout would have chosen. Before its clock starts it is at From.
+// A finished tween reports its end exactly, To or a yoyo's From, so a panel
+// lands on the height the static layout would choose. Unstarted, it is at From.
 func (t Tween) At(now time.Time) (int, bool) {
 	if t.Dur <= 0 {
 		return t.To, true
@@ -95,21 +96,21 @@ func (t Tween) At(now time.Time) (int, bool) {
 	if t.Start.IsZero() {
 		return t.From, false
 	}
-	p := float64(now.Sub(t.Start)) / float64(t.Dur)
-	if p >= 1 {
+	p, done := t.phase(now.Sub(t.Start), t.Dur)
+	switch {
+	case done && p == 1:
 		return t.To, true
-	}
-	if p < 0 {
-		p = 0
+	case done:
+		return t.From, true
 	}
 	return t.From + int(math.Round(float64(t.To-t.From)*t.ease.or()(p))), false
 }
 
 // New builds the tween taking a panel from its on-screen height to target
 // over dur, its clock started by the first frame Tick delivers. When dur <= 0
-// or from == target it is inactive and already at target: the toggle is instant.
+// or from == target, or motion is Still, it is inactive and already at target.
 func New(from, target int, dur time.Duration) Tween {
-	if dur <= 0 || from == target {
+	if dur <= 0 || from == target || Still() {
 		return Tween{From: target, To: target, Cur: target}
 	}
 	return Tween{From: from, To: target, Cur: from, Dur: dur, id: lastID.Add(1)}
@@ -118,5 +119,23 @@ func New(from, target int, dur time.Duration) Tween {
 // WithEase is t following e instead of EaseInOut.
 func (t Tween) WithEase(e Ease) Tween {
 	t.ease = e
+	return t
+}
+
+// WithDelay holds t at From for d after its first frame.
+func (t Tween) WithDelay(d time.Duration) Tween {
+	t.delay = max(d, 0)
+	return t
+}
+
+// WithRepeat runs t n more times after the first, or without end for Forever.
+func (t Tween) WithRepeat(n int) Tween {
+	t.repeat = max(n, Forever)
+	return t
+}
+
+// WithYoyo sends every other run of t back the way it came.
+func (t Tween) WithYoyo() Tween {
+	t.yoyo = true
 	return t
 }

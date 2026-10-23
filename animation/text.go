@@ -64,13 +64,31 @@ func (w Typewriter) Update(msg tea.Msg) (Typewriter, tea.Cmd) {
 
 // Advance is w at now, and whether it is done.
 func (w Typewriter) Advance(now time.Time) (Typewriter, bool) {
+	if !w.Active() {
+		return w, true
+	}
 	var p float64
 	w.run, p = w.run.advance(now)
 	w.shown = min(int(p*float64(len(w.text))), len(w.text))
-	if !w.run.active() {
-		w.shown = len(w.text)
-	}
-	return w, !w.run.active()
+	return w, !w.Active()
+}
+
+// WithDelay holds w empty for d after its first frame.
+func (w Typewriter) WithDelay(d time.Duration) Typewriter {
+	w.run.delay = max(d, 0)
+	return w
+}
+
+// WithRepeat types w n more times after the first, or without end for Forever.
+func (w Typewriter) WithRepeat(n int) Typewriter {
+	w.run.repeat = max(n, Forever)
+	return w
+}
+
+// WithYoyo erases w on every other run, as if typed backwards.
+func (w Typewriter) WithYoyo() Typewriter {
+	w.run.yoyo = true
+	return w
 }
 
 // marqueeGap is what passes between the end of the text and its start again.
@@ -101,9 +119,10 @@ func (m Marquee) WithEvery(d time.Duration) Marquee {
 	return m
 }
 
-// Start sets the text moving; text that fits is left alone and asks nothing.
+// Start sets the text moving; text that fits, or motion that is Still, is left
+// alone and asks nothing.
 func (m Marquee) Start() (Marquee, tea.Cmd) {
-	if m.running || ansi.StringWidth(m.text) <= m.width {
+	if m.running || Still() || ansi.StringWidth(m.text) <= m.width {
 		return m, nil
 	}
 	if m.id == 0 { // a Marquee never built with NewMarquee

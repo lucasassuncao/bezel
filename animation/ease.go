@@ -40,6 +40,7 @@ func (e Ease) or() Ease {
 // run is the clock a timed animation keeps: when its first frame came, how
 // long it lasts, its curve, and which frames are its own.
 type run struct {
+	loop
 	start   time.Time
 	dur     time.Duration
 	ease    Ease
@@ -47,7 +48,7 @@ type run struct {
 }
 
 func newRun(dur time.Duration) run {
-	if dur <= 0 {
+	if dur <= 0 || Still() {
 		return run{}
 	}
 	return run{dur: dur, id: lastID.Add(1)}
@@ -72,7 +73,7 @@ func (r run) own(msg tea.Msg) (FrameMsg, bool) {
 }
 
 // advance is r at now and its raw progress in [0,1]; the first call starts
-// the clock, and at 1 the run comes back spent.
+// the clock, and once its runs are over it comes back spent.
 func (r run) advance(now time.Time) (run, float64) {
 	if !r.active() {
 		return r, 1
@@ -80,15 +81,47 @@ func (r run) advance(now time.Time) (run, float64) {
 	if r.start.IsZero() {
 		r.start = now
 	}
-	p := float64(now.Sub(r.start)) / float64(r.dur)
-	if p >= 1 {
-		return run{}, 1
+	p, done := r.phase(now.Sub(r.start), r.dur)
+	if done {
+		return run{}, p
 	}
-	return r, max(p, 0)
+	return r, p
 }
 
 // next is r ready for its following frame, with the command that brings it.
 func (r run) next() (run, tea.Cmd) {
 	r.tag++
 	return r, r.tick()
+}
+
+// Forever is the repeat count of a motion that runs until it is replaced.
+const Forever = -1
+
+// loop is when a timed motion begins and how often it runs again.
+type loop struct {
+	delay  time.Duration
+	repeat int  // runs after the first; Forever for no end
+	yoyo   bool // every other run goes back
+}
+
+// phase is the raw progress after elapsed, and whether every run is over: 0
+// through the delay, a yoyo's odd runs backwards, and an exact 0 or 1 at the end.
+func (l loop) phase(elapsed, dur time.Duration) (float64, bool) {
+	elapsed -= l.delay
+	if elapsed < 0 {
+		return 0, false
+	}
+	n := int(elapsed / dur)
+	back := func(n int) bool { return l.yoyo && n%2 == 1 }
+	if l.repeat != Forever && n > l.repeat {
+		if back(l.repeat) {
+			return 0, true
+		}
+		return 1, true
+	}
+	p := float64(elapsed%dur) / float64(dur)
+	if back(n) {
+		p = 1 - p
+	}
+	return p, false
 }

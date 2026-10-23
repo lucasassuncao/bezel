@@ -5,6 +5,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -22,11 +23,14 @@ import (
 const hintsHeight = 8
 
 const (
-	slide  = 300 * time.Millisecond
-	race   = 1500 * time.Millisecond
-	track  = 32 // cells in a bar or a spring's track
-	nudge  = 8  // cells an arrow moves the springs' target
-	counts = 12345
+	slide   = 300 * time.Millisecond
+	race    = 1500 * time.Millisecond
+	track   = 32 // cells in a bar or a spring's track
+	nudge   = 8  // cells an arrow moves the springs' target
+	counts  = 12345
+	blocks  = 6                      // in the cascade
+	block   = 5                      // cells each one grows to
+	stagger = 120 * time.Millisecond // between one block starting and the next
 )
 
 const (
@@ -43,6 +47,7 @@ type (
 	fadeMsg   struct{}
 	typeMsg   struct{}
 	shakeMsg  struct{}
+	pulseMsg  struct{}
 )
 
 // eases are the curves the bars race on, in the order they are drawn.
@@ -68,6 +73,8 @@ type model struct {
 	fade           animation.Fade
 	typed          animation.Typewriter
 	shake          animation.Shake
+	pulse          animation.Fade
+	cascade        []animation.Tween
 	marquee        animation.Marquee
 
 	open   bool
@@ -95,6 +102,7 @@ func newModel() model {
 			shell.Custom("f", "fade", shell.Send(fadeMsg{})),
 			shell.Custom("t", "type", shell.Send(typeMsg{})),
 			shell.Custom("s", "shake", shell.Send(shakeMsg{})),
+			shell.Custom("p", "pulse", shell.Send(pulseMsg{})),
 			shell.Custom("h", "hints", shell.Send(toggleMsg{})),
 			shell.Quit(),
 		},
@@ -106,6 +114,7 @@ func newModel() model {
 		fade:    animation.NewFade(muted, muted, 0),
 		typed:   animation.NewTypewriter(headline, 0),
 		shake:   animation.NewShake(3, 0),
+		pulse:   animation.NewFade(muted, muted, 0),
 		marquee: animation.NewMarquee(longPath, 30),
 	}
 }
@@ -134,6 +143,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.run(nil)
 	case shakeMsg:
 		m.shake = animation.NewShake(3, 450*time.Millisecond)
+		return m.run(nil)
+	case pulseMsg:
+		if m.pulse.Active() {
+			muted := m.th.Muted.GetForeground()
+			m.pulse = animation.NewFade(muted, muted, 0)
+			return m, nil
+		}
+		m.pulse = animation.NewFade(m.th.Accent.GetForeground(), m.th.Muted.GetForeground(), 700*time.Millisecond).
+			WithYoyo().WithRepeat(animation.Forever)
 		return m.run(nil)
 	case toggleMsg:
 		m.open = !m.open
@@ -173,6 +191,10 @@ func (m model) replay() model {
 	}
 	m.smooth = animation.NewFloat(0, 1, race).WithEase(animation.Linear)
 	m.count = animation.New(0, counts, race).WithEase(animation.EaseOut)
+	m.cascade = make([]animation.Tween, blocks)
+	for i := range m.cascade {
+		m.cascade[i] = animation.New(0, block, 300*time.Millisecond).WithEase(animation.EaseOut).WithDelay(time.Duration(i) * stagger)
+	}
 	return m
 }
 
@@ -215,23 +237,27 @@ func (m model) advance(at time.Time) model {
 	m.fade, _ = m.fade.Advance(at)
 	m.typed, _ = m.typed.Advance(at)
 	m.shake, _ = m.shake.Advance(at)
+	m.pulse, _ = m.pulse.Advance(at)
+	for i := range m.cascade {
+		m.cascade[i], _ = m.cascade[i].Advance(at)
+	}
 	return m
 }
 
 // moving reports whether anything on the shared clock still needs frames.
 func (m model) moving() bool {
-	for _, b := range m.bars {
+	for _, b := range append(slices.Clone(m.bars), m.cascade...) {
 		if b.Active() {
 			return true
 		}
 	}
 	return m.steady.Active() || m.bouncy.Active() || m.smooth.Active() || m.count.Active() ||
-		m.fade.Active() || m.typed.Active() || m.shake.Active()
+		m.fade.Active() || m.typed.Active() || m.shake.Active() || m.pulse.Active()
 }
 
 func (m model) View() tea.View {
 	v := tea.NewView(m.sh.View(map[string]shell.Pane{
-		"main": {Title: "every animation", Body: func(layout.Rect) string { return m.gallery() }},
+		"main": {Title: "every animation", Right: still(), Body: func(layout.Rect) string { return m.gallery() }},
 		"hints": {Title: "hints", Body: func(layout.Rect) string {
 			return "This pane slides on a Tween of its own.\nThe marquee steps on its own ticks too;\neverything else shares one Clock."
 		}},
@@ -267,6 +293,9 @@ func (m model) gallery() string {
 		label("typewriter", "35ms a char")+m.th.Bold.Render(m.typed.View()),
 		label("marquee", "30 cells")+m.th.Muted.Render("[")+m.marquee.View()+m.th.Muted.Render("]"),
 		label("shake", "3 cells")+m.th.Danger.Render(m.shake.View(password)),
+		"",
+		label("pulse", "yoyo forever")+lipgloss.NewStyle().Foreground(m.pulse.Color()).Render("● waiting for the server"),
+		label("cascade", "120ms apart")+m.blocks(),
 	)
 	return strings.Join(rows, "\n")
 }
@@ -298,4 +327,25 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+// blocks is the cascade: each block grown as far as its own tween has come.
+func (m model) blocks() string {
+	parts := make([]string, blocks)
+	for i := range parts {
+		cur := 0
+		if i < len(m.cascade) {
+			cur = m.cascade[i].Cur
+		}
+		parts[i] = m.th.Accent.Render(strings.Repeat("▮", cur)) + strings.Repeat(" ", block-cur)
+	}
+	return strings.Join(parts, " ")
+}
+
+// still names the switch when motion is off, so a frozen gallery says why.
+func still() string {
+	if animation.Still() {
+		return "motion off"
+	}
+	return ""
 }

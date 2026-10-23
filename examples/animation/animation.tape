@@ -53,6 +53,11 @@ Sleep 1.2s
 Type "h"
 Sleep 1s
 
+Type "p"
+Sleep 2.5s
+Type "p"
+Sleep 800ms
+
 Type "r"
 Sleep 2.5s
 

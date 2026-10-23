@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -192,4 +193,61 @@ func TestTheMarqueeStepsOnItsOwnTicks(t *testing.T) {
 	m, _ = frame(t, m, m.(model).marquee.FrameAt(at))
 	m, _ = frame(t, m, m.(model).marquee.FrameAt(at.Add(time.Second)))
 	require.NotEqual(t, before, m.(model).marquee.View())
+}
+
+// TestMain clears the motion switches, so a CI with TERM=dumb still animates.
+func TestMain(m *testing.M) {
+	_ = os.Setenv("BEZEL_NO_MOTION", "")
+	_ = os.Setenv("TERM", "xterm-256color")
+	os.Exit(m.Run())
+}
+
+func TestThePulseRunsUntilPressedAgain(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	m = press(t, m, "p")
+	at := time.Unix(1000, 0)
+	for range 200 {
+		m, _ = frame(t, m, m.(model).clock.FrameAt(at))
+		at = at.Add(animation.Frame)
+	}
+	require.True(t, m.(model).pulse.Active(), "a yoyo forever never lands")
+	require.True(t, m.(model).clock.Running())
+
+	m = press(t, m, "p")
+	m, _ = clockFor(t, m, at)
+	require.False(t, m.(model).clock.Running(), "with the pulse off, the clock stops")
+}
+
+// Each block starts a stagger after the one before it.
+func TestTheCascadeStartsOneBlockAtATime(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	m = press(t, m, "r")
+	at := time.Unix(1000, 0)
+	m, _ = frame(t, m, m.(model).clock.FrameAt(at))
+	m, _ = frame(t, m, m.(model).clock.FrameAt(at.Add(stagger+stagger/2)))
+	c := m.(model).cascade
+	require.Positive(t, c[0].Cur)
+	require.Positive(t, c[1].Cur)
+	require.Zero(t, c[2].Cur, "the third has not started yet")
+	m, _ = clockFor(t, m, at.Add(stagger*2))
+	for _, b := range m.(model).cascade {
+		require.Equal(t, block, b.Cur)
+	}
+}
+
+// With motion off every row is drawn at its end and the clock never runs.
+func TestAStillGalleryLandsAtOnce(t *testing.T) {
+	t.Setenv("BEZEL_NO_MOTION", "1")
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	m, _ = m.Update(startMsg{})
+	m = press(t, m, "t")
+	m, out := frame(t, m, m.(model).clock.FrameAt(time.Unix(1000, 0)))
+	require.Contains(t, out, "12,345 files")
+	require.Contains(t, out, headline)
+	require.Contains(t, out, "motion off")
+	require.False(t, m.(model).marquee.Active())
+	require.False(t, m.(model).clock.Running())
 }

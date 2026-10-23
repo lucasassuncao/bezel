@@ -52,7 +52,7 @@ ASCII is for terminals and logs that cannot show the Unicode set.
 func FromEnv() Set
 ```
 
-FromEnv is ASCII when BEZEL\_ASCII is set or TERM is "dumb", Unicode otherwise. The one place bezel reads the environment, and only when called.
+FromEnv is ASCII when BEZEL\_ASCII is set or TERM is "dumb", Unicode otherwise, read only when called; animation.Still reads it too.
 
 <a name="Unicode"></a>
 ### func [Unicode](<https://github.com/lucasassuncao/bezel/blob/main/icon/icon.go#L35>)

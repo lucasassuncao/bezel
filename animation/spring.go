@@ -43,9 +43,13 @@ func (s Spring) WithDamping(d float64) Spring {
 }
 
 // To aims s at target. A spring at rest starts its frames; a moving one keeps
-// the ones it has, and its speed.
+// the ones it has, and its speed. When motion is Still it jumps there.
 func (s Spring) To(target float64) (Spring, tea.Cmd) {
 	s.Target = target
+	if Still() {
+		s.Pos, s.Vel, s.moving = target, 0, false
+		return s, nil
+	}
 	if s.moving || (s.Pos == target && s.Vel == 0) {
 		return s, nil
 	}

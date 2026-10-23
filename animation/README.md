@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/animation"
 ```
 
-Package animation moves things on frames that arrive as messages: eased tweens, springs, colour fades, typed and scrolling text, a shake, and a Clock that drives several of them on one chain of ticks.
+Package animation moves things on frames that arrive as messages: tweens that delay, repeat and yoyo, springs, fades, typed and scrolling text, a shake, and a Clock for several at once. BEZEL\_NO\_MOTION or TERM=dumb lands them all at once.
 
 ## Index
 
@@ -18,6 +18,7 @@ Package animation moves things on frames that arrive as messages: eased tweens, 
 - [func EaseInOut\(p float64\) float64](<#EaseInOut>)
 - [func EaseOut\(p float64\) float64](<#EaseOut>)
 - [func Linear\(p float64\) float64](<#Linear>)
+- [func Still\(\) bool](<#Still>)
 - [type Clock](<#Clock>)
   - [func NewClock\(\) Clock](<#NewClock>)
   - [func \(c Clock\) Frame\(msg tea.Msg\) \(time.Time, bool\)](<#Clock.Frame>)
@@ -35,7 +36,10 @@ Package animation moves things on frames that arrive as messages: eased tweens, 
   - [func \(f Fade\) FrameAt\(at time.Time\) FrameMsg](<#Fade.FrameAt>)
   - [func \(f Fade\) Tick\(\) tea.Cmd](<#Fade.Tick>)
   - [func \(f Fade\) Update\(msg tea.Msg\) \(Fade, tea.Cmd\)](<#Fade.Update>)
+  - [func \(f Fade\) WithDelay\(d time.Duration\) Fade](<#Fade.WithDelay>)
   - [func \(f Fade\) WithEase\(e Ease\) Fade](<#Fade.WithEase>)
+  - [func \(f Fade\) WithRepeat\(n int\) Fade](<#Fade.WithRepeat>)
+  - [func \(f Fade\) WithYoyo\(\) Fade](<#Fade.WithYoyo>)
 - [type Float](<#Float>)
   - [func NewFloat\(from, to float64, dur time.Duration\) Float](<#NewFloat>)
   - [func \(f Float\) Active\(\) bool](<#Float.Active>)
@@ -44,7 +48,10 @@ Package animation moves things on frames that arrive as messages: eased tweens, 
   - [func \(f Float\) Int\(\) int](<#Float.Int>)
   - [func \(f Float\) Tick\(\) tea.Cmd](<#Float.Tick>)
   - [func \(f Float\) Update\(msg tea.Msg\) \(Float, tea.Cmd\)](<#Float.Update>)
+  - [func \(f Float\) WithDelay\(d time.Duration\) Float](<#Float.WithDelay>)
   - [func \(f Float\) WithEase\(e Ease\) Float](<#Float.WithEase>)
+  - [func \(f Float\) WithRepeat\(n int\) Float](<#Float.WithRepeat>)
+  - [func \(f Float\) WithYoyo\(\) Float](<#Float.WithYoyo>)
 - [type FrameMsg](<#FrameMsg>)
 - [type Marquee](<#Marquee>)
   - [func NewMarquee\(text string, width int\) Marquee](<#NewMarquee>)
@@ -66,6 +73,8 @@ Package animation moves things on frames that arrive as messages: eased tweens, 
   - [func \(s Shake\) Tick\(\) tea.Cmd](<#Shake.Tick>)
   - [func \(s Shake\) Update\(msg tea.Msg\) \(Shake, tea.Cmd\)](<#Shake.Update>)
   - [func \(s Shake\) View\(block string\) string](<#Shake.View>)
+  - [func \(s Shake\) WithDelay\(d time.Duration\) Shake](<#Shake.WithDelay>)
+  - [func \(s Shake\) WithRepeat\(n int\) Shake](<#Shake.WithRepeat>)
 - [type Spring](<#Spring>)
   - [func NewSpring\(pos float64\) Spring](<#NewSpring>)
   - [func \(s Spring\) Active\(\) bool](<#Spring.Active>)
@@ -85,7 +94,10 @@ Package animation moves things on frames that arrive as messages: eased tweens, 
   - [func \(t Tween\) FrameAt\(at time.Time\) FrameMsg](<#Tween.FrameAt>)
   - [func \(t Tween\) Tick\(\) tea.Cmd](<#Tween.Tick>)
   - [func \(t Tween\) Update\(msg tea.Msg\) \(Tween, tea.Cmd\)](<#Tween.Update>)
+  - [func \(t Tween\) WithDelay\(d time.Duration\) Tween](<#Tween.WithDelay>)
   - [func \(t Tween\) WithEase\(e Ease\) Tween](<#Tween.WithEase>)
+  - [func \(t Tween\) WithRepeat\(n int\) Tween](<#Tween.WithRepeat>)
+  - [func \(t Tween\) WithYoyo\(\) Tween](<#Tween.WithYoyo>)
 - [type Typewriter](<#Typewriter>)
   - [func NewTypewriter\(text string, perChar time.Duration\) Typewriter](<#NewTypewriter>)
   - [func \(w Typewriter\) Active\(\) bool](<#Typewriter.Active>)
@@ -95,9 +107,18 @@ Package animation moves things on frames that arrive as messages: eased tweens, 
   - [func \(w Typewriter\) Tick\(\) tea.Cmd](<#Typewriter.Tick>)
   - [func \(w Typewriter\) Update\(msg tea.Msg\) \(Typewriter, tea.Cmd\)](<#Typewriter.Update>)
   - [func \(w Typewriter\) View\(\) string](<#Typewriter.View>)
+  - [func \(w Typewriter\) WithDelay\(d time.Duration\) Typewriter](<#Typewriter.WithDelay>)
+  - [func \(w Typewriter\) WithRepeat\(n int\) Typewriter](<#Typewriter.WithRepeat>)
+  - [func \(w Typewriter\) WithYoyo\(\) Typewriter](<#Typewriter.WithYoyo>)
 
 
 ## Constants
+
+<a name="Forever"></a>Forever is the repeat count of a motion that runs until it is replaced.
+
+```go
+const Forever = -1
+```
 
 <a name="Frame"></a>Frame is the interval between animation frames \(\~60fps\). Terminal rows are coarse, so a tween resolves to only a handful of distinct heights; the frame rate exists to keep the easing curve smooth in time, not in space.
 
@@ -149,6 +170,15 @@ func Linear(p float64) float64
 ```
 
 Linear moves at one speed throughout: a counter, a typewriter.
+
+<a name="Still"></a>
+## func [Still](<https://github.com/lucasassuncao/bezel/blob/main/animation/still.go#L8>)
+
+```go
+func Still() bool
+```
+
+Still reports whether motion is switched off: BEZEL\_NO\_MOTION set to anything, or TERM=dumb. Then every animation is born where it would end, for a user who finds motion hard to follow, a slow link or a CI log.
 
 <a name="Clock"></a>
 ## type [Clock](<https://github.com/lucasassuncao/bezel/blob/main/animation/clock.go#L12-L15>)
@@ -307,6 +337,15 @@ func (f Fade) Update(msg tea.Msg) (Fade, tea.Cmd)
 
 Update samples f on its own frames and asks for the next until it lands.
 
+<a name="Fade.WithDelay"></a>
+### func \(Fade\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L75>)
+
+```go
+func (f Fade) WithDelay(d time.Duration) Fade
+```
+
+WithDelay holds f at its first colour for d after its first frame.
+
 <a name="Fade.WithEase"></a>
 ### func \(Fade\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L25>)
 
@@ -315,6 +354,24 @@ func (f Fade) WithEase(e Ease) Fade
 ```
 
 WithEase is f following e instead of EaseInOut.
+
+<a name="Fade.WithRepeat"></a>
+### func \(Fade\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L81>)
+
+```go
+func (f Fade) WithRepeat(n int) Fade
+```
+
+WithRepeat runs f n more times after the first, or without end for Forever.
+
+<a name="Fade.WithYoyo"></a>
+### func \(Fade\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L87>)
+
+```go
+func (f Fade) WithYoyo() Fade
+```
+
+WithYoyo sends every other run of f back: with Forever, a pulse.
 
 <a name="Float"></a>
 ## type [Float](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L12-L16>)
@@ -336,7 +393,7 @@ type Float struct {
 func NewFloat(from, to float64, dur time.Duration) Float
 ```
 
-NewFloat eases from from to to over dur, its clock started by its first frame. When dur \<= 0 or from == to it is inactive and already at to.
+NewFloat eases from from to to over dur, its clock started by its first frame. When dur \<= 0, from == to or motion is Still it is inactive at to.
 
 <a name="Float.Active"></a>
 ### func \(Float\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L34>)
@@ -392,6 +449,15 @@ func (f Float) Update(msg tea.Msg) (Float, tea.Cmd)
 
 Update samples f on its own frames and asks for the next until it lands.
 
+<a name="Float.WithDelay"></a>
+### func \(Float\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L80>)
+
+```go
+func (f Float) WithDelay(d time.Duration) Float
+```
+
+WithDelay holds f at From for d after its first frame.
+
 <a name="Float.WithEase"></a>
 ### func \(Float\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L28>)
 
@@ -401,8 +467,26 @@ func (f Float) WithEase(e Ease) Float
 
 WithEase is f following e instead of EaseInOut.
 
+<a name="Float.WithRepeat"></a>
+### func \(Float\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L86>)
+
+```go
+func (f Float) WithRepeat(n int) Float
+```
+
+WithRepeat runs f n more times after the first, or without end for Forever.
+
+<a name="Float.WithYoyo"></a>
+### func \(Float\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L92>)
+
+```go
+func (f Float) WithYoyo() Float
+```
+
+WithYoyo sends every other run of f back the way it came.
+
 <a name="FrameMsg"></a>
-## type [FrameMsg](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L34-L37>)
+## type [FrameMsg](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L35-L38>)
 
 FrameMsg is one tick of a tween's clock, at the time it fired. Hand it to every running tween's Update: each one takes only its own.
 
@@ -414,7 +498,7 @@ type FrameMsg struct {
 ```
 
 <a name="Marquee"></a>
-## type [Marquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L81-L89>)
+## type [Marquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L99-L107>)
 
 Marquee scrolls text that is wider than its room, a cell at a time, round and round until stopped: a long name in a list row under the cursor.
 
@@ -425,7 +509,7 @@ type Marquee struct {
 ```
 
 <a name="NewMarquee"></a>
-### func [NewMarquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L92>)
+### func [NewMarquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L110>)
 
 ```go
 func NewMarquee(text string, width int) Marquee
@@ -434,7 +518,7 @@ func NewMarquee(text string, width int) Marquee
 NewMarquee is text in width cells, still until Start, stepping every 120ms.
 
 <a name="Marquee.Active"></a>
-### func \(Marquee\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L125>)
+### func \(Marquee\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L144>)
 
 ```go
 func (m Marquee) Active() bool
@@ -443,7 +527,7 @@ func (m Marquee) Active() bool
 Active reports whether the text is moving.
 
 <a name="Marquee.Advance"></a>
-### func \(Marquee\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L160>)
+### func \(Marquee\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L179>)
 
 ```go
 func (m Marquee) Advance(now time.Time) (Marquee, bool)
@@ -452,7 +536,7 @@ func (m Marquee) Advance(now time.Time) (Marquee, bool)
 Advance is m at now; it never finishes, so done is only true when stopped.
 
 <a name="Marquee.FrameAt"></a>
-### func \(Marquee\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L146>)
+### func \(Marquee\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L165>)
 
 ```go
 func (m Marquee) FrameAt(at time.Time) FrameMsg
@@ -461,16 +545,16 @@ func (m Marquee) FrameAt(at time.Time) FrameMsg
 FrameAt is m's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Marquee.Start"></a>
-### func \(Marquee\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L105>)
+### func \(Marquee\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L124>)
 
 ```go
 func (m Marquee) Start() (Marquee, tea.Cmd)
 ```
 
-Start sets the text moving; text that fits is left alone and asks nothing.
+Start sets the text moving; text that fits, or motion that is Still, is left alone and asks nothing.
 
 <a name="Marquee.Stop"></a>
-### func \(Marquee\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L118>)
+### func \(Marquee\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L137>)
 
 ```go
 func (m Marquee) Stop() Marquee
@@ -479,7 +563,7 @@ func (m Marquee) Stop() Marquee
 Stop halts the text back at its start; ticks already sent are dropped.
 
 <a name="Marquee.Tick"></a>
-### func \(Marquee\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L137>)
+### func \(Marquee\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L156>)
 
 ```go
 func (m Marquee) Tick() tea.Cmd
@@ -488,7 +572,7 @@ func (m Marquee) Tick() tea.Cmd
 Tick is the command for m's next step, nil while it is still.
 
 <a name="Marquee.Update"></a>
-### func \(Marquee\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L149>)
+### func \(Marquee\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L168>)
 
 ```go
 func (m Marquee) Update(msg tea.Msg) (Marquee, tea.Cmd)
@@ -497,7 +581,7 @@ func (m Marquee) Update(msg tea.Msg) (Marquee, tea.Cmd)
 Update steps on its own ticks and asks for the next while it runs.
 
 <a name="Marquee.View"></a>
-### func \(Marquee\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L128>)
+### func \(Marquee\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L147>)
 
 ```go
 func (m Marquee) View() string
@@ -506,7 +590,7 @@ func (m Marquee) View() string
 View is exactly width cells of the text, from where it has scrolled to.
 
 <a name="Marquee.WithEvery"></a>
-### func \(Marquee\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L97>)
+### func \(Marquee\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L115>)
 
 ```go
 func (m Marquee) WithEvery(d time.Duration) Marquee
@@ -597,6 +681,24 @@ func (s Shake) View(block string) string
 
 View is block moved by Offset, every line padded so it is always 2·amp cells wider than it was: what sits around it never moves.
 
+<a name="Shake.WithDelay"></a>
+### func \(Shake\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/shake.go#L80>)
+
+```go
+func (s Shake) WithDelay(d time.Duration) Shake
+```
+
+WithDelay holds s still for d after its first frame.
+
+<a name="Shake.WithRepeat"></a>
+### func \(Shake\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/shake.go#L86>)
+
+```go
+func (s Shake) WithRepeat(n int) Shake
+```
+
+WithRepeat shakes s n more times after the first, or without end for Forever.
+
 <a name="Spring"></a>
 ## type [Spring](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L17-L26>)
 
@@ -623,7 +725,7 @@ func NewSpring(pos float64) Spring
 NewSpring is a spring at rest at pos, stiffness 12 and damping 1.
 
 <a name="Spring.Active"></a>
-### func \(Spring\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L61>)
+### func \(Spring\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L65>)
 
 ```go
 func (s Spring) Active() bool
@@ -632,7 +734,7 @@ func (s Spring) Active() bool
 Active reports whether s is still moving.
 
 <a name="Spring.Advance"></a>
-### func \(Spring\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L94>)
+### func \(Spring\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L98>)
 
 ```go
 func (s Spring) Advance(now time.Time) (Spring, bool)
@@ -641,7 +743,7 @@ func (s Spring) Advance(now time.Time) (Spring, bool)
 Advance is s moved to now, and whether it came to rest. The first frame only starts the clock; each later one solves the motion exactly over the time since the last, so a slow frame never throws it off.
 
 <a name="Spring.FrameAt"></a>
-### func \(Spring\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L76>)
+### func \(Spring\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L80>)
 
 ```go
 func (s Spring) FrameAt(at time.Time) FrameMsg
@@ -650,7 +752,7 @@ func (s Spring) FrameAt(at time.Time) FrameMsg
 FrameAt is s's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Spring.Int"></a>
-### func \(Spring\) [Int](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L64>)
+### func \(Spring\) [Int](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L68>)
 
 ```go
 func (s Spring) Int() int
@@ -659,7 +761,7 @@ func (s Spring) Int() int
 Int is Pos rounded to the nearest whole number: the cell it is drawn on.
 
 <a name="Spring.Tick"></a>
-### func \(Spring\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L67>)
+### func \(Spring\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L71>)
 
 ```go
 func (s Spring) Tick() tea.Cmd
@@ -674,10 +776,10 @@ Tick is the command for s's next frame, nil at rest.
 func (s Spring) To(target float64) (Spring, tea.Cmd)
 ```
 
-To aims s at target. A spring at rest starts its frames; a moving one keeps the ones it has, and its speed.
+To aims s at target. A spring at rest starts its frames; a moving one keeps the ones it has, and its speed. When motion is Still it jumps there.
 
 <a name="Spring.Update"></a>
-### func \(Spring\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L79>)
+### func \(Spring\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L83>)
 
 ```go
 func (s Spring) Update(msg tea.Msg) (Spring, tea.Cmd)
@@ -704,7 +806,7 @@ func (s Spring) WithFreq(f float64) Spring
 WithFreq is s with stiffness f, in radians a second.
 
 <a name="Tween"></a>
-## type [Tween](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L22-L30>)
+## type [Tween](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L22-L31>)
 
 Tween eases an int between two values over a duration. Adapted from the minimize animation in github.com/Gaurav\-Gosain/tuios \(MIT\), reduced to one axis. The zero value is inactive: At reports it finished, at To.
 
@@ -719,16 +821,16 @@ type Tween struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L111>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L112>)
 
 ```go
 func New(from, target int, dur time.Duration) Tween
 ```
 
-New builds the tween taking a panel from its on\-screen height to target over dur, its clock started by the first frame Tick delivers. When dur \<= 0 or from == target it is inactive and already at target: the toggle is instant.
+New builds the tween taking a panel from its on\-screen height to target over dur, its clock started by the first frame Tick delivers. When dur \<= 0 or from == target, or motion is Still, it is inactive and already at target.
 
 <a name="Tween.Active"></a>
-### func \(Tween\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L71>)
+### func \(Tween\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L72>)
 
 ```go
 func (t Tween) Active() bool
@@ -737,25 +839,25 @@ func (t Tween) Active() bool
 Active reports whether t is currently in flight.
 
 <a name="Tween.Advance"></a>
-### func \(Tween\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L76>)
+### func \(Tween\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L77>)
 
 ```go
 func (t Tween) Advance(now time.Time) (Tween, bool)
 ```
 
-Advance is t sampled at now into Cur, and whether it finished, coming back inactive at To. The renderer reads Cur, not At, so one frame never mixes two samples and lays the hint panel out a row off from the space the preview left.
+Advance is t sampled at now into Cur, and whether it finished, coming back inactive where it landed. The renderer reads Cur, not At, so one frame never mixes two samples and lays the hint panel out a row off from the space the preview left.
 
 <a name="Tween.At"></a>
-### func \(Tween\) [At](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L91>)
+### func \(Tween\) [At](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L92>)
 
 ```go
 func (t Tween) At(now time.Time) (int, bool)
 ```
 
-At returns the interpolated value at now, and whether the tween has finished. A finished tween reports its end value exactly, so the panel always lands on the height the static layout would have chosen. Before its clock starts it is at From.
+At returns the interpolated value at now, and whether the tween has finished. A finished tween reports its end exactly, To or a yoyo's From, so a panel lands on the height the static layout would choose. Unstarted, it is at From.
 
 <a name="Tween.FrameAt"></a>
-### func \(Tween\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L52>)
+### func \(Tween\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L53>)
 
 ```go
 func (t Tween) FrameAt(at time.Time) FrameMsg
@@ -764,7 +866,7 @@ func (t Tween) FrameAt(at time.Time) FrameMsg
 FrameAt is t's frame for at, for a test harness that delivers frames itself.
 
 <a name="Tween.Tick"></a>
-### func \(Tween\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L43>)
+### func \(Tween\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L44>)
 
 ```go
 func (t Tween) Tick() tea.Cmd
@@ -773,7 +875,7 @@ func (t Tween) Tick() tea.Cmd
 Tick is the command for t's next frame, nil for a tween with nothing to do.
 
 <a name="Tween.Update"></a>
-### func \(Tween\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L57>)
+### func \(Tween\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L58>)
 
 ```go
 func (t Tween) Update(msg tea.Msg) (Tween, tea.Cmd)
@@ -781,14 +883,41 @@ func (t Tween) Update(msg tea.Msg) (Tween, tea.Cmd)
 
 Update samples t on one of its own frames and asks for the next until it lands. Other messages, frames meant for another tween and a twin frame from a second Tick leave it alone.
 
+<a name="Tween.WithDelay"></a>
+### func \(Tween\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L126>)
+
+```go
+func (t Tween) WithDelay(d time.Duration) Tween
+```
+
+WithDelay holds t at From for d after its first frame.
+
 <a name="Tween.WithEase"></a>
-### func \(Tween\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L119>)
+### func \(Tween\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L120>)
 
 ```go
 func (t Tween) WithEase(e Ease) Tween
 ```
 
 WithEase is t following e instead of EaseInOut.
+
+<a name="Tween.WithRepeat"></a>
+### func \(Tween\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L132>)
+
+```go
+func (t Tween) WithRepeat(n int) Tween
+```
+
+WithRepeat runs t n more times after the first, or without end for Forever.
+
+<a name="Tween.WithYoyo"></a>
+### func \(Tween\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L138>)
+
+```go
+func (t Tween) WithYoyo() Tween
+```
+
+WithYoyo sends every other run of t back the way it came.
 
 <a name="Typewriter"></a>
 ## type [Typewriter](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L15-L19>)
@@ -872,6 +1001,33 @@ func (w Typewriter) View() string
 ```
 
 View is the text shown so far.
+
+<a name="Typewriter.WithDelay"></a>
+### func \(Typewriter\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L77>)
+
+```go
+func (w Typewriter) WithDelay(d time.Duration) Typewriter
+```
+
+WithDelay holds w empty for d after its first frame.
+
+<a name="Typewriter.WithRepeat"></a>
+### func \(Typewriter\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L83>)
+
+```go
+func (w Typewriter) WithRepeat(n int) Typewriter
+```
+
+WithRepeat types w n more times after the first, or without end for Forever.
+
+<a name="Typewriter.WithYoyo"></a>
+### func \(Typewriter\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/text.go#L89>)
+
+```go
+func (w Typewriter) WithYoyo() Typewriter
+```
+
+WithYoyo erases w on every other run, as if typed backwards.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 

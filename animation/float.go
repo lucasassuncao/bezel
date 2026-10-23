@@ -16,9 +16,9 @@ type Float struct {
 }
 
 // NewFloat eases from from to to over dur, its clock started by its first
-// frame. When dur <= 0 or from == to it is inactive and already at to.
+// frame. When dur <= 0, from == to or motion is Still it is inactive at to.
 func NewFloat(from, to float64, dur time.Duration) Float {
-	if dur <= 0 || from == to {
+	if dur <= 0 || from == to || Still() {
 		return Float{From: to, To: to, Cur: to}
 	}
 	return Float{From: from, To: to, Cur: from, run: newRun(dur)}
@@ -59,13 +59,37 @@ func (f Float) Update(msg tea.Msg) (Float, tea.Cmd) {
 // Advance is f sampled at now, and whether it landed: for a host driving
 // several animations from one Clock.
 func (f Float) Advance(now time.Time) (Float, bool) {
+	if !f.Active() {
+		return f, true
+	}
 	ease := f.run.ease.or()
 	var p float64
 	f.run, p = f.run.advance(now)
-	if !f.run.active() {
+	switch {
+	case f.Active():
+		f.Cur = f.From + (f.To-f.From)*ease(p)
+	case p == 1:
 		f.Cur = f.To
-		return f, true
+	default:
+		f.Cur = f.From
 	}
-	f.Cur = f.From + (f.To-f.From)*ease(p)
-	return f, false
+	return f, !f.Active()
+}
+
+// WithDelay holds f at From for d after its first frame.
+func (f Float) WithDelay(d time.Duration) Float {
+	f.run.delay = max(d, 0)
+	return f
+}
+
+// WithRepeat runs f n more times after the first, or without end for Forever.
+func (f Float) WithRepeat(n int) Float {
+	f.run.repeat = max(n, Forever)
+	return f
+}
+
+// WithYoyo sends every other run of f back the way it came.
+func (f Float) WithYoyo() Float {
+	f.run.yoyo = true
+	return f
 }

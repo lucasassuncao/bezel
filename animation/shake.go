@@ -69,6 +69,21 @@ func (s Shake) Update(msg tea.Msg) (Shake, tea.Cmd) {
 
 // Advance is s sampled at now, and whether it settled.
 func (s Shake) Advance(now time.Time) (Shake, bool) {
+	if !s.Active() {
+		return s, true
+	}
 	s.run, s.p = s.run.advance(now)
 	return s, !s.run.active()
+}
+
+// WithDelay holds s still for d after its first frame.
+func (s Shake) WithDelay(d time.Duration) Shake {
+	s.run.delay = max(d, 0)
+	return s
+}
+
+// WithRepeat shakes s n more times after the first, or without end for Forever.
+func (s Shake) WithRepeat(n int) Shake {
+	s.run.repeat = max(n, Forever)
+	return s
 }

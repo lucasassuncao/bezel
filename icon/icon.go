@@ -68,7 +68,7 @@ func (s Set) Indent(last bool) string {
 }
 
 // FromEnv is ASCII when BEZEL_ASCII is set or TERM is "dumb", Unicode
-// otherwise. The one place bezel reads the environment, and only when called.
+// otherwise, read only when called; animation.Still reads it too.
 func FromEnv() Set {
 	if os.Getenv("BEZEL_ASCII") != "" || os.Getenv("TERM") == "dumb" {
 		return ASCII()
