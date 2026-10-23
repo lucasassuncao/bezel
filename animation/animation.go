@@ -24,13 +24,14 @@ type Tween struct {
 	Start    time.Time // zero until the first frame, which starts the clock
 	Dur      time.Duration
 	id       int64 // which FrameMsg values are this tween's
+	tag      int64 // which step: a twin frame from a second Tick is dropped
 }
 
 // FrameMsg is one tick of a tween's clock, at the time it fired. Hand it to
 // every running tween's Update: each one takes only its own.
 type FrameMsg struct {
-	At time.Time
-	id int64
+	At      time.Time
+	id, tag int64
 }
 
 // lastID numbers the tweens New builds, so a replaced one's frames are told apart.
@@ -41,40 +42,45 @@ func (t Tween) Tick() tea.Cmd {
 	if !t.Active() {
 		return nil
 	}
-	id := t.id
-	return tea.Tick(Frame, func(at time.Time) tea.Msg { return FrameMsg{At: at, id: id} })
+	id, tag := t.id, t.tag
+	return tea.Tick(Frame, func(at time.Time) tea.Msg { return FrameMsg{At: at, id: id, tag: tag} })
 }
 
 // FrameAt is t's frame for at, for a test harness that delivers frames itself.
-func (t Tween) FrameAt(at time.Time) FrameMsg { return FrameMsg{At: at, id: t.id} }
+func (t Tween) FrameAt(at time.Time) FrameMsg { return FrameMsg{At: at, id: t.id, tag: t.tag} }
 
 // Update samples t on one of its own frames and asks for the next until it
-// lands. Other messages, and frames meant for another tween, leave it alone.
+// lands. Other messages, frames meant for another tween and a twin frame from
+// a second Tick leave it alone.
 func (t Tween) Update(msg tea.Msg) (Tween, tea.Cmd) {
 	f, ok := msg.(FrameMsg)
-	if !ok || f.id != t.id || !t.Active() {
+	if !ok || f.id != t.id || f.tag != t.tag || !t.Active() {
 		return t, nil
 	}
 	next, done := t.Advance(f.At)
 	if done {
 		return next, nil
 	}
+	next.tag++
 	return next, next.Tick()
 }
 
 // Active reports whether t is currently in flight.
 func (t Tween) Active() bool { return t.Dur > 0 }
 
-// Advance is t with the curve sampled at now into Cur, and whether it finished.
-// The renderer reads Cur, not At, so one frame never mixes two samples and
-// lays the hint panel out a row off from the space the preview left.
+// Advance is t sampled at now into Cur, and whether it finished, coming back
+// inactive at To. The renderer reads Cur, not At, so one frame never mixes two
+// samples and lays the hint panel out a row off from the space the preview left.
 func (t Tween) Advance(now time.Time) (Tween, bool) {
 	if t.Start.IsZero() {
 		t.Start = now
 	}
 	var done bool
 	t.Cur, done = t.At(now)
-	return t, done
+	if done {
+		return Tween{From: t.To, To: t.To, Cur: t.To}, true
+	}
+	return t, false
 }
 
 // At returns the interpolated value at now, and whether the tween has finished.

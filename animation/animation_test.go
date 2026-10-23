@@ -177,3 +177,31 @@ func TestTickDeliversAFrameForThisTween(t *testing.T) {
 	assert.False(t, next.Start.IsZero(), "the tick's frame started the clock")
 	assert.NotNil(t, cmd)
 }
+
+// Landing ends the tween: Active turns false and no further frame is asked.
+func TestALandedTweenIsInactiveAtItsEnd(t *testing.T) {
+	start := time.Unix(1000, 0)
+	tw := New(0, 10, 100*time.Millisecond)
+	tw, _ = tw.Update(tw.FrameAt(start))
+	tw, _ = tw.Update(tw.FrameAt(start.Add(time.Second)))
+	assert.False(t, tw.Active())
+	assert.Nil(t, tw.Tick())
+	assert.Equal(t, 10, tw.Cur)
+
+	next, _ := New(0, 10, 100*time.Millisecond).Advance(start)
+	next, done := next.Advance(start.Add(time.Second))
+	assert.True(t, done)
+	assert.False(t, next.Active(), "Advance lands it too")
+}
+
+// Tick called twice sends two frames for one step; the tween takes one.
+func TestASecondClockIsDropped(t *testing.T) {
+	start := time.Unix(1000, 0)
+	tw := New(0, 10, time.Second)
+	first, second := tw.FrameAt(start), tw.FrameAt(start)
+	tw, cmd := tw.Update(first)
+	assert.NotNil(t, cmd)
+	next, cmd := tw.Update(second)
+	assert.Nil(t, cmd, "the twin frame starts no second clock")
+	assert.Equal(t, tw, next)
+}
