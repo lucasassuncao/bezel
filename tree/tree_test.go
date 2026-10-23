@@ -261,3 +261,14 @@ func BenchmarkView(b *testing.B) {
 		})
 	}
 }
+
+// A nil func matches nothing, changes nothing and draws empty rows.
+func TestNilFuncsAreHarmless(t *testing.T) {
+	m := newTree(4)
+	require.Equal(t, m.Nodes, m.WithNodeMutated(0, nil).Nodes)
+	_, moved := m.CursorTo(nil)
+	require.False(t, moved)
+	_, moved = m.Reveal(nil)
+	require.False(t, moved)
+	require.NotPanics(t, func() { _ = m.View(theme.Resolved{}, nil) })
+}

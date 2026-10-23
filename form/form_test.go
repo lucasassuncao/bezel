@@ -122,3 +122,11 @@ func BenchmarkTypingInAForm(b *testing.B) {
 		_ = f.View(60)
 	}
 }
+
+func TestNilFieldsAreLeftOutAndFieldIsBounded(t *testing.T) {
+	f, _ := New(nil, NewCheckbox("a", false, th()), nil)
+	require.NotPanics(t, func() { _ = f.View(40) })
+	require.NotNil(t, f.Field(0), "the checkbox is first once the nil is gone")
+	require.Nil(t, f.Field(1))
+	require.Nil(t, f.Field(-1))
+}

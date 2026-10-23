@@ -108,6 +108,15 @@ func New(th theme.Resolved) Model {
 	return Model{lines: []line{{starts: []int{0}}}, goal: -1, id: ids.Add(1), keys: DefaultKeys(), th: &th, caretOn: true}
 }
 
+// ready is m, or for the zero Model the empty field New builds, so a field
+// never built still edits and draws; every method that reads a line asks.
+func (m Model) ready() Model {
+	if len(m.lines) > 0 {
+		return m
+	}
+	return New(*m.styles())
+}
+
 // noTheme is what a zero Model draws with; it is never written.
 var noTheme theme.Resolved
 
@@ -127,12 +136,14 @@ func (m *Model) wrap(l edit.Line) line { return line{Line: l, starts: segments(l
 // WithClipboard reads the clipboard through read on a paste key, for a test
 // that must not touch the machine's own; nil is the system's.
 func (m Model) WithClipboard(read func() (string, error)) Model {
+	m = m.ready()
 	m.clipboard = read
 	return m
 }
 
 // WithKeys rebinds the editing keys.
 func (m Model) WithKeys(k Keys) Model {
+	m = m.ready()
 	m.keys = k
 	return m
 }
@@ -140,6 +151,7 @@ func (m Model) WithKeys(k Keys) Model {
 // WithHighlight colours the text while focused: fn takes the whole value and
 // gives each line its spans. It runs again only when the text changes.
 func (m Model) WithHighlight(fn func(value string) [][]Span) Model {
+	m = m.ready()
 	m.highlight, m.painted = fn, ""
 	return m.repaint(true)
 }
@@ -158,6 +170,7 @@ func (m Model) repaint(force bool) Model {
 
 // SetTheme repaints the field after the terminal's background was learned.
 func (m Model) SetTheme(th theme.Resolved) Model {
+	m = m.ready()
 	m.th = &th
 	return m
 }
@@ -165,6 +178,7 @@ func (m Model) SetTheme(th theme.Resolved) Model {
 // WithValue is the field holding s, the caret at its end. CRLF and lone CRs
 // read as line breaks, so a Windows file comes back one line per line.
 func (m Model) WithValue(s string) Model {
+	m = m.ready()
 	parts := strings.Split(clean(s), "\n")
 	m.lines = make([]line, len(parts))
 	for i, p := range parts {
@@ -188,17 +202,18 @@ func (m Model) Value() string {
 }
 
 // LineCount is how many lines the text has; an empty one has one.
-func (m Model) LineCount() int { return len(m.lines) }
+func (m Model) LineCount() int { return len(m.ready().lines) }
 
 // Line is the line the caret is on, from 0.
 func (m Model) Line() int { return m.row }
 
 // Column is how many characters sit before the caret on its line.
-func (m Model) Column() int { return m.lines[m.row].Cursor() }
+func (m Model) Column() int { m = m.ready(); return m.lines[m.row].Cursor() }
 
 // MoveTo puts the caret on line at column col, both kept within the text,
 // and scrolls it into view.
 func (m Model) MoveTo(line, col int) Model {
+	m = m.ready()
 	m.row = min(max(line, 0), len(m.lines)-1)
 	m = m.setLine(m.lines[m.row].SetCursor(col))
 	m.goal = -1
@@ -208,6 +223,7 @@ func (m Model) MoveTo(line, col int) Model {
 // SetWidth is the field's width in cells, the gutter included; zero draws
 // each line whole.
 func (m Model) SetWidth(w int) Model {
+	m = m.ready()
 	if w = max(w, 0); w != m.width {
 		m.width = w
 		lines := make([]line, len(m.lines))
@@ -221,6 +237,7 @@ func (m Model) SetWidth(w int) Model {
 
 // SetHeight is how many rows the field shows; zero shows every one.
 func (m Model) SetHeight(h int) Model {
+	m = m.ready()
 	m.height = max(h, 0)
 	return m.scroll()
 }
@@ -236,6 +253,7 @@ func (m Model) Focused() bool { return m.focused }
 
 // Focus gives the field the keys and starts its caret blinking.
 func (m Model) Focus() (Model, tea.Cmd) {
+	m = m.ready()
 	m.focused = true
 	return m.lit()
 }
@@ -258,6 +276,7 @@ func (m Model) Blink() tea.Cmd {
 // Update edits on a key or a paste while focused, and flips the caret on its
 // own BlinkMsg. A key it has no use for leaves it as it was, with no command.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	m = m.ready()
 	switch msg := msg.(type) {
 	case BlinkMsg:
 		if !m.focused || msg.id != m.id || msg.tag != m.tag {
@@ -513,7 +532,7 @@ func (m Model) caretRow() int {
 
 // Rows is how many rows the text takes at the width set, its wrapped lines
 // counted: a form that grows the field sets its height from it.
-func (m Model) Rows() int { return m.rowCount() }
+func (m Model) Rows() int { return m.ready().rowCount() }
 
 // rowCount is how many wrapped rows the text takes.
 func (m Model) rowCount() int {
@@ -585,6 +604,7 @@ func (m Model) scroll() Model {
 // View is the rows in the window, each a gutter and a wrapped piece of a
 // line, exactly the width and height set; rows past the text show "~".
 func (m Model) View() string {
+	m = m.ready()
 	caret := m.focused && m.caretOn
 	text := lipgloss.NewStyle()
 	if !m.focused {

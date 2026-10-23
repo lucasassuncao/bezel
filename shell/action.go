@@ -77,7 +77,9 @@ func (a *action) displayOnly() bool { return a.display || a.kind == kindMove || 
 
 func build(a *action, opts []Option) Action {
 	for _, o := range opts {
-		o(a)
+		if o != nil {
+			o(a)
+		}
 	}
 	return a
 }
@@ -191,6 +193,9 @@ func Check(actions ...Action) error {
 	owner := map[string]string{}
 	var errs []error
 	for _, a := range actions {
+		if a == nil {
+			continue
+		}
 		e := a.Entry()
 		for _, k := range e.Keys() {
 			if prev, taken := owner[k]; taken {

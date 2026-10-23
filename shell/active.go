@@ -1,6 +1,10 @@
 package shell
 
-import "github.com/lucasassuncao/bezel/legend"
+import (
+	"slices"
+
+	"github.com/lucasassuncao/bezel/legend"
+)
 
 // declared is every action the current screen names, live or not: the
 // global ones, the active tab's, then SetActions's.
@@ -9,7 +13,14 @@ func (s Shell) declared() []Action {
 	if len(s.cfg.Tabs) > 0 {
 		out = append(out, s.cfg.Tabs[s.tab].Actions(s.Context())...)
 	}
-	return append(out, s.actions...)
+	return withoutNil(append(out, s.actions...))
+}
+
+// withoutNil is xs without its nil entries: a nil Action or Tab is skipped,
+// not called.
+func withoutNil[T comparable](xs []T) []T {
+	var none T
+	return slices.DeleteFunc(slices.Clone(xs), func(x T) bool { return x == none })
 }
 
 // available reports a live action: its capability allowed, its When true,

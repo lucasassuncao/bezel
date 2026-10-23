@@ -26,7 +26,7 @@ Package key binds keys to what they do: the keys that fire a binding, the help t
 
 
 <a name="Matches"></a>
-## func [Matches](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L62>)
+## func [Matches](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L64>)
 
 ```go
 func Matches[Key fmt.Stringer](k Key, b ...Binding) bool
@@ -56,7 +56,7 @@ func NewBinding(opts ...BindingOpt) Binding
 NewBinding is a binding built from opts. Its keys or help change by building another: a binding read elsewhere never changes under its reader.
 
 <a name="Binding.Enabled"></a>
-### func \(Binding\) [Enabled](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L59>)
+### func \(Binding\) [Enabled](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L61>)
 
 ```go
 func (b Binding) Enabled() bool
@@ -65,7 +65,7 @@ func (b Binding) Enabled() bool
 Enabled reports whether b can fire: it has keys and is not switched off.
 
 <a name="Binding.Help"></a>
-### func \(Binding\) [Help](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L56>)
+### func \(Binding\) [Help](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L58>)
 
 ```go
 func (b Binding) Help() Help
@@ -74,7 +74,7 @@ func (b Binding) Help() Help
 Help is what the legend prints for b.
 
 <a name="Binding.Keys"></a>
-### func \(Binding\) [Keys](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L53>)
+### func \(Binding\) [Keys](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L55>)
 
 ```go
 func (b Binding) Keys() []string
@@ -92,7 +92,7 @@ type BindingOpt func(*Binding)
 ```
 
 <a name="WithDisabled"></a>
-### func [WithDisabled](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L48>)
+### func [WithDisabled](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L50>)
 
 ```go
 func WithDisabled() BindingOpt
@@ -101,7 +101,7 @@ func WithDisabled() BindingOpt
 WithDisabled builds the binding switched off.
 
 <a name="WithHelp"></a>
-### func [WithHelp](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L43>)
+### func [WithHelp](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L45>)
 
 ```go
 func WithHelp(key, desc string) BindingOpt
@@ -110,7 +110,7 @@ func WithHelp(key, desc string) BindingOpt
 WithHelp sets the key and the description the legend prints.
 
 <a name="WithKeys"></a>
-### func [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L38>)
+### func [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L40>)
 
 ```go
 func WithKeys(keys ...string) BindingOpt

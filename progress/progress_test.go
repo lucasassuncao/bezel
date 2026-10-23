@@ -69,3 +69,7 @@ func TestSmoothSplitsACellInEighths(t *testing.T) {
 func TestSmoothInASeriesColour(t *testing.T) {
 	require.Contains(t, Smooth(8, 8, 2, gruvbox(), InSeries(4)), gruvbox().Series[4].Render("██"))
 }
+
+func TestANilOptionIsSkipped(t *testing.T) {
+	require.Equal(t, ansi.Strip(Smooth(1, 2, 8, th())), ansi.Strip(Smooth(1, 2, 8, th(), nil)))
+}

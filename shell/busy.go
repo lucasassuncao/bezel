@@ -10,6 +10,7 @@ import (
 // text also is. A banner set meanwhile shows over it until it expires. The
 // command starts the spinner; nil when it is already spinning.
 func (s Shell) Busy(text string) (Shell, tea.Cmd) {
+	s = s.ready()
 	if text == "" {
 		return s.Idle(), nil
 	}
@@ -25,6 +26,7 @@ func (s Shell) Busy(text string) (Shell, tea.Cmd) {
 
 // Idle ends Busy. A banner on the status row is left alone.
 func (s Shell) Idle() Shell {
+	s = s.ready()
 	s.busy = ""
 	s.spin = s.spin.Stop()
 	return s

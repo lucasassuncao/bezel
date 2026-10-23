@@ -21,7 +21,7 @@ Package chart draws numbers in cells: Area and Spark a run of them over time, th
 
 
 <a name="Area"></a>
-## func [Area](<https://github.com/lucasassuncao/bezel/blob/main/chart/chart.go#L38>)
+## func [Area](<https://github.com/lucasassuncao/bezel/blob/main/chart/chart.go#L40>)
 
 ```go
 func Area(values []float64, top float64, width, height int, th theme.Resolved, opts ...Option) string
@@ -39,7 +39,7 @@ func Bars(bars []Bar, top float64, width int, th theme.Resolved, opts ...Option)
 Bars is one row per bar, width cells wide: the labels in a column, each bar scaled so top fills it, its edge cut to an eighth, and its text right\-aligned at the end. A long label is cut before the bars give up any room.
 
 <a name="Spark"></a>
-## func [Spark](<https://github.com/lucasassuncao/bezel/blob/main/chart/chart.go#L63>)
+## func [Spark](<https://github.com/lucasassuncao/bezel/blob/main/chart/chart.go#L65>)
 
 ```go
 func Spark(values []float64, top float64, width int, th theme.Resolved, opts ...Option) string

@@ -24,7 +24,9 @@ func InSeries(i int) Option { return func(l *look) { l.series = i } }
 func options(opts []Option) look {
 	l := look{series: -1}
 	for _, o := range opts {
-		o(&l)
+		if o != nil {
+			o(&l)
+		}
 	}
 	return l
 }

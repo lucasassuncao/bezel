@@ -44,5 +44,6 @@ func (s Shell) paletteItems() []palette.Item {
 // OpenCommands opens the palette over the declared named actions, for an app
 // that decides itself when ":" means commands and when it is text.
 func (s Shell) OpenCommands() Shell {
+	s = s.ready()
 	return s.Push(palette.New(s.paletteItems(), s.cfg.Theme)).relayout()
 }

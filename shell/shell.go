@@ -104,6 +104,7 @@ type Shell struct {
 // New is a shell over cfg, focused on the first leaf of the focus ring. It
 // draws nothing until the first tea.WindowSizeMsg.
 func New(cfg Config) Shell {
+	cfg.Tabs = withoutNil(cfg.Tabs)
 	if cfg.LegendLines < 1 {
 		cfg.LegendLines = 2
 	}
@@ -118,6 +119,15 @@ func New(cfg Config) Shell {
 		cfg: &cfg, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
 		spin: spinner.New(cfg.Spinner),
 	}
+}
+
+// ready is s, or for the zero Shell the one New(Config{}) builds, so a host
+// holding a Shell it has not built yet does not crash on it.
+func (s Shell) ready() Shell {
+	if s.cfg != nil {
+		return s
+	}
+	return New(Config{})
 }
 
 // withCfg is s holding a changed copy of its Config. The one it held is
@@ -141,11 +151,12 @@ func (s Shell) Size() (int, int) { return s.width, s.height }
 func (s Shell) Rect(name string) layout.Rect { return s.rects[name] }
 
 // Focus is the name of the focused leaf on the active tab.
-func (s Shell) Focus() string { return s.focus[s.tab] }
+func (s Shell) Focus() string { s = s.ready(); return s.focus[s.tab] }
 
 // SetFocus moves focus to a leaf of the layout. Unknown names are ignored,
 // and a leaf the layout dropped hands focus to one on screen.
 func (s Shell) SetFocus(name string) Shell {
+	s = s.ready()
 	if slices.Contains(layout.Order(s.cfg.Layout), name) {
 		return s.focusOn(name).relayout() // a Header may size itself by focus
 	}
@@ -166,6 +177,7 @@ func (s Shell) ActiveTab() int { return s.tab }
 
 // SetTab shows tab i. An index out of range is ignored.
 func (s Shell) SetTab(i int) Shell {
+	s = s.ready()
 	if i < 0 || i >= len(s.cfg.Tabs) {
 		return s
 	}
@@ -177,8 +189,10 @@ func (s Shell) SetTab(i int) Shell {
 // tab keeps its focus by position, a new one starts on the first pane, and a
 // shorter list moves the shell to its last tab when the active one is gone.
 func (s Shell) SetTabs(tabs ...Tab) Shell {
+	s = s.ready()
+	tabs = withoutNil(tabs)
 	n, first := max(1, len(tabs)), firstLeaf(s.cfg.Layout)
-	s = s.withCfg(func(c *Config) { c.Tabs = slices.Clone(tabs) })
+	s = s.withCfg(func(c *Config) { c.Tabs = tabs })
 	s.focus, s.ringFocus = resized(s.focus, n, first), resized(s.ringFocus, n, first)
 	s.tab = min(s.tab, n-1)
 	return s.relayout()
@@ -190,6 +204,7 @@ func (s Shell) Narrow() bool { return s.collapsed }
 // SetLayout swaps the layout tree and re-resolves it. For screens whose
 // shape changes at runtime, such as a panel that animates open.
 func (s Shell) SetLayout(n layout.Node) Shell {
+	s = s.ready()
 	s = s.withCfg(func(c *Config) { c.Layout = n })
 	s.present = nil // the old frame's panes say nothing about the new tree
 	return s.relayout()
@@ -198,12 +213,14 @@ func (s Shell) SetLayout(n layout.Node) Shell {
 // SetTheme swaps the styles, for a terminal that answered light or dark
 // after the shell was built.
 func (s Shell) SetTheme(th theme.Resolved) Shell {
+	s = s.ready()
 	s = s.withCfg(func(c *Config) { c.Theme = th })
 	return s.relayout()
 }
 
 // SetSubtitle changes the text after the title in the default header.
 func (s Shell) SetSubtitle(text string) Shell {
+	s = s.ready()
 	s = s.withCfg(func(c *Config) { c.Subtitle = text })
 	return s
 }
@@ -211,12 +228,14 @@ func (s Shell) SetSubtitle(text string) Shell {
 // SetActions is the current state's own actions, joining the global ones and
 // the tab's. Variadic.
 func (s Shell) SetActions(actions ...Action) Shell {
+	s = s.ready()
 	s.actions = slices.Clone(actions)
 	return s.relayout()
 }
 
 // SetLegendLines changes how many rows the legend keeps, 1 or more.
 func (s Shell) SetLegendLines(n int) Shell {
+	s = s.ready()
 	s = s.withCfg(func(c *Config) { c.LegendLines = max(1, n) })
 	return s.relayout()
 }
@@ -225,10 +244,11 @@ func (s Shell) SetLegendLines(n int) Shell {
 func (s Shell) Status() string { return s.status }
 
 // ShowHelp opens the Help overlay the ? key would.
-func (s Shell) ShowHelp() Shell { return s.Push(s.helpOverlay()).relayout() }
+func (s Shell) ShowHelp() Shell { s = s.ready(); return s.Push(s.helpOverlay()).relayout() }
 
 // Context is what the shell hands tabs and actions about where the user is.
 func (s Shell) Context() Context {
+	s = s.ready()
 	return Context{Width: s.width, Height: s.height, Focus: s.Focus(), Narrow: s.collapsed, Can: s.cfg.Can}
 }
 
@@ -240,12 +260,14 @@ func (s Shell) TopOverlay() overlay.Overlay { return s.overlays.Top() }
 
 // Push opens o above any open modal.
 func (s Shell) Push(o overlay.Overlay) Shell {
+	s = s.ready()
 	s.overlays = s.overlays.Push(o)
 	return s
 }
 
 // Pop closes the top modal, if any.
 func (s Shell) Pop() Shell {
+	s = s.ready()
 	s.overlays = s.overlays.Pop()
 	return s
 }

@@ -73,8 +73,12 @@ type Stack struct {
 	body  layout.Rect // what Resize last gave, zero before
 }
 
-// Push is the stack with o on top, sized to the stack's body when it has one.
+// Push is the stack with o on top, sized to the stack's body when it has one;
+// a nil o leaves the stack as it was.
 func (s Stack) Push(o Overlay) Stack {
+	if o == nil {
+		return s
+	}
 	items := make([]Overlay, len(s.items)+1)
 	copy(items, s.items)
 	items[len(s.items)] = s.fit(o)

@@ -1,8 +1,10 @@
 package theme
 
 import (
+	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -51,4 +53,22 @@ func TestLookupSeesAPresetChangedAtRuntime(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "#ABCDEF", got.Colors.Accent)
 	require.Equal(t, "#ABCDEF", All()["banana"].Colors.Accent)
+}
+
+// A redirected end must not reach lipgloss's query: on Windows it reads the
+// console instead, which can wait forever for an answer that never comes.
+func TestDarkTerminalSkipsTheQueryWhenRedirected(t *testing.T) {
+	r, w, err := os.Pipe()
+	require.NoError(t, err)
+	defer r.Close()
+	defer w.Close()
+
+	done := make(chan bool, 1)
+	go func() { done <- darkTerminal(r, w) }()
+	select {
+	case dark := <-done:
+		require.True(t, dark, "no answer reads as dark, as lipgloss does")
+	case <-time.After(time.Second):
+		t.Fatal("darkTerminal asked a pipe")
+	}
 }

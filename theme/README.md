@@ -310,7 +310,7 @@ var (
 ```
 
 <a name="All"></a>
-## func [All](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L226>)
+## func [All](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L227>)
 
 ```go
 func All() map[string]Theme
@@ -319,16 +319,16 @@ func All() map[string]Theme
 All returns all built\-in theme presets keyed by their CLI name. Useful for \-\-theme flag validation and \-\-list\-themes output in host CLIs.
 
 <a name="DarkTerminal"></a>
-## func [DarkTerminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L545>)
+## func [DarkTerminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L547>)
 
 ```go
 func DarkTerminal() bool
 ```
 
-DarkTerminal asks the terminal on stdin/stdout whether its background is dark, for code that resolves a theme outside a running bubbletea program.
+DarkTerminal asks the terminal on stdin/stdout whether its background is dark, for code that resolves a theme outside a running bubbletea program. A redirected stdin or stdout is not asked, and reads as dark.
 
 <a name="Category"></a>
-## type [Category](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L249-L252>)
+## type [Category](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L250-L253>)
 
 Category groups a set of related built\-in theme names for display purposes \- e.g. a \-\-list\-themes command that wants headings instead of one flat list.
 
@@ -340,7 +340,7 @@ type Category struct {
 ```
 
 <a name="Categories"></a>
-### func [Categories](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L257>)
+### func [Categories](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L258>)
 
 ```go
 func Categories() []Category
@@ -349,7 +349,7 @@ func Categories() []Category
 Categories returns the built\-in themes grouped for display. Every theme in All\(\) belongs to exactly one category \- "plain" has no siblings of its own, so it lives under "Miscellaneous" rather than being left ungrouped.
 
 <a name="Colors"></a>
-## type [Colors](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L16-L31>)
+## type [Colors](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L17-L32>)
 
 Colors names what a colour is for, not where one app happens to use it. Each value is a lipgloss colour string: a hex value \("\#7C3AED"\) or an ANSI code \("63"\). Empty means the adaptive default for that role.
 
@@ -373,7 +373,7 @@ type Colors struct {
 ```
 
 <a name="ResolveColors"></a>
-### func [ResolveColors](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L98>)
+### func [ResolveColors](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L99>)
 
 ```go
 func ResolveColors(t Theme, dark bool) Colors
@@ -437,7 +437,7 @@ func Resolve(t Theme, dark bool) Resolved
 Resolve turns t into styles for a dark or light terminal. Steps: the colour cascade \(ResolveColors\), the derived styles, then t.Styles overrides.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L35-L39>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L36-L40>)
 
 Styles holds optional per\-element lipgloss overrides. Nil fields are ignored during theme resolution and the default derived from Colors is used instead.
 
@@ -450,7 +450,7 @@ type Styles struct {
 ```
 
 <a name="Theme"></a>
-## type [Theme](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L44-L48>)
+## type [Theme](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L45-L49>)
 
 Theme layers an appearance: Base is an optional preset \(nil → adaptive default\) that may have a Base of its own; Colors and Styles override every layer under them.
 
@@ -463,7 +463,7 @@ type Theme struct {
 ```
 
 <a name="Lookup"></a>
-### func [Lookup](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L236>)
+### func [Lookup](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L237>)
 
 ```go
 func Lookup(name string) (Theme, error)

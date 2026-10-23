@@ -1175,7 +1175,7 @@ type Stack struct {
 ```
 
 <a name="Stack.Len"></a>
-### func \(Stack\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L125>)
+### func \(Stack\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L129>)
 
 ```go
 func (s Stack) Len() int
@@ -1184,7 +1184,7 @@ func (s Stack) Len() int
 Len is how many overlays are open.
 
 <a name="Stack.Pop"></a>
-### func \(Stack\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L85>)
+### func \(Stack\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L89>)
 
 ```go
 func (s Stack) Pop() Stack
@@ -1193,16 +1193,16 @@ func (s Stack) Pop() Stack
 Pop is the stack without its top overlay; an empty stack stays empty.
 
 <a name="Stack.Push"></a>
-### func \(Stack\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L77>)
+### func \(Stack\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L78>)
 
 ```go
 func (s Stack) Push(o Overlay) Stack
 ```
 
-Push is the stack with o on top, sized to the stack's body when it has one.
+Push is the stack with o on top, sized to the stack's body when it has one; a nil o leaves the stack as it was.
 
 <a name="Stack.Resize"></a>
-### func \(Stack\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L95>)
+### func \(Stack\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L99>)
 
 ```go
 func (s Stack) Resize(body layout.Rect) Stack
@@ -1211,7 +1211,7 @@ func (s Stack) Resize(body layout.Rect) Stack
 Resize hands body to every Resizer layer, the hidden ones too. A shell does it on each layout; an app driving a Stack itself calls it on every resize.
 
 <a name="Stack.Top"></a>
-### func \(Stack\) [Top](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L117>)
+### func \(Stack\) [Top](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L121>)
 
 ```go
 func (s Stack) Top() Overlay
@@ -1220,7 +1220,7 @@ func (s Stack) Top() Overlay
 Top is the overlay that gets the keys, or nil when the stack is empty.
 
 <a name="Stack.Update"></a>
-### func \(Stack\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L129>)
+### func \(Stack\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L133>)
 
 ```go
 func (s Stack) Update(msg tea.Msg) (Stack, bool, tea.Cmd)
@@ -1229,7 +1229,7 @@ func (s Stack) Update(msg tea.Msg) (Stack, bool, tea.Cmd)
 Update routes msg to the top overlay. handled is false only when the stack is empty and msg is not a stack message.
 
 <a name="Stack.View"></a>
-### func \(Stack\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L163>)
+### func \(Stack\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L167>)
 
 ```go
 func (s Stack) View(body layout.Rect, background string) string

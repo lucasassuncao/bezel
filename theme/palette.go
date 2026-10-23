@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/x/term"
 )
 
 // Colors names what a colour is for, not where one app happens to use it.
@@ -542,4 +543,14 @@ var (
 
 // DarkTerminal asks the terminal on stdin/stdout whether its background is
 // dark, for code that resolves a theme outside a running bubbletea program.
-func DarkTerminal() bool { return lipgloss.HasDarkBackground(os.Stdin, os.Stdout) }
+// A redirected stdin or stdout is not asked, and reads as dark.
+func DarkTerminal() bool { return darkTerminal(os.Stdin, os.Stdout) }
+
+// darkTerminal asks only when both ends are terminals: with either one
+// redirected, lipgloss reads the Windows console, which may never answer.
+func darkTerminal(in, out *os.File) bool {
+	if !term.IsTerminal(in.Fd()) || !term.IsTerminal(out.Fd()) {
+		return true
+	}
+	return lipgloss.HasDarkBackground(in, out)
+}

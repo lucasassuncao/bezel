@@ -13,6 +13,7 @@ import (
 // Body is the rect the panes share: the terminal minus header, tabs, status
 // and legend. Pure in the shell's state, so Update and View agree on it.
 func (s Shell) Body() layout.Rect {
+	s = s.ready()
 	top, bottom, _ := s.chromeRows()
 	return layout.Rect{X: 0, Y: top, W: s.width, H: max(1, s.height-top-bottom)}
 }
@@ -98,6 +99,7 @@ func (s Shell) withPresent(panes map[string]Pane) Shell {
 // View draws header, tabs, panes, status and legend, then the overlays on
 // top. It is pure: nothing here writes back to the shell the app holds.
 func (s Shell) View(panes map[string]Pane) string {
+	s = s.ready()
 	if s.width <= 0 || s.height <= 0 {
 		return ""
 	}

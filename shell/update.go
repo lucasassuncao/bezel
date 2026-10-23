@@ -18,6 +18,7 @@ type statusExpiredMsg struct{ seq uint }
 // Update handles what is the shell's: resize, status ticks, overlays, the
 // status-row input, help, tabs and focus. handled false means the app's turn.
 func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
+	s = s.ready()
 	next, handled, cmd := s.update(msg)
 	if !handled {
 		return s, false, nil
@@ -114,6 +115,7 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 // SetStatus shows text on the status row. ttl > 0 clears it later, unless a
 // newer status has replaced it by then.
 func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, tea.Cmd) {
+	s = s.ready()
 	s.statusSeq++
 	s.status, s.level = text, level
 	if ttl <= 0 {
@@ -139,6 +141,7 @@ func IsStatusExpiry(msg tea.Msg) bool {
 
 // ClearStatus removes the banner now, and makes its pending timer a no-op.
 func (s Shell) ClearStatus() Shell {
+	s = s.ready()
 	s.statusSeq++
 	s.status = ""
 	return s
@@ -147,12 +150,14 @@ func (s Shell) ClearStatus() Shell {
 // SetInput puts a text input on the status row. While it is there it takes
 // every key; the app reads the edits back with Input after each Update.
 func (s Shell) SetInput(m input.Model) Shell {
+	s = s.ready()
 	s.input, s.typing = m, true
 	return s
 }
 
 // ClearInput takes the input off the status row and gives the keys back.
 func (s Shell) ClearInput() Shell {
+	s = s.ready()
 	s.input, s.typing = input.Model{}, false
 	return s
 }

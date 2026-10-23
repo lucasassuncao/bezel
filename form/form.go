@@ -64,10 +64,10 @@ type Form struct {
 	keys   Keys
 }
 
-// New is a form focused on its first field.
+// New is a form focused on its first field; nil fields are left out.
 func New(fields ...Field) (Form, tea.Cmd) {
-	f := Form{fields: slices.Clone(fields), keys: DefaultKeys()}
-	if len(fields) == 0 {
+	f := Form{fields: slices.DeleteFunc(slices.Clone(fields), func(fl Field) bool { return fl == nil }), keys: DefaultKeys()}
+	if len(f.fields) == 0 {
 		return f, nil
 	}
 	var cmd tea.Cmd
@@ -88,8 +88,14 @@ func (f Form) WithKeys(k Keys) Form {
 	return f
 }
 
-// Field is the i-th field as it is now; assert it to read its value, or use Get.
-func (f Form) Field(i int) Field { return f.fields[i] }
+// Field is the i-th field as it is now, nil when i is out of range; assert it
+// to read its value, or use Get.
+func (f Form) Field(i int) Field {
+	if i < 0 || i >= len(f.fields) {
+		return nil
+	}
+	return f.fields[i]
+}
 
 // Get is the i-th field as a T, and false when i is out of range or the field
 // is of another type: a reordered form fails a check instead of a panic.

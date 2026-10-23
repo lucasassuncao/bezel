@@ -126,9 +126,10 @@ func At(cursor int, vis []int) int {
 }
 
 // WithNodeMutated returns the tree with a fresh Nodes slice in which
-// nodes[idx] was changed by mut: copy-on-write, never in place.
+// nodes[idx] was changed by mut: copy-on-write, never in place. A nil mut
+// changes nothing.
 func (m Model[N]) WithNodeMutated(idx int, mut func(*N)) Model[N] {
-	if idx < 0 || idx >= len(m.Nodes) {
+	if idx < 0 || idx >= len(m.Nodes) || mut == nil {
 		return m
 	}
 	nodes := make([]N, len(m.Nodes))
@@ -266,8 +267,11 @@ func (m Model[N]) ClampCursor() Model[N] {
 }
 
 // CursorTo moves the cursor to the first visible row match accepts, or
-// leaves it when none does. Reports whether it moved.
+// leaves it when none does, as a nil match. Reports whether it moved.
 func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool) {
+	if match == nil {
+		return m, false
+	}
 	vis := m.Visible()
 	for vi, ni := range vis {
 		if match(m.Nodes[ni]) {
@@ -282,6 +286,9 @@ func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool) {
 // ancestors of the first match in Nodes are expanded first. Ancestors are
 // the nearer rows above it with a smaller depth.
 func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool) {
+	if match == nil {
+		return m, false
+	}
 	if m2, ok := m.CursorTo(match); ok {
 		return m2, true
 	}
@@ -315,6 +322,9 @@ func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool) {
 // overflow; short trees are padded to Height. A tree not yet sized
 // (Height <= 0) renders nothing.
 func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) string) string {
+	if row == nil {
+		row = func(N, int, bool) string { return "" }
+	}
 	if m.Height <= 0 {
 		return ""
 	}

@@ -307,3 +307,18 @@ func TestABlurredFieldIsDimmedNotHighlighted(t *testing.T) {
 	m := New(th()).WithHighlight(keysBold(&calls)).WithValue("key: y")
 	require.NotContains(t, m.View(), lipgloss.NewStyle().Bold(true).Render("key"))
 }
+
+// A field never built with New is an empty one, as an input's zero value is.
+func TestTheZeroFieldIsAnEmptyOne(t *testing.T) {
+	var m Model
+	require.Equal(t, 1, m.LineCount())
+	require.Equal(t, 0, m.Column())
+	require.Equal(t, 1, m.Rows())
+	m = m.SetWidth(20).SetHeight(3).MoveTo(4, 4)
+	require.NotPanics(t, func() { _ = m.View() })
+
+	m, _ = Model{}.Focus()
+	m = run(m, typed("a"), press(tea.KeyEnter, 0), typed("b"), press(tea.KeyUp, 0))
+	require.Equal(t, "a\nb", m.Value())
+	require.Equal(t, 0, m.Line())
+}

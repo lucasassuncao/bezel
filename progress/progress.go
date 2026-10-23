@@ -108,7 +108,9 @@ var eighths = []rune("▏▎▍▌▋▊▉")
 func Smooth(done, total, width int, th theme.Resolved, opts ...Option) string {
 	l := look{series: -1}
 	for _, o := range opts {
-		o(&l)
+		if o != nil {
+			o(&l)
+		}
 	}
 	fill := th.Accent
 	if l.series >= 0 {

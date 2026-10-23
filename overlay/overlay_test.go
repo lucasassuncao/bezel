@@ -187,3 +187,9 @@ func TestDialogLegendsNameTheirKeys(t *testing.T) {
 func bind(keys, help string) key.Binding {
 	return key.NewBinding(key.WithKeys(strings.Split(keys, "/")...), key.WithHelp(keys, help))
 }
+
+func TestPushingNilLeavesTheStackAlone(t *testing.T) {
+	s := Stack{}.Push(nil)
+	require.Equal(t, 0, s.Len())
+	require.NotPanics(t, func() { _ = s.View(layout.Rect{W: 40, H: 10}, "base") })
+}

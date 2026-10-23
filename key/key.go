@@ -28,7 +28,9 @@ type BindingOpt func(*Binding)
 func NewBinding(opts ...BindingOpt) Binding {
 	var b Binding
 	for _, opt := range opts {
-		opt(&b)
+		if opt != nil {
+			opt(&b)
+		}
 	}
 	return b
 }

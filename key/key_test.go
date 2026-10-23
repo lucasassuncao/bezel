@@ -49,3 +49,8 @@ func TestABindingIsAValue(t *testing.T) {
 	require.False(t, Matches(press('s', tea.ModCtrl), keys.Save))
 	require.Equal(t, Help{Key: "ctrl+s", Desc: "save"}, keys.Save.Help(), "switched off, its help stays")
 }
+
+func TestANilOptionIsSkipped(t *testing.T) {
+	b := NewBinding(nil, WithKeys("x"), nil)
+	require.Equal(t, []string{"x"}, b.Keys())
+}

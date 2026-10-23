@@ -87,7 +87,7 @@ Package form is the controls that ask for a value: a text input, a select, check
 
 
 <a name="Get"></a>
-## func [Get](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L96>)
+## func [Get](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L102>)
 
 ```go
 func Get[T Field](f Form, i int) (T, bool)
@@ -285,19 +285,19 @@ type Form struct {
 func New(fields ...Field) (Form, tea.Cmd)
 ```
 
-New is a form focused on its first field.
+New is a form focused on its first field; nil fields are left out.
 
 <a name="Form.Field"></a>
-### func \(Form\) [Field](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L92>)
+### func \(Form\) [Field](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L93>)
 
 ```go
 func (f Form) Field(i int) Field
 ```
 
-Field is the i\-th field as it is now; assert it to read its value, or use Get.
+Field is the i\-th field as it is now, nil when i is out of range; assert it to read its value, or use Get.
 
 <a name="Form.Focused"></a>
-### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L106>)
+### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L112>)
 
 ```go
 func (f Form) Focused() int
@@ -306,7 +306,7 @@ func (f Form) Focused() int
 Focused is the index of the field in focus.
 
 <a name="Form.Update"></a>
-### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L110>)
+### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L116>)
 
 ```go
 func (f Form) Update(msg tea.Msg) (Form, tea.Cmd)
@@ -315,7 +315,7 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd)
 Update moves the focus on tab and shift\+tab, unless the focused field holds them, and hands every other message to the focused field.
 
 <a name="Form.View"></a>
-### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L143>)
+### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/form/form.go#L149>)
 
 ```go
 func (f Form) View(width int) string

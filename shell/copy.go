@@ -28,6 +28,7 @@ var errClipboardTimeout = errors.New("the clipboard did not answer: check that x
 // WithClipboard replaces the system clipboard with write, for a test that
 // must not touch the machine's own.
 func (s Shell) WithClipboard(write func(string) error) Shell {
+	s = s.ready()
 	s = s.withCfg(func(c *Config) { c.Clipboard = write })
 	return s
 }
@@ -36,6 +37,7 @@ func (s Shell) WithClipboard(write func(string) error) Shell {
 // status row, or "failed: why". A helper that hangs gives up after 5s
 // instead of freezing the program.
 func (s Shell) Copy(text, done, failed string) tea.Cmd {
+	s = s.ready()
 	write, timeout := s.cfg.Clipboard, clipboardTimeout // read here, on the loop, never from the command
 	if write == nil {
 		write = clipboard.WriteAll

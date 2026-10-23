@@ -41,3 +41,7 @@ func TestChartsOfNothing(t *testing.T) {
 	require.Empty(t, Spark([]float64{1}, 8, 0, th()))
 	require.Equal(t, "    ", ansi.Strip(Spark([]float64{1, 2}, 0, 4, th())), "no top draws nothing")
 }
+
+func TestANilOptionIsSkipped(t *testing.T) {
+	require.Equal(t, ansi.Strip(Spark([]float64{1, 2}, 2, 2, th())), ansi.Strip(Spark([]float64{1, 2}, 2, 2, th(), nil)))
+}

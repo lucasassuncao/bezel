@@ -260,3 +260,23 @@ func TestAConfigChangeIsTheCopysAlone(t *testing.T) {
 	require.Equal(t, 2, before.cfg.LegendLines)
 	require.Equal(t, theme.Resolve(theme.Plain, true).Colors, before.cfg.Theme.Colors)
 }
+
+// A Shell never built with New behaves as New(Config{}): a host that keeps
+// one in its model before it builds it must not crash on a stray message.
+func TestTheZeroShellIsAnEmptyOne(t *testing.T) {
+	var s Shell
+	require.NotPanics(t, func() {
+		_ = s.Focus()
+		_ = s.Context()
+		_ = s.Body()
+		_ = s.View(nil)
+		s, _, _ = s.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
+		s = Shell{}.SetTab(2).SetFocus("x").SetSubtitle("s").SetLegendLines(3).OpenCommands().Pop()
+		_ = Shell{}.Copy("a", "copied", "failed")
+		_, _ = Shell{}.Busy("working")
+		_, _ = Shell{}.SetStatus("hi", Info, time.Second)
+		_ = Shell{}.ShowHelp().View(nil)
+	})
+	w, h := s.Size()
+	require.Equal(t, 0, w+h)
+}

@@ -100,7 +100,7 @@ func New(th theme.Resolved) Model
 New is an empty field, not focused, sized by its text until SetWidth and SetHeight say otherwise.
 
 <a name="Model.Blink"></a>
-### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L251>)
+### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L269>)
 
 ```go
 func (m Model) Blink() tea.Cmd
@@ -109,7 +109,7 @@ func (m Model) Blink() tea.Cmd
 Blink is the command that keeps a focused caret blinking, for a host's Init; Focus and every edit arm their own.
 
 <a name="Model.Blur"></a>
-### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L244>)
+### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L262>)
 
 ```go
 func (m Model) Blur() Model
@@ -118,7 +118,7 @@ func (m Model) Blur() Model
 Blur takes the keys away, hides the caret and dims the text.
 
 <a name="Model.Column"></a>
-### func \(Model\) [Column](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L197>)
+### func \(Model\) [Column](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L211>)
 
 ```go
 func (m Model) Column() int
@@ -127,7 +127,7 @@ func (m Model) Column() int
 Column is how many characters sit before the caret on its line.
 
 <a name="Model.Focus"></a>
-### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L238>)
+### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L255>)
 
 ```go
 func (m Model) Focus() (Model, tea.Cmd)
@@ -136,7 +136,7 @@ func (m Model) Focus() (Model, tea.Cmd)
 Focus gives the field the keys and starts its caret blinking.
 
 <a name="Model.Focused"></a>
-### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L235>)
+### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L252>)
 
 ```go
 func (m Model) Focused() bool
@@ -145,7 +145,7 @@ func (m Model) Focused() bool
 Focused reports whether the field takes keys and shows its caret.
 
 <a name="Model.Height"></a>
-### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L232>)
+### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L249>)
 
 ```go
 func (m Model) Height() int
@@ -154,7 +154,7 @@ func (m Model) Height() int
 Height is how many rows the field shows.
 
 <a name="Model.Line"></a>
-### func \(Model\) [Line](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L194>)
+### func \(Model\) [Line](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L208>)
 
 ```go
 func (m Model) Line() int
@@ -163,7 +163,7 @@ func (m Model) Line() int
 Line is the line the caret is on, from 0.
 
 <a name="Model.LineCount"></a>
-### func \(Model\) [LineCount](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L191>)
+### func \(Model\) [LineCount](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L205>)
 
 ```go
 func (m Model) LineCount() int
@@ -172,7 +172,7 @@ func (m Model) LineCount() int
 LineCount is how many lines the text has; an empty one has one.
 
 <a name="Model.MoveTo"></a>
-### func \(Model\) [MoveTo](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L201>)
+### func \(Model\) [MoveTo](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L215>)
 
 ```go
 func (m Model) MoveTo(line, col int) Model
@@ -181,7 +181,7 @@ func (m Model) MoveTo(line, col int) Model
 MoveTo puts the caret on line at column col, both kept within the text, and scrolls it into view.
 
 <a name="Model.Rows"></a>
-### func \(Model\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L516>)
+### func \(Model\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L535>)
 
 ```go
 func (m Model) Rows() int
@@ -190,7 +190,7 @@ func (m Model) Rows() int
 Rows is how many rows the text takes at the width set, its wrapped lines counted: a form that grows the field sets its height from it.
 
 <a name="Model.SetHeight"></a>
-### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L223>)
+### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L239>)
 
 ```go
 func (m Model) SetHeight(h int) Model
@@ -199,7 +199,7 @@ func (m Model) SetHeight(h int) Model
 SetHeight is how many rows the field shows; zero shows every one.
 
 <a name="Model.SetTheme"></a>
-### func \(Model\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L160>)
+### func \(Model\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L172>)
 
 ```go
 func (m Model) SetTheme(th theme.Resolved) Model
@@ -208,7 +208,7 @@ func (m Model) SetTheme(th theme.Resolved) Model
 SetTheme repaints the field after the terminal's background was learned.
 
 <a name="Model.SetValue"></a>
-### func \(Model\) [SetValue](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L179>)
+### func \(Model\) [SetValue](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L193>)
 
 ```go
 func (m Model) SetValue(s string) Model
@@ -217,7 +217,7 @@ func (m Model) SetValue(s string) Model
 SetValue replaces the text after something happened, a reload say, with the caret at its end.
 
 <a name="Model.SetWidth"></a>
-### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L210>)
+### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L225>)
 
 ```go
 func (m Model) SetWidth(w int) Model
@@ -226,7 +226,7 @@ func (m Model) SetWidth(w int) Model
 SetWidth is the field's width in cells, the gutter included; zero draws each line whole.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L260>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L278>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
@@ -235,7 +235,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
 Update edits on a key or a paste while focused, and flips the caret on its own BlinkMsg. A key it has no use for leaves it as it was, with no command.
 
 <a name="Model.Value"></a>
-### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L182>)
+### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L196>)
 
 ```go
 func (m Model) Value() string
@@ -244,7 +244,7 @@ func (m Model) Value() string
 Value is the text, its lines joined by "\\n".
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L587>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L606>)
 
 ```go
 func (m Model) View() string
@@ -253,7 +253,7 @@ func (m Model) View() string
 View is the rows in the window, each a gutter and a wrapped piece of a line, exactly the width and height set; rows past the text show "\~".
 
 <a name="Model.Width"></a>
-### func \(Model\) [Width](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L229>)
+### func \(Model\) [Width](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L246>)
 
 ```go
 func (m Model) Width() int
@@ -262,7 +262,7 @@ func (m Model) Width() int
 Width is the field's width in cells, the gutter included.
 
 <a name="Model.WithClipboard"></a>
-### func \(Model\) [WithClipboard](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L129>)
+### func \(Model\) [WithClipboard](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L138>)
 
 ```go
 func (m Model) WithClipboard(read func() (string, error)) Model
@@ -271,7 +271,7 @@ func (m Model) WithClipboard(read func() (string, error)) Model
 WithClipboard reads the clipboard through read on a paste key, for a test that must not touch the machine's own; nil is the system's.
 
 <a name="Model.WithHighlight"></a>
-### func \(Model\) [WithHighlight](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L142>)
+### func \(Model\) [WithHighlight](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L153>)
 
 ```go
 func (m Model) WithHighlight(fn func(value string) [][]Span) Model
@@ -280,7 +280,7 @@ func (m Model) WithHighlight(fn func(value string) [][]Span) Model
 WithHighlight colours the text while focused: fn takes the whole value and gives each line its spans. It runs again only when the text changes.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L135>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L145>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
@@ -289,7 +289,7 @@ func (m Model) WithKeys(k Keys) Model
 WithKeys rebinds the editing keys.
 
 <a name="Model.WithValue"></a>
-### func \(Model\) [WithValue](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L167>)
+### func \(Model\) [WithValue](<https://github.com/lucasassuncao/bezel/blob/main/textbox/textbox.go#L180>)
 
 ```go
 func (m Model) WithValue(s string) Model
