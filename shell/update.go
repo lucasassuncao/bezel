@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/input"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/palette"
@@ -29,6 +30,13 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 
 func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	switch m := msg.(type) {
+	case animation.FrameMsg:
+		if s.trans.Owns(m) {
+			var cmd tea.Cmd
+			s.trans, cmd = s.trans.Update(m)
+			return s, true, cmd
+		}
+
 	case tea.WindowSizeMsg:
 		s.width, s.height = m.Width, m.Height
 		return s, true, nil

@@ -119,7 +119,11 @@ func (s Shell) View(panes map[string]Pane) string {
 	}
 	rows = append(rows, draw.Fit("", s.width))
 
-	rows = append(rows, strings.Split(s.paneCanvas(panes, body), "\n")...)
+	canvas := s.paneCanvas(panes, body)
+	if s.trans.Active() {
+		canvas = s.trans.Apply(canvas) // the tab strip above stays put
+	}
+	rows = append(rows, strings.Split(canvas, "\n")...)
 	rows = append(rows, s.statusRow())
 	for _, l := range legendLines {
 		rows = append(rows, draw.Fit(l, s.width))

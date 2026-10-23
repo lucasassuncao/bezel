@@ -16,7 +16,7 @@ func onEffects(t *testing.T) (tea.Model, string) {
 	var m tea.Model = newModel()
 	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
 	m, _ = m.Update(startMsg{})
-	return frame(t, m, tea.KeyPressMsg{Code: tea.KeyTab})
+	return turnTab(t, m)
 }
 
 func TestTheEffectsTabShowsEveryRow(t *testing.T) {

@@ -81,6 +81,31 @@ Sleep 2s
 Type "i"
 Sleep 2s
 
+Tab
+Sleep 1.5s
+Type "e"
+Sleep 2.6s
+Type "e"
+Sleep 1.5s
+Type "p"
+Sleep 1.5s
+Type "p"
+Sleep 1.5s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 2.6s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 1.5s
+Type "e"
+Sleep 2.6s
+
 Hide
 Type "q"
 Sleep 1s

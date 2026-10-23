@@ -1,5 +1,5 @@
 // Package animation moves things on frames that arrive as messages: tweens on a
-// dozen curves, springs, points, fades, shimmers, gradients and text effects,
+// dozen curves, springs, points, text effects, and effects over any drawn block,
 // alone or on a shared Clock. BEZEL_NO_MOTION or TERM=dumb lands them all at once.
 package animation
 

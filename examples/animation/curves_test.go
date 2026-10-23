@@ -12,7 +12,7 @@ import (
 func onCurves(t *testing.T) (tea.Model, string) {
 	t.Helper()
 	m, _ := onEffects(t)
-	return frame(t, m, tea.KeyPressMsg{Code: tea.KeyTab})
+	return turnTab(t, m)
 }
 
 func TestTheCurvesTabRacesEveryCurve(t *testing.T) {

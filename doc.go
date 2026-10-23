@@ -52,8 +52,8 @@
 //     is up.
 //   - [github.com/lucasassuncao/bezel/browser]: a pick-from-a-list screen, labels
 //     left and the selected item's detail right.
-//   - [github.com/lucasassuncao/bezel/animation]: tweens, springs, points,
-//     fades, shimmers, gradients and text effects, and one clock to drive them.
+//   - [github.com/lucasassuncao/bezel/animation]: tweens, springs, text effects,
+//     effects over any drawn block, and one clock to drive them.
 //   - [github.com/lucasassuncao/bezel/inline]: yes/no questions and progress bars
 //     for CLIs that print logs, without taking the screen.
 //   - [github.com/lucasassuncao/bezel/bezeltest]: builds the key presses a

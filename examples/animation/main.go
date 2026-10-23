@@ -1,4 +1,4 @@
-// Animation: every kind the animation package has, on three tabs. The timed
+// Animation: every kind the animation package has, on four tabs. The timed
 // ones share one Clock; the looping ones and the hints pane keep their own.
 package main
 
@@ -88,6 +88,7 @@ type model struct {
 	marquee        animation.Marquee
 	fx             effects // the second tab's
 	cv             curves  // the third tab's
+	dr             drawing // the fourth tab's
 
 	open   bool
 	tween  animation.Tween // the hints pane's height, on its own frames
@@ -105,9 +106,10 @@ func shape(h int) layout.Node {
 func newModel() model {
 	th := theme.Resolve(theme.Mint, true)
 	sh := shell.New(shell.Config{
-		Layout: shape(0),
-		Theme:  th,
-		Title:  "animation",
+		Layout:     shape(0),
+		Theme:      th,
+		Title:      "animation",
+		Transition: shell.SlideTabs(300 * time.Millisecond),
 		Tabs: []shell.Tab{
 			page{"basics", []shell.Action{
 				shell.Custom("r", "replay", shell.Send(replayMsg{})),
@@ -125,6 +127,11 @@ func newModel() model {
 			page{"curves", []shell.Action{
 				shell.Custom("r", "race", shell.Send(curvesMsg{})),
 				shell.Custom("i", "in/out", shell.Send(turnMsg{})),
+			}},
+			page{"draw", []shell.Action{
+				shell.Custom("e", "effect", shell.Send(effectMsg{})),
+				shell.Custom("p", "pattern", shell.Send(patternMsg{})),
+				shell.Custom("r", "again", shell.Send(againMsg{})),
 			}},
 		},
 		Actions: []shell.Action{
@@ -161,7 +168,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.marquee, cmd = m.marquee.Start()
 		m.fx, fxCmd = m.fx.start()
 		m.cv = m.cv.race()
+		m.dr = m.dr.again(m.th)
 		return m.replay().run(tea.Batch(cmd, fxCmd))
+	case effectMsg:
+		m.dr = m.dr.nextEffect(m.th)
+		return m.run(nil)
+	case patternMsg:
+		m.dr = m.dr.nextPattern(m.th)
+		return m.run(nil)
+	case againMsg:
+		m.dr = m.dr.again(m.th)
+		return m.run(nil)
 	case curvesMsg:
 		m.cv = m.cv.race()
 		return m.run(nil)
@@ -288,6 +305,7 @@ func (m model) advance(at time.Time) model {
 	}
 	m.fx = m.fx.advance(at)
 	m.cv = m.cv.advance(at)
+	m.dr = m.dr.advance(at)
 	return m
 }
 
@@ -299,7 +317,7 @@ func (m model) moving() bool {
 		}
 	}
 	return m.steady.Active() || m.bouncy.Active() || m.smooth.Active() || m.count.Active() ||
-		m.fade.Active() || m.typed.Active() || m.shake.Active() || m.pulse.Active() || m.fx.moving() || m.cv.moving()
+		m.fade.Active() || m.typed.Active() || m.shake.Active() || m.pulse.Active() || m.fx.moving() || m.cv.moving() || m.dr.moving()
 }
 
 func (m model) View() tea.View {
@@ -310,6 +328,8 @@ func (m model) View() tea.View {
 				return m.fx.rows(m.th, m.label)
 			case 2:
 				return m.cv.rows(m.th, m.label)
+			case 3:
+				return m.dr.rows(m.th, m.label)
 			}
 			return m.gallery()
 		}},

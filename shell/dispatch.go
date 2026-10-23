@@ -34,7 +34,12 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 	case kindCommands:
 		return s.OpenCommands(), nil
 	case kindChangeTab:
-		return s.SetTab(cycle(s.tab, len(s.cfg.Tabs), backward(ac, pressed))), nil
+		from := s.tab
+		if s = s.SetTab(cycle(s.tab, len(s.cfg.Tabs), backward(ac, pressed))); s.tab == from || s.cfg.Transition == nil {
+			return s, nil
+		}
+		s.trans = s.cfg.Transition(from, s.tab)
+		return s, s.trans.Tick()
 	case kindChangePane:
 		step := 1
 		if backward(ac, pressed) {
