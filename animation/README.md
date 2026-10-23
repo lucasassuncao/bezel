@@ -8,16 +8,25 @@
 import "github.com/lucasassuncao/bezel/animation"
 ```
 
-Package animation moves things on frames that arrive as messages: tweens, springs, points, fades, shimmers, gradients and text effects, alone or on a shared Clock. BEZEL\_NO\_MOTION or TERM=dumb lands them all at once.
+Package animation moves things on frames that arrive as messages: tweens on a dozen curves, springs, points, fades, shimmers, gradients and text effects, alone or on a shared Clock. BEZEL\_NO\_MOTION or TERM=dumb lands them all at once.
 
 ## Index
 
 - [Constants](<#constants>)
+- [func Back\(p float64\) float64](<#Back>)
 - [func Blend\(a, b color.Color, p float64\) color.Color](<#Blend>)
+- [func Bounce\(p float64\) float64](<#Bounce>)
+- [func Circ\(p float64\) float64](<#Circ>)
+- [func Cubic\(p float64\) float64](<#Cubic>)
 - [func EaseIn\(p float64\) float64](<#EaseIn>)
 - [func EaseInOut\(p float64\) float64](<#EaseInOut>)
 - [func EaseOut\(p float64\) float64](<#EaseOut>)
+- [func Elastic\(p float64\) float64](<#Elastic>)
+- [func Expo\(p float64\) float64](<#Expo>)
 - [func Linear\(p float64\) float64](<#Linear>)
+- [func Quart\(p float64\) float64](<#Quart>)
+- [func Quint\(p float64\) float64](<#Quint>)
+- [func Sine\(p float64\) float64](<#Sine>)
 - [func Still\(\) bool](<#Still>)
 - [type Clock](<#Clock>)
   - [func NewClock\(\) Clock](<#NewClock>)
@@ -28,6 +37,9 @@ Package animation moves things on frames that arrive as messages: tweens, spring
   - [func \(c Clock\) Start\(\) \(Clock, tea.Cmd\)](<#Clock.Start>)
   - [func \(c Clock\) Stop\(\) Clock](<#Clock.Stop>)
 - [type Ease](<#Ease>)
+  - [func InOut\(e Ease\) Ease](<#InOut>)
+  - [func Out\(e Ease\) Ease](<#Out>)
+  - [func Steps\(n int\) Ease](<#Steps>)
 - [type Fade](<#Fade>)
   - [func NewFade\(from, to color.Color, dur time.Duration\) Fade](<#NewFade>)
   - [func \(f Fade\) Active\(\) bool](<#Fade.Active>)
@@ -106,6 +118,7 @@ Package animation moves things on frames that arrive as messages: tweens, spring
   - [func \(o Odometer\) Update\(msg tea.Msg\) \(Odometer, tea.Cmd\)](<#Odometer.Update>)
   - [func \(o Odometer\) Value\(\) int](<#Odometer.Value>)
   - [func \(o Odometer\) View\(\) string](<#Odometer.View>)
+  - [func \(o Odometer\) WithEase\(e Ease\) Odometer](<#Odometer.WithEase>)
 - [type Point](<#Point>)
   - [func \(p Point\) Round\(\) \(x, y int\)](<#Point.Round>)
 - [type Scramble](<#Scramble>)
@@ -192,6 +205,15 @@ const Forever = -1
 const Frame = 16 * time.Millisecond
 ```
 
+<a name="Back"></a>
+## func [Back](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L160>)
+
+```go
+func Back(p float64) float64
+```
+
+Back pulls back a little before it goes; Out\(Back\) overshoots and settles.
+
 <a name="Blend"></a>
 ## func [Blend](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L58>)
 
@@ -201,8 +223,35 @@ func Blend(a, b color.Color, p float64) color.Color
 
 Blend is the colour p of the way from a to b, channel by channel. With either one nil there is nothing to mix, so it is a until half way, then b.
 
+<a name="Bounce"></a>
+## func [Bounce](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L173>)
+
+```go
+func Bounce(p float64) float64
+```
+
+Bounce hops off the start a few times before it goes; Out\(Bounce\) drops onto its end like a ball, and never leaves \[0,1\].
+
+<a name="Circ"></a>
+## func [Circ](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L154>)
+
+```go
+func Circ(p float64) float64
+```
+
+Circ eases along a quarter circle.
+
+<a name="Cubic"></a>
+## func [Cubic](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L137>)
+
+```go
+func Cubic(p float64) float64
+```
+
+Cubic is p³, slower to start than EaseIn's p².
+
 <a name="EaseIn"></a>
-## func [EaseIn](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L16>)
+## func [EaseIn](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L18>)
 
 ```go
 func EaseIn(p float64) float64
@@ -211,7 +260,7 @@ func EaseIn(p float64) float64
 EaseIn starts slow and ends fast, for something leaving.
 
 <a name="EaseInOut"></a>
-## func [EaseInOut](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L24>)
+## func [EaseInOut](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L26>)
 
 ```go
 func EaseInOut(p float64) float64
@@ -220,7 +269,7 @@ func EaseInOut(p float64) float64
 EaseInOut is quadratic, gentler than a cubic on purpose: on whole cells a cubic freezes, then skips rows, while this never repeats a height more than once over 180ms. Every tween follows it unless told otherwise.
 
 <a name="EaseOut"></a>
-## func [EaseOut](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L19>)
+## func [EaseOut](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L21>)
 
 ```go
 func EaseOut(p float64) float64
@@ -228,14 +277,59 @@ func EaseOut(p float64) float64
 
 EaseOut starts fast and settles, for something arriving.
 
+<a name="Elastic"></a>
+## func [Elastic](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L164>)
+
+```go
+func Elastic(p float64) float64
+```
+
+Elastic winds up like a spring before it lets go; Out\(Elastic\) rings past its end and settles.
+
+<a name="Expo"></a>
+## func [Expo](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L146>)
+
+```go
+func Expo(p float64) float64
+```
+
+Expo doubles its pace every tenth of the way: almost still, then gone.
+
 <a name="Linear"></a>
-## func [Linear](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L13>)
+## func [Linear](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L15>)
 
 ```go
 func Linear(p float64) float64
 ```
 
 Linear moves at one speed throughout: a counter, a typewriter.
+
+<a name="Quart"></a>
+## func [Quart](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L140>)
+
+```go
+func Quart(p float64) float64
+```
+
+Quart is p⁴.
+
+<a name="Quint"></a>
+## func [Quint](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L143>)
+
+```go
+func Quint(p float64) float64
+```
+
+Quint is p⁵.
+
+<a name="Sine"></a>
+## func [Sine](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L134>)
+
+```go
+func Sine(p float64) float64
+```
+
+Sine eases in along a quarter of a sine wave, the gentlest of them.
 
 <a name="Still"></a>
 ## func [Still](<https://github.com/lucasassuncao/bezel/blob/main/animation/still.go#L8>)
@@ -321,13 +415,40 @@ func (c Clock) Stop() Clock
 Stop halts c; the frame already on its way is dropped.
 
 <a name="Ease"></a>
-## type [Ease](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L10>)
+## type [Ease](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L12>)
 
-Ease maps progress in \[0,1\] onto how far along the motion is, also in \[0,1\].
+Ease maps progress in \[0,1\] onto how far along the motion is: 0 at the start and 1 at the end, and between them a lively one, Back or Elastic, may leave \[0,1\].
 
 ```go
 type Ease func(p float64) float64
 ```
+
+<a name="InOut"></a>
+### func [InOut](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L197>)
+
+```go
+func InOut(e Ease) Ease
+```
+
+InOut is e easing in over the first half and out over the second.
+
+<a name="Out"></a>
+### func [Out](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L194>)
+
+```go
+func Out(e Ease) Ease
+```
+
+Out is e played backwards from the end: fast first, then settling.
+
+<a name="Steps"></a>
+### func [Steps](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L207>)
+
+```go
+func Steps(n int) Ease
+```
+
+Steps moves in n equal jumps, like a clock's hand; none is one jump to the end.
 
 <a name="Fade"></a>
 ## type [Fade](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L13-L16>)
@@ -1051,6 +1172,15 @@ func (o Odometer) View() string
 ```
 
 View is the number as the columns show it now, zero\-padded to the width.
+
+<a name="Odometer.WithEase"></a>
+### func \(Odometer\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/odometer.go#L100>)
+
+```go
+func (o Odometer) WithEase(e Ease) Odometer
+```
+
+WithEase is o following e instead of EaseOut.
 
 <a name="Point"></a>
 ## type [Point](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L11>)

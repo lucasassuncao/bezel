@@ -51,7 +51,7 @@ func (o Odometer) View() string {
 		k := o.width - 1 - j // the column's power of ten
 		a, b := digit(o.from, k), digit(o.to, k)
 		steps := (b-a+10)%10 + 10*j // the right-hand columns spin more full turns
-		out[j] = byte('0' + (a+int(float64(steps)*ease(o.p)))%10)
+		out[j] = "0123456789"[wrap10(a+int(float64(steps)*ease(o.p)))]
 	}
 	return string(out)
 }
@@ -95,3 +95,13 @@ func (o Odometer) Advance(now time.Time) (Odometer, bool) {
 	o.run, o.p = o.run.advance(now)
 	return o, !o.Active()
 }
+
+// WithEase is o following e instead of EaseOut.
+func (o Odometer) WithEase(e Ease) Odometer {
+	o.run.ease = e
+	return o
+}
+
+// wrap10 is n's last digit, counted round from 9 when a curve that pulls back
+// takes it below zero.
+func wrap10(n int) int { return (n%10 + 10) % 10 }

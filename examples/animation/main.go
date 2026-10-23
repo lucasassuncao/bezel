@@ -1,4 +1,4 @@
-// Animation: every kind the animation package has, on two tabs. The timed
+// Animation: every kind the animation package has, on three tabs. The timed
 // ones share one Clock; the looping ones and the hints pane keep their own.
 package main
 
@@ -87,6 +87,7 @@ type model struct {
 	cascade        []animation.Tween
 	marquee        animation.Marquee
 	fx             effects // the second tab's
+	cv             curves  // the third tab's
 
 	open   bool
 	tween  animation.Tween // the hints pane's height, on its own frames
@@ -120,6 +121,10 @@ func newModel() model {
 				shell.Custom("x", "scramble", shell.Send(scrambleMsg{})),
 				shell.Custom("o", "odometer", shell.Send(odometerMsg{})),
 				shell.Custom("m", "move", shell.Send(moveMsg{})),
+			}},
+			page{"curves", []shell.Action{
+				shell.Custom("r", "race", shell.Send(curvesMsg{})),
+				shell.Custom("i", "in/out", shell.Send(turnMsg{})),
 			}},
 		},
 		Actions: []shell.Action{
@@ -155,7 +160,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var fxCmd tea.Cmd
 		m.marquee, cmd = m.marquee.Start()
 		m.fx, fxCmd = m.fx.start()
+		m.cv = m.cv.race()
 		return m.replay().run(tea.Batch(cmd, fxCmd))
+	case curvesMsg:
+		m.cv = m.cv.race()
+		return m.run(nil)
+	case turnMsg:
+		m.cv = m.cv.next()
+		return m.run(nil)
 	case scrambleMsg:
 		m.fx = m.fx.decode()
 		return m.run(nil)
@@ -275,6 +287,7 @@ func (m model) advance(at time.Time) model {
 		m.cascade[i], _ = m.cascade[i].Advance(at)
 	}
 	m.fx = m.fx.advance(at)
+	m.cv = m.cv.advance(at)
 	return m
 }
 
@@ -286,14 +299,17 @@ func (m model) moving() bool {
 		}
 	}
 	return m.steady.Active() || m.bouncy.Active() || m.smooth.Active() || m.count.Active() ||
-		m.fade.Active() || m.typed.Active() || m.shake.Active() || m.pulse.Active() || m.fx.moving()
+		m.fade.Active() || m.typed.Active() || m.shake.Active() || m.pulse.Active() || m.fx.moving() || m.cv.moving()
 }
 
 func (m model) View() tea.View {
 	v := tea.NewView(m.sh.View(map[string]shell.Pane{
 		"main": {Title: "every animation", Right: still(), Body: func(layout.Rect) string {
-			if m.sh.ActiveTab() == 1 {
+			switch m.sh.ActiveTab() {
+			case 1:
 				return m.fx.rows(m.th, m.label)
+			case 2:
+				return m.cv.rows(m.th, m.label)
 			}
 			return m.gallery()
 		}},

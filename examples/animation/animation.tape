@@ -74,6 +74,13 @@ Sleep 1.5s
 Type "o"
 Sleep 1.5s
 
+Tab
+Sleep 2s
+Type "i"
+Sleep 2s
+Type "i"
+Sleep 2s
+
 Hide
 Type "q"
 Sleep 1s

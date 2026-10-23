@@ -1,6 +1,6 @@
-// Package animation moves things on frames that arrive as messages: tweens,
-// springs, points, fades, shimmers, gradients and text effects, alone or on a
-// shared Clock. BEZEL_NO_MOTION or TERM=dumb lands them all at once.
+// Package animation moves things on frames that arrive as messages: tweens on a
+// dozen curves, springs, points, fades, shimmers, gradients and text effects,
+// alone or on a shared Clock. BEZEL_NO_MOTION or TERM=dumb lands them all at once.
 package animation
 
 import (
