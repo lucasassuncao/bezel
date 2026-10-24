@@ -1,68 +1,70 @@
 # Components
 
-One small program per package, each with a recording of it running. Every GIF is a real session of the program beside it, recorded from the `.tape` next to it. Run any of them with `go run ./examples/<name>`; for everything at once, `go run ./examples/demo`.
+One small program per package, each with a recording of it running. Every GIF is a real session of its program, recorded from the `.tape` beside it in [`docs/recordings`](recordings). Run any of them with `go run ./examples/<group>/<name>`, as `go run ./examples/component/list`; for a small app that puts several together, `go run ./examples/app`, explained step by step in [EXAMPLE.md](EXAMPLE.md).
 
 The widgets that go inside the panes live under [`component`](../component); the frame around them, and the key presses for tests, sit at the root. The effects have [EFFECTS.md](EFFECTS.md) and the animations [ANIMATIONS.md](ANIMATIONS.md).
 
 ## The frame
 
+How these fit together, from the first `shell.Config` to a dialog of your own, is [FRAME.md](FRAME.md).
+
 What every screen is built in: the shell an app embeds, the layout it resolves, the theme it draws with, and the dialogs, legend and command line around the panes.
 
 ### Shell
 
-Source: [`examples/shell/main.go`](../examples/shell/main.go)
+Source: [`examples/frame/shell/main.go`](../examples/frame/shell/main.go)
 
 Two tabs and two panes. `s` sets a status that clears itself, `b` shows the busy spinner until the work is done, `tab` switches tab and `?` lists every key.
 
-![shell](../examples/shell/shell.gif)
+![shell](recordings/frame/shell.gif)
 
 ### Layout
 
-Source: [`examples/layout/main.go`](../examples/layout/main.go)
+Source: [`examples/frame/layout/main.go`](../examples/frame/layout/main.go)
 
 A header over two columns, each pane printing the rect it was given. `w` narrows the window below the `Collapse` limit and the side column drops out, then comes back.
 
-![layout](../examples/layout/layout.gif)
+![layout](recordings/frame/layout.gif)
 
 ### Theme
 
-Source: [`examples/theme/main.go`](../examples/theme/main.go)
+Source: [`examples/frame/theme/main.go`](../examples/frame/theme/main.go)
 
 Every colour role and a list drawn with it. `n` and `p` step through a few presets, and `SetTheme` swaps them on the running shell.
 
-![theme](../examples/theme/theme.gif)
+![theme](recordings/frame/theme.gif)
 
 ### Overlay
 
-Source: [`examples/overlay/main.go`](../examples/overlay/main.go)
+Source: [`examples/frame/overlay/main.go`](../examples/frame/overlay/main.go)
 
 The ready-made modals, one per row: an alert, a confirm that answers the app, a prompt that refuses an empty name, the help list, a pager over a command's output and a file picker. `enter` opens the one under the cursor and `esc` closes it.
 
-![overlay](../examples/overlay/overlay.gif)
+![overlay](recordings/frame/overlay.gif)
 
 ### Draw
 
-Source: [`examples/draw/main.go`](../examples/draw/main.go)
+Source: [`examples/frame/draw/main.go`](../examples/frame/draw/main.go)
 
 One scrolling pane with a section per helper: header, tabs, breadcrumb, dividers, a card with its actions in the footer, buttons, key-value rows, wrapped and truncated text, numbered lines and the empty state.
 
-![draw](../examples/draw/draw.gif)
+![draw](recordings/frame/draw.gif)
 
 ### Legend
 
-Source: [`examples/legend/main.go`](../examples/legend/main.go)
+Source: [`examples/frame/legend/main.go`](../examples/frame/legend/main.go)
 
 More keys than one row holds: the ones cut are counted and `?` lists them all. Five keys need a write capability; `w` grants it and they join the legend.
 
-![legend](../examples/legend/legend.gif)
+![legend](recordings/frame/legend.gif)
 
 ### Palette
 
-Source: [`examples/palette/main.go`](../examples/palette/main.go)
+Source: [`examples/frame/palette/main.go`](../examples/frame/palette/main.go)
 
 The `:` command line. A name completes with `tab`, a command takes an argument, and one that is unknown or not allowed says so on the status row.
 
-![palette](../examples/palette/palette.gif)
+![palette](recordings/frame/palette.gif)
 
 ## Lists, tables and text
 
@@ -70,51 +72,51 @@ What a pane shows: rows with a cursor, a tree, a table, pages of items, a long t
 
 ### List
 
-Source: [`examples/list/main.go`](../examples/list/main.go)
+Source: [`examples/component/list/main.go`](../examples/component/list/main.go)
 
 Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included.
 
-![list](../examples/list/list.gif)
+![list](recordings/component/list.gif)
 
 ### Paginator
 
-Source: [`examples/paginator/main.go`](../examples/paginator/main.go)
+Source: [`examples/component/paginator/main.go`](../examples/component/paginator/main.go)
 
 Forty-two items, eight to a page, with the page under them. `←` and `→` turn the page, as do `pgup`/`pgdown` and `h`/`l`, and `t` switches between "2/6" and a row of dots.
 
-![paginator](../examples/paginator/paginator.gif)
+![paginator](recordings/component/paginator.gif)
 
 ### Tree
 
-Source: [`examples/tree/main.go`](../examples/tree/main.go)
+Source: [`examples/component/tree/main.go`](../examples/component/tree/main.go)
 
 A directory tree over the app's own node type. The arrows expand and collapse; `:reveal` opens every parent on the way down to a path.
 
-![tree](../examples/tree/tree.gif)
+![tree](recordings/component/tree.gif)
 
 ### Table
 
-Source: [`examples/table/main.go`](../examples/table/main.go)
+Source: [`examples/component/table/main.go`](../examples/component/table/main.go)
 
 Columns sized to their contents, and a cursor over rows that scroll under a fixed header, with the position at the foot of the pane, a scrollbar down its edge and the row's detail below. `pgdown` and `pgup` move a page at a time, `enter` reports the chosen row, and `w` narrows the window: the description gives way first, and the version and licence stay whole.
 
-![table](../examples/table/table.gif)
+![table](recordings/component/table.gif)
 
 ### Viewport
 
-Source: [`examples/viewport/main.go`](../examples/viewport/main.go)
+Source: [`examples/component/viewport/main.go`](../examples/component/viewport/main.go)
 
 An access log, numbered in a gutter, with its error lines in red and every `ERROR` highlighted. The arrows, `pgup`/`pgdown` and `home`/`end` scroll, `←` and `→` pan the long lines, `n` and `N` go from error to error, `w` wraps the lines, and the mouse wheel scrolls.
 
-![viewport](../examples/viewport/viewport.gif)
+![viewport](recordings/component/viewport.gif)
 
 ### Browser
 
-Source: [`examples/browser/main.go`](../examples/browser/main.go)
+Source: [`examples/component/browser/main.go`](../examples/component/browser/main.go)
 
 Recipe names on the left, the selected recipe on the right. `tab` moves the keys to the recipe so it scrolls, and back.
 
-![browser](../examples/browser/browser.gif)
+![browser](recordings/component/browser.gif)
 
 ## Input
 
@@ -122,27 +124,27 @@ What the user types into: a form of controls, a multi-line field, and the caret 
 
 ### Form
 
-Source: [`examples/form/main.go`](../examples/form/main.go)
+Source: [`examples/component/form/main.go`](../examples/component/form/main.go)
 
 One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
 
-![form](../examples/form/form.gif)
+![form](recordings/component/form.gif)
 
 ### Textbox
 
-Source: [`examples/textbox/main.go`](../examples/textbox/main.go)
+Source: [`examples/component/textbox/main.go`](../examples/component/textbox/main.go)
 
 A multi-line value with its lines numbered. Every key is text, so the app quits on `esc`; `ctrl+s` counts the lines.
 
-![textbox](../examples/textbox/textbox.gif)
+![textbox](recordings/component/textbox.gif)
 
 ### Cursor
 
-Source: [`examples/cursor/main.go`](../examples/cursor/main.go)
+Source: [`examples/component/cursor/main.go`](../examples/component/cursor/main.go)
 
 Three cursors, one per mode, each on the first letter of a word. `tab` moves the focus down the rows, and `m` turns the focused cursor from blinking to steady to hidden and around again.
 
-![cursor](../examples/cursor/cursor.gif)
+![cursor](recordings/component/cursor.gif)
 
 ## Progress, time and state
 
@@ -150,43 +152,43 @@ How far along something is, how long it took, and what state it is in.
 
 ### Progress
 
-Source: [`examples/progress/main.go`](../examples/progress/main.go)
+Source: [`examples/component/progress/main.go`](../examples/component/progress/main.go)
 
 A count that fills on its own, as a `Line` and as a bare `Bar`, and a wizard's stages in a `Stepper`. `n` and `p` walk the stages; the copy drawn at 30 columns folds to "Step 2 of 4". `r` restarts the count.
 
-![progress](../examples/progress/progress.gif)
+![progress](recordings/component/progress.gif)
 
 ### Spinner
 
-Source: [`examples/spinner/main.go`](../examples/spinner/main.go)
+Source: [`examples/component/spinner/main.go`](../examples/component/spinner/main.go)
 
 The twelve presets side by side, each turning at its own pace. `space` stops them all and starts them again.
 
-![spinner](../examples/spinner/spinner.gif)
+![spinner](recordings/component/spinner.gif)
 
 ### Timer
 
-Source: [`examples/timer/main.go`](../examples/timer/main.go)
+Source: [`examples/component/timer/main.go`](../examples/component/timer/main.go)
 
 Ten seconds counted down a tenth at a time, written to a tenth with `WithFormat`. `space` stops and resumes it, `r` starts it over, and the status row says when time is up.
 
-![timer](../examples/timer/timer.gif)
+![timer](recordings/component/timer.gif)
 
 ### Stopwatch
 
-Source: [`examples/stopwatch/main.go`](../examples/stopwatch/main.go)
+Source: [`examples/component/stopwatch/main.go`](../examples/component/stopwatch/main.go)
 
 Time counted up a tenth at a time. `space` starts and stops it, and `r` puts it back to zero, running or not.
 
-![stopwatch](../examples/stopwatch/stopwatch.gif)
+![stopwatch](recordings/component/stopwatch.gif)
 
 ### Icon
 
-Source: [`examples/icon/main.go`](../examples/icon/main.go)
+Source: [`examples/component/icon/main.go`](../examples/component/icon/main.go)
 
 Every state mark in both sets, then a list of packages and a source chain drawn as a tree. `a` swaps them between Unicode and ASCII, the set `BEZEL_ASCII` or `TERM=dumb` picks on its own.
 
-![icon](../examples/icon/icon.gif)
+![icon](recordings/component/icon.gif)
 
 ## Outside a full screen
 
@@ -194,32 +196,32 @@ For a CLI that prints logs rather than takes the screen, and for the tests that 
 
 ### Inline
 
-Source: [`examples/inline/main.go`](../examples/inline/main.go)
+Source: [`examples/component/inline/main.go`](../examples/component/inline/main.go)
 
 A CLI that prints logs, asks one question below them, then redraws a progress bar in place. Nothing takes over the screen.
 
-![inline](../examples/inline/inline.gif)
+![inline](recordings/component/inline.gif)
 
 ### Themebrowser
 
-Source: [`examples/themebrowser/main.go`](../examples/themebrowser/main.go)
+Source: [`examples/component/themebrowser/main.go`](../examples/component/themebrowser/main.go)
 
 The table a `--list-themes` flag prints: scrollable in a terminal, plain lines in a pipe.
 
-![themebrowser](../examples/themebrowser/themebrowser.gif)
+![themebrowser](recordings/component/themebrowser.gif)
 
 ### Bezeltest
 
-Source: [`examples/bezeltest/main_test.go`](../examples/bezeltest/main_test.go)
+Source: [`examples/frame/bezeltest/main_test.go`](../examples/frame/bezeltest/main_test.go)
 
 No recording: this one is a test. A counter, and the test that drives it with the key presses a terminal would send.
 
 ## Recording
 
-The tapes are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the two that print into the terminal rather than take it over, `inline` and `themebrowser`, run behind a `clear` so their command line never shows. The animation gallery has a tape per tab. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
+The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the two that print into the terminal rather than take it over, `inline` and `themebrowser`, run behind a `clear` so their command line never shows. The animation gallery has a tape per tab. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
 
 ```sh
-vhs examples/list/list.tape
+vhs docs/recordings/component/list.tape
 ```
 
 From the root, always: `Output` resolves against the working directory, not against the tape. Without the font, VHS falls back to another monospace and the recording drifts from the others.

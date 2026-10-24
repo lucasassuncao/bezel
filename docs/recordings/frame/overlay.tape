@@ -1,0 +1,126 @@
+# overlay: the ready-made modals: alert, confirm, prompt, help, pager and
+# file picker.
+#
+# Record from the repository root: vhs docs/recordings/frame/overlay.tape
+
+Output docs/recordings/frame/overlay.gif
+
+Require ttyd
+Require ffmpeg
+
+Set Shell         "powershell"
+Set FontSize      16
+Set FontFamily    "JetBrainsMono Nerd Font"
+Set Width         1000
+Set Height        640
+Set Theme         "Catppuccin Mocha"
+Set Framerate     30
+Set PlaybackSpeed 1.0
+Set TypingSpeed   45ms
+Set Padding       20
+
+# -- Build, off camera ----------------------------------------------------------
+
+Hide
+# A NO_COLOR inherited from the parent shell would record in monochrome.
+Type "Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue"
+Enter
+Wait
+Type "go build -o overlay.exe ./examples/frame/overlay"
+Enter
+Wait
+Type "clear"
+Enter
+# From examples/, so the file picker opens on a listing only tracked files make.
+Type "cd examples"
+Enter
+Type "..\overlay.exe"
+Enter
+Wait+Screen /Confirm/
+Show
+Sleep 1.2s
+
+# -- Alert: any key closes it ----------------------------------------------------------
+
+Enter
+Wait+Screen /Disk almost full/
+Sleep 2s
+Escape
+Sleep 800ms
+
+# -- Confirm: y answers at once ----------------------------------------------------------
+
+Down
+Enter
+Wait+Screen /Delete notes.txt/
+Sleep 2s
+Type "y"
+Wait+Screen /deleted notes.txt/
+Sleep 1.5s
+
+# -- Prompt: refused while empty, accepted with a name ---------------------------------
+
+Down
+Enter
+Wait+Screen /a name is required/
+Sleep 1.5s
+Type "todo.md"
+Sleep 1s
+Enter
+Wait+Screen /created todo.md/
+Sleep 1.5s
+
+# -- Help ---------------------------------------------------------------------------------
+
+Down
+Enter
+Wait+Screen /Navigation/
+Sleep 2s
+Escape
+Sleep 800ms
+
+# -- Pager: a long output, scrolled and closed --------------------------------------------
+
+Down
+Enter
+Wait+Screen /go test/
+Sleep 1.5s
+Down@200ms 6
+Sleep 800ms
+PageDown
+Sleep 1s
+PageDown@500ms 6
+Wait+Screen /1.284s/
+Sleep 1.5s
+Escape
+Sleep 800ms
+
+# -- FilePicker: into examples/component/browser/, pick its main.go ------------------------------
+
+Down
+Enter
+Wait+Screen /Open a file/
+Sleep 1.5s
+Down@400ms 2
+Sleep 600ms
+Right
+Wait+Screen /browser.tape/
+Sleep 1.2s
+Down@400ms 2
+Sleep 800ms
+Enter
+Wait+Screen /picked main.go/
+Sleep 1.5s
+
+Hide
+Type "q"
+Sleep 1s
+
+# -- Clean up, off camera ---------------------------------------------------------
+
+Hide
+Type "cd .."
+Enter
+Type "Remove-Item overlay.exe"
+Enter
+Wait

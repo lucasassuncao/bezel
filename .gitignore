@@ -41,12 +41,12 @@ tmp/*
 # Cross-compiled binary used by demo.tape
 demo-app
 
-# Binaries from running `go build` inside examples/*/ without -o
-examples/*/test
-examples/*/test.exe
+# Binaries from running `go build` inside examples/**/ without -o
+examples/**/test
+examples/**/test.exe
 
-# Throwaway working copies created by examples/*/demo.tape recordings
-examples/*/session.yaml
+# Throwaway working copies created by tape recordings
+examples/**/session.yaml
 
 # examples/test's auto-seeded default config (regenerated on first run)
 examples/test/demo.yaml

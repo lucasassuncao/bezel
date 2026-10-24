@@ -48,32 +48,40 @@ A pane missing from the map gives its space back that frame.
 
 ### Shell
 
-Source: [`examples/shell/main.go`](examples/shell/main.go)
+Source: [`examples/frame/shell/main.go`](examples/frame/shell/main.go)
 
 Two tabs and two panes. `s` sets a status that clears itself, `b` shows the busy spinner until the work is done, `tab` switches tab and `?` lists every key.
 
-![shell](examples/shell/shell.gif)
+![shell](docs/recordings/frame/shell.gif)
 
 ### Overlay
 
-Source: [`examples/overlay/main.go`](examples/overlay/main.go)
+Source: [`examples/frame/overlay/main.go`](examples/frame/overlay/main.go)
 
 The ready-made modals, one per row: an alert, a confirm that answers the app, a prompt that refuses an empty name, the help list, a pager over a command's output and a file picker. `enter` opens the one under the cursor and `esc` closes it.
 
-![overlay](examples/overlay/overlay.gif)
+![overlay](docs/recordings/frame/overlay.gif)
 
 ### Form
 
-Source: [`examples/form/main.go`](examples/form/main.go)
+Source: [`examples/component/form/main.go`](examples/component/form/main.go)
 
 One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
 
-![form](examples/form/form.gif)
+![form](docs/recordings/component/form.gif)
 
-Every package has its own example and recording in [COMPONENTS.md](docs/COMPONENTS.md); the effects have [EFFECTS.md](docs/EFFECTS.md) and the animations [ANIMATIONS.md](docs/ANIMATIONS.md). For all of them at once, run the demo; `DEMO_RW=1` turns on its write-gated key:
+Every package has its own example and recording in [COMPONENTS.md](docs/COMPONENTS.md); the effects have [EFFECTS.md](docs/EFFECTS.md) and the animations [ANIMATIONS.md](docs/ANIMATIONS.md).
+
+### A first app
+
+Source: [`examples/app/main.go`](examples/app/main.go)
+
+A task list built from a few of them: a list, a progress line, a prompt to add a task and a confirm to delete one. [EXAMPLE.md](docs/EXAMPLE.md) walks through the code step by step; `--read-only` hides the keys that change the list.
+
+![demo](docs/recordings/app.gif)
 
 ```sh
-go run ./examples/demo
+go run ./examples/app
 ```
 
 ## Packages
@@ -121,4 +129,4 @@ go run ./examples/demo
 - [`animation/text`](animation/text): text that types, scrolls, shimmers, scrambles, rolls, waves, decrypts, blinks and rises.
 - [`animation/scene`](animation/scene): rain, snow, confetti, fireworks, stars, static and plasma, alone or behind a block.
 
-Every package follows the same rules for where the theme goes and how `Update` looks: see [CONVENTIONS.md](docs/CONVENTIONS.md).
+How the shell, layout, actions and dialogs fit together: see [FRAME.md](docs/FRAME.md); picking, building and switching a theme: [THEME.md](docs/THEME.md). Why the folders are laid out as they are, and what may import what: see [ARCHITECTURE.md](docs/ARCHITECTURE.md). Every package follows the same rules for where the theme goes and how `Update` looks: see [CONVENTIONS.md](docs/CONVENTIONS.md).

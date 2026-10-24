@@ -4,7 +4,7 @@ The [`effect`](../effect) package changes a block that is already drawn.
 
 ## Over a drawn block
 
-![draw](../examples/animation/draw.gif)
+![draw](recordings/animation/draw.gif)
 
 `Apply` reads the block's escape codes back into cells, turns each one and draws it again, the same size, so it works on whatever a `View` returns, a pane, a dialog or a whole screen:
 
@@ -36,7 +36,7 @@ effect.Coalesce(600 * time.Millisecond).WithPattern(effect.Radial())
 
 ## Light
 
-![light](../examples/animation/light.gif)
+![light](recordings/animation/light.gif)
 
 Lights are effects that change colour and leave every cell in its place:
 
@@ -57,7 +57,7 @@ On the light tab a diff plays with `Melt(red).OnRows(1)` over the removed line a
 
 ## From one block to the next
 
-![swap](../examples/animation/swap.gif)
+![swap](recordings/animation/swap.gif)
 
 A `Transition` carries the screen from one block to another: `Apply(from, to)` every frame, the smaller one padded to the larger's size.
 

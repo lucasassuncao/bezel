@@ -84,6 +84,7 @@
 //   - [github.com/lucasassuncao/bezel/animation/scene]: rain, snow, stars and
 //     fireworks, alone or behind a block.
 //
-// docs/CONVENTIONS.md is how the packages share one shape:
-// where the theme goes, the three forms of Update, constructor or With.
+// docs/ARCHITECTURE.md is why the folders are laid out as they are, and
+// docs/CONVENTIONS.md how the packages share one shape: where the theme goes,
+// the three forms of Update, constructor or With.
 package bezel

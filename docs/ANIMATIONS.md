@@ -68,7 +68,7 @@ The [`animation`](../animation) package moves values: a number, a colour, a poin
 
 ### Values
 
-![basics](../examples/animation/basics.gif)
+![basics](recordings/animation/basics.gif)
 
 | Kind | What it moves |
 |---|---|
@@ -81,7 +81,7 @@ Every timed one takes `WithDelay` and `WithRepeat`, `animation.Forever` for no e
 
 ### Curves
 
-![curves](../examples/animation/curves.gif)
+![curves](recordings/animation/curves.gif)
 
 `Linear`, `EaseIn`, `EaseOut` and `EaseInOut`, the default, and nine more, each easing in: `Sine`, `Cubic`, `Quart`, `Quint`, `Expo`, `Circ`, `Back`, `Elastic` and `Bounce`. `Out` and `InOut` turn any of them round, and `Steps(n)` moves in whole jumps:
 
@@ -93,7 +93,7 @@ Every curve starts at exactly 0 and ends at exactly 1. `Back` and `Elastic` leav
 
 ### Physics
 
-![motion](../examples/animation/motion.gif)
+![motion](recordings/animation/motion.gif)
 
 | Kind | What it does |
 |---|---|
@@ -105,7 +105,7 @@ Every curve starts at exactly 0 and ends at exactly 1. `Back` and `Elastic` leav
 
 ### Charts that move
 
-![data](../examples/animation/data.gif)
+![data](recordings/animation/data.gif)
 
 A `Series` animates the values a chart draws: `NewGrow` raises them all from zero, `NewDraw` reveals them from the left, and `Push` adds one at the right that rises while the oldest drops off. `Heat` moves a grid of values cell by cell for `chart.Heat`, and a `Spring` carries the needle of `progress.Gauge`.
 
@@ -115,7 +115,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 
 ### Typed and scrolled
 
-![basics](../examples/animation/basics.gif)
+![basics](recordings/animation/basics.gif)
 
 | Kind | What it does |
 |---|---|
@@ -125,7 +125,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 
 ### Lit and rolled
 
-![effects](../examples/animation/effects.gif)
+![effects](recordings/animation/effects.gif)
 
 | Kind | What it does |
 |---|---|
@@ -136,7 +136,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 
 ### Marked and moved
 
-![text](../examples/animation/text.gif)
+![text](recordings/animation/text.gif)
 
 | Kind | What it does |
 |---|---|
@@ -156,7 +156,7 @@ text.NewTypewriter("Saved.", 400*time.Millisecond).WithYoyo().WithRepeat(1)
 
 ## Scenes
 
-![scene](../examples/animation/scene.gif)
+![scene](recordings/animation/scene.gif)
 
 The [`animation/scene`](../animation/scene) package draws a `Scene` from the time alone, at any size, for as long as it lives: `NewRain`, `NewSnow`, `NewConfetti`, `NewFireworks`, `NewStarfield`, `NewStatic` and `NewPlasma`, each in the colours it is given.
 
