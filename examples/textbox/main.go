@@ -9,10 +9,10 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/component/textbox"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
-	"github.com/lucasassuncao/bezel/textbox"
 	"github.com/lucasassuncao/bezel/theme"
 )
 

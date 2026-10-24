@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/lucasassuncao/bezel/component/themebrowser"
 	"github.com/lucasassuncao/bezel/theme"
-	"github.com/lucasassuncao/bezel/themebrowser"
 )
 
 func main() {

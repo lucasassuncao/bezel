@@ -10,7 +10,7 @@ import (
 func TestTheTextTabShowsEveryRow(t *testing.T) {
 	_, out := onTab(t, 4)
 	t.Log("\n" + out)
-	for _, want := range []string{"swell", "rainbow", "decrypt", "caret", "Saving", "ticker", searched, chore, "copy link"} {
+	for _, want := range []string{"wave", "rainbow", "decrypt", "caret", "Saving", "ticker", searched, chore, "copy link"} {
 		require.Contains(t, out, want)
 	}
 }

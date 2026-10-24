@@ -5,6 +5,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
 // rest is how close to its target, and how slow, a spring must be to stop:
@@ -27,7 +29,7 @@ type Spring struct {
 
 // NewSpring is a spring at rest at pos, stiffness 12 and damping 1.
 func NewSpring(pos float64) Spring {
-	return Spring{Pos: pos, Target: pos, Freq: 12, Damping: 1, id: lastID.Add(1)}
+	return Spring{Pos: pos, Target: pos, Freq: 12, Damping: 1, id: frames.NextID()}
 }
 
 // WithFreq is s with stiffness f, in radians a second.
@@ -54,7 +56,7 @@ func (s Spring) To(target float64) (Spring, tea.Cmd) {
 		return s, nil
 	}
 	if s.id == 0 { // a Spring never built with NewSpring
-		s.id = lastID.Add(1)
+		s.id = frames.NextID()
 	}
 	s.moving, s.last = true, time.Time{}
 	s.tag++
@@ -72,17 +74,16 @@ func (s Spring) Tick() tea.Cmd {
 	if !s.moving {
 		return nil
 	}
-	id, tag := s.id, s.tag
-	return tea.Tick(Frame, func(at time.Time) tea.Msg { return FrameMsg{At: at, id: id, tag: tag} })
+	return frames.Tick(Frame, s.id, s.tag)
 }
 
 // FrameAt is s's frame for at, for a test or a host that delivers frames itself.
-func (s Spring) FrameAt(at time.Time) FrameMsg { return FrameMsg{At: at, id: s.id, tag: s.tag} }
+func (s Spring) FrameAt(at time.Time) FrameMsg { return frames.NewMsg(at, s.id, s.tag) }
 
 // Update moves s on its own frames and asks for the next until it rests.
 func (s Spring) Update(msg tea.Msg) (Spring, tea.Cmd) {
-	f, ok := msg.(FrameMsg)
-	if !ok || !s.moving || f.id != s.id || f.tag != s.tag {
+	f, ok := frames.Is(msg, s.id, s.tag)
+	if !ok || !s.moving {
 		return s, nil
 	}
 	if s, _ = s.Advance(f.At); !s.moving {
@@ -103,7 +104,7 @@ func (s Spring) Advance(now time.Time) (Spring, bool) {
 		s.last = now
 		return s, false
 	}
-	dt := paced(now.Sub(s.last)).Seconds()
+	dt := frames.Paced(now.Sub(s.last)).Seconds()
 	s.last = now
 	x, v := step(s.Pos-s.Target, s.Vel, s.freq(), s.damping(), max(dt, 0))
 	s.Pos, s.Vel = s.Target+x, v

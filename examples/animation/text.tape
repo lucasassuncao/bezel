@@ -1,4 +1,4 @@
-# animation, text: the text tab: words that swell, turn, land, blink and rise
+# animation, text: the text tab: words that wave, turn, land, blink and rise
 #
 # Record from the repository root: vhs examples/animation/text.tape
 

@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
-	"github.com/lucasassuncao/bezel/inline"
+	"github.com/lucasassuncao/bezel/component/inline"
 	"github.com/lucasassuncao/bezel/theme"
 )
 

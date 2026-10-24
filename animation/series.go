@@ -5,6 +5,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
 // Series animates a run of chart values: grown from nothing all at once,
@@ -15,12 +17,12 @@ type Series struct {
 	draw     bool // reveal left to right instead of growing every value at once
 	dur      time.Duration
 	p        float64
-	run      run
+	run      frames.Run
 }
 
 // NewGrow raises every one of values from zero over dur: bars that grow in.
 func NewGrow(values []float64, dur time.Duration) Series {
-	s := Series{from: make([]float64, len(values)), to: slices.Clone(values), dur: dur, run: newRun(dur)}
+	s := Series{from: make([]float64, len(values)), to: slices.Clone(values), dur: dur, run: frames.NewRun(dur)}
 	if !s.Active() {
 		s.p = 1
 	}
@@ -37,7 +39,7 @@ func NewDraw(values []float64, dur time.Duration) Series {
 
 // WithEase is s following e instead of EaseInOut.
 func (s Series) WithEase(e Ease) Series {
-	s.run.ease = e
+	s.run.Ease = e
 	return s
 }
 
@@ -58,9 +60,9 @@ func (s Series) Push(v float64, keep int) (Series, tea.Cmd) {
 	s.from = slices.Clone(next)
 	s.from[len(s.from)-1] = 0
 	s.draw, s.p = false, 0
-	ease := s.run.ease
-	s.run = newRun(s.dur)
-	s.run.ease = ease
+	ease := s.run.Ease
+	s.run = frames.NewRun(s.dur)
+	s.run.Ease = ease
 	if !s.Active() {
 		s.p = 1
 	}
@@ -69,7 +71,7 @@ func (s Series) Push(v float64, keep int) (Series, tea.Cmd) {
 
 // Values are the numbers to draw now.
 func (s Series) Values() []float64 {
-	q := s.run.ease.or()(s.p)
+	q := frames.Or(s.run.Ease)(s.p)
 	if !s.Active() {
 		q = 1
 	}
@@ -85,17 +87,17 @@ func (s Series) Values() []float64 {
 }
 
 // Active reports whether any value is still moving.
-func (s Series) Active() bool { return s.run.active() }
+func (s Series) Active() bool { return s.run.Active() }
 
 // Tick is the command for s's next frame, nil at rest.
-func (s Series) Tick() tea.Cmd { return s.run.tick() }
+func (s Series) Tick() tea.Cmd { return s.run.Tick() }
 
 // FrameAt is s's frame for at, for a test or a host that delivers frames itself.
-func (s Series) FrameAt(at time.Time) FrameMsg { return s.run.frameAt(at) }
+func (s Series) FrameAt(at time.Time) FrameMsg { return s.run.FrameAt(at) }
 
 // Update moves on its own frames and asks for the next until it settles.
 func (s Series) Update(msg tea.Msg) (Series, tea.Cmd) {
-	r, p, ok, cmd := s.run.update(msg)
+	r, p, ok, cmd := s.run.Update(msg)
 	if ok {
 		s.run, s.p = r, p
 	}
@@ -107,6 +109,6 @@ func (s Series) Advance(now time.Time) (Series, bool) {
 	if !s.Active() {
 		return s, true
 	}
-	s.run, s.p = s.run.advance(now)
+	s.run, s.p = s.run.Advance(now)
 	return s, !s.Active()
 }

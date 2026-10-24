@@ -8,6 +8,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/animation/text"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -33,10 +34,10 @@ var corners = []animation.Point{{X: track - 1, Y: field - 1}, {X: 0, Y: field - 
 // effects is the second tab: the shimmer and the gradient keep their own
 // ticks, as the marquee does; the rest run on the gallery's clock.
 type effects struct {
-	shimmer  animation.Shimmer
-	gradient animation.Gradient
-	scramble animation.Scramble
-	odometer animation.Odometer
+	shimmer  text.Shimmer
+	gradient text.Gradient
+	scramble text.Scramble
+	odometer text.Odometer
 	reading  int
 	move     animation.Move
 	follow   animation.Follow
@@ -46,10 +47,10 @@ type effects struct {
 func newEffects(th theme.Resolved) effects {
 	stops := []color.Color{th.Accent.GetForeground(), th.Info.GetForeground(), th.Success.GetForeground(), th.Warning.GetForeground()}
 	return effects{
-		shimmer:  animation.NewShimmer(loading, th.Muted.GetForeground(), th.Accent.GetForeground(), 1200*time.Millisecond),
-		gradient: animation.NewGradient(title, stops, 2*time.Second),
-		scramble: animation.NewScramble(serial, 0),
-		odometer: animation.NewOdometer(0, 0, 900*time.Millisecond),
+		shimmer:  text.NewShimmer(loading, th.Muted.GetForeground(), th.Accent.GetForeground(), 1200*time.Millisecond),
+		gradient: text.NewGradient(title, stops, 2*time.Second),
+		scramble: text.NewScramble(serial, 0),
+		odometer: text.NewOdometer(0, 0, 900*time.Millisecond),
 		move:     animation.NewMove(animation.Point{}, animation.Point{}, 0),
 		follow:   animation.NewFollow(animation.Point{}).WithDamping(0.4),
 	}
@@ -62,7 +63,7 @@ func (e effects) start() (effects, tea.Cmd) {
 
 // decode scrambles the serial again.
 func (e effects) decode() effects {
-	e.scramble = animation.NewScramble(serial, 900*time.Millisecond)
+	e.scramble = text.NewScramble(serial, 900*time.Millisecond)
 	return e
 }
 

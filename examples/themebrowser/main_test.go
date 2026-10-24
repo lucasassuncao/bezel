@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/lucasassuncao/bezel/themebrowser"
+	"github.com/lucasassuncao/bezel/component/themebrowser"
 )
 
 // A test has no terminal, so this is what BrowseInTerminal falls back to.

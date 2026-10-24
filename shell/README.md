@@ -15,7 +15,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
 - [func Check\(actions ...Action\) error](<#Check>)
 - [func IsStatusExpiry\(msg tea.Msg\) bool](<#IsStatusExpiry>)
 - [func Send\(msg tea.Msg\) func\(ActionContext\) tea.Cmd](<#Send>)
-- [func SlideTabs\(dur time.Duration\) func\(from, to int\) animation.Effect](<#SlideTabs>)
+- [func SlideTabs\(dur time.Duration\) func\(from, to int\) effect.Effect](<#SlideTabs>)
 - [type Action](<#Action>)
   - [func ChangePane\(opts ...Option\) Action](<#ChangePane>)
   - [func ChangeTab\(opts ...Option\) Action](<#ChangeTab>)
@@ -79,7 +79,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) StatusExpiry\(\) tea.Msg](<#Shell.StatusExpiry>)
   - [func \(s Shell\) StatusLevel\(\) Level](<#Shell.StatusLevel>)
   - [func \(s Shell\) TopOverlay\(\) overlay.Overlay](<#Shell.TopOverlay>)
-  - [func \(s Shell\) Transition\(\) animation.Effect](<#Shell.Transition>)
+  - [func \(s Shell\) Transition\(\) effect.Effect](<#Shell.Transition>)
   - [func \(s Shell\) Update\(msg tea.Msg\) \(Shell, bool, tea.Cmd\)](<#Shell.Update>)
   - [func \(s Shell\) View\(panes map\[string\]Pane\) string](<#Shell.View>)
   - [func \(s Shell\) WithClipboard\(write func\(string\) error\) Shell](<#Shell.WithClipboard>)
@@ -114,10 +114,10 @@ func Send(msg tea.Msg) func(ActionContext) tea.Cmd
 Send is a run that emits msg, for value models: the app handles msg in its own Update instead of closing over a copy of itself.
 
 <a name="SlideTabs"></a>
-## func [SlideTabs](<https://github.com/lucasassuncao/bezel/blob/main/shell/transition.go#L11>)
+## func [SlideTabs](<https://github.com/lucasassuncao/bezel/blob/main/shell/transition.go#L12>)
 
 ```go
-func SlideTabs(dur time.Duration) func(from, to int) animation.Effect
+func SlideTabs(dur time.Duration) func(from, to int) effect.Effect
 ```
 
 SlideTabs is a Transition that slides the new tab's panes in from the side its tab sits on: from the right for a later tab, from the left for an earlier.
@@ -268,7 +268,7 @@ type Config struct {
     Spinner spinner.Spinner
     // Transition, when set, is the effect played over the panes as the user
     // changes tab, given the tab left and the tab shown. SlideTabs is one.
-    Transition func(from, to int) animation.Effect
+    Transition func(from, to int) effect.Effect
     // Clipboard is what Copy writes to; nil means the system clipboard.
     Clipboard func(string) error
 }
@@ -749,10 +749,10 @@ func (s Shell) TopOverlay() overlay.Overlay
 TopOverlay is the modal that gets the keys, or nil.
 
 <a name="Shell.Transition"></a>
-### func \(Shell\) [Transition](<https://github.com/lucasassuncao/bezel/blob/main/shell/transition.go#L22>)
+### func \(Shell\) [Transition](<https://github.com/lucasassuncao/bezel/blob/main/shell/transition.go#L23>)
 
 ```go
-func (s Shell) Transition() animation.Effect
+func (s Shell) Transition() effect.Effect
 ```
 
 Transition is the effect playing over the panes now, for a test or a host that delivers its frames itself; it is inactive when none plays.

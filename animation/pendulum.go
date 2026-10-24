@@ -5,6 +5,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
 // Pendulum swings a value either side of 0, Cur cells from the middle: a
@@ -14,16 +16,16 @@ type Pendulum struct {
 	amp    float64
 	period time.Duration
 	decay  time.Duration // how long a swing takes to shrink to a third; 0 never
-	run    run
+	run    frames.Run
 }
 
 // NewPendulum swings amp cells either way, once every period, for as long as
 // it lives. WithDecay lets it come to rest.
 func NewPendulum(amp float64, period time.Duration) Pendulum {
-	p := Pendulum{amp: amp, period: period, run: newRun(time.Second)}
-	p.run.ease, p.run.repeat = Linear, Forever
+	p := Pendulum{amp: amp, period: period, run: frames.NewRun(time.Second)}
+	p.run.Ease, p.run.Repeat = Linear, Forever
 	if period <= 0 {
-		p.run = run{}
+		p.run = frames.Run{}
 	}
 	return p
 }
@@ -48,17 +50,17 @@ func (p Pendulum) at(t float64) (float64, bool) {
 }
 
 // Active reports whether p is still swinging.
-func (p Pendulum) Active() bool { return p.run.active() }
+func (p Pendulum) Active() bool { return p.run.Active() }
 
 // Tick is the command for p's next frame, nil at rest.
-func (p Pendulum) Tick() tea.Cmd { return p.run.tick() }
+func (p Pendulum) Tick() tea.Cmd { return p.run.Tick() }
 
 // FrameAt is p's frame for at, for a test or a host that delivers frames itself.
-func (p Pendulum) FrameAt(at time.Time) FrameMsg { return p.run.frameAt(at) }
+func (p Pendulum) FrameAt(at time.Time) FrameMsg { return p.run.FrameAt(at) }
 
 // Update swings on its own frames and asks for the next until it rests.
 func (p Pendulum) Update(msg tea.Msg) (Pendulum, tea.Cmd) {
-	f, ok := p.run.own(msg)
+	f, ok := p.run.Own(msg)
 	if !ok {
 		return p, nil
 	}
@@ -66,7 +68,7 @@ func (p Pendulum) Update(msg tea.Msg) (Pendulum, tea.Cmd) {
 		return p, nil
 	}
 	var cmd tea.Cmd
-	p.run, cmd = p.run.next()
+	p.run, cmd = p.run.Next()
 	return p, cmd
 }
 
@@ -75,11 +77,11 @@ func (p Pendulum) Advance(now time.Time) (Pendulum, bool) {
 	if !p.Active() {
 		return p, true
 	}
-	p.run, _ = p.run.advance(now)
-	pos, rested := p.at(paced(now.Sub(p.run.start)).Seconds())
+	p.run, _ = p.run.Advance(now)
+	pos, rested := p.at(frames.Paced(now.Sub(p.run.Start)).Seconds())
 	p.Cur = pos
 	if rested {
-		p.run = run{}
+		p.run = frames.Run{}
 	}
 	return p, rested
 }

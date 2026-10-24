@@ -6,32 +6,16 @@
 # the examples.
 DOC_PACKAGES := \
 	./animation/... \
-	./browser/... \
-	./chart/... \
-	./cursor/... \
+	./component/... \
 	./draw/... \
-	./form/... \
-	./icon/... \
-	./inline/... \
-	./input/... \
+	./effect/... \
 	./key/... \
 	./layout/... \
 	./legend/... \
-	./list/... \
 	./overlay/... \
-	./paginator/... \
 	./palette/... \
-	./progress/... \
 	./shell/... \
-	./spinner/... \
-	./stopwatch/... \
-	./table/... \
-	./textbox/... \
-	./theme/... \
-	./themebrowser/... \
-	./timer/... \
-	./tree/... \
-	./viewport/...
+	./theme/...
 
 ## Generate documentation with gomarkdoc
 docs: $(GOMARKDOC)

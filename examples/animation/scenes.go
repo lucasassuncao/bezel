@@ -7,26 +7,27 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/animation/scene"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-type sceneMsg struct{} // n on the ambient tab: the next scene
+type sceneMsg struct{} // n on the scene tab: the next scene
 
 // sceneKinds are the scenes the tab plays, one at a time.
 var sceneKinds = []struct {
 	name string
-	make func(th theme.Resolved) animation.Ambient
+	make func(th theme.Resolved) scene.Scene
 }{
-	{"rain", func(th theme.Resolved) animation.Ambient {
-		return animation.NewRain(th.Success.GetForeground(), animation.Blend(black, th.Success.GetForeground(), 0.6))
+	{"rain", func(th theme.Resolved) scene.Scene {
+		return scene.NewRain(th.Success.GetForeground(), animation.Blend(black, th.Success.GetForeground(), 0.6))
 	}},
-	{"snow", func(th theme.Resolved) animation.Ambient { return animation.NewSnow(th.Bold.GetForeground()) }},
-	{"confetti", func(th theme.Resolved) animation.Ambient { return animation.NewConfetti(seriesColors(th)...) }},
-	{"fireworks", func(th theme.Resolved) animation.Ambient { return animation.NewFireworks(seriesColors(th)...) }},
-	{"starfield", func(th theme.Resolved) animation.Ambient { return animation.NewStarfield(th.Bold.GetForeground()) }},
-	{"static", func(th theme.Resolved) animation.Ambient { return animation.NewStatic(th.Bold.GetForeground()) }},
-	{"plasma", func(th theme.Resolved) animation.Ambient {
-		return animation.NewPlasma(black, animation.Blend(black, th.Accent.GetForeground(), 0.6))
+	{"snow", func(th theme.Resolved) scene.Scene { return scene.NewSnow(th.Bold.GetForeground()) }},
+	{"confetti", func(th theme.Resolved) scene.Scene { return scene.NewConfetti(seriesColors(th)...) }},
+	{"fireworks", func(th theme.Resolved) scene.Scene { return scene.NewFireworks(seriesColors(th)...) }},
+	{"starfield", func(th theme.Resolved) scene.Scene { return scene.NewStarfield(th.Bold.GetForeground()) }},
+	{"static", func(th theme.Resolved) scene.Scene { return scene.NewStatic(th.Bold.GetForeground()) }},
+	{"plasma", func(th theme.Resolved) scene.Scene {
+		return scene.NewPlasma(black, animation.Blend(black, th.Accent.GetForeground(), 0.6))
 	}},
 }
 
@@ -42,7 +43,7 @@ func seriesColors(th theme.Resolved) []color.Color {
 // scenes is the seventh tab: a scene filling the pane, a title over it.
 type scenes struct {
 	kind  int
-	scene animation.Ambient
+	scene scene.Scene
 }
 
 func newScenes(th theme.Resolved) scenes { return scenes{scene: sceneKinds[0].make(th)} }

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/lucasassuncao/bezel/animation"
-	"github.com/lucasassuncao/bezel/chart"
-	"github.com/lucasassuncao/bezel/progress"
+	"github.com/lucasassuncao/bezel/component/chart"
+	"github.com/lucasassuncao/bezel/component/progress"
 	"github.com/lucasassuncao/bezel/theme"
 )
 

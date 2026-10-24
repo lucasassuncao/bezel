@@ -76,25 +76,12 @@ func TestTweenTakesDelayRepeatAndYoyo(t *testing.T) {
 	assert.Equal(t, 0, tw.Cur)
 }
 
-// The other timed kinds pass the options on: a fade that pulses, text that
-// types and then erases itself.
-func TestTheOtherKindsRepeatToo(t *testing.T) {
+// A fade passes the options on too: it pulses.
+func TestAFadeRepeatsToo(t *testing.T) {
 	moving(t)
 	start := time.Unix(1000, 0)
 	fd := NewFade(black, white, 100*ms).WithEase(Linear).WithYoyo().WithRepeat(Forever)
 	fd, _ = fd.Update(fd.FrameAt(start))
 	fd, _ = fd.Update(fd.FrameAt(start.Add(150 * ms)))
 	assert.True(t, fd.Active())
-
-	w := NewTypewriter("abcd", 25*ms).WithYoyo().WithRepeat(1).WithDelay(0)
-	w, _ = w.Update(w.FrameAt(start))
-	w, _ = w.Update(w.FrameAt(start.Add(150 * ms)))
-	assert.Equal(t, "ab", w.View(), "erasing")
-	w, _ = w.Update(w.FrameAt(start.Add(time.Second)))
-	assert.Equal(t, "", w.View())
-
-	s := NewShake(2, 100*ms).WithDelay(50 * ms).WithRepeat(1)
-	s, _ = s.Update(s.FrameAt(start))
-	s, _ = s.Update(s.FrameAt(start.Add(150 * ms)))
-	assert.True(t, s.Active())
 }

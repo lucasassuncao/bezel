@@ -70,7 +70,7 @@ One of each control: a name typed into an `Input`, an image picked from a `Selec
 
 ![form](examples/form/form.gif)
 
-Every package has its own example and recording in [EXAMPLES.md](EXAMPLES.md). The animations have a page of their own, [ANIMATION.md](ANIMATION.md). For all of them at once, run the demo; `DEMO_RW=1` turns on its write-gated key:
+Every package has its own example and recording in [COMPONENTS.md](docs/COMPONENTS.md); the effects have [EFFECTS.md](docs/EFFECTS.md) and the animations [ANIMATIONS.md](docs/ANIMATIONS.md). For all of them at once, run the demo; `DEMO_RW=1` turns on its write-gated key:
 
 ```sh
 go run ./examples/demo
@@ -78,7 +78,7 @@ go run ./examples/demo
 
 ## Packages
 
-**The frame**
+**The frame**, at the root: what every screen is built in.
 
 - [`shell`](shell): the struct you embed. Tabs, focus, status, a busy spinner, overlays and the legend; keys are `Action`s that drive the key, the legend and the palette at once.
 - [`layout`](layout): the screen as a tree of `Columns`, `Rows`, `Fixed` and `Fill`, resolved to rects. `Collapse` drops a pane below a width.
@@ -88,31 +88,37 @@ go run ./examples/demo
 - [`legend`](legend): key hints, filtered by what the session allows and packed into a few rows.
 - [`key`](key): key bindings, with the help the legend prints; a `Binding` is a value, switched off by its `Disabled` field.
 - [`palette`](palette): the `:` command line, with completion and arguments.
-
-**Inside the panes**
-
-- [`list`](list): a cursor list with sections and a `/` filter.
-- [`paginator`](paginator): pages as dots or "2/5", and the slice of items each page shows.
-- [`tree`](tree): an expandable tree, generic over your node type.
-- [`table`](table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header.
-- [`form`](form): `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
-- [`input`](input): a one-line text field with readline keys, a placeholder and a mask for secrets.
-- [`textbox`](textbox): a multi-line text field with line numbers.
-- [`viewport`](viewport): scrollable text, wrapped or panned, with line numbers and search highlights.
-- [`cursor`](cursor): a caret that blinks, stays or hides, for fields of your own.
-- [`browser`](browser): a list on the left, the selected item's detail on the right.
-- [`progress`](progress): `Bar`, `Line`, `Smooth`, `Meter` and `Stepper`, each one row.
-- [`spinner`](spinner): twelve spinners and your own frames, each ticking on its own.
-- [`timer`](timer): a countdown that says when time is up.
-- [`stopwatch`](stopwatch): time counted up, paused and reset.
-- [`chart`](chart): `Area` and `Spark` charts of a run of numbers, and labelled `Bars` side by side.
-- [`icon`](icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
-
-**Around it**
-
-- [`inline`](inline): a yes/no question and a progress bar for CLIs that print logs.
-- [`themebrowser`](themebrowser): the preset table behind a `--list-themes` flag.
-- [`animation`](animation): tweens on a dozen easing curves that delay, repeat and yoyo, springs, points and physics (a drop, a pendulum, an orbit, a flock, a rubber band), text that types, scrambles, rolls, swells, decrypts, blinks and rises, effects and lights over any drawn block (fades, dissolves, slides, a melt, a tint, a spotlight, a hover) kept to rows or a part of it, transitions from one block to the next, ambient scenes, animated chart values, intent presets, and one clock to drive them; `BEZEL_NO_MOTION` turns motion off and `BEZEL_MOTION` sets its speed.
 - [`bezeltest`](bezeltest): key presses for tests that drive a model.
 
-Every package follows the same rules for where the theme goes and how `Update` looks: see [CONVENTIONS.md](CONVENTIONS.md).
+**Components**, in [`component`](component): what goes inside the panes.
+
+- [`list`](component/list): a cursor list with sections and a `/` filter.
+- [`paginator`](component/paginator): pages as dots or "2/5", and the slice of items each page shows.
+- [`tree`](component/tree): an expandable tree, generic over your node type.
+- [`table`](component/table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header.
+- [`form`](component/form): `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
+- [`input`](component/input): a one-line text field with readline keys, a placeholder and a mask for secrets.
+- [`textbox`](component/textbox): a multi-line text field with line numbers.
+- [`viewport`](component/viewport): scrollable text, wrapped or panned, with line numbers and search highlights.
+- [`cursor`](component/cursor): a caret that blinks, stays or hides, for fields of your own.
+- [`browser`](component/browser): a list on the left, the selected item's detail on the right.
+- [`progress`](component/progress): `Bar`, `Line`, `Smooth`, `Meter` and `Stepper`, each one row.
+- [`spinner`](component/spinner): twelve spinners and your own frames, each ticking on its own.
+- [`timer`](component/timer): a countdown that says when time is up.
+- [`stopwatch`](component/stopwatch): time counted up, paused and reset.
+- [`chart`](component/chart): `Area` and `Spark` charts of a run of numbers, and labelled `Bars` side by side.
+- [`icon`](component/icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
+- [`inline`](component/inline): a yes/no question and a progress bar for CLIs that print logs.
+- [`themebrowser`](component/themebrowser): the preset table behind a `--list-themes` flag.
+
+**Effects**
+
+- [`effect`](effect): effects and lights over any drawn block (fades, dissolves, slides, a melt, a tint, a spotlight, a hover), kept to rows or a part of it, transitions from one block to the next, and intent presets.
+
+**Animation**
+
+- [`animation`](animation): tweens on a dozen easing curves that delay, repeat and yoyo, springs, points, physics (a drop, a pendulum, an orbit, a flock, a rubber band) and animated chart values, with one clock to drive them; `BEZEL_NO_MOTION` turns motion off and `BEZEL_MOTION` sets its speed.
+- [`animation/text`](animation/text): text that types, scrolls, shimmers, scrambles, rolls, waves, decrypts, blinks and rises.
+- [`animation/scene`](animation/scene): rain, snow, confetti, fireworks, stars, static and plasma, alone or behind a block.
+
+Every package follows the same rules for where the theme goes and how `Update` looks: see [CONVENTIONS.md](docs/CONVENTIONS.md).

@@ -7,12 +7,12 @@ import (
 	"slices"
 	"time"
 
-	"github.com/lucasassuncao/bezel/animation"
-	"github.com/lucasassuncao/bezel/input"
+	"github.com/lucasassuncao/bezel/component/input"
+	"github.com/lucasassuncao/bezel/component/spinner"
+	"github.com/lucasassuncao/bezel/effect"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
-	"github.com/lucasassuncao/bezel/spinner"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -74,7 +74,7 @@ type Config struct {
 	Spinner spinner.Spinner
 	// Transition, when set, is the effect played over the panes as the user
 	// changes tab, given the tab left and the tab shown. SlideTabs is one.
-	Transition func(from, to int) animation.Effect
+	Transition func(from, to int) effect.Effect
 	// Clipboard is what Copy writes to; nil means the system clipboard.
 	Clipboard func(string) error
 }
@@ -101,9 +101,9 @@ type Shell struct {
 	spin spinner.Model
 
 	overlays overlay.Stack
-	present  map[string]bool  // leaves the last View was given
-	actions  []Action         // what the app set with SetActions
-	trans    animation.Effect // the Transition playing over the panes, if any
+	present  map[string]bool // leaves the last View was given
+	actions  []Action        // what the app set with SetActions
+	trans    effect.Effect   // the Transition playing over the panes, if any
 }
 
 // New is a shell over cfg, focused on the first leaf of the focus ring. It

@@ -7,6 +7,7 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/effect"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -20,47 +21,47 @@ type (
 // lightKinds are the lights and presets the card cycles through.
 var lightKinds = []struct {
 	name string
-	make func(th theme.Resolved) animation.Effect
+	make func(th theme.Resolved) effect.Effect
 }{
-	{"tint", func(th theme.Resolved) animation.Effect { return animation.Tint(th.Success.GetForeground(), play) }},
-	{"pulse", func(th theme.Resolved) animation.Effect {
-		return animation.Pulse(th.Accent.GetForeground(), 800*time.Millisecond).WithRepeat(2)
+	{"tint", func(th theme.Resolved) effect.Effect { return effect.Tint(th.Success.GetForeground(), play) }},
+	{"pulse", func(th theme.Resolved) effect.Effect {
+		return effect.Pulse(th.Accent.GetForeground(), 800*time.Millisecond).WithRepeat(2)
 	}},
-	{"press", func(theme.Resolved) animation.Effect { return animation.Press(400 * time.Millisecond) }},
-	{"flash", func(th theme.Resolved) animation.Effect { return animation.Flash(th.Warning.GetForeground(), play) }},
-	{"invert", func(theme.Resolved) animation.Effect { return animation.Invert(700 * time.Millisecond) }},
-	{"spotlight", func(theme.Resolved) animation.Effect {
-		return animation.Spotlight(2, 1, 26, 1, black, 600*time.Millisecond).WithYoyo().WithDelay(0).WithRepeat(1)
+	{"press", func(theme.Resolved) effect.Effect { return effect.Press(400 * time.Millisecond) }},
+	{"flash", func(th theme.Resolved) effect.Effect { return effect.Flash(th.Warning.GetForeground(), play) }},
+	{"invert", func(theme.Resolved) effect.Effect { return effect.Invert(700 * time.Millisecond) }},
+	{"spotlight", func(theme.Resolved) effect.Effect {
+		return effect.Spotlight(2, 1, 26, 1, black, 600*time.Millisecond).WithYoyo().WithDelay(0).WithRepeat(1)
 	}},
-	{"vignette", func(theme.Resolved) animation.Effect { return animation.Vignette(black, play).WithYoyo().WithRepeat(1) }},
-	{"contrast", func(theme.Resolved) animation.Effect { return animation.Contrast(0.2, play).WithYoyo().WithRepeat(1) }},
-	{"hover", func(th theme.Resolved) animation.Effect {
-		return animation.Hover(black, animation.Blend(black, th.Accent.GetForeground(), 0.3), 300*time.Millisecond).
+	{"vignette", func(theme.Resolved) effect.Effect { return effect.Vignette(black, play).WithYoyo().WithRepeat(1) }},
+	{"contrast", func(theme.Resolved) effect.Effect { return effect.Contrast(0.2, play).WithYoyo().WithRepeat(1) }},
+	{"hover", func(th theme.Resolved) effect.Effect {
+		return effect.Hover(black, animation.Blend(black, th.Accent.GetForeground(), 0.3), 300*time.Millisecond).
 			WithYoyo().WithRepeat(1).WithDelay(0)
 	}},
-	{"melt", func(theme.Resolved) animation.Effect { return animation.Melt(nil, play).WithYoyo().WithRepeat(1) }},
-	{"enter", func(theme.Resolved) animation.Effect { return animation.Enter(black) }},
-	{"exit", func(theme.Resolved) animation.Effect { return animation.Exit(black).WithYoyo().WithRepeat(1) }},
-	{"attention", func(th theme.Resolved) animation.Effect { return animation.Attention(th.Accent.GetForeground()) }},
-	{"success", func(th theme.Resolved) animation.Effect { return animation.Success(th.Success.GetForeground()) }},
-	{"failure", func(th theme.Resolved) animation.Effect { return animation.Failure(th.Danger.GetForeground()) }},
+	{"melt", func(theme.Resolved) effect.Effect { return effect.Melt(nil, play).WithYoyo().WithRepeat(1) }},
+	{"enter", func(theme.Resolved) effect.Effect { return effect.Enter(black) }},
+	{"exit", func(theme.Resolved) effect.Effect { return effect.Exit(black).WithYoyo().WithRepeat(1) }},
+	{"attention", func(th theme.Resolved) effect.Effect { return effect.Attention(th.Accent.GetForeground()) }},
+	{"success", func(th theme.Resolved) effect.Effect { return effect.Success(th.Success.GetForeground()) }},
+	{"failure", func(th theme.Resolved) effect.Effect { return effect.Failure(th.Danger.GetForeground()) }},
 }
 
 // lights is the sixth tab: one light at a time on a card, a diff whose lines
 // come and go, and the ghost of a dragged file.
 type lights struct {
 	kind     int
-	effect   animation.Effect
-	removed  animation.Effect // the diff's line going out
-	added    animation.Effect // the diff's line coming in
-	restored animation.Effect // undo's trail over the line it brought back
+	effect   effect.Effect
+	removed  effect.Effect // the diff's line going out
+	added    effect.Effect // the diff's line coming in
+	restored effect.Effect // undo's trail over the line it brought back
 	undone   bool
 }
 
 // newLights is the card's first light, and a diff at rest: its effects
 // already over, so the rows read as they are.
 func newLights(th theme.Resolved) lights {
-	quiet := func(row int) animation.Effect { return animation.Flash(black, 0).OnRows(row) }
+	quiet := func(row int) effect.Effect { return effect.Flash(black, 0).OnRows(row) }
 	l := lights{removed: quiet(1), added: quiet(2), restored: quiet(1)}
 	return l.again(th)
 }
@@ -78,15 +79,15 @@ func (l lights) next(th theme.Resolved) lights {
 // diff plays the change: the old line melts red, the new one flashes green.
 func (l lights) diff(th theme.Resolved) lights {
 	l.undone = false
-	l.removed = animation.Melt(th.Danger.GetForeground(), play).OnRows(1)
-	l.added = animation.Flash(th.Success.GetForeground(), play).OnRows(2)
+	l.removed = effect.Melt(th.Danger.GetForeground(), play).OnRows(1)
+	l.added = effect.Flash(th.Success.GetForeground(), play).OnRows(2)
 	return l
 }
 
 // undo brings the old line back, a soft light over it for a moment.
 func (l lights) undo(th theme.Resolved) lights {
 	l.undone = true
-	l.restored = animation.Flash(th.Accent.GetForeground(), play).WithStrength(0.5).OnRows(1)
+	l.restored = effect.Flash(th.Accent.GetForeground(), play).WithStrength(0.5).OnRows(1)
 	return l
 }
 
@@ -122,7 +123,7 @@ func (l lights) rows(th theme.Resolved, label func(kind, variant string) string)
 		rows = append(rows, label(kind, variant)+line)
 	}
 	file := th.Info.Render("▤ report.pdf")
-	rows = append(rows, label("ghost", "dragged")+file+"   "+animation.Ghost(file, black, 0.35))
+	rows = append(rows, label("ghost", "dragged")+file+"   "+effect.Ghost(file, black, 0.35))
 	return strings.Join(rows, "\n")
 }
 

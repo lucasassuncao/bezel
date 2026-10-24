@@ -4,6 +4,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
 // Heat moves a grid of values to new ones over dur, cell by cell: a heatmap
@@ -12,7 +14,7 @@ type Heat struct {
 	from, to [][]float64
 	dur      time.Duration
 	p        float64
-	run      run
+	run      frames.Run
 }
 
 // NewHeat is values at rest; each Set moves them over dur.
@@ -34,7 +36,7 @@ func (h Heat) Set(values [][]float64) (Heat, tea.Cmd) {
 			}
 		}
 	}
-	h.run, h.p = newRun(h.dur), 0
+	h.run, h.p = frames.NewRun(h.dur), 0
 	if !h.Active() {
 		h.p = 1
 	}
@@ -43,7 +45,7 @@ func (h Heat) Set(values [][]float64) (Heat, tea.Cmd) {
 
 // Values are the numbers to draw now.
 func (h Heat) Values() [][]float64 {
-	q := h.run.ease.or()(h.p)
+	q := frames.Or(h.run.Ease)(h.p)
 	if !h.Active() {
 		q = 1
 	}
@@ -66,17 +68,17 @@ func clone2(g [][]float64) [][]float64 {
 }
 
 // Active reports whether any cell is still changing.
-func (h Heat) Active() bool { return h.run.active() }
+func (h Heat) Active() bool { return h.run.Active() }
 
 // Tick is the command for h's next frame, nil at rest.
-func (h Heat) Tick() tea.Cmd { return h.run.tick() }
+func (h Heat) Tick() tea.Cmd { return h.run.Tick() }
 
 // FrameAt is h's frame for at, for a test or a host that delivers frames itself.
-func (h Heat) FrameAt(at time.Time) FrameMsg { return h.run.frameAt(at) }
+func (h Heat) FrameAt(at time.Time) FrameMsg { return h.run.FrameAt(at) }
 
 // Update moves on its own frames and asks for the next until it settles.
 func (h Heat) Update(msg tea.Msg) (Heat, tea.Cmd) {
-	r, p, ok, cmd := h.run.update(msg)
+	r, p, ok, cmd := h.run.Update(msg)
 	if ok {
 		h.run, h.p = r, p
 	}
@@ -88,6 +90,6 @@ func (h Heat) Advance(now time.Time) (Heat, bool) {
 	if !h.Active() {
 		return h, true
 	}
-	h.run, h.p = h.run.advance(now)
+	h.run, h.p = h.run.Advance(now)
 	return h, !h.Active()
 }

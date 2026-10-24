@@ -3,7 +3,7 @@ package shell
 import (
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/lucasassuncao/bezel/spinner"
+	"github.com/lucasassuncao/bezel/component/spinner"
 )
 
 // Busy shows a spinner and text on the status row until Idle, which an empty

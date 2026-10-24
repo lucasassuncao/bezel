@@ -5,6 +5,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
 // Point is a place on the screen in cells, fractional while it moves.
@@ -18,7 +20,7 @@ func (p Point) Round() (x, y int) { return int(math.Round(p.X)), int(math.Round(
 type Move struct {
 	From, To Point
 	Cur      Point // where the last frame put it
-	run      run
+	run      frames.Run
 }
 
 // NewMove goes from from to to over dur. When dur <= 0, from == to or motion
@@ -27,45 +29,45 @@ func NewMove(from, to Point, dur time.Duration) Move {
 	if dur <= 0 || from == to || Still() {
 		return Move{From: to, To: to, Cur: to}
 	}
-	return Move{From: from, To: to, Cur: from, run: newRun(dur)}
+	return Move{From: from, To: to, Cur: from, run: frames.NewRun(dur)}
 }
 
 // WithEase is m following e instead of EaseInOut.
 func (m Move) WithEase(e Ease) Move {
-	m.run.ease = e
+	m.run.Ease = e
 	return m
 }
 
 // WithDelay holds m at From for d after its first frame.
 func (m Move) WithDelay(d time.Duration) Move {
-	m.run.delay = max(d, 0)
+	m.run.Delay = max(d, 0)
 	return m
 }
 
 // WithRepeat runs m n more times after the first, or without end for Forever.
 func (m Move) WithRepeat(n int) Move {
-	m.run.repeat = max(n, Forever)
+	m.run.Repeat = max(n, Forever)
 	return m
 }
 
 // WithYoyo sends every other run of m back the way it came.
 func (m Move) WithYoyo() Move {
-	m.run.yoyo = true
+	m.run.Yoyo = true
 	return m
 }
 
 // Active reports whether m is still moving.
-func (m Move) Active() bool { return m.run.active() }
+func (m Move) Active() bool { return m.run.Active() }
 
 // Tick is the command for m's next frame, nil once it landed.
-func (m Move) Tick() tea.Cmd { return m.run.tick() }
+func (m Move) Tick() tea.Cmd { return m.run.Tick() }
 
 // FrameAt is m's frame for at, for a test or a host that delivers frames itself.
-func (m Move) FrameAt(at time.Time) FrameMsg { return m.run.frameAt(at) }
+func (m Move) FrameAt(at time.Time) FrameMsg { return m.run.FrameAt(at) }
 
 // Update moves on its own frames and asks for the next until it lands.
 func (m Move) Update(msg tea.Msg) (Move, tea.Cmd) {
-	f, ok := m.run.own(msg)
+	f, ok := m.run.Own(msg)
 	if !ok {
 		return m, nil
 	}
@@ -73,7 +75,7 @@ func (m Move) Update(msg tea.Msg) (Move, tea.Cmd) {
 		return m, nil
 	}
 	var cmd tea.Cmd
-	m.run, cmd = m.run.next()
+	m.run, cmd = m.run.Next()
 	return m, cmd
 }
 
@@ -82,9 +84,9 @@ func (m Move) Advance(now time.Time) (Move, bool) {
 	if !m.Active() {
 		return m, true
 	}
-	ease := m.run.ease.or()
+	ease := frames.Or(m.run.Ease)
 	var p float64
-	m.run, p = m.run.advance(now)
+	m.run, p = m.run.Advance(now)
 	switch {
 	case m.Active():
 		e := ease(p)
@@ -105,7 +107,7 @@ type Follow struct {
 
 // NewFollow is a point at rest at at, each axis a NewSpring.
 func NewFollow(at Point) Follow {
-	return Follow{x: NewSpring(at.X), y: NewSpring(at.Y), id: lastID.Add(1)}
+	return Follow{x: NewSpring(at.X), y: NewSpring(at.Y), id: frames.NextID()}
 }
 
 // WithFreq is f with stiffness w on both axes, in radians a second.
@@ -130,7 +132,7 @@ func (f Follow) To(p Point) (Follow, tea.Cmd) {
 		return f, nil
 	}
 	if f.id == 0 { // a Follow never built with NewFollow
-		f.id = lastID.Add(1)
+		f.id = frames.NextID()
 	}
 	f.tag++
 	return f, f.Tick()
@@ -147,17 +149,16 @@ func (f Follow) Tick() tea.Cmd {
 	if !f.Active() {
 		return nil
 	}
-	id, tag := f.id, f.tag
-	return tea.Tick(Frame, func(at time.Time) tea.Msg { return FrameMsg{At: at, id: id, tag: tag} })
+	return frames.Tick(Frame, f.id, f.tag)
 }
 
 // FrameAt is f's frame for at, for a test or a host that delivers frames itself.
-func (f Follow) FrameAt(at time.Time) FrameMsg { return FrameMsg{At: at, id: f.id, tag: f.tag} }
+func (f Follow) FrameAt(at time.Time) FrameMsg { return frames.NewMsg(at, f.id, f.tag) }
 
 // Update moves f on its own frames and asks for the next until it rests.
 func (f Follow) Update(msg tea.Msg) (Follow, tea.Cmd) {
-	fm, ok := msg.(FrameMsg)
-	if !ok || !f.Active() || fm.id != f.id || fm.tag != f.tag {
+	fm, ok := frames.Is(msg, f.id, f.tag)
+	if !ok || !f.Active() {
 		return f, nil
 	}
 	if f, _ = f.Advance(fm.At); !f.Active() {

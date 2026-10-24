@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
-	"github.com/lucasassuncao/bezel/spinner"
+	"github.com/lucasassuncao/bezel/component/spinner"
 )
 
 // busyShell is a sized shell whose spinner turns every nanosecond, so a

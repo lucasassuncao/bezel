@@ -4,6 +4,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
 // Clock is one chain of frames for a screen running several animations at
@@ -17,7 +19,7 @@ type Clock struct {
 }
 
 // NewClock is a stopped clock.
-func NewClock() Clock { return Clock{id: lastID.Add(1)} }
+func NewClock() Clock { return Clock{id: frames.NextID()} }
 
 // Start sets c ticking; a running clock asks for nothing more.
 func (c Clock) Start() (Clock, tea.Cmd) {
@@ -25,7 +27,7 @@ func (c Clock) Start() (Clock, tea.Cmd) {
 		return c, nil
 	}
 	if c.id == 0 { // a Clock never built with NewClock
-		c.id = lastID.Add(1)
+		c.id = frames.NextID()
 	}
 	c.running, c.last = true, time.Time{}
 	return c.Next()
@@ -44,8 +46,8 @@ func (c Clock) Running() bool { return c.running }
 // Frame is the time msg carries when it is c's current frame. Advance every
 // animation to it, then call Next while any of them still moves.
 func (c Clock) Frame(msg tea.Msg) (time.Time, bool) {
-	f, ok := msg.(FrameMsg)
-	if !ok || !c.running || f.id != c.id || f.tag != c.tag {
+	f, ok := frames.Is(msg, c.id, c.tag)
+	if !ok || !c.running {
 		return time.Time{}, false
 	}
 	return f.At, true
@@ -86,8 +88,8 @@ func (c Clock) Next() (Clock, tea.Cmd) {
 	}
 	c.tag++
 	id, tag := c.id, c.tag
-	return c, tea.Tick(c.gap(), func(at time.Time) tea.Msg { return FrameMsg{At: at, id: id, tag: tag} })
+	return c, tea.Tick(c.gap(), func(at time.Time) tea.Msg { return frames.NewMsg(at, id, tag) })
 }
 
 // FrameAt is c's current frame for at, for a test that delivers frames itself.
-func (c Clock) FrameAt(at time.Time) FrameMsg { return FrameMsg{At: at, id: c.id, tag: c.tag} }
+func (c Clock) FrameAt(at time.Time) FrameMsg { return frames.NewMsg(at, c.id, c.tag) }

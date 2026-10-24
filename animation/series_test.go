@@ -20,7 +20,7 @@ func TestGrowRaisesEveryValueFromZero(t *testing.T) {
 func TestDrawRevealsFromTheLeft(t *testing.T) {
 	start := time.Unix(1000, 0)
 	s := NewDraw([]float64{4, 4, 4, 4}, 100*ms)
-	s.run.ease = Linear
+	s.run.Ease = Linear
 	s, _ = s.Advance(start)
 	s, _ = s.Advance(start.Add(50 * ms))
 	assert.Equal(t, []float64{4, 4, 0, 0}, s.Values())

@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/lucasassuncao/bezel/inline"
+	"github.com/lucasassuncao/bezel/component/inline"
 	"github.com/lucasassuncao/bezel/theme"
 )
 

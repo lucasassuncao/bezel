@@ -6,6 +6,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
 // Flock is a line of points that follow one another: the first springs after
@@ -22,7 +24,7 @@ type Flock struct {
 
 // NewFlock is n points at rest at at, springs of stiffness 14 and damping 0.8.
 func NewFlock(n int, at Point) Flock {
-	f := Flock{pts: make([]Point, max(n, 1)), vel: make([]Point, max(n, 1)), target: at, freq: 14, damping: 0.8, id: lastID.Add(1)}
+	f := Flock{pts: make([]Point, max(n, 1)), vel: make([]Point, max(n, 1)), target: at, freq: 14, damping: 0.8, id: frames.NextID()}
 	for i := range f.pts {
 		f.pts[i] = at
 	}
@@ -75,17 +77,16 @@ func (f Flock) Tick() tea.Cmd {
 	if !f.moving {
 		return nil
 	}
-	id, tag := f.id, f.tag
-	return tea.Tick(Frame, func(at time.Time) tea.Msg { return FrameMsg{At: at, id: id, tag: tag} })
+	return frames.Tick(Frame, f.id, f.tag)
 }
 
 // FrameAt is f's frame for at, for a test or a host that delivers frames itself.
-func (f Flock) FrameAt(at time.Time) FrameMsg { return FrameMsg{At: at, id: f.id, tag: f.tag} }
+func (f Flock) FrameAt(at time.Time) FrameMsg { return frames.NewMsg(at, f.id, f.tag) }
 
 // Update moves f on its own frames and asks for the next until it rests.
 func (f Flock) Update(msg tea.Msg) (Flock, tea.Cmd) {
-	fm, ok := msg.(FrameMsg)
-	if !ok || !f.moving || fm.id != f.id || fm.tag != f.tag {
+	fm, ok := frames.Is(msg, f.id, f.tag)
+	if !ok || !f.moving {
 		return f, nil
 	}
 	if f, _ = f.Advance(fm.At); !f.moving {
@@ -105,7 +106,7 @@ func (f Flock) Advance(now time.Time) (Flock, bool) {
 		f.last = now
 		return f, false
 	}
-	dt := max(paced(now.Sub(f.last)).Seconds(), 0)
+	dt := max(frames.Paced(now.Sub(f.last)).Seconds(), 0)
 	f.last = now
 	f.pts, f.vel = slices.Clone(f.pts), slices.Clone(f.vel)
 	still := true

@@ -87,16 +87,3 @@ func TestStepsMovesInWholeSteps(t *testing.T) {
 	assert.Equal(t, 1.0, s(1))
 	assert.Equal(t, 1.0, Steps(0)(0.5), "no steps is a jump straight to the end")
 }
-
-// A curve that pulls below zero must not draw a non-digit on an odometer.
-func TestAnOdometerOnAnOvershootingCurveStaysDigits(t *testing.T) {
-	start := time.Unix(1000, 0)
-	o := NewOdometer(0, 999, 300*time.Millisecond).WithEase(Back)
-	o, _ = o.Update(o.FrameAt(start))
-	for d := time.Duration(0); d < 300*time.Millisecond; d += Frame {
-		o, _ = o.Update(o.FrameAt(start.Add(d)))
-		for _, c := range o.View() {
-			assert.True(t, c >= '0' && c <= '9', "%q", o.View())
-		}
-	}
-}

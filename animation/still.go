@@ -1,33 +1,12 @@
 package animation
 
-import (
-	"math"
-	"os"
-	"strconv"
-	"time"
-)
+import "github.com/lucasassuncao/bezel/internal/frames"
 
 // Still reports whether motion is switched off: BEZEL_NO_MOTION set to
 // anything, TERM=dumb, or BEZEL_MOTION at 0. Then every animation is born where
 // it would end, for a user who finds motion hard to follow, a slow link or a CI log.
-func Still() bool {
-	return os.Getenv("BEZEL_NO_MOTION") != "" || os.Getenv("TERM") == "dumb" || Speed() <= 0
-}
+func Still() bool { return frames.Still() }
 
 // Speed is how fast motion plays, from BEZEL_MOTION: 2 twice as fast, 0.5 at
 // half speed, 1 when it is unset or not a number.
-func Speed() float64 {
-	s, err := strconv.ParseFloat(os.Getenv("BEZEL_MOTION"), 64)
-	if err != nil || math.IsNaN(s) || math.IsInf(s, 0) {
-		return 1
-	}
-	return s
-}
-
-// paced is d of wall time as motion at Speed lives it.
-func paced(d time.Duration) time.Duration {
-	if s := Speed(); s > 0 {
-		return time.Duration(float64(d) * s)
-	}
-	return d
-}
+func Speed() float64 { return frames.Speed() }

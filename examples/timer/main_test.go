@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
-	"github.com/lucasassuncao/bezel/timer"
+	"github.com/lucasassuncao/bezel/component/timer"
 )
 
 // frame sends msg and renders; every row must be exactly 80 columns wide. A

@@ -1,20 +1,21 @@
-// Package animation moves things on frames that arrive as messages: tweens,
-// springs, physics, text effects, lights and transitions over any drawn block,
-// and scenes, alone or on a shared Clock. BEZEL_MOTION sets their speed.
+// Package animation moves values on frames that arrive as messages: tweens,
+// springs, fades and physics, alone or on a shared Clock. Its subpackages
+// animate text and scenes. BEZEL_MOTION sets the speed.
 package animation
 
 import (
 	"math"
-	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
 // Frame is the interval between animation frames (~60fps). Terminal
 // rows are coarse, so a tween resolves to only a handful of distinct heights;
 // the frame rate exists to keep the easing curve smooth in time, not in space.
-const Frame = 16 * time.Millisecond
+const Frame = frames.Frame
 
 // Tween eases an int between two values over a duration. Adapted from the
 // minimize animation in github.com/Gaurav-Gosain/tuios (MIT), reduced to one
@@ -24,40 +25,33 @@ type Tween struct {
 	Cur      int       // value sampled by the last advance; the height the frame draws
 	Start    time.Time // zero until the first frame, which starts the clock
 	Dur      time.Duration
-	loop
-	ease Ease  // nil is EaseInOut
-	id   int64 // which FrameMsg values are this tween's
-	tag  int64 // which step: a twin frame from a second Tick is dropped
+	loop     frames.Loop
+	ease     Ease  // nil is EaseInOut
+	id       int64 // which FrameMsg values are this tween's
+	tag      int64 // which step: a twin frame from a second Tick is dropped
 }
 
-// FrameMsg is one tick of a tween's clock, at the time it fired. Hand it to
-// every running tween's Update: each one takes only its own.
-type FrameMsg struct {
-	At      time.Time
-	id, tag int64
-}
-
-// lastID numbers the tweens New builds, so a replaced one's frames are told apart.
-var lastID atomic.Int64
+// FrameMsg is one tick of an animation's clock, at the time it fired. Hand it
+// to every running animation's Update: each one takes only its own.
+type FrameMsg = frames.Msg
 
 // Tick is the command for t's next frame, nil for a tween with nothing to do.
 func (t Tween) Tick() tea.Cmd {
 	if !t.Active() {
 		return nil
 	}
-	id, tag := t.id, t.tag
-	return tea.Tick(Frame, func(at time.Time) tea.Msg { return FrameMsg{At: at, id: id, tag: tag} })
+	return frames.Tick(Frame, t.id, t.tag)
 }
 
 // FrameAt is t's frame for at, for a test harness that delivers frames itself.
-func (t Tween) FrameAt(at time.Time) FrameMsg { return FrameMsg{At: at, id: t.id, tag: t.tag} }
+func (t Tween) FrameAt(at time.Time) FrameMsg { return frames.NewMsg(at, t.id, t.tag) }
 
 // Update samples t on one of its own frames and asks for the next until it
 // lands. Other messages, frames meant for another tween and a twin frame from
 // a second Tick leave it alone.
 func (t Tween) Update(msg tea.Msg) (Tween, tea.Cmd) {
-	f, ok := msg.(FrameMsg)
-	if !ok || f.id != t.id || f.tag != t.tag || !t.Active() {
+	f, ok := frames.Is(msg, t.id, t.tag)
+	if !ok || !t.Active() {
 		return t, nil
 	}
 	next, done := t.Advance(f.At)
@@ -96,14 +90,14 @@ func (t Tween) At(now time.Time) (int, bool) {
 	if t.Start.IsZero() {
 		return t.From, false
 	}
-	p, done := t.phase(paced(now.Sub(t.Start)), t.Dur)
+	p, done := t.loop.Phase(frames.Paced(now.Sub(t.Start)), t.Dur)
 	switch {
 	case done && p == 1:
 		return t.To, true
 	case done:
 		return t.From, true
 	}
-	return t.From + int(math.Round(float64(t.To-t.From)*t.ease.or()(p))), false
+	return t.From + int(math.Round(float64(t.To-t.From)*frames.Or(t.ease)(p))), false
 }
 
 // New builds the tween taking a panel from its on-screen height to target
@@ -113,7 +107,7 @@ func New(from, target int, dur time.Duration) Tween {
 	if dur <= 0 || from == target || Still() {
 		return Tween{From: target, To: target, Cur: target}
 	}
-	return Tween{From: from, To: target, Cur: from, Dur: dur, id: lastID.Add(1)}
+	return Tween{From: from, To: target, Cur: from, Dur: dur, id: frames.NextID()}
 }
 
 // WithEase is t following e instead of EaseInOut.
@@ -124,18 +118,18 @@ func (t Tween) WithEase(e Ease) Tween {
 
 // WithDelay holds t at From for d after its first frame.
 func (t Tween) WithDelay(d time.Duration) Tween {
-	t.delay = max(d, 0)
+	t.loop.Delay = max(d, 0)
 	return t
 }
 
 // WithRepeat runs t n more times after the first, or without end for Forever.
 func (t Tween) WithRepeat(n int) Tween {
-	t.repeat = max(n, Forever)
+	t.loop.Repeat = max(n, Forever)
 	return t
 }
 
 // WithYoyo sends every other run of t back the way it came.
 func (t Tween) WithYoyo() Tween {
-	t.yoyo = true
+	t.loop.Yoyo = true
 	return t
 }

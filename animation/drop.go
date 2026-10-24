@@ -5,6 +5,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
 // settleHop is the height, in cells, below which a bounce is too small to draw.
@@ -16,15 +18,15 @@ const settleHop = 0.05
 type Drop struct {
 	Cur      float64
 	from, to float64
-	gravity  float64 // cells a second squared
-	bounce   float64 // the share of its speed the floor gives back
-	run      run     // its frames only; the motion is solved from the time
+	gravity  float64    // cells a second squared
+	bounce   float64    // the share of its speed the floor gives back
+	run      frames.Run // its frames only; the motion is solved from the time
 }
 
 // NewDrop falls from from to the floor at to, either way up the screen.
 func NewDrop(from, to float64) Drop {
-	d := Drop{Cur: from, from: from, to: to, gravity: 60, bounce: 0.45, run: newRun(time.Second)}
-	d.run.ease, d.run.repeat = Linear, Forever
+	d := Drop{Cur: from, from: from, to: to, gravity: 60, bounce: 0.45, run: frames.NewRun(time.Second)}
+	d.run.Ease, d.run.Repeat = Linear, Forever
 	if !d.Active() {
 		d.Cur = to
 	}
@@ -68,17 +70,17 @@ func (d Drop) at(t float64) (float64, bool) {
 }
 
 // Active reports whether d is still falling or bouncing.
-func (d Drop) Active() bool { return d.run.active() }
+func (d Drop) Active() bool { return d.run.Active() }
 
 // Tick is the command for d's next frame, nil once it settled.
-func (d Drop) Tick() tea.Cmd { return d.run.tick() }
+func (d Drop) Tick() tea.Cmd { return d.run.Tick() }
 
 // FrameAt is d's frame for at, for a test or a host that delivers frames itself.
-func (d Drop) FrameAt(at time.Time) FrameMsg { return d.run.frameAt(at) }
+func (d Drop) FrameAt(at time.Time) FrameMsg { return d.run.FrameAt(at) }
 
 // Update falls on its own frames and asks for the next until it settles.
 func (d Drop) Update(msg tea.Msg) (Drop, tea.Cmd) {
-	f, ok := d.run.own(msg)
+	f, ok := d.run.Own(msg)
 	if !ok {
 		return d, nil
 	}
@@ -86,7 +88,7 @@ func (d Drop) Update(msg tea.Msg) (Drop, tea.Cmd) {
 		return d, nil
 	}
 	var cmd tea.Cmd
-	d.run, cmd = d.run.next()
+	d.run, cmd = d.run.Next()
 	return d, cmd
 }
 
@@ -95,11 +97,11 @@ func (d Drop) Advance(now time.Time) (Drop, bool) {
 	if !d.Active() {
 		return d, true
 	}
-	d.run, _ = d.run.advance(now)
-	pos, settled := d.at(paced(now.Sub(d.run.start)).Seconds())
+	d.run, _ = d.run.Advance(now)
+	pos, settled := d.at(frames.Paced(now.Sub(d.run.Start)).Seconds())
 	d.Cur = pos
 	if settled {
-		d.run = run{}
+		d.run = frames.Run{}
 	}
 	return d, settled
 }

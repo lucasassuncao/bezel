@@ -7,7 +7,7 @@ import (
 
 	"charm.land/lipgloss/v2"
 
-	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/effect"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -27,48 +27,48 @@ var black = color.RGBA{0, 0, 0, 255}
 // card away come back the same way, so it is never left empty.
 var effectKinds = []struct {
 	name string
-	make func(th theme.Resolved) animation.Effect
+	make func(th theme.Resolved) effect.Effect
 }{
-	{"fade in", func(theme.Resolved) animation.Effect { return animation.FadeIn(black, play) }},
-	{"fade out", func(theme.Resolved) animation.Effect { return animation.FadeOut(black, play).WithYoyo().WithRepeat(1) }},
-	{"dissolve", func(theme.Resolved) animation.Effect { return animation.Dissolve(play).WithYoyo().WithRepeat(1) }},
-	{"coalesce", func(theme.Resolved) animation.Effect { return animation.Coalesce(play) }},
-	{"sweep in", func(th theme.Resolved) animation.Effect { return animation.SweepIn(th.Accent.GetForeground(), play) }},
-	{"slide in", func(theme.Resolved) animation.Effect { return animation.SlideIn(animation.Right, play) }},
-	{"slide out", func(theme.Resolved) animation.Effect {
-		return animation.SlideOut(animation.Up, play).WithYoyo().WithRepeat(1)
+	{"fade in", func(theme.Resolved) effect.Effect { return effect.FadeIn(black, play) }},
+	{"fade out", func(theme.Resolved) effect.Effect { return effect.FadeOut(black, play).WithYoyo().WithRepeat(1) }},
+	{"dissolve", func(theme.Resolved) effect.Effect { return effect.Dissolve(play).WithYoyo().WithRepeat(1) }},
+	{"coalesce", func(theme.Resolved) effect.Effect { return effect.Coalesce(play) }},
+	{"sweep in", func(th theme.Resolved) effect.Effect { return effect.SweepIn(th.Accent.GetForeground(), play) }},
+	{"slide in", func(theme.Resolved) effect.Effect { return effect.SlideIn(effect.Right, play) }},
+	{"slide out", func(theme.Resolved) effect.Effect {
+		return effect.SlideOut(effect.Up, play).WithYoyo().WithRepeat(1)
 	}},
-	{"evolve", func(theme.Resolved) animation.Effect { return animation.Evolve(play) }},
-	{"explode", func(theme.Resolved) animation.Effect { return animation.Explode(play).WithYoyo().WithRepeat(1) }},
-	{"expand", func(th theme.Resolved) animation.Effect { return animation.Expand(th.Accent.GetForeground(), play) }},
-	{"stretch", func(th theme.Resolved) animation.Effect {
-		return animation.Stretch(animation.Right, th.Accent.GetForeground(), play)
+	{"evolve", func(theme.Resolved) effect.Effect { return effect.Evolve(play) }},
+	{"explode", func(theme.Resolved) effect.Effect { return effect.Explode(play).WithYoyo().WithRepeat(1) }},
+	{"expand", func(th theme.Resolved) effect.Effect { return effect.Expand(th.Accent.GetForeground(), play) }},
+	{"stretch", func(th theme.Resolved) effect.Effect {
+		return effect.Stretch(effect.Right, th.Accent.GetForeground(), play)
 	}},
-	{"hue shift", func(theme.Resolved) animation.Effect { return animation.HueShift(180, play).WithYoyo().WithRepeat(1) }},
-	{"desaturate", func(theme.Resolved) animation.Effect { return animation.Saturate(-1, play).WithYoyo().WithRepeat(1) }},
+	{"hue shift", func(theme.Resolved) effect.Effect { return effect.HueShift(180, play).WithYoyo().WithRepeat(1) }},
+	{"desaturate", func(theme.Resolved) effect.Effect { return effect.Saturate(-1, play).WithYoyo().WithRepeat(1) }},
 }
 
 // patterns are the orders the effect can reach the card's cells in; the
 // first leaves the effect its own.
 var patterns = []struct {
 	name    string
-	pattern animation.Pattern
+	pattern effect.Pattern
 }{
 	{"its own", nil},
-	{"sweep →", animation.Sweep(animation.Right)},
-	{"radial", animation.Radial()},
-	{"diamond", animation.Diamond()},
-	{"diagonal", animation.Diagonal()},
-	{"checker", animation.Checker()},
-	{"spiral", animation.Spiral(2)},
-	{"wave", animation.Wave()},
-	{"noise", animation.Noise(9)},
+	{"sweep →", effect.Sweep(effect.Right)},
+	{"radial", effect.Radial()},
+	{"diamond", effect.Diamond()},
+	{"diagonal", effect.Diagonal()},
+	{"checker", effect.Checker()},
+	{"spiral", effect.Spiral(2)},
+	{"wave", effect.Wave()},
+	{"noise", effect.Noise(9)},
 }
 
 // drawing is the fourth tab: one effect at a time on a card drawn by lipgloss.
 type drawing struct {
 	kind, order int
-	effect      animation.Effect
+	effect      effect.Effect
 }
 
 // again plays the current effect, in the current order, from the start.

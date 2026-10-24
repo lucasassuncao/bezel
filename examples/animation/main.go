@@ -13,8 +13,9 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/animation/text"
+	"github.com/lucasassuncao/bezel/component/progress"
 	"github.com/lucasassuncao/bezel/layout"
-	"github.com/lucasassuncao/bezel/progress"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -81,11 +82,11 @@ type model struct {
 	smooth         animation.Float
 	count          animation.Tween
 	fade           animation.Fade
-	typed          animation.Typewriter
-	shake          animation.Shake
+	typed          text.Typewriter
+	shake          text.Shake
 	pulse          animation.Fade
 	cascade        []animation.Tween
-	marquee        animation.Marquee
+	marquee        text.Marquee
 	fx             effects // the second tab's
 	cv             curves  // the third tab's
 	dr             drawing // the fourth tab's
@@ -182,10 +183,10 @@ func newModel() model {
 		sh: sh, th: th, clock: animation.NewClock(),
 		steady: animation.NewSpring(0), bouncy: animation.NewSpring(0).WithDamping(0.3),
 		fade:    animation.NewFade(muted, muted, 0),
-		typed:   animation.NewTypewriter(headline, 0),
-		shake:   animation.NewShake(3, 0),
+		typed:   text.NewTypewriter(headline, 0),
+		shake:   text.NewShake(3, 0),
 		pulse:   animation.NewFade(muted, muted, 0),
-		marquee: animation.NewMarquee(longPath, 30),
+		marquee: text.NewMarquee(longPath, 30),
 		fx:      newEffects(th),
 		tx:      newTexts(th),
 		lt:      newLights(th),
@@ -251,10 +252,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fade = animation.NewFade(m.th.Accent.GetForeground(), m.th.Muted.GetForeground(), 1500*time.Millisecond)
 		return m.run(nil)
 	case typeMsg:
-		m.typed = animation.NewTypewriter(headline, 35*time.Millisecond)
+		m.typed = text.NewTypewriter(headline, 35*time.Millisecond)
 		return m.run(nil)
 	case shakeMsg:
-		m.shake = animation.NewShake(3, 450*time.Millisecond)
+		m.shake = text.NewShake(3, 450*time.Millisecond)
 		return m.run(nil)
 	case pulseMsg:
 		if m.pulse.Active() {

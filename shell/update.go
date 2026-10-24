@@ -6,10 +6,10 @@ import (
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/animation"
-	"github.com/lucasassuncao/bezel/input"
+	"github.com/lucasassuncao/bezel/component/input"
+	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/palette"
-	"github.com/lucasassuncao/bezel/spinner"
 )
 
 // statusExpiredMsg clears the status whose sequence it carries. A stale one,

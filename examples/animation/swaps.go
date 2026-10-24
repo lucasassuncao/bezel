@@ -6,7 +6,7 @@ import (
 
 	"charm.land/lipgloss/v2"
 
-	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/effect"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -21,26 +21,26 @@ type (
 // swapKinds are the transitions the two cards swap with.
 var swapKinds = []struct {
 	name string
-	make func() animation.Transition
+	make func() effect.Transition
 }{
-	{"push ←", func() animation.Transition { return animation.Push(animation.Left, swapTime) }},
-	{"cover ↑", func() animation.Transition { return animation.Cover(animation.Up, swapTime) }},
-	{"reveal →", func() animation.Transition { return animation.Reveal(animation.Right, swapTime) }},
-	{"crossfade", func() animation.Transition { return animation.CrossFade(swapTime) }},
-	{"wipe radial", func() animation.Transition { return animation.Wipe(animation.Radial(), swapTime) }},
-	{"wipe diagonal", func() animation.Transition { return animation.Wipe(animation.Diagonal(), swapTime) }},
-	{"zoom", func() animation.Transition { return animation.Zoom(swapTime) }},
-	{"shuffle", func() animation.Transition { return animation.Shuffle(swapTime) }},
+	{"push ←", func() effect.Transition { return effect.Push(effect.Left, swapTime) }},
+	{"cover ↑", func() effect.Transition { return effect.Cover(effect.Up, swapTime) }},
+	{"reveal →", func() effect.Transition { return effect.Reveal(effect.Right, swapTime) }},
+	{"crossfade", func() effect.Transition { return effect.CrossFade(swapTime) }},
+	{"wipe radial", func() effect.Transition { return effect.Wipe(effect.Radial(), swapTime) }},
+	{"wipe diagonal", func() effect.Transition { return effect.Wipe(effect.Diagonal(), swapTime) }},
+	{"zoom", func() effect.Transition { return effect.Zoom(swapTime) }},
+	{"shuffle", func() effect.Transition { return effect.Shuffle(swapTime) }},
 }
 
 // swaps is the eighth tab: two cards, one carried into the other.
 type swaps struct {
 	kind    int
-	t       animation.Transition
+	t       effect.Transition
 	flipped bool // the settings card is in front
 }
 
-func newSwaps() swaps { return swaps{t: animation.Push(animation.Left, 0)} }
+func newSwaps() swaps { return swaps{t: effect.Push(effect.Left, 0)} }
 
 // again swaps back the way it came, with the same transition.
 func (s swaps) again() swaps {

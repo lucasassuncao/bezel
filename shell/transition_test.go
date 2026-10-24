@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/effect"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -91,7 +92,7 @@ func TestSlideTabsComesFromTheSideTheTabIsOn(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "")
 	t.Setenv("TERM", "xterm-256color")
 	slide := SlideTabs(100 * time.Millisecond)
-	half := func(e animation.Effect) string {
+	half := func(e effect.Effect) string {
 		at := time.Unix(1000, 0)
 		e, _ = e.Update(e.FrameAt(at))
 		e, _ = e.Update(e.FrameAt(at.Add(50 * time.Millisecond)))
