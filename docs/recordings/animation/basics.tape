@@ -43,10 +43,6 @@ Sleep 1.5s
 
 Type "f"
 Sleep 1.8s
-Type "t"
-Sleep 2s
-Type "s"
-Sleep 1.2s
 Type "p"
 Sleep 2.5s
 Type "p"

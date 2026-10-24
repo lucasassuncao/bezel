@@ -9,10 +9,12 @@ Every animation is a value, like the rest of bezel: it reads no clock, starts on
 | [`effect`](../effect) | a block that is already drawn: fades, dissolves, slides, lights, and transitions from one block to the next | [EFFECTS.md](EFFECTS.md) |
 | [`animation/scene`](../animation/scene) | whole scenes drawn from the time alone: rain, snow, stars, fireworks | [Scenes](#scenes) |
 
-Every one of them takes the same `animation.FrameMsg`, so one screen can mix them freely. The gallery shows every kind, a tab each:
+Every one of them takes the same `animation.FrameMsg`, so one screen can mix them freely. Each package has a gallery of its own, a tab for each family; the effects have theirs too, described in [EFFECTS.md](EFFECTS.md):
 
 ```sh
-go run ./examples/animation
+go run ./examples/animation        # values, curves, points, physics, data, choreography
+go run ./examples/animation/text   # text, typed, rolled, marked and arriving
+go run ./examples/animation/scene  # the scenes, one at a time
 ```
 
 `tab` turns the page; each tab keeps its own keys, listed at the foot of the screen.
@@ -50,7 +52,7 @@ case animation.FrameMsg:
 	m.clock = m.clock.Stop()
 ```
 
-Start the clock, `m.clock, cmd = m.clock.Start()`, whenever one of them is set off. The gallery runs its timed rows on one clock, and the marquee, the shimmer, the gradient and the hints pane on their own frames.
+Start the clock, `m.clock, cmd = m.clock.Start()`, whenever one of them is set off. The galleries run their timed rows on one clock each, and the pendulum, the orbit, the marquee, the shimmer, the gradient and the hints pane on their own frames.
 
 `Take` is `Frame` for a clock that paces itself: `m.clock, at, ok = m.clock.Take(msg)`. When frames arrive twice as far apart as it asked, the screen cannot keep up, so it asks half as often, down to a quarter of the usual rate, and speeds up again once they keep up. It reads only the times its own frames carry.
 
@@ -77,6 +79,10 @@ The [`animation`](../animation) package moves values: a number, a colour, a poin
 | `Fade` | a colour from one to another; `Blend` mixes two at any point |
 | `Move`, `Follow` | ease or spring a `Point` on both axes |
 
+The move tab plays the points beside a `Path`, below.
+
+![move](recordings/animation/move.gif)
+
 Every timed one takes `WithDelay` and `WithRepeat`, `animation.Forever` for no end, and `WithYoyo`, which runs every other pass back. Delays chain one animation after another: the gallery's cascade is six tweens, each delayed a little more than the one before. A pulse is a `Fade` with `WithYoyo().WithRepeat(animation.Forever)`.
 
 ### Curves
@@ -102,6 +108,11 @@ Every curve starts at exactly 0 and ends at exactly 1. `Back` and `Elastic` leav
 | `Orbit` | carries a point round an ellipse; `Near` says which half it is on, to draw it in front or behind |
 | `Flock` | a line of points, each springing after the one ahead, trailing like a tail |
 | `Rubber` | a value that gives past its limits, harder the farther it is pulled, and springs back when let go |
+| `Burst` | sparks thrown out of a point in every direction, pulled down by gravity as they fade: a task ticked off, a "+1" |
+
+`Drop.Shape()` is the squash and stretch to draw a dropped thing with: tall while it falls fast, wide and flat as it lands, round at rest. The pop tab draws a `Burst`, the squash, and the two below.
+
+![pop](recordings/animation/pop.gif)
 
 ### Charts that move
 
@@ -109,13 +120,32 @@ Every curve starts at exactly 0 and ends at exactly 1. `Back` and `Elastic` leav
 
 A `Series` animates the values a chart draws: `NewGrow` raises them all from zero, `NewDraw` reveals them from the left, and `Push` adds one at the right that rises while the oldest drops off. `Heat` moves a grid of values cell by cell for `chart.Heat`, and a `Spring` carries the needle of `progress.Gauge`.
 
+A `Race` moves a set of bars to new values and new places together, one that overtakes another sliding past it: sort its `Racers` by `Place` to draw them. `chart.Donut` draws a share as a ring filled clockwise from the top; carry the share on a `Float` and it sweeps.
+
+### Choreography
+
+![flow](recordings/animation/flow.gif)
+
+A `Timeline` plays several named values on one clock, so a sequence needs no delays worked out by hand. `Step` moves one value, `Seq` plays spans one after another, `Par` together, `Stagger` together a gap apart, and `Gap` waits:
+
+```go
+tl := animation.NewTimeline(animation.Seq(
+	animation.Stagger(90*time.Millisecond, animation.Step("a", 0, 1, 300*time.Millisecond), animation.Step("b", 0, 1, 300*time.Millisecond)),
+	animation.Gap(200*time.Millisecond),
+	animation.Step("glow", 0, 1, 400*time.Millisecond),
+))
+// in View: tl.Value("a"), tl.Value("glow")
+```
+
+`Cascade(gap, items...)` does the same for animations built apart, delaying each a gap more than the one before. `Keyframes` moves one value through several stops, each with the curve that leads into it, and `Path` carries a `Point` along a line of points at an even speed; `Bezier` makes the points of a curve for it.
+
 ## Text
 
 The [`animation/text`](../animation/text) package animates a line of text and draws it with `View`, its width kept wherever the text would jump.
 
 ### Typed and scrolled
 
-![basics](recordings/animation/basics.gif)
+![typed](recordings/animation/text/typed.gif)
 
 | Kind | What it does |
 |---|---|
@@ -125,7 +155,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 
 ### Lit and rolled
 
-![effects](recordings/animation/effects.gif)
+![roll](recordings/animation/text/roll.gif)
 
 | Kind | What it does |
 |---|---|
@@ -136,7 +166,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 
 ### Marked and moved
 
-![text](recordings/animation/text.gif)
+![mark](recordings/animation/text/mark.gif)
 
 | Kind | What it does |
 |---|---|
@@ -148,6 +178,22 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 | `Highlight`, `Strike` | a marker run under text, a line drawn through it; both stay |
 | `Rise` | a word that floats up off its place and fades: "copied!", "+1" |
 
+### Arriving and leaving
+
+![arrive](recordings/animation/text/arrive.gif)
+
+| Kind | What it does |
+|---|---|
+| `Stream` | shows text pushed in pieces at a steady pace, speeding up when it falls behind: an answer streamed from a model |
+| `Morph` | turns one text into another, taking out what the new one lacks and then putting in what it adds |
+| `Typist` | types like a person: unevenly, slower after a full stop, now and then a key beside the right one taken back |
+| `Flip` | turns over each letter that changes, left to right, like the cards of a scoreboard |
+| `Neon` | lights text like a sign: steady, with a stutter now and then and one weak letter that flickers more |
+| `Burn` | sets text alight from the left, each letter flaring and falling to ash |
+| `Fall` | drops the letters of a word from above, each at its own moment, landing with a bounce |
+
+`Big(s)` draws text in a block font three rows tall, for a countdown or a score; `Big(flip.View())` is a scoreboard clock.
+
 The timed ones take `WithEase`, `WithDelay`, `WithRepeat` and, all but `Shake`, `WithYoyo`, as the [motion](#motion) kinds do:
 
 ```go
@@ -158,7 +204,7 @@ text.NewTypewriter("Saved.", 400*time.Millisecond).WithYoyo().WithRepeat(1)
 
 ![scene](recordings/animation/scene.gif)
 
-The [`animation/scene`](../animation/scene) package draws a `Scene` from the time alone, at any size, for as long as it lives: `NewRain`, `NewSnow`, `NewConfetti`, `NewFireworks`, `NewStarfield`, `NewStatic` and `NewPlasma`, each in the colours it is given.
+The [`animation/scene`](../animation/scene) package draws a `Scene` from the time alone, at any size, for as long as it lives: `NewRain`, `NewSnow`, `NewConfetti`, `NewFireworks`, `NewStarfield`, `NewStatic`, `NewPlasma`, `NewFire`, `NewAurora`, `NewBubbles`, `NewSea` and `NewLife`, Conway's game on a board as large as the scene, each in the colours it is given.
 
 `View(w, h)` draws it on its own; `Under(block)` draws it behind a block, which hides it wherever the block draws something:
 

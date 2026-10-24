@@ -24,6 +24,11 @@ const (
 	starfield
 	static
 	plasma
+	fire
+	aurora
+	bubbles
+	sea
+	life
 )
 
 // Scene plays behind content, or in place of it: rain,
@@ -88,6 +93,16 @@ func (a Scene) paint(cv cells.Canvas, w, h int) {
 		a.static(cv, w, h)
 	case plasma:
 		a.plasma(cv, w, h)
+	case fire:
+		a.fire(cv, w, h)
+	case aurora:
+		a.aurora(cv, w, h)
+	case bubbles:
+		a.bubbles(cv, w, h)
+	case sea:
+		a.sea(cv, w, h)
+	case life:
+		a.life(cv, w, h)
 	}
 }
 

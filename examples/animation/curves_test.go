@@ -8,11 +8,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// onCurves is the gallery, sized and started, on its third tab.
+// onCurves is the gallery, sized and started, on its second tab.
 func onCurves(t *testing.T) (tea.Model, string) {
 	t.Helper()
-	m, _ := onEffects(t)
-	return turnTab(t, m)
+	return onTab(t, 1)
 }
 
 func TestTheCurvesTabRacesEveryCurve(t *testing.T) {

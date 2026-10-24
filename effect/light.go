@@ -84,6 +84,12 @@ func (e Effect) WithStrength(k float64) Effect {
 // depend on where a cell sits, then every other kind.
 func (e Effect) turnAt(c cells.Cell, q float64, x, y, w, h int) cells.Cell {
 	switch e.kind {
+	case scanlines:
+		return e.scanline(c, q, y)
+	case skeleton:
+		return e.skeleton(c, q, x, w)
+	case trace:
+		return e.traced(c, q, x, y, w, h)
 	case spotlight:
 		if e.spot.holds(x, y) {
 			return c

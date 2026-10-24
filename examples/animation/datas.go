@@ -44,7 +44,7 @@ func waves(n int) []float64 {
 	return out
 }
 
-// datas is the tenth tab: charts whose numbers move instead of jumping.
+// datas is the seventh tab: charts whose numbers move instead of jumping.
 type datas struct {
 	bars    animation.Series
 	area    animation.Series

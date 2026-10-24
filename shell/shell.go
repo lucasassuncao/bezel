@@ -75,6 +75,9 @@ type Config struct {
 	// Transition, when set, is the effect played over the panes as the user
 	// changes tab, given the tab left and the tab shown. SlideTabs is one.
 	Transition func(from, to int) effect.Effect
+	// FocusFade, when set, carries the focused border's colour from the pane
+	// ChangePane leaves to the one it focuses over that long.
+	FocusFade time.Duration
 	// Clipboard is what Copy writes to; nil means the system clipboard.
 	Clipboard func(string) error
 }
@@ -104,6 +107,7 @@ type Shell struct {
 	present  map[string]bool // leaves the last View was given
 	actions  []Action        // what the app set with SetActions
 	trans    effect.Effect   // the Transition playing over the panes, if any
+	glow     focusGlow       // the focus colour on its way between panes, if any
 }
 
 // New is a shell over cfg, focused on the first leaf of the focus ring. It

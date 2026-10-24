@@ -33,7 +33,7 @@ Enter
 Type ".\animation.exe"
 Enter
 Wait+Screen /every animation/
-Tab@600ms 2
+Tab@600ms 1
 Wait+Screen /steps 6/
 Sleep 600ms
 Show

@@ -28,7 +28,7 @@ The packages at the root are the ones every app touches: `shell` to embed, `them
 
 ## component/
 
-What an app creates and draws inside a pane: `list`, `paginator`, `tree`, `table`, `viewport`, `browser`, `form`, `input`, `textbox`, `cursor`, `progress`, `spinner`, `timer`, `stopwatch`, `chart` and `icon`, and the two that print into a terminal instead of taking it over, `inline` and `themebrowser`.
+What an app creates and draws inside a pane: `list`, `paginator`, `tree`, `table`, `viewport`, `browser`, `accordion`, `form`, `input`, `textbox`, `cursor`, `progress`, `spinner`, `timer`, `stopwatch`, `chart`, `icon` and `toast`, and the two that print into a terminal instead of taking it over, `inline` and `themebrowser`.
 
 A component imports the foundation and, where it is made of others, other components: `form` holds `input`s, `inline` draws a `progress` bar, `themebrowser` is a `table`. It never imports the frame, so any of them works in a pane, in a dialog or in a program without a shell. `component/` is a folder, not a package: each component is its own package, `component/list` imported as `list`.
 
@@ -55,7 +55,7 @@ Plumbing more than one folder needs and no app should depend on. Go lets only th
 
 | Package | What it holds | Who uses it |
 |---|---|---|
-| `frames` | the frame message, the run a timed motion keeps, the motion switches read from the environment | `animation`, `effect` |
+| `frames` | the frame message, the run a timed motion keeps, the motion switches read from the environment | `animation`, `effect`, `shell`, and the components that move: `list`, `accordion`, `toast` |
 | `cells` | a drawn block read back into styled cells, and the canvas they are put into | `effect`, `animation/scene` |
 | `noise` | the hash randomness is drawn from, the same for the same frame | `effect`, `animation/text`, `animation/scene` |
 | `hue` | colours turned round the HSL wheel | `effect`, `animation/text` |
@@ -78,7 +78,7 @@ A change that needs an arrow pointing up, a component that imports `overlay` or 
 
 ## examples/, docs/ and scripts/
 
-- **`examples/`**: one small program per package, in the same groups as the code: `frame/` for the packages at the root, `component/` for the components, and `animation/`, one gallery with a tab per family of animations and effects. `app/` is a small app built from several of them, which [EXAMPLE.md](EXAMPLE.md) explains step by step. Only code lives here.
+- **`examples/`**: one small program per package, in the same groups as the code: `frame/` for the packages at the root, `component/` for the components, and a gallery for each package that moves, a tab per family: `animation/` for the values, `animation/text/` and `animation/scene/` beside it, and `effect/` for the effects. `app/` is a small app built from several of them, which [EXAMPLE.md](EXAMPLE.md) explains step by step. Only code lives here.
 - **`docs/recordings/`**: what the examples look like running. Each GIF sits beside the `.tape` that records it, named after its example and grouped as `examples/` is: `component/list.tape` records `examples/component/list`. [Recording](COMPONENTS.md#recording) is how the tapes are run.
 - **`docs/`**: the guides. [FRAME.md](FRAME.md) is how the frame fits together, [THEME.md](THEME.md) the colours, [COMPONENTS.md](COMPONENTS.md) walks every package's example, [EFFECTS.md](EFFECTS.md) and [ANIMATIONS.md](ANIMATIONS.md) their packages, [CONVENTIONS.md](CONVENTIONS.md) the rules inside a package, and this page the layout. Each package's own `README.md`, next to its code, is generated from its doc comments by `make docs`.
 - **`scripts/`**: `make/` holds the Makefile's includes, one per concern (tools, docs, tests, security, release), and `bash/` and `pwsh/` the scripts they call, the same script twice so `make` works on Windows and on Unix alike.

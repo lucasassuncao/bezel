@@ -14,6 +14,7 @@ Package chart draws numbers in cells: Area and Spark a run of them over time, th
 
 - [func Area\(values \[\]float64, top float64, width, height int, th theme.Resolved, opts ...Option\) string](<#Area>)
 - [func Bars\(bars \[\]Bar, top float64, width int, th theme.Resolved, opts ...Option\) string](<#Bars>)
+- [func Donut\(value, total float64, size int, th theme.Resolved\) string](<#Donut>)
 - [func Heat\(values \[\]\[\]float64, top float64, th theme.Resolved\) string](<#Heat>)
 - [func Spark\(values \[\]float64, top float64, width int, th theme.Resolved, opts ...Option\) string](<#Spark>)
 - [type Bar](<#Bar>)
@@ -38,6 +39,15 @@ func Bars(bars []Bar, top float64, width int, th theme.Resolved, opts ...Option)
 ```
 
 Bars is one row per bar, width cells wide: the labels in a column, each bar scaled so top fills it, its edge cut to an eighth, and its text right\-aligned at the end. A long label is cut before the bars give up any room.
+
+<a name="Donut"></a>
+## func [Donut](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/donut.go#L16>)
+
+```go
+func Donut(value, total float64, size int, th theme.Resolved) string
+```
+
+Donut is a ring size rows tall and twice as wide, filled clockwise from the top by value's share of total, with the share in its middle: a quota, a disk, a goal. Animate value with a Float to sweep it in.
 
 <a name="Heat"></a>
 ## func [Heat](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/heat.go#L12>)

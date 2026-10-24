@@ -20,6 +20,7 @@ type Drop struct {
 	from, to float64
 	gravity  float64    // cells a second squared
 	bounce   float64    // the share of its speed the floor gives back
+	t        float64    // seconds since it let go
 	run      frames.Run // its frames only; the motion is solved from the time
 }
 
@@ -98,7 +99,8 @@ func (d Drop) Advance(now time.Time) (Drop, bool) {
 		return d, true
 	}
 	d.run, _ = d.run.Advance(now)
-	pos, settled := d.at(frames.Paced(now.Sub(d.run.Start)).Seconds())
+	d.t = frames.Paced(now.Sub(d.run.Start)).Seconds()
+	pos, settled := d.at(d.t)
 	d.Cur = pos
 	if settled {
 		d.run = frames.Run{}

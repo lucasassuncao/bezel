@@ -125,12 +125,14 @@ go run ./examples/app
 - [`viewport`](component/viewport): scrollable text, wrapped or panned, with line numbers and search highlights.
 - [`cursor`](component/cursor): a caret that blinks, stays or hides, for fields of your own.
 - [`browser`](component/browser): a list on the left, the selected item's detail on the right.
+- [`accordion`](component/accordion): sections that open and close onto their text, sliding.
 - [`progress`](component/progress): `Bar`, `Line`, `Smooth`, `Meter` and `Stepper`, each one row.
 - [`spinner`](component/spinner): twelve spinners and your own frames, each ticking on its own.
 - [`timer`](component/timer): a countdown that says when time is up.
 - [`stopwatch`](component/stopwatch): time counted up, paused and reset.
 - [`chart`](component/chart): `Area` and `Spark` charts of a run of numbers, and labelled `Bars` side by side.
 - [`icon`](component/icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
+- [`toast`](component/toast): notices that slide into a corner, stack and leave on their own.
 - [`inline`](component/inline): a yes/no question and a progress bar for CLIs that print logs.
 - [`themebrowser`](component/themebrowser): the preset table behind a `--list-themes` flag.
 

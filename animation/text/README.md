@@ -12,6 +12,16 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
 
 ## Index
 
+- [func Big\(s string\) string](<#Big>)
+- [type Burn](<#Burn>)
+  - [func NewBurn\(text string, dur time.Duration\) Burn](<#NewBurn>)
+  - [func \(b Burn\) Active\(\) bool](<#Burn.Active>)
+  - [func \(b Burn\) Advance\(now time.Time\) \(Burn, bool\)](<#Burn.Advance>)
+  - [func \(b Burn\) FrameAt\(at time.Time\) animation.FrameMsg](<#Burn.FrameAt>)
+  - [func \(b Burn\) Tick\(\) tea.Cmd](<#Burn.Tick>)
+  - [func \(b Burn\) Update\(msg tea.Msg\) \(Burn, tea.Cmd\)](<#Burn.Update>)
+  - [func \(b Burn\) View\(\) string](<#Burn.View>)
+  - [func \(b Burn\) WithDelay\(d time.Duration\) Burn](<#Burn.WithDelay>)
 - [type Caret](<#Caret>)
   - [func NewCaret\(glyph string, period time.Duration\) Caret](<#NewCaret>)
   - [func \(c Caret\) Active\(\) bool](<#Caret.Active>)
@@ -37,6 +47,25 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(e Ellipsis\) Tick\(\) tea.Cmd](<#Ellipsis.Tick>)
   - [func \(e Ellipsis\) Update\(msg tea.Msg\) \(Ellipsis, tea.Cmd\)](<#Ellipsis.Update>)
   - [func \(e Ellipsis\) View\(\) string](<#Ellipsis.View>)
+- [type Fall](<#Fall>)
+  - [func NewFall\(text string, rows int, dur time.Duration\) Fall](<#NewFall>)
+  - [func \(f Fall\) Active\(\) bool](<#Fall.Active>)
+  - [func \(f Fall\) Advance\(now time.Time\) \(Fall, bool\)](<#Fall.Advance>)
+  - [func \(f Fall\) FrameAt\(at time.Time\) animation.FrameMsg](<#Fall.FrameAt>)
+  - [func \(f Fall\) Tick\(\) tea.Cmd](<#Fall.Tick>)
+  - [func \(f Fall\) Update\(msg tea.Msg\) \(Fall, tea.Cmd\)](<#Fall.Update>)
+  - [func \(f Fall\) View\(\) string](<#Fall.View>)
+  - [func \(f Fall\) WithDelay\(d time.Duration\) Fall](<#Fall.WithDelay>)
+- [type Flip](<#Flip>)
+  - [func NewFlip\(from, to string, dur time.Duration\) Flip](<#NewFlip>)
+  - [func \(f Flip\) Active\(\) bool](<#Flip.Active>)
+  - [func \(f Flip\) Advance\(now time.Time\) \(Flip, bool\)](<#Flip.Advance>)
+  - [func \(f Flip\) FrameAt\(at time.Time\) animation.FrameMsg](<#Flip.FrameAt>)
+  - [func \(f Flip\) Tick\(\) tea.Cmd](<#Flip.Tick>)
+  - [func \(f Flip\) To\(next string\) \(Flip, tea.Cmd\)](<#Flip.To>)
+  - [func \(f Flip\) Update\(msg tea.Msg\) \(Flip, tea.Cmd\)](<#Flip.Update>)
+  - [func \(f Flip\) View\(\) string](<#Flip.View>)
+  - [func \(f Flip\) WithDelay\(d time.Duration\) Flip](<#Flip.WithDelay>)
 - [type Gradient](<#Gradient>)
   - [func NewGradient\(text string, colors \[\]color.Color, dur time.Duration\) Gradient](<#NewGradient>)
   - [func \(g Gradient\) Active\(\) bool](<#Gradient.Active>)
@@ -68,6 +97,25 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(m Marquee\) Update\(msg tea.Msg\) \(Marquee, tea.Cmd\)](<#Marquee.Update>)
   - [func \(m Marquee\) View\(\) string](<#Marquee.View>)
   - [func \(m Marquee\) WithEvery\(d time.Duration\) Marquee](<#Marquee.WithEvery>)
+- [type Morph](<#Morph>)
+  - [func NewMorph\(from, to string, dur time.Duration\) Morph](<#NewMorph>)
+  - [func \(m Morph\) Active\(\) bool](<#Morph.Active>)
+  - [func \(m Morph\) Advance\(now time.Time\) \(Morph, bool\)](<#Morph.Advance>)
+  - [func \(m Morph\) FrameAt\(at time.Time\) animation.FrameMsg](<#Morph.FrameAt>)
+  - [func \(m Morph\) Tick\(\) tea.Cmd](<#Morph.Tick>)
+  - [func \(m Morph\) To\(next string\) \(Morph, tea.Cmd\)](<#Morph.To>)
+  - [func \(m Morph\) Update\(msg tea.Msg\) \(Morph, tea.Cmd\)](<#Morph.Update>)
+  - [func \(m Morph\) View\(\) string](<#Morph.View>)
+  - [func \(m Morph\) WithDelay\(d time.Duration\) Morph](<#Morph.WithDelay>)
+- [type Neon](<#Neon>)
+  - [func NewNeon\(text string, on, off color.Color\) Neon](<#NewNeon>)
+  - [func \(n Neon\) Active\(\) bool](<#Neon.Active>)
+  - [func \(n Neon\) Advance\(now time.Time\) \(Neon, bool\)](<#Neon.Advance>)
+  - [func \(n Neon\) FrameAt\(at time.Time\) animation.FrameMsg](<#Neon.FrameAt>)
+  - [func \(n Neon\) Tick\(\) tea.Cmd](<#Neon.Tick>)
+  - [func \(n Neon\) Update\(msg tea.Msg\) \(Neon, tea.Cmd\)](<#Neon.Update>)
+  - [func \(n Neon\) View\(\) string](<#Neon.View>)
+  - [func \(n Neon\) WithSeed\(seed uint64\) Neon](<#Neon.WithSeed>)
 - [type Odometer](<#Odometer>)
   - [func NewOdometer\(from, to int, dur time.Duration\) Odometer](<#NewOdometer>)
   - [func \(o Odometer\) Active\(\) bool](<#Odometer.Active>)
@@ -130,6 +178,17 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(s Shimmer\) WithDelay\(d time.Duration\) Shimmer](<#Shimmer.WithDelay>)
   - [func \(s Shimmer\) WithRepeat\(n int\) Shimmer](<#Shimmer.WithRepeat>)
   - [func \(s Shimmer\) WithYoyo\(\) Shimmer](<#Shimmer.WithYoyo>)
+- [type Stream](<#Stream>)
+  - [func NewStream\(perChar time.Duration\) Stream](<#NewStream>)
+  - [func \(s Stream\) Active\(\) bool](<#Stream.Active>)
+  - [func \(s Stream\) Advance\(now time.Time\) \(Stream, bool\)](<#Stream.Advance>)
+  - [func \(s Stream\) Behind\(\) int](<#Stream.Behind>)
+  - [func \(s Stream\) FrameAt\(at time.Time\) animation.FrameMsg](<#Stream.FrameAt>)
+  - [func \(s Stream\) Push\(text string\) \(Stream, tea.Cmd\)](<#Stream.Push>)
+  - [func \(s Stream\) Skip\(\) Stream](<#Stream.Skip>)
+  - [func \(s Stream\) Tick\(\) tea.Cmd](<#Stream.Tick>)
+  - [func \(s Stream\) Update\(msg tea.Msg\) \(Stream, tea.Cmd\)](<#Stream.Update>)
+  - [func \(s Stream\) View\(\) string](<#Stream.View>)
 - [type Strike](<#Strike>)
   - [func NewStrike\(text string, dur time.Duration\) Strike](<#NewStrike>)
   - [func \(s Strike\) Active\(\) bool](<#Strike.Active>)
@@ -162,6 +221,17 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(w Typewriter\) WithDelay\(d time.Duration\) Typewriter](<#Typewriter.WithDelay>)
   - [func \(w Typewriter\) WithRepeat\(n int\) Typewriter](<#Typewriter.WithRepeat>)
   - [func \(w Typewriter\) WithYoyo\(\) Typewriter](<#Typewriter.WithYoyo>)
+- [type Typist](<#Typist>)
+  - [func NewTypist\(text string, perChar time.Duration\) Typist](<#NewTypist>)
+  - [func \(t Typist\) Active\(\) bool](<#Typist.Active>)
+  - [func \(t Typist\) Advance\(now time.Time\) \(Typist, bool\)](<#Typist.Advance>)
+  - [func \(t Typist\) FrameAt\(at time.Time\) animation.FrameMsg](<#Typist.FrameAt>)
+  - [func \(t Typist\) Tick\(\) tea.Cmd](<#Typist.Tick>)
+  - [func \(t Typist\) Update\(msg tea.Msg\) \(Typist, tea.Cmd\)](<#Typist.Update>)
+  - [func \(t Typist\) View\(\) string](<#Typist.View>)
+  - [func \(t Typist\) WithDelay\(d time.Duration\) Typist](<#Typist.WithDelay>)
+  - [func \(t Typist\) WithSeed\(seed uint64\) Typist](<#Typist.WithSeed>)
+  - [func \(t Typist\) WithTypos\(rate float64\) Typist](<#Typist.WithTypos>)
 - [type Wave](<#Wave>)
   - [func NewWave\(text string, amp int, dur time.Duration\) Wave](<#NewWave>)
   - [func \(w Wave\) Active\(\) bool](<#Wave.Active>)
@@ -172,6 +242,98 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(w Wave\) View\(\) string](<#Wave.View>)
   - [func \(w Wave\) WithRepeat\(n int\) Wave](<#Wave.WithRepeat>)
 
+
+<a name="Big"></a>
+## func [Big](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/big.go#L41>)
+
+```go
+func Big(s string) string
+```
+
+Big draws s in capitals, in a block font three rows tall and three columns a letter: a countdown or a score read from across the room. What the font lacks is blank, and every row is as wide, so effects work on it.
+
+<a name="Burn"></a>
+## type [Burn](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/burn.go#L35-L39>)
+
+Burn sets text alight from the left, unevenly, each letter flaring through the colours of a flame and falling to ash before it is gone: something deleted for good, a message that self\-destructs. Still, it is born gone.
+
+```go
+type Burn struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewBurn"></a>
+### func [NewBurn](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/burn.go#L42>)
+
+```go
+func NewBurn(text string, dur time.Duration) Burn
+```
+
+NewBurn burns text away over dur.
+
+<a name="Burn.Active"></a>
+### func \(Burn\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/burn.go#L79>)
+
+```go
+func (b Burn) Active() bool
+```
+
+Active reports whether anything is still burning.
+
+<a name="Burn.Advance"></a>
+### func \(Burn\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/burn.go#L97>)
+
+```go
+func (b Burn) Advance(now time.Time) (Burn, bool)
+```
+
+Advance is b at now, and whether it is gone.
+
+<a name="Burn.FrameAt"></a>
+### func \(Burn\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/burn.go#L85>)
+
+```go
+func (b Burn) FrameAt(at time.Time) animation.FrameMsg
+```
+
+FrameAt is b's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Burn.Tick"></a>
+### func \(Burn\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/burn.go#L82>)
+
+```go
+func (b Burn) Tick() tea.Cmd
+```
+
+Tick is the command for b's next frame, nil once it is gone.
+
+<a name="Burn.Update"></a>
+### func \(Burn\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/burn.go#L88>)
+
+```go
+func (b Burn) Update(msg tea.Msg) (Burn, tea.Cmd)
+```
+
+Update burns on its own frames and asks for the next until it is gone.
+
+<a name="Burn.View"></a>
+### func \(Burn\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/burn.go#L59>)
+
+```go
+func (b Burn) View() string
+```
+
+View is the text burning, its width kept: blanks where letters are gone.
+
+<a name="Burn.WithDelay"></a>
+### func \(Burn\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/burn.go#L106>)
+
+```go
+func (b Burn) WithDelay(d time.Duration) Burn
+```
+
+WithDelay holds the text whole for d after the first frame.
 
 <a name="Caret"></a>
 ## type [Caret](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/caret.go#L16-L20>)
@@ -403,6 +565,181 @@ func (e Ellipsis) View() string
 ```
 
 View is the dots shown so far, padded to the full width.
+
+<a name="Fall"></a>
+## type [Fall](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/fall.go#L25-L30>)
+
+Fall drops the letters of a word from above, each letting go at its own moment, and lands them in place with a bounce: a title that arrives, a word that piles up out of nothing. Still, it is born landed.
+
+```go
+type Fall struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewFall"></a>
+### func [NewFall](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/fall.go#L33>)
+
+```go
+func NewFall(text string, rows int, dur time.Duration) Fall
+```
+
+NewFall drops text from rows rows above its line over dur.
+
+<a name="Fall.Active"></a>
+### func \(Fall\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/fall.go#L79>)
+
+```go
+func (f Fall) Active() bool
+```
+
+Active reports whether any letter is still falling.
+
+<a name="Fall.Advance"></a>
+### func \(Fall\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/fall.go#L97>)
+
+```go
+func (f Fall) Advance(now time.Time) (Fall, bool)
+```
+
+Advance is f at now, and whether every letter landed.
+
+<a name="Fall.FrameAt"></a>
+### func \(Fall\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/fall.go#L85>)
+
+```go
+func (f Fall) FrameAt(at time.Time) animation.FrameMsg
+```
+
+FrameAt is f's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Fall.Tick"></a>
+### func \(Fall\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/fall.go#L82>)
+
+```go
+func (f Fall) Tick() tea.Cmd
+```
+
+Tick is the command for f's next frame, nil once every letter landed.
+
+<a name="Fall.Update"></a>
+### func \(Fall\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/fall.go#L88>)
+
+```go
+func (f Fall) Update(msg tea.Msg) (Fall, tea.Cmd)
+```
+
+Update drops on its own frames and asks for the next until every letter lands.
+
+<a name="Fall.View"></a>
+### func \(Fall\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/fall.go#L58>)
+
+```go
+func (f Fall) View() string
+```
+
+View is rows\+1 lines as wide as the text, each letter on the row it has fallen to; the last line is where they land.
+
+<a name="Fall.WithDelay"></a>
+### func \(Fall\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/fall.go#L106>)
+
+```go
+func (f Fall) WithDelay(d time.Duration) Fall
+```
+
+WithDelay holds every letter up for d after the first frame.
+
+<a name="Flip"></a>
+## type [Flip](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L26-L31>)
+
+Flip turns over each letter that changes, left to right, like the cards of a scoreboard: a score, a status word, a clock that changes in place. The letters that stay the same do not move.
+
+```go
+type Flip struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewFlip"></a>
+### func [NewFlip](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L34>)
+
+```go
+func NewFlip(from, to string, dur time.Duration) Flip
+```
+
+NewFlip turns from into to over dur.
+
+<a name="Flip.Active"></a>
+### func \(Flip\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L86>)
+
+```go
+func (f Flip) Active() bool
+```
+
+Active reports whether any letter is still turning.
+
+<a name="Flip.Advance"></a>
+### func \(Flip\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L104>)
+
+```go
+func (f Flip) Advance(now time.Time) (Flip, bool)
+```
+
+Advance is f at now, and whether every letter landed.
+
+<a name="Flip.FrameAt"></a>
+### func \(Flip\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L92>)
+
+```go
+func (f Flip) FrameAt(at time.Time) animation.FrameMsg
+```
+
+FrameAt is f's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Flip.Tick"></a>
+### func \(Flip\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L89>)
+
+```go
+func (f Flip) Tick() tea.Cmd
+```
+
+Tick is the command for f's next frame, nil once every letter landed.
+
+<a name="Flip.To"></a>
+### func \(Flip\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L54>)
+
+```go
+func (f Flip) To(next string) (Flip, tea.Cmd)
+```
+
+To flips on from the text f is heading for to next, over the same duration.
+
+<a name="Flip.Update"></a>
+### func \(Flip\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L95>)
+
+```go
+func (f Flip) Update(msg tea.Msg) (Flip, tea.Cmd)
+```
+
+Update turns on its own frames and asks for the next until every letter lands.
+
+<a name="Flip.View"></a>
+### func \(Flip\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L60>)
+
+```go
+func (f Flip) View() string
+```
+
+View is the text with each changing letter at its point in the turn.
+
+<a name="Flip.WithDelay"></a>
+### func \(Flip\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/flip.go#L113>)
+
+```go
+func (f Flip) WithDelay(d time.Duration) Flip
+```
+
+WithDelay holds the old text for d after the first frame.
 
 <a name="Gradient"></a>
 ## type [Gradient](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/gradient.go#L20-L25>)
@@ -688,6 +1025,181 @@ func (m Marquee) WithEvery(d time.Duration) Marquee
 ```
 
 WithEvery steps the text once every d instead of every 120ms.
+
+<a name="Morph"></a>
+## type [Morph](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L25-L33>)
+
+Morph turns one text into another, taking out the letters the new one lacks and then putting in the ones it adds, keeping what the two share: "saving…" becomes "saved" without a flash of nothing between.
+
+```go
+type Morph struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewMorph"></a>
+### func [NewMorph](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L36>)
+
+```go
+func NewMorph(from, to string, dur time.Duration) Morph
+```
+
+NewMorph turns from into to over dur.
+
+<a name="Morph.Active"></a>
+### func \(Morph\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L132>)
+
+```go
+func (m Morph) Active() bool
+```
+
+Active reports whether m is still changing.
+
+<a name="Morph.Advance"></a>
+### func \(Morph\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L150>)
+
+```go
+func (m Morph) Advance(now time.Time) (Morph, bool)
+```
+
+Advance is m at now, and whether it landed.
+
+<a name="Morph.FrameAt"></a>
+### func \(Morph\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L138>)
+
+```go
+func (m Morph) FrameAt(at time.Time) animation.FrameMsg
+```
+
+FrameAt is m's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Morph.Tick"></a>
+### func \(Morph\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L135>)
+
+```go
+func (m Morph) Tick() tea.Cmd
+```
+
+Tick is the command for m's next frame, nil once it landed.
+
+<a name="Morph.To"></a>
+### func \(Morph\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L57>)
+
+```go
+func (m Morph) To(next string) (Morph, tea.Cmd)
+```
+
+To morphs on from the text m is heading for to next, over the same duration.
+
+<a name="Morph.Update"></a>
+### func \(Morph\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L141>)
+
+```go
+func (m Morph) Update(msg tea.Msg) (Morph, tea.Cmd)
+```
+
+Update changes on its own frames and asks for the next until it lands.
+
+<a name="Morph.View"></a>
+### func \(Morph\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L98>)
+
+```go
+func (m Morph) View() string
+```
+
+View is the text between the two: the removals going first, right to left, then the additions, left to right.
+
+<a name="Morph.WithDelay"></a>
+### func \(Morph\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/morph.go#L159>)
+
+```go
+func (m Morph) WithDelay(d time.Duration) Morph
+```
+
+WithDelay holds the old text for d after the first frame.
+
+<a name="Neon"></a>
+## type [Neon](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/neon.go#L24-L31>)
+
+Neon lights text like a neon sign: steady, but now and then the whole sign stutters, and one weak letter flickers more often than the rest. The same seed flickers the same way every time; Still, it never flickers.
+
+```go
+type Neon struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewNeon"></a>
+### func [NewNeon](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/neon.go#L34>)
+
+```go
+func NewNeon(text string, on, off color.Color) Neon
+```
+
+NewNeon lights text in on, dropping towards off when it flickers.
+
+<a name="Neon.Active"></a>
+### func \(Neon\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/neon.go#L75>)
+
+```go
+func (n Neon) Active() bool
+```
+
+Active reports whether the sign is still flickering.
+
+<a name="Neon.Advance"></a>
+### func \(Neon\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/neon.go#L96>)
+
+```go
+func (n Neon) Advance(now time.Time) (Neon, bool)
+```
+
+Advance is n at now; a sign never ends on its own, so done is false while it lives.
+
+<a name="Neon.FrameAt"></a>
+### func \(Neon\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/neon.go#L81>)
+
+```go
+func (n Neon) FrameAt(at time.Time) animation.FrameMsg
+```
+
+FrameAt is n's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Neon.Tick"></a>
+### func \(Neon\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/neon.go#L78>)
+
+```go
+func (n Neon) Tick() tea.Cmd
+```
+
+Tick is the command for n's next frame, nil once it stopped.
+
+<a name="Neon.Update"></a>
+### func \(Neon\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/neon.go#L84>)
+
+```go
+func (n Neon) Update(msg tea.Msg) (Neon, tea.Cmd)
+```
+
+Update flickers on its own frames and asks for the next while it lives.
+
+<a name="Neon.View"></a>
+### func \(Neon\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/neon.go#L66>)
+
+```go
+func (n Neon) View() string
+```
+
+View is the text, each letter in its brightness now.
+
+<a name="Neon.WithSeed"></a>
+### func \(Neon\) [WithSeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/neon.go#L41>)
+
+```go
+func (n Neon) WithSeed(seed uint64) Neon
+```
+
+WithSeed flickers another way, with another weak letter.
 
 <a name="Odometer"></a>
 ## type [Odometer](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/odometer.go#L17-L23>)
@@ -1259,6 +1771,107 @@ func (s Shimmer) WithYoyo() Shimmer
 
 WithYoyo sends every other sweep back from the right.
 
+<a name="Stream"></a>
+## type [Stream](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L22-L30>)
+
+Stream shows text that arrives in pieces at a steady pace, however the pieces come: an answer streamed from a model, a log tailed in bursts. It speeds up when it falls far behind, so what arrived is never long unseen.
+
+```go
+type Stream struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewStream"></a>
+### func [NewStream](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L34>)
+
+```go
+func NewStream(perChar time.Duration) Stream
+```
+
+NewStream reveals what it is pushed at one grapheme per perChar, 10ms when perChar is not positive.
+
+<a name="Stream.Active"></a>
+### func \(Stream\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L74>)
+
+```go
+func (s Stream) Active() bool
+```
+
+Active reports whether s is still revealing.
+
+<a name="Stream.Advance"></a>
+### func \(Stream\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L101>)
+
+```go
+func (s Stream) Advance(now time.Time) (Stream, bool)
+```
+
+Advance is s at now, and whether it caught up.
+
+<a name="Stream.Behind"></a>
+### func \(Stream\) [Behind](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L71>)
+
+```go
+func (s Stream) Behind() int
+```
+
+Behind is how many graphemes have arrived but are not shown yet.
+
+<a name="Stream.FrameAt"></a>
+### func \(Stream\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L85>)
+
+```go
+func (s Stream) FrameAt(at time.Time) animation.FrameMsg
+```
+
+FrameAt is s's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Stream.Push"></a>
+### func \(Stream\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L43>)
+
+```go
+func (s Stream) Push(text string) (Stream, tea.Cmd)
+```
+
+Push adds text to the end and starts revealing it if the stream had caught up. With motion Still it shows at once.
+
+<a name="Stream.Skip"></a>
+### func \(Stream\) [Skip](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L61>)
+
+```go
+func (s Stream) Skip() Stream
+```
+
+Skip shows everything pushed so far at once.
+
+<a name="Stream.Tick"></a>
+### func \(Stream\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L77>)
+
+```go
+func (s Stream) Tick() tea.Cmd
+```
+
+Tick is the command for s's next frame, nil once it caught up.
+
+<a name="Stream.Update"></a>
+### func \(Stream\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L88>)
+
+```go
+func (s Stream) Update(msg tea.Msg) (Stream, tea.Cmd)
+```
+
+Update reveals on its own frames and asks for the next until it caught up.
+
+<a name="Stream.View"></a>
+### func \(Stream\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L68>)
+
+```go
+func (s Stream) View() string
+```
+
+View is the text revealed so far.
+
 <a name="Strike"></a>
 ## type [Strike](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/strike.go#L20-L25>)
 
@@ -1552,6 +2165,107 @@ func (w Typewriter) WithYoyo() Typewriter
 ```
 
 WithYoyo erases w on every other run, as if typed backwards.
+
+<a name="Typist"></a>
+## type [Typist](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L36-L44>)
+
+Typist types text the way a person does: unevenly, slower after a word or a full stop, now and then hitting the key beside the right one and taking it back. The same text and seed type the same way every time.
+
+```go
+type Typist struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewTypist"></a>
+### func [NewTypist](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L48>)
+
+```go
+func NewTypist(text string, perChar time.Duration) Typist
+```
+
+NewTypist types text at about one grapheme per perChar, with a typo in roughly one letter of every twenty; a perChar of 0 shows it at once.
+
+<a name="Typist.Active"></a>
+### func \(Typist\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L116>)
+
+```go
+func (t Typist) Active() bool
+```
+
+Active reports whether t is still typing.
+
+<a name="Typist.Advance"></a>
+### func \(Typist\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L139>)
+
+```go
+func (t Typist) Advance(now time.Time) (Typist, bool)
+```
+
+Advance is t at now, and whether it is done.
+
+<a name="Typist.FrameAt"></a>
+### func \(Typist\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L122>)
+
+```go
+func (t Typist) FrameAt(at time.Time) animation.FrameMsg
+```
+
+FrameAt is t's frame for at, for a test or a host that delivers frames itself.
+
+<a name="Typist.Tick"></a>
+### func \(Typist\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L119>)
+
+```go
+func (t Typist) Tick() tea.Cmd
+```
+
+Tick is the command for t's next frame, nil once it is done.
+
+<a name="Typist.Update"></a>
+### func \(Typist\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L125>)
+
+```go
+func (t Typist) Update(msg tea.Msg) (Typist, tea.Cmd)
+```
+
+Update types on its own frames and asks for the next until it is done.
+
+<a name="Typist.View"></a>
+### func \(Typist\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L113>)
+
+```go
+func (t Typist) View() string
+```
+
+View is the text as typed so far, typos and all.
+
+<a name="Typist.WithDelay"></a>
+### func \(Typist\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L159>)
+
+```go
+func (t Typist) WithDelay(d time.Duration) Typist
+```
+
+WithDelay holds t empty for d after its first frame.
+
+<a name="Typist.WithSeed"></a>
+### func \(Typist\) [WithSeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L60>)
+
+```go
+func (t Typist) WithSeed(seed uint64) Typist
+```
+
+WithSeed types the same text another way.
+
+<a name="Typist.WithTypos"></a>
+### func \(Typist\) [WithTypos](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/typist.go#L54>)
+
+```go
+func (t Typist) WithTypos(rate float64) Typist
+```
+
+WithTypos sets the share of letters typed wrong first, 0 for none.
 
 <a name="Wave"></a>
 ## type [Wave](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/wave.go#L22-L27>)

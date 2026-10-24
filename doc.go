@@ -45,6 +45,8 @@
 //     wrapped or panned sideways, with a gutter and search highlights.
 //   - [github.com/lucasassuncao/bezel/component/browser]: a pick-from-a-list
 //     screen, labels left and the selected item's detail right.
+//   - [github.com/lucasassuncao/bezel/component/accordion]: sections that open
+//     and close onto their text, sliding.
 //   - [github.com/lucasassuncao/bezel/component/form]: Input, Select, Checkbox,
 //     Radio, Toggle and Button, stacked in a Form that moves focus with tab.
 //   - [github.com/lucasassuncao/bezel/component/input]: a one-line text field
@@ -65,6 +67,8 @@
 //     heat charts of a run of numbers.
 //   - [github.com/lucasassuncao/bezel/component/icon]: one set of state marks,
 //     Unicode or ASCII, in the theme's colours.
+//   - [github.com/lucasassuncao/bezel/component/toast]: notices that slide into
+//     a corner, stack and leave on their own.
 //   - [github.com/lucasassuncao/bezel/component/inline]: yes/no questions and
 //     progress bars for CLIs that print logs, without taking the screen.
 //   - [github.com/lucasassuncao/bezel/component/themebrowser]: an inline table

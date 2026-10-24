@@ -8,7 +8,7 @@ import (
 )
 
 func TestTheDataTabDrawsEveryChart(t *testing.T) {
-	m, out := onTab(t, 9)
+	m, out := onTab(t, 4)
 	t.Log("\n" + out)
 	for _, want := range []string{"bars", "cpu", "spark", "area", "gauge", "heat", "▲"} {
 		require.Contains(t, out, want)

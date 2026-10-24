@@ -74,7 +74,7 @@ What a pane shows: rows with a cursor, a tree, a table, pages of items, a long t
 
 Source: [`examples/component/list/main.go`](../examples/component/list/main.go)
 
-Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included.
+Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included. `WithMotion` makes the cursor glide from row to row, a row that arrives light up and one that leaves fade where it was; `Update` still returns no command, so the app calls `Tick` after it and hands the frames to `Animate`.
 
 ![list](recordings/component/list.gif)
 
@@ -117,6 +117,14 @@ Source: [`examples/component/browser/main.go`](../examples/component/browser/mai
 Recipe names on the left, the selected recipe on the right. `tab` moves the keys to the recipe so it scrolls, and back.
 
 ![browser](recordings/component/browser.gif)
+
+### Accordion
+
+Source: [`examples/component/accordion/main.go`](../examples/component/accordion/main.go)
+
+A column of questions, each a heading that opens onto its answer, sliding rather than jumping. The arrows move between headings and `enter` or `space` opens and closes the one under the cursor; a section closing half way closes from where it is.
+
+![accordion](recordings/component/accordion.gif)
 
 ## Input
 
@@ -190,6 +198,14 @@ Every state mark in both sets, then a list of packages and a source chain drawn 
 
 ![icon](recordings/component/icon.gif)
 
+### Toast
+
+Source: [`examples/component/toast/main.go`](../examples/component/toast/main.go)
+
+Notices that slide into the top right corner, stack with the newest on top, and leave on their own after three seconds, each edged in the colour of its kind. `Over(screen, th)` draws them on top of whatever the shell drew. `s`, `c`, `w` and `e` push one of each kind.
+
+![toast](recordings/component/toast.gif)
+
 ## Outside a full screen
 
 For a CLI that prints logs rather than takes the screen, and for the tests that drive a model.
@@ -218,7 +234,7 @@ No recording: this one is a test. A counter, and the test that drives it with th
 
 ## Recording
 
-The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the two that print into the terminal rather than take it over, `inline` and `themebrowser`, run behind a `clear` so their command line never shows. The animation gallery has a tape per tab. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
+The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the two that print into the terminal rather than take it over, `inline` and `themebrowser`, run behind a `clear` so their command line never shows. The galleries, of animation, text, scenes and effects, have a tape per tab. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
 
 ```sh
 vhs docs/recordings/component/list.tape

@@ -24,7 +24,7 @@ type (
 	rubberMsg struct{} // b: pull the rubber, or let it go
 )
 
-// physics is the ninth tab. The pendulum and the orbit go on their own ticks;
+// physics is the sixth tab. The pendulum and the orbit go on their own ticks;
 // the drop, the flock and the rubber run on the gallery's clock.
 type physics struct {
 	drop   animation.Drop

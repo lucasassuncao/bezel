@@ -173,36 +173,14 @@ func TestTheArrowsMoveBothSprings(t *testing.T) {
 	require.Equal(t, 2*nudge, m.(model).bouncy.Int())
 }
 
-func TestFadeTypeAndShakeLandAndStop(t *testing.T) {
+func TestTheFadeLandsAndStops(t *testing.T) {
 	var m tea.Model = newModel()
 	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
-	for _, k := range []string{"f", "t", "s"} {
-		m = press(t, m, k)
-	}
-	mid := m.(model)
-	require.True(t, mid.fade.Active() && mid.typed.Active() && mid.shake.Active())
-	require.Equal(t, "", mid.typed.View(), "the headline starts empty")
-
+	m = press(t, m, "f")
+	require.True(t, m.(model).fade.Active())
 	m, out := clockFor(t, m, time.Unix(1000, 0))
-	require.Contains(t, out, headline)
 	require.Contains(t, out, saved)
-	require.Equal(t, 0, m.(model).shake.Offset())
-}
-
-// The marquee keeps its own ticks: it moves with the shared clock stopped.
-func TestTheMarqueeStepsOnItsOwnTicks(t *testing.T) {
-	var m tea.Model = newModel()
-	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
-	m, _ = m.Update(startMsg{})
-	mm := m.(model)
-	mm.clock = mm.clock.Stop()
-	m = mm
-	before := m.(model).marquee.View()
-
-	at := time.Unix(1000, 0)
-	m, _ = frame(t, m, m.(model).marquee.FrameAt(at))
-	m, _ = frame(t, m, m.(model).marquee.FrameAt(at.Add(time.Second)))
-	require.NotEqual(t, before, m.(model).marquee.View())
+	require.False(t, m.(model).fade.Active())
 }
 
 // TestMain clears the motion switches, so a CI with TERM=dumb still animates.
@@ -253,12 +231,10 @@ func TestAStillGalleryLandsAtOnce(t *testing.T) {
 	var m tea.Model = newModel()
 	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
 	m, _ = m.Update(startMsg{})
-	m = press(t, m, "t")
+	m = press(t, m, "f")
 	m, out := frame(t, m, m.(model).clock.FrameAt(time.Unix(1000, 0)))
 	require.Contains(t, out, "12,345 files")
-	require.Contains(t, out, headline)
 	require.Contains(t, out, "motion off")
-	require.False(t, m.(model).marquee.Active())
 	require.False(t, m.(model).clock.Running())
 }
 

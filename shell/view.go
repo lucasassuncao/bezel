@@ -171,6 +171,9 @@ func (s Shell) paneCanvas(panes map[string]Pane, body layout.Rect) string {
 		if name == s.Focus() {
 			st = s.cfg.Theme.PanelFocused
 		}
+		if c := s.glowColor(name); c != nil {
+			st.Border = st.Border.Foreground(c)
+		}
 		if p.Accent != nil {
 			st.Border = st.Border.Foreground(p.Accent)
 		}

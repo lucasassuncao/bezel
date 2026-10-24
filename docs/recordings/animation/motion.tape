@@ -33,7 +33,7 @@ Enter
 Type ".\anim-motion.exe"
 Enter
 Wait+Screen /every animation/
-Tab@600ms 8
+Tab@600ms 3
 Wait+Screen /rubber/
 Sleep 1s
 Show

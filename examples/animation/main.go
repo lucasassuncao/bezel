@@ -1,5 +1,6 @@
-// Animation: every kind the animation package has, a tab for each family. The timed
-// ones share one Clock; the looping ones and the hints pane keep their own.
+// Animation: every kind the animation package has, a tab for each family. Its
+// text and scenes have galleries of their own beside this one, and the effects
+// one in examples/effect. The timed ones share one Clock.
 package main
 
 import (
@@ -13,7 +14,6 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/animation"
-	"github.com/lucasassuncao/bezel/animation/text"
 	"github.com/lucasassuncao/bezel/component/progress"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
@@ -34,20 +34,13 @@ const (
 	stagger = 120 * time.Millisecond // between one block starting and the next
 )
 
-const (
-	saved    = "✓ saved"
-	headline = "Copying 1,204 files to the backup drive…"
-	longPath = "~/Downloads/Media/Images/wallhaven-2026/landscapes/aurora-over-the-fjord.png"
-	password = "[ password: •••••• ]"
-)
+const saved = "✓ saved"
 
 type (
 	startMsg  struct{}
 	toggleMsg struct{}
 	replayMsg struct{}
 	fadeMsg   struct{}
-	typeMsg   struct{}
-	shakeMsg  struct{}
 	pulseMsg  struct{}
 )
 
@@ -75,27 +68,21 @@ var eases = []struct {
 type model struct {
 	sh    shell.Shell
 	th    theme.Resolved
-	clock animation.Clock // drives everything below it but the marquee and the hints
+	clock animation.Clock // drives everything but the pendulum, the orbit and the hints
 
 	bars           []animation.Tween
 	steady, bouncy animation.Spring
 	smooth         animation.Float
 	count          animation.Tween
 	fade           animation.Fade
-	typed          text.Typewriter
-	shake          text.Shake
 	pulse          animation.Fade
 	cascade        []animation.Tween
-	marquee        text.Marquee
-	fx             effects // the second tab's
-	cv             curves  // the third tab's
-	dr             drawing // the fourth tab's
-	tx             texts
-	lt             lights
-	sc             scenes
-	sw             swaps
+	cv             curves // the second tab's
+	mv             moves  // the third tab's
 	ph             physics
 	dt             datas
+	fl             flows
+	pp             pops
 
 	open   bool
 	tween  animation.Tween // the hints pane's height, on its own frames
@@ -122,43 +109,15 @@ func newModel() model {
 				shell.Custom("r", "replay", shell.Send(replayMsg{})),
 				shell.Custom("←/→", "spring", nil, shell.DisplayOnly()),
 				shell.Custom("f", "fade", shell.Send(fadeMsg{})),
-				shell.Custom("t", "type", shell.Send(typeMsg{})),
-				shell.Custom("s", "shake", shell.Send(shakeMsg{})),
 				shell.Custom("p", "pulse", shell.Send(pulseMsg{})),
-			}},
-			page{"effects", []shell.Action{
-				shell.Custom("x", "scramble", shell.Send(scrambleMsg{})),
-				shell.Custom("o", "odometer", shell.Send(odometerMsg{})),
-				shell.Custom("m", "move", shell.Send(moveMsg{})),
 			}},
 			page{"curves", []shell.Action{
 				shell.Custom("r", "race", shell.Send(curvesMsg{})),
 				shell.Custom("i", "in/out", shell.Send(turnMsg{})),
 			}},
-			page{"draw", []shell.Action{
-				shell.Custom("e", "effect", shell.Send(effectMsg{})),
-				shell.Custom("p", "pattern", shell.Send(patternMsg{})),
-				shell.Custom("r", "again", shell.Send(againMsg{})),
-			}},
-			page{"text", []shell.Action{
-				shell.Custom("d", "decrypt", shell.Send(decryptMsg{})),
-				shell.Custom("t", "ticker", shell.Send(tickerMsg{})),
-				shell.Custom("l", "highlight", shell.Send(markMsg{})),
-				shell.Custom("k", "strike", shell.Send(strikeMsg{})),
-				shell.Custom("c", "copy", shell.Send(copyMsg{})),
-			}},
-			page{"light", []shell.Action{
-				shell.Custom("e", "light", shell.Send(lightMsg{})),
-				shell.Custom("r", "again", shell.Send(shineMsg{})),
-				shell.Custom("f", "diff", shell.Send(diffMsg{})),
-				shell.Custom("u", "undo", shell.Send(undoMsg{})),
-			}},
-			page{"scene", []shell.Action{
-				shell.Custom("n", "next scene", shell.Send(sceneMsg{})),
-			}},
-			page{"swap", []shell.Action{
-				shell.Custom("n", "next", shell.Send(swapMsg{})),
-				shell.Custom("r", "back", shell.Send(againSwap{})),
+			page{"move", []shell.Action{
+				shell.Custom("m", "points", shell.Send(moveMsg{})),
+				shell.Custom("p", "path", shell.Send(routeMsg{})),
 			}},
 			page{"motion", []shell.Action{
 				shell.Custom("d", "drop", shell.Send(dropMsg{})),
@@ -171,6 +130,15 @@ func newModel() model {
 				shell.Custom("n", "gauge", shell.Send(gaugeMsg{})),
 				shell.Custom("w", "warm", shell.Send(warmMsg{})),
 			}},
+			page{"flow", []shell.Action{
+				shell.Custom("r", "replay", shell.Send(flowMsg{})),
+			}},
+			page{"pop", []shell.Action{
+				shell.Custom("x", "burst", shell.Send(burstMsg{})),
+				shell.Custom("o", "donut", shell.Send(sweepMsg{})),
+				shell.Custom("v", "race", shell.Send(rankMsg{})),
+				shell.Custom("d", "squash", shell.Send(squashMsg{})),
+			}},
 		},
 		Actions: []shell.Action{
 			shell.ChangeTab(),
@@ -182,22 +150,17 @@ func newModel() model {
 	return model{
 		sh: sh, th: th, clock: animation.NewClock(),
 		steady: animation.NewSpring(0), bouncy: animation.NewSpring(0).WithDamping(0.3),
-		fade:    animation.NewFade(muted, muted, 0),
-		typed:   text.NewTypewriter(headline, 0),
-		shake:   text.NewShake(3, 0),
-		pulse:   animation.NewFade(muted, muted, 0),
-		marquee: text.NewMarquee(longPath, 30),
-		fx:      newEffects(th),
-		tx:      newTexts(th),
-		lt:      newLights(th),
-		sc:      newScenes(th),
-		sw:      newSwaps(),
-		ph:      newPhysics(),
-		dt:      newDatas(),
+		fade:  animation.NewFade(muted, muted, 0),
+		pulse: animation.NewFade(muted, muted, 0),
+		mv:    newMoves(),
+		ph:    newPhysics(),
+		dt:    newDatas(),
+		fl:    newFlows(),
+		pp:    newPops(),
 	}
 }
 
-// Init starts the race and the marquee as soon as the program runs.
+// Init starts the race as soon as the program runs.
 func (m model) Init() tea.Cmd { return func() tea.Msg { return startMsg{} } }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -206,56 +169,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, handled, cmd = m.sh.Update(msg); handled {
 		return m, cmd
 	}
-	if next, cmd, ok := m.familyKey(msg); ok {
-		return next.run(cmd)
+	if next, ok := m.familyKey(msg); ok {
+		return next.run(nil)
 	}
 	switch msg := msg.(type) {
 	case startMsg:
-		var fxCmd, txCmd, scCmd, phCmd tea.Cmd
-		m.marquee, cmd = m.marquee.Start()
-		m.fx, fxCmd = m.fx.start()
-		m.tx, txCmd = m.tx.start()
-		m.sc, scCmd = m.sc.start()
-		m.ph, phCmd = m.ph.start()
+		m.ph, cmd = m.ph.start()
+		m.fl = m.fl.again()
 		m.cv = m.cv.race()
-		m.dr = m.dr.again(m.th)
-		m.lt = m.lt.diff(m.th)
 		m.dt = m.dt.replay()
-		return m.replay().run(tea.Batch(cmd, fxCmd, txCmd, scCmd, phCmd))
-	case effectMsg:
-		m.dr = m.dr.nextEffect(m.th)
-		return m.run(nil)
-	case patternMsg:
-		m.dr = m.dr.nextPattern(m.th)
-		return m.run(nil)
-	case againMsg:
-		m.dr = m.dr.again(m.th)
-		return m.run(nil)
-	case curvesMsg:
-		m.cv = m.cv.race()
-		return m.run(nil)
-	case turnMsg:
-		m.cv = m.cv.next()
-		return m.run(nil)
-	case scrambleMsg:
-		m.fx = m.fx.decode()
-		return m.run(nil)
-	case odometerMsg:
-		m.fx = m.fx.roll()
-		return m.run(nil)
-	case moveMsg:
-		m.fx = m.fx.travel()
-		return m.run(nil)
+		return m.replay().run(cmd)
 	case replayMsg:
 		return m.replay().run(nil)
 	case fadeMsg:
 		m.fade = animation.NewFade(m.th.Accent.GetForeground(), m.th.Muted.GetForeground(), 1500*time.Millisecond)
-		return m.run(nil)
-	case typeMsg:
-		m.typed = text.NewTypewriter(headline, 35*time.Millisecond)
-		return m.run(nil)
-	case shakeMsg:
-		m.shake = text.NewShake(3, 450*time.Millisecond)
 		return m.run(nil)
 	case pulseMsg:
 		if m.pulse.Active() {
@@ -296,6 +223,48 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// familyKey acts on the keys of every tab but the first, and reports whether
+// msg was one of them.
+func (m model) familyKey(msg tea.Msg) (model, bool) {
+	switch msg.(type) {
+	case curvesMsg:
+		m.cv = m.cv.race()
+	case turnMsg:
+		m.cv = m.cv.next()
+	case moveMsg:
+		m.mv = m.mv.travel()
+	case routeMsg:
+		m.mv = m.mv.route()
+	case dropMsg:
+		m.ph = m.ph.dropAgain()
+	case flockMsg:
+		m.ph = m.ph.fly()
+	case rubberMsg:
+		m.ph = m.ph.stretch()
+	case growMsg:
+		m.dt = m.dt.replay()
+	case pushMsg:
+		m.dt = m.dt.feed()
+	case gaugeMsg:
+		m.dt = m.dt.read()
+	case warmMsg:
+		m.dt = m.dt.warmUp()
+	case flowMsg:
+		m.fl = m.fl.again()
+	case burstMsg:
+		m.pp = m.pp.pop()
+	case rankMsg:
+		m.pp = m.pp.rank()
+	case sweepMsg:
+		m.pp = m.pp.sweep()
+	case squashMsg:
+		m.pp = m.pp.dropBall()
+	default:
+		return m, false
+	}
+	return m, true
+}
+
 // replay sets the bars, the smooth bar and the counter off again.
 func (m model) replay() model {
 	m.bars = make([]animation.Tween, len(eases))
@@ -318,18 +287,14 @@ func (m model) run(cmd tea.Cmd) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmd, tick)
 }
 
-// frame hands a frame to whoever owns it: the hints tween and the marquee
-// take their own, and the clock's moves everything else to its time.
+// frame hands a frame to whoever owns it: the hints tween, the pendulum and
+// the orbit take their own, and the clock's moves everything else to its time.
 func (m model) frame(msg animation.FrameMsg) (tea.Model, tea.Cmd) {
-	var slideCmd, marqueeCmd, fxCmd, txCmd, scCmd, phCmd, clockCmd tea.Cmd
+	var slideCmd, phCmd, clockCmd tea.Cmd
 	if m.tween, slideCmd = m.tween.Update(msg); m.tween.Cur != m.height {
 		m.height = m.tween.Cur
 		m.sh = m.sh.SetLayout(shape(m.height))
 	}
-	m.marquee, marqueeCmd = m.marquee.Update(msg)
-	m.fx, fxCmd = m.fx.update(msg)
-	m.tx, txCmd = m.tx.update(msg)
-	m.sc, scCmd = m.sc.update(msg)
 	m.ph, phCmd = m.ph.update(msg)
 	var at time.Time
 	var ok bool
@@ -341,7 +306,7 @@ func (m model) frame(msg animation.FrameMsg) (tea.Model, tea.Cmd) {
 			m.clock = m.clock.Stop()
 		}
 	}
-	return m, tea.Batch(slideCmd, marqueeCmd, fxCmd, txCmd, scCmd, phCmd, clockCmd)
+	return m, tea.Batch(slideCmd, phCmd, clockCmd)
 }
 
 // advance moves every animation on the shared clock to at.
@@ -354,20 +319,16 @@ func (m model) advance(at time.Time) model {
 	m.smooth, _ = m.smooth.Advance(at)
 	m.count, _ = m.count.Advance(at)
 	m.fade, _ = m.fade.Advance(at)
-	m.typed, _ = m.typed.Advance(at)
-	m.shake, _ = m.shake.Advance(at)
 	m.pulse, _ = m.pulse.Advance(at)
 	for i := range m.cascade {
 		m.cascade[i], _ = m.cascade[i].Advance(at)
 	}
-	m.fx = m.fx.advance(at)
 	m.cv = m.cv.advance(at)
-	m.dr = m.dr.advance(at)
-	m.tx = m.tx.advance(at)
-	m.lt = m.lt.advance(at)
-	m.sw = m.sw.advance(at)
+	m.mv = m.mv.advance(at)
 	m.ph = m.ph.advance(at)
 	m.dt = m.dt.advance(at)
+	m.fl = m.fl.advance(at)
+	m.pp = m.pp.advance(at)
 	return m
 }
 
@@ -379,37 +340,31 @@ func (m model) moving() bool {
 		}
 	}
 	return m.steady.Active() || m.bouncy.Active() || m.smooth.Active() || m.count.Active() ||
-		m.fade.Active() || m.typed.Active() || m.shake.Active() || m.pulse.Active() || m.fx.moving() || m.cv.moving() || m.dr.moving() ||
-		m.tx.moving() || m.lt.moving() || m.sw.moving() || m.ph.moving() || m.dt.moving()
+		m.fade.Active() || m.pulse.Active() || m.cv.moving() || m.mv.moving() ||
+		m.ph.moving() || m.dt.moving() || m.fl.moving() || m.pp.moving()
 }
 
 func (m model) View() tea.View {
 	v := tea.NewView(m.sh.View(map[string]shell.Pane{
-		"main": {Title: "every animation", Right: still(), Body: func(r layout.Rect) string {
+		"main": {Title: "every animation", Right: still(), Body: func(layout.Rect) string {
 			switch m.sh.ActiveTab() {
 			case 1:
-				return m.fx.rows(m.th, m.label)
-			case 2:
 				return m.cv.rows(m.th, m.label)
+			case 2:
+				return m.mv.rows(m.th, m.label)
 			case 3:
-				return m.dr.rows(m.th, m.label)
-			case 4:
-				return m.tx.rows(m.th, m.label)
-			case 5:
-				return m.lt.rows(m.th, m.label)
-			case 6:
-				return m.sc.rows(m.th, m.label, r.W, r.H)
-			case 7:
-				return m.sw.rows(m.th, m.label)
-			case 8:
 				return m.ph.rows(m.th, m.label)
-			case 9:
+			case 4:
 				return m.dt.rows(m.th, m.label)
+			case 5:
+				return m.fl.rows(m.th, m.label)
+			case 6:
+				return m.pp.rows(m.th, m.label)
 			}
 			return m.gallery()
 		}},
 		"hints": {Title: "hints", Body: func(layout.Rect) string {
-			return "This pane slides on a Tween of its own.\nThe marquee steps on its own ticks too;\neverything else shares one Clock."
+			return "This pane slides on a Tween of its own.\nThe pendulum and the orbit keep their own\nticks; everything else shares one Clock."
 		}},
 	}))
 	v.AltScreen = true
@@ -438,9 +393,6 @@ func (m model) gallery() string {
 		label("float", "sub-cell")+progress.Smooth(int(m.smooth.Cur*1000), 1000, track, m.th),
 		label("count-up", "ease out")+m.th.Bold.Render(thousands(m.count.Cur)+" files"),
 		label("fade", "accent→muted")+lipgloss.NewStyle().Foreground(m.fade.Color()).Render(saved),
-		label("typewriter", "35ms a char")+m.th.Bold.Render(m.typed.View()),
-		label("marquee", "30 cells")+m.th.Muted.Render("[")+m.marquee.View()+m.th.Muted.Render("]"),
-		label("shake", "3 cells")+m.th.Danger.Render(m.shake.View(password)),
 		"",
 		label("pulse", "yoyo forever")+lipgloss.NewStyle().Foreground(m.pulse.Color()).Render("● waiting for the server"),
 		label("cascade", "120ms apart")+m.blocks(),
@@ -501,53 +453,4 @@ func still() string {
 // label is a row's kind and variant, in two fixed columns.
 func (m model) label(kind, variant string) string {
 	return m.th.Accent.Render(fmt.Sprintf("%-11s", kind)) + m.th.Muted.Render(fmt.Sprintf("%-14s", variant))
-}
-
-// familyKey acts on the keys of the text, light, scene, swap, motion and data
-// tabs, and reports whether msg was one of them.
-func (m model) familyKey(msg tea.Msg) (model, tea.Cmd, bool) {
-	var cmd tea.Cmd
-	switch msg.(type) {
-	case decryptMsg:
-		m.tx = m.tx.land()
-	case tickerMsg:
-		m.tx = m.tx.move()
-	case markMsg:
-		m.tx = m.tx.remark()
-	case strikeMsg:
-		m.tx = m.tx.cross()
-	case copyMsg:
-		m.tx = m.tx.copied()
-	case lightMsg:
-		m.lt = m.lt.next(m.th)
-	case shineMsg:
-		m.lt = m.lt.again(m.th)
-	case diffMsg:
-		m.lt = m.lt.diff(m.th)
-	case undoMsg:
-		m.lt = m.lt.undo(m.th)
-	case sceneMsg:
-		m.sc, cmd = m.sc.next(m.th)
-	case swapMsg:
-		m.sw = m.sw.next()
-	case againSwap:
-		m.sw = m.sw.again()
-	case dropMsg:
-		m.ph = m.ph.dropAgain()
-	case flockMsg:
-		m.ph = m.ph.fly()
-	case rubberMsg:
-		m.ph = m.ph.stretch()
-	case growMsg:
-		m.dt = m.dt.replay()
-	case pushMsg:
-		m.dt = m.dt.feed()
-	case gaugeMsg:
-		m.dt = m.dt.read()
-	case warmMsg:
-		m.dt = m.dt.warmUp()
-	default:
-		return m, nil, false
-	}
-	return m, cmd, true
 }

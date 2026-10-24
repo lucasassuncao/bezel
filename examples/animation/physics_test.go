@@ -9,7 +9,7 @@ import (
 )
 
 func TestPhysicsSettleOnTheClock(t *testing.T) {
-	m, out := onTab(t, 8)
+	m, out := onTab(t, 3)
 	t.Log("\n" + out)
 	for _, want := range []string{"drop", "pendulum", "orbit", "flock", "rubber", "◉"} {
 		require.Contains(t, out, want)

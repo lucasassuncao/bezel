@@ -19,7 +19,10 @@ Package list is a cursor list with section headings, a scroll indicator and a / 
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
 - [type Model](<#Model>)
   - [func New\[T any\]\(rows \[\]Row\[T\], height int\) Model\[T\]](<#New>)
+  - [func \(m Model\[T\]\) Active\(\) bool](<#Model[T].Active>)
+  - [func \(m Model\[T\]\) Animate\(msg tea.Msg\) \(Model\[T\], tea.Cmd\)](<#Model[T].Animate>)
   - [func \(m Model\[T\]\) Filter\(\) string](<#Model[T].Filter>)
+  - [func \(m Model\[T\]\) FrameAt\(at time.Time\) tea.Msg](<#Model[T].FrameAt>)
   - [func \(m Model\[T\]\) IsFiltering\(\) bool](<#Model[T].IsFiltering>)
   - [func \(m Model\[T\]\) Len\(\) int](<#Model[T].Len>)
   - [func \(m Model\[T\]\) Rows\(\) \[\]Row\[T\]](<#Model[T].Rows>)
@@ -27,15 +30,17 @@ Package list is a cursor list with section headings, a scroll indicator and a / 
   - [func \(m Model\[T\]\) Selected\(\) \*Row\[T\]](<#Model[T].Selected>)
   - [func \(m Model\[T\]\) SetHeight\(h int\) Model\[T\]](<#Model[T].SetHeight>)
   - [func \(m Model\[T\]\) SetRows\(rows \[\]Row\[T\]\) Model\[T\]](<#Model[T].SetRows>)
+  - [func \(m Model\[T\]\) Tick\(\) tea.Cmd](<#Model[T].Tick>)
   - [func \(m Model\[T\]\) Update\(msg tea.KeyPressMsg\) \(Model\[T\], Action\)](<#Model[T].Update>)
   - [func \(m Model\[T\]\) View\(th theme.Resolved\) string](<#Model[T].View>)
   - [func \(m Model\[T\]\) WithKeys\(k Keys\) Model\[T\]](<#Model[T].WithKeys>)
   - [func \(m Model\[T\]\) WithMatch\(match func\(query, label string\) bool\) Model\[T\]](<#Model[T].WithMatch>)
+  - [func \(m Model\[T\]\) WithMotion\(dur time.Duration\) Model\[T\]](<#Model[T].WithMotion>)
 - [type Row](<#Row>)
 
 
 <a name="Contains"></a>
-## func [Contains](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L66>)
+## func [Contains](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L67>)
 
 ```go
 func Contains(query, label string) bool
@@ -44,7 +49,7 @@ func Contains(query, label string) bool
 Contains is the filter's default match: the label holds the query, in any case.
 
 <a name="Prefix"></a>
-## func [Prefix](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L71>)
+## func [Prefix](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L72>)
 
 ```go
 func Prefix(query, label string) bool
@@ -91,7 +96,7 @@ func DefaultKeys() Keys
 DefaultKeys are the arrows, enter, / and esc.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L57-L63>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L57-L64>)
 
 Model is a value: every method returns the new list.
 
@@ -102,7 +107,7 @@ type Model[T any] struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L90>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L91>)
 
 ```go
 func New[T any](rows []Row[T], height int) Model[T]
@@ -110,8 +115,26 @@ func New[T any](rows []Row[T], height int) Model[T]
 
 New builds a list height rows tall with the cursor on the first selectable row.
 
+<a name="Model[T].Active"></a>
+### func \(Model\[T\]\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L101>)
+
+```go
+func (m Model[T]) Active() bool
+```
+
+Active reports whether the list is still moving.
+
+<a name="Model[T].Animate"></a>
+### func \(Model\[T\]\) [Animate](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L112>)
+
+```go
+func (m Model[T]) Animate(msg tea.Msg) (Model[T], tea.Cmd)
+```
+
+Animate moves on the list's own frames and asks for the next until it settles; every other message leaves it alone.
+
 <a name="Model[T].Filter"></a>
-### func \(Model\[T\]\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L119>)
+### func \(Model\[T\]\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L120>)
 
 ```go
 func (m Model[T]) Filter() string
@@ -119,8 +142,17 @@ func (m Model[T]) Filter() string
 
 Filter is the text typed at the / prompt.
 
+<a name="Model[T].FrameAt"></a>
+### func \(Model\[T\]\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L108>)
+
+```go
+func (m Model[T]) FrameAt(at time.Time) tea.Msg
+```
+
+FrameAt is the list's frame for at, for a test that delivers frames itself.
+
 <a name="Model[T].IsFiltering"></a>
-### func \(Model\[T\]\) [IsFiltering](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L116>)
+### func \(Model\[T\]\) [IsFiltering](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L117>)
 
 ```go
 func (m Model[T]) IsFiltering() bool
@@ -129,7 +161,7 @@ func (m Model[T]) IsFiltering() bool
 IsFiltering reports whether the / prompt is open and taking the keys.
 
 <a name="Model[T].Len"></a>
-### func \(Model\[T\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L113>)
+### func \(Model\[T\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L114>)
 
 ```go
 func (m Model[T]) Len() int
@@ -138,7 +170,7 @@ func (m Model[T]) Len() int
 Len is how many rows there are, headings included.
 
 <a name="Model[T].Rows"></a>
-### func \(Model\[T\]\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L110>)
+### func \(Model\[T\]\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L111>)
 
 ```go
 func (m Model[T]) Rows() []Row[T]
@@ -147,7 +179,7 @@ func (m Model[T]) Rows() []Row[T]
 Rows is a copy of every row, headings included.
 
 <a name="Model[T].Scroll"></a>
-### func \(Model\[T\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L123>)
+### func \(Model\[T\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L124>)
 
 ```go
 func (m Model[T]) Scroll() layout.Scroll
@@ -156,7 +188,7 @@ func (m Model[T]) Scroll() layout.Scroll
 Scroll is where the list shows its rows from, for a pane's scrollbar; while filtering, where the matches show from.
 
 <a name="Model[T].Selected"></a>
-### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L162>)
+### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L169>)
 
 ```go
 func (m Model[T]) Selected() *Row[T]
@@ -165,7 +197,7 @@ func (m Model[T]) Selected() *Row[T]
 Selected is the row under the cursor, or nil on a heading or an empty list. While filtering it is the row under the filter cursor.
 
 <a name="Model[T].SetHeight"></a>
-### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L154>)
+### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L161>)
 
 ```go
 func (m Model[T]) SetHeight(h int) Model[T]
@@ -174,7 +206,7 @@ func (m Model[T]) SetHeight(h int) Model[T]
 SetHeight updates the visible row count and re\-clamps the scroll.
 
 <a name="Model[T].SetRows"></a>
-### func \(Model\[T\]\) [SetRows](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L134>)
+### func \(Model\[T\]\) [SetRows](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L135>)
 
 ```go
 func (m Model[T]) SetRows(rows []Row[T]) Model[T]
@@ -182,8 +214,17 @@ func (m Model[T]) SetRows(rows []Row[T]) Model[T]
 
 SetRows replaces the rows, keeping the cursor on the row with the same label when it survives \(at the same index first\), else on the first selectable one.
 
+<a name="Model[T].Tick"></a>
+### func \(Model\[T\]\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L105>)
+
+```go
+func (m Model[T]) Tick() tea.Cmd
+```
+
+Tick is the command for the list's next frame, nil while it is still: call it after Update or SetRows to start what they set moving.
+
 <a name="Model[T].Update"></a>
-### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L180>)
+### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L187>)
 
 ```go
 func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
@@ -192,7 +233,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
 Update handles one key. Keys the list does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L281>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L293>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved) string
@@ -201,7 +242,7 @@ func (m Model[T]) View(th theme.Resolved) string
 View renders the visible rows, or the filter prompt with its matches.
 
 <a name="Model[T].WithKeys"></a>
-### func \(Model\[T\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L104>)
+### func \(Model\[T\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L105>)
 
 ```go
 func (m Model[T]) WithKeys(k Keys) Model[T]
@@ -210,13 +251,22 @@ func (m Model[T]) WithKeys(k Keys) Model[T]
 WithKeys rebinds the list.
 
 <a name="Model[T].WithMatch"></a>
-### func \(Model\[T\]\) [WithMatch](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L98>)
+### func \(Model\[T\]\) [WithMatch](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L99>)
 
 ```go
 func (m Model[T]) WithMatch(match func(query, label string) bool) Model[T]
 ```
 
 WithMatch filters with match, which gets the typed text and each label: Prefix, a fuzzy match of the app's own. nil is Contains again.
+
+<a name="Model[T].WithMotion"></a>
+### func \(Model\[T\]\) [WithMotion](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L35>)
+
+```go
+func (m Model[T]) WithMotion(dur time.Duration) Model[T]
+```
+
+WithMotion makes the list move instead of jump: the cursor glides to its new row, a row that arrives lights up and a row that leaves fades where it was, over dur. Update still returns no command: call Tick after it.
 
 <a name="Row"></a>
 ## type [Row](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L24-L30>)

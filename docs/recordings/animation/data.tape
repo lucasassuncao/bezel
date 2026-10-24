@@ -33,7 +33,7 @@ Enter
 Type ".\anim-data.exe"
 Enter
 Wait+Screen /every animation/
-Tab@600ms 9
+Tab@600ms 4
 Wait+Screen /heat/
 Sleep 1s
 Show

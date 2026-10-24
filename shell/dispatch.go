@@ -48,7 +48,8 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 		from := s.Focus()
 		s = s.nextPane(step).relayout() // so FocusMsg names where focus really lands
 		if to := s.Focus(); to != from {
-			return s, func() tea.Msg { return FocusMsg{From: from, To: to} }
+			s.glow = newGlow(from, s.cfg.FocusFade)
+			return s, tea.Batch(func() tea.Msg { return FocusMsg{From: from, To: to} }, s.glow.run.Tick())
 		}
 		return s, nil
 	}

@@ -27,6 +27,21 @@ func TestTabsMarkTheActiveOne(t *testing.T) {
 	require.Contains(t, ansi.Strip(got), "policies")
 }
 
+func TestTabsScrollToKeepTheActiveOneInSight(t *testing.T) {
+	names := []string{"one", "two", "three", "four", "five", "six", "seven"}
+	last := ansi.Strip(Tabs(24, names, 6, ChromeStyle{}))
+	require.Equal(t, 24, ansi.StringWidth(last))
+	require.Contains(t, last, "seven", "the active tab is never cut off")
+	require.True(t, strings.HasPrefix(last, "‹"), "and the hidden ones are hinted")
+	first := ansi.Strip(Tabs(24, names, 0, ChromeStyle{}))
+	require.True(t, strings.HasPrefix(first, " one"))
+	require.Contains(t, first, "›")
+	mid := ansi.Strip(Tabs(24, names, 3, ChromeStyle{}))
+	require.Contains(t, mid, "four")
+	require.Contains(t, mid, "‹")
+	require.Contains(t, mid, "›")
+}
+
 func TestStatusLineIsExactlyWidth(t *testing.T) {
 	require.Equal(t, 12, ansi.StringWidth(StatusLine(12, "ok", lipgloss.NewStyle())))
 	require.Equal(t, 5, ansi.StringWidth(StatusLine(5, "a long status", lipgloss.NewStyle())))

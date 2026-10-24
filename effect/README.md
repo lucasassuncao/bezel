@@ -28,13 +28,21 @@ Package effect changes a block that is already drawn, cell by cell: fades, disso
   - [func FadeOut\(to color.Color, dur time.Duration\) Effect](<#FadeOut>)
   - [func Failure\(c color.Color\) Effect](<#Failure>)
   - [func Flash\(c color.Color, dur time.Duration\) Effect](<#Flash>)
+  - [func Glitch\(dur time.Duration\) Effect](<#Glitch>)
   - [func Hover\(base, c color.Color, dur time.Duration\) Effect](<#Hover>)
   - [func HueShift\(degrees float64, dur time.Duration\) Effect](<#HueShift>)
   - [func Invert\(dur time.Duration\) Effect](<#Invert>)
+  - [func IrisIn\(dur time.Duration\) Effect](<#IrisIn>)
+  - [func IrisOut\(dur time.Duration\) Effect](<#IrisOut>)
   - [func Melt\(c color.Color, dur time.Duration\) Effect](<#Melt>)
+  - [func Pixelate\(dur time.Duration\) Effect](<#Pixelate>)
+  - [func PowerOff\(glow color.Color, dur time.Duration\) Effect](<#PowerOff>)
+  - [func PowerOn\(glow color.Color, dur time.Duration\) Effect](<#PowerOn>)
   - [func Press\(dur time.Duration\) Effect](<#Press>)
   - [func Pulse\(c color.Color, dur time.Duration\) Effect](<#Pulse>)
   - [func Saturate\(amount float64, dur time.Duration\) Effect](<#Saturate>)
+  - [func Scanlines\(dim color.Color, dur time.Duration\) Effect](<#Scanlines>)
+  - [func Skeleton\(base, glow color.Color, dur time.Duration\) Effect](<#Skeleton>)
   - [func SlideIn\(d Direction, dur time.Duration\) Effect](<#SlideIn>)
   - [func SlideOut\(d Direction, dur time.Duration\) Effect](<#SlideOut>)
   - [func Spotlight\(x, y, w, h int, dim color.Color, dur time.Duration\) Effect](<#Spotlight>)
@@ -42,6 +50,7 @@ Package effect changes a block that is already drawn, cell by cell: fades, disso
   - [func Success\(c color.Color\) Effect](<#Success>)
   - [func SweepIn\(glow color.Color, dur time.Duration\) Effect](<#SweepIn>)
   - [func Tint\(c color.Color, dur time.Duration\) Effect](<#Tint>)
+  - [func Trace\(c color.Color, dur time.Duration\) Effect](<#Trace>)
   - [func Vignette\(dim color.Color, dur time.Duration\) Effect](<#Vignette>)
   - [func \(e Effect\) Active\(\) bool](<#Effect.Active>)
   - [func \(e Effect\) Advance\(now time.Time\) \(Effect, bool\)](<#Effect.Advance>)
@@ -70,11 +79,14 @@ Package effect changes a block that is already drawn, cell by cell: fades, disso
   - [func Sweep\(d Direction\) Pattern](<#Sweep>)
   - [func Wave\(\) Pattern](<#Wave>)
 - [type Transition](<#Transition>)
+  - [func Blinds\(n int, dur time.Duration\) Transition](<#Blinds>)
   - [func Cover\(d Direction, dur time.Duration\) Transition](<#Cover>)
   - [func CrossFade\(dur time.Duration\) Transition](<#CrossFade>)
+  - [func Iris\(dur time.Duration\) Transition](<#Iris>)
   - [func Push\(d Direction, dur time.Duration\) Transition](<#Push>)
   - [func Reveal\(d Direction, dur time.Duration\) Transition](<#Reveal>)
   - [func Shuffle\(dur time.Duration\) Transition](<#Shuffle>)
+  - [func Stack\(d Direction, dur time.Duration\) Transition](<#Stack>)
   - [func Wipe\(p Pattern, dur time.Duration\) Transition](<#Wipe>)
   - [func Zoom\(dur time.Duration\) Transition](<#Zoom>)
   - [func \(t Transition\) Active\(\) bool](<#Transition.Active>)
@@ -118,7 +130,7 @@ const (
 ```
 
 <a name="Effect"></a>
-## type [Effect](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L56-L68>)
+## type [Effect](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L63-L75>)
 
 Effect changes a block that is already drawn, cell by cell: a pane that fades in, a dialog that dissolves, a screen that slides in. Apply it to whatever View drew; it reads the colours back from the escape sequences.
 
@@ -138,7 +150,7 @@ func Attention(c color.Color) Effect
 Attention draws the eye to a block with two pulses of c.
 
 <a name="Coalesce"></a>
-### func [Coalesce](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L97>)
+### func [Coalesce](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L104>)
 
 ```go
 func Coalesce(dur time.Duration) Effect
@@ -156,7 +168,7 @@ func Contrast(factor float64, dur time.Duration) Effect
 Contrast scales every colour's distance from mid grey by factor: above 1 sharper, below 1 washed out, a pane leaving the focus. It stays.
 
 <a name="Dissolve"></a>
-### func [Dissolve](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L94>)
+### func [Dissolve](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L101>)
 
 ```go
 func Dissolve(dur time.Duration) Effect
@@ -174,7 +186,7 @@ func Enter(bg color.Color) Effect
 Enter brings a block in, gathering it out of bg from the middle outward.
 
 <a name="Evolve"></a>
-### func [Evolve](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L121>)
+### func [Evolve](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L128>)
 
 ```go
 func Evolve(dur time.Duration) Effect
@@ -210,7 +222,7 @@ func Explode(dur time.Duration) Effect
 Explode throws the block's cells outward from its middle, each on its own line and pace, until none is left.
 
 <a name="FadeIn"></a>
-### func [FadeIn](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L80>)
+### func [FadeIn](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L87>)
 
 ```go
 func FadeIn(from color.Color, dur time.Duration) Effect
@@ -219,7 +231,7 @@ func FadeIn(from color.Color, dur time.Duration) Effect
 FadeIn raises every cell's colours from from to its own: from the background colour, a block that surfaces.
 
 <a name="FadeOut"></a>
-### func [FadeOut](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L87>)
+### func [FadeOut](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L94>)
 
 ```go
 func FadeOut(to color.Color, dur time.Duration) Effect
@@ -244,6 +256,15 @@ func Flash(c color.Color, dur time.Duration) Effect
 ```
 
 Flash lights the block in c at once and lets the light fade out: a value that changed, a line that arrived.
+
+<a name="Glitch"></a>
+### func [Glitch](<https://github.com/lucasassuncao/bezel/blob/main/effect/retro.go#L26>)
+
+```go
+func Glitch(dur time.Duration) Effect
+```
+
+Glitch tears the block for a moment: rows jump sideways and their colours split, worst halfway, and the block comes back whole. An error, a hack.
 
 <a name="Hover"></a>
 ### func [Hover](<https://github.com/lucasassuncao/bezel/blob/main/effect/light.go#L62>)
@@ -272,6 +293,24 @@ func Invert(dur time.Duration) Effect
 
 Invert swaps the block's text and background for a moment, an alarm.
 
+<a name="IrisIn"></a>
+### func [IrisIn](<https://github.com/lucasassuncao/bezel/blob/main/effect/shape.go#L16>)
+
+```go
+func IrisIn(dur time.Duration) Effect
+```
+
+IrisIn opens the block from a point in its middle, a widening circle showing it: a scene that begins. Reverse closes it to the point.
+
+<a name="IrisOut"></a>
+### func [IrisOut](<https://github.com/lucasassuncao/bezel/blob/main/effect/shape.go#L19>)
+
+```go
+func IrisOut(dur time.Duration) Effect
+```
+
+IrisOut closes the block down to a point in its middle.
+
 <a name="Melt"></a>
 ### func [Melt](<https://github.com/lucasassuncao/bezel/blob/main/effect/light.go#L70>)
 
@@ -280,6 +319,33 @@ func Melt(c color.Color, dur time.Duration) Effect
 ```
 
 Melt lets the cells drip down out of the block one by one, tinted towards c as they fall when c is not nil: a line that leaves, a screen closing.
+
+<a name="Pixelate"></a>
+### func [Pixelate](<https://github.com/lucasassuncao/bezel/blob/main/effect/shape.go#L23>)
+
+```go
+func Pixelate(dur time.Duration) Effect
+```
+
+Pixelate coarsens the block into squares of colour, coarsest halfway, and sharpens it again: a screen being changed, a thing being redacted.
+
+<a name="PowerOff"></a>
+### func [PowerOff](<https://github.com/lucasassuncao/bezel/blob/main/effect/retro.go#L34>)
+
+```go
+func PowerOff(glow color.Color, dur time.Duration) Effect
+```
+
+PowerOff turns the block off like an old tube: it squashes to a glowing line, the line to a dot, and the dot goes out. glow is the line's light.
+
+<a name="PowerOn"></a>
+### func [PowerOn](<https://github.com/lucasassuncao/bezel/blob/main/effect/retro.go#L42>)
+
+```go
+func PowerOn(glow color.Color, dur time.Duration) Effect
+```
+
+PowerOn is PowerOff played backwards: a dot, a line, then the block.
 
 <a name="Press"></a>
 ### func [Press](<https://github.com/lucasassuncao/bezel/blob/main/effect/light.go#L36>)
@@ -308,8 +374,26 @@ func Saturate(amount float64, dur time.Duration) Effect
 
 Saturate scales every coloured cell's saturation by 1\+amount: \-1 drains it to grey, 1 doubles it. The terminal's own colours have none and are left.
 
+<a name="Scanlines"></a>
+### func [Scanlines](<https://github.com/lucasassuncao/bezel/blob/main/effect/retro.go#L46>)
+
+```go
+func Scanlines(dim color.Color, dur time.Duration) Effect
+```
+
+Scanlines darkens every other row towards dim, as the lines of an old screen, and leaves them darkened. Reverse lifts them.
+
+<a name="Skeleton"></a>
+### func [Skeleton](<https://github.com/lucasassuncao/bezel/blob/main/effect/loading.go#L22>)
+
+```go
+func Skeleton(base, glow color.Color, dur time.Duration) Effect
+```
+
+Skeleton draws the block as grey bars where its text would be, with a glow sweeping across them once every dur: the shape of what is still loading. It sweeps until it is no longer applied; WithRepeat gives it an end.
+
 <a name="SlideIn"></a>
-### func [SlideIn](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L107>)
+### func [SlideIn](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L114>)
 
 ```go
 func SlideIn(d Direction, dur time.Duration) Effect
@@ -318,7 +402,7 @@ func SlideIn(d Direction, dur time.Duration) Effect
 SlideIn brings the block in travelling d: Right comes in from the left edge.
 
 <a name="SlideOut"></a>
-### func [SlideOut](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L114>)
+### func [SlideOut](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L121>)
 
 ```go
 func SlideOut(d Direction, dur time.Duration) Effect
@@ -354,7 +438,7 @@ func Success(c color.Color) Effect
 Success acknowledges a block with one wash of c, a green say.
 
 <a name="SweepIn"></a>
-### func [SweepIn](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L100>)
+### func [SweepIn](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L107>)
 
 ```go
 func SweepIn(glow color.Color, dur time.Duration) Effect
@@ -371,6 +455,15 @@ func Tint(c color.Color, dur time.Duration) Effect
 
 Tint washes the block towards c and back again, once: red on an error, green on a save.
 
+<a name="Trace"></a>
+### func [Trace](<https://github.com/lucasassuncao/bezel/blob/main/effect/loading.go#L35>)
+
+```go
+func Trace(c color.Color, dur time.Duration) Effect
+```
+
+Trace runs a light round the block's outer edge once every dur, a short tail fading behind it: a panel at work, quieter than a spinner. It runs until it is no longer applied; WithRepeat gives it an end.
+
 <a name="Vignette"></a>
 ### func [Vignette](<https://github.com/lucasassuncao/bezel/blob/main/effect/light.go#L54>)
 
@@ -381,7 +474,7 @@ func Vignette(dim color.Color, dur time.Duration) Effect
 Vignette darkens the block towards dim the farther a cell is from its middle.
 
 <a name="Effect.Active"></a>
-### func \(Effect\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L337>)
+### func \(Effect\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L352>)
 
 ```go
 func (e Effect) Active() bool
@@ -390,7 +483,7 @@ func (e Effect) Active() bool
 Active reports whether e is still changing the block.
 
 <a name="Effect.Advance"></a>
-### func \(Effect\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L360>)
+### func \(Effect\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L375>)
 
 ```go
 func (e Effect) Advance(now time.Time) (Effect, bool)
@@ -399,7 +492,7 @@ func (e Effect) Advance(now time.Time) (Effect, bool)
 Advance is e at now, and whether it ended.
 
 <a name="Effect.Apply"></a>
-### func \(Effect\) [Apply](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L156>)
+### func \(Effect\) [Apply](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L163>)
 
 ```go
 func (e Effect) Apply(block string) string
@@ -408,7 +501,7 @@ func (e Effect) Apply(block string) string
 Apply is block as this frame shows it, its size kept. Within and OnRows keep the change to their parts of it.
 
 <a name="Effect.FrameAt"></a>
-### func \(Effect\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L343>)
+### func \(Effect\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L358>)
 
 ```go
 func (e Effect) FrameAt(at time.Time) animation.FrameMsg
@@ -417,7 +510,7 @@ func (e Effect) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is e's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Effect.OnRows"></a>
-### func \(Effect\) [OnRows](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L206>)
+### func \(Effect\) [OnRows](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L221>)
 
 ```go
 func (e Effect) OnRows(rows ...int) Effect
@@ -426,7 +519,7 @@ func (e Effect) OnRows(rows ...int) Effect
 OnRows keeps e to whole rows of the block: the lines a diff added, the ones undo restored. Each row turns on its own, as a one\-line block.
 
 <a name="Effect.Owns"></a>
-### func \(Effect\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L370>)
+### func \(Effect\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L385>)
 
 ```go
 func (e Effect) Owns(msg tea.Msg) bool
@@ -435,7 +528,7 @@ func (e Effect) Owns(msg tea.Msg) bool
 Owns reports whether msg is e's current frame, for a host that routes frames to whoever owns them before handing the rest on.
 
 <a name="Effect.Reverse"></a>
-### func \(Effect\) [Reverse](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L215>)
+### func \(Effect\) [Reverse](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L230>)
 
 ```go
 func (e Effect) Reverse() Effect
@@ -444,7 +537,7 @@ func (e Effect) Reverse() Effect
 Reverse plays e backwards: an effect that brings a block in takes it away, a hover lets go.
 
 <a name="Effect.Tick"></a>
-### func \(Effect\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L340>)
+### func \(Effect\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L355>)
 
 ```go
 func (e Effect) Tick() tea.Cmd
@@ -453,7 +546,7 @@ func (e Effect) Tick() tea.Cmd
 Tick is the command for e's next frame, nil once it ended.
 
 <a name="Effect.Update"></a>
-### func \(Effect\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L346>)
+### func \(Effect\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L361>)
 
 ```go
 func (e Effect) Update(msg tea.Msg) (Effect, tea.Cmd)
@@ -462,7 +555,7 @@ func (e Effect) Update(msg tea.Msg) (Effect, tea.Cmd)
 Update advances on its own frames and asks for the next until it ends.
 
 <a name="Effect.WithDelay"></a>
-### func \(Effect\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L137>)
+### func \(Effect\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L144>)
 
 ```go
 func (e Effect) WithDelay(d time.Duration) Effect
@@ -471,7 +564,7 @@ func (e Effect) WithDelay(d time.Duration) Effect
 WithDelay holds e at its start for d after its first frame.
 
 <a name="Effect.WithEase"></a>
-### func \(Effect\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L131>)
+### func \(Effect\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L138>)
 
 ```go
 func (e Effect) WithEase(ease animation.Ease) Effect
@@ -480,7 +573,7 @@ func (e Effect) WithEase(ease animation.Ease) Effect
 WithEase is e following ease instead of EaseInOut.
 
 <a name="Effect.WithPattern"></a>
-### func \(Effect\) [WithPattern](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L125>)
+### func \(Effect\) [WithPattern](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L132>)
 
 ```go
 func (e Effect) WithPattern(p Pattern) Effect
@@ -489,7 +582,7 @@ func (e Effect) WithPattern(p Pattern) Effect
 WithPattern reaches the cells in p's order; nil reaches them all at once. A slide moves the block whole and takes no pattern.
 
 <a name="Effect.WithRepeat"></a>
-### func \(Effect\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L143>)
+### func \(Effect\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L150>)
 
 ```go
 func (e Effect) WithRepeat(n int) Effect
@@ -507,7 +600,7 @@ func (e Effect) WithStrength(k float64) Effect
 WithStrength sets how far a light goes, in \[0,1\]: the share of c a tint, pulse, flash, spotlight or vignette reaches at its height.
 
 <a name="Effect.WithYoyo"></a>
-### func \(Effect\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L149>)
+### func \(Effect\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L156>)
 
 ```go
 func (e Effect) WithYoyo() Effect
@@ -516,7 +609,7 @@ func (e Effect) WithYoyo() Effect
 WithYoyo sends every other run of e back: in, then out again.
 
 <a name="Effect.Within"></a>
-### func \(Effect\) [Within](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L199>)
+### func \(Effect\) [Within](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L214>)
 
 ```go
 func (e Effect) Within(x, y, w, h int) Effect
@@ -615,7 +708,7 @@ func Wave() Pattern
 Wave reaches the cells in a front travelling right whose edge ripples.
 
 <a name="Transition"></a>
-## type [Transition](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L31-L37>)
+## type [Transition](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L34-L41>)
 
 Transition carries a screen from one block to the next: the old one pushed out, covered, faded or wiped away, the new one in its place. Apply it to both blocks every frame; a smaller one is padded to the larger's size.
 
@@ -625,8 +718,17 @@ type Transition struct {
 }
 ```
 
+<a name="Blinds"></a>
+### func [Blinds](<https://github.com/lucasassuncao/bezel/blob/main/effect/swap.go#L22>)
+
+```go
+func Blinds(n int, dur time.Duration) Transition
+```
+
+Blinds turns the screen over in n slats at once, each row of a slat flipping from the old block to the new, top first, like a venetian blind.
+
 <a name="Cover"></a>
-### func [Cover](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L56>)
+### func [Cover](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L60>)
 
 ```go
 func Cover(d Direction, dur time.Duration) Transition
@@ -635,7 +737,7 @@ func Cover(d Direction, dur time.Duration) Transition
 Cover slides the new block in travelling d over the old one, which stays put.
 
 <a name="CrossFade"></a>
-### func [CrossFade](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L71>)
+### func [CrossFade](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L75>)
 
 ```go
 func CrossFade(dur time.Duration) Transition
@@ -643,8 +745,17 @@ func CrossFade(dur time.Duration) Transition
 
 CrossFade blends the old block's colours into the new one's, the text changing over halfway.
 
+<a name="Iris"></a>
+### func [Iris](<https://github.com/lucasassuncao/bezel/blob/main/effect/swap.go#L18>)
+
+```go
+func Iris(dur time.Duration) Transition
+```
+
+Iris closes the old block down to a point in its middle and opens the new one out of it: the end of one scene and the start of the next.
+
 <a name="Push"></a>
-### func [Push](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L49>)
+### func [Push](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L53>)
 
 ```go
 func Push(d Direction, dur time.Duration) Transition
@@ -653,7 +764,7 @@ func Push(d Direction, dur time.Duration) Transition
 Push slides the new block in and the old one out ahead of it, both travelling d, the two side by side halfway.
 
 <a name="Reveal"></a>
-### func [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L63>)
+### func [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L67>)
 
 ```go
 func Reveal(d Direction, dur time.Duration) Transition
@@ -662,7 +773,7 @@ func Reveal(d Direction, dur time.Duration) Transition
 Reveal slides the old block away travelling d, uncovering the new one beneath.
 
 <a name="Shuffle"></a>
-### func [Shuffle](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L86>)
+### func [Shuffle](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L90>)
 
 ```go
 func Shuffle(dur time.Duration) Transition
@@ -670,8 +781,17 @@ func Shuffle(dur time.Duration) Transition
 
 Shuffle scatters the old block's cells and gathers the new one's out of the scatter.
 
+<a name="Stack"></a>
+### func [Stack](<https://github.com/lucasassuncao/bezel/blob/main/effect/swap.go#L30>)
+
+```go
+func Stack(d Direction, dur time.Duration) Transition
+```
+
+Stack lays the new block over the old one travelling d, the old one sinking into the dark beneath it: a screen opened on top of another.
+
 <a name="Wipe"></a>
-### func [Wipe](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L75>)
+### func [Wipe](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L79>)
 
 ```go
 func Wipe(p Pattern, dur time.Duration) Transition
@@ -680,7 +800,7 @@ func Wipe(p Pattern, dur time.Duration) Transition
 Wipe turns each cell from the old block to the new one in p's order: a front, a circle, a spiral.
 
 <a name="Zoom"></a>
-### func [Zoom](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L82>)
+### func [Zoom](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L86>)
 
 ```go
 func Zoom(dur time.Duration) Transition
@@ -689,7 +809,7 @@ func Zoom(dur time.Duration) Transition
 Zoom grows the new block out of the middle of the old one.
 
 <a name="Transition.Active"></a>
-### func \(Transition\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L302>)
+### func \(Transition\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L312>)
 
 ```go
 func (t Transition) Active() bool
@@ -698,7 +818,7 @@ func (t Transition) Active() bool
 Active reports whether t is still moving between the blocks.
 
 <a name="Transition.Advance"></a>
-### func \(Transition\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L326>)
+### func \(Transition\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L336>)
 
 ```go
 func (t Transition) Advance(now time.Time) (Transition, bool)
@@ -707,7 +827,7 @@ func (t Transition) Advance(now time.Time) (Transition, bool)
 Advance is t at now, and whether it ended.
 
 <a name="Transition.Apply"></a>
-### func \(Transition\) [Apply](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L102>)
+### func \(Transition\) [Apply](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L106>)
 
 ```go
 func (t Transition) Apply(from, to string) string
@@ -716,7 +836,7 @@ func (t Transition) Apply(from, to string) string
 Apply is the frame between from and to: all from before the first frame, all to once t ends.
 
 <a name="Transition.FrameAt"></a>
-### func \(Transition\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L308>)
+### func \(Transition\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L318>)
 
 ```go
 func (t Transition) FrameAt(at time.Time) animation.FrameMsg
@@ -725,7 +845,7 @@ func (t Transition) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is t's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Transition.Owns"></a>
-### func \(Transition\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L311>)
+### func \(Transition\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L321>)
 
 ```go
 func (t Transition) Owns(msg tea.Msg) bool
@@ -734,7 +854,7 @@ func (t Transition) Owns(msg tea.Msg) bool
 Owns reports whether msg is t's current frame.
 
 <a name="Transition.Tick"></a>
-### func \(Transition\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L305>)
+### func \(Transition\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L315>)
 
 ```go
 func (t Transition) Tick() tea.Cmd
@@ -743,7 +863,7 @@ func (t Transition) Tick() tea.Cmd
 Tick is the command for t's next frame, nil once it ended.
 
 <a name="Transition.Update"></a>
-### func \(Transition\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L317>)
+### func \(Transition\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L327>)
 
 ```go
 func (t Transition) Update(msg tea.Msg) (Transition, tea.Cmd)
@@ -752,7 +872,7 @@ func (t Transition) Update(msg tea.Msg) (Transition, tea.Cmd)
 Update advances on its own frames and asks for the next until it ends.
 
 <a name="Transition.WithDelay"></a>
-### func \(Transition\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L95>)
+### func \(Transition\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L99>)
 
 ```go
 func (t Transition) WithDelay(d time.Duration) Transition
@@ -761,7 +881,7 @@ func (t Transition) WithDelay(d time.Duration) Transition
 WithDelay holds t on the old block for d after its first frame.
 
 <a name="Transition.WithEase"></a>
-### func \(Transition\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L89>)
+### func \(Transition\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L93>)
 
 ```go
 func (t Transition) WithEase(e animation.Ease) Transition

@@ -1,4 +1,4 @@
-# animation, scene: the scene tab: ambient scenes with a title over them
+# scene: every scene, one at a time, under a title
 #
 # Record from the repository root: vhs docs/recordings/animation/scene.tape
 
@@ -25,15 +25,14 @@ Hide
 Type "Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue"
 Enter
 Wait
-Type "go build -o anim-scene.exe ./examples/animation"
+Type "go build -o anim-scene.exe ./examples/animation/scene"
 Enter
 Wait
 Type "clear"
 Enter
 Type ".\anim-scene.exe"
 Enter
-Wait+Screen /every animation/
-Tab@600ms 6
+Wait+Screen /every scene/
 Wait+Screen /scene/
 Sleep 1s
 Show

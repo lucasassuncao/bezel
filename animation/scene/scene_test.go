@@ -36,6 +36,8 @@ func TestSceneScenesFillTheirSizeAndMove(t *testing.T) {
 	for name, a := range map[string]Scene{
 		"rain": NewRain(white, grey), "snow": NewSnow(white), "confetti": NewConfetti(white, black),
 		"fireworks": NewFireworks(white), "stars": NewStarfield(white), "static": NewStatic(white), "plasma": NewPlasma(black, white),
+		"fire": NewFire(white, grey), "aurora": NewAurora(white, grey), "bubbles": NewBubbles(white), "sea": NewSea(white, grey),
+		"life": NewLife(white),
 	} {
 		first := playedFor(a, 1).View(40, 12)
 		w, h := size(t, first)

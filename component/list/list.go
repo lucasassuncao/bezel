@@ -60,6 +60,7 @@ type Model[T any] struct {
 	keys  Keys
 	find  filterMode
 	match func(query, label string) bool // nil is Contains
+	mo    motion
 }
 
 // Contains is the filter's default match: the label holds the query, in any case.
@@ -132,6 +133,12 @@ func (m Model[T]) Scroll() layout.Scroll {
 // label when it survives (at the same index first), else on the first
 // selectable one.
 func (m Model[T]) SetRows(rows []Row[T]) Model[T] {
+	before, cursor := m.rows, m.win.Cursor
+	return m.setRows(rows).changed(before, cursor)
+}
+
+// setRows is SetRows without the motion.
+func (m Model[T]) setRows(rows []Row[T]) Model[T] {
 	prev, at := "", m.win.Cursor
 	if r := m.Selected(); r != nil {
 		prev = r.Label
@@ -208,8 +215,9 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 		if at >= len(idx) {
 			return m, None
 		}
+		from := m.win.Cursor
 		m.win.Cursor = idx[at]
-		return m.clampScroll(), Chosen
+		return m.start(float64(from)).clampScroll(), Chosen
 	case msg.String() == "backspace" || msg.String() == "ctrl+h":
 		if text := m.find.text; text != "" {
 			_, size := utf8.DecodeLastRuneInString(text)
@@ -251,7 +259,11 @@ func (m Model[T]) filtered() []int {
 
 // move steps the cursor over headings, clamped at the ends.
 func (m Model[T]) move(delta int) Model[T] {
+	from := m.win.Cursor
 	m.win = m.win.Move(delta, len(m.rows), func(i int) bool { return m.rows[i].Section })
+	if m.win.Cursor != from {
+		m = m.start(float64(from))
+	}
 	return m
 }
 
@@ -286,26 +298,40 @@ func (m Model[T]) View(th theme.Resolved) string {
 		return ""
 	}
 	start, end, below := m.win.Bounds(len(m.rows))
+	cursor := m.cursorRow()
 
-	var sb strings.Builder
+	lines := make([]string, 0, end-start)
 	for i := start; i < end; i++ {
-		if i > start {
-			sb.WriteByte('\n')
+		if g, ok := m.ghostLine(i, &th); ok {
+			lines = append(lines, g)
 		}
 		r := m.rows[i]
-		if r.Section {
-			sb.WriteString(th.Section.Render(r.Label))
-		} else {
-			sb.WriteString(renderRow(r, i == m.win.Cursor, &th))
+		switch {
+		case r.Section:
+			lines = append(lines, th.Section.Render(r.Label))
+		case i != cursor && m.arriving(r, &th) != nil:
+			r.Style = m.arriving(r, &th)
+			lines = append(lines, renderRow(r, false, &th))
+		default:
+			lines = append(lines, renderRow(r, i == cursor, &th))
 		}
 	}
+	if g, ok := m.ghostLine(end, &th); ok && below == 0 {
+		lines = append(lines, g)
+	}
+	room := max(end-start, m.win.Height-boolInt(below > 0)) // a ghost never pushes the list past its height
+	lines = lines[:min(len(lines), room)]
 	if below > 0 {
-		if sb.Len() > 0 {
-			sb.WriteByte('\n')
-		}
-		sb.WriteString(moreRow(below, &th))
+		lines = append(lines, moreRow(below, &th))
 	}
-	return sb.String()
+	return strings.Join(lines, "\n")
+}
+
+func boolInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 // viewFilter is the matches in the filter's window, padded to it, then the prompt.

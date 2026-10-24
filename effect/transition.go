@@ -23,6 +23,9 @@ const (
 	wipe
 	zoom
 	shuffle
+	irisSwap
+	blinds
+	stack
 )
 
 // Transition carries a screen from one block to the next: the old one pushed
@@ -32,6 +35,7 @@ type Transition struct {
 	kind    transitionKind
 	dir     Direction
 	pattern Pattern
+	slats   int
 	p       float64 // raw progress: 0 is all from, 1 all to
 	run     frames.Run
 }
@@ -132,6 +136,12 @@ func (t Transition) Apply(from, to string) string {
 		zoomed(cv, a, b, w, h, p)
 	case shuffle:
 		shuffled(cv, a, b, w, h, p)
+	case irisSwap:
+		irised(cv, a, b, w, h, p)
+	case blinds:
+		t.blinded(cv, a, b, h, p)
+	case stack:
+		t.stacked(cv, a, b, w, h, p)
 	}
 	return cv.Grid().String()
 }

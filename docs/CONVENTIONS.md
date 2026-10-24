@@ -20,7 +20,7 @@ A component that draws takes a `theme.Resolved`; loose lipgloss styles reach it 
 | Who calls `View` | Where the theme goes | Packages |
 | --- | --- | --- |
 | bezel, through a fixed interface (`overlay.Overlay`, `form.Field`), or a field that needs the theme before it draws (a caret's blink pace) | the constructor's last parameter | `overlay`, `form`, `palette`, `textbox`, `input`, `cursor` |
-| the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport` |
+| the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport`, `accordion`, `toast` |
 | nobody: it is a plain function | after the data it draws | `progress`, `chart`, `inline`, `icon.Set.Render` |
 | `shell` | `shell.Config.Theme`, replaced with `SetTheme` | `shell` |
 
@@ -42,8 +42,8 @@ The theme sets how everything looks; a component's own styles let an app recolou
 | Shape | Who | Why |
 | --- | --- | --- |
 | `Update(tea.Msg) (T, bool, tea.Cmd)` | `shell.Shell`, `overlay.Stack` | They route: `handled` false means the message is still the app's. |
-| `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model`, `paginator` | They only move a cursor. The `Action` says what a key did (`list.Chosen`, `tree.Expanded`), the app decides what it means, and they never produce a command. |
-| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model`, `cursor.Model`, `spinner.Model`, `timer.Model`, `stopwatch.Model`, `viewport.Model` and the types of `animation`, its subpackages and `effect` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
+| `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model`, `paginator` | They only move a cursor. The `Action` says what a key did (`list.Chosen`, `tree.Expanded`), the app decides what it means, and they never produce a command. A list with motion keeps that shape: `Tick` and `Animate` carry its frames apart from `Update`. |
+| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model`, `cursor.Model`, `spinner.Model`, `timer.Model`, `stopwatch.Model`, `viewport.Model`, `accordion.Model`, `toast.Model` and the types of `animation`, its subpackages and `effect` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
 
 A new component picks the row whose "Why" fits it, not a fourth shape.
 

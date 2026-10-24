@@ -36,6 +36,10 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 			s.trans, cmd = s.trans.Update(m)
 			return s, true, cmd
 		}
+		if run, p, ok, cmd := s.glow.run.Update(m); ok {
+			s.glow.run, s.glow.p = run, p
+			return s, true, cmd
+		}
 
 	case tea.WindowSizeMsg:
 		s.width, s.height = m.Width, m.Height

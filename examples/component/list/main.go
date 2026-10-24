@@ -1,10 +1,11 @@
-// List: rows under section headings, a / filter, and enter showing the
-// payload the chosen row carries.
+// List: rows under section headings, a / filter, enter showing the payload
+// the chosen row carries, and a cursor that glides from row to row.
 package main
 
 import (
 	"fmt"
 	"os"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 
@@ -54,26 +55,27 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, list: list.New(rows(), 0)}
+	return model{sh: sh, th: th, list: list.New(rows(), 0).WithMotion(120 * time.Millisecond)}
 }
 
 func (m model) Init() tea.Cmd { return nil }
 
-// toList hands a key to the list and reads what it did.
-func (m model) toList(key tea.KeyPressMsg) model {
+// toList hands a key to the list, reads what it did, and starts the cursor
+// gliding to where the key moved it.
+func (m model) toList(key tea.KeyPressMsg) (model, tea.Cmd) {
 	var act list.Action
 	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
 	if m.list, act = m.list.Update(key); act == list.Chosen {
 		f := m.list.Selected().Value
 		m.chosen = &f
 	}
-	return m
+	return m, m.list.Tick()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// While filtering every key is text for the filter, q included.
 	if key, ok := msg.(tea.KeyPressMsg); ok && m.list.IsFiltering() {
-		return m.toList(key), nil
+		return m.toList(key)
 	}
 	var handled bool
 	var cmd tea.Cmd
@@ -84,7 +86,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if key.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
-		return m.toList(key), nil
+		return m.toList(key)
+	}
+	var cmd2 tea.Cmd
+	if m.list, cmd2 = m.list.Animate(msg); cmd2 != nil {
+		return m, cmd2
 	}
 	return m, nil
 }

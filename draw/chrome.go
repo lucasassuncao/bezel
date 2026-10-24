@@ -44,7 +44,44 @@ func Tabs(width int, names []string, active int, st ChromeStyle) string {
 			parts[i] = st.Tab.Render(" " + n + " ")
 		}
 	}
-	return Fit(strings.Join(parts, " "), width)
+	all := strings.Join(parts, " ")
+	if ansi.StringWidth(all) <= width || active < 0 || active >= len(parts) {
+		return Fit(all, width)
+	}
+	return Fit(scrolledTabs(parts, active, width, st), width)
+}
+
+// scrolledTabs is as many of parts as fit width around active, with ‹ or ›
+// where tabs are hidden on that side, so the active tab is never cut off.
+func scrolledTabs(parts []string, active, width int, st ChromeStyle) string {
+	lo, hi := active, active+1
+	fits := func(lo, hi int) bool {
+		w := ansi.StringWidth(strings.Join(parts[lo:hi], " "))
+		if lo > 0 {
+			w += 2
+		}
+		if hi < len(parts) {
+			w += 2
+		}
+		return w <= width
+	}
+	for grew := true; grew; {
+		grew = false
+		if hi < len(parts) && fits(lo, hi+1) {
+			hi, grew = hi+1, true
+		}
+		if lo > 0 && fits(lo-1, hi) {
+			lo, grew = lo-1, true
+		}
+	}
+	s := strings.Join(parts[lo:hi], " ")
+	if lo > 0 {
+		s = st.Tab.Render("‹") + " " + s
+	}
+	if hi < len(parts) {
+		s += " " + st.Tab.Render("›")
+	}
+	return s
 }
 
 // Divider is a horizontal rule width cells long, with label set into it after a

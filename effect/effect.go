@@ -48,6 +48,13 @@ const (
 	contrast
 	hover
 	melt
+	glitch
+	powerOff
+	scanlines
+	iris
+	pixelate
+	skeleton
+	trace
 )
 
 // Effect changes a block that is already drawn, cell by cell: a pane that
@@ -183,6 +190,14 @@ func (e Effect) applyGrid(g cells.Grid) cells.Grid {
 		return e.stretch(g, w, h, p)
 	case melt:
 		return e.melt(g, w, h, p)
+	case glitch:
+		return e.glitch(g, w, raw)
+	case powerOff:
+		return e.powerOff(g, w, h, p)
+	case iris:
+		return e.iris(g, w, h, p)
+	case pixelate:
+		return e.pixelate(g, w, h, p)
 	}
 	for y, row := range g {
 		x := 0

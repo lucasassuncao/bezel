@@ -13,10 +13,15 @@ Package scene draws whole scenes from the time alone: rain, snow, confetti, fire
 ## Index
 
 - [type Scene](<#Scene>)
+  - [func NewAurora\(colors ...color.Color\) Scene](<#NewAurora>)
+  - [func NewBubbles\(c color.Color\) Scene](<#NewBubbles>)
   - [func NewConfetti\(colors ...color.Color\) Scene](<#NewConfetti>)
+  - [func NewFire\(hot, cool color.Color\) Scene](<#NewFire>)
   - [func NewFireworks\(colors ...color.Color\) Scene](<#NewFireworks>)
+  - [func NewLife\(c color.Color\) Scene](<#NewLife>)
   - [func NewPlasma\(a, b color.Color\) Scene](<#NewPlasma>)
   - [func NewRain\(head, trail color.Color\) Scene](<#NewRain>)
+  - [func NewSea\(foam, water color.Color\) Scene](<#NewSea>)
   - [func NewSnow\(c color.Color\) Scene](<#NewSnow>)
   - [func NewStarfield\(c color.Color\) Scene](<#NewStarfield>)
   - [func NewStatic\(c color.Color\) Scene](<#NewStatic>)
@@ -30,7 +35,7 @@ Package scene draws whole scenes from the time alone: rain, snow, confetti, fire
 
 
 <a name="Scene"></a>
-## type [Scene](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L32-L37>)
+## type [Scene](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L37-L42>)
 
 Scene plays behind content, or in place of it: rain, snow, stars, fireworks. It is drawn from the time alone, at any size, for as long as it lives; Still, it holds its first frame.
 
@@ -39,6 +44,24 @@ type Scene struct {
     // contains filtered or unexported fields
 }
 ```
+
+<a name="NewAurora"></a>
+### func [NewAurora](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/fire.go#L20>)
+
+```go
+func NewAurora(colors ...color.Color) Scene
+```
+
+NewAurora is curtains of light in colors waving across the top of the sky.
+
+<a name="NewBubbles"></a>
+### func [NewBubbles](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/water.go#L17>)
+
+```go
+func NewBubbles(c color.Color) Scene
+```
+
+NewBubbles is bubbles in c rising from the bottom, swaying and growing, and popping at the top.
 
 <a name="NewConfetti"></a>
 ### func [NewConfetti](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L26>)
@@ -49,6 +72,15 @@ func NewConfetti(colors ...color.Color) Scene
 
 NewConfetti is pieces in colors tumbling down, faster than snow and wider.
 
+<a name="NewFire"></a>
+### func [NewFire](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/fire.go#L17>)
+
+```go
+func NewFire(hot, cool color.Color) Scene
+```
+
+NewFire is flames licking up from the bottom, hot in hot and dying out in cool towards their tips: a campfire screen, a "this is fine".
+
 <a name="NewFireworks"></a>
 ### func [NewFireworks](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L29>)
 
@@ -57,6 +89,15 @@ func NewFireworks(colors ...color.Color) Scene
 ```
 
 NewFireworks is rockets that climb and burst in colors, one after another.
+
+<a name="NewLife"></a>
+### func [NewLife](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/life.go#L19>)
+
+```go
+func NewLife(c color.Color) Scene
+```
+
+NewLife is Conway's Game of Life in c, on a board as large as the scene that wraps at its edges, seeded afresh every twenty seconds.
 
 <a name="NewPlasma"></a>
 ### func [NewPlasma](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/sky.go#L31>)
@@ -75,6 +116,15 @@ func NewRain(head, trail color.Color) Scene
 ```
 
 NewRain is a rain of characters down the columns, each drop's head in head and its trail in trail, fading out behind it.
+
+<a name="NewSea"></a>
+### func [NewSea](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/water.go#L21>)
+
+```go
+func NewSea(foam, water color.Color) Scene
+```
+
+NewSea is waves rolling along the bottom of the screen, foam in foam on their crests and the water in water below.
 
 <a name="NewSnow"></a>
 ### func [NewSnow](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L23>)
@@ -104,7 +154,7 @@ func NewStatic(c color.Color) Scene
 NewStatic is the snow of a television with no signal, in c.
 
 <a name="Scene.Active"></a>
-### func \(Scene\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L103>)
+### func \(Scene\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L118>)
 
 ```go
 func (a Scene) Active() bool
@@ -113,7 +163,7 @@ func (a Scene) Active() bool
 Active reports whether the scene is still playing.
 
 <a name="Scene.Advance"></a>
-### func \(Scene\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L125>)
+### func \(Scene\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L140>)
 
 ```go
 func (a Scene) Advance(now time.Time) (Scene, bool)
@@ -122,7 +172,7 @@ func (a Scene) Advance(now time.Time) (Scene, bool)
 Advance is a at now; a scene never ends on its own, so done is false while it plays.
 
 <a name="Scene.FrameAt"></a>
-### func \(Scene\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L109>)
+### func \(Scene\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L124>)
 
 ```go
 func (a Scene) FrameAt(at time.Time) animation.FrameMsg
@@ -131,7 +181,7 @@ func (a Scene) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is a's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Scene.Tick"></a>
-### func \(Scene\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L106>)
+### func \(Scene\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L121>)
 
 ```go
 func (a Scene) Tick() tea.Cmd
@@ -140,7 +190,7 @@ func (a Scene) Tick() tea.Cmd
 Tick is the command for a's next frame, nil once it stopped.
 
 <a name="Scene.Under"></a>
-### func \(Scene\) [Under](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L57>)
+### func \(Scene\) [Under](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L62>)
 
 ```go
 func (a Scene) Under(block string) string
@@ -149,7 +199,7 @@ func (a Scene) Under(block string) string
 Under is the scene with block on top of it: every cell of block that draws something, a grapheme or a background, hides the scene there.
 
 <a name="Scene.Update"></a>
-### func \(Scene\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L112>)
+### func \(Scene\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L127>)
 
 ```go
 func (a Scene) Update(msg tea.Msg) (Scene, tea.Cmd)
@@ -158,7 +208,7 @@ func (a Scene) Update(msg tea.Msg) (Scene, tea.Cmd)
 Update plays on its own frames and asks for the next while it runs.
 
 <a name="Scene.View"></a>
-### func \(Scene\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L46>)
+### func \(Scene\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L51>)
 
 ```go
 func (a Scene) View(w, h int) string
