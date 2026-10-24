@@ -184,7 +184,7 @@ func (m Marquee) Advance(now time.Time) (Marquee, bool) {
 		m.start = now
 	}
 	cycle := ansi.StringWidth(m.text) + len(marqueeGap)
-	m.offset = int(now.Sub(m.start)/m.every) % cycle
+	m.offset = int(paced(now.Sub(m.start))/m.every) % cycle
 	return m, false
 }
 

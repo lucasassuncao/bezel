@@ -3,6 +3,7 @@ package animation
 import (
 	"image/color"
 	"math"
+	"slices"
 	"strings"
 	"time"
 
@@ -32,19 +33,31 @@ const (
 	stretch
 	hue
 	saturate
+	tint
+	flash
+	invert
+	spotlight
+	vignette
+	contrast
+	hover
+	melt
 )
 
 // Effect changes a block that is already drawn, cell by cell: a pane that
 // fades in, a dialog that dissolves, a screen that slides in. Apply it to
 // whatever View drew; it reads the colours back from the escape sequences.
 type Effect struct {
-	kind    effectKind
-	pattern Pattern // nil reaches every cell at once
-	tint    color.Color
-	dir     Direction
-	amount  float64 // degrees for a hue shift, the change for a saturation
-	p       float64 // raw progress: 0 before the first frame, 1 at the end
-	run     run
+	kind     effectKind
+	pattern  Pattern // nil reaches every cell at once
+	tint     color.Color
+	base     color.Color // a hover's background where a cell has none
+	dir      Direction
+	amount   float64 // degrees for a hue shift, the change for a saturation, a light's strength
+	spot     rect    // the lit part of a spotlight
+	masks    []rect  // the parts of the block it changes; none is all of it
+	reversed bool
+	p        float64 // raw progress: 0 before the first frame, 1 at the end
+	run      run
 }
 
 func newEffect(kind effectKind, pattern Pattern, dur time.Duration) Effect {
@@ -131,29 +144,70 @@ func (e Effect) WithYoyo() Effect {
 	return e
 }
 
-// Apply is block as this frame shows it, its size kept.
+// Apply is block as this frame shows it, its size kept. Within and OnRows
+// keep the change to their parts of it.
 func (e Effect) Apply(block string) string {
 	g := parse(block)
+	if len(e.masks) == 0 {
+		return e.applyGrid(g).String()
+	}
+	for _, r := range e.masks {
+		g = paste(g, e.applyGrid(crop(g, r)), r)
+	}
+	return g.String()
+}
+
+// applyGrid is g as this frame shows it.
+func (e Effect) applyGrid(g grid) grid {
 	w, h := g.width(), len(g)
-	p := e.run.ease.or()(e.p)
+	raw := e.p
+	if e.reversed {
+		raw = 1 - raw
+	}
+	p := e.run.ease.or()(raw)
 	switch e.kind {
 	case slideIn, slideOut:
-		return e.slide(g, w, h, p).String()
+		return e.slide(g, w, h, p)
 	case explode:
-		return e.explode(g, w, h, p).String()
+		return e.explode(g, w, h, p)
 	case expand:
-		return e.expand(g, w, p).String()
+		return e.expand(g, w, p)
 	case stretch:
-		return e.stretch(g, w, h, p).String()
+		return e.stretch(g, w, h, p)
+	case melt:
+		return e.melt(g, w, h, p)
 	}
 	for y, row := range g {
 		x := 0
 		for i, c := range row {
-			row[i] = e.turn(c, e.reach(p, x, y, w, h))
+			row[i] = e.turnAt(c, e.reach(p, x, y, w, h), x, y, w, h)
 			x += c.width
 		}
 	}
-	return g.String()
+	return g
+}
+
+// Within keeps e to the w×h part of the block whose top left is x, y. A w or h
+// of 0 or less runs to the block's right or bottom edge. It may be given again.
+func (e Effect) Within(x, y, w, h int) Effect {
+	e.masks = append(slices.Clone(e.masks), rect{x: x, y: y, w: w, h: h})
+	return e
+}
+
+// OnRows keeps e to whole rows of the block: the lines a diff added, the
+// ones undo restored. Each row turns on its own, as a one-line block.
+func (e Effect) OnRows(rows ...int) Effect {
+	for _, r := range rows {
+		e = e.Within(0, r, 0, 1)
+	}
+	return e
+}
+
+// Reverse plays e backwards: an effect that brings a block in takes it away,
+// a hover lets go.
+func (e Effect) Reverse() Effect {
+	e.reversed = !e.reversed
+	return e
 }
 
 // reach is how far the cell at x, y has turned, in [0,1], with e at p.

@@ -13,6 +13,7 @@ Package progress draws how far along something is: a bar for a count of items, a
 ## Index
 
 - [func Bar\(done, total, width int, th theme.Resolved\) string](<#Bar>)
+- [func Gauge\(value, total float64, width int, th theme.Resolved\) string](<#Gauge>)
 - [func Line\(label string, done, total, width int, th theme.Resolved\) string](<#Line>)
 - [func Meter\(done, total, width int, th theme.Resolved\) string](<#Meter>)
 - [func Smooth\(done, total, width int, th theme.Resolved, opts ...Option\) string](<#Smooth>)
@@ -29,6 +30,15 @@ func Bar(done, total, width int, th theme.Resolved) string
 ```
 
 Bar is a done/total bar width cells wide: filled in the accent colour, the rest muted. A zero total reads as nothing done.
+
+<a name="Gauge"></a>
+## func [Gauge](<https://github.com/lucasassuncao/bezel/blob/main/progress/gauge.go#L13>)
+
+```go
+func Gauge(value, total float64, width int, th theme.Resolved) string
+```
+
+Gauge is value out of total as a needle under a ruled track width cells wide, two rows: the track with a tick every quarter, then the needle. The value is a float, so a Spring can carry the needle smoothly.
 
 <a name="Line"></a>
 ## func [Line](<https://github.com/lucasassuncao/bezel/blob/main/progress/progress.go#L34>)

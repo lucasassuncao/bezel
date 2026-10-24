@@ -103,7 +103,7 @@ func (s Spring) Advance(now time.Time) (Spring, bool) {
 		s.last = now
 		return s, false
 	}
-	dt := now.Sub(s.last).Seconds()
+	dt := paced(now.Sub(s.last)).Seconds()
 	s.last = now
 	x, v := step(s.Pos-s.Target, s.Vel, s.freq(), s.damping(), max(dt, 0))
 	s.Pos, s.Vel = s.Target+x, v

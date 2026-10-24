@@ -83,7 +83,7 @@ func (r run) advance(now time.Time) (run, float64) {
 	if r.start.IsZero() {
 		r.start = now
 	}
-	p, done := r.phase(now.Sub(r.start), r.dur)
+	p, done := r.phase(paced(now.Sub(r.start)), r.dur)
 	if done {
 		return run{}, p
 	}
@@ -94,6 +94,21 @@ func (r run) advance(now time.Time) (run, float64) {
 func (r run) next() (run, tea.Cmd) {
 	r.tag++
 	return r, r.tick()
+}
+
+// update advances r on msg when it is r's own frame: the run after it, its
+// progress, whether msg was r's, and the command for the next frame.
+func (r run) update(msg tea.Msg) (run, float64, bool, tea.Cmd) {
+	f, ok := r.own(msg)
+	if !ok {
+		return r, 0, false, nil
+	}
+	r, p := r.advance(f.At)
+	if !r.active() {
+		return r, p, true, nil
+	}
+	r, cmd := r.next()
+	return r, p, true, cmd
 }
 
 // Forever is the repeat count of a motion that runs until it is replaced.

@@ -14,6 +14,7 @@ Package chart draws numbers in cells: Area and Spark a run of them over time, th
 
 - [func Area\(values \[\]float64, top float64, width, height int, th theme.Resolved, opts ...Option\) string](<#Area>)
 - [func Bars\(bars \[\]Bar, top float64, width int, th theme.Resolved, opts ...Option\) string](<#Bars>)
+- [func Heat\(values \[\]\[\]float64, top float64, th theme.Resolved\) string](<#Heat>)
 - [func Spark\(values \[\]float64, top float64, width int, th theme.Resolved, opts ...Option\) string](<#Spark>)
 - [type Bar](<#Bar>)
 - [type Option](<#Option>)
@@ -37,6 +38,15 @@ func Bars(bars []Bar, top float64, width int, th theme.Resolved, opts ...Option)
 ```
 
 Bars is one row per bar, width cells wide: the labels in a column, each bar scaled so top fills it, its edge cut to an eighth, and its text right\-aligned at the end. A long label is cut before the bars give up any room.
+
+<a name="Heat"></a>
+## func [Heat](<https://github.com/lucasassuncao/bezel/blob/main/chart/heat.go#L12>)
+
+```go
+func Heat(values [][]float64, top float64, th theme.Resolved) string
+```
+
+Heat is values as a grid of cells two columns wide, each coloured along the theme's ramp by its share of top; a value at or below zero is a muted dot.
 
 <a name="Spark"></a>
 ## func [Spark](<https://github.com/lucasassuncao/bezel/blob/main/chart/chart.go#L65>)

@@ -1,6 +1,6 @@
-// Package animation moves things on frames that arrive as messages: tweens on a
-// dozen curves, springs, points, text effects, and effects over any drawn block,
-// alone or on a shared Clock. BEZEL_NO_MOTION or TERM=dumb lands them all at once.
+// Package animation moves things on frames that arrive as messages: tweens,
+// springs, physics, text effects, lights and transitions over any drawn block,
+// and scenes, alone or on a shared Clock. BEZEL_MOTION sets their speed.
 package animation
 
 import (
@@ -96,7 +96,7 @@ func (t Tween) At(now time.Time) (int, bool) {
 	if t.Start.IsZero() {
 		return t.From, false
 	}
-	p, done := t.phase(now.Sub(t.Start), t.Dur)
+	p, done := t.phase(paced(now.Sub(t.Start)), t.Dur)
 	switch {
 	case done && p == 1:
 		return t.To, true

@@ -261,3 +261,16 @@ func TestAStillGalleryLandsAtOnce(t *testing.T) {
 	require.False(t, m.(model).marquee.Active())
 	require.False(t, m.(model).clock.Running())
 }
+
+// onTab is the gallery, sized and started, on tab i.
+func onTab(t *testing.T, i int) (tea.Model, string) {
+	t.Helper()
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	m, _ = m.Update(startMsg{})
+	var out string
+	for range i {
+		m, out = turnTab(t, m)
+	}
+	return m, out
+}

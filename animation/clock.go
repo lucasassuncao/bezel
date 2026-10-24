@@ -12,6 +12,8 @@ import (
 type Clock struct {
 	running bool
 	id, tag int64
+	every   time.Duration // the gap it asks between frames; Frame when zero
+	last    time.Time     // the previous frame Take saw
 }
 
 // NewClock is a stopped clock.
@@ -25,13 +27,13 @@ func (c Clock) Start() (Clock, tea.Cmd) {
 	if c.id == 0 { // a Clock never built with NewClock
 		c.id = lastID.Add(1)
 	}
-	c.running = true
+	c.running, c.last = true, time.Time{}
 	return c.Next()
 }
 
 // Stop halts c; the frame already on its way is dropped.
 func (c Clock) Stop() Clock {
-	c.running = false
+	c.running, c.last = false, time.Time{}
 	c.tag++
 	return c
 }
@@ -49,6 +51,34 @@ func (c Clock) Frame(msg tea.Msg) (time.Time, bool) {
 	return f.At, true
 }
 
+// Take is Frame for a host that lets c pace itself: frames that arrive twice
+// as far apart as asked mean the screen cannot keep up, so c asks half as
+// often, down to a quarter of the usual rate, and faster again once they keep up.
+func (c Clock) Take(msg tea.Msg) (Clock, time.Time, bool) {
+	at, ok := c.Frame(msg)
+	if !ok {
+		return c, at, false
+	}
+	if gap := c.gap(); !c.last.IsZero() {
+		switch took := at.Sub(c.last); {
+		case took > 2*gap:
+			c.every = min(2*gap, 4*Frame)
+		case took < gap+gap/2 && gap > Frame:
+			c.every = max(gap/2, Frame)
+		}
+	}
+	c.last = at
+	return c, at, true
+}
+
+// gap is how long c waits between frames.
+func (c Clock) gap() time.Duration {
+	if c.every <= 0 {
+		return Frame
+	}
+	return c.every
+}
+
 // Next is c with the command for its following frame, nil when stopped.
 func (c Clock) Next() (Clock, tea.Cmd) {
 	if !c.running {
@@ -56,7 +86,7 @@ func (c Clock) Next() (Clock, tea.Cmd) {
 	}
 	c.tag++
 	id, tag := c.id, c.tag
-	return c, tea.Tick(Frame, func(at time.Time) tea.Msg { return FrameMsg{At: at, id: id, tag: tag} })
+	return c, tea.Tick(c.gap(), func(at time.Time) tea.Msg { return FrameMsg{At: at, id: id, tag: tag} })
 }
 
 // FrameAt is c's current frame for at, for a test that delivers frames itself.

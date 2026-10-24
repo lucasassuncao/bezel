@@ -13,6 +13,7 @@ import (
 func moving(t *testing.T) {
 	t.Helper()
 	t.Setenv("BEZEL_NO_MOTION", "")
+	t.Setenv("BEZEL_MOTION", "")
 	t.Setenv("TERM", "xterm-256color")
 }
 
@@ -56,6 +57,7 @@ func TestStillAnimationsAreBornAtTheirEnd(t *testing.T) {
 // TestMain clears both switches, so a CI with TERM=dumb still tests motion.
 func TestMain(m *testing.M) {
 	_ = os.Setenv("BEZEL_NO_MOTION", "")
+	_ = os.Setenv("BEZEL_MOTION", "")
 	_ = os.Setenv("TERM", "xterm-256color")
 	os.Exit(m.Run())
 }
@@ -68,4 +70,29 @@ func TestStillEffectsAreBornAtTheirEnd(t *testing.T) {
 	g := NewGradient("abcd", []color.Color{black, white}, time.Second)
 	assert.False(t, g.Active())
 	assert.Equal(t, white, g.colorAt(2), "a still gradient is drawn, only not moved")
+}
+
+func TestSpeedIsReadFromTheEnvironment(t *testing.T) {
+	moving(t)
+	assert.InDelta(t, 1.0, Speed(), 0)
+	t.Setenv("BEZEL_MOTION", "2")
+	assert.InDelta(t, 2.0, Speed(), 0)
+	t.Setenv("BEZEL_MOTION", "fast")
+	assert.InDelta(t, 1.0, Speed(), 0, "a value that is not a number plays at normal speed")
+	t.Setenv("BEZEL_MOTION", "0")
+	assert.True(t, Still(), "speed 0 is motion off")
+}
+
+// At speed 2 a tween is over in half its time; a spring lives its time faster too.
+func TestSpeedScalesEveryClock(t *testing.T) {
+	moving(t)
+	t.Setenv("BEZEL_MOTION", "2")
+	start := time.Unix(100, 0)
+	tw := New(0, 10, time.Second)
+	tw, _ = tw.Advance(start)
+	tw, done := tw.Advance(start.Add(500 * time.Millisecond))
+	assert.True(t, done)
+	assert.Equal(t, 10, tw.Cur)
+
+	assert.Equal(t, time.Second, paced(500*time.Millisecond))
 }
