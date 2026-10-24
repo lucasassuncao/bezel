@@ -44,6 +44,21 @@ func (m model) View() tea.View {
 
 A pane missing from the map gives its space back that frame.
 
+## Documentation
+
+| Guide | What it covers |
+|---|---|
+| [A first app](docs/EXAMPLE.md) | a small task list built step by step, from the model to its tests |
+| [The frame](docs/FRAME.md) | the shell, layout, tabs, actions, focus, status row, dialogs and palette |
+| [Theme](docs/THEME.md) | the presets, a theme of your own, light and dark, recolouring one component |
+| [Components](docs/COMPONENTS.md) | every package's example and recording |
+| [Effects](docs/EFFECTS.md) | effects, lights and transitions over a drawn block |
+| [Animations](docs/ANIMATIONS.md) | tweens, springs, physics, text and scenes, and the clock that drives them |
+| [Architecture](docs/ARCHITECTURE.md) | what each folder holds, and what may import what |
+| [Conventions](docs/CONVENTIONS.md) | the rules every package follows: where the theme goes, the shapes of `Update` |
+
+Each package also has its own `README.md`, generated from its doc comments.
+
 ## Examples
 
 ### Shell
@@ -128,5 +143,3 @@ go run ./examples/app
 - [`animation`](animation): tweens on a dozen easing curves that delay, repeat and yoyo, springs, points, physics (a drop, a pendulum, an orbit, a flock, a rubber band) and animated chart values, with one clock to drive them; `BEZEL_NO_MOTION` turns motion off and `BEZEL_MOTION` sets its speed.
 - [`animation/text`](animation/text): text that types, scrolls, shimmers, scrambles, rolls, waves, decrypts, blinks and rises.
 - [`animation/scene`](animation/scene): rain, snow, confetti, fireworks, stars, static and plasma, alone or behind a block.
-
-How the shell, layout, actions and dialogs fit together: see [FRAME.md](docs/FRAME.md); picking, building and switching a theme: [THEME.md](docs/THEME.md). Why the folders are laid out as they are, and what may import what: see [ARCHITECTURE.md](docs/ARCHITECTURE.md). Every package follows the same rules for where the theme goes and how `Update` looks: see [CONVENTIONS.md](docs/CONVENTIONS.md).
