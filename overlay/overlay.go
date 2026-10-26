@@ -4,7 +4,10 @@
 package overlay
 
 import (
+	"strings"
+
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -26,6 +29,12 @@ type EscOwner interface{ OwnsEsc() bool }
 // BottomAnchored is implemented by overlays drawn flush with the bottom of
 // the body instead of centred: a command line and its candidates.
 type BottomAnchored interface{ AnchorBottom() bool }
+
+// Clicker is implemented by overlays a left click acts on, such as one with
+// buttons. x and y are counted from the top left of what View drew in body.
+type Clicker interface {
+	Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
+}
 
 // StatusLiner is implemented by overlays that draw the status row while on
 // top: a command line typed where the status usually is.
@@ -167,14 +176,57 @@ func (s Stack) replaceTop(o Overlay) Stack {
 func (s Stack) View(body layout.Rect, background string) string {
 	out := draw.PadHeight(background, body.Y+body.H)
 	for _, o := range s.items {
-		fg := o.View(body)
-		fgW, fgH := draw.BlockSize(fg)
-		x := body.X + max(0, (body.W-fgW)/2)
-		y := body.Y + max(0, (body.H-fgH)/2)
-		if b, ok := o.(BottomAnchored); ok && b.AnchorBottom() {
-			x, y = body.X, body.Y+max(0, body.H-fgH)
-		}
+		fg, x, y := place(o, body)
 		out = draw.Composite(fg, out, x, y)
 	}
 	return out
+}
+
+// place is what o draws in body and the screen cell its top left lands on.
+func place(o Overlay, body layout.Rect) (fg string, x, y int) {
+	fg = o.View(body)
+	fgW, fgH := draw.BlockSize(fg)
+	x = body.X + max(0, (body.W-fgW)/2)
+	y = body.Y + max(0, (body.H-fgH)/2)
+	if b, ok := o.(BottomAnchored); ok && b.AnchorBottom() {
+		x, y = body.X, body.Y+max(0, body.H-fgH)
+	}
+	return fg, x, y
+}
+
+// Click hands a left click at screen cell (x, y) to the top overlay when it
+// is a Clicker, moved into what it drew; the dialog covers the screen, so
+// a click anywhere else does nothing.
+func (s Stack) Click(x, y int, body layout.Rect) (Stack, tea.Cmd) {
+	top := s.Top()
+	c, ok := top.(Clicker)
+	if !ok {
+		return s, nil
+	}
+	_, ox, oy := place(top, body)
+	updated, cmd := c.Click(x-ox, y-oy, body)
+	return s.replaceTop(updated), cmd
+}
+
+// buttonAt is which of buttons, drawn left to right on row y of view, covers
+// column x; -1 when none does.
+func buttonAt(view string, x, y int, buttons []string) int {
+	rows := strings.Split(ansi.Strip(view), "\n")
+	if y < 0 || y >= len(rows) {
+		return -1
+	}
+	row, from := rows[y], 0
+	for i, b := range buttons {
+		label := ansi.Strip(b)
+		at := strings.Index(row[from:], label)
+		if at < 0 {
+			return -1
+		}
+		start := ansi.StringWidth(row[:from+at])
+		if x >= start && x < start+ansi.StringWidth(label) {
+			return i
+		}
+		from += at + len(label)
+	}
+	return -1
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -129,4 +130,33 @@ func TestNilFieldsAreLeftOutAndFieldIsBounded(t *testing.T) {
 	require.NotNil(t, f.Field(0), "the checkbox is first once the nil is gone")
 	require.Nil(t, f.Field(1))
 	require.Nil(t, f.Field(-1))
+}
+
+func TestAClickFocusesAFieldAndPressesAButton(t *testing.T) {
+	f := sample(t)
+	f, cmd := f.Click(5, 60)
+	require.Equal(t, 5, f.Focused())
+	require.NotNil(t, cmd)
+	require.Equal(t, submitted{}, cmd())
+
+	f, _ = f.Click(3, 60)
+	toggle, _ := Get[Toggle](f, 3)
+	require.True(t, toggle.On(), "a toggle flips")
+	f, _ = f.Click(4, 60)
+	box, _ := Get[Checkbox](f, 4)
+	require.True(t, box.Checked())
+
+	f, _ = f.Click(0, 60)
+	require.Equal(t, 0, f.Focused(), "an input only takes the focus")
+	same, cmd := f.Click(99, 60)
+	require.Equal(t, 0, same.Focused())
+	require.Nil(t, cmd)
+}
+
+func TestAClickCountsTheRowsOfAnOpenSelect(t *testing.T) {
+	f, _ := press(sample(t), "tab", "enter") // the select, open under its row
+	_, h := draw.BlockSize(f.Field(1).View(true, 20, 60))
+	require.Greater(t, h, 1)
+	f, _ = f.Click(1+h, 60)
+	require.Equal(t, 2, f.Focused(), "the radio sits under the open list")
 }

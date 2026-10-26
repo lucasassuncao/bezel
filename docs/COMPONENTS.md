@@ -14,7 +14,7 @@ What every screen is built in: the shell an app embeds, the layout it resolves, 
 
 Source: [`examples/frame/shell/main.go`](../examples/frame/shell/main.go)
 
-Two tabs and two panes. `s` sets a status that clears itself, `b` shows the busy spinner until the work is done, `tab` switches tab and `?` lists every key.
+Two tabs and two panes. `s` sets a status that clears itself, `b` shows the busy spinner until the work is done, `d` asks before deleting, `tab` switches tab and `?` lists every key. The mouse works as well: a click on a tab shows it, on a pane focuses it, on a row moves the cursor there (a second click opens it), and on a dialog's button presses it.
 
 ![shell](recordings/frame/shell.gif)
 

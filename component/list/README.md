@@ -21,6 +21,7 @@ Package list is a cursor list with section headings, a scroll indicator or pages
   - [func New\[T any\]\(rows \[\]Row\[T\], height int\) Model\[T\]](<#New>)
   - [func \(m Model\[T\]\) Active\(\) bool](<#Model[T].Active>)
   - [func \(m Model\[T\]\) Animate\(msg tea.Msg\) \(Model\[T\], tea.Cmd\)](<#Model[T].Animate>)
+  - [func \(m Model\[T\]\) Click\(y int\) \(Model\[T\], Action\)](<#Model[T].Click>)
   - [func \(m Model\[T\]\) Filter\(\) string](<#Model[T].Filter>)
   - [func \(m Model\[T\]\) FrameAt\(at time.Time\) tea.Msg](<#Model[T].FrameAt>)
   - [func \(m Model\[T\]\) InsertRow\(i int, r Row\[T\]\) Model\[T\]](<#Model[T].InsertRow>)
@@ -141,6 +142,15 @@ func (m Model[T]) Animate(msg tea.Msg) (Model[T], tea.Cmd)
 ```
 
 Animate moves on the list's own frames and asks for the next until it settles; every other message leaves it alone.
+
+<a name="Model[T].Click"></a>
+### func \(Model\[T\]\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L365>)
+
+```go
+func (m Model[T]) Click(y int) (Model[T], Action)
+```
+
+Click is a left click on line y of View: on a row it moves the cursor there, and on the row already under the cursor it chooses it, as enter would. A heading, the title or a line past the rows does nothing.
 
 <a name="Model[T].Filter"></a>
 ### func \(Model\[T\]\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L214>)
@@ -278,7 +288,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
 Update handles one key. Keys the list does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L473>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L520>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved) string

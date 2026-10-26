@@ -199,6 +199,23 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action) {
 	return m, None
 }
 
+// Click is a left click on line y of View: on a row it moves the cursor
+// there, and on the row already under the cursor it chooses it. The header
+// and the "more" row do nothing. A blurred table takes it too.
+func (m Model[T]) Click(y int) (Model[T], Action) {
+	w := m.win.Clamp(len(m.items))
+	start, end, _ := w.Bounds(len(m.items))
+	i := start + y - 1 // the header takes line 0
+	switch {
+	case y < 1 || i >= end:
+		return m, None
+	case i == w.Cursor:
+		return m, Chosen
+	}
+	m.win.Cursor = i
+	return m.clamp(), None
+}
+
 // page is how far pgup and pgdown move: the rows shown, less the "more" row.
 func (m Model[T]) page() int { return max(1, m.win.Height-1) }
 

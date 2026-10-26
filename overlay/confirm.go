@@ -80,3 +80,14 @@ func (c Confirm) View(body layout.Rect) string {
 	buttons := lipgloss.JoinHorizontal(lipgloss.Top, c.button("Yes", !c.no), "  ", c.button("No", c.no))
 	return dialog(c.title, []string{c.message}, buttons, c.style(), body)
 }
+
+// Click answers yes or no on a click on its button.
+func (c Confirm) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
+	switch buttonAt(c.View(body), x, y, []string{c.button("Yes", !c.no), c.button("No", c.no)}) {
+	case 0:
+		return c, tea.Batch(c.onYes, Close())
+	case 1:
+		return c, Close()
+	}
+	return c, nil
+}

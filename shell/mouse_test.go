@@ -1,9 +1,11 @@
 package shell
 
 import (
+	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -49,4 +51,40 @@ func TestADialogCoversThePanes(t *testing.T) {
 	r := s.Rect("list")
 	_, ok := s.PaneAt(r.X+1, r.Y+1)
 	require.False(t, ok)
+}
+
+func click(x, y int) tea.MouseClickMsg { return tea.MouseClickMsg{X: x, Y: y, Button: tea.MouseLeft} }
+
+func TestAClickOnATabShowsIt(t *testing.T) {
+	s, _, _ := newShell(stubTab{name: "alpha"}, stubTab{name: "beta"}).Update(tea.WindowSizeMsg{Width: 120, Height: 30})
+	row := strings.Split(ansi.Strip(s.View(demoPanes())), "\n")[s.headerRows()]
+	s, handled, _ := s.Update(click(strings.Index(row, "beta"), s.headerRows()))
+	require.True(t, handled)
+	require.Equal(t, 1, s.ActiveTab())
+	s, handled, _ = s.Update(click(119, s.headerRows()))
+	require.True(t, handled, "the tab row is the shell's even off a tab")
+	require.Equal(t, 1, s.ActiveTab())
+}
+
+func TestAClickFocusesAPaneThenComesBackToTheApp(t *testing.T) {
+	s := sizedShell()
+	require.Equal(t, "list", s.Focus())
+	r := s.Rect("detail")
+	s, handled, cmd := s.Update(click(r.X+3, r.Y+2))
+	require.True(t, handled, "the shell takes it to move the focus")
+	require.Equal(t, "detail", s.Focus())
+	require.NotNil(t, cmd)
+
+	_, handled, _ = s.Update(click(r.X+3, r.Y+2))
+	require.False(t, handled, "on the focused pane the click is the app's")
+	_, handled, _ = s.Update(tea.MouseClickMsg{X: r.X + 3, Y: r.Y + 2, Button: tea.MouseRight})
+	require.False(t, handled, "only the left button")
+}
+
+func TestAClickWithADialogOpenIsTheDialogs(t *testing.T) {
+	s := sizedShell().Push(overlay.NewAlert(overlay.Info, "Saved", "done", theme.Resolve(theme.Plain, true)))
+	_, handled, cmd := s.Update(click(0, 0))
+	require.True(t, handled)
+	require.Nil(t, cmd, "off its buttons it does nothing")
+	require.Equal(t, "list", s.Focus())
 }

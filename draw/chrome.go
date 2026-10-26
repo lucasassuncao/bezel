@@ -36,6 +36,36 @@ func Header(width int, title, subtitle, right string, st ChromeStyle) string {
 
 // Tabs is one row of names, the active one styled apart.
 func Tabs(width int, names []string, active int, st ChromeStyle) string {
+	parts := tabParts(names, active, st)
+	all := strings.Join(parts, " ")
+	if ansi.StringWidth(all) <= width || active < 0 || active >= len(parts) {
+		return Fit(all, width)
+	}
+	return Fit(scrolledTabs(parts, active, width, st), width)
+}
+
+// TabAt is the tab Tabs draws at column x with the same arguments, -1 over
+// a gap, a scroll mark or past the last tab.
+func TabAt(width int, names []string, active int, st ChromeStyle, x int) int {
+	parts := tabParts(names, active, st)
+	lo, hi, at := 0, len(parts), 0
+	if ansi.StringWidth(strings.Join(parts, " ")) > width && active >= 0 && active < len(parts) {
+		if lo, hi = tabWindow(parts, active, width); lo > 0 {
+			at = 2 // "‹ "
+		}
+	}
+	for i := lo; i < hi; i++ {
+		w := ansi.StringWidth(parts[i])
+		if x >= at && x < at+w && x < width {
+			return i
+		}
+		at += w + 1
+	}
+	return -1
+}
+
+// tabParts is each name drawn as its tab.
+func tabParts(names []string, active int, st ChromeStyle) []string {
 	parts := make([]string, len(names))
 	for i, n := range names {
 		if i == active {
@@ -44,17 +74,27 @@ func Tabs(width int, names []string, active int, st ChromeStyle) string {
 			parts[i] = st.Tab.Render(" " + n + " ")
 		}
 	}
-	all := strings.Join(parts, " ")
-	if ansi.StringWidth(all) <= width || active < 0 || active >= len(parts) {
-		return Fit(all, width)
-	}
-	return Fit(scrolledTabs(parts, active, width, st), width)
+	return parts
 }
 
 // scrolledTabs is as many of parts as fit width around active, with ‹ or ›
 // where tabs are hidden on that side, so the active tab is never cut off.
 func scrolledTabs(parts []string, active, width int, st ChromeStyle) string {
-	lo, hi := active, active+1
+	lo, hi := tabWindow(parts, active, width)
+	s := strings.Join(parts[lo:hi], " ")
+	if lo > 0 {
+		s = st.Tab.Render("‹") + " " + s
+	}
+	if hi < len(parts) {
+		s += " " + st.Tab.Render("›")
+	}
+	return s
+}
+
+// tabWindow is the parts [lo, hi) that fit width around active, room kept
+// for the marks of the hidden ones.
+func tabWindow(parts []string, active, width int) (lo, hi int) {
+	lo, hi = active, active+1
 	fits := func(lo, hi int) bool {
 		w := ansi.StringWidth(strings.Join(parts[lo:hi], " "))
 		if lo > 0 {
@@ -74,14 +114,7 @@ func scrolledTabs(parts []string, active, width int, st ChromeStyle) string {
 			lo, grew = lo-1, true
 		}
 	}
-	s := strings.Join(parts[lo:hi], " ")
-	if lo > 0 {
-		s = st.Tab.Render("‹") + " " + s
-	}
-	if hi < len(parts) {
-		s += " " + st.Tab.Render("›")
-	}
-	return s
+	return lo, hi
 }
 
 // Divider is a horizontal rule width cells long, with label set into it after a

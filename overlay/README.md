@@ -21,6 +21,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
 - [func ToTop\(cmd tea.Cmd\) tea.Cmd](<#ToTop>)
 - [type Alert](<#Alert>)
   - [func NewAlert\(kind Kind, title, message string, th theme.Resolved\) Alert](<#NewAlert>)
+  - [func \(a Alert\) Click\(x, y int, body layout.Rect\) \(Overlay, tea.Cmd\)](<#Alert.Click>)
   - [func \(a Alert\) Kind\(\) Kind](<#Alert.Kind>)
   - [func \(a Alert\) Legend\(\) \[\]legend.Entry](<#Alert.Legend>)
   - [func \(a Alert\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Alert.Update>)
@@ -28,13 +29,16 @@ Package overlay is the stack of modals floating over the panes. The top one gets
 - [type BottomAnchored](<#BottomAnchored>)
 - [type Choice](<#Choice>)
   - [func NewChoice\(title string, lines \[\]string, options \[\]Option, th theme.Resolved\) Choice](<#NewChoice>)
+  - [func \(c Choice\) Click\(x, y int, body layout.Rect\) \(Overlay, tea.Cmd\)](<#Choice.Click>)
   - [func \(c Choice\) Legend\(\) \[\]legend.Entry](<#Choice.Legend>)
   - [func \(c Choice\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Choice.Update>)
   - [func \(c Choice\) View\(body layout.Rect\) string](<#Choice.View>)
   - [func \(c Choice\) WithKind\(k Kind\) Choice](<#Choice.WithKind>)
+- [type Clicker](<#Clicker>)
 - [type CloseMsg](<#CloseMsg>)
 - [type Confirm](<#Confirm>)
   - [func NewConfirm\(title, message string, onYes tea.Cmd, th theme.Resolved\) Confirm](<#NewConfirm>)
+  - [func \(c Confirm\) Click\(x, y int, body layout.Rect\) \(Overlay, tea.Cmd\)](<#Confirm.Click>)
   - [func \(c Confirm\) Legend\(\) \[\]legend.Entry](<#Confirm.Legend>)
   - [func \(c Confirm\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Confirm.Update>)
   - [func \(c Confirm\) View\(body layout.Rect\) string](<#Confirm.View>)
@@ -121,6 +125,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
 - [type PushMsg](<#PushMsg>)
 - [type Resizer](<#Resizer>)
 - [type Stack](<#Stack>)
+  - [func \(s Stack\) Click\(x, y int, body layout.Rect\) \(Stack, tea.Cmd\)](<#Stack.Click>)
   - [func \(s Stack\) Len\(\) int](<#Stack.Len>)
   - [func \(s Stack\) Pop\(\) Stack](<#Stack.Pop>)
   - [func \(s Stack\) Push\(o Overlay\) Stack](<#Stack.Push>)
@@ -165,7 +170,7 @@ func BoxWidth(lines []string, body layout.Rect, inner int, style lipgloss.Style)
 BoxWidth is Box with the content width chosen by the caller, for a form that reads better narrower than the terminal allows.
 
 <a name="Close"></a>
-## func [Close](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L48>)
+## func [Close](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L57>)
 
 ```go
 func Close() tea.Cmd
@@ -183,7 +188,7 @@ func Inner(body layout.Rect) int
 Inner is the content width a modal gets inside body.
 
 <a name="Open"></a>
-## func [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L51>)
+## func [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L60>)
 
 ```go
 func Open(o Overlay) tea.Cmd
@@ -192,7 +197,7 @@ func Open(o Overlay) tea.Cmd
 Open is the command that pushes o on top of the stack.
 
 <a name="ToTop"></a>
-## func [ToTop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L58>)
+## func [ToTop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L67>)
 
 ```go
 func ToTop(cmd tea.Cmd) tea.Cmd
@@ -219,6 +224,15 @@ func NewAlert(kind Kind, title, message string, th theme.Resolved) Alert
 ```
 
 NewAlert is an alert of kind, its border in that kind's colour.
+
+<a name="Alert.Click"></a>
+### func \(Alert\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L45>)
+
+```go
+func (a Alert) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
+```
+
+Click closes the alert on a click on OK.
 
 <a name="Alert.Kind"></a>
 ### func \(Alert\) [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L28>)
@@ -257,7 +271,7 @@ func (a Alert) View(body layout.Rect) string
 
 
 <a name="BottomAnchored"></a>
-## type [BottomAnchored](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L28>)
+## type [BottomAnchored](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L31>)
 
 BottomAnchored is implemented by overlays drawn flush with the bottom of the body instead of centred: a command line and its candidates.
 
@@ -284,6 +298,15 @@ func NewChoice(title string, lines []string, options []Option, th theme.Resolved
 ```
 
 NewChoice shows lines under title with options as its buttons.
+
+<a name="Choice.Click"></a>
+### func \(Choice\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L117>)
+
+```go
+func (c Choice) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
+```
+
+Click runs the option whose button it lands on, as its key would.
 
 <a name="Choice.Legend"></a>
 ### func \(Choice\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L86>)
@@ -321,8 +344,19 @@ func (c Choice) WithKind(k Kind) Choice
 
 WithKind tints the choice for what it decides.
 
+<a name="Clicker"></a>
+## type [Clicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L35-L37>)
+
+Clicker is implemented by overlays a left click acts on, such as one with buttons. x and y are counted from the top left of what View drew in body.
+
+```go
+type Clicker interface {
+    Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
+}
+```
+
 <a name="CloseMsg"></a>
-## type [CloseMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L42>)
+## type [CloseMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L51>)
 
 CloseMsg pops the top overlay.
 
@@ -349,6 +383,15 @@ func NewConfirm(title, message string, onYes tea.Cmd, th theme.Resolved) Confirm
 ```
 
 NewConfirm asks message under title; onYes runs on a yes and may be nil.
+
+<a name="Confirm.Click"></a>
+### func \(Confirm\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/confirm.go#L85>)
+
+```go
+func (c Confirm) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
+```
+
+Click answers yes or no on a click on its button.
 
 <a name="Confirm.Legend"></a>
 ### func \(Confirm\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/confirm.go#L74>)
@@ -416,7 +459,7 @@ func DefaultConfirmKeys() ConfirmKeys
 DefaultConfirmKeys are ←/→ or tab to move, enter or space to pick, and y or n to answer at once; q answers no.
 
 <a name="EscOwner"></a>
-## type [EscOwner](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L24>)
+## type [EscOwner](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L27>)
 
 EscOwner is implemented by overlays with their own Esc semantics, such as a nested editor that steps out one level at a time.
 
@@ -731,7 +774,7 @@ func Opt(keys, label string, do tea.Cmd) Option
 Opt builds an Option from a key label and what it does.
 
 <a name="Overlay"></a>
-## type [Overlay](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L16-L20>)
+## type [Overlay](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L19-L23>)
 
 Overlay is one floating modal. View gets the body rect and picks its own box within it.
 
@@ -848,7 +891,7 @@ func DefaultPagerKeys() PagerKeys
 DefaultPagerKeys are the viewport's own, and q or enter to close.
 
 <a name="Pick"></a>
-## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L114-L122>)
+## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L131-L139>)
 
 Pick is a dialog that chooses one row of a list with the arrows: which source manages this, which preset to apply. Enter runs OnPick with the cursor; esc closes with nothing. A list taller than the body scrolls.
 
@@ -859,7 +902,7 @@ type Pick struct {
 ```
 
 <a name="NewPick"></a>
-### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L141>)
+### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L158>)
 
 ```go
 func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick
@@ -868,7 +911,7 @@ func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.R
 NewPick lists rows with the cursor on the first. onPick may be nil, which makes enter only close.
 
 <a name="Pick.Cursor"></a>
-### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L166>)
+### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L183>)
 
 ```go
 func (p Pick) Cursor() int
@@ -877,7 +920,7 @@ func (p Pick) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Pick.Legend"></a>
-### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L204>)
+### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L221>)
 
 ```go
 func (p Pick) Legend() []legend.Entry
@@ -886,7 +929,7 @@ func (p Pick) Legend() []legend.Entry
 
 
 <a name="Pick.Resize"></a>
-### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L169>)
+### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L186>)
 
 ```go
 func (p Pick) Resize(body layout.Rect) Overlay
@@ -895,7 +938,7 @@ func (p Pick) Resize(body layout.Rect) Overlay
 Resize shows as many rows as fit in body, scrolled to keep the cursor's.
 
 <a name="Pick.Update"></a>
-### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L185>)
+### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L202>)
 
 ```go
 func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -904,7 +947,7 @@ func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pick.View"></a>
-### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L209>)
+### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L226>)
 
 ```go
 func (p Pick) View(body layout.Rect) string
@@ -913,7 +956,7 @@ func (p Pick) View(body layout.Rect) string
 
 
 <a name="Pick.WithCursor"></a>
-### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L159>)
+### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L176>)
 
 ```go
 func (p Pick) WithCursor(i int) Pick
@@ -922,7 +965,7 @@ func (p Pick) WithCursor(i int) Pick
 WithCursor starts the cursor on row i, such as the value already chosen; an index outside the rows is clamped to them.
 
 <a name="Pick.WithKeys"></a>
-### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L146>)
+### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L163>)
 
 ```go
 func (p Pick) WithKeys(k PickKeys) Pick
@@ -940,7 +983,7 @@ func (p Pick) WithKind(k Kind) Pick
 WithKind tints the pick for what it decides.
 
 <a name="Pick.WithNotes"></a>
-### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L152>)
+### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L169>)
 
 ```go
 func (p Pick) WithNotes(notes ...string) Pick
@@ -949,7 +992,7 @@ func (p Pick) WithNotes(notes ...string) Pick
 WithNotes are lines drawn under the rows, such as what the picked one does.
 
 <a name="PickKeys"></a>
-## type [PickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L126-L128>)
+## type [PickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L143-L145>)
 
 PickKeys are the bindings a Pick answers to besides esc. Down has no help of its own: Up's "↑/↓" names both.
 
@@ -960,7 +1003,7 @@ type PickKeys struct {
 ```
 
 <a name="DefaultPickKeys"></a>
-### func [DefaultPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L131>)
+### func [DefaultPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L148>)
 
 ```go
 func DefaultPickKeys() PickKeys
@@ -1144,7 +1187,7 @@ func DefaultPromptKeys() PromptKeys
 DefaultPromptKeys accept on enter.
 
 <a name="PushMsg"></a>
-## type [PushMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L45>)
+## type [PushMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L54>)
 
 PushMsg opens Overlay above the top one.
 
@@ -1153,7 +1196,7 @@ type PushMsg struct{ Overlay Overlay }
 ```
 
 <a name="Resizer"></a>
-## type [Resizer](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L37-L39>)
+## type [Resizer](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L46-L48>)
 
 Resizer is implemented by overlays that size what they show to the body, such as how far a page scrolls. The stack calls Resize when it pushes one and whenever its body changes, so Update knows before anything is drawn.
 
@@ -1164,7 +1207,7 @@ type Resizer interface {
 ```
 
 <a name="Stack"></a>
-## type [Stack](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L71-L74>)
+## type [Stack](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L80-L83>)
 
 Stack is a value: every method returns the new stack.
 
@@ -1174,8 +1217,17 @@ type Stack struct {
 }
 ```
 
+<a name="Stack.Click"></a>
+### func \(Stack\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L200>)
+
+```go
+func (s Stack) Click(x, y int, body layout.Rect) (Stack, tea.Cmd)
+```
+
+Click hands a left click at screen cell \(x, y\) to the top overlay when it is a Clicker, moved into what it drew; the dialog covers the screen, so a click anywhere else does nothing.
+
 <a name="Stack.Len"></a>
-### func \(Stack\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L129>)
+### func \(Stack\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L138>)
 
 ```go
 func (s Stack) Len() int
@@ -1184,7 +1236,7 @@ func (s Stack) Len() int
 Len is how many overlays are open.
 
 <a name="Stack.Pop"></a>
-### func \(Stack\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L89>)
+### func \(Stack\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L98>)
 
 ```go
 func (s Stack) Pop() Stack
@@ -1193,7 +1245,7 @@ func (s Stack) Pop() Stack
 Pop is the stack without its top overlay; an empty stack stays empty.
 
 <a name="Stack.Push"></a>
-### func \(Stack\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L78>)
+### func \(Stack\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L87>)
 
 ```go
 func (s Stack) Push(o Overlay) Stack
@@ -1202,7 +1254,7 @@ func (s Stack) Push(o Overlay) Stack
 Push is the stack with o on top, sized to the stack's body when it has one; a nil o leaves the stack as it was.
 
 <a name="Stack.Resize"></a>
-### func \(Stack\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L99>)
+### func \(Stack\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L108>)
 
 ```go
 func (s Stack) Resize(body layout.Rect) Stack
@@ -1211,7 +1263,7 @@ func (s Stack) Resize(body layout.Rect) Stack
 Resize hands body to every Resizer layer, the hidden ones too. A shell does it on each layout; an app driving a Stack itself calls it on every resize.
 
 <a name="Stack.Top"></a>
-### func \(Stack\) [Top](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L121>)
+### func \(Stack\) [Top](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L130>)
 
 ```go
 func (s Stack) Top() Overlay
@@ -1220,7 +1272,7 @@ func (s Stack) Top() Overlay
 Top is the overlay that gets the keys, or nil when the stack is empty.
 
 <a name="Stack.Update"></a>
-### func \(Stack\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L133>)
+### func \(Stack\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L142>)
 
 ```go
 func (s Stack) Update(msg tea.Msg) (Stack, bool, tea.Cmd)
@@ -1229,7 +1281,7 @@ func (s Stack) Update(msg tea.Msg) (Stack, bool, tea.Cmd)
 Update routes msg to the top overlay. handled is false only when the stack is empty and msg is not a stack message.
 
 <a name="Stack.View"></a>
-### func \(Stack\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L167>)
+### func \(Stack\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L176>)
 
 ```go
 func (s Stack) View(body layout.Rect, background string) string
@@ -1238,7 +1290,7 @@ func (s Stack) View(body layout.Rect, background string) string
 View composites every layer, bottom first, centred over background.
 
 <a name="StatusLiner"></a>
-## type [StatusLiner](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L32>)
+## type [StatusLiner](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L41>)
 
 StatusLiner is implemented by overlays that draw the status row while on top: a command line typed where the status usually is.
 
@@ -1303,7 +1355,7 @@ func (t Text) WithKind(k Kind) Text
 WithKind tints the text for what it reports.
 
 <a name="TopMsg"></a>
-## type [TopMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L55>)
+## type [TopMsg](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L64>)
 
 TopMsg carries an overlay's own answer back to the top overlay. Other non\-key messages pass an open modal by: they are the app's.
 

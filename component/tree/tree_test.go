@@ -326,3 +326,29 @@ func TestTheTreeLegendNamesItsKeys(t *testing.T) {
 	}
 	require.Equal(t, []string{"↑/↓", "←/→"}, keys)
 }
+
+func TestAClickMovesTheCursorAndASecondOpensOrCloses(t *testing.T) {
+	m := newTree(10) // ADDED, server (open), host, port, AVAILABLE, cache, ...
+	m, act := m.Click(5)
+	require.Equal(t, None, act)
+	require.Equal(t, "cache", label(m))
+	m, act = m.Click(5)
+	require.Equal(t, Expanded, act)
+	require.Contains(t, labelsOf(m), "ttl")
+	m, act = m.Click(5)
+	require.Equal(t, Collapsed, act)
+
+	m, _ = m.Click(2)
+	_, act = m.Click(2)
+	require.Equal(t, None, act, "a leaf has nothing to open")
+	same, _ := m.Click(0)
+	require.Equal(t, "host", label(same), "a heading is not a row to land on")
+}
+
+func labelsOf(m Model[node]) []string {
+	var out []string
+	for _, i := range m.Visible() {
+		out = append(out, m.Nodes[i].label)
+	}
+	return out
+}

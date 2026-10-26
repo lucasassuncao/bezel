@@ -179,3 +179,19 @@ func TestTheLegendNamesTheKeys(t *testing.T) {
 	}
 	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "ctrl+u/d", "home/end", "enter"}, keys)
 }
+
+func TestAClickMovesTheCursorAndASecondChooses(t *testing.T) {
+	m := New(pkgCols, pkgs(10), 5) // header, three rows, the more row
+	m, act := m.Click(3)
+	require.Equal(t, None, act)
+	require.Equal(t, 2, m.Cursor())
+	_, act = m.Click(3)
+	require.Equal(t, Chosen, act)
+	for _, y := range []int{0, 4, -1} {
+		got, act := m.Click(y)
+		require.Equal(t, None, act, "line %d", y)
+		require.Equal(t, 2, got.Cursor())
+	}
+	blurred, _ := m.Blur().Click(1)
+	require.Equal(t, 0, blurred.Cursor(), "a click reaches a blurred table")
+}

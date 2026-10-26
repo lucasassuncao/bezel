@@ -361,3 +361,31 @@ func BenchmarkFuzzyFilter(b *testing.B) {
 		_ = m.View(th)
 	}
 }
+
+func TestAClickMovesTheCursorAndASecondChooses(t *testing.T) {
+	m := New(rows(), 10) // ADDED, server, logging, spacer, AVAILABLE, cache, metrics
+	m, act := m.Click(5)
+	require.Equal(t, None, act)
+	require.Equal(t, "cache", m.Selected().Label)
+	_, act = m.Click(5)
+	require.Equal(t, Chosen, act, "the row under the cursor is chosen")
+	same, act := m.Click(0)
+	require.Equal(t, None, act, "a heading is not a row to land on")
+	require.Equal(t, "cache", same.Selected().Label)
+	_, act = m.Click(40)
+	require.Equal(t, None, act)
+
+	titled := New(rows(), 10).WithTitle("Plugins")
+	titled, _ = titled.Click(3)
+	require.Equal(t, "logging", titled.Selected().Label, "the title takes the first line")
+}
+
+func TestAClickPicksAMatchWhileFiltering(t *testing.T) {
+	m := filtered(New(numbered(5), 10), "item")
+	m, _ = m.Click(2)
+	require.Equal(t, "item-02", m.Selected().Label)
+	m, act := m.Click(2)
+	require.Equal(t, Chosen, act)
+	require.False(t, m.IsFiltering())
+	require.Equal(t, "item-02", m.Selected().Label)
+}

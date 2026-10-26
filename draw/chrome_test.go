@@ -71,3 +71,19 @@ func TestDividerMeasuresAPaddedLabelStyle(t *testing.T) {
 		require.Equal(t, width, ansi.StringWidth(Divider(width, "Packages", lipgloss.NewStyle(), padded)), "width %d", width)
 	}
 }
+
+func TestTabAtFindsTheTabUnderAColumn(t *testing.T) {
+	names := []string{"one", "two", "three"}
+	// " one   two   three " : one at 0-4, two at 6-10, three at 12-18
+	require.Equal(t, 0, TabAt(40, names, 0, ChromeStyle{}, 0))
+	require.Equal(t, -1, TabAt(40, names, 0, ChromeStyle{}, 5), "the gap between")
+	require.Equal(t, 1, TabAt(40, names, 0, ChromeStyle{}, 8))
+	require.Equal(t, 2, TabAt(40, names, 0, ChromeStyle{}, 18))
+	require.Equal(t, -1, TabAt(40, names, 0, ChromeStyle{}, 30))
+
+	seven := []string{"one", "two", "three", "four", "five", "six", "seven"}
+	row := ansi.Strip(Tabs(24, seven, 6, ChromeStyle{}))
+	x := strings.Index(row, "seven")
+	require.Equal(t, 6, TabAt(24, seven, 6, ChromeStyle{}, x), "scrolled, as Tabs draws it")
+	require.Equal(t, -1, TabAt(24, seven, 6, ChromeStyle{}, 0), "the scroll mark is no tab")
+}

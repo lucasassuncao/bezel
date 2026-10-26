@@ -111,11 +111,7 @@ func (s Shell) View(panes map[string]Pane) string {
 	rows := make([]string, 0, s.height)
 	rows = append(rows, s.headerLines()...)
 	if len(s.cfg.Tabs) > 0 {
-		names := make([]string, len(s.cfg.Tabs))
-		for i, t := range s.cfg.Tabs {
-			names[i] = t.Name()
-		}
-		rows = append(rows, draw.Tabs(s.width, names, s.tab, th.Chrome))
+		rows = append(rows, draw.Tabs(s.width, s.tabNames(), s.tab, th.Chrome))
 	}
 	rows = append(rows, draw.Fit("", s.width))
 
@@ -214,4 +210,13 @@ func (s Shell) statusRow() string {
 func (s Shell) statusLiner() overlay.StatusLiner {
 	sl, _ := s.overlays.Top().(overlay.StatusLiner)
 	return sl
+}
+
+// tabNames is what the tab strip shows, one per tab.
+func (s Shell) tabNames() []string {
+	names := make([]string, len(s.cfg.Tabs))
+	for i, t := range s.cfg.Tabs {
+		names[i] = t.Name()
+	}
+	return names
 }

@@ -145,3 +145,15 @@ func TestPickAnswersToTheKeysItWasGiven(t *testing.T) {
 	require.Equal(t, 1, o.(Pick).Cursor(), "the arrow is no longer bound")
 	require.Contains(t, ansi.Strip(p.View(layout.Rect{W: 60, H: 20})), "[k] move")
 }
+
+func TestChoiceRunsTheOptionClicked(t *testing.T) {
+	ran := ""
+	opt := func(label, k string) Option {
+		return Opt(k, label, func() tea.Msg { ran = label; return nil })
+	}
+	s := Stack{}.Push(NewChoice("Save?", []string{"unsaved"}, []Option{opt("Save", "s"), opt("Discard", "d")}, theme.Resolved{}))
+	x, y := cellOf(t, s, "Discard")
+	_, cmd := s.Click(x, y, clickBody)
+	require.True(t, isClose(cmd))
+	require.Equal(t, "Discard", ran)
+}

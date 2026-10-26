@@ -111,6 +111,11 @@ func (c Checkbox) Label() string           { return "" }
 func (c Checkbox) Focus() (Field, tea.Cmd) { return c, nil }
 func (c Checkbox) Blur() Field             { return c }
 
+func (c Checkbox) flip() Field {
+	c.checked = !c.checked
+	return c
+}
+
 func (c Checkbox) Update(msg tea.Msg) (Field, tea.Cmd) {
 	if is(msg, c.keys.Press) {
 		c.checked = !c.checked
@@ -226,6 +231,11 @@ func (t Toggle) On() bool                { return t.on }
 func (t Toggle) Label() string           { return t.label }
 func (t Toggle) Focus() (Field, tea.Cmd) { return t, nil }
 func (t Toggle) Blur() Field             { return t }
+
+func (t Toggle) flip() Field {
+	t.on = !t.on
+	return t
+}
 
 func (t Toggle) Update(msg tea.Msg) (Field, tea.Cmd) {
 	if is(msg, t.keys.Press, t.keys.Left, t.keys.Right) {
@@ -365,6 +375,8 @@ func (b Button) rebind(k Keys) Field { return b.WithKeys(k) }
 func (b Button) Label() string           { return "" }
 func (b Button) Focus() (Field, tea.Cmd) { return b, nil }
 func (b Button) Blur() Field             { return b }
+
+func (b Button) press() tea.Cmd { return b.onPress }
 
 func (b Button) Update(msg tea.Msg) (Field, tea.Cmd) {
 	if is(msg, b.keys.Press) {

@@ -1,6 +1,8 @@
 package shell
 
 import (
+	"slices"
+
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -54,4 +56,29 @@ func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg {
 		return tea.MouseMotionMsg(m)
 	}
 	return msg
+}
+
+// click is the shell's part of a left click: an open dialog's, a tab's, or
+// the focus of a pane out of focus, after which the click comes back to be
+// the app's. A click on a focused pane or the chrome is the app's at once.
+func (s Shell) click(c tea.MouseClickMsg) (Shell, bool, tea.Cmd) {
+	if s.overlays.Len() > 0 {
+		var cmd tea.Cmd
+		s.overlays, cmd = s.overlays.Click(c.X, c.Y, s.Body())
+		return s, true, cmd
+	}
+	if len(s.cfg.Tabs) > 0 && c.Y == s.headerRows() {
+		if i := draw.TabAt(s.width, s.tabNames(), s.tab, s.cfg.Theme.Chrome, c.X); i >= 0 {
+			next, cmd := s.showTab(i)
+			return next, true, cmd
+		}
+		return s, true, nil
+	}
+	pane, ok := s.PaneAt(c.X, c.Y)
+	if !ok || pane == s.Focus() || !slices.Contains(layout.Ring(s.cfg.Layout), pane) {
+		return s, false, nil
+	}
+	next, cmd := s.focused(s.Focus(), s.focusOn(pane).relayout())
+	again := func() tea.Msg { return c } // now on the focused pane: the app's
+	return next, true, tea.Sequence(cmd, again)
 }

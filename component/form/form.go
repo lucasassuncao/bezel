@@ -136,6 +136,51 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 }
 
 // move hands the focus by steps, wrapping at either end.
+// pressable is a field a click runs, as space would: a button.
+type pressable interface{ press() tea.Cmd }
+
+// flippable is a field a click turns over: a checkbox or a toggle.
+type flippable interface{ flip() Field }
+
+// Click focuses the field drawn on row y of View(width) and presses it when
+// it is a button, a checkbox or a toggle. A row past the fields does nothing.
+func (f Form) Click(y, width int) (Form, tea.Cmd) {
+	i := f.fieldAt(y, width)
+	if i < 0 {
+		return f, nil
+	}
+	var focus tea.Cmd
+	if i != f.focus {
+		f, focus = f.move(i - f.focus)
+	}
+	switch fl := f.fields[i].(type) {
+	case pressable:
+		return f, tea.Batch(focus, fl.press())
+	case flippable:
+		f.fields = slices.Clone(f.fields)
+		f.fields[i] = fl.flip()
+	}
+	return f, focus
+}
+
+// fieldAt is the field drawn on row y, counting the rows an open select
+// takes; -1 past them.
+func (f Form) fieldAt(y, width int) int {
+	labelW := 0
+	for _, fl := range f.fields {
+		labelW = max(labelW, draw.Width(fl.Label()))
+	}
+	top := 0
+	for i, fl := range f.fields {
+		_, h := draw.BlockSize(fl.View(i == f.focus, labelW, width))
+		if y >= top && y < top+h {
+			return i
+		}
+		top += h
+	}
+	return -1
+}
+
 func (f Form) move(by int) (Form, tea.Cmd) {
 	f.fields = slices.Clone(f.fields)
 	f.fields[f.focus] = f.fields[f.focus].Blur()

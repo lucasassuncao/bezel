@@ -193,3 +193,56 @@ func TestPushingNilLeavesTheStackAlone(t *testing.T) {
 	require.Equal(t, 0, s.Len())
 	require.NotPanics(t, func() { _ = s.View(layout.Rect{W: 40, H: 10}, "base") })
 }
+
+var clickBody = layout.Rect{X: 0, Y: 2, W: 60, H: 20}
+
+// cellOf is the screen cell where text first shows in the stack's view.
+func cellOf(t *testing.T, s Stack, text string) (x, y int) {
+	t.Helper()
+	blank := strings.Repeat(strings.Repeat(" ", clickBody.W)+"\n", clickBody.Y+clickBody.H)
+	for y, row := range strings.Split(ansi.Strip(s.View(clickBody, blank)), "\n") {
+		if at := strings.Index(row, text); at >= 0 {
+			return ansi.StringWidth(row[:at]), y
+		}
+	}
+	t.Fatalf("%q is not on screen", text)
+	return 0, 0
+}
+
+// isClose reports whether cmd, or one in its batch, closes the dialog.
+func isClose(cmd tea.Cmd) bool {
+	if cmd == nil {
+		return false
+	}
+	switch msg := cmd().(type) {
+	case CloseMsg:
+		return true
+	case tea.BatchMsg:
+		for _, c := range msg {
+			if isClose(c) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func TestAClickReachesTheTopDialogInItsOwnCells(t *testing.T) {
+	s := Stack{}.Push(NewAlert(Info, "Saved", "all done", theme.Resolved{}))
+	x, y := cellOf(t, s, "OK")
+	_, cmd := s.Click(x, y, clickBody)
+	require.True(t, isClose(cmd), "a click on OK")
+	_, cmd = s.Click(0, 0, clickBody)
+	require.Nil(t, cmd, "a click off the dialog does nothing")
+	_, cmd = Stack{}.Push(&fake{}).Click(x, y, clickBody)
+	require.Nil(t, cmd, "a dialog that is no Clicker ignores it")
+}
+
+func TestButtonAtFindsEachButtonOnItsRow(t *testing.T) {
+	view := "title\n\n [ Yes ]  [ No ] "
+	require.Equal(t, 0, buttonAt(view, 2, 2, []string{"[ Yes ]", "[ No ]"}))
+	require.Equal(t, 1, buttonAt(view, 11, 2, []string{"[ Yes ]", "[ No ]"}))
+	require.Equal(t, -1, buttonAt(view, 9, 2, []string{"[ Yes ]", "[ No ]"}), "the gap")
+	require.Equal(t, -1, buttonAt(view, 2, 0, []string{"[ Yes ]"}), "another row")
+	require.Equal(t, -1, buttonAt(view, 2, 9, []string{"[ Yes ]"}))
+}

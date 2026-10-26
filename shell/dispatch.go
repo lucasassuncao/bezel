@@ -34,26 +34,37 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 	case kindCommands:
 		return s.OpenCommands(), nil
 	case kindChangeTab:
-		from := s.tab
-		if s = s.SetTab(cycle(s.tab, len(s.cfg.Tabs), backward(ac, pressed))); s.tab == from || s.cfg.Transition == nil {
-			return s, nil
-		}
-		s.trans = s.cfg.Transition(from, s.tab)
-		return s, s.trans.Tick()
+		return s.showTab(cycle(s.tab, len(s.cfg.Tabs), backward(ac, pressed)))
 	case kindChangePane:
 		step := 1
 		if backward(ac, pressed) {
 			step = -1
 		}
 		from := s.Focus()
-		s = s.nextPane(step).relayout() // so FocusMsg names where focus really lands
-		if to := s.Focus(); to != from {
-			s.glow = newGlow(from, s.cfg.FocusFade)
-			return s, tea.Batch(func() tea.Msg { return FocusMsg{From: from, To: to} }, s.glow.run.Tick())
-		}
-		return s, nil
+		return s.focused(from, s.nextPane(step).relayout()) // so FocusMsg names where focus really lands
 	}
 	return s, a.Run(ActionContext{Context: s.Context(), Arg: arg})
+}
+
+// showTab moves to tab i, playing the Transition when there is one.
+func (s Shell) showTab(i int) (Shell, tea.Cmd) {
+	from := s.tab
+	if s = s.SetTab(i); s.tab == from || s.cfg.Transition == nil {
+		return s, nil
+	}
+	s.trans = s.cfg.Transition(from, s.tab)
+	return s, s.trans.Tick()
+}
+
+// focused is s after focus moved from from: the glow and a FocusMsg when it
+// landed somewhere else, nothing when it stayed.
+func (s Shell) focused(from string, next Shell) (Shell, tea.Cmd) {
+	to := next.Focus()
+	if to == from {
+		return next, nil
+	}
+	next.glow = newGlow(from, next.cfg.FocusFade)
+	return next, tea.Batch(func() tea.Msg { return FocusMsg{From: from, To: to} }, next.glow.run.Tick())
 }
 
 // backward reports a cycle walking back: fired by any key after the first.

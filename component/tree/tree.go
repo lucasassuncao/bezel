@@ -296,6 +296,27 @@ func (m Model[N]) keepOff(w layout.Window, n int) layout.Window {
 	return w
 }
 
+// Click is a left click on line y of View: on a row it moves the cursor
+// there, and on the row already under the cursor it opens or closes it,
+// Expanded or Collapsed. A heading or the "more" row does nothing.
+func (m Model[N]) Click(y int) (Model[N], Action) {
+	vis := m.Visible()
+	w := m.window().Clamp(len(vis))
+	start, end, _ := w.Bounds(len(vis))
+	vi := start + y
+	switch {
+	case y < 0 || vi >= end || m.Nodes[vis[vi]].TreeInfo().Section:
+		return m, None
+	case vi != w.Cursor:
+		m.Cursor = vi
+		return m.clampOffset(len(vis)), None
+	}
+	if in := m.Nodes[vis[vi]].TreeInfo(); !in.Leaf && in.Expanded {
+		return m.WithNodeMutated(vis[vi], func(n *N) { *n = (*n).Expand(false) }), Collapsed
+	}
+	return m.expand(vis)
+}
+
 // MoveTo jumps to a visible row, snapping backwards over section rows: the
 // last row of a grouped list is a node only by coincidence.
 func (m Model[N]) MoveTo(i int) Model[N] {

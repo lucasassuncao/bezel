@@ -57,3 +57,17 @@ func TestConfirmAnswersToTheKeysItWasGiven(t *testing.T) {
 	require.Contains(t, drain(cmd()), tea.Msg(CloseMsg{}))
 	require.Contains(t, hint(c), "[s] sim")
 }
+
+func TestConfirmAnswersAClickOnItsButtons(t *testing.T) {
+	fired := false
+	c := NewConfirm("Delete?", "for good", func() tea.Msg { fired = true; return nil }, theme.Resolved{})
+	s := Stack{}.Push(c)
+	x, y := cellOf(t, s, "No")
+	_, cmd := s.Click(x, y, clickBody)
+	require.True(t, isClose(cmd))
+	require.False(t, fired)
+	x, y = cellOf(t, s, "Yes")
+	_, cmd = s.Click(x, y, clickBody)
+	require.True(t, isClose(cmd))
+	require.True(t, fired)
+}

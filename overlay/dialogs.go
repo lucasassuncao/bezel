@@ -101,11 +101,28 @@ func (c Choice) Legend() []legend.Entry {
 // View draws each option as a button naming its keys. The one enter picks is
 // filled in the dialog's colour, since that is what enter will do.
 func (c Choice) View(body layout.Rect) string {
+	return dialog(c.title, c.lines, strings.Join(c.buttons(), "  "), c.style(), body)
+}
+
+// buttons are the options as View draws them.
+func (c Choice) buttons() []string {
 	buttons := make([]string, 0, len(c.options))
 	for _, o := range c.options {
 		buttons = append(buttons, c.button(o.Label+" ("+o.Key.Help().Key+")", slices.Contains(o.Key.Keys(), "enter")))
 	}
-	return dialog(c.title, c.lines, strings.Join(buttons, "  "), c.style(), body)
+	return buttons
+}
+
+// Click runs the option whose button it lands on, as its key would.
+func (c Choice) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
+	i := buttonAt(c.View(body), x, y, c.buttons())
+	switch {
+	case i < 0:
+		return c, nil
+	case c.options[i].Do == nil:
+		return c, Close()
+	}
+	return c, tea.Batch(c.options[i].Do, Close())
 }
 
 // Pick is a dialog that chooses one row of a list with the arrows: which

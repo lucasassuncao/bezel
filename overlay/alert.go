@@ -41,6 +41,14 @@ func (a Alert) View(body layout.Rect) string {
 	return dialog(a.title, lines, a.okButton(lines), a.style(), body)
 }
 
+// Click closes the alert on a click on OK.
+func (a Alert) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
+	if buttonAt(a.View(body), x, y, []string{a.button("OK", true)}) == 0 {
+		return a, Close()
+	}
+	return a, nil
+}
+
 // accent is the colour a dialog is drawn in: its border's.
 func accent(style lipgloss.Style) lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(style.GetBorderTopForeground())

@@ -23,6 +23,7 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
   - [func New\[N Noder\[N\]\]\(nodes \[\]N, height int\) Model\[N\]](<#New>)
   - [func \(m Model\[N\]\) ClampCursor\(\) Model\[N\]](<#Model[N].ClampCursor>)
   - [func \(m Model\[N\]\) ClampOffset\(\) Model\[N\]](<#Model[N].ClampOffset>)
+  - [func \(m Model\[N\]\) Click\(y int\) \(Model\[N\], Action\)](<#Model[N].Click>)
   - [func \(m Model\[N\]\) CurrentIdx\(\) int](<#Model[N].CurrentIdx>)
   - [func \(m Model\[N\]\) CursorTo\(match func\(N\) bool\) \(Model\[N\], bool\)](<#Model[N].CursorTo>)
   - [func \(m Model\[N\]\) Expand\(\) \(Model\[N\], Action\)](<#Model[N].Expand>)
@@ -151,7 +152,7 @@ func New[N Noder[N]](nodes []N, height int) Model[N]
 New builds a tree over nodes, height rows tall, with the cursor on the first row that is not a section.
 
 <a name="Model[N].ClampCursor"></a>
-### func \(Model\[N\]\) [ClampCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L362>)
+### func \(Model\[N\]\) [ClampCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L383>)
 
 ```go
 func (m Model[N]) ClampCursor() Model[N]
@@ -160,13 +161,22 @@ func (m Model[N]) ClampCursor() Model[N]
 ClampCursor forces the cursor back into the visible range, for state restores whose cursor may no longer be valid against the restored nodes.
 
 <a name="Model[N].ClampOffset"></a>
-### func \(Model\[N\]\) [ClampOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L355>)
+### func \(Model\[N\]\) [ClampOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L376>)
 
 ```go
 func (m Model[N]) ClampOffset() Model[N]
 ```
 
 ClampOffset scrolls so the cursor row stays visible, moving a cursor past the last row back onto it.
+
+<a name="Model[N].Click"></a>
+### func \(Model\[N\]\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L302>)
+
+```go
+func (m Model[N]) Click(y int) (Model[N], Action)
+```
+
+Click is a left click on line y of View: on a row it moves the cursor there, and on the row already under the cursor it opens or closes it, Expanded or Collapsed. A heading or the "more" row does nothing.
 
 <a name="Model[N].CurrentIdx"></a>
 ### func \(Model\[N\]\) [CurrentIdx](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L193>)
@@ -178,7 +188,7 @@ func (m Model[N]) CurrentIdx() int
 CurrentIdx is the Nodes index under the cursor, or \-1.
 
 <a name="Model[N].CursorTo"></a>
-### func \(Model\[N\]\) [CursorTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L370>)
+### func \(Model\[N\]\) [CursorTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L391>)
 
 ```go
 func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool)
@@ -187,7 +197,7 @@ func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool)
 CursorTo moves the cursor to the first visible row match accepts, or leaves it when none does, as a nil match. Reports whether it moved.
 
 <a name="Model[N].Expand"></a>
-### func \(Model\[N\]\) [Expand](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L318>)
+### func \(Model\[N\]\) [Expand](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L339>)
 
 ```go
 func (m Model[N]) Expand() (Model[N], Action)
@@ -223,7 +233,7 @@ func (m Model[N]) Move(delta int) Model[N]
 Move walks delta rows, stepping over section rows and stopping at the last row rather than running into a trailing heading.
 
 <a name="Model[N].MoveTo"></a>
-### func \(Model\[N\]\) [MoveTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L301>)
+### func \(Model\[N\]\) [MoveTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L322>)
 
 ```go
 func (m Model[N]) MoveTo(i int) Model[N]
@@ -232,7 +242,7 @@ func (m Model[N]) MoveTo(i int) Model[N]
 MoveTo jumps to a visible row, snapping backwards over section rows: the last row of a grouped list is a node only by coincidence.
 
 <a name="Model[N].Reveal"></a>
-### func \(Model\[N\]\) [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L387>)
+### func \(Model\[N\]\) [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L408>)
 
 ```go
 func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool)
@@ -259,7 +269,7 @@ func (m Model[N]) Update(msg tea.KeyPressMsg) (Model[N], Action)
 Update moves the cursor and expands or collapses. Other keys return None and leave the tree unchanged, so the caller layers its own on top.
 
 <a name="Model[N].View"></a>
-### func \(Model\[N\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L423>)
+### func \(Model\[N\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L444>)
 
 ```go
 func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) string) string

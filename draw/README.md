@@ -42,6 +42,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func ScrollTo\(s string, height, target int\) string](<#ScrollTo>)
 - [func ShortDuration\(d time.Duration\) string](<#ShortDuration>)
 - [func StatusLine\(width int, text string, style lipgloss.Style\) string](<#StatusLine>)
+- [func TabAt\(width int, names \[\]string, active int, st ChromeStyle, x int\) int](<#TabAt>)
 - [func Tabs\(width int, names \[\]string, active int, st ChromeStyle\) string](<#Tabs>)
 - [func Tail\(lines \[\]string, height int\) \[\]string](<#Tail>)
 - [func TitledPanel\(r layout.Rect, title, right, body string, st PanelStyle\) string](<#TitledPanel>)
@@ -141,7 +142,7 @@ func Cut(s string, width int) string
 Cut is Truncate without the ellipsis: the line ends where the width does.
 
 <a name="Divider"></a>
-## func [Divider](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L89>)
+## func [Divider](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L122>)
 
 ```go
 func Divider(width int, label string, line, text lipgloss.Style) string
@@ -150,7 +151,7 @@ func Divider(width int, label string, line, text lipgloss.Style) string
 Divider is a horizontal rule width cells long, with label set into it after a short lead when one is given: "── Label ─────".
 
 <a name="EmptyState"></a>
-## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L112>)
+## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L145>)
 
 ```go
 func EmptyState(r layout.Rect, message, hint string, st ChromeStyle) string
@@ -321,13 +322,22 @@ func ShortDuration(d time.Duration) string
 ShortDuration renders a lifetime the way a header has room for: the two largest units that say anything, truncated rather than rounded, so a countdown never shows more time than is left.
 
 <a name="StatusLine"></a>
-## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L107>)
+## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L140>)
 
 ```go
 func StatusLine(width int, text string, style lipgloss.Style) string
 ```
 
 StatusLine is one row of text in a style, exactly width cells.
+
+<a name="TabAt"></a>
+## func [TabAt](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L49>)
+
+```go
+func TabAt(width int, names []string, active int, st ChromeStyle, x int) int
+```
+
+TabAt is the tab Tabs draws at column x with the same arguments, \-1 over a gap, a scroll mark or past the last tab.
 
 <a name="Tabs"></a>
 ## func [Tabs](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L38>)

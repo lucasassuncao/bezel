@@ -337,14 +337,7 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 	case key.Matches(msg, m.keys.Esc):
 		m.find = filterMode{}
 	case key.Matches(msg, m.keys.Enter):
-		idx, at := m.filtered(), m.find.win.Cursor
-		m.find = filterMode{}
-		if at >= len(idx) {
-			return m, None
-		}
-		from := m.win.Cursor
-		m.win.Cursor = idx[at]
-		return m.start(float64(from)).clampScroll(), Chosen
+		return m.pickMatch()
 	case msg.String() == "backspace" || msg.String() == "ctrl+h":
 		if text := m.find.text; text != "" {
 			_, size := utf8.DecodeLastRuneInString(text)
@@ -364,6 +357,60 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 		}
 	}
 	return m, None
+}
+
+// Click is a left click on line y of View: on a row it moves the cursor
+// there, and on the row already under the cursor it chooses it, as enter
+// would. A heading, the title or a line past the rows does nothing.
+func (m Model[T]) Click(y int) (Model[T], Action) {
+	if m.title != "" {
+		y--
+	}
+	if m.height <= 0 || y < 0 {
+		return m, None
+	}
+	at := y / m.itemLines()
+	if m.find.on {
+		idx := m.filtered()
+		w := m.find.win.Clamp(len(idx))
+		start, end, _ := w.Bounds(len(idx))
+		if at >= end-start {
+			return m, None
+		}
+		if start+at == w.Cursor {
+			return m.pickMatch()
+		}
+		m.find.win.Cursor = start + at
+		return m, None
+	}
+	start, end, _ := m.win.Bounds(len(m.rows))
+	if m.pages && m.win.Height > 0 {
+		start = m.win.Cursor / m.win.Height * m.win.Height
+		end = min(start+m.win.Height, len(m.rows))
+	}
+	i := start + at
+	switch {
+	case i >= end || m.rows[i].Section:
+		return m, None
+	case i == m.win.Cursor:
+		return m, Chosen
+	}
+	from := m.win.Cursor
+	m.win.Cursor = i
+	return m.start(float64(from)).clampScroll(), None
+}
+
+// pickMatch closes the filter on the match under its cursor, Chosen, or on
+// nothing when nothing matched.
+func (m Model[T]) pickMatch() (Model[T], Action) {
+	idx, at := m.filtered(), m.find.win.Cursor
+	m.find = filterMode{}
+	if at >= len(idx) {
+		return m, None
+	}
+	from := m.win.Cursor
+	m.win.Cursor = idx[at]
+	return m.start(float64(from)).clampScroll(), Chosen
 }
 
 // newFilter is the prompt opened afresh, its window the rows the body holds

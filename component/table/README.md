@@ -25,6 +25,7 @@ Package table sizes columns to their contents, giving way in a declared order wh
 - [type Model](<#Model>)
   - [func New\[T any\]\(cols \[\]Column, items \[\]Item\[T\], height int\) Model\[T\]](<#New>)
   - [func \(m Model\[T\]\) Blur\(\) Model\[T\]](<#Model[T].Blur>)
+  - [func \(m Model\[T\]\) Click\(y int\) \(Model\[T\], Action\)](<#Model[T].Click>)
   - [func \(m Model\[T\]\) Cursor\(\) int](<#Model[T].Cursor>)
   - [func \(m Model\[T\]\) Focus\(\) Model\[T\]](<#Model[T].Focus>)
   - [func \(m Model\[T\]\) Focused\(\) bool](<#Model[T].Focused>)
@@ -176,6 +177,15 @@ func (m Model[T]) Blur() Model[T]
 
 Blur stops the table taking keys and draws its cursor row dimmed, for a pane that lost the focus.
 
+<a name="Model[T].Click"></a>
+### func \(Model\[T\]\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L205>)
+
+```go
+func (m Model[T]) Click(y int) (Model[T], Action)
+```
+
+Click is a left click on line y of View: on a row it moves the cursor there, and on the row already under the cursor it chooses it. The header and the "more" row do nothing. A blurred table takes it too.
+
 <a name="Model[T].Cursor"></a>
 ### func \(Model\[T\]\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L125>)
 
@@ -276,7 +286,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
 Update handles one key. Keys the table does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L213>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L230>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved, width int) string
