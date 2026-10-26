@@ -482,3 +482,26 @@ func TestCursorModesAndTheTerminalCursor(t *testing.T) {
 	require.Nil(t, m.Blur().TerminalCursor())
 	require.Nil(t, focused("x").TerminalCursor())
 }
+
+func TestTheMouseSelectsByDragging(t *testing.T) {
+	m := focused("hello world\nsecond line").SetWidth(40)
+	lead := draw.GutterWidth
+	m = run(m, tea.MouseClickMsg{X: lead + 6, Y: 0, Button: tea.MouseLeft})
+	require.Equal(t, 0, m.Line())
+	require.Equal(t, 6, m.Column(), "the caret on the cell clicked")
+	require.False(t, m.HasSelection())
+
+	m = run(m, tea.MouseMotionMsg{X: lead + 6, Y: 1, Button: tea.MouseLeft}, tea.MouseReleaseMsg{X: lead + 3, Y: 1})
+	require.Equal(t, "world\nsec", m.SelectedText())
+	m = run(m, tea.MouseMotionMsg{X: lead, Y: 0})
+	require.Equal(t, "world\nsec", m.SelectedText(), "after the release a motion is not a drag")
+
+	m = run(m, tea.MouseClickMsg{X: lead + 99, Y: 1, Button: tea.MouseLeft, Mod: tea.ModShift})
+	require.Equal(t, "world\nsecond line", m.SelectedText(), "shift+click extends; a cell past the end is the end")
+	require.Equal(t, Position{1, 11}, m.PositionAt(99, 99))
+}
+
+func TestABlurredFieldIgnoresTheMouse(t *testing.T) {
+	m := run(focused("abc").Blur(), tea.MouseClickMsg{X: draw.GutterWidth, Y: 0, Button: tea.MouseLeft})
+	require.Equal(t, 3, m.Column())
+}

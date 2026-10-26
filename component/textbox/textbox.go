@@ -141,6 +141,7 @@ type Model struct {
 	painted   string
 	selecting bool // the selection runs from anchor to the caret
 	anchor    Position
+	dragging  bool   // the left button went down in the field and is held
 	charLimit int    // the most characters, line breaks included; 0 is no cap
 	maxLines  int    // the most lines; 0 is no cap
 	grow      [2]int // the least and most rows a growing field takes; zero is fixed
@@ -551,8 +552,74 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		if m.focused {
 			return m.key(msg)
 		}
+	case tea.MouseClickMsg, tea.MouseMotionMsg, tea.MouseReleaseMsg:
+		if m.focused {
+			return m.mouse(msg.(tea.MouseMsg))
+		}
 	}
 	return m, nil
+}
+
+// mouse selects with the left button: a click puts the caret on the cell and
+// anchors there, shift+click extends from the old anchor, a drag drags the
+// caret and a release ends it. Cells are the field's own, from its top left.
+func (m Model) mouse(msg tea.MouseMsg) (Model, tea.Cmd) {
+	at := msg.Mouse()
+	switch msg.(type) {
+	case tea.MouseClickMsg:
+		if at.Button != tea.MouseLeft {
+			return m, nil
+		}
+		keep := m.selecting && at.Mod&tea.ModShift != 0
+		anchor := m.anchor
+		if !keep {
+			anchor = m.PositionAt(at.X, at.Y)
+		}
+		m = m.dragTo(at.X, at.Y)
+		m.selecting, m.anchor, m.dragging = true, anchor, true
+	case tea.MouseMotionMsg:
+		if !m.dragging {
+			return m, nil
+		}
+		m = m.dragTo(at.X, at.Y)
+	case tea.MouseReleaseMsg:
+		if !m.dragging {
+			return m, nil
+		}
+		m = m.dragTo(at.X, at.Y)
+		m.dragging = false
+	}
+	return m.scroll().lit()
+}
+
+// dragTo moves the caret to the cell, keeping the selection as it was.
+func (m Model) dragTo(x, y int) Model {
+	p, sel, anchor := m.PositionAt(x, y), m.selecting, m.anchor
+	m = m.MoveTo(p.Line, p.Column)
+	m.selecting, m.anchor = sel, anchor
+	return m
+}
+
+// PositionAt is the place in the text drawn at cell (x, y) of the field's
+// view, counted from its top left; a cell past the text lands on the
+// nearest place in it.
+func (m Model) PositionAt(x, y int) Position {
+	m = m.ready()
+	start, _ := m.window()
+	row := max(start+y, 0)
+	for i, l := range m.lines {
+		if row < len(l.starts) {
+			from, to := span(l.starts, row, l.Len())
+			col := from + edit.NewLine(l.Slice(from, to)).IndexAt(max(x-m.lead(), 0))
+			if row+1 < len(l.starts) {
+				col = min(col, to-1) // the end of a wrapped row is the next row's start
+			}
+			return Position{i, col}
+		}
+		row -= len(l.starts)
+	}
+	last := len(m.lines) - 1
+	return Position{last, m.lines[last].Len()}
 }
 
 // typingMods are the modifiers that make a key a command, never text.

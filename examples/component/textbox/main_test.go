@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
+	"github.com/lucasassuncao/bezel/draw"
 )
 
 // frame sends msg and renders; every row must be exactly 80 columns wide.
@@ -42,4 +43,16 @@ func TestTextboxCountsLines(t *testing.T) {
 	_, out := frame(t, m, cmd())
 	t.Log("\n" + out)
 	require.Contains(t, out, "4 lines", "CRLF folded: three lines and the empty last one")
+}
+
+func TestTextboxSelectsWithTheMouse(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	in := draw.InnerRect(m.(model).sh.Rect("text"))
+	x, y := in.X+draw.GutterWidth, in.Y
+	m, _ = m.Update(tea.MouseClickMsg{X: x, Y: y, Button: tea.MouseLeft})
+	m, _ = m.Update(tea.MouseReleaseMsg{X: x + 7, Y: y, Button: tea.MouseLeft})
+	require.Equal(t, "# notes", m.(model).ta.SelectedText())
+	m, _ = m.Update(bezeltest.Key("x"))
+	require.True(t, strings.HasPrefix(m.(model).ta.Value(), "x\n"), "typing replaced the selection")
 }

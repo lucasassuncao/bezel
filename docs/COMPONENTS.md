@@ -150,7 +150,7 @@ One of each control: a name typed into an `Input`, an image picked from a `Selec
 
 Source: [`examples/component/textbox/main.go`](../examples/component/textbox/main.go)
 
-A multi-line value with its lines numbered. Every key is text, so the app quits on `esc`; `ctrl+s` counts the lines.
+A multi-line value with its lines numbered. Every key is text, so the app quits on `esc`; `ctrl+s` counts the lines. Shift with the arrows selects, and so does dragging the mouse: the shell's `MouseIn` moves the pointer into the pane's cells.
 
 ![textbox](recordings/component/textbox.gif)
 

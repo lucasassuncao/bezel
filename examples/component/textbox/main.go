@@ -1,5 +1,5 @@
 // Textbox: a multi-line value with its lines numbered; every key is text,
-// so the app quits on esc and reports on ctrl+s.
+// so the app quits on esc and reports on ctrl+s. The mouse selects by dragging.
 package main
 
 import (
@@ -65,6 +65,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
+	case tea.MouseMsg:
+		// One pane: a drag that leaves it still moves the caret.
+		m.ta, cmd = m.ta.Update(m.sh.MouseIn("text", msg))
+		return m, cmd
 	}
 	m.ta, cmd = m.ta.Update(msg)
 	return m, cmd
@@ -75,6 +79,7 @@ func (m model) View() tea.View {
 		"text": {Title: "notes.md", Body: func(layout.Rect) string { return m.ta.View() }},
 	}))
 	v.AltScreen = true
+	v.MouseMode = tea.MouseModeCellMotion
 	return v
 }
 

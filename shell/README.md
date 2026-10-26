@@ -57,8 +57,11 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) Idle\(\) Shell](<#Shell.Idle>)
   - [func \(s Shell\) Input\(\) \(input.Model, bool\)](<#Shell.Input>)
   - [func \(s Shell\) IsBusy\(\) bool](<#Shell.IsBusy>)
+  - [func \(s Shell\) Mouse\(msg tea.MouseMsg\) \(string, tea.MouseMsg, bool\)](<#Shell.Mouse>)
+  - [func \(s Shell\) MouseIn\(pane string, msg tea.MouseMsg\) tea.MouseMsg](<#Shell.MouseIn>)
   - [func \(s Shell\) Narrow\(\) bool](<#Shell.Narrow>)
   - [func \(s Shell\) OpenCommands\(\) Shell](<#Shell.OpenCommands>)
+  - [func \(s Shell\) PaneAt\(x, y int\) \(string, bool\)](<#Shell.PaneAt>)
   - [func \(s Shell\) Pop\(\) Shell](<#Shell.Pop>)
   - [func \(s Shell\) Push\(o overlay.Overlay\) Shell](<#Shell.Push>)
   - [func \(s Shell\) Rect\(name string\) layout.Rect](<#Shell.Rect>)
@@ -553,6 +556,24 @@ func (s Shell) IsBusy() bool
 
 IsBusy reports whether Busy is in effect.
 
+<a name="Shell.Mouse"></a>
+### func \(Shell\) [Mouse](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L31>)
+
+```go
+func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool)
+```
+
+Mouse finds the pane under the pointer of msg and hands back msg moved into that pane's body, the rect its Body draws in, so a component in it reads the cell it was given. false when no pane is under the pointer.
+
+<a name="Shell.MouseIn"></a>
+### func \(Shell\) [MouseIn](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L42>)
+
+```go
+func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg
+```
+
+MouseIn is msg moved into pane's body wherever the pointer is, for a drag that began in the pane and left it: the cell may then fall outside.
+
 <a name="Shell.Narrow"></a>
 ### func \(Shell\) [Narrow](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L211>)
 
@@ -570,6 +591,15 @@ func (s Shell) OpenCommands() Shell
 ```
 
 OpenCommands opens the palette over the declared named actions, for an app that decides itself when ":" means commands and when it is text.
+
+<a name="Shell.PaneAt"></a>
+### func \(Shell\) [PaneAt](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L12>)
+
+```go
+func (s Shell) PaneAt(x, y int) (string, bool)
+```
+
+PaneAt is the pane drawn at the screen cell \(x, y\), border included, and false over the chrome, a gap or an open dialog, which covers the panes.
 
 <a name="Shell.Pop"></a>
 ### func \(Shell\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L278>)
