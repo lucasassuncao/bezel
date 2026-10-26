@@ -12,6 +12,7 @@ import (
 
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
+	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -28,6 +29,7 @@ type Info struct {
 	Leaf     bool // nothing under it: never expands
 	Expanded bool
 	Section  bool // a heading or spacer: skipped by the cursor
+	Hidden   bool // left out, and everything under it with it
 }
 
 // Action is what a key did.
@@ -47,11 +49,21 @@ type Keys struct {
 // DefaultKeys are the four arrows.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:    key.NewBinding(key.WithKeys("up")),
+		Up:    key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "move")),
 		Down:  key.NewBinding(key.WithKeys("down")),
-		Left:  key.NewBinding(key.WithKeys("left")),
+		Left:  key.NewBinding(key.WithKeys("left"), key.WithHelp("←/→", "close/open")),
 		Right: key.NewBinding(key.WithKeys("right")),
 	}
+}
+
+// Connectors are what Guides draws before a row, one piece per level under
+// the top: Mid for a row with siblings after it, Last for the last one,
+// Pipe where an outer level runs on below and Space where it ended.
+type Connectors struct{ Mid, Last, Pipe, Space string }
+
+// DefaultConnectors are thin box-drawing lines, three cells a level.
+func DefaultConnectors() Connectors {
+	return Connectors{Mid: "├─ ", Last: "└─ ", Pipe: "│  ", Space: "   "}
 }
 
 // Model is a value: every method returns the new tree. Nodes is exported for
@@ -66,6 +78,8 @@ type Model[N Noder[N]] struct {
 	// EmptyMessage is shown when nothing is visible.
 	EmptyMessage string
 	keys         *Keys
+	lines        *Connectors
+	scrollOff    int
 }
 
 // New builds a tree over nodes, height rows tall, with the cursor on the
@@ -85,6 +99,64 @@ func (m Model[N]) WithKeys(k Keys) Model[N] {
 	return m
 }
 
+// Legend lists the keys the tree answers to.
+func (m Model[N]) Legend() []legend.Entry {
+	k := m.bindings()
+	return legend.FromBindings([]key.Binding{k.Up, k.Down, k.Left, k.Right})
+}
+
+// WithConnectors changes the lines Guides draws.
+func (m Model[N]) WithConnectors(c Connectors) Model[N] {
+	m.lines = &c
+	return m
+}
+
+// WithScrollOff keeps n rows in view above and below the cursor while it
+// moves, where the tree has them.
+func (m Model[N]) WithScrollOff(n int) Model[N] {
+	m.scrollOff = max(n, 0)
+	return m.ClampOffset()
+}
+
+// Guides is the connector prefix of every visible row, in Visible's order,
+// for a row function to draw before its label; a top-level row has none.
+func (m Model[N]) Guides() []string {
+	c := DefaultConnectors()
+	if m.lines != nil {
+		c = *m.lines
+	}
+	vis := m.Visible()
+	out := make([]string, len(vis))
+	var after []bool // after[d]: a row of depth d follows, no shallower one between
+	for vi := len(vis) - 1; vi >= 0; vi-- {
+		d := m.Nodes[vis[vi]].TreeInfo().Depth
+		for len(after) <= d {
+			after = append(after, false)
+		}
+		var b strings.Builder
+		for l := 1; l < d; l++ {
+			if after[l] {
+				b.WriteString(c.Pipe)
+			} else {
+				b.WriteString(c.Space)
+			}
+		}
+		if d > 0 {
+			if after[d] {
+				b.WriteString(c.Mid)
+			} else {
+				b.WriteString(c.Last)
+			}
+		}
+		out[vi] = b.String()
+		after[d] = true
+		for k := d + 1; k < len(after); k++ {
+			after[k] = false
+		}
+	}
+	return out
+}
+
 func (m Model[N]) bindings() Keys {
 	if m.keys != nil {
 		return *m.keys
@@ -96,13 +168,17 @@ func (m Model[N]) bindings() Keys {
 // parent's collapsed state.
 func (m Model[N]) Visible() []int {
 	vis := make([]int, 0, len(m.Nodes))
-	var collapsed []int // depths of collapsed ancestors: inside one, rows are skipped
+	var collapsed []int // depths of collapsed or hidden ancestors: inside one, rows are skipped
 	for i, n := range m.Nodes {
 		in := n.TreeInfo()
 		for len(collapsed) > 0 && in.Depth <= collapsed[len(collapsed)-1] {
 			collapsed = collapsed[:len(collapsed)-1]
 		}
 		if len(collapsed) > 0 {
+			continue
+		}
+		if in.Hidden {
+			collapsed = append(collapsed, in.Depth)
 			continue
 		}
 		vis = append(vis, i)
@@ -193,8 +269,31 @@ func (m Model[N]) Scroll() layout.Scroll {
 }
 
 func (m Model[N]) withWindow(w layout.Window) Model[N] {
+	if m.scrollOff > 0 && w.Height > 0 {
+		w = m.keepOff(w, len(m.Visible()))
+	}
 	m.Cursor, m.Offset = w.Cursor, w.Offset
 	return m
+}
+
+// keepOff scrolls w so scrollOff rows show either side of the cursor, as far
+// as n rows and the "more" row allow.
+func (m Model[N]) keepOff(w layout.Window, n int) layout.Window {
+	off := min(m.scrollOff, (w.Height-1)/2)
+	shown := w.Height
+	if w.Offset+w.Height < n {
+		shown-- // the "more" row
+	}
+	switch {
+	case w.Cursor-w.Offset < off:
+		w.Offset = max(w.Cursor-off, 0)
+	case w.Offset+shown-1-w.Cursor < off:
+		w.Offset = min(w.Cursor+off-shown+1, max(n-w.Height, 0))
+	}
+	if w.Offset+w.Height < n && w.Cursor >= w.Offset+w.Height-1 {
+		w.Offset = w.Cursor - w.Height + 2
+	}
+	return w
 }
 
 // MoveTo jumps to a visible row, snapping backwards over section rows: the

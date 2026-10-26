@@ -19,10 +19,11 @@ type node struct {
 	leaf     bool
 	expanded bool
 	section  bool
+	hidden   bool
 }
 
 func (n node) TreeInfo() Info {
-	return Info{Depth: n.depth, Leaf: n.leaf, Expanded: n.expanded, Section: n.section}
+	return Info{Depth: n.depth, Leaf: n.leaf, Expanded: n.expanded, Section: n.section, Hidden: n.hidden}
 }
 
 func (n node) Expand(open bool) node {
@@ -271,4 +272,57 @@ func TestNilFuncsAreHarmless(t *testing.T) {
 	_, moved = m.Reveal(nil)
 	require.False(t, moved)
 	require.NotPanics(t, func() { _ = m.View(theme.Resolved{}, nil) })
+}
+
+func TestAHiddenNodeTakesItsBranchWithIt(t *testing.T) {
+	ns := nodes()
+	ns[1].hidden = true // server, open, with host and port under it
+	m := New(ns, 10)
+	var labels []string
+	for _, i := range m.Visible() {
+		labels = append(labels, m.Nodes[i].label)
+	}
+	require.Equal(t, []string{"ADDED", "AVAILABLE", "cache"}, labels)
+	require.Equal(t, "cache", label(m), "the cursor skips what is gone")
+}
+
+func TestGuidesDrawTheBranches(t *testing.T) {
+	ns := []node{
+		{label: "root", expanded: true},
+		{label: "a", depth: 1, expanded: true},
+		{label: "a1", depth: 2, leaf: true},
+		{label: "a2", depth: 2, leaf: true},
+		{label: "b", depth: 1, expanded: true},
+		{label: "b1", depth: 2, leaf: true},
+	}
+	m := New(ns, 10)
+	require.Equal(t, []string{"", "├─ ", "│  ├─ ", "│  └─ ", "└─ ", "   └─ "}, m.Guides())
+	m = m.WithConnectors(Connectors{Mid: "+ ", Last: "` ", Pipe: "| ", Space: "  "})
+	require.Equal(t, "| + ", m.Guides()[2])
+}
+
+func TestScrollOffKeepsRowsAroundTheCursor(t *testing.T) {
+	ns := make([]node, 30)
+	for i := range ns {
+		ns[i] = node{label: fmt.Sprint(i), leaf: true}
+	}
+	m := New(ns, 10).WithScrollOff(2)
+	for range 7 {
+		m, _ = m.Update(press(tea.KeyDown))
+	}
+	require.Equal(t, 7, m.Cursor)
+	require.Equal(t, 1, m.Offset, "two rows and the more row below the cursor")
+	for range 6 {
+		m, _ = m.Update(press(tea.KeyUp))
+	}
+	require.Equal(t, 1, m.Cursor)
+	require.Equal(t, 0, m.Offset, "the top can show no more than it has")
+}
+
+func TestTheTreeLegendNamesItsKeys(t *testing.T) {
+	var keys []string
+	for _, e := range newTree(5).Legend() {
+		keys = append(keys, e.Help().Key)
+	}
+	require.Equal(t, []string{"↑/↓", "←/→"}, keys)
 }

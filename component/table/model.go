@@ -11,6 +11,7 @@ import (
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
+	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -31,19 +32,22 @@ const (
 
 // Keys are the bindings the table answers to.
 type Keys struct {
-	Up, Down, PageUp, PageDown, Top, Bottom, Enter key.Binding
+	Up, Down, PageUp, PageDown, HalfPageUp, HalfPageDown, Top, Bottom, Enter key.Binding
 }
 
-// DefaultKeys are the arrows, pgup/pgdown, home/end and enter.
+// DefaultKeys are the arrows, pgup/pgdown, ctrl+u/ctrl+d for half a page,
+// home/end and enter.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:       key.NewBinding(key.WithKeys("up")),
-		Down:     key.NewBinding(key.WithKeys("down")),
-		PageUp:   key.NewBinding(key.WithKeys("pgup")),
-		PageDown: key.NewBinding(key.WithKeys("pgdown")),
-		Top:      key.NewBinding(key.WithKeys("home")),
-		Bottom:   key.NewBinding(key.WithKeys("end")),
-		Enter:    key.NewBinding(key.WithKeys("enter")),
+		Up:           key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "move")),
+		Down:         key.NewBinding(key.WithKeys("down")),
+		PageUp:       key.NewBinding(key.WithKeys("pgup"), key.WithHelp("pgup/pgdn", "page")),
+		PageDown:     key.NewBinding(key.WithKeys("pgdown")),
+		HalfPageUp:   key.NewBinding(key.WithKeys("ctrl+u"), key.WithHelp("ctrl+u/d", "half page")),
+		HalfPageDown: key.NewBinding(key.WithKeys("ctrl+d")),
+		Top:          key.NewBinding(key.WithKeys("home"), key.WithHelp("home/end", "ends")),
+		Bottom:       key.NewBinding(key.WithKeys("end")),
+		Enter:        key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "choose")),
 	}
 }
 
@@ -59,6 +63,7 @@ type Model[T any] struct {
 	height int
 	win    layout.Window // over the rows, one shorter than height for the header
 	keys   Keys
+	blur   bool // drawn without the cursor's colour, and deaf to keys
 }
 
 // New builds a table height rows tall, header included, with the cursor on
@@ -72,6 +77,42 @@ func New[T any](cols []Column, items []Item[T], height int) Model[T] {
 func (m Model[T]) WithKeys(k Keys) Model[T] {
 	m.keys = k
 	return m
+}
+
+// Focus lets the table take keys and paints its cursor row; a table is
+// focused when built.
+func (m Model[T]) Focus() Model[T] {
+	m.blur = false
+	return m
+}
+
+// Blur stops the table taking keys and draws its cursor row dimmed, for a
+// pane that lost the focus.
+func (m Model[T]) Blur() Model[T] {
+	m.blur = true
+	return m
+}
+
+// Focused reports whether the table takes keys.
+func (m Model[T]) Focused() bool { return !m.blur }
+
+// Legend lists the keys the table answers to.
+func (m Model[T]) Legend() []legend.Entry {
+	k := m.keys
+	return legend.FromBindings([]key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.HalfPageUp, k.HalfPageDown, k.Top, k.Bottom, k.Enter})
+}
+
+// FromValues is the rows of delimited text, one per line, its cells split
+// at sep; blank lines are skipped. The payload is left zero.
+func FromValues[T any](text, sep string) []Item[T] {
+	var items []Item[T]
+	for line := range strings.SplitSeq(strings.ReplaceAll(text, "\r\n", "\n"), "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		items = append(items, Item[T]{Cells: strings.Split(line, sep)})
+	}
+	return items
 }
 
 // Items is a copy of every row, cells included.
@@ -130,7 +171,14 @@ func (m Model[T]) SetHeight(h int) Model[T] {
 // leave it unchanged, so the caller can layer its own on top.
 func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action) {
 	n := len(m.items)
+	if m.blur {
+		return m, None
+	}
 	switch {
+	case key.Matches(msg, m.keys.HalfPageUp):
+		m.win = m.win.Move(-max(m.page()/2, 1), n, nil)
+	case key.Matches(msg, m.keys.HalfPageDown):
+		m.win = m.win.Move(max(m.page()/2, 1), n, nil)
 	case key.Matches(msg, m.keys.Up):
 		m.win = m.win.Move(-1, n, nil)
 	case key.Matches(msg, m.keys.Down):
@@ -177,9 +225,12 @@ func (m Model[T]) View(th theme.Resolved, width int) string {
 	w := m.win.Clamp(len(m.items))
 	start, end, below := w.Bounds(len(m.items))
 	for i := start; i < end; i++ {
-		if i == w.Cursor {
+		switch {
+		case i == w.Cursor && m.blur:
+			lines = append(lines, th.Dim.Render(marker)+Row(widths, cells[i]))
+		case i == w.Cursor:
 			lines = append(lines, th.Cursor.Render(marker)+Row(widths, cursorCells(cells[i], &th)))
-		} else {
+		default:
 			lines = append(lines, pad+Row(widths, cells[i]))
 		}
 	}

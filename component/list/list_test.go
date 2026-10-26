@@ -247,3 +247,117 @@ func BenchmarkListFrame(b *testing.B) {
 		_ = m.View(th)
 	}
 }
+
+func filtered(m Model[int], text string) Model[int] {
+	m, _ = m.Update(typed("/"))
+	for _, r := range text {
+		m, _ = m.Update(typed(string(r)))
+	}
+	return m
+}
+
+func TestFuzzyRanksTheBestMatchFirstAndMarksIt(t *testing.T) {
+	m := New([]Row[int]{{Label: "carousel"}, {Label: "cherry-pick"}, {Label: "checkout"}}, 10).WithFuzzy()
+	m = filtered(m, "chk")
+	require.Equal(t, "checkout", m.Selected().Label, "a run beats scattered letters")
+	lines := strings.Split(ansi.Strip(m.View(th)), "\n")
+	require.Equal(t, "▶ checkout", lines[0])
+	require.Equal(t, "  cherry-pick", lines[1])
+	require.NotContains(t, ansi.Strip(m.View(th)), "carousel")
+	require.Contains(t, m.View(th), th.Cursor.Underline(true).Bold(true).Render("ch"))
+	plain := New([]Row[int]{{Label: "carousel"}, {Label: "cherry-pick"}}, 10).WithFuzzy().WithMatch(nil)
+	require.Equal(t, "carousel", filtered(plain, "ar").Selected().Label, "WithMatch ends it: the cherry-pick letters are not a run")
+}
+
+func TestTitleAndStatusFrameTheRows(t *testing.T) {
+	m := New(numbered(5), 5).WithTitle("Items").WithStatusBar(true)
+	lines := strings.Split(ansi.Strip(m.View(th)), "\n")
+	require.Len(t, lines, 5)
+	require.Equal(t, "Items", lines[0])
+	require.Equal(t, "  5 items", lines[4])
+	require.Contains(t, lines[3], "↓ 3 more", "three lines left for rows")
+
+	m = filtered(m, "3")
+	require.Equal(t, "  1 of 5", strings.Split(ansi.Strip(m.View(th)), "\n")[4])
+	m = filtered(New(numbered(5), 5).WithStatusBar(true), "zz")
+	require.Contains(t, ansi.Strip(m.View(th)), "nothing matched")
+}
+
+func TestPagesShowARunOfRowsAndTheirDots(t *testing.T) {
+	m := New(numbered(7), 4).WithPages(true)
+	lines := strings.Split(ansi.Strip(m.View(th)), "\n")
+	require.Len(t, lines, 4)
+	require.Equal(t, "▶ item-00", lines[0])
+	require.NotContains(t, ansi.Strip(m.View(th)), "more", "a page has no overflow row")
+	m, _ = m.Update(press(tea.KeyPgDown))
+	lines = strings.Split(ansi.Strip(m.View(th)), "\n")
+	require.Equal(t, "▶ item-03", lines[0], "the next page")
+	require.NotEqual(t, strings.Split(ansi.Strip(New(numbered(7), 4).WithPages(true).View(th)), "\n")[3], lines[3], "the dots moved")
+}
+
+func TestDescriptionsGiveEveryRowTwoLines(t *testing.T) {
+	rows := []Row[int]{{Label: "a", Description: "first"}, {Label: "b"}, {Label: "c", Description: "third"}}
+	m := New(rows, 6)
+	lines := strings.Split(ansi.Strip(m.View(th)), "\n")
+	require.Equal(t, []string{"▶ a", "  first", "  b", "  ", "  c", "  third"}, lines)
+	require.Contains(t, ansi.Strip(New(rows, 4).View(th)), "↓ 2 more", "four lines hold one row and the count")
+	m, _ = m.Update(press(tea.KeyDown))
+	m, _ = m.Update(press(tea.KeyDown))
+	require.Equal(t, "c", m.Selected().Label)
+	require.Contains(t, ansi.Strip(m.View(th)), "  third")
+}
+
+func TestRowsGoInComeOutAndChange(t *testing.T) {
+	m := New(numbered(3), 10)
+	m, _ = m.Update(press(tea.KeyDown))
+	m = m.InsertRow(0, Row[int]{Label: "new"})
+	require.Equal(t, "item-01", m.Selected().Label, "the cursor stays on its row")
+	require.Equal(t, 4, m.Len())
+	m = m.RemoveRow(0).RemoveRow(99)
+	require.Equal(t, 3, m.Len())
+	m = m.SetRow(1, Row[int]{Label: "renamed"})
+	require.Equal(t, "renamed", m.Rows()[1].Label)
+	require.Equal(t, 3, m.SetRow(-1, Row[int]{}).Len())
+}
+
+func TestWrapGoesRoundTheEnds(t *testing.T) {
+	m := New(rows(), 10).WithWrap(true)
+	m, _ = m.Update(press(tea.KeyUp))
+	require.Equal(t, "metrics", m.Selected().Label, "up from the first goes to the last")
+	m, _ = m.Update(press(tea.KeyDown))
+	require.Equal(t, "server", m.Selected().Label, "down from the last, over the heading, to the first")
+	n, _ := New(rows(), 10).Update(press(tea.KeyUp))
+	require.Equal(t, "server", n.Selected().Label, "without wrap it stops")
+}
+
+func TestPageAndEndKeysJump(t *testing.T) {
+	m := New(numbered(20), 5)
+	m, _ = m.Update(press(tea.KeyPgDown))
+	require.Equal(t, "item-05", m.Selected().Label)
+	m, _ = m.Update(press(tea.KeyEnd))
+	require.Equal(t, "item-19", m.Selected().Label)
+	m, _ = m.Update(press(tea.KeyHome))
+	require.Equal(t, "item-00", m.Selected().Label)
+}
+
+func TestLegendListsTheKeysOfTheMode(t *testing.T) {
+	keys := func(m Model[int]) []string {
+		var out []string
+		for _, e := range m.Legend() {
+			out = append(out, e.Help().Key)
+		}
+		return out
+	}
+	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "home/end", "enter", "/"}, keys(New(rows(), 5)))
+	require.Equal(t, []string{"↑/↓", "enter", "esc"}, keys(filtered(New(rows(), 5), "x")))
+}
+
+// Fuzzy ranking over many rows, as each keystroke reruns it.
+func BenchmarkFuzzyFilter(b *testing.B) {
+	m := bigList(10_000).WithFuzzy()
+	m, _ = m.Update(tea.KeyPressMsg{Code: '/', Text: "/"})
+	m, _ = m.Update(tea.KeyPressMsg{Code: '7', Text: "7"})
+	for b.Loop() {
+		_ = m.View(th)
+	}
+}

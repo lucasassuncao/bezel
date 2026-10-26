@@ -146,3 +146,36 @@ func TestModelCopiesTheCells(t *testing.T) {
 	more[2].Cells[0] = "changed"
 	require.Equal(t, "pkg-2", m.Items()[2].Cells[0])
 }
+
+func TestHalfPageKeysMoveHalfThePage(t *testing.T) {
+	m := New(pkgCols, pkgs(30), 11) // ten rows, nine a page beside the more row
+	m, _ = m.Update(tea.KeyPressMsg{Code: 'd', Mod: tea.ModCtrl})
+	require.Equal(t, 4, m.Cursor())
+	m, _ = m.Update(tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl})
+	require.Equal(t, 0, m.Cursor())
+}
+
+func TestABlurredTableDimsItsCursorAndTakesNoKeys(t *testing.T) {
+	m := New(pkgCols, pkgs(3), 5).Blur()
+	require.False(t, m.Focused())
+	m, _ = m.Update(press(tea.KeyDown))
+	require.Equal(t, 0, m.Cursor())
+	require.Contains(t, m.View(th, 40), th.Dim.Render(marker))
+	require.NotContains(t, m.View(th, 40), th.Cursor.Render("pkg-0"))
+	m, _ = m.Focus().Update(press(tea.KeyDown))
+	require.Equal(t, 1, m.Cursor())
+}
+
+func TestFromValuesSplitsLinesIntoCells(t *testing.T) {
+	items := FromValues[int]("a,1\r\n\nb,2\n", ",")
+	require.Len(t, items, 2)
+	require.Equal(t, []string{"b", "2"}, items[1].Cells)
+}
+
+func TestTheLegendNamesTheKeys(t *testing.T) {
+	var keys []string
+	for _, e := range New(pkgCols, pkgs(3), 5).Legend() {
+		keys = append(keys, e.Help().Key)
+	}
+	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "ctrl+u/d", "home/end", "enter"}, keys)
+}
