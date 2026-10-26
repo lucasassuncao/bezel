@@ -1,6 +1,6 @@
 //go:build windows
 
-package overlay
+package filepicker
 
 import "golang.org/x/sys/windows"
 

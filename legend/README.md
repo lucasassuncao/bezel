@@ -23,7 +23,7 @@ Package legend is the key legend: entries tagged with the capability they need, 
 
 
 <a name="HintLine"></a>
-## func [HintLine](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L83>)
+## func [HintLine](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L99>)
 
 ```go
 func HintLine(entries []Entry, st Style) string
@@ -32,7 +32,7 @@ func HintLine(entries []Entry, st Style) string
 HintLine is every entry on one line, for a modal's own footer.
 
 <a name="Pack"></a>
-## func [Pack](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L95>)
+## func [Pack](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L111>)
 
 ```go
 func Pack(entries []Entry, width, maxLines int, st Style) []string
@@ -41,7 +41,7 @@ func Pack(entries []Entry, width, maxLines int, st Style) []string
 Pack lays entries over up to maxLines rows of width. Entries are dropped whole from the end, never the first, and the last row says how many. An entry for HelpKey stays where it was put; without one, help is pinned first.
 
 <a name="Capability"></a>
-## type [Capability](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L20>)
+## type [Capability](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L21>)
 
 Capability names something a session may refuse: "write", "apply", ... The zero value is always allowed.
 
@@ -50,7 +50,7 @@ type Capability string
 ```
 
 <a name="Entry"></a>
-## type [Entry](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L24-L28>)
+## type [Entry](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L25-L29>)
 
 Entry is one key and what it does, plus the capability it needs. Group sorts it into a row: each group starts a new one while the rows last.
 
@@ -63,7 +63,7 @@ type Entry struct {
 ```
 
 <a name="Filter"></a>
-### func [Filter](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L51>)
+### func [Filter](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L52>)
 
 ```go
 func Filter(entries []Entry, can func(Capability) bool) []Entry
@@ -72,7 +72,7 @@ func Filter(entries []Entry, can func(Capability) bool) []Entry
 Filter keeps the entries can allows and that are not disabled, in a new slice. A nil can allows every capability.
 
 <a name="FromBindings"></a>
-### func [FromBindings](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L209>)
+### func [FromBindings](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L241>)
 
 ```go
 func FromBindings(bs []key.Binding) []Entry
@@ -81,7 +81,7 @@ func FromBindings(bs []key.Binding) []Entry
 FromBindings turns bindings into entries, skipping disabled ones and those without help, such as the second of a pair the first names \("↑/↓"\). For apps that already keep their keys as key.Binding.
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L32>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L33>)
 
 ```go
 func New(keys, desc string, needs ...Capability) Entry
@@ -90,7 +90,7 @@ func New(keys, desc string, needs ...Capability) Entry
 New builds an entry from the key label, its description and, optionally, the capability it needs. keys is what the legend prints, e.g. "↑/↓".
 
 <a name="Style"></a>
-## type [Style](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L64-L69>)
+## type [Style](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L65-L77>)
 
 Style colours the bracketed key and the action text. HelpKey is the key that opens the full list: when set, "\[HelpKey\] help" opens the legend and the dropped\-count mark names it. Empty means the app has none.
 
@@ -100,6 +100,13 @@ type Style struct {
     Text    lipgloss.Style
     HelpKey string
     Bare    bool // keys without their brackets: "r run" for "[r] run"
+
+    // Sep goes between entries: "" is two spaces in Pack, " · " in HintLine.
+    // GroupSep goes between two groups sharing a row; "" is Sep.
+    Sep, GroupSep string
+    // More is the dropped-count mark, a format for the count: "" is
+    // "  +%d more", or "  +%d in [HelpKey]" when there is a help key.
+    More string
 }
 ```
 

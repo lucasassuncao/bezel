@@ -86,6 +86,14 @@ Forty-two items, eight to a page, with the page under them. `←` and `→` turn
 
 ![paginator](recordings/component/paginator.gif)
 
+### Filepicker
+
+Source: [`examples/component/filepicker/main.go`](../examples/component/filepicker/main.go)
+
+The repository browsed inside a pane, directories first and sizes in a column. `enter` opens a directory or picks a file and names it on the status row, `←` climbs, and `p` shows or hides the permissions column.
+
+![filepicker](recordings/component/filepicker.gif)
+
 ### Tree
 
 Source: [`examples/component/tree/main.go`](../examples/component/tree/main.go)

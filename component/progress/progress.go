@@ -1,6 +1,6 @@
-// Package progress draws how far along something is: a bar for a count of
-// items, and a stepper for a sequence of named stages such as a wizard's.
-// Everything is one row, exactly the width asked for, in the theme's colours.
+// Package progress draws how far along something is: bars, a meter and a
+// stepper of named stages, each one row exactly the width asked for, and
+// Model, a bar that springs to the share it is set to.
 package progress
 
 import (

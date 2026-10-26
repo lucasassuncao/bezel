@@ -4,6 +4,7 @@
 package legend
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"strings"
@@ -66,6 +67,21 @@ type Style struct {
 	Text    lipgloss.Style
 	HelpKey string
 	Bare    bool // keys without their brackets: "r run" for "[r] run"
+
+	// Sep goes between entries: "" is two spaces in Pack, " · " in HintLine.
+	// GroupSep goes between two groups sharing a row; "" is Sep.
+	Sep, GroupSep string
+	// More is the dropped-count mark, a format for the count: "" is
+	// "  +%d more", or "  +%d in [HelpKey]" when there is a help key.
+	More string
+}
+
+// sep is the separator Pack or HintLine puts between entries.
+func (s Style) sep(fallback string) string { return s.Text.Render(cmp.Or(s.Sep, fallback)) }
+
+// groupSep is the separator between groups sharing a row.
+func (s Style) groupSep(fallback string) string {
+	return s.Text.Render(cmp.Or(s.GroupSep, s.Sep, fallback))
 }
 
 func (s Style) pair(e Entry) string {
@@ -86,7 +102,7 @@ func HintLine(entries []Entry, st Style) string {
 	for i, e := range entries {
 		parts[i] = st.pair(e)
 	}
-	return strings.Join(parts, st.Text.Render(" · "))
+	return strings.Join(parts, st.sep(" · "))
 }
 
 // Pack lays entries over up to maxLines rows of width. Entries are dropped
@@ -112,23 +128,40 @@ func Pack(entries []Entry, width, maxLines int, st Style) []string {
 	if len(parts) == 0 {
 		return nil
 	}
-	sep := st.Text.Render("  ")
-	if lines, ok := packGroups(parts, starts, sep, width, maxLines); ok {
+	// seps[i] goes before parts[i]: the group's separator where a group starts
+	seps := make([]string, len(parts))
+	for i := range seps {
+		seps[i] = st.sep("  ")
+	}
+	for _, at := range starts[1:] {
+		seps[at] = st.groupSep("  ")
+	}
+	if lines, ok := packGroups(parts, seps, starts, width, maxLines); ok {
 		return lines
 	}
 	mark := func(dropped int) string {
-		if st.HelpKey == "" {
+		switch {
+		case st.More != "":
+			return st.Text.Render(fmt.Sprintf(st.More, dropped))
+		case st.HelpKey == "":
 			return st.Text.Render(fmt.Sprintf("  +%d more", dropped))
 		}
 		return st.Text.Render(fmt.Sprintf("  +%d in %s", dropped, st.key(st.HelpKey)))
 	}
 
 	if width <= 0 || maxLines < 1 {
-		return []string{strings.Join(parts, sep)}
+		var b strings.Builder
+		for i, p := range parts {
+			if i > 0 {
+				b.WriteString(seps[i])
+			}
+			b.WriteString(p)
+		}
+		return []string{b.String()}
 	}
-	lines, placed := packGreedy(parts, sep, width, maxLines, 0)
+	lines, placed := packGreedy(parts, seps, width, maxLines, 0)
 	if placed < len(parts) {
-		lines, placed = packGreedy(parts, sep, width, maxLines, ansi.StringWidth(mark(len(parts))))
+		lines, placed = packGreedy(parts, seps, width, maxLines, ansi.StringWidth(mark(len(parts))))
 		lines[len(lines)-1] += mark(len(parts) - placed)
 	}
 	for i := range lines {
@@ -139,7 +172,7 @@ func Pack(entries []Entry, width, maxLines int, st Style) []string {
 
 // packGroups gives each group rows of its own, or reports false when there is
 // one group or the groups do not all fit whole: Pack then fills rows as usual.
-func packGroups(parts []string, starts []int, sep string, width, maxLines int) ([]string, bool) {
+func packGroups(parts, seps []string, starts []int, width, maxLines int) ([]string, bool) {
 	if len(starts) < 2 || width <= 0 {
 		return nil, false
 	}
@@ -153,7 +186,7 @@ func packGroups(parts []string, starts []int, sep string, width, maxLines int) (
 		if left < 1 {
 			return nil, false
 		}
-		rows, placed := packGreedy(parts[from:to], sep, width, left, 0)
+		rows, placed := packGreedy(parts[from:to], seps[from:to], width, left, 0)
 		if placed < to-from {
 			return nil, false
 		}
@@ -167,15 +200,14 @@ func packGroups(parts []string, starts []int, sep string, width, maxLines int) (
 
 // packGreedy fills rows left to right and reports how many parts it placed.
 // reserveOnLast is held back on the final row for the dropped-count mark.
-func packGreedy(parts []string, sep string, width, maxLines, reserveOnLast int) (lines []string, placed int) {
-	sepW := ansi.StringWidth(sep)
+func packGreedy(parts, seps []string, width, maxLines, reserveOnLast int) (lines []string, placed int) {
 	current, currentW := "", 0
 
-	for _, part := range parts {
-		partW := ansi.StringWidth(part)
+	for i, part := range parts {
+		partW, sep := ansi.StringWidth(part), seps[i]
 		cost := partW
 		if current != "" {
-			cost += sepW
+			cost += ansi.StringWidth(sep)
 		}
 		budget := width
 		if len(lines)+1 == maxLines {

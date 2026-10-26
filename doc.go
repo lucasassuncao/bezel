@@ -43,6 +43,8 @@
 //     contents within a width, and a cursor over rows under a fixed header.
 //   - [github.com/lucasassuncao/bezel/component/viewport]: scrollable text,
 //     wrapped or panned sideways, with a gutter and search highlights.
+//   - [github.com/lucasassuncao/bezel/component/filepicker]: directories
+//     browsed in a pane, with size and permission columns.
 //   - [github.com/lucasassuncao/bezel/component/browser]: a pick-from-a-list
 //     screen, labels left and the selected item's detail right.
 //   - [github.com/lucasassuncao/bezel/component/accordion]: sections that open
@@ -56,7 +58,8 @@
 //   - [github.com/lucasassuncao/bezel/component/cursor]: a text field's caret
 //     on its own, blinking, steady or hidden.
 //   - [github.com/lucasassuncao/bezel/component/progress]: Bar, Line and
-//     Stepper, how far along something is in one row.
+//     Stepper, how far along something is in one row, and a Model that
+//     springs to its share.
 //   - [github.com/lucasassuncao/bezel/component/spinner]: twelve spinners or
 //     frames of your own, each ticking on its own.
 //   - [github.com/lucasassuncao/bezel/component/timer]: a countdown that says

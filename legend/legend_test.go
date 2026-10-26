@@ -190,3 +190,15 @@ func TestPackBareLeavesTheBracketsOut(t *testing.T) {
 	require.NotContains(t, got, "[")
 	require.Contains(t, got, "in ?")
 }
+
+func TestSeparatorsAndTheMarkAreTheStyles(t *testing.T) {
+	st := Style{Sep: " | ", GroupSep: " || ", More: " (+%d)"}
+	es := []Entry{New("a", "one"), New("b", "two"), New("c", "three")}
+	es[2].Group = 1
+	require.Equal(t, "[a] one | [b] two || [c] three", ansi.Strip(Pack(es, 0, 1, st)[0]), "groups on one row get their own separator")
+	require.Equal(t, "[a] one | [b] two | [c] three", ansi.Strip(HintLine(es, Style{Sep: " | "})))
+
+	lines := Pack(entries(8), 30, 1, st)
+	require.Equal(t, "[a] action number a (+7)", ansi.Strip(lines[0]))
+	require.Equal(t, "[a] one · [b] two", ansi.Strip(HintLine(es[:2], Style{})), "the defaults stay")
+}

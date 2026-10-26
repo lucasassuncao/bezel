@@ -267,7 +267,7 @@ func TestFilePickerLeavesARootThroughTheDrives(t *testing.T) {
 	other := pickerTree(t)
 	start := rootOf(other)
 	volumes = func() []string { return []string{start, other} }
-	t.Cleanup(func() { volumes = listVolumes })
+	t.Cleanup(func() { volumes = nil })
 
 	p := newPicker(start)
 	p, cmd := pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyLeft})
@@ -289,7 +289,7 @@ func TestFilePickerLeavesARootThroughTheDrives(t *testing.T) {
 // With no drive list, as off Windows, ← at the root just stays there.
 func TestFilePickerStaysAtARootWithoutDrives(t *testing.T) {
 	volumes = func() []string { return nil }
-	t.Cleanup(func() { volumes = listVolumes })
+	t.Cleanup(func() { volumes = nil })
 
 	start := rootOf(t.TempDir())
 	p := newPicker(start)
@@ -307,7 +307,7 @@ func TestFilePickerScrollsALongDriveList(t *testing.T) {
 		drives = append(drives, fmt.Sprintf("D%02d:%c", i, filepath.Separator))
 	}
 	volumes = func() []string { return drives }
-	t.Cleanup(func() { volumes = listVolumes })
+	t.Cleanup(func() { volumes = nil })
 
 	body := layout.Rect{W: 60, H: 14}
 	p := newPicker(start).Resize(body).(FilePicker)
@@ -320,16 +320,6 @@ func TestFilePickerScrollsALongDriveList(t *testing.T) {
 	}
 	require.Equal(t, drives[8], p.Highlighted())
 	require.Contains(t, ansi.Strip(p.View(body)), drives[8])
-}
-
-func TestHumanBytesReadsLikeAListing(t *testing.T) {
-	for n, want := range map[int64]string{
-		0: "0B", 999: "999B", 1000: "1.0kB", 1500: "1.5kB", 12_345: "12kB",
-		640_000_000: "640MB", 3_200_000_000: "3.2GB",
-		999_950: "1.0MB", 999_999_999: "1.0GB", 9_960: "10kB", 1_000_000_000_000: "1.0TB",
-	} {
-		require.Equal(t, want, humanBytes(n), "%d", n)
-	}
 }
 
 func TestFilePickerShowsFileSizesAndMarksTheCursor(t *testing.T) {
