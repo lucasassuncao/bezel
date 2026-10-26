@@ -13,7 +13,9 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel/component/cursor"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/clip"
 	"github.com/lucasassuncao/bezel/internal/edit"
@@ -23,17 +25,26 @@ import (
 
 // Keys are the editing bindings. Any other key that types text inserts it.
 type Keys struct {
-	Left, Right, WordLeft, WordRight   key.Binding
-	Up, Down, PageUp, PageDown         key.Binding
-	LineStart, LineEnd, Top, Bottom    key.Binding
-	Newline, DeleteBack, DeleteForward key.Binding
-	DeleteWordBack, DeleteWordForward  key.Binding
-	KillToStart, KillToEnd             key.Binding
-	Paste                              key.Binding // reads the clipboard
+	Left, Right, WordLeft, WordRight                key.Binding
+	Up, Down, PageUp, PageDown                      key.Binding
+	LineStart, LineEnd, Top, Bottom                 key.Binding
+	Newline, DeleteBack, DeleteForward              key.Binding
+	DeleteWordBack, DeleteWordForward               key.Binding
+	KillToStart, KillToEnd                          key.Binding
+	UpperWord, LowerWord, CapitalizeWord, Transpose key.Binding
+	Paste                                           key.Binding // reads the clipboard
+
+	// Each moves as its plain twin does and drags the selection along.
+	SelectLeft, SelectRight, SelectWordLeft, SelectWordRight key.Binding
+	SelectUp, SelectDown, SelectLineStart, SelectLineEnd     key.Binding
+	SelectAll                                                key.Binding
+	Copy, Cut                                                key.Binding // the selection, to the clipboard
 }
 
 // DefaultKeys are the arrows, pgup/pgdown, ctrl+home/end for the ends of the
-// text, and the readline keys an input answers to, ctrl+v to paste.
+// text, and the readline keys an input answers to, ctrl+v to paste; shift
+// with a move selects, alt+a selects everything, alt+w copies it and alt+x
+// cuts it; alt+u, alt+l and alt+c change a word's case, ctrl+t transposes.
 func DefaultKeys() Keys {
 	return Keys{
 		Left:              key.NewBinding(key.WithKeys("left", "ctrl+b")),
@@ -56,7 +67,38 @@ func DefaultKeys() Keys {
 		KillToStart:       key.NewBinding(key.WithKeys("ctrl+u")),
 		KillToEnd:         key.NewBinding(key.WithKeys("ctrl+k")),
 		Paste:             key.NewBinding(key.WithKeys("ctrl+v")),
+		SelectLeft:        key.NewBinding(key.WithKeys("shift+left")),
+		SelectRight:       key.NewBinding(key.WithKeys("shift+right")),
+		SelectWordLeft:    key.NewBinding(key.WithKeys("ctrl+shift+left", "alt+shift+left")),
+		SelectWordRight:   key.NewBinding(key.WithKeys("ctrl+shift+right", "alt+shift+right")),
+		SelectUp:          key.NewBinding(key.WithKeys("shift+up")),
+		SelectDown:        key.NewBinding(key.WithKeys("shift+down")),
+		SelectLineStart:   key.NewBinding(key.WithKeys("shift+home")),
+		SelectLineEnd:     key.NewBinding(key.WithKeys("shift+end")),
+		SelectAll:         key.NewBinding(key.WithKeys("alt+a")),
+		UpperWord:         key.NewBinding(key.WithKeys("alt+u")),
+		LowerWord:         key.NewBinding(key.WithKeys("alt+l")),
+		CapitalizeWord:    key.NewBinding(key.WithKeys("alt+c")),
+		Transpose:         key.NewBinding(key.WithKeys("ctrl+t")),
+		Copy:              key.NewBinding(key.WithKeys("alt+w")),
+		Cut:               key.NewBinding(key.WithKeys("alt+x")),
 	}
+}
+
+// CopiedMsg is how a copy or a cut to the clipboard went: Err is nil when
+// Text is on it. The field ignores it; an app shows it on its status row.
+type CopiedMsg struct {
+	Text string
+	Err  error
+}
+
+// Position is a place in the text: a line and the characters before it on
+// that line, both from 0.
+type Position struct{ Line, Column int }
+
+// before reports whether p comes earlier in the text than q.
+func (p Position) before(q Position) bool {
+	return p.Line < q.Line || p.Line == q.Line && p.Column < q.Column
 }
 
 // ids tells fields apart, so a blink reaches only the field that armed it.
@@ -87,13 +129,25 @@ type Model struct {
 	height    int
 	focused   bool
 	caretOn   bool
+	mode      cursor.Mode
+	term      bool // the terminal's own cursor stands in for the caret
 	id, tag   int64
 	keys      Keys
 	clipboard func() (string, error) // nil is the system's
+	write     func(string) error     // nil is the system's
 	th        *theme.Resolved        // shared by every copy and never written
 	highlight func(string) [][]Span
 	marks     [][]Span // highlight's answer for painted
 	painted   string
+	selecting bool // the selection runs from anchor to the caret
+	anchor    Position
+	charLimit int    // the most characters, line breaks included; 0 is no cap
+	maxLines  int    // the most lines; 0 is no cap
+	grow      [2]int // the least and most rows a growing field takes; zero is fixed
+	noNumbers bool   // no gutter of line numbers
+	prompt    func(line int) string
+	promptW   int // the cells every prompt is fit to
+	holder    string
 }
 
 // Span styles bytes [Start, End) of one line of the text.
@@ -141,6 +195,70 @@ func (m Model) WithClipboard(read func() (string, error)) Model {
 	return m
 }
 
+// WithClipboardWrite writes the clipboard through write on a copy or a cut,
+// for a test that must not touch the machine's own; nil is the system's.
+func (m Model) WithClipboardWrite(write func(string) error) Model {
+	m = m.ready()
+	m.write = write
+	return m
+}
+
+// Copy is the command that puts the selection on the clipboard, answering
+// with a CopiedMsg; nil when nothing is selected.
+func (m Model) Copy() tea.Cmd {
+	if !m.HasSelection() {
+		return nil
+	}
+	text := m.SelectedText()
+	return clip.Copy(m.write, text, func(err error) tea.Msg { return CopiedMsg{Text: text, Err: err} })
+}
+
+// WithCharLimit caps the text at n characters, a line break counting as one:
+// typing stops there and a paste is cut to what fits. Zero is no cap.
+func (m Model) WithCharLimit(n int) Model {
+	m = m.ready()
+	m.charLimit = max(n, 0)
+	return m.WithValue(m.Value())
+}
+
+// WithMaxLines caps the text at n lines: enter stops making new ones and a
+// paste is cut at the last that fits. Zero is no cap.
+func (m Model) WithMaxLines(n int) Model {
+	m = m.ready()
+	m.maxLines = max(n, 0)
+	return m.WithValue(m.Value())
+}
+
+// CharLimit is the most characters the text holds; zero is no cap.
+func (m Model) CharLimit() int { return m.charLimit }
+
+// MaxLines is the most lines the text holds; zero is no cap.
+func (m Model) MaxLines() int { return m.maxLines }
+
+// fit is the cleaned s cut to what the limits leave room for beside the text
+// already held.
+func (m *Model) fit(s string) string {
+	if m.charLimit == 0 && m.maxLines == 0 {
+		return s
+	}
+	chars, lines := len(m.lines)-1, len(m.lines)
+	for _, l := range m.lines {
+		chars += l.Len()
+	}
+	var b strings.Builder
+	for _, g := range edit.Graphemes(s) {
+		if m.charLimit > 0 && chars >= m.charLimit || g == "\n" && m.maxLines > 0 && lines >= m.maxLines {
+			break
+		}
+		if g == "\n" {
+			lines++
+		}
+		chars++
+		b.WriteString(g)
+	}
+	return b.String()
+}
+
 // WithKeys rebinds the editing keys.
 func (m Model) WithKeys(k Keys) Model {
 	m = m.ready()
@@ -179,12 +297,13 @@ func (m Model) SetTheme(th theme.Resolved) Model {
 // read as line breaks, so a Windows file comes back one line per line.
 func (m Model) WithValue(s string) Model {
 	m = m.ready()
-	parts := strings.Split(clean(s), "\n")
+	m.lines = []line{m.wrap(edit.NewLine(""))}
+	parts := strings.Split(m.fit(clean(s)), "\n")
 	m.lines = make([]line, len(parts))
 	for i, p := range parts {
 		m.lines[i] = m.wrap(edit.NewLine(p))
 	}
-	m.row, m.goal = len(m.lines)-1, -1
+	m.row, m.goal, m.selecting = len(m.lines)-1, -1, false
 	return m.scroll().repaint(false)
 }
 
@@ -226,19 +345,103 @@ func (m Model) SetWidth(w int) Model {
 	m = m.ready()
 	if w = max(w, 0); w != m.width {
 		m.width = w
-		lines := make([]line, len(m.lines))
-		for i, l := range m.lines {
-			lines[i] = m.wrap(l.Line)
-		}
-		m.lines = lines
+		m = m.rewrap()
 	}
 	return m.scroll()
 }
 
-// SetHeight is how many rows the field shows; zero shows every one.
+// rewrap works every line's rows out again, after the room for text changed.
+func (m Model) rewrap() Model {
+	lines := make([]line, len(m.lines))
+	for i, l := range m.lines {
+		lines[i] = m.wrap(l.Line)
+	}
+	m.lines = lines
+	return m
+}
+
+// WithLineNumbers shows or hides the gutter of line numbers; it shows by
+// default.
+func (m Model) WithLineNumbers(on bool) Model {
+	m = m.ready()
+	m.noNumbers = !on
+	return m.rewrap().scroll()
+}
+
+// WithPrompt draws p before every line, after the line numbers, in the
+// accent, as "> ".
+func (m Model) WithPrompt(p string) Model {
+	return m.WithPromptFunc(ansi.StringWidth(p), func(int) string { return p })
+}
+
+// WithPromptFunc draws fn's answer for each line, from 0, before it, fit to
+// width cells; a wrapped line's later rows get blanks. nil draws none.
+func (m Model) WithPromptFunc(width int, fn func(line int) string) Model {
+	m = m.ready()
+	m.prompt, m.promptW = fn, max(width, 0)
+	if fn == nil {
+		m.promptW = 0
+	}
+	return m.rewrap().scroll()
+}
+
+// WithPlaceholder shows s, muted, while the field is empty.
+func (m Model) WithPlaceholder(s string) Model {
+	m = m.ready()
+	m.holder = s
+	return m
+}
+
+// Placeholder is what an empty field shows.
+func (m Model) Placeholder() string { return m.holder }
+
+// lead is the cells before the text on every row: the gutter and the prompt.
+func (m *Model) lead() int {
+	w := m.promptW
+	if !m.noNumbers {
+		w += draw.GutterWidth
+	}
+	return w
+}
+
+// margin is what goes before the text on wrapped row k of line i.
+func (m *Model) margin(i, k int) string {
+	var b strings.Builder
+	switch {
+	case m.noNumbers:
+	case k == 0:
+		b.WriteString(draw.Gutter(i+1, m.styles().Muted))
+	default:
+		b.WriteString(m.styles().Muted.Render(strings.Repeat(" ", draw.GutterWidth-2) + "│ "))
+	}
+	if m.prompt != nil {
+		p := strings.Repeat(" ", m.promptW)
+		if k == 0 {
+			p = draw.Fit(m.prompt(i), m.promptW)
+		}
+		b.WriteString(m.styles().Accent.Render(p))
+	}
+	return b.String()
+}
+
+// SetHeight is how many rows the field shows; zero shows every one. It ends
+// a dynamic height.
 func (m Model) SetHeight(h int) Model {
 	m = m.ready()
-	m.height = max(h, 0)
+	m.height, m.grow = max(h, 0), [2]int{}
+	return m.scroll()
+}
+
+// WithDynamicHeight makes the field as tall as its text, never under least
+// rows nor over most, scrolling past that; the height then follows every
+// edit. A least under 1 turns it off and SetHeight rules again.
+func (m Model) WithDynamicHeight(least, most int) Model {
+	m = m.ready()
+	if least < 1 {
+		m.grow = [2]int{}
+		return m.scroll()
+	}
+	m.grow = [2]int{least, max(most, least)}
 	return m.scroll()
 }
 
@@ -267,10 +470,62 @@ func (m Model) Blur() Model {
 // Blink is the command that keeps a focused caret blinking, for a host's
 // Init; Focus and every edit arm their own.
 func (m Model) Blink() tea.Cmd {
-	if !m.focused {
+	if !m.blinks() {
 		return nil
 	}
 	return m.tick()
+}
+
+// blinks reports whether the field ticks its own caret.
+func (m *Model) blinks() bool { return m.focused && m.mode == cursor.Blinking && !m.term }
+
+// shows reports whether the caret is painted now.
+func (m *Model) shows() bool { return m.focused && m.caretOn && m.mode != cursor.Hidden && !m.term }
+
+// WithCursorMode sets how the caret shows while focused: blinking at the
+// theme's pace, steady, or hidden.
+func (m Model) WithCursorMode(mode cursor.Mode) Model {
+	m = m.ready()
+	m.mode = mode
+	return m
+}
+
+// SetCursorMode changes how a live caret shows, lit at once; a focused field
+// turned to Blinking starts its blink with the command returned.
+func (m Model) SetCursorMode(mode cursor.Mode) (Model, tea.Cmd) {
+	m = m.ready()
+	m.mode = mode
+	if !m.focused {
+		return m, nil
+	}
+	return m.lit()
+}
+
+// CursorMode is how the caret shows while focused.
+func (m Model) CursorMode() cursor.Mode { return m.mode }
+
+// WithTerminalCursor leaves the caret to the terminal's own cursor: View
+// paints none, and TerminalCursor says where to put the real one.
+func (m Model) WithTerminalCursor() Model {
+	m = m.ready()
+	m.term = true
+	return m
+}
+
+// TerminalCursor is the terminal's cursor for a field made WithTerminalCursor,
+// placed within the field's view: add the field's origin before handing it
+// to tea.View. nil while blurred, hidden, or painting its own caret.
+func (m Model) TerminalCursor() *tea.Cursor {
+	m = m.ready()
+	if !m.term || !m.focused || m.mode == cursor.Hidden {
+		return nil
+	}
+	l := m.lines[m.row]
+	from := l.starts[segmentOf(l.starts, l.Cursor())]
+	start, _ := m.window()
+	c := tea.NewCursor(m.lead()+l.Width(from, l.Cursor()), m.caretRow()-start)
+	c.Blink = m.mode == cursor.Blinking
+	return c
 }
 
 // Update edits on a key or a paste while focused, and flips the caret on its
@@ -279,13 +534,17 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	m = m.ready()
 	switch msg := msg.(type) {
 	case BlinkMsg:
-		if !m.focused || msg.id != m.id || msg.tag != m.tag {
+		if !m.blinks() || msg.id != m.id || msg.tag != m.tag {
 			return m, nil
 		}
 		m.caretOn = !m.caretOn
 		return m.arm()
 	case tea.PasteMsg:
 		if m.focused {
+			if m.HasSelection() {
+				m = m.cut()
+			}
+			m.selecting = false
 			return m.insert(msg.Content).edited()
 		}
 	case tea.KeyPressMsg:
@@ -300,7 +559,27 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 const typingMods = tea.ModCtrl | tea.ModAlt | tea.ModMeta | tea.ModSuper | tea.ModHyper
 
 func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
-	l, keys := m.lines[m.row], m.keys
+	if moved, ok := m.selectKey(k); ok {
+		return moved.scroll().lit()
+	}
+	keys := m.keys
+	switch {
+	case key.Matches(k, keys.Copy):
+		return m, m.Copy()
+	case key.Matches(k, keys.Cut) && m.HasSelection():
+		cmd := m.Copy()
+		m, blink := m.cut().edited()
+		return m, tea.Batch(cmd, blink)
+	}
+	if m.HasSelection() && editKey(k, keys) {
+		m = m.cut()
+		if !typingKey(k, keys) {
+			m.goal = -1
+			return m.edited()
+		}
+	}
+	m.selecting = false
+	l := m.lines[m.row]
 	vertical := false
 	switch {
 	case key.Matches(k, keys.Up), key.Matches(k, keys.Down):
@@ -337,6 +616,8 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 		m = m.setLine(l.KillToStart())
 	case key.Matches(k, keys.KillToEnd):
 		m = m.setLine(l.KillToEnd())
+	case wordKey(k, keys) != nil:
+		m = m.setLine(wordKey(k, keys)(l.Line))
 	case key.Matches(k, keys.Paste):
 		return m, clip.Paste(m.clipboard) // it comes back as a tea.PasteMsg
 	default:
@@ -352,6 +633,177 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 	return m.edited()
 }
 
+// selectKey moves the caret for a select key, anchoring the selection where
+// the caret was when none is under way.
+func (m Model) selectKey(k tea.KeyPressMsg) (Model, bool) {
+	keys, l := m.keys, m.lines[m.row]
+	if key.Matches(k, keys.SelectAll) {
+		last := len(m.lines) - 1
+		return m.Select(Position{}, Position{last, m.lines[last].Len()}), true
+	}
+	var moved Model
+	vertical := false
+	switch {
+	case key.Matches(k, keys.SelectLeft):
+		moved = m.left()
+	case key.Matches(k, keys.SelectRight):
+		moved = m.right()
+	case key.Matches(k, keys.SelectWordLeft):
+		moved = m.setLine(l.WordLeft())
+	case key.Matches(k, keys.SelectWordRight):
+		moved = m.setLine(l.WordRight())
+	case key.Matches(k, keys.SelectUp), key.Matches(k, keys.SelectDown):
+		moved, vertical = m.vertical(key.Matches(k, keys.SelectDown), 1), true
+	case key.Matches(k, keys.SelectLineStart):
+		moved = m.setLine(l.SetCursor(0))
+	case key.Matches(k, keys.SelectLineEnd):
+		moved = m.setLine(l.SetCursor(l.Len()))
+	default:
+		return m, false
+	}
+	if !m.selecting {
+		moved.selecting, moved.anchor = true, m.caret()
+	}
+	if !vertical {
+		moved.goal = -1
+	}
+	return moved, true
+}
+
+// editKey reports whether k changes the text, so a selection goes first.
+func editKey(k tea.KeyPressMsg, keys Keys) bool {
+	for _, b := range []key.Binding{keys.DeleteBack, keys.DeleteForward, keys.DeleteWordBack,
+		keys.DeleteWordForward, keys.KillToStart, keys.KillToEnd} {
+		if key.Matches(k, b) {
+			return true
+		}
+	}
+	return typingKey(k, keys)
+}
+
+// typingKey reports whether k types text, or a line break, in place of the
+// selection rather than only deleting it.
+func typingKey(k tea.KeyPressMsg, keys Keys) bool {
+	if key.Matches(k, keys.Newline) {
+		return true
+	}
+	for _, b := range []key.Binding{keys.Left, keys.Right, keys.WordLeft, keys.WordRight, keys.Up,
+		keys.Down, keys.PageUp, keys.PageDown, keys.LineStart, keys.LineEnd, keys.Top, keys.Bottom,
+		keys.DeleteBack, keys.DeleteForward, keys.DeleteWordBack, keys.DeleteWordForward,
+		keys.KillToStart, keys.KillToEnd, keys.Paste} {
+		if key.Matches(k, b) {
+			return false
+		}
+	}
+	return edit.Printable(k.Key().Text) != "" && k.Mod&typingMods == 0
+}
+
+// caret is where the caret is.
+func (m Model) caret() Position { return Position{m.row, m.lines[m.row].Cursor()} }
+
+// HasSelection reports whether some text is selected.
+func (m Model) HasSelection() bool {
+	return m.selecting && len(m.lines) > 0 && m.anchor != m.caret()
+}
+
+// Selection is the selected text's start and end, the end just past it; both
+// are the caret when nothing is selected.
+func (m Model) Selection() (start, end Position) {
+	m = m.ready()
+	c := m.caret()
+	if !m.HasSelection() {
+		return c, c
+	}
+	if m.anchor.before(c) {
+		return m.anchor, c
+	}
+	return c, m.anchor
+}
+
+// SelectedText is the text the selection holds, its lines joined by "\n".
+func (m Model) SelectedText() string {
+	m = m.ready()
+	start, end := m.Selection()
+	if start.Line == end.Line {
+		return m.lines[start.Line].Slice(start.Column, end.Column)
+	}
+	parts := []string{m.lines[start.Line].Slice(start.Column, m.lines[start.Line].Len())}
+	for _, l := range m.lines[start.Line+1 : end.Line] {
+		parts = append(parts, l.String())
+	}
+	parts = append(parts, m.lines[end.Line].Slice(0, end.Column))
+	return strings.Join(parts, "\n")
+}
+
+// Select selects from one position to another, both kept within the text;
+// the caret lands on to.
+func (m Model) Select(from, to Position) Model {
+	m = m.MoveTo(from.Line, from.Column)
+	anchor := m.caret()
+	m = m.MoveTo(to.Line, to.Column)
+	m.selecting, m.anchor = true, anchor
+	return m
+}
+
+// ClearSelection drops the selection, leaving the caret where it is.
+func (m Model) ClearSelection() Model {
+	m.selecting = false
+	return m
+}
+
+// cut deletes the selection, leaving the caret where it began.
+func (m Model) cut() Model {
+	start, end := m.Selection()
+	m.selecting = false
+	head := m.lines[start.Line].Slice(0, start.Column)
+	tail := m.lines[end.Line].Slice(end.Column, m.lines[end.Line].Len())
+	joined := edit.NewLine(head + tail).SetCursor(start.Column)
+	m.lines = slices.Concat(m.lines[:start.Line], []line{m.wrap(joined)}, m.lines[end.Line+1:])
+	m.row = start.Line
+	return m
+}
+
+// wordKey is the edit a case or transpose key makes, nil for any other key.
+func wordKey(k tea.KeyPressMsg, keys Keys) func(edit.Line) edit.Line {
+	switch {
+	case key.Matches(k, keys.UpperWord):
+		return func(l edit.Line) edit.Line { return l.MapWord(strings.ToUpper) }
+	case key.Matches(k, keys.LowerWord):
+		return func(l edit.Line) edit.Line { return l.MapWord(strings.ToLower) }
+	case key.Matches(k, keys.CapitalizeWord):
+		return func(l edit.Line) edit.Line { return l.MapWord(capitalize) }
+	case key.Matches(k, keys.Transpose):
+		return edit.Line.Transpose
+	}
+	return nil
+}
+
+// capitalize is w with its first letter upper case and the rest lower.
+func capitalize(w string) string {
+	r, n := utf8.DecodeRuneInString(w)
+	return string(unicode.ToTitle(r)) + strings.ToLower(w[n:])
+}
+
+// InsertString puts s at the caret as typing would, in place of a selection
+// and within the limits, and leaves the caret after it.
+func (m Model) InsertString(s string) Model {
+	m = m.ready()
+	if m.HasSelection() {
+		m = m.cut()
+	}
+	m.selecting, m.goal = false, -1
+	return m.insert(s).scroll().repaint(false)
+}
+
+// InsertRune is InsertString for one character.
+func (m Model) InsertRune(r rune) Model { return m.InsertString(string(r)) }
+
+// Word is the word the caret is in or touches, "" between spaces.
+func (m Model) Word() string {
+	m = m.ready()
+	return m.lines[m.row].WordAt()
+}
+
 // edited keeps the caret in view and lights it for a full blink: a caret
 // that went dark while typing would seem to lag.
 func (m Model) edited() (Model, tea.Cmd) { return m.scroll().repaint(false).lit() }
@@ -365,6 +817,9 @@ func (m Model) lit() (Model, tea.Cmd) {
 // way, this one's twin included, lands spent.
 func (m Model) arm() (Model, tea.Cmd) {
 	m.tag++
+	if !m.blinks() {
+		return m, nil
+	}
 	return m, m.tick()
 }
 
@@ -398,7 +853,7 @@ func (m Model) setLine(l edit.Line) Model {
 // insert puts s at the caret, its line breaks splitting the line, and leaves
 // the caret after it.
 func (m Model) insert(s string) Model {
-	parts := strings.Split(clean(s), "\n")
+	parts := strings.Split(m.fit(clean(s)), "\n")
 	before, after := m.lines[m.row].Split()
 	if len(parts) == 1 {
 		return m.setLine(m.lines[m.row].Insert(parts[0]))
@@ -463,7 +918,7 @@ func (m *Model) textWidth() int {
 	if m.width == 0 {
 		return 0
 	}
-	return max(m.width-draw.GutterWidth-1, 1)
+	return max(m.width-m.lead()-1, 1)
 }
 
 // segments are where the wrapped rows of l start: after the last space that
@@ -588,6 +1043,9 @@ func (m Model) window() (start, end int) {
 // scroll moves the window to show the caret's row, and back up while rows
 // below the text would show blank.
 func (m Model) scroll() Model {
+	if m.grow[0] > 0 {
+		m.height = min(max(m.rowCount(), m.grow[0]), m.grow[1])
+	}
 	if m.height == 0 {
 		m.top = 0
 		return m
@@ -605,13 +1063,16 @@ func (m Model) scroll() Model {
 // line, exactly the width and height set; rows past the text show "~".
 func (m Model) View() string {
 	m = m.ready()
-	caret := m.focused && m.caretOn
+	caret := m.shows()
 	text := lipgloss.NewStyle()
 	if !m.focused {
 		text = m.styles().Dim
 	}
 	start, end := m.window()
 	var rows []string
+	if len(m.lines) == 1 && m.lines[0].Len() == 0 && m.holder != "" && start == 0 && end > 0 {
+		rows, start = []string{m.margin(0, 0) + m.placeholderRow()}, 1
+	}
 	n := 0
 	for i, l := range m.lines {
 		if n >= end {
@@ -624,39 +1085,87 @@ func (m Model) View() string {
 		for k := range l.starts {
 			if n >= start && n < end {
 				from, to := span(l.starts, k, l.Len())
-				gutter := draw.Gutter(i+1, m.styles().Muted)
-				if k > 0 {
-					gutter = m.styles().Muted.Render(strings.Repeat(" ", draw.GutterWidth-2) + "│ ")
-				}
+				gutter := m.margin(i, k)
 				onCaret := caret && i == m.row && segmentOf(l.starts, l.Cursor()) == k
 				var spans []Span
 				if m.focused && i < len(m.marks) {
 					spans = m.marks[i]
 				}
-				rows = append(rows, gutter+m.piece(l.Line, spans, from, to, onCaret, text))
+				rows = append(rows, gutter+m.piece(l.Line, spans, from, to, onCaret, m.selectedOn(i), text))
 			}
 			n++
 		}
 	}
+	filler := strings.Repeat(" ", m.lead())
+	if !m.noNumbers {
+		filler = m.styles().Muted.Render(strings.Repeat(" ", draw.GutterWidth-4)+"~ │ ") + strings.Repeat(" ", m.promptW)
+	}
 	for len(rows) < m.height {
-		rows = append(rows, m.styles().Muted.Render(strings.Repeat(" ", draw.GutterWidth-4)+"~ │ ")+m.pad(""))
+		rows = append(rows, filler+m.pad(""))
 	}
 	return strings.Join(rows, "\n")
 }
 
-// piece is the graphemes [from, to) of l in style, the caret painted on its
-// cell when this row holds it, padded to the text's width.
-func (m *Model) piece(l edit.Line, spans []Span, from, to int, onCaret bool, style lipgloss.Style) string {
-	var b strings.Builder
-	c := l.Cursor()
-	if !onCaret {
-		return m.pad(paint(l, spans, from, to, style))
+// placeholderRow is the placeholder, muted, with the caret on its first
+// character while it shows, padded to the text's width.
+func (m Model) placeholderRow() string {
+	text := m.holder
+	if m.width > 0 {
+		text = draw.Truncate(text, max(m.width-m.lead(), 0))
 	}
-	b.WriteString(paint(l, spans, from, c, style))
-	if c < to {
-		b.WriteString(m.styles().Caret.Render(l.At(c)))
-		b.WriteString(paint(l, spans, c+1, to, style))
-	} else {
+	if !m.shows() {
+		return m.pad(m.styles().Muted.Render(text))
+	}
+	g := edit.Graphemes(text)
+	if len(g) == 0 {
+		return m.pad(m.styles().Caret.Render(" "))
+	}
+	return m.pad(m.styles().Caret.Render(g[0]) + m.styles().Muted.Render(strings.Join(g[1:], "")))
+}
+
+// selectedOn is the characters [from, to) of line i the selection covers;
+// from equals to when it covers none.
+func (m Model) selectedOn(i int) [2]int {
+	start, end := m.Selection()
+	if !m.HasSelection() || i < start.Line || i > end.Line {
+		return [2]int{}
+	}
+	sel := [2]int{0, m.lines[i].Len()}
+	if i == start.Line {
+		sel[0] = start.Column
+	}
+	if i == end.Line {
+		sel[1] = end.Column
+	}
+	return sel
+}
+
+// piece is the graphemes [from, to) of l in style, the selection and the
+// caret painted over it where this row holds them, padded to the text's width.
+func (m *Model) piece(l edit.Line, spans []Span, from, to int, onCaret bool, sel [2]int, style lipgloss.Style) string {
+	c := l.Cursor()
+	cuts := []int{from, to, sel[0], sel[1]}
+	if onCaret {
+		cuts = append(cuts, c, c+1)
+	}
+	for i, at := range cuts {
+		cuts[i] = min(max(at, from), to)
+	}
+	slices.Sort(cuts)
+	cuts = slices.Compact(cuts)
+	var b strings.Builder
+	for i := 0; i+1 < len(cuts); i++ {
+		a, z := cuts[i], cuts[i+1]
+		switch {
+		case onCaret && a == c:
+			b.WriteString(m.styles().Caret.Render(l.Slice(a, z)))
+		case a >= sel[0] && z <= sel[1]:
+			b.WriteString(m.styles().Selected.Render(l.Slice(a, z)))
+		default:
+			b.WriteString(paint(l, spans, a, z, style))
+		}
+	}
+	if onCaret && c >= to {
 		b.WriteString(m.styles().Caret.Render(" "))
 	}
 	return m.pad(b.String())
@@ -704,5 +1213,5 @@ func (m *Model) pad(s string) string {
 	if m.width == 0 {
 		return s
 	}
-	return draw.Fit(s, max(m.width-draw.GutterWidth, 0))
+	return draw.Fit(s, max(m.width-m.lead(), 0))
 }

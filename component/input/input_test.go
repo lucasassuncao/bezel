@@ -1,6 +1,7 @@
 package input
 
 import (
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/component/cursor"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -204,4 +206,117 @@ func BenchmarkJumpingAcrossALongValue(b *testing.B) {
 		m, _ = m.Update(home)
 		m, _ = m.Update(end)
 	}
+}
+
+func TestASuggestionShowsTheRestAndTabTakesIt(t *testing.T) {
+	m := focused().WithSuggestions([]string{"commit", "Checkout", "cherry-pick"})
+	m = run(m, typed("c"))
+	require.Equal(t, []string{"commit", "Checkout", "cherry-pick"}, m.MatchedSuggestions())
+	require.Equal(t, "commit", ansi.Strip(m.View()), "the rest muted after the caret")
+	require.Contains(t, m.View(), th.Muted.Render("m"))
+
+	m = run(m, typed("h"))
+	require.Equal(t, "Checkout", m.CurrentSuggestion(), "matched whatever the case")
+	m = run(m, press('n', tea.ModCtrl))
+	require.Equal(t, "cherry-pick", m.CurrentSuggestion())
+	m = run(m, press('n', tea.ModCtrl))
+	require.Equal(t, "Checkout", m.CurrentSuggestion(), "the turn wraps")
+	m = run(m, press('p', tea.ModCtrl), press(tea.KeyTab, 0))
+	require.Equal(t, "cherry-pick", m.Value())
+	require.Empty(t, m.MatchedSuggestions(), "a whole suggestion has nothing to add")
+}
+
+func TestWithoutAMatchTabIsLeftToTheHost(t *testing.T) {
+	m := focused().WithSuggestions([]string{"commit"}).WithValue("x")
+	got, cmd := m.Update(press(tea.KeyTab, 0))
+	require.Equal(t, "x", got.Value())
+	require.Nil(t, cmd)
+	require.Empty(t, focused().WithSuggestions([]string{"a"}).CurrentSuggestion(), "an empty field suggests nothing")
+}
+
+func TestASuggestionKeepsToTheWidth(t *testing.T) {
+	m := focused().WithWidth(4).WithSuggestions([]string{"abcdefgh"}).WithValue("ab")
+	require.Equal(t, "abcd", ansi.Strip(m.View()))
+	m = run(m, press(tea.KeyLeft, 0))
+	require.Equal(t, "ab  ", ansi.Strip(m.View()), "only with the caret at the end")
+}
+
+func TestTheCharLimitStopsTypingAndCutsAPaste(t *testing.T) {
+	m := focused().WithCharLimit(4).WithValue("abcdef")
+	require.Equal(t, "abcd", m.Value(), "a value is cut too")
+	got, cmd := m.Update(typed("x"))
+	require.Equal(t, "abcd", got.Value())
+	require.Nil(t, cmd, "a key that types nothing is left to the host")
+
+	m = run(m, press(tea.KeyBackspace, 0), press(tea.KeyBackspace, 0), tea.PasteMsg{Content: "中xyz"})
+	require.Equal(t, "ab中x", m.Value(), "characters, not bytes")
+	require.Equal(t, 4, m.CharLimit())
+	require.Equal(t, "abcdef", focused().WithCharLimit(-1).WithValue("abcdef").Value(), "below one is no cap")
+}
+
+func TestTheCharLimitCutsATakenSuggestion(t *testing.T) {
+	m := focused().WithCharLimit(3).WithSuggestions([]string{"commit"})
+	m = run(m, typed("c"), press(tea.KeyTab, 0))
+	require.Equal(t, "com", m.Value())
+}
+
+func TestTheValidatorJudgesEveryChange(t *testing.T) {
+	digits := func(s string) error {
+		if strings.Trim(s, "0123456789") != "" {
+			return errors.New("digits only")
+		}
+		return nil
+	}
+	m := focused().WithValidate(digits).WithValue("12")
+	require.NoError(t, m.Err())
+	m = run(m, typed("x"))
+	require.EqualError(t, m.Err(), "digits only")
+	require.Equal(t, "12x", m.Value(), "the text stays as typed")
+	m = run(m, press(tea.KeyBackspace, 0))
+	require.NoError(t, m.Err())
+	require.NoError(t, m.WithValidate(nil).WithValue("x").Err(), "nil checks nothing")
+}
+
+func TestAHiddenFieldDrawsNoneOfItsText(t *testing.T) {
+	m := focused().WithHidden().WithWidth(6).WithValue("secret words")
+	require.Equal(t, "      ", ansi.Strip(m.View()))
+	require.Contains(t, m.View(), th.Caret.Render(" "), "the caret on the first cell")
+	require.Empty(t, ansi.Strip(m.Blur().WithWidth(0).View()))
+	m = run(m, press(tea.KeyBackspace, tea.ModAlt))
+	require.Empty(t, m.Value(), "no word boundary to give away")
+}
+
+func TestASteadyCaretNeverBlinksAndAHiddenOneNeverShows(t *testing.T) {
+	m, cmd := New(th).WithCursorMode(cursor.Steady).Focus()
+	require.Nil(t, cmd, "nothing to blink")
+	require.Nil(t, m.Blink())
+	require.Contains(t, m.View(), th.Caret.Render(" "))
+	m, cmd = m.Update(typed("a"))
+	require.Nil(t, cmd, "an edit arms no blink either")
+
+	m, cmd = m.SetCursorMode(cursor.Hidden)
+	require.Nil(t, cmd)
+	require.Equal(t, cursor.Hidden, m.CursorMode())
+	require.NotContains(t, m.View(), th.Caret.Render(" "))
+
+	m, cmd = m.SetCursorMode(cursor.Blinking)
+	require.NotNil(t, cmd, "back to blinking, the blink starts")
+	require.Contains(t, m.View(), th.Caret.Render(" "))
+}
+
+func TestTheTerminalCursorStandsInForTheCaret(t *testing.T) {
+	m, cmd := New(th).WithTerminalCursor().WithPrompt("> ").WithWidth(4).Focus()
+	require.Nil(t, cmd, "the terminal blinks its own")
+	m = run(m, typed("a"), typed("中"), typed("b"), typed("c"))
+	require.NotContains(t, m.View(), th.Caret.Render(" "), "no painted caret")
+	c := m.TerminalCursor()
+	require.NotNil(t, c)
+	require.Equal(t, 2+2, c.X, "the prompt, then bc: the scroll left 中 out")
+	require.True(t, c.Blink)
+
+	m = run(m, press(tea.KeyHome, 0))
+	require.Equal(t, 2, m.TerminalCursor().X)
+	require.Nil(t, m.Blur().TerminalCursor())
+	require.Nil(t, m.WithCursorMode(cursor.Hidden).TerminalCursor())
+	require.Nil(t, focused().TerminalCursor(), "a field painting its own caret has none")
 }

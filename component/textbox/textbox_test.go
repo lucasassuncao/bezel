@@ -1,6 +1,7 @@
 package textbox
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/component/cursor"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -321,4 +323,162 @@ func TestTheZeroFieldIsAnEmptyOne(t *testing.T) {
 	m = run(m, typed("a"), press(tea.KeyEnter, 0), typed("b"), press(tea.KeyUp, 0))
 	require.Equal(t, "a\nb", m.Value())
 	require.Equal(t, 0, m.Line())
+}
+
+func TestShiftMovesSelect(t *testing.T) {
+	m := focused("one two\nthree")
+	m = run(m, press(tea.KeyUp, 0), press(tea.KeyHome, 0), press(tea.KeyRight, tea.ModShift), press(tea.KeyRight, tea.ModShift))
+	require.True(t, m.HasSelection())
+	require.Equal(t, "on", m.SelectedText())
+
+	m = run(m, press(tea.KeyDown, tea.ModShift))
+	require.Equal(t, "one two\nth", m.SelectedText(), "down carries the selection to the next line")
+	start, end := m.Selection()
+	require.Equal(t, Position{0, 0}, start)
+	require.Equal(t, Position{1, 2}, end)
+
+	m = run(m, press(tea.KeyLeft, 0))
+	require.False(t, m.HasSelection(), "a plain move drops it")
+}
+
+func TestTypingReplacesTheSelectionAndDeletingTakesIt(t *testing.T) {
+	m := focused("hello world")
+	m = run(m, press(tea.KeyLeft, tea.ModCtrl|tea.ModShift))
+	require.Equal(t, "world", m.SelectedText())
+	m = run(m, typed("m"), typed("e"))
+	require.Equal(t, "hello me", m.Value())
+
+	m = run(m, press('a', tea.ModAlt))
+	require.Equal(t, "hello me", m.SelectedText(), "alt+a takes everything")
+	m = run(m, press(tea.KeyBackspace, 0))
+	require.Empty(t, m.Value())
+
+	m = run(focused("ab\ncd"), press('a', tea.ModAlt), tea.PasteMsg{Content: "x"})
+	require.Equal(t, "x", m.Value(), "a paste replaces it too")
+}
+
+func TestSelectAndClearSelectionFromTheApp(t *testing.T) {
+	m := focused("abc\ndef").Select(Position{0, 1}, Position{1, 1})
+	require.Equal(t, "bc\nd", m.SelectedText())
+	require.Equal(t, 1, m.Line())
+	require.Contains(t, m.View(), th().Selected.Render("bc"))
+	require.False(t, m.ClearSelection().HasSelection())
+	require.Empty(t, m.SetValue("x").SelectedText(), "a new value has nothing selected")
+	require.Empty(t, Model{}.SelectedText(), "the zero field neither")
+}
+
+func TestAltWCopiesTheSelectionAndAltXCutsIt(t *testing.T) {
+	var board string
+	m := focused("copy me").WithClipboardWrite(func(s string) error { board = s; return nil })
+	_, cmd := m.Update(press('w', tea.ModAlt))
+	require.Nil(t, cmd, "nothing selected, nothing copied")
+
+	m = run(m, press(tea.KeyLeft, tea.ModCtrl|tea.ModShift))
+	_, cmd = m.Update(press('w', tea.ModAlt))
+	require.Equal(t, CopiedMsg{Text: "me"}, cmd())
+	require.Equal(t, "me", board)
+
+	board = ""
+	m, cmd = m.Update(press('x', tea.ModAlt))
+	require.Equal(t, "copy ", m.Value())
+	for _, c := range cmd().(tea.BatchMsg) {
+		if c, ok := c().(CopiedMsg); ok {
+			require.Equal(t, "me", c.Text)
+		}
+	}
+	require.Equal(t, "me", board)
+}
+
+func TestTheCharLimitCountsLineBreaks(t *testing.T) {
+	m := focused("").WithCharLimit(5)
+	m = run(m, typed("a"), typed("b"), press(tea.KeyEnter, 0), typed("c"), typed("d"), typed("e"))
+	require.Equal(t, "ab\ncd", m.Value())
+	m = run(m, press(tea.KeyBackspace, 0), tea.PasteMsg{Content: "中xyz"})
+	require.Equal(t, "ab\nc中", m.Value(), "characters, not bytes")
+	require.Equal(t, "abcde", New(th()).WithCharLimit(5).WithValue("abcdefgh").Value())
+	require.Equal(t, 5, m.CharLimit())
+}
+
+func TestMaxLinesStopsNewLines(t *testing.T) {
+	m := focused("one").WithMaxLines(2)
+	m = run(m, press(tea.KeyEnter, 0), typed("x"), press(tea.KeyEnter, 0), typed("y"))
+	require.Equal(t, "one\nxy", m.Value())
+	m = run(m, tea.PasteMsg{Content: "z\nlost"})
+	require.Equal(t, "one\nxyz", m.Value(), "a paste is cut at the last line that fits")
+	require.Equal(t, "a\nb", New(th()).WithMaxLines(2).WithValue("a\nb\nc").Value())
+	require.Equal(t, 2, m.MaxLines())
+}
+
+func TestADynamicHeightFollowsTheText(t *testing.T) {
+	m := focused("").SetWidth(20).WithDynamicHeight(2, 4)
+	require.Equal(t, 2, m.Height(), "never under the least")
+	require.Len(t, viewRows(m), 2)
+	m = run(m, press(tea.KeyEnter, 0), press(tea.KeyEnter, 0))
+	require.Equal(t, 3, m.Height())
+	m = run(m, press(tea.KeyEnter, 0), press(tea.KeyEnter, 0), press(tea.KeyEnter, 0))
+	require.Equal(t, 4, m.Height(), "nor over the most: it scrolls")
+	require.Len(t, viewRows(m), 4)
+	m = run(m, press('a', tea.ModAlt), press(tea.KeyBackspace, 0))
+	require.Equal(t, 2, m.Height(), "it shrinks back")
+	require.Equal(t, 7, m.SetHeight(7).Height(), "SetHeight ends it")
+	require.Equal(t, 0, m.WithDynamicHeight(0, 9).SetHeight(0).Height())
+}
+
+func TestThePlaceholderShowsWhileEmpty(t *testing.T) {
+	m := focused("").SetWidth(20).SetHeight(2).WithPlaceholder("write here")
+	rows := viewRows(m)
+	require.Contains(t, rows[0], "write here")
+	require.Equal(t, 20, ansi.StringWidth(rows[0]))
+	require.Equal(t, "write here", m.Placeholder())
+	require.NotContains(t, viewRows(run(m, typed("x")))[0], "write here")
+}
+
+func TestThePromptLeadsEveryLineAndTheNumbersCanGo(t *testing.T) {
+	m := New(th()).SetWidth(12).WithLineNumbers(false).WithPrompt("> ").SetValue("ab\ncd")
+	require.Equal(t, []string{"> ab        ", "> cd        "}, viewRows(m))
+
+	m = m.WithPromptFunc(3, func(i int) string { return fmt.Sprint(i+1, ":") }).SetValue("one two three")
+	rows := viewRows(m)
+	require.Equal(t, "1: one two", strings.TrimRight(rows[0], " "), "the text wraps in what the prompt leaves")
+	require.True(t, strings.HasPrefix(rows[1], "   three"), "a wrapped row gets a blank prompt")
+	for _, r := range rows {
+		require.Equal(t, 12, ansi.StringWidth(r))
+	}
+}
+
+func TestWordKeysChangeCaseAndCtrlTTransposes(t *testing.T) {
+	m := run(focused("make it loud"), press(tea.KeyHome, 0), press('u', tea.ModAlt), press('c', tea.ModAlt))
+	require.Equal(t, "MAKE It loud", m.Value())
+	m = run(m, press('l', tea.ModAlt))
+	require.Equal(t, "MAKE It loud", m.Value(), "the next word, loud, was lower already")
+	m = run(m, press(tea.KeyHome, 0), press('l', tea.ModAlt))
+	require.Equal(t, "make It loud", m.Value())
+	require.Equal(t, "ba", run(focused("ab"), press('t', tea.ModCtrl)).Value())
+}
+
+func TestInsertStringAndRuneTypeAtTheCaret(t *testing.T) {
+	m := focused("ad").MoveTo(0, 1).InsertString("b\nc").InsertRune('!')
+	require.Equal(t, "ab\nc!d", m.Value())
+	require.Equal(t, 1, m.Line())
+	m = m.Select(Position{0, 0}, Position{1, 0}).InsertString("x")
+	require.Equal(t, "xc!d", m.Value(), "in place of the selection")
+	require.Equal(t, "xc", New(th()).WithCharLimit(2).InsertString("xcz").Value())
+	require.Equal(t, "xc!d", m.MoveTo(0, 2).Word())
+}
+
+func TestCursorModesAndTheTerminalCursor(t *testing.T) {
+	m, cmd := New(th()).WithCursorMode(cursor.Steady).Focus()
+	require.Nil(t, cmd)
+	require.Nil(t, m.Blink())
+	m, cmd = m.SetCursorMode(cursor.Blinking)
+	require.NotNil(t, cmd)
+	require.Equal(t, cursor.Blinking, m.CursorMode())
+
+	m, cmd = New(th()).SetWidth(20).SetHeight(2).WithTerminalCursor().SetValue("a\nb\nxyz").MoveTo(2, 1).Focus()
+	require.Nil(t, cmd, "the terminal blinks its own")
+	c := m.TerminalCursor()
+	require.Equal(t, draw.GutterWidth+1, c.X)
+	require.Equal(t, 1, c.Y, "the window scrolled one row down")
+	require.Nil(t, m.Blur().TerminalCursor())
+	require.Nil(t, focused("x").TerminalCursor())
 }

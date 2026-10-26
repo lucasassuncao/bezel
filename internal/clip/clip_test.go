@@ -37,3 +37,22 @@ func TestPasteGivesUpOnAReadThatHangs(t *testing.T) {
 	require.Nil(t, cmd())
 	require.Less(t, time.Since(start), time.Second)
 }
+
+func TestCopyWritesAndSaysHowItWent(t *testing.T) {
+	var got string
+	done := func(err error) tea.Msg { return err }
+	require.Nil(t, Copy(func(s string) error { got = s; return nil }, "text", done)())
+	require.Equal(t, "text", got)
+	require.EqualError(t, Copy(func(string) error { return errors.New("no xclip") }, "x", done)().(error), "no xclip")
+}
+
+func TestCopyGivesUpOnAWriteThatHangs(t *testing.T) {
+	old := timeout
+	timeout = 10 * time.Millisecond
+	t.Cleanup(func() { timeout = old })
+
+	release := make(chan struct{})
+	t.Cleanup(func() { close(release) })
+	msg := Copy(func(string) error { <-release; return nil }, "x", func(err error) tea.Msg { return err })()
+	require.ErrorIs(t, msg.(error), ErrTimeout)
+}

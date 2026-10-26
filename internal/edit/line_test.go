@@ -2,6 +2,7 @@ package edit
 
 import (
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/charmbracelet/x/ansi"
@@ -152,4 +153,27 @@ func TestAt32ClampsWhatFourBytesCannotHold(t *testing.T) {
 	require.Equal(t, int32(7), at32(7))
 	require.Equal(t, int32(0), at32(-1))
 	require.Equal(t, int32(math.MaxInt32), at32(math.MaxInt32+1))
+}
+
+func TestMapWordChangesTheWordAfterTheCaret(t *testing.T) {
+	l := NewLine("hello  big world").SetCursor(5)
+	got := l.MapWord(strings.ToUpper)
+	require.Equal(t, "hello  BIG world", got.String())
+	require.Equal(t, 10, got.Cursor(), "after the word")
+	require.Equal(t, "end", NewLine("end").MapWord(strings.ToUpper).String(), "no word after the caret")
+}
+
+func TestTransposeSwapsAroundTheCaret(t *testing.T) {
+	require.Equal(t, "bac", NewLine("abc").SetCursor(1).Transpose().String())
+	l := NewLine("abc").Transpose()
+	require.Equal(t, "acb", l.String(), "at the end, the last two")
+	require.Equal(t, 3, l.Cursor())
+	require.Equal(t, "a", NewLine("a").Transpose().String())
+	require.Equal(t, "ab", NewLine("ab").SetCursor(0).Transpose().String())
+}
+
+func TestWordAtIsTheWordUnderTheCaret(t *testing.T) {
+	require.Equal(t, "big", NewLine("the big dog").SetCursor(5).WordAt())
+	require.Equal(t, "the", NewLine("the big dog").SetCursor(3).WordAt(), "touching its end")
+	require.Empty(t, NewLine("a  b").SetCursor(2).WordAt())
 }

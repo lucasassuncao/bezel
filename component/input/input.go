@@ -4,13 +4,16 @@
 package input
 
 import (
+	"slices"
 	"strings"
 	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel/component/cursor"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/clip"
 	"github.com/lucasassuncao/bezel/internal/edit"
@@ -25,10 +28,12 @@ type Keys struct {
 	DeleteWordBack, DeleteWordForward           key.Binding
 	KillToStart, KillToEnd                      key.Binding
 	Paste                                       key.Binding // reads the clipboard
+	Accept, NextSuggestion, PrevSuggestion      key.Binding // with suggestions only
 }
 
 // DefaultKeys are the arrows and the readline keys: ctrl+a/e, alt+b/f,
-// ctrl+w, ctrl+k and ctrl+u, ctrl and alt arrows for words, ctrl+v to paste.
+// ctrl+w, ctrl+k and ctrl+u, ctrl and alt arrows for words, ctrl+v to paste;
+// tab takes a suggestion, ctrl+n and ctrl+p turn through them.
 func DefaultKeys() Keys {
 	return Keys{
 		Left:              key.NewBinding(key.WithKeys("left", "ctrl+b")),
@@ -44,6 +49,9 @@ func DefaultKeys() Keys {
 		KillToStart:       key.NewBinding(key.WithKeys("ctrl+u")),
 		KillToEnd:         key.NewBinding(key.WithKeys("ctrl+k")),
 		Paste:             key.NewBinding(key.WithKeys("ctrl+v")),
+		Accept:            key.NewBinding(key.WithKeys("tab")),
+		NextSuggestion:    key.NewBinding(key.WithKeys("ctrl+n")),
+		PrevSuggestion:    key.NewBinding(key.WithKeys("ctrl+p")),
 	}
 }
 
@@ -62,12 +70,21 @@ type Model struct {
 	prompt      string
 	placeholder string
 	mask        string
+	hidden      bool // nothing of the text is drawn
 	focused     bool
-	caretOn     bool  // false for the dark half of a blink
+	caretOn     bool // false for the dark half of a blink
+	mode        cursor.Mode
+	term        bool  // the terminal's own cursor stands in for the caret
 	id, tag     int64 // tag counts the blinks armed; only the newest flips
 	keys        Keys
 	clipboard   func() (string, error) // nil is the system's
 	th          *theme.Resolved        // shared by every copy and never written
+	suggestions []string
+	matches     []int // the suggestions the text starts, in order
+	pick        int   // the match shown, an index into matches
+	limit       int   // the most characters the field holds; 0 is no cap
+	validate    func(string) error
+	err         error // validate's answer for the text as it is
 }
 
 // New is an empty field, not focused, as wide as its text.
@@ -122,6 +139,64 @@ func (m Model) WithMask(mask rune) Model {
 	return m.scroll()
 }
 
+// WithHidden draws none of the text, not even a mask, so not even its length
+// shows; the caret stays on the first cell. Word keys run to the ends.
+func (m Model) WithHidden() Model {
+	m.hidden = true
+	return m.scroll()
+}
+
+// WithCursorMode sets how the caret shows while focused: blinking at the
+// theme's pace, steady, or hidden.
+func (m Model) WithCursorMode(mode cursor.Mode) Model {
+	m.mode = mode
+	return m
+}
+
+// SetCursorMode changes how a live caret shows, lit at once; a focused field
+// turned to Blinking starts its blink with the command returned.
+func (m Model) SetCursorMode(mode cursor.Mode) (Model, tea.Cmd) {
+	m.mode = mode
+	if !m.focused {
+		return m, nil
+	}
+	return m.lit()
+}
+
+// CursorMode is how the caret shows while focused.
+func (m Model) CursorMode() cursor.Mode { return m.mode }
+
+// shows reports whether the caret is painted now.
+func (m *Model) shows() bool { return m.focused && m.caretOn && m.mode != cursor.Hidden && !m.term }
+
+// blinks reports whether the field ticks its own caret.
+func (m *Model) blinks() bool { return m.focused && m.mode == cursor.Blinking && !m.term }
+
+// WithTerminalCursor leaves the caret to the terminal's own cursor: View
+// paints none, and TerminalCursor says where to put the real one.
+func (m Model) WithTerminalCursor() Model {
+	m.term = true
+	return m
+}
+
+// TerminalCursor is the terminal's cursor for a field made WithTerminalCursor,
+// placed within the field's view: add the field's origin before handing it
+// to tea.View. nil while blurred, hidden, or painting its own caret.
+func (m Model) TerminalCursor() *tea.Cursor {
+	if !m.term || !m.focused || m.mode == cursor.Hidden {
+		return nil
+	}
+	x := ansi.StringWidth(m.prompt)
+	if !m.hidden && (m.line.Len() > 0 || m.placeholder == "") {
+		for i := m.offset; i < m.line.Cursor(); i++ {
+			x += m.cell(i)
+		}
+	}
+	c := tea.NewCursor(x, 0)
+	c.Blink = m.mode == cursor.Blinking
+	return c
+}
+
 // WithClipboard reads the clipboard through read on a paste key, for a test
 // that must not touch the machine's own; nil is the system's.
 func (m Model) WithClipboard(read func() (string, error)) Model {
@@ -138,8 +213,106 @@ func (m Model) WithKeys(k Keys) Model {
 // WithValue is the field holding s, the caret at its end, as a form opens on
 // a saved value.
 func (m Model) WithValue(s string) Model {
-	m.line = edit.NewLine(oneLine(s))
-	return m.scroll()
+	m.line = edit.NewLine(m.clip(oneLine(s), 0))
+	return m.scroll().match().check()
+}
+
+// WithCharLimit caps the field at n characters: typing stops there and a
+// paste is cut to what fits. Zero or less is no cap.
+func (m Model) WithCharLimit(n int) Model {
+	m.limit = max(n, 0)
+	return m.WithValue(m.Value())
+}
+
+// CharLimit is the most characters the field holds; zero is no cap.
+func (m Model) CharLimit() int { return m.limit }
+
+// clip is s cut to the characters left under the limit when the field
+// already holds have.
+func (m *Model) clip(s string, have int) string {
+	if m.limit == 0 {
+		return s
+	}
+	g := edit.Graphemes(s)
+	return strings.Join(g[:min(len(g), max(m.limit-have, 0))], "")
+}
+
+// WithValidate runs fn on the text after every change and keeps its answer
+// for Err; the text stays as typed either way. nil checks nothing.
+func (m Model) WithValidate(fn func(string) error) Model {
+	m.validate = fn
+	return m.check()
+}
+
+// Err is what the validator said of the text as it is, nil when it took it.
+func (m Model) Err() error { return m.err }
+
+func (m Model) check() Model {
+	m.err = nil
+	if m.validate != nil {
+		m.err = m.validate(m.line.String())
+	}
+	return m
+}
+
+// WithSuggestions offers to complete the text with any of list it starts,
+// matched case-blind: the rest of one shows muted after the caret.
+func (m Model) WithSuggestions(list []string) Model {
+	m.suggestions = slices.Clone(list)
+	return m.match()
+}
+
+// SetSuggestions replaces the list after something happened, a directory
+// read say.
+func (m Model) SetSuggestions(list []string) Model { return m.WithSuggestions(list) }
+
+// Suggestions is the whole list the field completes from.
+func (m Model) Suggestions() []string { return slices.Clone(m.suggestions) }
+
+// MatchedSuggestions are the suggestions the text starts, in list order.
+func (m Model) MatchedSuggestions() []string {
+	out := make([]string, len(m.matches))
+	for i, j := range m.matches {
+		out[i] = m.suggestions[j]
+	}
+	return out
+}
+
+// CurrentSuggestion is the match the field shows, "" when none does.
+func (m Model) CurrentSuggestion() string {
+	if len(m.matches) == 0 {
+		return ""
+	}
+	return m.suggestions[m.matches[m.pick]]
+}
+
+// match finds the suggestions the text starts, keeping the one shown when
+// it still matches.
+func (m Model) match() Model {
+	shown := m.CurrentSuggestion()
+	m.matches, m.pick = nil, 0
+	v := strings.ToLower(m.line.String())
+	if v == "" {
+		return m
+	}
+	for i, s := range m.suggestions {
+		if len(s) > len(v) && strings.HasPrefix(strings.ToLower(s), v) {
+			if s == shown {
+				m.pick = len(m.matches)
+			}
+			m.matches = append(m.matches, i)
+		}
+	}
+	return m
+}
+
+// ghost is what the current suggestion adds to the text, drawn after it.
+func (m *Model) ghost() []string {
+	s := m.CurrentSuggestion()
+	if s == "" || m.mask != "" || m.line.Cursor() != m.line.Len() {
+		return nil
+	}
+	return edit.Graphemes(s)[m.line.Len():]
 }
 
 // SetValue replaces the text after something happened, a completion say,
@@ -173,7 +346,7 @@ func (m Model) Blur() Model {
 // Blink is the command that keeps a focused caret blinking, for a host that
 // focused the field before it could hand on a command; nil while blurred.
 func (m Model) Blink() tea.Cmd {
-	if !m.focused {
+	if !m.blinks() {
 		return nil
 	}
 	msg := BlinkMsg{id: m.id, tag: m.tag}
@@ -185,14 +358,14 @@ func (m Model) Blink() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case BlinkMsg:
-		if !m.focused || msg.id != m.id || msg.tag != m.tag {
+		if !m.blinks() || msg.id != m.id || msg.tag != m.tag {
 			return m, nil
 		}
 		m.caretOn = !m.caretOn
 		return m.arm()
 	case tea.PasteMsg:
 		if m.focused {
-			return m.edited(m.line.Insert(oneLine(msg.Content)))
+			return m.edited(m.line.Insert(m.clip(oneLine(msg.Content), m.line.Len())))
 		}
 	case tea.KeyPressMsg:
 		if m.focused {
@@ -206,7 +379,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 const typingMods = tea.ModCtrl | tea.ModAlt | tea.ModMeta | tea.ModSuper | tea.ModHyper
 
 func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
-	l, masked := m.line, m.mask != ""
+	l, masked := m.line, m.mask != "" || m.hidden
 	switch {
 	case key.Matches(k, m.keys.Left):
 		l = l.SetCursor(l.Cursor() - 1)
@@ -234,9 +407,20 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 		l = l.DeleteWordForward()
 	case key.Matches(k, m.keys.Paste):
 		return m, clip.Paste(m.clipboard) // it comes back as a tea.PasteMsg
+	case len(m.matches) > 0 && key.Matches(k, m.keys.Accept):
+		l = edit.NewLine(m.clip(m.CurrentSuggestion(), 0))
+	case len(m.matches) > 0 && key.Matches(k, m.keys.NextSuggestion):
+		m.pick = (m.pick + 1) % len(m.matches)
+		return m.lit()
+	case len(m.matches) > 0 && key.Matches(k, m.keys.PrevSuggestion):
+		m.pick = (m.pick + len(m.matches) - 1) % len(m.matches)
+		return m.lit()
 	default:
 		text := oneLine(k.Key().Text)
 		if text == "" || k.Mod&typingMods != 0 {
+			return m, nil
+		}
+		if text = m.clip(text, l.Len()); text == "" {
 			return m, nil
 		}
 		l = l.Insert(text)
@@ -248,7 +432,7 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 // a caret that went dark while typing would seem to lag.
 func (m Model) edited(l edit.Line) (Model, tea.Cmd) {
 	m.line = l
-	m = m.scroll()
+	m = m.scroll().match().check()
 	return m.lit()
 }
 
@@ -261,6 +445,9 @@ func (m Model) lit() (Model, tea.Cmd) {
 // way, this one's twin included, lands spent.
 func (m Model) arm() (Model, tea.Cmd) {
 	m.tag++
+	if !m.blinks() {
+		return m, nil
+	}
 	msg := BlinkMsg{id: m.id, tag: m.tag}
 	return m, tea.Tick(draw.Blink(m.styles().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
@@ -332,8 +519,11 @@ func (m Model) View() string {
 	if m.line.Len() == 0 && m.placeholder != "" {
 		return prompt + m.placeholderView()
 	}
+	if m.hidden {
+		return prompt + m.hiddenView()
+	}
 	var b strings.Builder
-	used, c, caret := 0, m.line.Cursor(), m.focused && m.caretOn
+	used, c, caret := 0, m.line.Cursor(), m.shows()
 	for i := m.offset; i < m.line.Len(); i++ {
 		g := m.show(i)
 		w := ansi.StringWidth(g)
@@ -347,17 +537,53 @@ func (m Model) View() string {
 		used += w
 	}
 	if c == m.line.Len() && m.focused && (m.width == 0 || used < m.width) {
-		end := " "
-		if caret {
-			end = m.styles().Caret.Render(end)
-		}
-		b.WriteString(end)
-		used++
+		used += m.end(&b, used, caret)
 	}
 	if m.width > used {
 		b.WriteString(strings.Repeat(" ", m.width-used))
 	}
 	return prompt + b.String()
+}
+
+// end draws the cell after the text, and the rest of a suggestion from it,
+// into what the width leaves; it returns the cells it took.
+func (m *Model) end(b *strings.Builder, used int, caret bool) int {
+	ghost, rest := m.ghost(), m.styles().Muted
+	if len(ghost) == 0 {
+		ghost, rest = []string{" "}, lipgloss.NewStyle()
+	}
+	took := 0
+	for i, g := range ghost {
+		w := edit.Cells(g)
+		if m.width > 0 && used+took+w > m.width {
+			break
+		}
+		if i == 0 && caret {
+			b.WriteString(m.styles().Caret.Render(g))
+		} else {
+			b.WriteString(rest.Render(g))
+		}
+		took += w
+	}
+	return took
+}
+
+// hiddenView is a blank field, the caret on its first cell while focused.
+func (m Model) hiddenView() string {
+	var b strings.Builder
+	used := 0
+	if m.focused {
+		end := " "
+		if m.shows() {
+			end = m.styles().Caret.Render(end)
+		}
+		b.WriteString(end)
+		used = 1
+	}
+	if m.width > used {
+		b.WriteString(strings.Repeat(" ", m.width-used))
+	}
+	return b.String()
 }
 
 // placeholderView is the placeholder, muted, with the caret on its first
@@ -367,7 +593,7 @@ func (m Model) placeholderView() string {
 	if m.width > 0 {
 		text = draw.Fit(text, m.width)
 	}
-	if !m.focused || !m.caretOn {
+	if !m.shows() {
 		return m.styles().Muted.Render(text)
 	}
 	g := edit.Graphemes(text)

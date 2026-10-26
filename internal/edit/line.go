@@ -218,6 +218,46 @@ func (l Line) wordRight() int {
 	return i
 }
 
+// MapWord passes the word after the caret, spaces before it skipped, through
+// f, and leaves the caret after it, as alt+u does in a shell.
+func (l Line) MapWord(f func(string) string) Line {
+	from := l.cursor
+	for from < l.Len() && l.space(from) {
+		from++
+	}
+	to := l.SetCursor(from).wordRight()
+	if from >= to {
+		return l.SetCursor(to)
+	}
+	return rebuild(l.s[:l.off(from)]+f(l.s[l.off(from):l.off(to)]), l.s[l.off(to):])
+}
+
+// Transpose swaps the characters either side of the caret, the last two at
+// the end of the line, and moves the caret past them, as ctrl+t does.
+func (l Line) Transpose() Line {
+	c := l.cursor
+	if c == l.Len() {
+		c--
+	}
+	if c < 1 || c >= l.Len() {
+		return l
+	}
+	a, b := l.At(c-1), l.At(c)
+	return rebuild(l.s[:l.off(c-1)]+b+a, l.s[l.off(c+1):])
+}
+
+// WordAt is the word the caret is in or touches, "" between spaces.
+func (l Line) WordAt() string {
+	from, to := l.cursor, l.cursor
+	for from > 0 && !l.space(from-1) {
+		from--
+	}
+	for to < l.Len() && !l.space(to) {
+		to++
+	}
+	return l.Slice(from, to)
+}
+
 // Split cuts the line at the caret: what was before it, and what was after,
 // with the caret at its start. Each half is a copy of its own text.
 func (l Line) Split() (before, after Line) {

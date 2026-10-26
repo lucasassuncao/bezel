@@ -32,6 +32,7 @@ type Resolved struct {
 	Badge        lipgloss.Style // a filled label; recolour its background per kind
 	Match        lipgloss.Style // every search match in a text
 	MatchCurrent lipgloss.Style // the match the reader is on
+	Selected     lipgloss.Style // text selected in a field
 
 	// Chrome styles the shell draws with. Derived from Colors like the rest.
 	Panel        draw.PanelStyle
@@ -107,6 +108,7 @@ func buildDerivedStyles(c Colors) Resolved {
 		// accent in many themes, and the two must still tell apart.
 		Match:        lipgloss.NewStyle().Foreground(onAccent).Background(info),
 		MatchCurrent: lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(warning),
+		Selected:     lipgloss.NewStyle().Foreground(text).Background(border),
 	}
 	for i, s := range c.Series {
 		r.Series[i] = lipgloss.NewStyle().Foreground(lipgloss.Color(s))
