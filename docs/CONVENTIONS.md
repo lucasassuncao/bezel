@@ -54,6 +54,17 @@ A new component picks the row whose "Why" fits it, not a fourth shape.
 - A pair that reads as one entry gives its help to the first binding (`Up` as "↑/↓") and none to the second, which `FromBindings` then leaves out.
 - Esc belongs to the stack, which closes the top dialog before the dialog sees the key. A dialog still lists it; its own binding for it only reaches a host that drives the dialog without a stack.
 
+## Clicks
+
+The mouse reaches a component the way a key does: the app hands it on, already moved into the pane's cells by the shell's `ClickMsg`, `Mouse` or `MouseIn`.
+
+- A component that moves a cursor takes a click through **`Click(y int) (T, Action)`** beside its `Update`, with the same return: `list`, `table.Model`, `tree`. `y` is a line of what its `View` drew. The first click moves the cursor to the row; a click on the row already under it does what enter does there.
+- `form.Form` takes **`Click(y, width int) (Form, tea.Cmd)`**: the width is the one its `View` gets, which sets how tall an open select draws.
+- A leaf that tracks a press, a drag and a release, as `textbox` does, takes the mouse messages in its own `Update`, like its keys.
+- A dialog takes clicks by implementing `overlay.Clicker`, counted from the top left of what it drew.
+
+`Click` is not a fourth shape of `Update`: it is a second way in, and answers as `Update` does.
+
 ## Constructor, With and Set
 
 - **`NewX(required..., th)`**: what the component cannot work without, the theme last. A callback may be documented as accepting nil.
@@ -82,6 +93,6 @@ A new component reaches for one of these before it invents a shape.
 | Chain of responsibility | `Shell.Update`: the overlays, then the status input, then the actions; `handled` false hands the rest to the app. |
 | Command | `shell.Action`, `palette.Item`: a key, a name and what it runs, held as data the legend, the palette and the dispatch read. |
 | Functional options | `shell.Option` on the prebuilt actions, `With` on every model: optional settings without a growing constructor. |
-| Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `form.Holder`: an overlay or field opts into a behaviour by implementing one small interface. |
+| Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `Clicker`, `form.Holder`: an overlay or field opts into a behaviour by implementing one small interface. |
 | Strategy | `tree.View`'s row, `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies the answer. |
 | Cascade | `theme.Theme.Base`: each layer overrides the one under it, so a preset is a base to build on. |

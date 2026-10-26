@@ -69,6 +69,7 @@ func newModel() model {
 		Tabs:   shTabs,
 		Theme:  th,
 		Title:  "shell",
+		Mouse:  true, // Screen turns it on; tabs, panes and dialogs then take clicks
 		Actions: []shell.Action{
 			shell.Help(), shell.ChangeTab(), shell.Move(), shell.Quit(),
 		},
@@ -110,13 +111,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case deletedMsg:
 		m.sh, cmd = m.sh.SetStatus("deleted "+msg.item, shell.OK, 2*time.Second)
 		return m, cmd
-	case tea.MouseClickMsg:
-		if pane, local, ok := m.sh.Mouse(msg); ok && pane == "list" {
-			var act list.Action
-			if m.lists[at], act = m.lists[at].Click(local.Mouse().Y); act == list.Chosen {
-				m.sh, cmd = m.sh.SetStatus("opened "+m.selected(), shell.OK, 2*time.Second)
-				return m, cmd
-			}
+	case shell.ClickMsg:
+		if msg.Pane != "list" {
+			return m, nil
+		}
+		var act list.Action
+		if m.lists[at], act = m.lists[at].Click(msg.Y); act == list.Chosen {
+			m.sh, cmd = m.sh.SetStatus("opened "+m.selected(), shell.OK, 2*time.Second)
+			return m, cmd
 		}
 	case tea.KeyPressMsg:
 		if msg.String() == "ctrl+c" {
@@ -130,15 +132,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() tea.View {
 	at := m.sh.ActiveTab()
 	l := m.lists[at].SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.Screen(map[string]shell.Pane{
 		"list": {Title: m.tabs[at].name, Body: func(layout.Rect) string { return l.View(m.th) }},
 		"detail": {Title: "detail", Body: func(r layout.Rect) string {
 			return fmt.Sprintf("selected: %s\nfocus: %s\npane: %dx%d", m.selected(), m.sh.Focus(), r.W, r.H)
 		}},
-	}))
-	v.AltScreen = true
-	v.MouseMode = tea.MouseModeCellMotion
-	return v
+	})
 }
 
 func main() {

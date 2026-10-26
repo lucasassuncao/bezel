@@ -31,6 +31,7 @@ func newModel() model {
 		Layout: layout.Columns(layout.Fill("text")),
 		Theme:  th,
 		Title:  "textbox",
+		Mouse:  true,
 		Actions: []shell.Action{
 			shell.Custom("ctrl+s", "count lines", shell.Send(countMsg{})),
 			// q would be text here, so esc quits instead.
@@ -65,9 +66,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
-	case tea.MouseMsg:
-		// One pane: a drag that leaves it still moves the caret.
-		m.ta, cmd = m.ta.Update(m.sh.MouseIn("text", msg))
+	case shell.ClickMsg: // the press, already in the pane's cells
+		m.ta, cmd = m.ta.Update(msg.MouseClickMsg)
+		return m, cmd
+	case tea.MouseMotionMsg, tea.MouseReleaseMsg:
+		// The drag: moved into the pane even when the pointer left it.
+		m.ta, cmd = m.ta.Update(m.sh.MouseIn("text", msg.(tea.MouseMsg)))
 		return m, cmd
 	}
 	m.ta, cmd = m.ta.Update(msg)
@@ -75,12 +79,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.Screen(map[string]shell.Pane{
 		"text": {Title: "notes.md", Body: func(layout.Rect) string { return m.ta.View() }},
-	}))
-	v.AltScreen = true
-	v.MouseMode = tea.MouseModeCellMotion
-	return v
+	})
 }
 
 func main() {

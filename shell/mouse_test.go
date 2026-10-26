@@ -66,19 +66,55 @@ func TestAClickOnATabShowsIt(t *testing.T) {
 	require.Equal(t, 1, s.ActiveTab())
 }
 
-func TestAClickFocusesAPaneThenComesBackToTheApp(t *testing.T) {
+// clickOf is the ClickMsg cmd sends, alone or in a batch; false for none.
+func clickOf(cmd tea.Cmd) (ClickMsg, bool) {
+	if cmd == nil {
+		return ClickMsg{}, false
+	}
+	switch msg := cmd().(type) {
+	case ClickMsg:
+		return msg, true
+	case tea.BatchMsg:
+		for _, c := range msg {
+			if got, ok := clickOf(c); ok {
+				return got, true
+			}
+		}
+	}
+	return ClickMsg{}, false
+}
+
+func TestAClickOnAPaneFocusesItAndComesAsAClickMsg(t *testing.T) {
 	s := sizedShell()
 	require.Equal(t, "list", s.Focus())
-	r := s.Rect("detail")
-	s, handled, cmd := s.Update(click(r.X+3, r.Y+2))
-	require.True(t, handled, "the shell takes it to move the focus")
+	inner := draw.InnerRect(s.Rect("detail"))
+	s, handled, cmd := s.Update(click(inner.X+3, inner.Y+2))
+	require.True(t, handled)
 	require.Equal(t, "detail", s.Focus())
-	require.NotNil(t, cmd)
+	got, ok := clickOf(cmd)
+	require.True(t, ok, "the focus and the click, in one go")
+	require.Equal(t, "detail", got.Pane)
+	require.Equal(t, 3, got.X)
+	require.Equal(t, 2, got.Y)
 
-	_, handled, _ = s.Update(click(r.X+3, r.Y+2))
-	require.False(t, handled, "on the focused pane the click is the app's")
-	_, handled, _ = s.Update(tea.MouseClickMsg{X: r.X + 3, Y: r.Y + 2, Button: tea.MouseRight})
+	_, handled, cmd = s.Update(click(inner.X, inner.Y))
+	require.True(t, handled)
+	got, _ = clickOf(cmd)
+	require.Equal(t, ClickMsg{Pane: "detail", MouseClickMsg: tea.MouseClickMsg{Button: tea.MouseLeft}}, got, "on the focused pane, just the click")
+
+	_, handled, _ = s.Update(tea.MouseClickMsg{X: inner.X, Y: inner.Y, Button: tea.MouseRight})
 	require.False(t, handled, "only the left button")
+	_, handled, _ = s.Update(click(0, 0))
+	require.False(t, handled, "the header is no pane: the click is the app's as it came")
+}
+
+func TestScreenTurnsTheMouseOnWhenAsked(t *testing.T) {
+	s := sizedShell()
+	v := s.Screen(demoPanes())
+	require.True(t, v.AltScreen)
+	require.Equal(t, tea.MouseModeNone, v.MouseMode)
+	on := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true), Mouse: true})
+	require.Equal(t, tea.MouseModeCellMotion, on.Screen(demoPanes()).MouseMode)
 }
 
 func TestAClickWithADialogOpenIsTheDialogs(t *testing.T) {

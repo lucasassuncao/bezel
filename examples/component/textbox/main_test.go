@@ -50,7 +50,8 @@ func TestTextboxSelectsWithTheMouse(t *testing.T) {
 	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
 	in := draw.InnerRect(m.(model).sh.Rect("text"))
 	x, y := in.X+draw.GutterWidth, in.Y
-	m, _ = m.Update(tea.MouseClickMsg{X: x, Y: y, Button: tea.MouseLeft})
+	m, cmd := m.Update(tea.MouseClickMsg{X: x, Y: y, Button: tea.MouseLeft})
+	m, _ = m.Update(cmd()) // the shell.ClickMsg it sends
 	m, _ = m.Update(tea.MouseReleaseMsg{X: x + 7, Y: y, Button: tea.MouseLeft})
 	require.Equal(t, "# notes", m.(model).ta.SelectedText())
 	m, _ = m.Update(bezeltest.Key("x"))

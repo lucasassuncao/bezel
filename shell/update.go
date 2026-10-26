@@ -18,7 +18,7 @@ type statusExpiredMsg struct{ seq uint }
 
 // Update handles what is the shell's: resize, status ticks, overlays, the
 // status-row input, help, tabs and focus, and a left click on a dialog, a
-// tab or a pane out of focus. handled false means the app's turn.
+// tab or a pane, which comes back as a ClickMsg. false means the app's turn.
 func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	s = s.ready()
 	update := s.update

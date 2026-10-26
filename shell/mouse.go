@@ -9,6 +9,27 @@ import (
 	"github.com/lucasassuncao/bezel/layout"
 )
 
+// ClickMsg is a left click on a pane, sent by the shell once it focused the
+// pane: X and Y are cells of the pane's body, the rect its Body draws in,
+// and may fall outside it on the border. The embedded message is the click
+// moved there, for a component that takes the mouse itself.
+type ClickMsg struct {
+	Pane string
+	tea.MouseClickMsg
+}
+
+// Screen is the shell's view as the full-screen tea.View a program returns,
+// with mouse reporting on when Config.Mouse is.
+func (s Shell) Screen(panes map[string]Pane) tea.View {
+	s = s.ready()
+	v := tea.NewView(s.View(panes))
+	v.AltScreen = true
+	if s.cfg.Mouse {
+		v.MouseMode = tea.MouseModeCellMotion
+	}
+	return v
+}
+
 // PaneAt is the pane drawn at the screen cell (x, y), border included, and
 // false over the chrome, a gap or an open dialog, which covers the panes.
 func (s Shell) PaneAt(x, y int) (string, bool) {
@@ -28,8 +49,8 @@ func (s Shell) PaneAt(x, y int) (string, bool) {
 }
 
 // Mouse finds the pane under the pointer of msg and hands back msg moved
-// into that pane's body, the rect its Body draws in, so a component in it
-// reads the cell it was given. false when no pane is under the pointer.
+// into that pane's body, for the wheel or a drag; a click comes as a
+// ClickMsg instead. false when no pane is under the pointer.
 func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool) {
 	at := msg.Mouse()
 	pane, ok := s.PaneAt(at.X, at.Y)
@@ -59,8 +80,8 @@ func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg {
 }
 
 // click is the shell's part of a left click: an open dialog's, a tab's, or
-// the focus of a pane out of focus, after which the click comes back to be
-// the app's. A click on a focused pane or the chrome is the app's at once.
+// a pane's, which it focuses and hands to the app as a ClickMsg. A click on
+// the chrome is the app's as it came.
 func (s Shell) click(c tea.MouseClickMsg) (Shell, bool, tea.Cmd) {
 	if s.overlays.Len() > 0 {
 		var cmd tea.Cmd
@@ -75,10 +96,14 @@ func (s Shell) click(c tea.MouseClickMsg) (Shell, bool, tea.Cmd) {
 		return s, true, nil
 	}
 	pane, ok := s.PaneAt(c.X, c.Y)
-	if !ok || pane == s.Focus() || !slices.Contains(layout.Ring(s.cfg.Layout), pane) {
+	if !ok {
 		return s, false, nil
 	}
-	next, cmd := s.focused(s.Focus(), s.focusOn(pane).relayout())
-	again := func() tea.Msg { return c } // now on the focused pane: the app's
-	return next, true, tea.Sequence(cmd, again)
+	clicked := ClickMsg{Pane: pane, MouseClickMsg: s.MouseIn(pane, c).(tea.MouseClickMsg)}
+	send := func() tea.Msg { return clicked }
+	if pane == s.Focus() || !slices.Contains(layout.Ring(s.cfg.Layout), pane) {
+		return s, true, send
+	}
+	next, focus := s.focused(s.Focus(), s.focusOn(pane).relayout())
+	return next, true, tea.Batch(focus, send)
 }

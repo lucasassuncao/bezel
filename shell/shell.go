@@ -80,6 +80,9 @@ type Config struct {
 	FocusFade time.Duration
 	// Clipboard is what Copy writes to; nil means the system clipboard.
 	Clipboard func(string) error
+	// Mouse turns the terminal's mouse reporting on in Screen. Clicks on
+	// tabs, panes and dialogs then work, and a pane's arrive as ClickMsg.
+	Mouse bool
 }
 
 // Shell is a value: every mutation returns the new shell.

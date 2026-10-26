@@ -145,6 +145,49 @@ shell.Config{
 
 The shell knows which pane has focus and draws its border in the accent. `Focus()` names it, `SetFocus(name)` moves it, and `ChangePane` steps through the layout's leaves, skipping the `Info` ones. Each move sends a `shell.FocusMsg{From, To}`, so the app can run what entering and leaving a pane means for it. With `Config.FocusFade` set, the accent colour travels from the pane left to the pane gained over that long instead of jumping. Keys the actions leave alone fall through to the app, which hands them to the component in the focused pane.
 
+## The mouse
+
+The mouse is off until the app asks for it. Two lines turn it on:
+
+```go
+shell.New(shell.Config{ /* ... */ Mouse: true})
+
+func (m model) View() tea.View {
+	return m.sh.Screen(panes) // the full-screen view, the mouse reporting on
+}
+```
+
+From then on the shell answers a left click by itself, in `Update`, like a key an action takes:
+
+- on a **tab**, it shows that tab, with `Config.Transition` if there is one;
+- on a **dialog**, the dialog takes it: `Confirm`, `Alert` and `Choice` press the button clicked, and a click off the dialog does nothing;
+- on a **pane**, it focuses the pane, with the `FocusMsg` and the fade a key gives (an `Info` pane keeps the focus where it was), and sends the app a `shell.ClickMsg`.
+
+`ClickMsg` names the pane and carries the cell inside its body, the rect its `Body` draws in, so the app hands it on the way it hands on a key:
+
+```go
+case shell.ClickMsg:
+	switch msg.Pane {
+	case "list":
+		m.list, act = m.list.Click(msg.Y) // act is list.Chosen on a second click
+	case "form":
+		m.form, cmd = m.form.Click(msg.Y, width)
+	case "notes":
+		m.notes, cmd = m.notes.Update(msg.MouseClickMsg) // a textbox takes the press itself
+	}
+```
+
+The components' `Click` moves the cursor to the row clicked, and on the row already under it does what enter would: `list` and `table` return `Chosen`, `tree` opens or closes the node. `form.Click` focuses the field and presses a button, a checkbox or a toggle.
+
+A click is all `ClickMsg` carries. The rest of the mouse reaches the app as it came, and two methods move it into a pane:
+
+- **`Mouse(msg)`** finds the pane under the pointer and moves `msg` into its body: the wheel over a [`viewport`](../component/viewport), which scrolls on `tea.MouseWheelMsg`.
+- **`MouseIn(pane, msg)`** moves `msg` into a pane wherever the pointer is: a drag that began in a [`textbox`](../component/textbox) and left it still moves its caret.
+
+A dialog of the app's own takes clicks by implementing `overlay.Clicker`: `Click(x, y, body)`, with `x` and `y` counted from the top left of what its `View` drew.
+
+Two limits to know. The ready-made dialogs find a button by its label on the row clicked, so a row holding the same text twice takes the first. And a `list` with motion draws a row that left for a moment after it goes, which shifts the rows under it: a click in that moment lands one row off.
+
 ## The status row
 
 The row under the panes says what is happening:
@@ -169,7 +212,7 @@ shell.Custom("d", "delete", func(shell.ActionContext) tea.Cmd {
 
 `overlay.Open(o)` is the command that pushes a dialog, from an action or anywhere a command goes; `Push(o)` and `Pop()` do it on the shell directly. A dialog closes itself by returning `overlay.Close()`, and hands its answer back the way an action does, as a command the app receives. The ready-made ones are `Alert`, `Confirm`, `Prompt`, `Choice`, `Pick`, `Text`, `Help`, `Pager` and `FilePicker`.
 
-A dialog of the app's own is any type with `Update`, `View(body)` and `Legend()`. Small interfaces opt it into more: `Resizer` hears the body's size before it draws, `EscOwner` keeps `esc` for itself, `StatusLiner` draws the status row while on top, and `BottomAnchored` sits at the foot of the screen instead of the middle.
+A dialog of the app's own is any type with `Update`, `View(body)` and `Legend()`. Small interfaces opt it into more: `Resizer` hears the body's size before it draws, `EscOwner` keeps `esc` for itself, `StatusLiner` draws the status row while on top, `BottomAnchored` sits at the foot of the screen instead of the middle, and `Clicker` takes [the mouse](#the-mouse).
 
 ## The palette and the legend
 
@@ -206,3 +249,4 @@ next, _ = next.Update(bezeltest.Key("d"))
 - An animation asks for frames with `Tick`; a test hands it its own with `FrameAt(time)`, so no test waits on a clock. `animation.Record` plays one to its end as text. See [ANIMATIONS.md](ANIMATIONS.md).
 - Set `BEZEL_NO_MOTION=1` in a test that only cares where things land, and clear it in `TestMain` when a CI sets `TERM=dumb`.
 - `shell.Check` over each screen's actions catches two keys bound twice.
+- A click on a pane comes back from `Update` as a command: call it for the `shell.ClickMsg`, and feed that to the app.

@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
+	"github.com/lucasassuncao/bezel/shell"
 )
 
 // frame sends msg and renders; every row must be exactly 80 columns wide.
@@ -59,13 +60,34 @@ func at(t *testing.T, out, text string) (x, y int) {
 
 func click(x, y int) tea.MouseClickMsg { return tea.MouseClickMsg{X: x, Y: y, Button: tea.MouseLeft} }
 
+// clicked clicks (x, y) and hands the app the shell.ClickMsg it sends, with
+// the command the app answers it with.
+func clicked(t *testing.T, m tea.Model, x, y int) (tea.Model, tea.Cmd) {
+	t.Helper()
+	m, cmd := m.Update(click(x, y))
+	require.NotNil(t, cmd)
+	msg := cmd()
+	if batch, ok := msg.(tea.BatchMsg); ok { // a focus change comes with it
+		for _, c := range batch {
+			if c, ok := c().(shell.ClickMsg); ok {
+				msg = c
+			}
+		}
+	}
+	require.IsType(t, shell.ClickMsg{}, msg)
+	return m.Update(msg)
+}
+
 func TestShellTakesTheMouse(t *testing.T) {
 	var m tea.Model = newModel()
 	m, out := frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
 
-	m, out = frame(t, m, click(at(t, out, "README.md")))
+	x, y := at(t, out, "README.md")
+	m, _ = clicked(t, m, x, y)
+	_, out = frame(t, m, nil)
 	require.Contains(t, out, "▶ README.md", "a click moves the cursor")
-	m, cmd := m.Update(click(at(t, out, "▶ README.md"))) // the detail pane names it too
+	x, y = at(t, out, "▶ README.md") // the detail pane names it too
+	m, cmd := clicked(t, m, x, y)
 	require.NotNil(t, cmd, "the status's timer")
 	_, out = frame(t, m, nil)
 	require.Contains(t, out, "opened README.md", "a second click opens it")
