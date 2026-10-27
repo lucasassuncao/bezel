@@ -33,7 +33,7 @@ Package stopwatch counts time up a step per tick, paused and reset at will. The 
 
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L38-L45>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L35-L42>)
 
 Model is a value: every method returns the new stopwatch.
 
@@ -44,7 +44,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L48>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L45>)
 
 ```go
 func New() Model
@@ -53,7 +53,7 @@ func New() Model
 New is a stopped stopwatch at zero, stepping a second a tick.
 
 <a name="Model.Elapsed"></a>
-### func \(Model\) [Elapsed](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L124>)
+### func \(Model\) [Elapsed](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L121>)
 
 ```go
 func (m Model) Elapsed() time.Duration
@@ -62,7 +62,7 @@ func (m Model) Elapsed() time.Duration
 Elapsed is the time counted so far.
 
 <a name="Model.Every"></a>
-### func \(Model\) [Every](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L127>)
+### func \(Model\) [Every](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L124>)
 
 ```go
 func (m Model) Every() time.Duration
@@ -71,7 +71,7 @@ func (m Model) Every() time.Duration
 Every is the step a tick adds; a second for a Model never built with New.
 
 <a name="Model.ID"></a>
-### func \(Model\) [ID](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L133>)
+### func \(Model\) [ID](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L130>)
 
 ```go
 func (m Model) ID() int64
@@ -80,7 +80,7 @@ func (m Model) ID() int64
 ID tells this stopwatch's ticks from another's.
 
 <a name="Model.Reset"></a>
-### func \(Model\) [Reset](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L102>)
+### func \(Model\) [Reset](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L99>)
 
 ```go
 func (m Model) Reset() Model
@@ -89,7 +89,7 @@ func (m Model) Reset() Model
 Reset puts the time back to zero; a running stopwatch keeps running.
 
 <a name="Model.Running"></a>
-### func \(Model\) [Running](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L130>)
+### func \(Model\) [Running](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L127>)
 
 ```go
 func (m Model) Running() bool
@@ -98,7 +98,7 @@ func (m Model) Running() bool
 Running reports whether the stopwatch is counting.
 
 <a name="Model.Start"></a>
-### func \(Model\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L74>)
+### func \(Model\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L71>)
 
 ```go
 func (m Model) Start() (Model, tea.Cmd)
@@ -107,7 +107,7 @@ func (m Model) Start() (Model, tea.Cmd)
 Start runs the stopwatch. The command is its first tick; nil when it is already running.
 
 <a name="Model.Stop"></a>
-### func \(Model\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L87>)
+### func \(Model\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L84>)
 
 ```go
 func (m Model) Stop() Model
@@ -116,7 +116,7 @@ func (m Model) Stop() Model
 Stop holds the stopwatch; a tick already on its way lands spent.
 
 <a name="Model.Toggle"></a>
-### func \(Model\) [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L94>)
+### func \(Model\) [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L91>)
 
 ```go
 func (m Model) Toggle() (Model, tea.Cmd)
@@ -125,7 +125,7 @@ func (m Model) Toggle() (Model, tea.Cmd)
 Toggle stops a running stopwatch and starts a stopped one.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L114>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L111>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
@@ -134,7 +134,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
 Update adds a step on its own tick and arms the next. Any other message leaves it as it was, with no command.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L136>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L133>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
@@ -143,7 +143,7 @@ func (m Model) View(th theme.Resolved) string
 View is the elapsed time in the style of the stopwatch's state.
 
 <a name="Model.WithEvery"></a>
-### func \(Model\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L51>)
+### func \(Model\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L48>)
 
 ```go
 func (m Model) WithEvery(d time.Duration) Model
@@ -152,7 +152,7 @@ func (m Model) WithEvery(d time.Duration) Model
 WithEvery steps d a tick; zero or less is a second.
 
 <a name="Model.WithFormat"></a>
-### func \(Model\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L60>)
+### func \(Model\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L57>)
 
 ```go
 func (m Model) WithFormat(f func(time.Duration) string) Model
@@ -161,7 +161,7 @@ func (m Model) WithFormat(f func(time.Duration) string) Model
 WithFormat writes the elapsed time with f; nil is time.Duration's String.
 
 <a name="Model.WithStyles"></a>
-### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L67>)
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L64>)
 
 ```go
 func (m Model) WithStyles(edit func(Styles) Styles) Model
@@ -170,7 +170,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit, under whatever theme View gets. It replaces an earlier edit.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L27-L30>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L24-L27>)
 
 Styles are how the elapsed time is painted in each state.
 
@@ -182,7 +182,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L33>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L30>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles
@@ -191,7 +191,7 @@ func DefaultStyles(th theme.Resolved) Styles
 DefaultStyles leaves a running stopwatch plain and dims a stopped one.
 
 <a name="TickMsg"></a>
-## type [TickMsg](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L21-L24>)
+## type [TickMsg](<https://github.com/lucasassuncao/bezel/blob/main/component/stopwatch/stopwatch.go#L18-L21>)
 
 TickMsg adds a step to the stopwatch whose ID it carries. A host hands it on the way it hands on keys; a stopwatch ignores every other one's.
 

@@ -351,6 +351,11 @@ func (m Model) Blink() tea.Cmd {
 	if !m.blinks() {
 		return nil
 	}
+	return m.tick()
+}
+
+// tick is the next flip under the current tag.
+func (m Model) tick() tea.Cmd {
 	msg := BlinkMsg{id: m.id, tag: m.tag}
 	return tea.Tick(draw.Blink(m.styles().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
@@ -453,8 +458,7 @@ func (m Model) arm() (Model, tea.Cmd) {
 	if !m.blinks() {
 		return m, nil
 	}
-	msg := BlinkMsg{id: m.id, tag: m.tag}
-	return m, tea.Tick(draw.Blink(m.styles().CaretBlink), func(time.Time) tea.Msg { return msg })
+	return m, m.tick()
 }
 
 // spaced turns line breaks and tabs into spaces; a Replacer is safe to share.

@@ -1,12 +1,19 @@
 package draw
 
 import (
+	"fmt"
 	"strings"
 
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/layout"
 )
+
+// More is the row a scrolled list shows in place of its last while n rows
+// hide below, set in indent cells to line up with the rows' text.
+func More(n, indent int, st lipgloss.Style) string {
+	return st.Render(fmt.Sprintf("%s↓ %d more", strings.Repeat(" ", max(indent, 0)), n))
+}
 
 // ButtonStyle paints a button: Focused the one enter would press, Blurred the
 // rest. The theme fills both from its palette, with the same padding so focus

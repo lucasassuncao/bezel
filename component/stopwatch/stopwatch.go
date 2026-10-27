@@ -4,17 +4,14 @@ package stopwatch
 
 import (
 	"cmp"
-	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
 )
-
-// ids tells stopwatches apart, so a tick reaches only the one that armed it.
-var ids atomic.Int64
 
 // TickMsg adds a step to the stopwatch whose ID it carries. A host hands it
 // on the way it hands on keys; a stopwatch ignores every other one's.
@@ -45,7 +42,7 @@ type Model struct {
 }
 
 // New is a stopped stopwatch at zero, stepping a second a tick.
-func New() Model { return Model{every: time.Second, id: ids.Add(1)} }
+func New() Model { return Model{every: time.Second, id: frames.NextID()} }
 
 // WithEvery steps d a tick; zero or less is a second.
 func (m Model) WithEvery(d time.Duration) Model {
@@ -76,7 +73,7 @@ func (m Model) Start() (Model, tea.Cmd) {
 		return m, nil
 	}
 	if m.id == 0 { // a Model never built with New
-		m.id = ids.Add(1)
+		m.id = frames.NextID()
 	}
 	m.running = true
 	m.tag++

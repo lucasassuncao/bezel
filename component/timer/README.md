@@ -35,7 +35,7 @@ Package timer counts a time down a step per tick and says when it runs out. The 
 
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L45-L52>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L42-L49>)
 
 Model is a value: every method returns the new timer.
 
@@ -46,7 +46,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L56>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L53>)
 
 ```go
 func New(timeout time.Duration) Model
@@ -55,7 +55,7 @@ func New(timeout time.Duration) Model
 New is a stopped timer with timeout left, stepping a second a tick. A negative timeout is zero.
 
 <a name="Model.Every"></a>
-### func \(Model\) [Every](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L144>)
+### func \(Model\) [Every](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L141>)
 
 ```go
 func (m Model) Every() time.Duration
@@ -64,7 +64,7 @@ func (m Model) Every() time.Duration
 Every is the step a tick takes off; a second for a Model never built with New.
 
 <a name="Model.ID"></a>
-### func \(Model\) [ID](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L153>)
+### func \(Model\) [ID](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L150>)
 
 ```go
 func (m Model) ID() int64
@@ -73,7 +73,7 @@ func (m Model) ID() int64
 ID tells this timer's messages from another's.
 
 <a name="Model.Left"></a>
-### func \(Model\) [Left](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L140>)
+### func \(Model\) [Left](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L137>)
 
 ```go
 func (m Model) Left() time.Duration
@@ -82,7 +82,7 @@ func (m Model) Left() time.Duration
 Left is the time left.
 
 <a name="Model.Reset"></a>
-### func \(Model\) [Reset](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L112>)
+### func \(Model\) [Reset](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L109>)
 
 ```go
 func (m Model) Reset(timeout time.Duration) Model
@@ -91,7 +91,7 @@ func (m Model) Reset(timeout time.Duration) Model
 Reset stops the timer with timeout left.
 
 <a name="Model.Running"></a>
-### func \(Model\) [Running](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L147>)
+### func \(Model\) [Running](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L144>)
 
 ```go
 func (m Model) Running() bool
@@ -100,7 +100,7 @@ func (m Model) Running() bool
 Running reports whether the timer is counting down.
 
 <a name="Model.Start"></a>
-### func \(Model\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L84>)
+### func \(Model\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L81>)
 
 ```go
 func (m Model) Start() (Model, tea.Cmd)
@@ -109,7 +109,7 @@ func (m Model) Start() (Model, tea.Cmd)
 Start runs the timer. The command is its first tick; nil when it is already running or has run out.
 
 <a name="Model.Stop"></a>
-### func \(Model\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L97>)
+### func \(Model\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L94>)
 
 ```go
 func (m Model) Stop() Model
@@ -118,7 +118,7 @@ func (m Model) Stop() Model
 Stop holds the timer; a tick already on its way lands spent.
 
 <a name="Model.TimedOut"></a>
-### func \(Model\) [TimedOut](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L150>)
+### func \(Model\) [TimedOut](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L147>)
 
 ```go
 func (m Model) TimedOut() bool
@@ -127,7 +127,7 @@ func (m Model) TimedOut() bool
 TimedOut reports whether no time is left.
 
 <a name="Model.Toggle"></a>
-### func \(Model\) [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L104>)
+### func \(Model\) [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L101>)
 
 ```go
 func (m Model) Toggle() (Model, tea.Cmd)
@@ -136,7 +136,7 @@ func (m Model) Toggle() (Model, tea.Cmd)
 Toggle stops a running timer and starts a stopped one.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L125>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L122>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
@@ -145,7 +145,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
 Update takes a step off on its own tick and arms the next; at zero it stops, and the command says it timed out.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L156>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L153>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
@@ -154,7 +154,7 @@ func (m Model) View(th theme.Resolved) string
 View is the time left in the style of the timer's state.
 
 <a name="Model.WithEvery"></a>
-### func \(Model\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L61>)
+### func \(Model\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L58>)
 
 ```go
 func (m Model) WithEvery(d time.Duration) Model
@@ -163,7 +163,7 @@ func (m Model) WithEvery(d time.Duration) Model
 WithEvery steps d a tick; zero or less is a second.
 
 <a name="Model.WithFormat"></a>
-### func \(Model\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L70>)
+### func \(Model\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L67>)
 
 ```go
 func (m Model) WithFormat(f func(time.Duration) string) Model
@@ -172,7 +172,7 @@ func (m Model) WithFormat(f func(time.Duration) string) Model
 WithFormat writes the time left with f; nil is time.Duration's String.
 
 <a name="Model.WithStyles"></a>
-### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L77>)
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L74>)
 
 ```go
 func (m Model) WithStyles(edit func(Styles) Styles) Model
@@ -181,7 +181,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit, under whatever theme View gets. It replaces an earlier edit.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L32-L36>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L29-L33>)
 
 Styles are how the time left is painted in each state.
 
@@ -194,7 +194,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L40>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L37>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles
@@ -203,7 +203,7 @@ func DefaultStyles(th theme.Resolved) Styles
 DefaultStyles leaves a running timer plain, dims a stopped one and marks one that ran out as danger.
 
 <a name="TickMsg"></a>
-## type [TickMsg](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L21-L24>)
+## type [TickMsg](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L18-L21>)
 
 TickMsg takes a step off the timer whose ID it carries. A host hands it on the way it hands on keys; a timer ignores every other timer's.
 
@@ -215,7 +215,7 @@ type TickMsg struct {
 ```
 
 <a name="TimeoutMsg"></a>
-## type [TimeoutMsg](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L27-L29>)
+## type [TimeoutMsg](<https://github.com/lucasassuncao/bezel/blob/main/component/timer/timer.go#L24-L26>)
 
 TimeoutMsg says the timer whose ID it carries ran out.
 

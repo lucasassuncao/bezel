@@ -59,7 +59,7 @@ func Fit(cols []Column, rows [][]string, width int) []int
 Fit returns each column's width: its widest cell \(title included\) capped at Max, then shrunk to fit width \- Flex first down to Min, then the widest, never below minCell. Min is a floor for shrinking, not a width to grow to.
 
 <a name="Row"></a>
-## func [Row](<https://github.com/lucasassuncao/bezel/blob/main/component/table/table.go#L85>)
+## func [Row](<https://github.com/lucasassuncao/bezel/blob/main/component/table/table.go#L94>)
 
 ```go
 func Row(widths []int, cells []string) string
@@ -68,7 +68,7 @@ func Row(widths []int, cells []string) string
 Row lays cells out in widths, padded to their columns and separated by Gap; the last cell is cut but not padded, so the row ends where it ends.
 
 <a name="Titles"></a>
-## func [Titles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/table.go#L102>)
+## func [Titles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/table.go#L111>)
 
 ```go
 func Titles(cols []Column, widths []int) string
@@ -77,7 +77,7 @@ func Titles(cols []Column, widths []int) string
 Titles is the header row: every column's title in its width.
 
 <a name="Action"></a>
-## type [Action](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L26>)
+## type [Action](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L25>)
 
 Action is what a key did.
 
@@ -108,7 +108,7 @@ type Column struct {
 ```
 
 <a name="Item"></a>
-## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L20-L23>)
+## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L19-L22>)
 
 Item is one row of a Model: its cells in column order, and a payload of the caller's type T. A cell may carry its own colour.
 
@@ -129,7 +129,7 @@ func FromValues[T any](text, sep string) []Item[T]
 FromValues is the rows of delimited text, one per line, its cells split at sep; blank lines are skipped. The payload is left zero.
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L34-L36>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L33-L35>)
 
 Keys are the bindings the table answers to.
 
@@ -140,7 +140,7 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L40>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L39>)
 
 ```go
 func DefaultKeys() Keys
@@ -149,7 +149,7 @@ func DefaultKeys() Keys
 DefaultKeys are the arrows, pgup/pgdown, ctrl\+u/ctrl\+d for half a page, home/end and enter.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L60-L67>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L59-L67>)
 
 Model is a table with a cursor: the header stays put and the rows under it scroll. A value: every method returns the new table.
 
@@ -286,7 +286,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
 Update handles one key. Keys the table does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L230>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L242>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved, width int) string

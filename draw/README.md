@@ -32,6 +32,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func HeadingBadged\(name, badge string, style lipgloss.Style, width int\) string](<#HeadingBadged>)
 - [func InnerRect\(r layout.Rect\) layout.Rect](<#InnerRect>)
 - [func KV\(key, value string, keyStyle lipgloss.Style, width int\) string](<#KV>)
+- [func More\(n, indent int, st lipgloss.Style\) string](<#More>)
 - [func NumberLines\(s string, style lipgloss.Style\) string](<#NumberLines>)
 - [func OrDash\(s string\) string](<#OrDash>)
 - [func Pad\(s string, width int\) string](<#Pad>)
@@ -97,7 +98,7 @@ func Breadcrumb(segs []string) string
 Breadcrumb joins path segments the way a header subtitle shows them.
 
 <a name="Button"></a>
-## func [Button](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L20>)
+## func [Button](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L27>)
 
 ```go
 func Button(label string, st ButtonStyle, focused bool) string
@@ -106,7 +107,7 @@ func Button(label string, st ButtonStyle, focused bool) string
 Button is a filled label in st.Focused when focused, st.Blurred otherwise. Dialogs draw their answers with it; a form draws its submit with it.
 
 <a name="Card"></a>
-## func [Card](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L30>)
+## func [Card](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L37>)
 
 ```go
 func Card(r layout.Rect, title, body, footer string, st PanelStyle) string
@@ -239,6 +240,15 @@ func KV(key, value string, keyStyle lipgloss.Style, width int) string
 ```
 
 KV is one labelled row: the key padded to 14, the value after it, the whole line cut to width. Both halves are sanitized, since either may be something a server chose.
+
+<a name="More"></a>
+## func [More](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L14>)
+
+```go
+func More(n, indent int, st lipgloss.Style) string
+```
+
+More is the row a scrolled list shows in place of its last while n rows hide below, set in indent cells to line up with the rows' text.
 
 <a name="NumberLines"></a>
 ## func [NumberLines](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L121>)
@@ -394,7 +404,7 @@ func Wrap(s string, width int) []string
 Wrap folds plain text into rows of at most width cells, breaking after spaces and hyphens and cutting a word wider than a row. Newlines stay; style the rows after wrapping, since a style is not re\-opened per row.
 
 <a name="ButtonStyle"></a>
-## type [ButtonStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L14-L16>)
+## type [ButtonStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L21-L23>)
 
 ButtonStyle paints a button: Focused the one enter would press, Blurred the rest. The theme fills both from its palette, with the same padding so focus never moves a button.
 

@@ -1,12 +1,12 @@
 package overlay
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -232,7 +232,7 @@ func (p Pick) View(body layout.Rect) string {
 		}
 	}
 	if below > 0 {
-		lines = append(lines, p.hint().Text.Render(fmt.Sprintf("  ↓ %d more", below)))
+		lines = append(lines, draw.More(below, 2, p.hint().Text))
 	}
 	if len(p.notes) > 0 {
 		lines = append(lines, "")

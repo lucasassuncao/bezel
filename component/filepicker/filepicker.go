@@ -13,6 +13,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -441,7 +442,7 @@ func (m Model) entryRows(st *Styles) []string {
 		}
 	}
 	if below > 0 {
-		out = append(out, st.Meta.Render(fmt.Sprintf("  ↓ %d more", below)))
+		out = append(out, draw.More(below, 2, st.Meta))
 	}
 	return out
 }
@@ -489,7 +490,7 @@ func (m Model) driveRows(st *Styles) []string {
 		out = append(out, " "+st.Dir.Render(" "+roots[i]))
 	}
 	if below > 0 {
-		out = append(out, st.Meta.Render(fmt.Sprintf("  ↓ %d more", below)))
+		out = append(out, draw.More(below, 2, st.Meta))
 	}
 	return out
 }

@@ -13,6 +13,7 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/component/paginator"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/fuzzy"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -347,12 +348,12 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 			_, size := utf8.DecodeLastRuneInString(text)
 			m.find = m.filterFor(text[:len(text)-size])
 		}
-	case key.Matches(msg, m.keys.Up):
-		n := len(m.find.idx)
-		m.find.win = m.find.win.Move(m.wrapped(-1, m.find.win.Cursor, n), n, nil)
-	case key.Matches(msg, m.keys.Down):
-		n := len(m.find.idx)
-		m.find.win = m.find.win.Move(m.wrapped(1, m.find.win.Cursor, n), n, nil)
+	case key.Matches(msg, m.keys.Up, m.keys.Down):
+		d, n := 1, len(m.find.idx)
+		if key.Matches(msg, m.keys.Up) {
+			d = -1
+		}
+		m.find.win = m.find.win.Move(m.wrapped(d, m.find.win.Cursor, n), n, nil)
 	default:
 		// Only arrows navigate while filtering, so letters stay typeable.
 		if typed := msg.Key().Text; utf8.RuneCountInString(typed) == 1 {
@@ -615,7 +616,7 @@ func (m Model[T]) rowLines(th *theme.Resolved) (lines []string, of []int) {
 		if g, ok := m.ghostLine(i, th); ok {
 			lines, of = append(lines, g), append(of, -1)
 		}
-		r := m.rows[i]
+		r, arriving := m.rows[i], m.arriving(m.rows[i], th)
 		switch {
 		case r.Section:
 			heading := th.Section.Render(r.Label)
@@ -623,8 +624,8 @@ func (m Model[T]) rowLines(th *theme.Resolved) (lines []string, of []int) {
 				heading += "\n"
 			}
 			lines = append(lines, heading)
-		case i != cursor && m.arriving(r, th) != nil:
-			r.Style = m.arriving(r, th)
+		case i != cursor && arriving != nil:
+			r.Style = arriving
 			lines = append(lines, renderRow(r, false, th, nil, two))
 		default:
 			lines = append(lines, renderRow(r, i == cursor, th, nil, two))
@@ -676,7 +677,7 @@ func (m Model[T]) viewFilter(th *theme.Resolved) string {
 }
 
 // moreRow stands in for the last row while n rows are hidden below it.
-func moreRow(n int, th *theme.Resolved) string { return th.Dim.Render(fmt.Sprintf("  ↓ %d more", n)) }
+func moreRow(n int, th *theme.Resolved) string { return draw.More(n, 2, th.Dim) }
 
 // renderRow is a row in its style, the runes of its label at hits
 // underlined, and with two its description, or a blank, under it.

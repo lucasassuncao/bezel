@@ -25,7 +25,11 @@ const Gap = 2
 // Max, then shrunk to fit width - Flex first down to Min, then the widest,
 // never below minCell. Min is a floor for shrinking, not a width to grow to.
 func Fit(cols []Column, rows [][]string, width int) []int {
-	const minCell = 8
+	return shrink(cols, natural(cols, rows), width)
+}
+
+// natural is each column's widest cell, title included, capped at Max.
+func natural(cols []Column, rows [][]string) []int {
 	widths := make([]int, len(cols))
 	for i, c := range cols {
 		widths[i] = draw.Width(c.Title)
@@ -42,7 +46,12 @@ func Fit(cols []Column, rows [][]string, width int) []int {
 			widths[i] = min(widths[i], c.Max)
 		}
 	}
+	return widths
+}
 
+// shrink cuts widths, which it changes in place, down to fit width.
+func shrink(cols []Column, widths []int, width int) []int {
+	const minCell = 8
 	avail := width - Gap*(len(cols)-1)
 	for total(widths) > avail {
 		if i := flexOf(cols); i >= 0 && widths[i] > max(cols[i].Min, 1) {

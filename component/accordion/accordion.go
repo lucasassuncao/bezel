@@ -158,6 +158,9 @@ func (m Model) View(th theme.Resolved, width int) string {
 		} else {
 			out = append(out, th.Bold.Render(head))
 		}
+		if share == 0 {
+			continue // a closed section shows none of its body: skip wrapping it
+		}
 		body := draw.Wrap(s.Body, max(width-2, 1))
 		shown := int(math.Round(share * float64(len(body))))
 		for _, l := range body[:shown] {

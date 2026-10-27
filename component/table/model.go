@@ -1,7 +1,6 @@
 package table
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 
@@ -60,6 +59,7 @@ const marker = "▶ "
 type Model[T any] struct {
 	cols   []Column
 	items  []Item[T]
+	widths []int // natural column widths over items, measured when they change
 	height int
 	win    layout.Window // over the rows, one shorter than height for the header
 	keys   Keys
@@ -69,8 +69,8 @@ type Model[T any] struct {
 // New builds a table height rows tall, header included, with the cursor on
 // the first row.
 func New[T any](cols []Column, items []Item[T], height int) Model[T] {
-	m := Model[T]{cols: slices.Clone(cols), items: cloneItems(items), keys: DefaultKeys()}
-	return m.SetHeight(height)
+	m := Model[T]{cols: slices.Clone(cols), keys: DefaultKeys()}
+	return m.withItems(items).SetHeight(height)
 }
 
 // WithKeys rebinds the table.
@@ -147,7 +147,7 @@ func (m Model[T]) SetItems(items []Item[T]) Model[T] {
 	if it := m.Selected(); it != nil {
 		prev = first(*it)
 	}
-	m.items = cloneItems(items)
+	m = m.withItems(items)
 	if at < len(m.items) && first(m.items[at]) == prev {
 		return m.clamp()
 	}
@@ -224,6 +224,18 @@ func (m Model[T]) clamp() Model[T] {
 	return m
 }
 
+// withItems takes a copy of items and measures their columns once, so View
+// does not walk every row each frame.
+func (m Model[T]) withItems(items []Item[T]) Model[T] {
+	m.items = cloneItems(items)
+	rows := make([][]string, len(m.items))
+	for i, it := range m.items {
+		rows[i] = it.Cells
+	}
+	m.widths = natural(m.cols, rows)
+	return m
+}
+
 // View is the header and the rows in its window, width cells wide. Columns
 // are sized over every row, not the ones shown, so scrolling never moves
 // them. On the cursor row a cell with no colour of its own wears the cursor's.
@@ -231,12 +243,8 @@ func (m Model[T]) View(th theme.Resolved, width int) string {
 	if m.height <= 0 {
 		return ""
 	}
-	cells := make([][]string, len(m.items))
-	for i, it := range m.items {
-		cells[i] = it.Cells
-	}
 	pad := strings.Repeat(" ", draw.Width(marker))
-	widths := Fit(m.cols, cells, width-len(pad))
+	widths := shrink(m.cols, slices.Clone(m.widths), width-len(pad))
 	lines := []string{th.TableHeader.Render(pad + Titles(m.cols, widths))}
 
 	w := m.win.Clamp(len(m.items))
@@ -244,15 +252,15 @@ func (m Model[T]) View(th theme.Resolved, width int) string {
 	for i := start; i < end; i++ {
 		switch {
 		case i == w.Cursor && m.blur:
-			lines = append(lines, th.Dim.Render(marker)+Row(widths, cells[i]))
+			lines = append(lines, th.Dim.Render(marker)+Row(widths, m.items[i].Cells))
 		case i == w.Cursor:
-			lines = append(lines, th.Cursor.Render(marker)+Row(widths, cursorCells(cells[i], &th)))
+			lines = append(lines, th.Cursor.Render(marker)+Row(widths, cursorCells(m.items[i].Cells, &th)))
 		default:
-			lines = append(lines, pad+Row(widths, cells[i]))
+			lines = append(lines, pad+Row(widths, m.items[i].Cells))
 		}
 	}
 	if below > 0 {
-		lines = append(lines, th.Dim.Render(fmt.Sprintf("%s↓ %d more", pad, below)))
+		lines = append(lines, draw.More(below, draw.Width(marker), th.Dim))
 	}
 	return strings.Join(lines, "\n")
 }

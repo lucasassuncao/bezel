@@ -272,7 +272,7 @@ func (m Model) TerminalCursor() *tea.Cursor
 TerminalCursor is the terminal's cursor for a field made WithTerminalCursor, placed within the field's view: add the field's origin before handing it to tea.View. nil while blurred, hidden, or painting its own caret.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L360>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L365>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
@@ -290,7 +290,7 @@ func (m Model) Value() string
 Value is the text in the field.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L519>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L523>)
 
 ```go
 func (m Model) View() string

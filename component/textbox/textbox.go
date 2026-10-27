@@ -6,7 +6,6 @@ package textbox
 import (
 	"slices"
 	"strings"
-	"sync/atomic"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -19,7 +18,9 @@ import (
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/clip"
 	"github.com/lucasassuncao/bezel/internal/edit"
+	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/key"
+	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -101,9 +102,6 @@ func (p Position) before(q Position) bool {
 	return p.Line < q.Line || p.Line == q.Line && p.Column < q.Column
 }
 
-// ids tells fields apart, so a blink reaches only the field that armed it.
-var ids atomic.Int64
-
 // BlinkMsg flips the caret of the field that armed it. A host hands it on
 // the way it hands on keys; a field ignores every other field's.
 type BlinkMsg struct{ id, tag int64 }
@@ -160,7 +158,7 @@ type Span struct {
 // New is an empty field, not focused, sized by its text until SetWidth and
 // SetHeight say otherwise.
 func New(th theme.Resolved) Model {
-	return Model{lines: []line{{starts: []int{0}}}, goal: -1, id: ids.Add(1), keys: DefaultKeys(), th: &th, caretOn: true}
+	return Model{lines: []line{{starts: []int{0}}}, goal: -1, id: frames.NextID(), keys: DefaultKeys(), th: &th, caretOn: true}
 }
 
 // ready is m, or for the zero Model the empty field New builds, so a field
@@ -438,11 +436,10 @@ func (m Model) SetHeight(h int) Model {
 // edit. A least under 1 turns it off and SetHeight rules again.
 func (m Model) WithDynamicHeight(least, most int) Model {
 	m = m.ready()
-	if least < 1 {
-		m.grow = [2]int{}
-		return m.scroll()
+	m.grow = [2]int{}
+	if least >= 1 {
+		m.grow = [2]int{least, max(most, least)}
 	}
-	m.grow = [2]int{least, max(most, least)}
 	return m.scroll()
 }
 
@@ -1117,11 +1114,7 @@ func (m Model) scroll() Model {
 		m.top = 0
 		return m
 	}
-	r := m.caretRow()
-	m.top = min(m.top, r)
-	if r >= m.top+m.height {
-		m.top = r - m.height + 1
-	}
+	m.top = layout.ClampScroll(m.caretRow(), m.top, m.height)
 	m.top = max(min(m.top, m.rowCount()-m.height), 0)
 	return m
 }

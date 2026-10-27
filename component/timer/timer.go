@@ -4,17 +4,14 @@ package timer
 
 import (
 	"cmp"
-	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
 )
-
-// ids tells timers apart, so a tick reaches only the timer that armed it.
-var ids atomic.Int64
 
 // TickMsg takes a step off the timer whose ID it carries. A host hands it on
 // the way it hands on keys; a timer ignores every other timer's.
@@ -54,7 +51,7 @@ type Model struct {
 // New is a stopped timer with timeout left, stepping a second a tick. A
 // negative timeout is zero.
 func New(timeout time.Duration) Model {
-	return Model{left: max(timeout, 0), every: time.Second, id: ids.Add(1)}
+	return Model{left: max(timeout, 0), every: time.Second, id: frames.NextID()}
 }
 
 // WithEvery steps d a tick; zero or less is a second.
@@ -86,7 +83,7 @@ func (m Model) Start() (Model, tea.Cmd) {
 		return m, nil
 	}
 	if m.id == 0 { // a Model never built with New
-		m.id = ids.Add(1)
+		m.id = frames.NextID()
 	}
 	m.running = true
 	m.tag++

@@ -4,12 +4,12 @@
 package tree
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -248,7 +248,7 @@ func (m Model[N]) Move(delta int) Model[N] {
 	if len(vis) == 0 {
 		return m
 	}
-	return m.withWindow(m.window().Move(delta, len(vis), m.isSection(vis)), len(vis))
+	return m.move(delta, vis)
 }
 
 // isSection reports the visible rows the cursor passes over.
@@ -281,20 +281,15 @@ func (m Model[N]) withWindow(w layout.Window, n int) Model[N] {
 // as n rows and the "more" row allow.
 func (m Model[N]) keepOff(w layout.Window, n int) layout.Window {
 	off := min(m.scrollOff, (w.Height-1)/2)
-	shown := w.Height
-	if w.Offset+w.Height < n {
-		shown-- // the "more" row
-	}
+	start, end, _ := w.Bounds(n)
+	shown := end - start // less the "more" row
 	switch {
 	case w.Cursor-w.Offset < off:
 		w.Offset = max(w.Cursor-off, 0)
 	case w.Offset+shown-1-w.Cursor < off:
 		w.Offset = min(w.Cursor+off-shown+1, max(n-w.Height, 0))
 	}
-	if w.Offset+w.Height < n && w.Cursor >= w.Offset+w.Height-1 {
-		w.Offset = w.Cursor - w.Height + 2
-	}
-	return w
+	return w.Clamp(n) // and off the "more" row
 }
 
 // Click is a left click on line y of View: on a row it moves the cursor
@@ -467,7 +462,7 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 		sb.WriteByte('\n')
 	}
 	if below > 0 {
-		sb.WriteString(th.Dim.Render(fmt.Sprintf("  ↓ %d more", below)))
+		sb.WriteString(draw.More(below, 2, th.Dim))
 	} else {
 		for i := end - start; i < m.Height; i++ {
 			sb.WriteByte('\n')

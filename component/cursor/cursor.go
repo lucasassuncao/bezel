@@ -3,13 +3,13 @@
 package cursor
 
 import (
-	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -30,9 +30,6 @@ func (m Mode) String() string {
 	}
 	return modeNames[m]
 }
-
-// ids tells cursors apart, so a blink reaches only the cursor that armed it.
-var ids atomic.Int64
 
 // BlinkMsg flips the cursor whose ID it carries. A host hands it on the way
 // it hands on keys; a cursor ignores every other cursor's.
@@ -66,7 +63,7 @@ type Model struct {
 
 // New is a blinking cursor over a space, not focused.
 func New(th theme.Resolved) Model {
-	m := Model{char: " ", on: true, id: ids.Add(1), th: &th}
+	m := Model{char: " ", on: true, id: frames.NextID(), th: &th}
 	return m.restyle()
 }
 

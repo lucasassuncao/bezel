@@ -35,3 +35,8 @@ func TestCardPinsTheFooterUnderARule(t *testing.T) {
 	tall := ansi.Strip(Card(layout.Rect{W: 30, H: 5}, "git", "a\nb\nc\nd\ne", "[i] install", plain))
 	require.Contains(t, tall, "[i] install", "a long body is cut, never the footer")
 }
+
+func TestMoreCountsTheHiddenRowsUnderTheText(t *testing.T) {
+	require.Equal(t, "  ↓ 3 more", More(3, 2, lipgloss.NewStyle()))
+	require.Equal(t, "↓ 1 more", More(1, -1, lipgloss.NewStyle()), "no indent below zero")
+}

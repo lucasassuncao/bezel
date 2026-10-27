@@ -5,13 +5,13 @@ package spinner
 import (
 	"slices"
 	"strings"
-	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -87,9 +87,6 @@ func Ellipsis() Spinner {
 // defaultEvery is the pace of a Spinner that sets none.
 const defaultEvery = time.Second / 10
 
-// ids tells spinners apart, so a tick reaches only the spinner that armed it.
-var ids atomic.Int64
-
 // TickMsg turns the spinner whose ID it carries. A host hands it on the way
 // it hands on keys; a spinner ignores every other spinner's.
 type TickMsg struct {
@@ -126,7 +123,7 @@ func New(s Spinner) Model {
 	for _, f := range s.Frames {
 		w = max(w, ansi.StringWidth(f))
 	}
-	return Model{spinner: s, width: w, id: ids.Add(1)}
+	return Model{spinner: s, width: w, id: frames.NextID()}
 }
 
 // WithStyles changes the styles derived from the theme through edit, under
@@ -201,5 +198,5 @@ func (m Model) View(th theme.Resolved) string {
 	if m.edit != nil {
 		st = m.edit(st)
 	}
-	return st.Frame.Render(f) + strings.Repeat(" ", m.width-ansi.StringWidth(f))
+	return st.Frame.Render(f) + strings.Repeat(" ", max(0, m.width-ansi.StringWidth(f)))
 }
