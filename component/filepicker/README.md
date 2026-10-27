@@ -12,7 +12,6 @@ Package filepicker browses directories inside a pane: directories first, sizes a
 
 ## Index
 
-- [Constants](<#constants>)
 - [type Keys](<#Keys>)
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
 - [type Model](<#Model>)
@@ -39,14 +38,6 @@ Package filepicker browses directories inside a pane: directories first, sizes a
 - [type Styles](<#Styles>)
   - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
 
-
-## Constants
-
-<a name="SizeWidth"></a>SizeWidth is the column file sizes are right\-aligned in, as "999.9MB".
-
-```go
-const SizeWidth = 7
-```
 
 <a name="Keys"></a>
 ## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L25-L28>)

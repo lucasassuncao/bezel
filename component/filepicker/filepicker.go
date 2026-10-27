@@ -94,8 +94,8 @@ type volumesMsg struct {
 	roots []string
 }
 
-// SizeWidth is the column file sizes are right-aligned in, as "999.9MB".
-const SizeWidth = 7
+// sizeWidth is the column file sizes are right-aligned in, as "999.9MB".
+const sizeWidth = 7
 
 // Model is a value: every method returns the new picker.
 type Model struct {
@@ -456,7 +456,7 @@ func (m Model) columns(e entry) string {
 		if !e.dir {
 			size = humanBytes(e.size)
 		}
-		fmt.Fprintf(&b, "%*s", SizeWidth, size)
+		fmt.Fprintf(&b, "%*s", sizeWidth, size)
 	}
 	b.WriteString(" ")
 	return b.String()

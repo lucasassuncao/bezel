@@ -21,11 +21,7 @@ type statusExpiredMsg struct{ seq uint }
 // tab or a pane, which comes back as a ClickMsg. false means the app's turn.
 func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	s = s.ready()
-	update := s.update
-	if c, ok := msg.(tea.MouseClickMsg); ok && c.Button == tea.MouseLeft {
-		update = func(tea.Msg) (Shell, bool, tea.Cmd) { return s.click(c) }
-	}
-	next, handled, cmd := update(msg)
+	next, handled, cmd := s.update(msg)
 	if !handled {
 		return s, false, nil
 	}
@@ -35,6 +31,11 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 
 func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	switch m := msg.(type) {
+	case tea.MouseClickMsg:
+		if m.Button == tea.MouseLeft {
+			return s.click(m)
+		}
+
 	case animation.FrameMsg:
 		if s.trans.Owns(m) {
 			var cmd tea.Cmd

@@ -213,7 +213,7 @@ func (m Model) WithKeys(k Keys) Model {
 // WithValue is the field holding s, the caret at its end, as a form opens on
 // a saved value.
 func (m Model) WithValue(s string) Model {
-	m.line = edit.NewLine(m.clip(oneLine(s), 0))
+	m.line = edit.NewLine(m.capped(oneLine(s), 0))
 	return m.scroll().match().check()
 }
 
@@ -227,9 +227,9 @@ func (m Model) WithCharLimit(n int) Model {
 // CharLimit is the most characters the field holds; zero is no cap.
 func (m Model) CharLimit() int { return m.limit }
 
-// clip is s cut to the characters left under the limit when the field
+// capped is s cut to the characters left under the limit when the field
 // already holds have.
-func (m *Model) clip(s string, have int) string {
+func (m *Model) capped(s string, have int) string {
 	if m.limit == 0 {
 		return s
 	}
@@ -365,7 +365,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m.arm()
 	case tea.PasteMsg:
 		if m.focused {
-			return m.edited(m.line.Insert(m.clip(oneLine(msg.Content), m.line.Len())))
+			return m.edited(m.line.Insert(m.capped(oneLine(msg.Content), m.line.Len())))
 		}
 	case tea.KeyPressMsg:
 		if m.focused {
@@ -408,7 +408,7 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 	case key.Matches(k, m.keys.Paste):
 		return m, clip.Paste(m.clipboard) // it comes back as a tea.PasteMsg
 	case len(m.matches) > 0 && key.Matches(k, m.keys.Accept):
-		l = edit.NewLine(m.clip(m.CurrentSuggestion(), 0))
+		l = edit.NewLine(m.capped(m.CurrentSuggestion(), 0))
 	case len(m.matches) > 0 && key.Matches(k, m.keys.NextSuggestion):
 		m.pick = (m.pick + 1) % len(m.matches)
 		return m.lit()
@@ -420,7 +420,7 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 		if text == "" || k.Mod&typingMods != 0 {
 			return m, nil
 		}
-		if text = m.clip(text, l.Len()); text == "" {
+		if text = m.capped(text, l.Len()); text == "" {
 			return m, nil
 		}
 		l = l.Insert(text)
