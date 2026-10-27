@@ -118,7 +118,7 @@ func (c Checkbox) flip() Field {
 
 func (c Checkbox) Update(msg tea.Msg) (Field, tea.Cmd) {
 	if is(msg, c.keys.Press) {
-		c.checked = !c.checked
+		return c.flip(), nil
 	}
 	return c, nil
 }
@@ -239,7 +239,7 @@ func (t Toggle) flip() Field {
 
 func (t Toggle) Update(msg tea.Msg) (Field, tea.Cmd) {
 	if is(msg, t.keys.Press, t.keys.Left, t.keys.Right) {
-		t.on = !t.on
+		return t.flip(), nil
 	}
 	return t, nil
 }
@@ -380,7 +380,7 @@ func (b Button) press() tea.Cmd { return b.onPress }
 
 func (b Button) Update(msg tea.Msg) (Field, tea.Cmd) {
 	if is(msg, b.keys.Press) {
-		return b, b.onPress
+		return b, b.press()
 	}
 	return b, nil
 }

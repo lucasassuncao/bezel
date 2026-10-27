@@ -6,7 +6,6 @@ package input
 import (
 	"slices"
 	"strings"
-	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -17,6 +16,7 @@ import (
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/clip"
 	"github.com/lucasassuncao/bezel/internal/edit"
+	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -55,9 +55,6 @@ func DefaultKeys() Keys {
 	}
 }
 
-// ids tells inputs apart, so a blink reaches only the input that armed it.
-var ids atomic.Int64
-
 // BlinkMsg flips the caret of the input that armed it. A host hands it on
 // the way it hands on keys; an input ignores every other input's.
 type BlinkMsg struct{ id, tag int64 }
@@ -80,16 +77,17 @@ type Model struct {
 	clipboard   func() (string, error) // nil is the system's
 	th          *theme.Resolved        // shared by every copy and never written
 	suggestions []string
-	matches     []int // the suggestions the text starts, in order
-	pick        int   // the match shown, an index into matches
-	limit       int   // the most characters the field holds; 0 is no cap
+	lower       []string // suggestions lowercased once, for match
+	matches     []int    // the suggestions the text starts, in order
+	pick        int      // the match shown, an index into matches
+	limit       int      // the most characters the field holds; 0 is no cap
 	validate    func(string) error
 	err         error // validate's answer for the text as it is
 }
 
 // New is an empty field, not focused, as wide as its text.
 func New(th theme.Resolved) Model {
-	return Model{id: ids.Add(1), keys: DefaultKeys(), th: &th, caretOn: true}
+	return Model{id: frames.NextID(), keys: DefaultKeys(), th: &th, caretOn: true}
 }
 
 // noTheme is what a zero Model draws with; it is never written.
@@ -259,6 +257,10 @@ func (m Model) check() Model {
 // matched case-blind: the rest of one shows muted after the caret.
 func (m Model) WithSuggestions(list []string) Model {
 	m.suggestions = slices.Clone(list)
+	m.lower = make([]string, len(list))
+	for i, s := range list {
+		m.lower[i] = strings.ToLower(s)
+	}
 	return m.match()
 }
 
@@ -295,9 +297,9 @@ func (m Model) match() Model {
 	if v == "" {
 		return m
 	}
-	for i, s := range m.suggestions {
-		if len(s) > len(v) && strings.HasPrefix(strings.ToLower(s), v) {
-			if s == shown {
+	for i, s := range m.lower {
+		if len(s) > len(v) && strings.HasPrefix(s, v) {
+			if m.suggestions[i] == shown {
 				m.pick = len(m.matches)
 			}
 			m.matches = append(m.matches, i)
@@ -431,8 +433,11 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 // edited takes l, keeps the caret in view, and lights it for a full blink:
 // a caret that went dark while typing would seem to lag.
 func (m Model) edited(l edit.Line) (Model, tea.Cmd) {
+	changed := l.String() != m.line.String() // a caret move leaves both alone
 	m.line = l
-	m = m.scroll().match().check()
+	if m = m.scroll(); changed {
+		m = m.match().check()
+	}
 	return m.lit()
 }
 

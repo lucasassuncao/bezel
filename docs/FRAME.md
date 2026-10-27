@@ -186,8 +186,6 @@ A click is all `ClickMsg` carries. The rest of the mouse reaches the app as it c
 
 A dialog of the app's own takes clicks by implementing `overlay.Clicker`: `Click(x, y, body)`, with `x` and `y` counted from the top left of what its `View` drew.
 
-Two limits to know. The ready-made dialogs find a button by its label on the row clicked, so a row holding the same text twice takes the first. And a `list` with motion draws a row that left for a moment after it goes, which shifts the rows under it: a click in that moment lands one row off.
-
 ## The status row
 
 The row under the panes says what is happening:

@@ -23,9 +23,9 @@ func TestPasteOfNothingIsNoMessage(t *testing.T) {
 // A helper that hangs costs a paste, not the program: the command gives up
 // in time, and the read's goroutine ends whenever the helper does.
 func TestPasteGivesUpOnAReadThatHangs(t *testing.T) {
-	old := timeout
-	timeout = 10 * time.Millisecond
-	t.Cleanup(func() { timeout = old })
+	old := Timeout
+	Timeout = 10 * time.Millisecond
+	t.Cleanup(func() { Timeout = old })
 
 	release := make(chan struct{})
 	t.Cleanup(func() { close(release) })
@@ -47,9 +47,9 @@ func TestCopyWritesAndSaysHowItWent(t *testing.T) {
 }
 
 func TestCopyGivesUpOnAWriteThatHangs(t *testing.T) {
-	old := timeout
-	timeout = 10 * time.Millisecond
-	t.Cleanup(func() { timeout = old })
+	old := Timeout
+	Timeout = 10 * time.Millisecond
+	t.Cleanup(func() { Timeout = old })
 
 	release := make(chan struct{})
 	t.Cleanup(func() { close(release) })

@@ -88,17 +88,14 @@ func Prefix(query, label string) bool {
 	return strings.HasPrefix(strings.ToLower(label), strings.ToLower(query))
 }
 
-// filterMode is the / prompt while it is open: the text typed, and a window
-// over the rows it matches one row shorter than the list, for the prompt.
+// filterMode is the / prompt while it is open: the text typed, the rows it
+// matches, found once per change, and a window over them one row shorter
+// than the list, for the prompt.
 type filterMode struct {
 	on   bool
 	text string
+	idx  []int
 	win  layout.Window
-}
-
-// newFilter is the prompt opened afresh under a list height rows tall.
-func newFilter(height int) filterMode {
-	return filterMode{on: true, win: layout.Window{Height: max(height-1, 0)}}
 }
 
 // New builds a list height rows tall with the cursor on the first
@@ -113,14 +110,14 @@ func New[T any](rows []Row[T], height int) Model[T] {
 // Prefix, a match of the app's own. nil is Contains again. It ends WithFuzzy.
 func (m Model[T]) WithMatch(match func(query, label string) bool) Model[T] {
 	m.match, m.fuzzy = match, false
-	return m.clampFilter()
+	return m.refilter()
 }
 
 // WithFuzzy filters by the typed letters in order, anywhere in the label,
 // best match first, and marks the letters that matched.
 func (m Model[T]) WithFuzzy() Model[T] {
 	m.fuzzy = true
-	return m.clampFilter()
+	return m.refilter()
 }
 
 // WithTitle draws title on the list's first line.
@@ -186,13 +183,20 @@ func (m Model[T]) body() int {
 
 // fit sizes the windows to the rows that fit in the body.
 func (m Model[T]) fit() Model[T] {
-	if m.height <= 0 {
-		m.win.Height, m.find.win.Height = m.height, 0
-		return m.clampScroll().clampFilter()
+	m.win.Height = m.height
+	if m.height > 0 {
+		m.win.Height = m.body() / m.itemLines()
 	}
-	m.win.Height = m.body() / m.itemLines()
-	m.find.win.Height = max(m.body()-1, 0) / m.itemLines()
+	m.find.win.Height = m.filterRows()
 	return m.clampScroll().clampFilter()
+}
+
+// filterRows is the rows the body holds beside the filter prompt's line.
+func (m Model[T]) filterRows() int {
+	if m.height <= 0 {
+		return 0
+	}
+	return max(m.body()-1, 0) / m.itemLines()
 }
 
 // WithKeys rebinds the list.
@@ -217,7 +221,7 @@ func (m Model[T]) Filter() string { return m.find.text }
 // filtering, where the matches show from.
 func (m Model[T]) Scroll() layout.Scroll {
 	if m.find.on {
-		n := len(m.filtered())
+		n := len(m.find.idx)
 		return m.find.win.Clamp(n).Scroll(n)
 	}
 	return m.win.Clamp(len(m.rows)).Scroll(len(m.rows))
@@ -240,7 +244,7 @@ func (m Model[T]) setRows(rows []Row[T]) Model[T] {
 	m.rows = slices.Clone(rows)
 	m = m.fit()
 	if at < len(m.rows) && !m.rows[at].Section && m.rows[at].Label == prev {
-		return m.clampScroll().clampFilter()
+		return m.clampScroll().refilter()
 	}
 	m.win.Cursor = firstSelectable(m.rows)
 	for i, r := range m.rows {
@@ -249,7 +253,7 @@ func (m Model[T]) setRows(rows []Row[T]) Model[T] {
 			break
 		}
 	}
-	return m.clampScroll().clampFilter()
+	return m.clampScroll().refilter()
 }
 
 // SetHeight updates the lines the list takes and re-clamps the scroll.
@@ -287,7 +291,7 @@ func (m Model[T]) SetRow(i int, r Row[T]) Model[T] {
 // list. While filtering it is the row under the filter cursor.
 func (m Model[T]) Selected() *Row[T] {
 	if m.find.on {
-		idx := m.filtered()
+		idx := m.find.idx
 		if m.find.win.Cursor >= len(idx) {
 			return nil
 		}
@@ -309,7 +313,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action) {
 	}
 	switch {
 	case key.Matches(msg, m.keys.Filter):
-		m.find = m.newFilter()
+		m.find = m.filterFor("")
 	case key.Matches(msg, m.keys.Up):
 		return m.move(-1), None
 	case key.Matches(msg, m.keys.Down):
@@ -341,19 +345,18 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 	case msg.String() == "backspace" || msg.String() == "ctrl+h":
 		if text := m.find.text; text != "" {
 			_, size := utf8.DecodeLastRuneInString(text)
-			m.find = m.newFilter()
-			m.find.text = text[:len(text)-size]
+			m.find = m.filterFor(text[:len(text)-size])
 		}
 	case key.Matches(msg, m.keys.Up):
-		m.find.win = m.find.win.Move(m.wrapped(-1, m.find.win.Cursor, len(m.filtered())), len(m.filtered()), nil)
+		n := len(m.find.idx)
+		m.find.win = m.find.win.Move(m.wrapped(-1, m.find.win.Cursor, n), n, nil)
 	case key.Matches(msg, m.keys.Down):
-		m.find.win = m.find.win.Move(m.wrapped(1, m.find.win.Cursor, len(m.filtered())), len(m.filtered()), nil)
+		n := len(m.find.idx)
+		m.find.win = m.find.win.Move(m.wrapped(1, m.find.win.Cursor, n), n, nil)
 	default:
 		// Only arrows navigate while filtering, so letters stay typeable.
 		if typed := msg.Key().Text; utf8.RuneCountInString(typed) == 1 {
-			text := m.find.text + typed
-			m.find = m.newFilter()
-			m.find.text = text
+			m.find = m.filterFor(m.find.text + typed)
 		}
 	}
 	return m, None
@@ -369,11 +372,10 @@ func (m Model[T]) Click(y int) (Model[T], Action) {
 	if m.height <= 0 || y < 0 {
 		return m, None
 	}
-	at := y / m.itemLines()
 	if m.find.on {
-		idx := m.filtered()
-		w := m.find.win.Clamp(len(idx))
-		start, end, _ := w.Bounds(len(idx))
+		at := y / m.itemLines()
+		w := m.find.win.Clamp(len(m.find.idx))
+		start, end, _ := w.Bounds(len(m.find.idx))
 		if at >= end-start {
 			return m, None
 		}
@@ -383,14 +385,16 @@ func (m Model[T]) Click(y int) (Model[T], Action) {
 		m.find.win.Cursor = start + at
 		return m, None
 	}
-	start, end, _ := m.win.Bounds(len(m.rows))
-	if m.pages && m.win.Height > 0 {
-		start = m.win.Cursor / m.win.Height * m.win.Height
-		end = min(start+m.win.Height, len(m.rows))
+	i := -1
+	lines, of := m.rowLines(new(theme.Resolved)) // what View draws, ghosts included
+	for k, l := range lines {
+		if y -= strings.Count(l, "\n") + 1; y < 0 {
+			i = of[k]
+			break
+		}
 	}
-	i := start + at
 	switch {
-	case i >= end || m.rows[i].Section:
+	case i < 0 || m.rows[i].Section:
 		return m, None
 	case i == m.win.Cursor:
 		return m, Chosen
@@ -403,7 +407,7 @@ func (m Model[T]) Click(y int) (Model[T], Action) {
 // pickMatch closes the filter on the match under its cursor, Chosen, or on
 // nothing when nothing matched.
 func (m Model[T]) pickMatch() (Model[T], Action) {
-	idx, at := m.filtered(), m.find.win.Cursor
+	idx, at := m.find.idx, m.find.win.Cursor
 	m.find = filterMode{}
 	if at >= len(idx) {
 		return m, None
@@ -413,15 +417,9 @@ func (m Model[T]) pickMatch() (Model[T], Action) {
 	return m.start(float64(from)).clampScroll(), Chosen
 }
 
-// newFilter is the prompt opened afresh, its window the rows the body holds
-// beside the prompt's line.
-func (m Model[T]) newFilter() filterMode {
-	f := newFilter(0)
-	f.win.Height = max(m.body()-1, 0) / m.itemLines()
-	if m.height <= 0 {
-		f.win.Height = 0
-	}
-	return f
+// filterFor is the prompt open on text, its matches found here once.
+func (m Model[T]) filterFor(text string) filterMode {
+	return filterMode{on: true, text: text, idx: m.filtered(text), win: layout.Window{Height: m.filterRows()}}
 }
 
 // wrapped is delta, or the step that wraps round, for a cursor at at over n
@@ -438,13 +436,13 @@ func (m Model[T]) wrapped(delta, at, n int) int {
 	return delta
 }
 
-// filtered is the indices into rows that match the filter, so a pick maps
-// back to its own row even when labels repeat.
-func (m Model[T]) filtered() []int {
-	if m.fuzzy && m.find.text != "" {
-		return m.ranked()
+// filtered is the indices into rows that match query, so a pick maps back
+// to its own row even when labels repeat.
+func (m Model[T]) filtered(query string) []int {
+	if m.fuzzy && query != "" {
+		return m.ranked(query)
 	}
-	query, match := m.find.text, m.match
+	match := m.match
 	if match == nil {
 		// Contains, with the query lowered once rather than once per row.
 		q := strings.ToLower(query)
@@ -460,14 +458,14 @@ func (m Model[T]) filtered() []int {
 }
 
 // ranked is the rows the fuzzy filter keeps, best match first.
-func (m Model[T]) ranked() []int {
+func (m Model[T]) ranked(query string) []int {
 	labels := make([]string, len(m.rows))
 	for i, r := range m.rows {
 		if !r.Section { // a heading's empty label matches no query
 			labels[i] = r.Label
 		}
 	}
-	return fuzzy.Ranked(m.find.text, labels)
+	return fuzzy.Ranked(query, labels)
 }
 
 // move steps the cursor over headings, clamped at the ends, or round them
@@ -498,12 +496,20 @@ func (m Model[T]) clampScroll() Model[T] {
 	return m
 }
 
-// clampFilter keeps the filter's window on its matches after the rows changed.
+// clampFilter keeps the filter's window on its matches.
 func (m Model[T]) clampFilter() Model[T] {
 	if m.find.on {
-		m.find.win = m.find.win.Clamp(len(m.filtered()))
+		m.find.win = m.find.win.Clamp(len(m.find.idx))
 	}
 	return m
+}
+
+// refilter matches the open filter again after the rows or the match changed.
+func (m Model[T]) refilter() Model[T] {
+	if m.find.on {
+		m.find.idx = m.filtered(m.find.text)
+	}
+	return m.clampFilter()
 }
 
 func firstSelectable[T any](rows []Row[T]) int {
@@ -572,29 +578,42 @@ func (m Model[T]) statusText() string {
 	switch {
 	case !m.find.on || m.find.text == "":
 		return fmt.Sprintf("  %d %s", n, unit)
-	case len(m.filtered()) == 0:
+	case len(m.find.idx) == 0:
 		return "  nothing matched"
 	}
-	return fmt.Sprintf("  %d of %d", len(m.filtered()), n)
+	return fmt.Sprintf("  %d of %d", len(m.find.idx), n)
 }
 
 // viewRows is the rows in the window, or on the cursor's page.
 func (m Model[T]) viewRows(th *theme.Resolved) string {
+	lines, _ := m.rowLines(th)
+	return strings.Join(lines, "\n")
+}
+
+// bounds is the rows the window shows and how many hide below it; a paged
+// list shows the cursor's page and hides none.
+func (m Model[T]) bounds() (start, end, below int) {
+	if !m.pages {
+		return m.win.Bounds(len(m.rows))
+	}
+	start = m.win.Cursor / m.win.Height * m.win.Height
+	return start, min(start+m.win.Height, len(m.rows)), 0
+}
+
+// rowLines is what viewRows draws, a row or a ghost a piece, with the row
+// each piece is: -1 for a ghost or the "more" row.
+func (m Model[T]) rowLines(th *theme.Resolved) (lines []string, of []int) {
 	if m.win.Height <= 0 {
-		return ""
+		return nil, nil
 	}
-	start, end, below := m.win.Bounds(len(m.rows))
-	if m.pages {
-		start = m.win.Cursor / m.win.Height * m.win.Height
-		end, below = min(start+m.win.Height, len(m.rows)), 0
-	}
+	start, end, below := m.bounds()
 	cursor := m.cursorRow()
 
 	two := m.itemLines() == 2
-	lines := make([]string, 0, end-start)
+	lines, of = make([]string, 0, end-start), make([]int, 0, end-start)
 	for i := start; i < end; i++ {
 		if g, ok := m.ghostLine(i, th); ok {
-			lines = append(lines, g)
+			lines, of = append(lines, g), append(of, -1)
 		}
 		r := m.rows[i]
 		switch {
@@ -610,16 +629,17 @@ func (m Model[T]) viewRows(th *theme.Resolved) string {
 		default:
 			lines = append(lines, renderRow(r, i == cursor, th, nil, two))
 		}
+		of = append(of, i)
 	}
 	if g, ok := m.ghostLine(end, th); ok && below == 0 {
-		lines = append(lines, g)
+		lines, of = append(lines, g), append(of, -1)
 	}
 	room := max(end-start, m.win.Height-boolInt(below > 0)) // a ghost never pushes the list past its height
-	lines = lines[:min(len(lines), room)]
+	lines, of = lines[:min(len(lines), room)], of[:min(len(of), room)]
 	if below > 0 {
-		lines = append(lines, moreRow(below, th))
+		lines, of = append(lines, moreRow(below, th)), append(of, -1)
 	}
-	return strings.Join(lines, "\n")
+	return lines, of
 }
 
 func boolInt(b bool) int {
@@ -631,7 +651,7 @@ func boolInt(b bool) int {
 
 // viewFilter is the matches in the filter's window, padded to it, then the prompt.
 func (m Model[T]) viewFilter(th *theme.Resolved) string {
-	idx := m.filtered()
+	idx := m.find.idx
 	w := m.find.win.Clamp(len(idx))
 	start, end, below := w.Bounds(len(idx))
 

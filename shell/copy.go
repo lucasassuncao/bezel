@@ -2,13 +2,11 @@ package shell
 
 import (
 	"errors"
-	"time"
-
-	"github.com/atotto/clipboard"
 
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/clip"
 )
 
 // copiedMsg is a finished clipboard write, carrying the status to show.
@@ -16,10 +14,6 @@ type copiedMsg struct {
 	done, failed string
 	err          error
 }
-
-// clipboardTimeout bounds a write that never comes back. A variable so a
-// test can shrink it.
-var clipboardTimeout = 5 * time.Second
 
 // errClipboardTimeout is worded for the status row: a write that hangs is
 // almost always a missing or wedged helper, not anything about the text.
@@ -38,20 +32,12 @@ func (s Shell) WithClipboard(write func(string) error) Shell {
 // instead of freezing the program.
 func (s Shell) Copy(text, done, failed string) tea.Cmd {
 	s = s.ready()
-	write, timeout := s.cfg.Clipboard, clipboardTimeout // read here, on the loop, never from the command
-	if write == nil {
-		write = clipboard.WriteAll
-	}
-	return func() tea.Msg {
-		errc := make(chan error, 1) // buffered: a late write must not leak a goroutine
-		go func() { errc <- write(text) }()
-		select {
-		case err := <-errc:
-			return copiedMsg{done: done, failed: failed, err: err}
-		case <-time.After(timeout):
-			return copiedMsg{done: done, failed: failed, err: errClipboardTimeout}
+	return clip.Copy(s.cfg.Clipboard, text, func(err error) tea.Msg {
+		if errors.Is(err, clip.ErrTimeout) {
+			err = errClipboardTimeout
 		}
-	}
+		return copiedMsg{done: done, failed: failed, err: err}
+	})
 }
 
 // copied shows how a copy went.

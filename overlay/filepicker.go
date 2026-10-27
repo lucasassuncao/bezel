@@ -21,7 +21,6 @@ type FilePicker struct {
 	title  string
 	m      filepicker.Model
 	onPick func(path string) tea.Cmd
-	keys   FilePickerKeys
 }
 
 // FilePickerKeys are the bindings a FilePicker answers to besides esc. Pick
@@ -58,14 +57,13 @@ var volumes func() []string
 // NewFilePicker browses dir, files only, without hidden entries. onPick,
 // which may be nil, gets the absolute path.
 func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, th theme.Resolved) FilePicker {
-	keys := DefaultFilePickerKeys()
-	m := filepicker.New(dir).WithKeys(filepicker.Keys(keys))
-	return FilePicker{look: lookOf(th), title: title, m: m, onPick: onPick, keys: keys}
+	m := filepicker.New(dir).WithKeys(filepicker.Keys(DefaultFilePickerKeys()))
+	return FilePicker{look: lookOf(th), title: title, m: m, onPick: onPick}
 }
 
 // WithKeys rebinds the picker.
 func (p FilePicker) WithKeys(k FilePickerKeys) FilePicker {
-	p.keys, p.m = k, p.m.WithKeys(filepicker.Keys(k))
+	p.m = p.m.WithKeys(filepicker.Keys(k))
 	return p
 }
 

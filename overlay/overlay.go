@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -208,25 +209,22 @@ func (s Stack) Click(x, y int, body layout.Rect) (Stack, tea.Cmd) {
 	return s.replaceTop(updated), cmd
 }
 
-// buttonAt is which of buttons, drawn left to right on row y of view, covers
-// column x; -1 when none does.
-func buttonAt(view string, x, y int, buttons []string) int {
-	rows := strings.Split(ansi.Strip(view), "\n")
-	if y < 0 || y >= len(rows) {
+// buttonAt is which of buttons covers (x, y) of view: a dialog drawn in
+// frame, its last row the buttons two cells apart after row's lead spaces.
+// -1 when none does.
+func buttonAt(view, row string, frame lipgloss.Style, buttons []string, x, y int) int {
+	_, h := draw.BlockSize(view)
+	if y != h-1-frame.GetBorderBottomSize()-frame.GetMarginBottom()-frame.GetPaddingBottom() {
 		return -1
 	}
-	row, from := rows[y], 0
+	plain := ansi.Strip(row)
+	x -= frame.GetBorderLeftSize() + frame.GetMarginLeft() + frame.GetPaddingLeft() + len(plain) - len(strings.TrimLeft(plain, " "))
 	for i, b := range buttons {
-		label := ansi.Strip(b)
-		at := strings.Index(row[from:], label)
-		if at < 0 {
-			return -1
-		}
-		start := ansi.StringWidth(row[:from+at])
-		if x >= start && x < start+ansi.StringWidth(label) {
+		w := lipgloss.Width(b)
+		if x >= 0 && x < w {
 			return i
 		}
-		from += at + len(label)
+		x -= w + 2
 	}
 	return -1
 }

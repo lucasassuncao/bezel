@@ -87,7 +87,7 @@ New browses dir, files only, without hidden entries, ten rows tall. Call Init fo
 func (m Model) Browsing() bool
 ```
 
-Browsing reports whether the drive list shows rather than a directory.
+Browsing reports whether a directory shows, false while the drive list does.
 
 <a name="Model.Dir"></a>
 ### func \(Model\) [Dir](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L197>)
@@ -126,7 +126,7 @@ func (m Model) Init() tea.Cmd
 Init reads the first directory.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L394>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L396>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -162,7 +162,7 @@ func (m Model) SetHeight(h int) Model
 SetHeight shows as many entries as h rows hold, at least one.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L288>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L290>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
@@ -171,7 +171,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
 Update takes the picker's own listings and its keys; Picked then says whether enter picked something.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L403>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L405>)
 
 ```go
 func (m Model) View(th theme.Resolved) string

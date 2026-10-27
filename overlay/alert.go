@@ -43,7 +43,8 @@ func (a Alert) View(body layout.Rect) string {
 
 // Click closes the alert on a click on OK.
 func (a Alert) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
-	if buttonAt(a.View(body), x, y, []string{a.button("OK", true)}) == 0 {
+	row := a.okButton([]string{a.message})
+	if buttonAt(a.View(body), row, dialogFrame(a.style()), []string{a.button("OK", true)}, x, y) == 0 {
 		return a, Close()
 	}
 	return a, nil

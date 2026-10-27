@@ -11,9 +11,9 @@ import (
 	"github.com/atotto/clipboard"
 )
 
-// timeout bounds a read that never comes back, as Shell.Copy bounds a write.
-// A variable so a test can shrink it.
-var timeout = 5 * time.Second
+// Timeout bounds a read or write that never comes back. A variable so a
+// test, here or in a package that copies, can shrink it.
+var Timeout = 5 * time.Second
 
 // Paste is the command that reads the clipboard through read, the system's
 // when read is nil, and answers with its text as a tea.PasteMsg; with
@@ -22,7 +22,7 @@ func Paste(read func() (string, error)) tea.Cmd {
 	if read == nil {
 		read = clipboard.ReadAll
 	}
-	limit := timeout // read here, on the loop, never from the command
+	limit := Timeout // read here, on the loop, never from the command
 	return func() tea.Msg {
 		type answer struct {
 			s   string
@@ -55,7 +55,7 @@ func Copy(write func(string) error, s string, done func(error) tea.Msg) tea.Cmd 
 	if write == nil {
 		write = clipboard.WriteAll
 	}
-	limit := timeout
+	limit := Timeout
 	return func() tea.Msg {
 		errc := make(chan error, 1) // buffered: a late write still ends its goroutine
 		go func() { errc <- write(s) }()

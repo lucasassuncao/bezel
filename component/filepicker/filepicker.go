@@ -196,7 +196,7 @@ func (m Model) Init() tea.Cmd { return m.list(m.dir) }
 // Dir is the directory being browsed.
 func (m Model) Dir() string { return m.dir }
 
-// Browsing reports whether the drive list shows rather than a directory.
+// Browsing reports whether a directory shows, false while the drive list does.
 func (m Model) Browsing() bool { return !m.drives.open() }
 
 // Problem is why the last key did nothing, such as a file of the wrong type;
@@ -235,11 +235,12 @@ func (m Model) list(dir string) tea.Cmd {
 		entries := make([]entry, 0, len(des))
 		for _, de := range des {
 			path := filepath.Join(dir, de.Name())
-			if !hidden && isHidden(path) {
+			info, err := de.Info()
+			if !hidden && isHidden(de.Name(), info) {
 				continue
 			}
 			e := entry{name: de.Name(), dir: de.IsDir()}
-			if info, err := de.Info(); err == nil {
+			if err == nil {
 				e.size, e.mode = info.Size(), info.Mode()
 				if info.Mode()&os.ModeSymlink != 0 {
 					e.link, _ = filepath.EvalSymlinks(path)
@@ -263,9 +264,10 @@ func (m Model) list(dir string) tea.Cmd {
 	}
 }
 
-// isHidden is a dotfile anywhere, or a file Windows marks hidden.
-func isHidden(path string) bool {
-	return strings.HasPrefix(filepath.Base(path), ".") || hiddenAttr(path)
+// isHidden is a dotfile anywhere, or a file Windows marks hidden; info is
+// nil when it could not be read.
+func isHidden(name string, info os.FileInfo) bool {
+	return strings.HasPrefix(name, ".") || info != nil && hiddenAttr(info)
 }
 
 // browse starts dir afresh, landing on reselect once its listing arrives.

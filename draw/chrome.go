@@ -37,23 +37,16 @@ func Header(width int, title, subtitle, right string, st ChromeStyle) string {
 // Tabs is one row of names, the active one styled apart.
 func Tabs(width int, names []string, active int, st ChromeStyle) string {
 	parts := tabParts(names, active, st)
-	all := strings.Join(parts, " ")
-	if ansi.StringWidth(all) <= width || active < 0 || active >= len(parts) {
-		return Fit(all, width)
-	}
-	return Fit(scrolledTabs(parts, active, width, st), width)
+	lo, hi, before, after := tabSpan(parts, active, width, st)
+	return Fit(before+strings.Join(parts[lo:hi], " ")+after, width)
 }
 
 // TabAt is the tab Tabs draws at column x with the same arguments, -1 over
 // a gap, a scroll mark or past the last tab.
 func TabAt(width int, names []string, active int, st ChromeStyle, x int) int {
 	parts := tabParts(names, active, st)
-	lo, hi, at := 0, len(parts), 0
-	if ansi.StringWidth(strings.Join(parts, " ")) > width && active >= 0 && active < len(parts) {
-		if lo, hi = tabWindow(parts, active, width); lo > 0 {
-			at = 2 // "‹ "
-		}
-	}
+	lo, hi, before, _ := tabSpan(parts, active, width, st)
+	at := ansi.StringWidth(before)
 	for i := lo; i < hi; i++ {
 		w := ansi.StringWidth(parts[i])
 		if x >= at && x < at+w && x < width {
@@ -77,18 +70,21 @@ func tabParts(names []string, active int, st ChromeStyle) []string {
 	return parts
 }
 
-// scrolledTabs is as many of parts as fit width around active, with ‹ or ›
-// where tabs are hidden on that side, so the active tab is never cut off.
-func scrolledTabs(parts []string, active, width int, st ChromeStyle) string {
-	lo, hi := tabWindow(parts, active, width)
-	s := strings.Join(parts[lo:hi], " ")
+// tabSpan is the parts [lo, hi) a row width wide shows, all when they fit,
+// else as many as fit around active with ‹ or › where tabs are hidden on
+// that side, so the active tab is never cut off.
+func tabSpan(parts []string, active, width int, st ChromeStyle) (lo, hi int, before, after string) {
+	if ansi.StringWidth(strings.Join(parts, " ")) <= width || active < 0 || active >= len(parts) {
+		return 0, len(parts), "", ""
+	}
+	lo, hi = tabWindow(parts, active, width)
 	if lo > 0 {
-		s = st.Tab.Render("‹") + " " + s
+		before = st.Tab.Render("‹") + " "
 	}
 	if hi < len(parts) {
-		s += " " + st.Tab.Render("›")
+		after = " " + st.Tab.Render("›")
 	}
-	return s
+	return lo, hi, before, after
 }
 
 // tabWindow is the parts [lo, hi) that fit width around active, room kept

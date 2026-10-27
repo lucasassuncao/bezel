@@ -128,3 +128,16 @@ func TestMixBlendsAndGivesWayToAMissingColour(t *testing.T) {
 	assert.Equal(t, black, mix(black, nil, 0.2))
 	assert.Equal(t, white, mix(nil, white, 0.2))
 }
+
+// A click reads the rows as drawn, so the ghost above a row does not put it
+// one line off.
+func TestAClickLooksPastAGhost(t *testing.T) {
+	moving(t)
+	m := New(plainRows("keep", "old"), 4).WithMotion(100 * ms)
+	m = playTo(m.SetRows(plainRows("keep", "new")), 20*ms) // "keep", the ghost, "new"
+	m, act := m.Click(1)
+	assert.Equal(t, None, act, "the ghost is no row")
+	assert.Equal(t, 0, m.win.Cursor)
+	m, _ = m.Click(2)
+	assert.Equal(t, "new", m.Selected().Label)
+}

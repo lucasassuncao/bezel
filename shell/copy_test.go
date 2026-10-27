@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel/internal/clip"
 )
 
 // run feeds a command's message back into the shell, the way the program would.
@@ -43,9 +45,9 @@ func TestCopyReportsTheFailureInTheAppsWords(t *testing.T) {
 // A helper that never returns must not freeze the program: the copy gives up
 // and says what is most likely wrong.
 func TestCopyGivesUpOnAHelperThatHangs(t *testing.T) {
-	old := clipboardTimeout
-	clipboardTimeout = 20 * time.Millisecond
-	t.Cleanup(func() { clipboardTimeout = old })
+	old := clip.Timeout
+	clip.Timeout = 20 * time.Millisecond
+	t.Cleanup(func() { clip.Timeout = old })
 
 	block := make(chan struct{})
 	defer close(block)
@@ -82,15 +84,15 @@ func TestCopyStatusIsSafeToDraw(t *testing.T) {
 
 // The timeout, like the writer, is read when Copy is called, on the loop.
 func TestCopyUsesTheTimeoutSetWhenItWasCalled(t *testing.T) {
-	old := clipboardTimeout
-	t.Cleanup(func() { clipboardTimeout = old })
-	clipboardTimeout = 20 * time.Millisecond
+	old := clip.Timeout
+	t.Cleanup(func() { clip.Timeout = old })
+	clip.Timeout = 20 * time.Millisecond
 
 	block := make(chan struct{})
 	defer close(block)
 	s := sized(New(actionConfig())).WithClipboard(func(string) error { <-block; return nil })
 	cmd := s.Copy("x", "copied", "copy")
-	clipboardTimeout = time.Hour
+	clip.Timeout = time.Hour
 
 	done := make(chan any, 1)
 	go func() { done <- cmd() }()

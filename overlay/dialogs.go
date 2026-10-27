@@ -115,7 +115,7 @@ func (c Choice) buttons() []string {
 
 // Click runs the option whose button it lands on, as its key would.
 func (c Choice) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
-	i := buttonAt(c.View(body), x, y, c.buttons())
+	i := buttonAt(c.View(body), "", dialogFrame(c.style()), c.buttons(), x, y)
 	switch {
 	case i < 0:
 		return c, nil

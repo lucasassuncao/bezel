@@ -1,8 +1,9 @@
 package overlay
 
 import (
+	"strings"
+
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -77,13 +78,17 @@ func (c Confirm) Legend() []legend.Entry {
 }
 
 func (c Confirm) View(body layout.Rect) string {
-	buttons := lipgloss.JoinHorizontal(lipgloss.Top, c.button("Yes", !c.no), "  ", c.button("No", c.no))
-	return dialog(c.title, []string{c.message}, buttons, c.style(), body)
+	return dialog(c.title, []string{c.message}, strings.Join(c.buttons(), "  "), c.style(), body)
+}
+
+// buttons are Yes and No as View draws them.
+func (c Confirm) buttons() []string {
+	return []string{c.button("Yes", !c.no), c.button("No", c.no)}
 }
 
 // Click answers yes or no on a click on its button.
 func (c Confirm) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
-	switch buttonAt(c.View(body), x, y, []string{c.button("Yes", !c.no), c.button("No", c.no)}) {
+	switch buttonAt(c.View(body), "", dialogFrame(c.style()), c.buttons(), x, y) {
 	case 0:
 		return c, tea.Batch(c.onYes, Close())
 	case 1:

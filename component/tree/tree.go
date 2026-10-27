@@ -238,7 +238,7 @@ func (m Model[N]) Update(msg tea.KeyPressMsg) (Model[N], Action) {
 
 // move steps the cursor over section rows, clamped at both ends.
 func (m Model[N]) move(dir int, vis []int) Model[N] {
-	return m.withWindow(m.window().Move(dir, len(vis), m.isSection(vis)))
+	return m.withWindow(m.window().Move(dir, len(vis), m.isSection(vis)), len(vis))
 }
 
 // Move walks delta rows, stepping over section rows and stopping at the
@@ -248,7 +248,7 @@ func (m Model[N]) Move(delta int) Model[N] {
 	if len(vis) == 0 {
 		return m
 	}
-	return m.withWindow(m.window().Move(delta, len(vis), m.isSection(vis)))
+	return m.withWindow(m.window().Move(delta, len(vis), m.isSection(vis)), len(vis))
 }
 
 // isSection reports the visible rows the cursor passes over.
@@ -268,9 +268,10 @@ func (m Model[N]) Scroll() layout.Scroll {
 	return m.window().Clamp(n).Scroll(n)
 }
 
-func (m Model[N]) withWindow(w layout.Window) Model[N] {
+// withWindow takes w's cursor and offset; n is how many rows are visible.
+func (m Model[N]) withWindow(w layout.Window, n int) Model[N] {
 	if m.scrollOff > 0 && w.Height > 0 {
-		w = m.keepOff(w, len(m.Visible()))
+		w = m.keepOff(w, n)
 	}
 	m.Cursor, m.Offset = w.Cursor, w.Offset
 	return m
@@ -376,7 +377,7 @@ func (m Model[N]) collapse(vis []int) (Model[N], Action) {
 func (m Model[N]) ClampOffset() Model[N] { return m.clampOffset(len(m.Visible())) }
 
 // clampOffset is ClampOffset for a caller already holding n visible rows.
-func (m Model[N]) clampOffset(n int) Model[N] { return m.withWindow(m.window().Clamp(n)) }
+func (m Model[N]) clampOffset(n int) Model[N] { return m.withWindow(m.window().Clamp(n), n) }
 
 // ClampCursor forces the cursor back into the visible range, for state
 // restores whose cursor may no longer be valid against the restored nodes.

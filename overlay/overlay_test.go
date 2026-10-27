@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
@@ -239,10 +240,12 @@ func TestAClickReachesTheTopDialogInItsOwnCells(t *testing.T) {
 }
 
 func TestButtonAtFindsEachButtonOnItsRow(t *testing.T) {
-	view := "title\n\n [ Yes ]  [ No ] "
-	require.Equal(t, 0, buttonAt(view, 2, 2, []string{"[ Yes ]", "[ No ]"}))
-	require.Equal(t, 1, buttonAt(view, 11, 2, []string{"[ Yes ]", "[ No ]"}))
-	require.Equal(t, -1, buttonAt(view, 9, 2, []string{"[ Yes ]", "[ No ]"}), "the gap")
-	require.Equal(t, -1, buttonAt(view, 2, 0, []string{"[ Yes ]"}), "another row")
-	require.Equal(t, -1, buttonAt(view, 2, 9, []string{"[ Yes ]"}))
+	frame := lipgloss.NewStyle().PaddingLeft(1)
+	view := " title\n\n  [ A ]  [ A ] "
+	buttons := []string{"[ A ]", "[ A ]"}
+	require.Equal(t, 0, buttonAt(view, " ", frame, buttons, 2, 2))
+	require.Equal(t, 1, buttonAt(view, " ", frame, buttons, 9, 2), "found by place, not by label")
+	require.Equal(t, -1, buttonAt(view, " ", frame, buttons, 7, 2), "the gap")
+	require.Equal(t, -1, buttonAt(view, " ", frame, buttons, 2, 0), "another row")
+	require.Equal(t, -1, buttonAt(view, " ", frame, buttons, 1, 2), "the lead")
 }

@@ -142,7 +142,7 @@ func Cut(s string, width int) string
 Cut is Truncate without the ellipsis: the line ends where the width does.
 
 <a name="Divider"></a>
-## func [Divider](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L122>)
+## func [Divider](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L118>)
 
 ```go
 func Divider(width int, label string, line, text lipgloss.Style) string
@@ -151,7 +151,7 @@ func Divider(width int, label string, line, text lipgloss.Style) string
 Divider is a horizontal rule width cells long, with label set into it after a short lead when one is given: "── Label ─────".
 
 <a name="EmptyState"></a>
-## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L145>)
+## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L141>)
 
 ```go
 func EmptyState(r layout.Rect, message, hint string, st ChromeStyle) string
@@ -322,7 +322,7 @@ func ShortDuration(d time.Duration) string
 ShortDuration renders a lifetime the way a header has room for: the two largest units that say anything, truncated rather than rounded, so a countdown never shows more time than is left.
 
 <a name="StatusLine"></a>
-## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L140>)
+## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L136>)
 
 ```go
 func StatusLine(width int, text string, style lipgloss.Style) string
@@ -331,7 +331,7 @@ func StatusLine(width int, text string, style lipgloss.Style) string
 StatusLine is one row of text in a style, exactly width cells.
 
 <a name="TabAt"></a>
-## func [TabAt](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L49>)
+## func [TabAt](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L46>)
 
 ```go
 func TabAt(width int, names []string, active int, st ChromeStyle, x int) int

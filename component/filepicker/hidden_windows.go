@@ -2,15 +2,14 @@
 
 package filepicker
 
-import "golang.org/x/sys/windows"
+import (
+	"os"
+	"syscall"
+)
 
-// hiddenAttr reports the hidden attribute of path, asked for by its full
-// path, not by a name the working directory would resolve.
-func hiddenAttr(path string) bool {
-	p, err := windows.UTF16PtrFromString(path)
-	if err != nil {
-		return false
-	}
-	attrs, err := windows.GetFileAttributes(p)
-	return err == nil && attrs&windows.FILE_ATTRIBUTE_HIDDEN != 0
+// hiddenAttr reports the hidden attribute ReadDir already fetched with info,
+// so a listing costs no extra call per entry.
+func hiddenAttr(info os.FileInfo) bool {
+	d, ok := info.Sys().(*syscall.Win32FileAttributeData)
+	return ok && d.FileAttributes&syscall.FILE_ATTRIBUTE_HIDDEN != 0
 }
