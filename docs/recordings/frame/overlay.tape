@@ -104,10 +104,13 @@ Sleep 1.5s
 Down@400ms 2
 Sleep 600ms
 Right
-Wait+Screen /browser.tape/
+Wait+Screen /accordion/
 Sleep 1.2s
-Down@400ms 2
-Sleep 800ms
+Down
+Sleep 600ms
+Right
+Wait+Screen /main_test.go/
+Sleep 1.2s
 Enter
 Wait+Screen /picked main.go/
 Sleep 1.5s
