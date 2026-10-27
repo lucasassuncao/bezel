@@ -39,15 +39,17 @@ func Key(s string) tea.KeyPressMsg {
 		}
 		msg.Mod |= mod
 	}
-	if code, ok := named[name]; ok {
+	code, isName := named[name]
+	switch {
+	case isName:
 		msg.Code = code
-	} else if utf8.RuneCountInString(name) == 1 {
+	case utf8.RuneCountInString(name) == 1:
 		msg.Code, _ = utf8.DecodeRuneInString(name)
-	} else {
+	default:
 		panic(fmt.Sprintf("bezeltest.Key(%q): unknown key %q", s, name))
 	}
 	// tea reads Text back as the key's name, so only a bare character has it.
-	if msg.Mod == 0 && (msg.Code == tea.KeySpace || !isNamed(name)) {
+	if msg.Mod == 0 && (msg.Code == tea.KeySpace || !isName) {
 		msg.Text = string(msg.Code)
 	}
 	return msg
@@ -67,9 +69,4 @@ func split(s string) (mods []string, name string) {
 		return nil, s
 	}
 	return strings.Split(s[:i], "+"), s[i+1:]
-}
-
-func isNamed(name string) bool {
-	_, ok := named[name]
-	return ok
 }

@@ -284,9 +284,9 @@ func (s Shell) Pop() Shell {
 	return s
 }
 
-// nextPane moves focus by step through the leaves currently on screen. From
-// an Info pane it goes back to the ring pane that had focus before.
-func (s Shell) nextPane(step int) Shell {
+// nextPane moves focus to the next leaf on screen, or the one before when
+// back. From an Info pane it goes back to the ring pane that had focus.
+func (s Shell) nextPane(back bool) Shell {
 	order := s.visibleOrder()
 	if len(order) == 0 {
 		return s
@@ -298,7 +298,7 @@ func (s Shell) nextPane(step int) Shell {
 		}
 		return s.focusOn(order[0])
 	}
-	return s.focusOn(order[((cur+step)%len(order)+len(order))%len(order)])
+	return s.focusOn(order[cycle(cur, len(order), back)])
 }
 
 // visibleOrder is the focus ring minus the leaves the layout dropped. Before

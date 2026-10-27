@@ -70,9 +70,9 @@ func TestFocusMovesAlongTheLayoutOrderAndWraps(t *testing.T) {
 	s := newShell()
 	s = s.SetFocus("detail")
 	require.Equal(t, "detail", s.Focus())
-	s = s.nextPane(1)
+	s = s.nextPane(false)
 	require.Equal(t, "list", s.Focus())
-	s = s.nextPane(-1)
+	s = s.nextPane(true)
 	require.Equal(t, "detail", s.Focus())
 	require.Equal(t, "detail", s.SetFocus("nope").Focus()) // unknown leaf: unchanged
 }
@@ -86,14 +86,14 @@ func TestTabSkipsInfoPanes(t *testing.T) {
 	})
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	require.Equal(t, "list", s.Focus())
-	require.Equal(t, "detail", s.nextPane(1).Focus())
-	require.Equal(t, "list", s.nextPane(1).nextPane(1).Focus())
-	require.Equal(t, "detail", s.nextPane(-1).Focus())
+	require.Equal(t, "detail", s.nextPane(false).Focus())
+	require.Equal(t, "list", s.nextPane(false).nextPane(false).Focus())
+	require.Equal(t, "detail", s.nextPane(true).Focus())
 	require.Equal(t, "hint", s.SetFocus("hint").Focus())
 	// Leaving an Info pane goes back to the ring pane that had focus, either way.
 	s = s.SetFocus("detail").SetFocus("hint")
-	require.Equal(t, "detail", s.nextPane(1).Focus())
-	require.Equal(t, "detail", s.nextPane(-1).Focus())
+	require.Equal(t, "detail", s.nextPane(false).Focus())
+	require.Equal(t, "detail", s.nextPane(true).Focus())
 }
 
 func TestEachTabRemembersItsFocus(t *testing.T) {

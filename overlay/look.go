@@ -43,15 +43,18 @@ func (l look) styles() *theme.Resolved {
 // for information, the palette's success, warning or danger otherwise.
 func (l look) style() lipgloss.Style {
 	c := l.styles().Colors
+	var border string
 	switch l.kind {
 	case Success:
-		return l.styles().Modal.BorderForeground(lipgloss.Color(c.Success))
+		border = c.Success
 	case Warning:
-		return l.styles().Modal.BorderForeground(lipgloss.Color(c.Warning))
+		border = c.Warning
 	case Danger:
-		return l.styles().Modal.BorderForeground(lipgloss.Color(c.Danger))
+		border = c.Danger
+	default:
+		return l.styles().Modal
 	}
-	return l.styles().Modal
+	return l.styles().Modal.BorderForeground(lipgloss.Color(border))
 }
 
 // hint is how a dialog draws the keys it lists inside its box.

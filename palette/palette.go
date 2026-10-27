@@ -136,6 +136,11 @@ func (m Model) Value() string { return m.input.Value() }
 // name starts with the word before the first space.
 func (m Model) candidates() []Item {
 	name, _ := splitLine(m.input.Value())
+	return m.matching(name)
+}
+
+// matching is the available items whose name starts with name.
+func (m Model) matching(name string) []Item {
 	var out []Item
 	for _, it := range m.items {
 		if it.Available && strings.HasPrefix(it.Name, name) {
@@ -270,12 +275,7 @@ func (m Model) resolve(line string) (Item, string, error) {
 		}
 		refused = true
 	}
-	var prefix []Item
-	for _, it := range m.items {
-		if it.Available && strings.HasPrefix(it.Name, name) {
-			prefix = append(prefix, it)
-		}
-	}
+	prefix := m.matching(name)
 	// A refused exact name never falls through to a sibling it prefixes.
 	if refused {
 		return Item{}, "", refusedError{name: name, siblings: len(prefix) > 0}

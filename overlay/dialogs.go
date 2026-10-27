@@ -72,10 +72,7 @@ func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 	}
 	for _, o := range c.options {
 		if key.Matches(k, o.Key) {
-			if o.Do == nil {
-				return c, Close()
-			}
-			return c, tea.Batch(o.Do, Close())
+			return c, tea.Batch(o.Do, Close()) // Batch drops a nil Do
 		}
 	}
 	return c, nil
@@ -116,11 +113,8 @@ func (c Choice) buttons() []string {
 // Click runs the option whose button it lands on, as its key would.
 func (c Choice) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
 	i := buttonAt(c.View(body), "", dialogFrame(c.style()), c.buttons(), x, y)
-	switch {
-	case i < 0:
+	if i < 0 {
 		return c, nil
-	case c.options[i].Do == nil:
-		return c, Close()
 	}
 	return c, tea.Batch(c.options[i].Do, Close())
 }

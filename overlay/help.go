@@ -77,5 +77,5 @@ func (h Help) View(body layout.Rect) string {
 		}
 	}
 	lines = append(lines, "", h.hint().Text.Render(h.keys.Close.Help().Key+" closes"))
-	return Box(lines, body, h.style().Padding(1, 3))
+	return Box(lines, body, dialogFrame(h.style()))
 }

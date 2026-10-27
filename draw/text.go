@@ -77,7 +77,7 @@ func FitBlock(s string, width, height int) string {
 	if height <= 0 {
 		return ""
 	}
-	lines := strings.Split(s, "\n")
+	lines := strings.SplitN(s, "\n", height+1) // a long body is never split past what shows
 	if len(lines) > height {
 		lines = lines[:height]
 	}

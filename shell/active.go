@@ -50,11 +50,11 @@ func (s Shell) active() []Action {
 	return out
 }
 
-// actionEntries is the legend half of the active actions. Palette-only
+// actionEntries is the legend half of acts, the active actions. Palette-only
 // commands have no key and stay out; Help only when withHelp.
-func (s Shell) actionEntries(withHelp bool) []legend.Entry {
+func actionEntries(acts []Action, withHelp bool) []legend.Entry {
 	var out []legend.Entry
-	for _, a := range s.active() {
+	for _, a := range acts {
 		if e := a.Entry(); len(e.Keys()) > 0 && (withHelp || kindOf(a) != kindHelp) {
 			out = append(out, e)
 		}
@@ -62,9 +62,9 @@ func (s Shell) actionEntries(withHelp bool) []legend.Entry {
 	return out
 }
 
-// helpAction is the active Help, or nil.
-func (s Shell) helpAction() Action {
-	for _, a := range s.active() {
+// helpAction is the Help among acts, the active actions, or nil.
+func helpAction(acts []Action) Action {
+	for _, a := range acts {
 		if kindOf(a) == kindHelp {
 			return a
 		}

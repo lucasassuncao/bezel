@@ -36,12 +36,8 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 	case kindChangeTab:
 		return s.showTab(cycle(s.tab, len(s.cfg.Tabs), backward(ac, pressed)))
 	case kindChangePane:
-		step := 1
-		if backward(ac, pressed) {
-			step = -1
-		}
 		from := s.Focus()
-		return s.focused(from, s.nextPane(step).relayout()) // so FocusMsg names where focus really lands
+		return s.focused(from, s.nextPane(backward(ac, pressed)).relayout()) // so FocusMsg names where focus really lands
 	}
 	return s, a.Run(ActionContext{Context: s.Context(), Arg: arg})
 }

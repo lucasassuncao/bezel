@@ -129,12 +129,12 @@ func Pack(entries []Entry, width, maxLines int, st Style) []string {
 		return nil
 	}
 	// seps[i] goes before parts[i]: the group's separator where a group starts
-	seps := make([]string, len(parts))
+	seps, sep, groupSep := make([]string, len(parts)), st.sep("  "), st.groupSep("  ")
 	for i := range seps {
-		seps[i] = st.sep("  ")
+		seps[i] = sep
 	}
 	for _, at := range starts[1:] {
-		seps[at] = st.groupSep("  ")
+		seps[at] = groupSep
 	}
 	if lines, ok := packGroups(parts, seps, starts, width, maxLines); ok {
 		return lines

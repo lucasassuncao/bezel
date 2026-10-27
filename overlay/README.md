@@ -300,7 +300,7 @@ func NewChoice(title string, lines []string, options []Option, th theme.Resolved
 NewChoice shows lines under title with options as its buttons.
 
 <a name="Choice.Click"></a>
-### func \(Choice\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L117>)
+### func \(Choice\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L114>)
 
 ```go
 func (c Choice) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
@@ -309,7 +309,7 @@ func (c Choice) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
 Click runs the option whose button it lands on, as its key would.
 
 <a name="Choice.Legend"></a>
-### func \(Choice\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L86>)
+### func \(Choice\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L83>)
 
 ```go
 func (c Choice) Legend() []legend.Entry
@@ -327,7 +327,7 @@ func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Choice.View"></a>
-### func \(Choice\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L103>)
+### func \(Choice\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L100>)
 
 ```go
 func (c Choice) View(body layout.Rect) string
@@ -336,7 +336,7 @@ func (c Choice) View(body layout.Rect) string
 View draws each option as a button naming its keys. The one enter picks is filled in the dialog's colour, since that is what enter will do.
 
 <a name="Choice.WithKind"></a>
-### func \(Choice\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L67>)
+### func \(Choice\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L70>)
 
 ```go
 func (c Choice) WithKind(k Kind) Choice
@@ -430,7 +430,7 @@ func (c Confirm) WithKeys(k ConfirmKeys) Confirm
 WithKeys rebinds the confirm; its legend follows the bindings' help.
 
 <a name="Confirm.WithKind"></a>
-### func \(Confirm\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L61>)
+### func \(Confirm\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L64>)
 
 ```go
 func (c Confirm) WithKind(k Kind) Confirm
@@ -596,7 +596,7 @@ func (p FilePicker) WithKeys(k FilePickerKeys) FilePicker
 WithKeys rebinds the picker.
 
 <a name="FilePicker.WithKind"></a>
-### func \(FilePicker\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L82>)
+### func \(FilePicker\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L85>)
 
 ```go
 func (p FilePicker) WithKind(k Kind) FilePicker
@@ -682,7 +682,7 @@ func (h Help) WithKeys(k HelpKeys) Help
 WithKeys rebinds the help; the line under the keys follows Close's help.
 
 <a name="Help.WithKind"></a>
-### func \(Help\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L73>)
+### func \(Help\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L76>)
 
 ```go
 func (h Help) WithKind(k Kind) Help
@@ -807,7 +807,7 @@ func NewPager(title, text string, th theme.Resolved) Pager
 NewPager shows text from its first line. CRLF reads as LF and trailing blank lines are dropped.
 
 <a name="Pager.Legend"></a>
-### func \(Pager\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L86>)
+### func \(Pager\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L83>)
 
 ```go
 func (p Pager) Legend() []legend.Entry
@@ -816,7 +816,7 @@ func (p Pager) Legend() []legend.Entry
 
 
 <a name="Pager.Offset"></a>
-### func \(Pager\) [Offset](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L76>)
+### func \(Pager\) [Offset](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L73>)
 
 ```go
 func (p Pager) Offset() int
@@ -825,7 +825,7 @@ func (p Pager) Offset() int
 Offset is the index of the first line shown.
 
 <a name="Pager.Resize"></a>
-### func \(Pager\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L63>)
+### func \(Pager\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L60>)
 
 ```go
 func (p Pager) Resize(body layout.Rect) Overlay
@@ -834,7 +834,7 @@ func (p Pager) Resize(body layout.Rect) Overlay
 Resize sizes the viewport to what fits in body.
 
 <a name="Pager.Update"></a>
-### func \(Pager\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L78>)
+### func \(Pager\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L75>)
 
 ```go
 func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -843,7 +843,7 @@ func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pager.View"></a>
-### func \(Pager\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L91>)
+### func \(Pager\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L88>)
 
 ```go
 func (p Pager) View(body layout.Rect) string
@@ -852,7 +852,7 @@ func (p Pager) View(body layout.Rect) string
 
 
 <a name="Pager.WithKeys"></a>
-### func \(Pager\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L56>)
+### func \(Pager\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L53>)
 
 ```go
 func (p Pager) WithKeys(k PagerKeys) Pager
@@ -861,7 +861,7 @@ func (p Pager) WithKeys(k PagerKeys) Pager
 WithKeys rebinds the pager; its legend and position line follow the bindings' help.
 
 <a name="Pager.WithKind"></a>
-### func \(Pager\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L76>)
+### func \(Pager\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L79>)
 
 ```go
 func (p Pager) WithKind(k Kind) Pager
@@ -891,7 +891,7 @@ func DefaultPagerKeys() PagerKeys
 DefaultPagerKeys are the viewport's own, and q or enter to close.
 
 <a name="Pick"></a>
-## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L131-L139>)
+## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L125-L133>)
 
 Pick is a dialog that chooses one row of a list with the arrows: which source manages this, which preset to apply. Enter runs OnPick with the cursor; esc closes with nothing. A list taller than the body scrolls.
 
@@ -902,7 +902,7 @@ type Pick struct {
 ```
 
 <a name="NewPick"></a>
-### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L158>)
+### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L152>)
 
 ```go
 func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick
@@ -911,7 +911,7 @@ func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.R
 NewPick lists rows with the cursor on the first. onPick may be nil, which makes enter only close.
 
 <a name="Pick.Cursor"></a>
-### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L183>)
+### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L177>)
 
 ```go
 func (p Pick) Cursor() int
@@ -920,7 +920,7 @@ func (p Pick) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Pick.Legend"></a>
-### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L221>)
+### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L215>)
 
 ```go
 func (p Pick) Legend() []legend.Entry
@@ -929,7 +929,7 @@ func (p Pick) Legend() []legend.Entry
 
 
 <a name="Pick.Resize"></a>
-### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L186>)
+### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L180>)
 
 ```go
 func (p Pick) Resize(body layout.Rect) Overlay
@@ -938,7 +938,7 @@ func (p Pick) Resize(body layout.Rect) Overlay
 Resize shows as many rows as fit in body, scrolled to keep the cursor's.
 
 <a name="Pick.Update"></a>
-### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L202>)
+### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L196>)
 
 ```go
 func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -947,7 +947,7 @@ func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pick.View"></a>
-### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L226>)
+### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L220>)
 
 ```go
 func (p Pick) View(body layout.Rect) string
@@ -956,7 +956,7 @@ func (p Pick) View(body layout.Rect) string
 
 
 <a name="Pick.WithCursor"></a>
-### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L176>)
+### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L170>)
 
 ```go
 func (p Pick) WithCursor(i int) Pick
@@ -965,7 +965,7 @@ func (p Pick) WithCursor(i int) Pick
 WithCursor starts the cursor on row i, such as the value already chosen; an index outside the rows is clamped to them.
 
 <a name="Pick.WithKeys"></a>
-### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L163>)
+### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L157>)
 
 ```go
 func (p Pick) WithKeys(k PickKeys) Pick
@@ -974,7 +974,7 @@ func (p Pick) WithKeys(k PickKeys) Pick
 WithKeys rebinds the pick; the keys drawn in its box follow the bindings' help.
 
 <a name="Pick.WithKind"></a>
-### func \(Pick\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L70>)
+### func \(Pick\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L73>)
 
 ```go
 func (p Pick) WithKind(k Kind) Pick
@@ -983,7 +983,7 @@ func (p Pick) WithKind(k Kind) Pick
 WithKind tints the pick for what it decides.
 
 <a name="Pick.WithNotes"></a>
-### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L169>)
+### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L163>)
 
 ```go
 func (p Pick) WithNotes(notes ...string) Pick
@@ -992,7 +992,7 @@ func (p Pick) WithNotes(notes ...string) Pick
 WithNotes are lines drawn under the rows, such as what the picked one does.
 
 <a name="PickKeys"></a>
-## type [PickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L143-L145>)
+## type [PickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L137-L139>)
 
 PickKeys are the bindings a Pick answers to besides esc. Down has no help of its own: Up's "↑/↓" names both.
 
@@ -1003,7 +1003,7 @@ type PickKeys struct {
 ```
 
 <a name="DefaultPickKeys"></a>
-### func [DefaultPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L148>)
+### func [DefaultPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L142>)
 
 ```go
 func DefaultPickKeys() PickKeys
@@ -1113,7 +1113,7 @@ func (p Prompt) WithKeys(k PromptKeys) Prompt
 WithKeys rebinds the prompt.
 
 <a name="Prompt.WithKind"></a>
-### func \(Prompt\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L79>)
+### func \(Prompt\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L82>)
 
 ```go
 func (p Prompt) WithKind(k Kind) Prompt
@@ -1346,7 +1346,7 @@ func (t Text) View(body layout.Rect) string
 
 
 <a name="Text.WithKind"></a>
-### func \(Text\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L64>)
+### func \(Text\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L67>)
 
 ```go
 func (t Text) WithKind(k Kind) Text

@@ -4,6 +4,8 @@ import (
 	"image/color"
 	"strings"
 
+	"charm.land/lipgloss/v2"
+
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -28,10 +30,12 @@ func (s Shell) chromeRows() (top, bottom int, legendLines []string) {
 	// active and not while the input has the keys.
 	st := s.cfg.Theme.Legend
 	st.HelpKey = ""
-	if help := s.helpAction(); help != nil && !s.typing {
+	acts := s.active()
+	if help := helpAction(acts); help != nil && !s.typing {
 		st.HelpKey = help.Entry().Help().Key
 	}
-	legendLines = legend.Pack(s.legendEntries(), s.width, s.cfg.LegendLines, st)
+	keys := legend.Filter(actionEntries(acts, !s.typing), s.cfg.Can) // a modal draws its own keys in its box
+	legendLines = legend.Pack(keys, s.width, s.cfg.LegendLines, st)
 	// Every row the legend may take, filled or not: fewer keys never grow the panes.
 	bottom = 1 + max(s.cfg.LegendLines, len(legendLines))
 	return top, bottom, legendLines
@@ -44,16 +48,10 @@ func (s Shell) headerRows() int {
 	return 1
 }
 
-// legendEntries is the screen's keys, filtered by Can. An overlay never
-// replaces them: a modal draws its own keys inside its box.
-func (s Shell) legendEntries() []legend.Entry {
-	return legend.Filter(s.actionEntries(!s.typing), s.cfg.Can)
-}
-
 // helpOverlay lists every key for where the user is, unpacked: the top
 // overlay's when one is up, else the screen's. Help itself is the panel's key.
 func (s Shell) helpOverlay() overlay.Overlay {
-	keys := s.actionEntries(false)
+	keys := actionEntries(s.active(), false)
 	if top := s.overlays.Top(); top != nil {
 		keys = top.Legend()
 	}
@@ -192,18 +190,25 @@ func (s Shell) statusRow() string {
 		return s.statusLiner().StatusLine(s.width)
 	case s.typing:
 		return draw.Fit(s.input.View(), s.width)
-	case s.status != "" && s.level == OK:
-		return draw.StatusLine(s.width, s.status, th.StatusOK)
-	case s.status != "" && s.level == Error:
-		return draw.StatusLine(s.width, s.status, th.StatusErr)
 	case s.status != "":
-		return draw.StatusLine(s.width, s.status, th.Chrome.Status)
+		return draw.StatusLine(s.width, s.status, s.statusStyle())
 	case s.busy != "":
 		return draw.StatusLine(s.width, s.spin.View(*th)+" "+s.busy, th.Chrome.Status)
 	case len(s.cfg.Tabs) > 0:
 		return draw.StatusLine(s.width, s.cfg.Tabs[s.tab].Status(s.Context()), th.Chrome.Status)
 	}
 	return draw.StatusLine(s.width, "", th.Chrome.Status)
+}
+
+// statusStyle is how the status message shows at its level.
+func (s Shell) statusStyle() lipgloss.Style {
+	switch s.level {
+	case OK:
+		return s.cfg.Theme.StatusOK
+	case Error:
+		return s.cfg.Theme.StatusErr
+	}
+	return s.cfg.Theme.Chrome.Status
 }
 
 // statusLiner is the top overlay when it draws the status row itself.

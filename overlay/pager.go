@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel/component/viewport"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -45,10 +45,7 @@ const pagerChrome = 2 + 2 + 2 + 2
 func NewPager(title, text string, th theme.Resolved) Pager {
 	keys := DefaultPagerKeys()
 	vp := viewport.New().WithKeys(keys.Keys).SetContent(strings.TrimRight(strings.ReplaceAll(text, "\r\n", "\n"), "\n"))
-	widest := 0
-	for _, l := range vp.Lines() {
-		widest = max(widest, ansi.StringWidth(l))
-	}
+	widest, _ := draw.BlockSize(strings.Join(vp.Lines(), "\n"))
 	return Pager{title: title, vp: vp, widest: widest, look: lookOf(th), keys: keys}
 }
 
@@ -91,11 +88,10 @@ func (p Pager) Legend() []legend.Entry {
 func (p Pager) View(body layout.Rect) string {
 	vp := p.sized(body)
 	s := vp.Scroll()
-	out := []string{accent(p.style()).Bold(true).Render(p.title), ""}
-	out = append(out, strings.Split(vp.View(*p.styles()), "\n")...)
+	out := strings.Split(vp.View(*p.styles()), "\n")
 	// The keys ride on the position line: the screen's legend under a modal is
 	// still the screen's, so nothing else says how to scroll or leave.
 	scroll := strings.TrimSpace(p.keys.Up.Help().Key + " " + p.keys.PageUp.Help().Key)
 	pos := fmt.Sprintf("lines %d-%d of %d · %s scroll · esc closes", s.Offset+1, s.Offset+s.Visible, s.Total, scroll)
-	return Box(append(out, "", p.hint().Text.Render(pos)), body, dialogFrame(p.style()))
+	return dialog(p.title, append(out, "", p.hint().Text.Render(pos)), "", p.style(), body)
 }

@@ -78,7 +78,7 @@ func FramedPanel(r layout.Rect, edges Edges, body string, st PanelStyle) string 
 	}
 
 	content := InnerRect(r)
-	lines := strings.Split(FitBlock(body, content.W, content.H), "\n")
+	lines := strings.SplitN(body, "\n", content.H+1) // Fit below cuts each row
 	rows := make([]string, 0, r.H)
 	rows = append(rows, top)
 	left, right, thumb := st.Border.Render(e.Left), st.Border.Render(e.Right), st.Thumb.Render(thumbMark)
