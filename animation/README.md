@@ -297,7 +297,7 @@ func Bounce(p float64) float64
 Bounce hops off the start a few times before it goes; Out\(Bounce\) drops onto its end like a ball, and never leaves \[0,1\].
 
 <a name="Cascade"></a>
-## func [Cascade](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L196>)
+## func [Cascade](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L195>)
 
 ```go
 func Cascade[T delayer[T]](gap time.Duration, items ...T) []T
@@ -452,7 +452,7 @@ func NewBurst(at Point, n int, dur time.Duration) Burst
 NewBurst throws n sparks out of at over dur.
 
 <a name="Burst.Active"></a>
-### func \(Burst\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L84>)
+### func \(Burst\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L83>)
 
 ```go
 func (b Burst) Active() bool
@@ -461,7 +461,7 @@ func (b Burst) Active() bool
 Active reports whether any spark is still flying.
 
 <a name="Burst.Advance"></a>
-### func \(Burst\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L107>)
+### func \(Burst\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L106>)
 
 ```go
 func (b Burst) Advance(now time.Time) (Burst, bool)
@@ -470,7 +470,7 @@ func (b Burst) Advance(now time.Time) (Burst, bool)
 Advance is b at now, and whether it is spent.
 
 <a name="Burst.FrameAt"></a>
-### func \(Burst\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L90>)
+### func \(Burst\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L89>)
 
 ```go
 func (b Burst) FrameAt(at time.Time) FrameMsg
@@ -479,7 +479,7 @@ func (b Burst) FrameAt(at time.Time) FrameMsg
 FrameAt is b's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Burst.Sparks"></a>
-### func \(Burst\) [Sparks](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L67>)
+### func \(Burst\) [Sparks](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L66>)
 
 ```go
 func (b Burst) Sparks() []Spark
@@ -488,7 +488,7 @@ func (b Burst) Sparks() []Spark
 Sparks is every spark still alive, where it has flown. Rows count double, as a terminal cell is twice as tall as it is wide.
 
 <a name="Burst.Tick"></a>
-### func \(Burst\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L87>)
+### func \(Burst\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L86>)
 
 ```go
 func (b Burst) Tick() tea.Cmd
@@ -497,7 +497,7 @@ func (b Burst) Tick() tea.Cmd
 Tick is the command for b's next frame, nil once it is spent.
 
 <a name="Burst.Update"></a>
-### func \(Burst\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L93>)
+### func \(Burst\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L92>)
 
 ```go
 func (b Burst) Update(msg tea.Msg) (Burst, tea.Cmd)
@@ -506,7 +506,7 @@ func (b Burst) Update(msg tea.Msg) (Burst, tea.Cmd)
 Update flies on its own frames and asks for the next until it is spent.
 
 <a name="Burst.WithDelay"></a>
-### func \(Burst\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L120>)
+### func \(Burst\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L119>)
 
 ```go
 func (b Burst) WithDelay(d time.Duration) Burst
@@ -515,7 +515,7 @@ func (b Burst) WithDelay(d time.Duration) Burst
 WithDelay holds the sparks in for d after the first frame.
 
 <a name="Burst.WithGravity"></a>
-### func \(Burst\) [WithGravity](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L54>)
+### func \(Burst\) [WithGravity](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L53>)
 
 ```go
 func (b Burst) WithGravity(g float64) Burst
@@ -524,7 +524,7 @@ func (b Burst) WithGravity(g float64) Burst
 WithGravity pulls the sparks down at g cells a second squared: 30 when unset, 0 for none.
 
 <a name="Burst.WithSeed"></a>
-### func \(Burst\) [WithSeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L60>)
+### func \(Burst\) [WithSeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L59>)
 
 ```go
 func (b Burst) WithSeed(seed uint64) Burst
@@ -533,7 +533,7 @@ func (b Burst) WithSeed(seed uint64) Burst
 WithSeed throws the sparks another way.
 
 <a name="Burst.WithSpeed"></a>
-### func \(Burst\) [WithSpeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L45>)
+### func \(Burst\) [WithSpeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L44>)
 
 ```go
 func (b Burst) WithSpeed(v float64) Burst
@@ -571,7 +571,7 @@ func (c Clock) Frame(msg tea.Msg) (time.Time, bool)
 Frame is the time msg carries when it is c's current frame. Advance every animation to it, then call Next while any of them still moves.
 
 <a name="Clock.FrameAt"></a>
-### func \(Clock\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/clock.go#L95>)
+### func \(Clock\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/clock.go#L94>)
 
 ```go
 func (c Clock) FrameAt(at time.Time) FrameMsg
@@ -1304,7 +1304,7 @@ func NewKeyframes(dur time.Duration, keys ...Key) Keyframes
 NewKeyframes plays keys over dur, sorted by At. With motion Still, no time or fewer than two keys it is inactive at the last key's value.
 
 <a name="Keyframes.Active"></a>
-### func \(Keyframes\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L86>)
+### func \(Keyframes\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L85>)
 
 ```go
 func (k Keyframes) Active() bool
@@ -1313,7 +1313,7 @@ func (k Keyframes) Active() bool
 Active reports whether k is still moving.
 
 <a name="Keyframes.Advance"></a>
-### func \(Keyframes\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L109>)
+### func \(Keyframes\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L108>)
 
 ```go
 func (k Keyframes) Advance(now time.Time) (Keyframes, bool)
@@ -1322,7 +1322,7 @@ func (k Keyframes) Advance(now time.Time) (Keyframes, bool)
 Advance is k at now, and whether it ended.
 
 <a name="Keyframes.FrameAt"></a>
-### func \(Keyframes\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L92>)
+### func \(Keyframes\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L91>)
 
 ```go
 func (k Keyframes) FrameAt(at time.Time) FrameMsg
@@ -1331,7 +1331,7 @@ func (k Keyframes) FrameAt(at time.Time) FrameMsg
 FrameAt is k's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Keyframes.Tick"></a>
-### func \(Keyframes\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L89>)
+### func \(Keyframes\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L88>)
 
 ```go
 func (k Keyframes) Tick() tea.Cmd
@@ -1340,7 +1340,7 @@ func (k Keyframes) Tick() tea.Cmd
 Tick is the command for k's next frame, nil once it ended.
 
 <a name="Keyframes.Update"></a>
-### func \(Keyframes\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L95>)
+### func \(Keyframes\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L94>)
 
 ```go
 func (k Keyframes) Update(msg tea.Msg) (Keyframes, tea.Cmd)
@@ -1349,7 +1349,7 @@ func (k Keyframes) Update(msg tea.Msg) (Keyframes, tea.Cmd)
 Update moves on its own frames and asks for the next until it ends.
 
 <a name="Keyframes.WithDelay"></a>
-### func \(Keyframes\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L68>)
+### func \(Keyframes\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L67>)
 
 ```go
 func (k Keyframes) WithDelay(d time.Duration) Keyframes
@@ -1358,7 +1358,7 @@ func (k Keyframes) WithDelay(d time.Duration) Keyframes
 WithDelay holds k at its first key for d after its first frame.
 
 <a name="Keyframes.WithRepeat"></a>
-### func \(Keyframes\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L74>)
+### func \(Keyframes\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L73>)
 
 ```go
 func (k Keyframes) WithRepeat(n int) Keyframes
@@ -1367,7 +1367,7 @@ func (k Keyframes) WithRepeat(n int) Keyframes
 WithRepeat plays k n more times after the first, or without end for Forever.
 
 <a name="Keyframes.WithYoyo"></a>
-### func \(Keyframes\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L80>)
+### func \(Keyframes\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L79>)
 
 ```go
 func (k Keyframes) WithYoyo() Keyframes
@@ -1775,7 +1775,7 @@ func (p Point) Round() (x, y int)
 Round is the cell p is drawn in.
 
 <a name="Race"></a>
-## type [Race](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L23-L31>)
+## type [Race](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L23-L30>)
 
 Race moves a set of bars to new values and new places together, a bar that overtakes another sliding past it: a leaderboard, the busiest services.
 
@@ -1786,7 +1786,7 @@ type Race struct {
 ```
 
 <a name="NewRace"></a>
-### func [NewRace](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L34>)
+### func [NewRace](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L33>)
 
 ```go
 func NewRace(labels []string, values []float64, dur time.Duration) Race
@@ -1831,7 +1831,7 @@ func (r Race) Racers() []Racer
 Racers is every bar as it stands now, in the order the labels were given; sort by Place to draw them top to bottom.
 
 <a name="Race.Set"></a>
-### func \(Race\) [Set](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L65>)
+### func \(Race\) [Set](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L64>)
 
 ```go
 func (r Race) Set(values []float64) (Race, tea.Cmd)
@@ -2294,7 +2294,7 @@ func NewTimeline(s Span) Timeline
 NewTimeline plays s once, its clock started by its first frame. Empty, or with motion Still, it is inactive with every value at its end.
 
 <a name="Timeline.Active"></a>
-### func \(Timeline\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L156>)
+### func \(Timeline\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L155>)
 
 ```go
 func (t Timeline) Active() bool
@@ -2303,7 +2303,7 @@ func (t Timeline) Active() bool
 Active reports whether t is still playing.
 
 <a name="Timeline.Advance"></a>
-### func \(Timeline\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L179>)
+### func \(Timeline\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L178>)
 
 ```go
 func (t Timeline) Advance(now time.Time) (Timeline, bool)
@@ -2312,7 +2312,7 @@ func (t Timeline) Advance(now time.Time) (Timeline, bool)
 Advance is t at now, and whether it ended.
 
 <a name="Timeline.Elapsed"></a>
-### func \(Timeline\) [Elapsed](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L153>)
+### func \(Timeline\) [Elapsed](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L152>)
 
 ```go
 func (t Timeline) Elapsed() time.Duration
@@ -2321,7 +2321,7 @@ func (t Timeline) Elapsed() time.Duration
 Elapsed is how far into the span t is.
 
 <a name="Timeline.FrameAt"></a>
-### func \(Timeline\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L162>)
+### func \(Timeline\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L161>)
 
 ```go
 func (t Timeline) FrameAt(at time.Time) FrameMsg
@@ -2330,7 +2330,7 @@ func (t Timeline) FrameAt(at time.Time) FrameMsg
 FrameAt is t's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Timeline.Progress"></a>
-### func \(Timeline\) [Progress](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L122>)
+### func \(Timeline\) [Progress](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L121>)
 
 ```go
 func (t Timeline) Progress(name string) float64
@@ -2339,7 +2339,7 @@ func (t Timeline) Progress(name string) float64
 Progress is how far the current step of name is, in \[0,1\] before its ease.
 
 <a name="Timeline.Tick"></a>
-### func \(Timeline\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L159>)
+### func \(Timeline\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L158>)
 
 ```go
 func (t Timeline) Tick() tea.Cmd
@@ -2348,7 +2348,7 @@ func (t Timeline) Tick() tea.Cmd
 Tick is the command for t's next frame, nil once it ended.
 
 <a name="Timeline.Update"></a>
-### func \(Timeline\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L165>)
+### func \(Timeline\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L164>)
 
 ```go
 func (t Timeline) Update(msg tea.Msg) (Timeline, tea.Cmd)
@@ -2357,7 +2357,7 @@ func (t Timeline) Update(msg tea.Msg) (Timeline, tea.Cmd)
 Update plays on its own frames and asks for the next until it ends.
 
 <a name="Timeline.Value"></a>
-### func \(Timeline\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L116>)
+### func \(Timeline\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L115>)
 
 ```go
 func (t Timeline) Value(name string) float64
@@ -2366,7 +2366,7 @@ func (t Timeline) Value(name string) float64
 Value is where the value called name is now: the last step of that name to have started, or the first step's start before any has.
 
 <a name="Timeline.WithRepeat"></a>
-### func \(Timeline\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L103>)
+### func \(Timeline\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L102>)
 
 ```go
 func (t Timeline) WithRepeat(n int) Timeline
@@ -2375,7 +2375,7 @@ func (t Timeline) WithRepeat(n int) Timeline
 WithRepeat plays t n more times after the first, or without end for Forever.
 
 <a name="Timeline.WithYoyo"></a>
-### func \(Timeline\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L109>)
+### func \(Timeline\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L108>)
 
 ```go
 func (t Timeline) WithYoyo() Timeline

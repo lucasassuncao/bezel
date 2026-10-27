@@ -59,6 +59,13 @@ func Parse(block string) Grid {
 	return append(g, row)
 }
 
+// setAttr and clearAttr are the attributes SGR codes 1-9 turn on and 20-29
+// turn off, the latter indexed from 20.
+var (
+	setAttr   = [10]Attr{1: Bold, 2: Faint, 3: Italic, 4: Underline, 5: Blink, 7: Reverse, 9: Strike}
+	clearAttr = [10]Attr{3: Italic, 4: Underline, 5: Blink, 7: Reverse, 9: Strike}
+)
+
 // sgr is style changed by one Select Graphic Rendition sequence's params.
 func sgr(style Cell, params ansi.Params) Cell {
 	if len(params) == 0 {
@@ -69,11 +76,11 @@ func sgr(style Cell, params ansi.Params) Cell {
 		case code == 0:
 			style = Cell{}
 		case code >= 1 && code <= 9:
-			style.Attrs |= map[int]Attr{1: Bold, 2: Faint, 3: Italic, 4: Underline, 5: Blink, 7: Reverse, 9: Strike}[code]
+			style.Attrs |= setAttr[code]
 		case code == 22:
 			style.Attrs &^= Bold | Faint
 		case code >= 23 && code <= 29:
-			style.Attrs &^= map[int]Attr{23: Italic, 24: Underline, 25: Blink, 27: Reverse, 29: Strike}[code]
+			style.Attrs &^= clearAttr[code-20]
 		case code >= 30 && code <= 37:
 			style.Fg = ansi.BasicColor(code - 30)
 		case code >= 40 && code <= 47:
@@ -178,11 +185,16 @@ func (g Grid) String() string {
 func (g Grid) Width() int {
 	w := 0
 	for _, row := range g {
-		n := 0
-		for _, c := range row {
-			n += c.Width
-		}
-		w = max(w, n)
+		w = max(w, RowWidth(row))
 	}
 	return w
+}
+
+// RowWidth is how many columns row's cells take.
+func RowWidth(row []Cell) int {
+	n := 0
+	for _, c := range row {
+		n += c.Width
+	}
+	return n
 }

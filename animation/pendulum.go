@@ -23,7 +23,7 @@ type Pendulum struct {
 // it lives. WithDecay lets it come to rest.
 func NewPendulum(amp float64, period time.Duration) Pendulum {
 	p := Pendulum{amp: amp, period: period, run: frames.NewRun(time.Second)}
-	p.run.Ease, p.run.Repeat = Linear, Forever
+	p.run.Repeat = Forever
 	if period <= 0 {
 		p.run = frames.Run{}
 	}

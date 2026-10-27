@@ -39,7 +39,6 @@ func NewKeyframes(dur time.Duration, keys ...Key) Keyframes {
 		return k
 	}
 	if k.run = frames.NewRun(dur); k.run.Active() {
-		k.run.Ease = Linear
 		k.Cur = k.keys[0].Value
 	}
 	return k

@@ -43,7 +43,7 @@ type Scene struct {
 
 func newScene(kind sceneKind, colors ...color.Color) Scene {
 	a := Scene{kind: kind, colors: colors, run: frames.NewRun(time.Second)}
-	a.run.Ease, a.run.Repeat = animation.Linear, animation.Forever
+	a.run.Repeat = animation.Forever
 	return a
 }
 

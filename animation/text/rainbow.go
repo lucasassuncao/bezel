@@ -30,7 +30,7 @@ type Rainbow struct {
 // long as it lives. Still, the colours stay where they start.
 func NewRainbow(text string, dur time.Duration) Rainbow {
 	r := Rainbow{text: edit.Graphemes(text), spread: 24, s: 0.75, l: 0.65, run: frames.NewRun(dur)}
-	r.run.Ease, r.run.Repeat = animation.Linear, animation.Forever
+	r.run.Repeat = animation.Forever
 	return r
 }
 

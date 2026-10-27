@@ -28,7 +28,6 @@ type Typewriter struct {
 func NewTypewriter(text string, perChar time.Duration) Typewriter {
 	g := edit.Graphemes(text)
 	w := Typewriter{text: g, run: frames.NewRun(time.Duration(len(g)) * perChar)}
-	w.run.Ease = animation.Linear
 	if !w.run.Active() {
 		w.shown = len(g)
 	}

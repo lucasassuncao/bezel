@@ -45,7 +45,6 @@ func NewMorph(from, to string, dur time.Duration) Morph {
 	}
 	if m.dels+m.adds > 0 {
 		m.run = frames.NewRun(dur)
-		m.run.Ease = animation.Linear
 	}
 	if !m.Active() {
 		m.p = 1

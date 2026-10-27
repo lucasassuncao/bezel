@@ -91,7 +91,6 @@ func NewTimeline(s Span) Timeline {
 	t := Timeline{span: s, elapsed: s.length}
 	if s.length > 0 {
 		t.run = frames.NewRun(s.length)
-		t.run.Ease = Linear
 	}
 	if t.run.Active() {
 		t.elapsed = 0

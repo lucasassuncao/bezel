@@ -29,7 +29,7 @@ type Shimmer struct {
 // for as long as it lives. Plain text only; WithRepeat gives it an end.
 func NewShimmer(text string, base, glow color.Color, dur time.Duration) Shimmer {
 	s := Shimmer{text: edit.Graphemes(text), base: base, glow: glow, band: 4, run: frames.NewRun(dur)}
-	s.run.Ease, s.run.Repeat = animation.Linear, animation.Forever
+	s.run.Repeat = animation.Forever
 	return s
 }
 

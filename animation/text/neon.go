@@ -33,7 +33,7 @@ type Neon struct {
 // NewNeon lights text in on, dropping towards off when it flickers.
 func NewNeon(text string, on, off color.Color) Neon {
 	n := Neon{text: edit.Graphemes(text), on: on, off: off, seed: 1, run: frames.NewRun(time.Second)}
-	n.run.Ease, n.run.Repeat = animation.Linear, animation.Forever
+	n.run.Repeat = animation.Forever
 	return n.WithSeed(1)
 }
 

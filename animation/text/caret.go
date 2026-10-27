@@ -22,7 +22,7 @@ type Caret struct {
 // NewCaret blinks glyph, "▌" or "_" say, once every period.
 func NewCaret(glyph string, period time.Duration) Caret {
 	c := Caret{glyph: glyph, run: frames.NewRun(period)}
-	c.run.Ease, c.run.Repeat = animation.Linear, animation.Forever
+	c.run.Repeat = animation.Forever
 	return c
 }
 

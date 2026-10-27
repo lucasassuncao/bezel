@@ -34,7 +34,6 @@ type Burst struct {
 // NewBurst throws n sparks out of at over dur.
 func NewBurst(at Point, n int, dur time.Duration) Burst {
 	b := Burst{at: at, n: max(n, 0), speed: 24, gravity: 30, seed: 1, run: frames.NewRun(dur)}
-	b.run.Ease = Linear
 	if !b.Active() {
 		b.p = 1
 	}

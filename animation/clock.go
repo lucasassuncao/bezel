@@ -87,8 +87,7 @@ func (c Clock) Next() (Clock, tea.Cmd) {
 		return c, nil
 	}
 	c.tag++
-	id, tag := c.id, c.tag
-	return c, tea.Tick(c.gap(), func(at time.Time) tea.Msg { return frames.NewMsg(at, id, tag) })
+	return c, frames.Tick(c.gap(), c.id, c.tag)
 }
 
 // FrameAt is c's current frame for at, for a test that delivers frames itself.

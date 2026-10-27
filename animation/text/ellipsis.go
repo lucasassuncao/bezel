@@ -22,7 +22,7 @@ type Ellipsis struct {
 // NewEllipsis grows up to dots dots, one round every period.
 func NewEllipsis(dots int, period time.Duration) Ellipsis {
 	e := Ellipsis{dots: max(dots, 1), run: frames.NewRun(period)}
-	e.run.Ease, e.run.Repeat = animation.Linear, animation.Forever
+	e.run.Repeat = animation.Forever
 	return e
 }
 

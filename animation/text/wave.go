@@ -30,7 +30,7 @@ type Wave struct {
 // for as long as it lives; WithRepeat gives it an end. It draws 2·amp+1 rows.
 func NewWave(text string, amp int, dur time.Duration) Wave {
 	w := Wave{text: edit.Graphemes(text), amp: max(amp, 1), run: frames.NewRun(dur)}
-	w.run.Ease, w.run.Repeat = animation.Linear, animation.Forever
+	w.run.Repeat = animation.Forever
 	return w
 }
 

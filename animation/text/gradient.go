@@ -29,7 +29,7 @@ type Gradient struct {
 // drawn without moving.
 func NewGradient(text string, colors []color.Color, dur time.Duration) Gradient {
 	g := Gradient{text: edit.Graphemes(text), colors: colors, run: frames.NewRun(dur)}
-	g.run.Ease, g.run.Repeat = animation.Linear, animation.Forever
+	g.run.Repeat = animation.Forever
 	return g
 }
 

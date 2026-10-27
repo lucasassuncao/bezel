@@ -41,16 +41,21 @@ func (s Strike) WithInk(c color.Color) Strike {
 
 // View is the text with the struck graphemes crossed out.
 func (s Strike) View() string {
-	n := int(math.Round(frames.Or(s.run.Ease)(s.p) * float64(len(s.text))))
-	n = min(max(n, 0), len(s.text))
 	st := lipgloss.NewStyle().Strikethrough(true)
 	if s.ink != nil {
 		st = st.Foreground(s.ink)
 	}
+	return swept(s.text, frames.Or(s.run.Ease)(s.p), st)
+}
+
+// swept is text with its first q of graphemes in st, the rest as they are:
+// the line a strike or a marker has reached.
+func swept(text []string, q float64, st lipgloss.Style) string {
+	n := min(max(int(math.Round(q*float64(len(text)))), 0), len(text))
 	if n == 0 {
-		return strings.Join(s.text, "")
+		return strings.Join(text, "")
 	}
-	return st.Render(strings.Join(s.text[:n], "")) + strings.Join(s.text[n:], "")
+	return st.Render(strings.Join(text[:n], "")) + strings.Join(text[n:], "")
 }
 
 // Active reports whether the line is still being drawn.

@@ -708,7 +708,7 @@ func Wave() Pattern
 Wave reaches the cells in a front travelling right whose edge ripples.
 
 <a name="Transition"></a>
-## type [Transition](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L34-L41>)
+## type [Transition](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L33-L40>)
 
 Transition carries a screen from one block to the next: the old one pushed out, covered, faded or wiped away, the new one in its place. Apply it to both blocks every frame; a smaller one is padded to the larger's size.
 
@@ -728,7 +728,7 @@ func Blinds(n int, dur time.Duration) Transition
 Blinds turns the screen over in n slats at once, each row of a slat flipping from the old block to the new, top first, like a venetian blind.
 
 <a name="Cover"></a>
-### func [Cover](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L60>)
+### func [Cover](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L59>)
 
 ```go
 func Cover(d Direction, dur time.Duration) Transition
@@ -737,7 +737,7 @@ func Cover(d Direction, dur time.Duration) Transition
 Cover slides the new block in travelling d over the old one, which stays put.
 
 <a name="CrossFade"></a>
-### func [CrossFade](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L75>)
+### func [CrossFade](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L74>)
 
 ```go
 func CrossFade(dur time.Duration) Transition
@@ -755,7 +755,7 @@ func Iris(dur time.Duration) Transition
 Iris closes the old block down to a point in its middle and opens the new one out of it: the end of one scene and the start of the next.
 
 <a name="Push"></a>
-### func [Push](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L53>)
+### func [Push](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L52>)
 
 ```go
 func Push(d Direction, dur time.Duration) Transition
@@ -764,7 +764,7 @@ func Push(d Direction, dur time.Duration) Transition
 Push slides the new block in and the old one out ahead of it, both travelling d, the two side by side halfway.
 
 <a name="Reveal"></a>
-### func [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L67>)
+### func [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L66>)
 
 ```go
 func Reveal(d Direction, dur time.Duration) Transition
@@ -773,7 +773,7 @@ func Reveal(d Direction, dur time.Duration) Transition
 Reveal slides the old block away travelling d, uncovering the new one beneath.
 
 <a name="Shuffle"></a>
-### func [Shuffle](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L90>)
+### func [Shuffle](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L89>)
 
 ```go
 func Shuffle(dur time.Duration) Transition
@@ -791,7 +791,7 @@ func Stack(d Direction, dur time.Duration) Transition
 Stack lays the new block over the old one travelling d, the old one sinking into the dark beneath it: a screen opened on top of another.
 
 <a name="Wipe"></a>
-### func [Wipe](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L79>)
+### func [Wipe](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L78>)
 
 ```go
 func Wipe(p Pattern, dur time.Duration) Transition
@@ -800,7 +800,7 @@ func Wipe(p Pattern, dur time.Duration) Transition
 Wipe turns each cell from the old block to the new one in p's order: a front, a circle, a spiral.
 
 <a name="Zoom"></a>
-### func [Zoom](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L86>)
+### func [Zoom](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L85>)
 
 ```go
 func Zoom(dur time.Duration) Transition
@@ -809,7 +809,7 @@ func Zoom(dur time.Duration) Transition
 Zoom grows the new block out of the middle of the old one.
 
 <a name="Transition.Active"></a>
-### func \(Transition\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L312>)
+### func \(Transition\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L291>)
 
 ```go
 func (t Transition) Active() bool
@@ -818,7 +818,7 @@ func (t Transition) Active() bool
 Active reports whether t is still moving between the blocks.
 
 <a name="Transition.Advance"></a>
-### func \(Transition\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L336>)
+### func \(Transition\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L315>)
 
 ```go
 func (t Transition) Advance(now time.Time) (Transition, bool)
@@ -827,7 +827,7 @@ func (t Transition) Advance(now time.Time) (Transition, bool)
 Advance is t at now, and whether it ended.
 
 <a name="Transition.Apply"></a>
-### func \(Transition\) [Apply](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L106>)
+### func \(Transition\) [Apply](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L105>)
 
 ```go
 func (t Transition) Apply(from, to string) string
@@ -836,7 +836,7 @@ func (t Transition) Apply(from, to string) string
 Apply is the frame between from and to: all from before the first frame, all to once t ends.
 
 <a name="Transition.FrameAt"></a>
-### func \(Transition\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L318>)
+### func \(Transition\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L297>)
 
 ```go
 func (t Transition) FrameAt(at time.Time) animation.FrameMsg
@@ -845,7 +845,7 @@ func (t Transition) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is t's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Transition.Owns"></a>
-### func \(Transition\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L321>)
+### func \(Transition\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L300>)
 
 ```go
 func (t Transition) Owns(msg tea.Msg) bool
@@ -854,7 +854,7 @@ func (t Transition) Owns(msg tea.Msg) bool
 Owns reports whether msg is t's current frame.
 
 <a name="Transition.Tick"></a>
-### func \(Transition\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L315>)
+### func \(Transition\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L294>)
 
 ```go
 func (t Transition) Tick() tea.Cmd
@@ -863,7 +863,7 @@ func (t Transition) Tick() tea.Cmd
 Tick is the command for t's next frame, nil once it ended.
 
 <a name="Transition.Update"></a>
-### func \(Transition\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L327>)
+### func \(Transition\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L306>)
 
 ```go
 func (t Transition) Update(msg tea.Msg) (Transition, tea.Cmd)
@@ -872,7 +872,7 @@ func (t Transition) Update(msg tea.Msg) (Transition, tea.Cmd)
 Update advances on its own frames and asks for the next until it ends.
 
 <a name="Transition.WithDelay"></a>
-### func \(Transition\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L99>)
+### func \(Transition\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L98>)
 
 ```go
 func (t Transition) WithDelay(d time.Duration) Transition
@@ -881,7 +881,7 @@ func (t Transition) WithDelay(d time.Duration) Transition
 WithDelay holds t on the old block for d after its first frame.
 
 <a name="Transition.WithEase"></a>
-### func \(Transition\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L93>)
+### func \(Transition\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L92>)
 
 ```go
 func (t Transition) WithEase(e animation.Ease) Transition

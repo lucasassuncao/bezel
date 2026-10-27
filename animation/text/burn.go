@@ -41,7 +41,6 @@ type Burn struct {
 // NewBurn burns text away over dur.
 func NewBurn(text string, dur time.Duration) Burn {
 	b := Burn{text: edit.Graphemes(text), run: frames.NewRun(dur)}
-	b.run.Ease = animation.Linear
 	if !b.Active() {
 		b.p = 1
 	}

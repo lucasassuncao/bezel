@@ -22,7 +22,7 @@ type Orbit struct {
 // twice as tall as wide, so ry near rx/2 looks round.
 func NewOrbit(centre Point, rx, ry float64, period time.Duration) Orbit {
 	o := Orbit{centre: centre, rx: rx, ry: ry, run: frames.NewRun(period)}
-	o.run.Ease, o.run.Repeat = Linear, Forever
+	o.run.Repeat = Forever
 	return o
 }
 

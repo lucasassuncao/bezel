@@ -27,7 +27,7 @@ type Drop struct {
 // NewDrop falls from from to the floor at to, either way up the screen.
 func NewDrop(from, to float64) Drop {
 	d := Drop{Cur: from, from: from, to: to, gravity: 60, bounce: 0.45, run: frames.NewRun(time.Second)}
-	d.run.Ease, d.run.Repeat = Linear, Forever
+	d.run.Repeat = Forever
 	if !d.Active() {
 		d.Cur = to
 	}

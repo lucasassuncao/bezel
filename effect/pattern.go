@@ -113,7 +113,7 @@ func Wave() Pattern {
 func Noise(seed uint64) Pattern {
 	return func(x, y, w, _ int) float64 {
 		k := uint64(max(y*w+x, 0)) // #nosec G115 -- clamped to zero or more
-		return float64(noise.Hash(seed, k)>>11) / (1 << 53)
+		return noise.Unit(noise.Hash(seed, k))
 	}
 }
 

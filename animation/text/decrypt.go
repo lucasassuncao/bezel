@@ -33,7 +33,6 @@ type Decrypt struct {
 // NewDecrypt lands every letter of text within dur.
 func NewDecrypt(text string, dur time.Duration) Decrypt {
 	d := Decrypt{text: edit.Graphemes(text), run: frames.NewRun(dur)}
-	d.run.Ease = animation.Linear
 	if !d.Active() {
 		d.p = 1
 	}

@@ -1,7 +1,6 @@
 package effect
 
 import (
-	"image/color"
 	"math"
 	"time"
 
@@ -213,7 +212,7 @@ func crossFaded(a, b cells.Grid, p float64) cells.Grid {
 				if p < 0.5 {
 					from, to = c, o
 				}
-				c.Fg, c.Bg = blendOr(from.Fg, to.Fg, p), blendOr(from.Bg, to.Bg, p)
+				c.Fg, c.Bg = animation.Blend(from.Fg, to.Fg, p), animation.Blend(from.Bg, to.Bg, p)
 			}
 			row[i] = c
 			x += c.Width
@@ -221,26 +220,6 @@ func crossFaded(a, b cells.Grid, p float64) cells.Grid {
 		out[y] = row
 	}
 	return out
-}
-
-// blendOr is Blend, or whichever side has a colour when the other is the
-// terminal's own.
-func blendOr(a, b color.Color, p float64) color.Color {
-	switch {
-	case a == nil && b == nil:
-		return nil
-	case a == nil:
-		if p >= 0.5 {
-			return b
-		}
-		return nil
-	case b == nil:
-		if p < 0.5 {
-			return a
-		}
-		return nil
-	}
-	return animation.Blend(a, b, p)
 }
 
 // wiped puts on cv each cell of b the pattern has reached, and a's elsewhere.

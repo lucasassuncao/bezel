@@ -100,7 +100,7 @@ func (t Typist) plan() Typist {
 	t.run = frames.Run{}
 	if len(t.text) > 0 && t.perChar > 0 {
 		t.run = frames.NewRun(at)
-		t.run.Ease, t.run.Delay = animation.Linear, delay
+		t.run.Delay = delay
 	}
 	t.shown = nil
 	if !t.run.Active() {

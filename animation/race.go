@@ -25,7 +25,6 @@ type Race struct {
 	fromV, toV       []float64
 	fromPos, toPosns []float64
 	dur              time.Duration
-	ease             Ease
 	p                float64
 	run              frames.Run
 }
@@ -70,8 +69,9 @@ func (r Race) Set(values []float64) (Race, tea.Cmd) {
 	}
 	r.toV = fit(values, len(r.labels))
 	r.toPosns = places(r.toV)
+	ease := r.run.Ease // a new run keeps the ease WithEase set
 	r.run, r.p = frames.NewRun(r.dur), 0
-	r.run.Ease = r.ease
+	r.run.Ease = ease
 	if !r.run.Active() {
 		r.p = 1
 	}
@@ -125,6 +125,6 @@ func (r Race) Advance(now time.Time) (Race, bool) {
 
 // WithEase is r following e instead of EaseInOut, for every later Set.
 func (r Race) WithEase(e Ease) Race {
-	r.ease, r.run.Ease = e, e
+	r.run.Ease = e
 	return r
 }

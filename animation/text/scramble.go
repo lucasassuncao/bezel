@@ -32,7 +32,6 @@ type Scramble struct {
 // punctuation stand still, so the shape of the text reads from the start.
 func NewScramble(text string, dur time.Duration) Scramble {
 	s := Scramble{text: edit.Graphemes(text), charset: []rune(letters), run: frames.NewRun(dur)}
-	s.run.Ease = animation.Linear
 	return s
 }
 

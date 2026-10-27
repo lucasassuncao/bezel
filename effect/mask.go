@@ -42,7 +42,7 @@ func paste(g, sub cells.Grid, r rect) cells.Grid {
 		if y >= len(g) {
 			break
 		}
-		cv := cells.NewCanvas(max(rowWidth(g[y]), left+rowWidth(srow)), 1)
+		cv := cells.NewCanvas(max(cells.RowWidth(g[y]), left+cells.RowWidth(srow)), 1)
 		x := 0
 		for _, c := range g[y] {
 			if !r.covers(x, c.Width) {
@@ -58,13 +58,4 @@ func paste(g, sub cells.Grid, r rect) cells.Grid {
 		g[y] = cv.Grid()[0]
 	}
 	return g
-}
-
-// rowWidth is how many columns row's cells take.
-func rowWidth(row []cells.Cell) int {
-	n := 0
-	for _, c := range row {
-		n += c.Width
-	}
-	return n
 }

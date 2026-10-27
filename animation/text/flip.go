@@ -42,7 +42,6 @@ func NewFlip(from, to string, dur time.Duration) Flip {
 	f := Flip{from: a, to: b, dur: dur}
 	if strings.Join(a, "") != strings.Join(b, "") {
 		f.run = frames.NewRun(dur)
-		f.run.Ease = animation.Linear
 	}
 	if !f.Active() {
 		f.p = 1

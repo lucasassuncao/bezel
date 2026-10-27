@@ -32,7 +32,6 @@ type Fall struct {
 // NewFall drops text from rows rows above its line over dur.
 func NewFall(text string, rows int, dur time.Duration) Fall {
 	f := Fall{text: edit.Graphemes(text), rows: max(rows, 1), run: frames.NewRun(dur)}
-	f.run.Ease = animation.Linear
 	if !f.Active() {
 		f.p = 1
 	}

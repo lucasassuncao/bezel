@@ -2,8 +2,6 @@ package text
 
 import (
 	"image/color"
-	"math"
-	"strings"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -47,13 +45,7 @@ func (h Highlight) WithDelay(d time.Duration) Highlight {
 
 // View is the text with the marked graphemes on the marker.
 func (h Highlight) View() string {
-	n := int(math.Round(frames.Or(h.run.Ease)(h.p) * float64(len(h.text))))
-	n = min(max(n, 0), len(h.text))
-	if n == 0 {
-		return strings.Join(h.text, "")
-	}
-	marked := lipgloss.NewStyle().Background(h.marker).Render(strings.Join(h.text[:n], ""))
-	return marked + strings.Join(h.text[n:], "")
+	return swept(h.text, frames.Or(h.run.Ease)(h.p), lipgloss.NewStyle().Background(h.marker))
 }
 
 // Active reports whether the marker is still moving.
