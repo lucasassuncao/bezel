@@ -87,6 +87,13 @@ func TestStillToastsDoNotSlideAndStillExpire(t *testing.T) {
 	assert.Zero(t, m.Len())
 }
 
+// With motion off no frame ever stamps a toast, and it still shows.
+func TestAStillToastShowsWithoutAFrame(t *testing.T) {
+	t.Setenv("BEZEL_NO_MOTION", "1")
+	m, _ := New().Push("saved", Success)
+	assert.Contains(t, ansi.Strip(m.View(theme.Resolve(theme.Plain, true))), "saved")
+}
+
 func TestAZeroToastWorks(t *testing.T) {
 	var m Model
 	m, cmd := m.Push("x", Info)

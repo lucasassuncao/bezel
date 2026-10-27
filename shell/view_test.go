@@ -2,8 +2,10 @@ package shell
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -246,4 +248,48 @@ func TestAPaneCarriesABottomTextAndAScrollbar(t *testing.T) {
 	require.True(t, strings.HasSuffix(ansi.Truncate(lines[r.Y+r.H-1], r.X+r.W, ""), " 1/40 ─╯"))
 	require.Equal(t, "█", cell(r.Y+1), "the thumb at the top of the track")
 	require.Equal(t, "│", cell(r.Y+r.H-2), "the track below it")
+}
+
+// quietTab has nothing to say on the status row.
+type quietTab struct{ stubTab }
+
+func (quietTab) Status(Context) string { return "" }
+
+// The Toast style gives the row back to the panes until something is typed
+// there, Busy runs or the tab has a status, and shows a banner as a toast.
+func TestTheToastStyleShowsTheRowOnlyWhenItHasALine(t *testing.T) {
+	t.Setenv("BEZEL_NO_MOTION", "1") // a toast shows at once, without frames
+	th := theme.Resolve(theme.Plain, true)
+	size := tea.WindowSizeMsg{Width: 120, Height: 30}
+	s, _, _ := New(Config{Layout: twoPane(), Tabs: []Tab{quietTab{stubTab{name: "a"}}}, Theme: th, StatusStyle: Toast}).Update(size)
+	bar, _, _ := New(Config{Layout: twoPane(), Tabs: []Tab{quietTab{stubTab{name: "a"}}}, Theme: th}).Update(size)
+	require.Equal(t, bar.Body().H+1, s.Body().H, "no row: the panes take it")
+
+	s, cmd := s.SetStatus("saved notes.md", OK, time.Minute)
+	require.NotNil(t, cmd)
+	rows := strings.Split(ansi.Strip(s.View(demoPanes())), "\n")
+	at := slices.IndexFunc(rows, func(r string) bool { return strings.Contains(r, "saved notes.md") })
+	require.Positive(t, at, "the banner is a toast")
+	require.Less(t, at, 5, "at the top")
+	require.Greater(t, strings.Index(rows[at], "saved"), 60, "on the right")
+	require.Equal(t, "saved notes.md", s.Status(), "Status still reads it")
+
+	typing := s.SetInput(input.New(th).WithValue("kv/"))
+	require.Equal(t, bar.Body().H, typing.Body().H, "typing brings the row back")
+	busy, _ := s.Busy("indexing")
+	require.Equal(t, bar.Body().H, busy.Body().H, "and so does Busy")
+	talking, _, _ := New(Config{Layout: twoPane(), Tabs: []Tab{stubTab{name: "a"}}, Theme: th, StatusStyle: Toast}).Update(size)
+	require.Equal(t, bar.Body().H, talking.Body().H, "and the tab's status")
+}
+
+// A toast's frames and expiry are the shell's, and a harness drops them like
+// the status timer.
+func TestAToastsMessagesAreTheShells(t *testing.T) {
+	s, _, _ := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true), StatusStyle: Toast}).
+		Update(tea.WindowSizeMsg{Width: 120, Height: 30})
+	s, _ = s.SetStatus("x", Info, time.Minute)
+	frame := toastMsg{s.toasts.FrameAt(time.Now())}
+	require.True(t, IsStatusExpiry(frame))
+	_, handled, _ := s.Update(frame)
+	require.True(t, handled)
 }

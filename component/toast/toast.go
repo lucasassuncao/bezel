@@ -141,10 +141,12 @@ func drop(items []item, gone func(item) bool) []item {
 // offset is how many columns right of its place a toast is drawn now: the
 // whole width as it arrives and as it leaves, nothing between.
 func (m Model) offset(it item) int {
-	if it.born.IsZero() {
+	switch {
+	case frames.Still():
+		return 0 // no frames come to stamp it: it shows at once
+	case it.born.IsZero():
 		return m.width + 1
-	}
-	if frames.Still() || m.now.IsZero() {
+	case m.now.IsZero():
 		return 0
 	}
 	age := frames.Paced(m.now.Sub(it.born))

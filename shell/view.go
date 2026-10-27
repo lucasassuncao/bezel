@@ -37,8 +37,27 @@ func (s Shell) chromeRows() (top, bottom int, legendLines []string) {
 	keys := legend.Filter(actionEntries(acts, !s.typing), s.cfg.Can) // a modal draws its own keys in its box
 	legendLines = legend.Pack(keys, s.width, s.cfg.LegendLines, st)
 	// Every row the legend may take, filled or not: fewer keys never grow the panes.
-	bottom = 1 + max(s.cfg.LegendLines, len(legendLines))
+	bottom = max(s.cfg.LegendLines, len(legendLines))
+	if s.statusShown() {
+		bottom++
+	}
 	return top, bottom, legendLines
+}
+
+// toastWidth is how wide the Toast style draws a message, edges included.
+const toastWidth = 48
+
+// statusShown reports whether the status row is drawn: always in the
+// StatusBar style; in the Toast style while a line is typed on it, Busy runs
+// or the tab's Status has text.
+func (s Shell) statusShown() bool {
+	switch {
+	case s.cfg.StatusStyle != Toast, s.typing, s.statusLiner() != nil, s.busy != "":
+		return true
+	case len(s.cfg.Tabs) > 0:
+		return s.cfg.Tabs[s.tab].Status(s.Context()) != ""
+	}
+	return false
 }
 
 func (s Shell) headerRows() int {
@@ -118,7 +137,9 @@ func (s Shell) View(panes map[string]Pane) string {
 		canvas = s.trans.Apply(canvas) // the tab strip above stays put
 	}
 	rows = append(rows, strings.Split(canvas, "\n")...)
-	rows = append(rows, s.statusRow())
+	if s.statusShown() {
+		rows = append(rows, s.statusRow())
+	}
 	for _, l := range legendLines {
 		rows = append(rows, draw.Fit(l, s.width))
 	}
@@ -129,6 +150,10 @@ func (s Shell) View(panes map[string]Pane) string {
 	out := draw.FitBlock(strings.Join(rows, "\n"), s.width, s.height)
 	if s.overlays.Len() > 0 {
 		out = s.overlays.View(body, out)
+	}
+	if s.toasts.Len() > 0 {
+		// Narrower than the screen, so a toast never hangs off its left edge.
+		out = s.toasts.WithWidth(min(toastWidth, s.width-2)).Over(out, *th)
 	}
 	return out
 }
@@ -182,7 +207,8 @@ func (s Shell) paneCanvas(panes map[string]Pane, body layout.Rect) string {
 }
 
 // statusRow: the input outranks the banner, the banner outranks busy, and
-// busy outranks the tab's own status text.
+// busy outranks the tab's own status text. The Toast style draws the banner
+// as a toast instead.
 func (s Shell) statusRow() string {
 	th := &s.cfg.Theme
 	switch {
@@ -190,7 +216,7 @@ func (s Shell) statusRow() string {
 		return s.statusLiner().StatusLine(s.width)
 	case s.typing:
 		return draw.Fit(s.input.View(), s.width)
-	case s.status != "":
+	case s.status != "" && s.cfg.StatusStyle != Toast:
 		return draw.StatusLine(s.width, s.status, s.statusStyle())
 	case s.busy != "":
 		return draw.StatusLine(s.width, s.spin.View(*th)+" "+s.busy, th.Chrome.Status)

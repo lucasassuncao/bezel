@@ -197,6 +197,8 @@ The row under the panes says what is happening:
 
 `Copy(text, done, failed)` writes to the clipboard and reports the result on the row.
 
+`StatusStyle` in the `Config` says where these messages show. `shell.StatusBar`, the default, is the row above. With `shell.Toast` each one slides into the top right corner as a [`toast`](../component/toast), and the row gives its line back to the panes: it shows only while a line is typed on it, the palette's or `SetInput`'s, while `Busy` runs, or while the tab's `Status` has text. `Status()` still reads the newest message.
+
 ## Overlays
 
 Dialogs float over the panes in a stack. The top one takes every key, `esc` closes it, and the legend shows its keys while it is open.

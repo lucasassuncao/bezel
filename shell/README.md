@@ -88,6 +88,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) Update\(msg tea.Msg\) \(Shell, bool, tea.Cmd\)](<#Shell.Update>)
   - [func \(s Shell\) View\(panes map\[string\]Pane\) string](<#Shell.View>)
   - [func \(s Shell\) WithClipboard\(write func\(string\) error\) Shell](<#Shell.WithClipboard>)
+- [type StatusStyle](<#StatusStyle>)
 - [type Tab](<#Tab>)
 
 
@@ -101,13 +102,13 @@ func Check(actions ...Action) error
 Check reports every key two actions share, display\-only ones included. Apps call it in a test over each screen's set; at runtime the first match runs.
 
 <a name="IsStatusExpiry"></a>
-## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L155>)
+## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L193>)
 
 ```go
 func IsStatusExpiry(msg tea.Msg) bool
 ```
 
-IsStatusExpiry reports a status timer's message, for a harness that must not feed timers back into the loop.
+IsStatusExpiry reports a status timer's message, or a toast's frame, for a harness that must not feed timers back into the loop.
 
 <a name="Send"></a>
 ## func [Send](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L136>)
@@ -233,7 +234,7 @@ type ActionContext struct {
 ```
 
 <a name="Capability"></a>
-## type [Capability](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L20>)
+## type [Capability](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L21>)
 
 Capability is legend.Capability, so an app need not import legend for it.
 
@@ -254,7 +255,7 @@ type ClickMsg struct {
 ```
 
 <a name="Config"></a>
-## type [Config](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L51-L86>)
+## type [Config](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L52-L90>)
 
 Config is everything a Shell needs up front.
 
@@ -294,11 +295,14 @@ type Config struct {
     // Mouse turns the terminal's mouse reporting on in Screen. Clicks on
     // tabs, panes and dialogs then work, and a pane's arrive as ClickMsg.
     Mouse bool
+    // StatusStyle is where status messages show: StatusBar, the default, or
+    // Toast.
+    StatusStyle StatusStyle
 }
 ```
 
 <a name="Context"></a>
-## type [Context](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L33-L38>)
+## type [Context](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L34-L39>)
 
 Context is what a Tab gets when asked for its legend: enough to change its wording by width, focus and what the session allows.
 
@@ -312,7 +316,7 @@ type Context struct {
 ```
 
 <a name="FocusMsg"></a>
-## type [FocusMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L157>)
+## type [FocusMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L175>)
 
 FocusMsg is sent when ChangePane moves focus, so the app can run what entering To and leaving From mean for it.
 
@@ -321,7 +325,7 @@ type FocusMsg struct{ From, To string }
 ```
 
 <a name="Level"></a>
-## type [Level](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L23>)
+## type [Level](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L24>)
 
 Level is how a status message is drawn: neutral, a success, or an error.
 
@@ -430,7 +434,7 @@ func WithKey(keys ...string) Option
 WithKey rebinds the action. A prebuilt, or a Command that had no key, prints the first key; a custom keeps the label it was given.
 
 <a name="Pane"></a>
-## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L78-L85>)
+## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L97-L104>)
 
 Pane is what the app hands the shell for one leaf: a title for the border and a body drawn into the inner rect the shell computed.
 
@@ -446,7 +450,7 @@ type Pane struct {
 ```
 
 <a name="Shell"></a>
-## type [Shell](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L89-L114>)
+## type [Shell](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L105-L132>)
 
 Shell is a value: every mutation returns the new shell.
 
@@ -457,7 +461,7 @@ type Shell struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L118>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L136>)
 
 ```go
 func New(cfg Config) Shell
@@ -466,7 +470,7 @@ func New(cfg Config) Shell
 New is a shell over cfg, focused on the first leaf of the focus ring. It draws nothing until the first tea.WindowSizeMsg.
 
 <a name="Shell.ActiveTab"></a>
-### func \(Shell\) [ActiveTab](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L188>)
+### func \(Shell\) [ActiveTab](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L206>)
 
 ```go
 func (s Shell) ActiveTab() int
@@ -493,7 +497,7 @@ func (s Shell) Busy(text string) (Shell, tea.Cmd)
 Busy shows a spinner and text on the status row until Idle, which an empty text also is. A banner set meanwhile shows over it until it expires. The command starts the spinner; nil when it is already spinning.
 
 <a name="Shell.ClearInput"></a>
-### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L177>)
+### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L218>)
 
 ```go
 func (s Shell) ClearInput() Shell
@@ -502,7 +506,7 @@ func (s Shell) ClearInput() Shell
 ClearInput takes the input off the status row and gives the keys back.
 
 <a name="Shell.ClearStatus"></a>
-### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L161>)
+### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L202>)
 
 ```go
 func (s Shell) ClearStatus() Shell
@@ -511,7 +515,7 @@ func (s Shell) ClearStatus() Shell
 ClearStatus removes the banner now, and makes its pending timer a no\-op.
 
 <a name="Shell.Context"></a>
-### func \(Shell\) [Context](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L262>)
+### func \(Shell\) [Context](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L280>)
 
 ```go
 func (s Shell) Context() Context
@@ -529,7 +533,7 @@ func (s Shell) Copy(text, done, failed string) tea.Cmd
 Copy puts text on the clipboard off the event loop, then shows done on the status row, or "failed: why". A helper that hangs gives up after 5s instead of freezing the program.
 
 <a name="Shell.Focus"></a>
-### func \(Shell\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L166>)
+### func \(Shell\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L184>)
 
 ```go
 func (s Shell) Focus() string
@@ -538,7 +542,7 @@ func (s Shell) Focus() string
 Focus is the name of the focused leaf on the active tab.
 
 <a name="Shell.HasOverlay"></a>
-### func \(Shell\) [HasOverlay](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L268>)
+### func \(Shell\) [HasOverlay](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L286>)
 
 ```go
 func (s Shell) HasOverlay() bool
@@ -556,7 +560,7 @@ func (s Shell) Idle() Shell
 Idle ends Busy. A banner on the status row is left alone.
 
 <a name="Shell.Input"></a>
-### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L184>)
+### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L225>)
 
 ```go
 func (s Shell) Input() (input.Model, bool)
@@ -592,7 +596,7 @@ func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg
 MouseIn is msg moved into pane's body wherever the pointer is, for a drag that began in the pane and left it: the cell may then fall outside.
 
 <a name="Shell.Narrow"></a>
-### func \(Shell\) [Narrow](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L214>)
+### func \(Shell\) [Narrow](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L232>)
 
 ```go
 func (s Shell) Narrow() bool
@@ -619,7 +623,7 @@ func (s Shell) PaneAt(x, y int) (string, bool)
 PaneAt is the pane drawn at the screen cell \(x, y\), border included, and false over the chrome, a gap or an open dialog, which covers the panes.
 
 <a name="Shell.Pop"></a>
-### func \(Shell\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L281>)
+### func \(Shell\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L299>)
 
 ```go
 func (s Shell) Pop() Shell
@@ -628,7 +632,7 @@ func (s Shell) Pop() Shell
 Pop closes the top modal, if any.
 
 <a name="Shell.Push"></a>
-### func \(Shell\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L274>)
+### func \(Shell\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L292>)
 
 ```go
 func (s Shell) Push(o overlay.Overlay) Shell
@@ -637,7 +641,7 @@ func (s Shell) Push(o overlay.Overlay) Shell
 Push opens o above any open modal.
 
 <a name="Shell.Rect"></a>
-### func \(Shell\) [Rect](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L163>)
+### func \(Shell\) [Rect](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L181>)
 
 ```go
 func (s Shell) Rect(name string) layout.Rect
@@ -655,7 +659,7 @@ func (s Shell) Screen(panes map[string]Pane) tea.View
 Screen is the shell's view as the full\-screen tea.View a program returns, with mouse reporting on when Config.Mouse is.
 
 <a name="Shell.SetActions"></a>
-### func \(Shell\) [SetActions](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L242>)
+### func \(Shell\) [SetActions](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L260>)
 
 ```go
 func (s Shell) SetActions(actions ...Action) Shell
@@ -664,7 +668,7 @@ func (s Shell) SetActions(actions ...Action) Shell
 SetActions is the current state's own actions, joining the global ones and the tab's. Variadic.
 
 <a name="Shell.SetFocus"></a>
-### func \(Shell\) [SetFocus](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L170>)
+### func \(Shell\) [SetFocus](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L188>)
 
 ```go
 func (s Shell) SetFocus(name string) Shell
@@ -673,7 +677,7 @@ func (s Shell) SetFocus(name string) Shell
 SetFocus moves focus to a leaf of the layout. Unknown names are ignored, and a leaf the layout dropped hands focus to one on screen.
 
 <a name="Shell.SetInput"></a>
-### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L170>)
+### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L211>)
 
 ```go
 func (s Shell) SetInput(m input.Model) Shell
@@ -682,7 +686,7 @@ func (s Shell) SetInput(m input.Model) Shell
 SetInput puts a text input on the status row. While it is there it takes every key; the app reads the edits back with Input after each Update.
 
 <a name="Shell.SetLayout"></a>
-### func \(Shell\) [SetLayout](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L218>)
+### func \(Shell\) [SetLayout](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L236>)
 
 ```go
 func (s Shell) SetLayout(n layout.Node) Shell
@@ -691,7 +695,7 @@ func (s Shell) SetLayout(n layout.Node) Shell
 SetLayout swaps the layout tree and re\-resolves it. For screens whose shape changes at runtime, such as a panel that animates open.
 
 <a name="Shell.SetLegendLines"></a>
-### func \(Shell\) [SetLegendLines](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L249>)
+### func \(Shell\) [SetLegendLines](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L267>)
 
 ```go
 func (s Shell) SetLegendLines(n int) Shell
@@ -700,16 +704,16 @@ func (s Shell) SetLegendLines(n int) Shell
 SetLegendLines changes how many rows the legend keeps, 1 or more.
 
 <a name="Shell.SetStatus"></a>
-### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L135>)
+### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L153>)
 
 ```go
 func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, tea.Cmd)
 ```
 
-SetStatus shows text on the status row. ttl \> 0 clears it later, unless a newer status has replaced it by then.
+SetStatus shows text on the status row, or as a toast in the Toast style. ttl \> 0 clears it later, unless a newer status has replaced it by then; a toast always leaves, after StatusTTL when ttl is not above zero.
 
 <a name="Shell.SetSubtitle"></a>
-### func \(Shell\) [SetSubtitle](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L234>)
+### func \(Shell\) [SetSubtitle](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L252>)
 
 ```go
 func (s Shell) SetSubtitle(text string) Shell
@@ -718,7 +722,7 @@ func (s Shell) SetSubtitle(text string) Shell
 SetSubtitle changes the text after the title in the default header.
 
 <a name="Shell.SetTab"></a>
-### func \(Shell\) [SetTab](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L191>)
+### func \(Shell\) [SetTab](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L209>)
 
 ```go
 func (s Shell) SetTab(i int) Shell
@@ -727,7 +731,7 @@ func (s Shell) SetTab(i int) Shell
 SetTab shows tab i. An index out of range is ignored.
 
 <a name="Shell.SetTabs"></a>
-### func \(Shell\) [SetTabs](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L203>)
+### func \(Shell\) [SetTabs](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L221>)
 
 ```go
 func (s Shell) SetTabs(tabs ...Tab) Shell
@@ -736,7 +740,7 @@ func (s Shell) SetTabs(tabs ...Tab) Shell
 SetTabs replaces the tabs, for an app whose Tab values carry its state. Each tab keeps its focus by position, a new one starts on the first pane, and a shorter list moves the shell to its last tab when the active one is gone.
 
 <a name="Shell.SetTheme"></a>
-### func \(Shell\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L227>)
+### func \(Shell\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L245>)
 
 ```go
 func (s Shell) SetTheme(th theme.Resolved) Shell
@@ -745,7 +749,7 @@ func (s Shell) SetTheme(th theme.Resolved) Shell
 SetTheme swaps the styles, for a terminal that answered light or dark after the shell was built.
 
 <a name="Shell.ShowHelp"></a>
-### func \(Shell\) [ShowHelp](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L259>)
+### func \(Shell\) [ShowHelp](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L277>)
 
 ```go
 func (s Shell) ShowHelp() Shell
@@ -754,7 +758,7 @@ func (s Shell) ShowHelp() Shell
 ShowHelp opens the Help overlay the ? key would.
 
 <a name="Shell.Size"></a>
-### func \(Shell\) [Size](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L160>)
+### func \(Shell\) [Size](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L178>)
 
 ```go
 func (s Shell) Size() (int, int)
@@ -772,7 +776,7 @@ func (s Shell) Spinner() string
 Spinner is the current frame, unstyled, for a pane showing the same work.
 
 <a name="Shell.Status"></a>
-### func \(Shell\) [Status](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L256>)
+### func \(Shell\) [Status](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L274>)
 
 ```go
 func (s Shell) Status() string
@@ -781,7 +785,7 @@ func (s Shell) Status() string
 Status is the banner text currently set, empty when none.
 
 <a name="Shell.StatusExpiry"></a>
-### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L151>)
+### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L189>)
 
 ```go
 func (s Shell) StatusExpiry() tea.Msg
@@ -790,7 +794,7 @@ func (s Shell) StatusExpiry() tea.Msg
 StatusExpiry is the message that would clear the current status, for a test harness that drops timers and delivers them itself.
 
 <a name="Shell.StatusLevel"></a>
-### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L147>)
+### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L185>)
 
 ```go
 func (s Shell) StatusLevel() Level
@@ -799,7 +803,7 @@ func (s Shell) StatusLevel() Level
 StatusLevel is how the current status is drawn.
 
 <a name="Shell.TopOverlay"></a>
-### func \(Shell\) [TopOverlay](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L271>)
+### func \(Shell\) [TopOverlay](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L289>)
 
 ```go
 func (s Shell) TopOverlay() overlay.Overlay
@@ -817,7 +821,7 @@ func (s Shell) Transition() effect.Effect
 Transition is the effect playing over the panes now, for a test or a host that delivers its frames itself; it is inactive when none plays.
 
 <a name="Shell.Update"></a>
-### func \(Shell\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L22>)
+### func \(Shell\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L34>)
 
 ```go
 func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd)
@@ -826,7 +830,7 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd)
 Update handles what is the shell's: resize, status ticks, overlays, the status\-row input, help, tabs and focus, and a left click on a dialog, a tab or a pane, which comes back as a ClickMsg. false means the app's turn.
 
 <a name="Shell.View"></a>
-### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L99>)
+### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L118>)
 
 ```go
 func (s Shell) View(panes map[string]Pane) string
@@ -843,8 +847,29 @@ func (s Shell) WithClipboard(write func(string) error) Shell
 
 WithClipboard replaces the system clipboard with write, for a test that must not touch the machine's own.
 
+<a name="StatusStyle"></a>
+## type [StatusStyle](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L94>)
+
+StatusStyle is where the shell shows SetStatus's messages, Copy's result and the palette's errors.
+
+```go
+type StatusStyle int
+```
+
+<a name="StatusBar"></a>
+
+```go
+const (
+    // StatusBar puts them on the row under the panes, which is always there.
+    StatusBar StatusStyle = iota
+    // Toast slides each into the top right corner. The row then shows only
+    // while a line is typed on it, Busy runs, or the tab's Status has text.
+    Toast
+)
+```
+
 <a name="Tab"></a>
-## type [Tab](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L44-L48>)
+## type [Tab](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L45-L49>)
 
 Tab answers for one screen of the app: its name in the strip, the status text and the keys for where the user is. Status and Actions run several times a frame, so keep them cheap and free of side effects. A Tab that is a value is read as given: hand it back through SetTabs when it changes.
 

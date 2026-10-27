@@ -8,6 +8,7 @@ import (
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/component/spinner"
+	"github.com/lucasassuncao/bezel/component/toast"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/palette"
 )
@@ -15,6 +16,17 @@ import (
 // statusExpiredMsg clears the status whose sequence it carries. A stale one,
 // from a message already replaced, is dropped.
 type statusExpiredMsg struct{ seq uint }
+
+// toastMsg carries a toast's frame or expiry, so the shell knows its own.
+type toastMsg struct{ tea.Msg }
+
+// toastCmd wraps what cmd sends in a toastMsg; nil stays nil.
+func toastCmd(cmd tea.Cmd) tea.Cmd {
+	if cmd == nil {
+		return nil
+	}
+	return func() tea.Msg { return toastMsg{cmd()} }
+}
 
 // Update handles what is the shell's: resize, status ticks, overlays, the
 // status-row input, help, tabs and focus, and a left click on a dialog, a
@@ -56,6 +68,11 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 			s.status = ""
 		}
 		return s, true, nil
+
+	case toastMsg:
+		var cmd tea.Cmd
+		s.toasts, cmd = s.toasts.Update(m.Msg)
+		return s, true, toastCmd(cmd)
 
 	case spinner.TickMsg:
 		if m.ID == s.spin.ID() {
@@ -130,17 +147,38 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	return s, false, nil
 }
 
-// SetStatus shows text on the status row. ttl > 0 clears it later, unless a
-// newer status has replaced it by then.
+// SetStatus shows text on the status row, or as a toast in the Toast style.
+// ttl > 0 clears it later, unless a newer status has replaced it by then; a
+// toast always leaves, after StatusTTL when ttl is not above zero.
 func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, tea.Cmd) {
 	s = s.ready()
 	s.statusSeq++
 	s.status, s.level = text, level
+	var shown tea.Cmd
+	if s.cfg.StatusStyle == Toast {
+		life := ttl
+		if life <= 0 {
+			life = s.cfg.StatusTTL
+		}
+		s.toasts, shown = s.toasts.WithTTL(life).Push(text, toastKind(level))
+		shown = toastCmd(shown)
+	}
 	if ttl <= 0 {
-		return s, nil
+		return s, shown
 	}
 	seq := s.statusSeq
-	return s, tea.Tick(ttl, func(time.Time) tea.Msg { return statusExpiredMsg{seq: seq} })
+	return s, tea.Batch(shown, tea.Tick(ttl, func(time.Time) tea.Msg { return statusExpiredMsg{seq: seq} }))
+}
+
+// toastKind is the toast that reports a status at level.
+func toastKind(level Level) toast.Kind {
+	switch level {
+	case OK:
+		return toast.Success
+	case Error:
+		return toast.Error
+	}
+	return toast.Info
 }
 
 // StatusLevel is how the current status is drawn.
@@ -150,11 +188,14 @@ func (s Shell) StatusLevel() Level { return s.level }
 // test harness that drops timers and delivers them itself.
 func (s Shell) StatusExpiry() tea.Msg { return statusExpiredMsg{seq: s.statusSeq} }
 
-// IsStatusExpiry reports a status timer's message, for a harness that must
-// not feed timers back into the loop.
+// IsStatusExpiry reports a status timer's message, or a toast's frame, for a
+// harness that must not feed timers back into the loop.
 func IsStatusExpiry(msg tea.Msg) bool {
-	_, ok := msg.(statusExpiredMsg)
-	return ok
+	switch msg.(type) {
+	case statusExpiredMsg, toastMsg:
+		return true
+	}
+	return false
 }
 
 // ClearStatus removes the banner now, and makes its pending timer a no-op.

@@ -94,7 +94,7 @@ func (m Model) Len() int
 Len is how many toasts are showing.
 
 <a name="Model.Over"></a>
-### func \(Model\) [Over](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L186>)
+### func \(Model\) [Over](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L188>)
 
 ```go
 func (m Model) Over(screen string, th theme.Resolved) string
@@ -121,7 +121,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
 Update slides the toasts on the stack's own frames and drops the ones whose time is up, asking for frames while any is showing.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L173>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L175>)
 
 ```go
 func (m Model) View(th theme.Resolved) string

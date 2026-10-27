@@ -9,6 +9,7 @@ import (
 
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/component/spinner"
+	"github.com/lucasassuncao/bezel/component/toast"
 	"github.com/lucasassuncao/bezel/effect"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -83,7 +84,22 @@ type Config struct {
 	// Mouse turns the terminal's mouse reporting on in Screen. Clicks on
 	// tabs, panes and dialogs then work, and a pane's arrive as ClickMsg.
 	Mouse bool
+	// StatusStyle is where status messages show: StatusBar, the default, or
+	// Toast.
+	StatusStyle StatusStyle
 }
+
+// StatusStyle is where the shell shows SetStatus's messages, Copy's result
+// and the palette's errors.
+type StatusStyle int
+
+const (
+	// StatusBar puts them on the row under the panes, which is always there.
+	StatusBar StatusStyle = iota
+	// Toast slides each into the top right corner. The row then shows only
+	// while a line is typed on it, Busy runs, or the tab's Status has text.
+	Toast
+)
 
 // Shell is a value: every mutation returns the new shell.
 type Shell struct {
@@ -105,6 +121,8 @@ type Shell struct {
 
 	busy string // what the spinner says, empty when idle
 	spin spinner.Model
+
+	toasts toast.Model // the messages, in the Toast style
 
 	overlays overlay.Stack
 	present  map[string]bool // leaves the last View was given
