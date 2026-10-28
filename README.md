@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-The frame around a [Bubble Tea](https://github.com/charmbracelet/bubbletea) v2. bezel owns resize, tabs, focus, overlays, the status row and the key legend; your app only draws what goes *inside* the panes.
+A TUI framework for [Bubble Tea](https://github.com/charmbracelet/bubbletea) v2. bezel owns the frame: resize, tabs, focus, overlays, the status row and the key legend. Your app draws what goes *inside* the panes, with components, effects and animations that share one theme.
 
 ```sh
 go get github.com/lucasassuncao/bezel

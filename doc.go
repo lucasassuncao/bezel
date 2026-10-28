@@ -1,6 +1,6 @@
-// Package bezel is the frame around a bubbletea app: layout, panels, theme,
-// overlays and a shell that owns resize, tabs, focus, status and the legend.
-// The app only draws what goes inside the panes.
+// Package bezel is a TUI framework for bubbletea v2. It owns the frame: resize,
+// tabs, focus, overlays, the status row and the key legend. The app draws what
+// goes inside the panes, with components, effects and animations in one theme.
 //
 // This package holds no code. The work is in its subpackages.
 //
