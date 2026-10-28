@@ -1,6 +1,6 @@
 # Components
 
-One small program per package, each with a recording of it running. Every GIF is a real session of its program, recorded from the `.tape` beside it in [`docs/recordings`](recordings). Run any of them with `go run ./examples/<group>/<name>`, as `go run ./examples/component/list`; for a small app that puts several together, `go run ./examples/app`, explained step by step in [EXAMPLE.md](EXAMPLE.md).
+One small program per package, each with a recording of it running; `bezeltest`, a helper for tests, has a test instead. Every GIF is a real session of its program, recorded from the `.tape` beside it in [`docs/recordings`](recordings). Run any of them with `go run ./examples/<group>/<name>`, as `go run ./examples/component/list`; for a small app that puts several together, `go run ./examples/app`, explained step by step in [EXAMPLE.md](EXAMPLE.md).
 
 The widgets that go inside the panes live under [`component`](../component); the frame around them, and the key presses for tests, sit at the root. The effects have [EFFECTS.md](EFFECTS.md) and the animations [ANIMATIONS.md](ANIMATIONS.md).
 
@@ -136,7 +136,7 @@ A column of questions, each a heading that opens onto its answer, sliding rather
 
 ## Input
 
-What the user types into: a form of controls, a multi-line field, and the caret any field of your own can draw.
+What the user types into: a form of controls, a one-line field, a multi-line field, and the caret any field of your own can draw.
 
 ### Form
 
@@ -145,6 +145,14 @@ Source: [`examples/component/form/main.go`](../examples/component/form/main.go)
 One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
 
 ![form](recordings/component/form.gif)
+
+### Input
+
+Source: [`examples/component/input/main.go`](../examples/component/input/main.go)
+
+Three one-line fields. The name must not be empty, and says so once you leave it blank; the command completes on `tab` from its suggestions; the password shows only its mask. `↑/↓` move between them and `enter` submits. Every key is text, so the app quits on `esc`.
+
+![input](recordings/component/input.gif)
 
 ### Textbox
 
@@ -164,7 +172,7 @@ Three cursors, one per mode, each on the first letter of a word. `tab` moves the
 
 ## Progress, time and state
 
-How far along something is, how long it took, and what state it is in.
+How far along something is, how long it took, what state it is in, and a run of numbers charted.
 
 ### Progress
 
@@ -173,6 +181,14 @@ Source: [`examples/component/progress/main.go`](../examples/component/progress/m
 A count that fills on its own, as a `Line` and as a bare `Bar`, and a wizard's stages in a `Stepper`. `n` and `p` walk the stages; the copy drawn at 30 columns folds to "Step 2 of 4". `r` restarts the count.
 
 ![progress](recordings/component/progress.gif)
+
+### Chart
+
+Source: [`examples/component/chart/main.go`](../examples/component/chart/main.go)
+
+A made-up CPU load fed a sample per tick, drawn as an `Area` and a `Spark` line, beside labelled `Bars` (the busy ones in the danger colour), a week's `Heat` grid and a `Donut`. `space` pauses the feed and `r` starts it over.
+
+![chart](recordings/component/chart.gif)
 
 ### Spinner
 

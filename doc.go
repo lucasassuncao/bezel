@@ -57,17 +57,17 @@
 //     field with numbered lines that wrap at its width.
 //   - [github.com/lucasassuncao/bezel/component/cursor]: a text field's caret
 //     on its own, blinking, steady or hidden.
-//   - [github.com/lucasassuncao/bezel/component/progress]: Bar, Line and
-//     Stepper, how far along something is in one row, and a Model that
-//     springs to its share.
+//   - [github.com/lucasassuncao/bezel/component/progress]: Bar, Line, Smooth,
+//     Meter and Stepper, how far along something is in one row, and a Model
+//     that springs to its share.
 //   - [github.com/lucasassuncao/bezel/component/spinner]: twelve spinners or
 //     frames of your own, each ticking on its own.
 //   - [github.com/lucasassuncao/bezel/component/timer]: a countdown that says
 //     when time is up.
 //   - [github.com/lucasassuncao/bezel/component/stopwatch]: time counted up,
 //     paused and reset.
-//   - [github.com/lucasassuncao/bezel/component/chart]: area, spark, bar and
-//     heat charts of a run of numbers.
+//   - [github.com/lucasassuncao/bezel/component/chart]: area, spark, bar,
+//     heat and donut charts of a run of numbers.
 //   - [github.com/lucasassuncao/bezel/component/icon]: one set of state marks,
 //     Unicode or ASCII, in the theme's colours.
 //   - [github.com/lucasassuncao/bezel/component/toast]: notices that slide into
