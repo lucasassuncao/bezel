@@ -38,12 +38,14 @@ Desktop.ini
 /docs/superpowers
 tmp/
 tmp/*
+CLAUDE.md
 # Cross-compiled binary used by demo.tape
 demo-app
 
-# Binaries from running `go build` inside examples/**/ without -o
+# Binaries from running `go build` inside examples/**/ without -o, named after
+# their folder (animation.exe, text.exe)
 examples/**/test
-examples/**/test.exe
+examples/**/*.exe
 
 # Throwaway working copies created by tape recordings
 examples/**/session.yaml
