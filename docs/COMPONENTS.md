@@ -242,6 +242,14 @@ A CLI that prints logs, asks one question below them, then redraws a progress ba
 
 ![inline](recordings/component/inline.gif)
 
+### Logger
+
+Source: [`examples/component/logger/main.go`](../examples/component/logger/main.go)
+
+A run that sorts downloads, logged through `log/slog`. Each message gets its own line and every attribute hangs under it as a branch of a tree, groups as nested branches; a long path wraps under its own start instead of being cut. `--json` sends the same calls to slog's JSON handler.
+
+![logger](recordings/component/logger.gif)
+
 ### Themebrowser
 
 Source: [`examples/component/themebrowser/main.go`](../examples/component/themebrowser/main.go)
@@ -258,7 +266,7 @@ No recording: this one is a test. A counter, and the test that drives it with th
 
 ## Recording
 
-The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the two that print into the terminal rather than take it over, `inline` and `themebrowser`, run behind a `clear` so their command line never shows. The galleries, of animation, text, scenes and effects, have a tape per tab. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
+The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the three that print into the terminal rather than take it over, `inline`, `logger` and `themebrowser`, run behind a `clear` so their command line never shows. The galleries, of animation, text, scenes and effects, have a tape per tab. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
 
 ```sh
 vhs docs/recordings/component/list.tape

@@ -19,7 +19,7 @@ A component that draws takes a `theme.Resolved`; loose lipgloss styles reach it 
 
 | Who calls `View` | Where the theme goes | Packages |
 | --- | --- | --- |
-| bezel, through a fixed interface (`overlay.Overlay`, `form.Field`), or a field that needs the theme before it draws (a caret's blink pace) | the constructor's last parameter | `overlay`, `form`, `palette`, `textbox`, `input`, `cursor` |
+| bezel, through a fixed interface (`overlay.Overlay`, `form.Field`, `slog.Handler`), or a field that needs the theme before it draws (a caret's blink pace) | the constructor's last parameter | `overlay`, `form`, `palette`, `textbox`, `input`, `cursor`, `logger` |
 | the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport`, `accordion`, `toast` |
 | nobody: it is a plain function | after the data it draws | `progress`, `chart`, `inline`, `icon.Set.Render` |
 | `shell` | `shell.Config.Theme`, replaced with `SetTheme` | `shell` |
