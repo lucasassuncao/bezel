@@ -1,4 +1,4 @@
-# themebrowser: the table a --list-themes flag prints, scrolled.
+# themebrowser: the table a --list-themes flag prints, scrolled, copied from and filtered.
 #
 # Record from the repository root: vhs docs/recordings/component/themebrowser.tape
 
@@ -36,7 +36,15 @@ Show
 
 Sleep 1.5s
 Down@250ms 8
+Sleep 1s
+Enter
 Sleep 1.5s
+Type "/"
+Sleep 500ms
+Type "berry"
+Sleep 1.5s
+Enter
+Sleep 2s
 
 # -- Quit and clean up, off camera ------------------------------------------------
 

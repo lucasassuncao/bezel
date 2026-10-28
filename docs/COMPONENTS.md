@@ -230,7 +230,7 @@ A CLI that prints logs, asks one question below them, then redraws a progress ba
 
 Source: [`examples/component/themebrowser/main.go`](../examples/component/themebrowser/main.go)
 
-The table a `--list-themes` flag prints: scrollable in a terminal, plain lines in a pipe.
+The table a `--list-themes` flag prints: as wide as the terminal, each colour named, `/` to filter and `enter` to copy a theme's name; plain lines in a pipe.
 
 ![themebrowser](recordings/component/themebrowser.gif)
 

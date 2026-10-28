@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/component/themebrowser"
 ```
 
-Package themebrowser provides a small, inline \(not full\-screen\) terminal table listing bezel's built\-in theme names next to their category and palette.
+Package themebrowser provides an inline \(not full\-screen\) terminal table listing bezel's built\-in themes next to their category and named colours.
 
 ## Index
 
@@ -17,16 +17,16 @@ Package themebrowser provides a small, inline \(not full\-screen\) terminal tabl
 
 
 <a name="BrowseInTerminal"></a>
-## func [BrowseInTerminal](<https://github.com/lucasassuncao/bezel/blob/main/component/themebrowser/browser.go#L104>)
+## func [BrowseInTerminal](<https://github.com/lucasassuncao/bezel/blob/main/component/themebrowser/browser.go#L441>)
 
 ```go
 func BrowseInTerminal(t ...theme.Theme) error
 ```
 
-BrowseInTerminal renders an inline, scrollable table \(↑/↓, q/ctrl\+c to quit\) of every built\-in theme and its theme.Categories\(\) category. An optional theme.Theme sets colors; without a terminal on stdout it Lists.
+BrowseInTerminal is an inline table of the built\-in themes and their named colours \(enter copies a name, / filters, q quits\), in an optional theme.Theme's colours; without a terminal on stdout it Lists.
 
 <a name="List"></a>
-## func [List](<https://github.com/lucasassuncao/bezel/blob/main/component/themebrowser/browser.go#L91>)
+## func [List](<https://github.com/lucasassuncao/bezel/blob/main/component/themebrowser/browser.go#L428>)
 
 ```go
 func List(w io.Writer) error
