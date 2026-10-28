@@ -13,7 +13,7 @@ bezel/
 ├── animation/                  values that move, and text/ and scene/
 ├── internal/                   plumbing shared by the folders above, private to the module
 ├── examples/                   one program per package, by group, and a first app
-├── docs/                       the guides, and every recording under recordings/
+├── docs/                       the guides, every recording under recordings/ and the site under pages/
 └── scripts/                    the Makefile's includes and the scripts it runs
 ```
 
@@ -80,5 +80,5 @@ A change that needs an arrow pointing up, a component that imports `overlay` or 
 
 - **`examples/`**: one small program per package, in the same groups as the code: `frame/` for the packages at the root, `component/` for the components, and a gallery for each package that moves, a tab per family: `animation/` for the values, `animation/text/` and `animation/scene/` beside it, and `effect/` for the effects. `app/` is a small app built from several of them, which [EXAMPLE.md](EXAMPLE.md) explains step by step. Only code lives here.
 - **`docs/recordings/`**: what the examples look like running. Each GIF sits beside the `.tape` that records it, named after its example and grouped as `examples/` is: `component/list.tape` records `examples/component/list`. [Recording](COMPONENTS.md#recording) is how the tapes are run.
-- **`docs/`**: the guides. [FRAME.md](FRAME.md) is how the frame fits together, [THEME.md](THEME.md) the colours, [COMPONENTS.md](COMPONENTS.md) walks every package's example, [EFFECTS.md](EFFECTS.md) and [ANIMATIONS.md](ANIMATIONS.md) their packages, [CONVENTIONS.md](CONVENTIONS.md) the rules inside a package, and this page the layout. Each package's own `README.md`, next to its code, is generated from its doc comments by `make docs`.
+- **`docs/`**: the guides. [FRAME.md](FRAME.md) is how the frame fits together, [THEME.md](THEME.md) the colours, [COMPONENTS.md](COMPONENTS.md) walks every package's example, [EFFECTS.md](EFFECTS.md) and [ANIMATIONS.md](ANIMATIONS.md) their packages, [CONVENTIONS.md](CONVENTIONS.md) the rules inside a package, and this page the layout. Each package's own `README.md`, next to its code, is generated from its doc comments by `make docs`. `pages/` holds the website, a landing page and the guides served by docsify: `make stage-docs` assembles it with the guides and recordings into `site/`, which CI publishes to GitHub Pages, and `make serve-docs` serves it locally.
 - **`scripts/`**: `make/` holds the Makefile's includes, one per concern (tools, docs, tests, security, release), and `bash/` and `pwsh/` the scripts they call, the same script twice so `make` works on Windows and on Unix alike.

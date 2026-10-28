@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bezel · A TUI framework for Bubble Tea</title>
+  <meta name="description" content="A TUI framework for Bubble Tea v2. bezel owns the frame: resize, tabs, focus, overlays, the status row and the key legend. Your app draws what goes inside the panes.">
+  <meta property="og:title" content="bezel · A TUI framework for Bubble Tea">
+  <meta property="og:description" content="The frame, components, effects and animations for Bubble Tea v2, under one theme.">
+  <meta property="og:image" content="https://lucasassuncao.github.io/bezel/icons/bezel_horizontal_on_dark.png">
+  <meta property="og:url" content="https://lucasassuncao.github.io/bezel/">
+  <link rel="icon" href="icons/bezel_icon_on_dark.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+<canvas id="backdrop" aria-hidden="true"></canvas>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="bezel home">
+      <picture>
+        <source media="(prefers-color-scheme: light)" srcset="icons/bezel_horizontal_on_light.png">
+        <img src="icons/bezel_horizontal_on_dark.png" alt="bezel">
+      </picture>
+    </a>
+    <ul>
+      <li><a href="guide.html#/EXAMPLE">Guide</a></li>
+      <li><a href="guide.html#/COMPONENTS">Components</a></li>
+      <li class="wide"><a href="https://pkg.go.dev/github.com/lucasassuncao/bezel">API</a></li>
+      <li><a href="https://github.com/lucasassuncao/bezel">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="icons/bezel_horizontal_on_light.png">
+      <img class="logo" src="icons/bezel_horizontal_on_dark.png" alt="bezel">
+    </picture>
+    <h1>Frame your <span class="hl">terminal</span><br>apps in Go.<span class="caret" aria-hidden="true"></span></h1>
+    <p class="lede">A TUI framework for <a href="https://github.com/charmbracelet/bubbletea">Bubble Tea</a> v2. bezel owns the frame: resize, tabs, focus, overlays, the status row and the key legend. Your app draws what goes <em>inside</em> the panes, with components, effects and animations that share one theme.</p>
+    <div class="buttons">
+      <a class="btn primary" href="guide.html#/EXAMPLE">Get started</a>
+      <a class="btn" href="#gallery">See it run</a>
+      <a class="btn" href="https://pkg.go.dev/github.com/lucasassuncao/bezel">API docs</a>
+    </div>
+    <div class="install">
+      <code><span class="prompt">$ </span><span id="install-cmd">go get github.com/lucasassuncao/bezel</span></code>
+      <button class="copy" type="button" data-copy="install-cmd">copy</button>
+    </div>
+
+    <div class="term showcase">
+      <div class="bar"><i></i><i></i><i></i><span>go run ./examples/app</span></div>
+      <img src="recordings/app.gif" alt="A task list built with bezel: a list, a progress line, a prompt and a confirm" width="1000" height="640">
+    </div>
+
+    <div class="stats">
+      <div><b>21</b><span>components</span></div>
+      <div><b>59</b><span>themes, light and dark</span></div>
+      <div><b>20+</b><span>text animations</span></div>
+      <div><b>9</b><span>ready-made dialogs</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="shape">
+    <div class="wrap split">
+      <div>
+        <div class="kicker">The shape of an app</div>
+        <h2>You draw the panes.<br>bezel draws the rest.</h2>
+        <ol>
+          <li><b>Declare the screen.</b> A tree of <code>Columns</code>, <code>Rows</code>, <code>Fixed</code> and <code>Fill</code>, resolved to rects on every resize. <code>Collapse</code> drops a pane below a width.</li>
+          <li><b>Hand the shell your messages first.</b> Overlays, the status input and every key action are its; whatever it leaves is yours.</li>
+          <li><b>Return a body per pane.</b> A pane missing from the map gives its space back that frame.</li>
+        </ol>
+      </div>
+      <div class="term">
+        <div class="bar"><i></i><i></i><i></i><span>main.go</span></div>
+<pre class="code"><code>sh := shell.<span class="f">New</span>(shell.<span class="t">Config</span>{
+    Layout: layout.<span class="f">Columns</span>(
+        layout.<span class="f">Fixed</span>(<span class="s">"list"</span>, layout.<span class="f">Ratio</span>(1, 3), layout.<span class="f">Min</span>(26)),
+        layout.<span class="f">Fill</span>(<span class="s">"detail"</span>),
+    ).<span class="f">Collapse</span>(72, <span class="s">"detail"</span>),
+    Tabs:    tabs,
+    Theme:   theme.<span class="f">Resolve</span>(theme.Mint, <span class="k">true</span>),
+    Title:   <span class="s">"my app"</span>,
+    Actions: []shell.<span class="t">Action</span>{shell.<span class="f">Help</span>(), shell.<span class="f">Quit</span>()},
+})
+
+<span class="k">func</span> (m model) <span class="f">Update</span>(msg tea.<span class="t">Msg</span>) (tea.<span class="t">Model</span>, tea.<span class="t">Cmd</span>) {
+    <span class="k">var</span> handled <span class="t">bool</span>
+    <span class="k">var</span> cmd tea.<span class="t">Cmd</span>
+    <span class="k">if</span> m.sh, handled, cmd = m.sh.<span class="f">Update</span>(msg); handled {
+        <span class="k">return</span> m, cmd <span class="c">// resize, overlays and every action</span>
+    }
+    <span class="c">// the messages your actions send, and the keys no action claims</span>
+}
+
+<span class="k">func</span> (m model) <span class="f">View</span>() tea.<span class="t">View</span> {
+    <span class="k">return</span> tea.<span class="f">NewView</span>(m.sh.<span class="f">View</span>(<span class="k">map</span>[<span class="t">string</span>]shell.<span class="t">Pane</span>{
+        <span class="s">"list"</span>:   {Title: <span class="s">"Items"</span>, Body: m.renderList},
+        <span class="s">"detail"</span>: {Title: m.path, Body: m.renderDetail},
+    }))
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <div class="wrap">
+      <div class="kicker">Built with bezel</div>
+      <h2>Every recording is a real program.</h2>
+      <p class="sub">Every component has an example under <code>examples/</code> and a recording of it running; the effects and animations have a gallery each. Run any of them with <code>go run ./examples/&lt;group&gt;/&lt;name&gt;</code>.</p>
+      <div class="gallery">
+        <a class="card" href="guide.html#/COMPONENTS?id=shell">
+          <img loading="lazy" src="recordings/frame/shell.gif" alt="The shell with two tabs and two panes">
+          <div><h3>shell</h3><p>Tabs, focus, a status that clears itself and a busy spinner.</p></div>
+        </a>
+        <a class="card" href="guide.html#/COMPONENTS?id=overlay">
+          <img loading="lazy" src="recordings/frame/overlay.gif" alt="Alert, confirm, prompt, help, pager and file picker dialogs">
+          <div><h3>overlay</h3><p>Alert, confirm, prompt, help, a pager and a file picker.</p></div>
+        </a>
+        <a class="card" href="guide.html#/COMPONENTS?id=form">
+          <img loading="lazy" src="recordings/component/form.gif" alt="A form with an input, a select, radio, toggle and checkbox">
+          <div><h3>form</h3><p>Input, Select, Radio, Toggle, Checkbox and Button in one column.</p></div>
+        </a>
+        <a class="card" href="guide.html#/COMPONENTS?id=table">
+          <img loading="lazy" src="recordings/component/table.gif" alt="A table with a cursor over scrolling rows">
+          <div><h3>table</h3><p>Columns sized to their contents, rows under a fixed header.</p></div>
+        </a>
+        <a class="card" href="guide.html#/COMPONENTS?id=filepicker">
+          <img loading="lazy" src="recordings/component/filepicker.gif" alt="A file picker browsing directories">
+          <div><h3>filepicker</h3><p>Directories browsed in a pane, with size and permissions.</p></div>
+        </a>
+        <a class="card" href="guide.html#/COMPONENTS?id=tree">
+          <img loading="lazy" src="recordings/component/tree.gif" alt="An expandable tree">
+          <div><h3>tree</h3><p>An expandable tree, generic over your node type.</p></div>
+        </a>
+        <a class="card" href="guide.html#/COMPONENTS?id=viewport">
+          <img loading="lazy" src="recordings/component/viewport.gif" alt="Scrollable text with search highlights">
+          <div><h3>viewport</h3><p>Scrollable text, wrapped or panned, with search highlights.</p></div>
+        </a>
+        <a class="card" href="guide.html#/EFFECTS?id=light">
+          <img loading="lazy" src="recordings/effect/light.gif" alt="Lights moving over a drawn block">
+          <div><h3>effect</h3><p>Fades, dissolves, slides and lights over any drawn block.</p></div>
+        </a>
+        <a class="card" href="guide.html#/ANIMATIONS?id=scenes">
+          <img loading="lazy" src="recordings/animation/scene.gif" alt="Rain, snow and fireworks scenes">
+          <div><h3>animation</h3><p>Tweens, springs, physics, text that moves and whole scenes.</p></div>
+        </a>
+      </div>
+      <p class="more"><a href="guide.html#/COMPONENTS">Browse every package →</a></p>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="kicker">What is in the box</div>
+      <h2>Everything around the panes, and most of what goes in them.</h2>
+      <p class="sub">One module, no cgo, built on Bubble Tea v2 and Lip Gloss v2.</p>
+      <div class="features">
+        <div class="feature">
+          <h3><span>▣</span> The frame</h3>
+          <p>A <code>shell.Shell</code> you embed owns resize, tabs, focus, the status row, a busy spinner, the overlay stack and the key legend.</p>
+        </div>
+        <div class="feature">
+          <h3><span>⌨</span> Keys as actions</h3>
+          <p>Each <code>Action</code> is a key, a name and what it runs. The same value drives the key, the legend and the <code>:</code> command palette.</p>
+        </div>
+        <div class="feature">
+          <h3><span>▦</span> Layouts that collapse</h3>
+          <p>Columns and rows of fixed and filling panes, with minimums, maximums and ratios. Below a width, a pane steps aside.</p>
+        </div>
+        <div class="feature">
+          <h3><span>◐</span> One theme</h3>
+          <p>Semantic roles, not colours. 59 presets, light and dark, and <code>WithStyles</code> to recolour one component without touching the rest.</p>
+        </div>
+        <div class="feature">
+          <h3><span>✦</span> Motion that is a message</h3>
+          <p>Tweens, springs, physics, effects and scenes run on frames that arrive as messages. <code>BEZEL_NO_MOTION</code> turns them off.</p>
+        </div>
+        <div class="feature">
+          <h3><span>✓</span> Tested by sending keys</h3>
+          <p>Every model is a value and every input a message, so a test drives the app with <code>bezeltest.Key("tab")</code> as the terminal would.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap cta">
+    <h2>Ready to frame your app?</h2>
+    <p class="sub" style="margin-inline:auto">Build a small task list step by step, from the model to its tests.</p>
+    <div class="buttons">
+      <a class="btn primary" href="guide.html#/EXAMPLE">Build a first app</a>
+      <a class="btn" href="guide.html#/FRAME">Read about the frame</a>
+      <a class="btn" href="https://github.com/lucasassuncao/bezel">Star on GitHub</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    bezel is MIT licensed · <a href="https://github.com/lucasassuncao/bezel">github.com/lucasassuncao/bezel</a>
+    <p class="made">made with <span class="heart" role="img" aria-label="love">❤️</span> by <a href="https://github.com/lucasassuncao">Lucas Assunção</a></p>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll("[data-copy]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var text = document.getElementById(b.dataset.copy).textContent;
+      navigator.clipboard.writeText(text).then(function () {
+        b.textContent = "copied";
+        setTimeout(function () { b.textContent = "copy"; }, 1500);
+      });
+    });
+  });
+</script>
+<script src="backdrop.js"></script>
+</body>
+</html>

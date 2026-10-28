@@ -3,6 +3,7 @@
 .PHONY: tools clean-tools
 
 # Tool versions
+CADDY_VERSION         := v2.11.7
 GITCLIFF_VERSION      := v2.14.2
 # gocover-cobertura has no tags: the pin is its last commit.
 GOCOBERTURA_VERSION   := v0.0.0-20180217150009-aaee18c8195c
@@ -36,7 +37,10 @@ GOVULNCHECK := $(GOBIN_DIR)/govulncheck$(EXE)
 GRYPE       := $(GOBIN_DIR)/grype$(EXE)
 SYFT        := $(GOBIN_DIR)/syft$(EXE)
 
-TOOLS := $(GOLANGCI) $(GOMARKDOC) $(GOTESTSUM) $(GOSEC) $(GOCOBERTURA) $(SYFT) $(GRYPE) $(GOVULNCHECK) $(GITCLIFF)
+# caddy serves the docs site locally.
+CADDY       := $(GOBIN_DIR)/caddy$(EXE)
+
+TOOLS := $(GOLANGCI) $(GOMARKDOC) $(GOTESTSUM) $(GOSEC) $(GOCOBERTURA) $(SYFT) $(GRYPE) $(GOVULNCHECK) $(GITCLIFF) $(CADDY)
 
 # `go install` takes its destination from GOBIN in the environment and has no
 # flag for it, so the tool rules - and only those - export it.
@@ -73,6 +77,10 @@ $(GRYPE):
 $(GOVULNCHECK):
 	@echo "Installing govulncheck $(GOVULNCHECK_VERSION)..."
 	@go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)
+
+$(CADDY):
+	@echo "Installing caddy $(CADDY_VERSION)..."
+	@go install github.com/caddyserver/caddy/v2/cmd/caddy@$(CADDY_VERSION)
 
 $(GITCLIFF):
 	@echo "Installing git-cliff $(GITCLIFF_VERSION)..."

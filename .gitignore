@@ -11,6 +11,9 @@ coverage/
 # Pinned tools installed by the Makefile
 .gobin/
 
+# Docs site, assembled by `make stage-docs` for serve-docs and GitHub Pages
+site/
+
 # Supply-chain scan output
 sbom.json
 

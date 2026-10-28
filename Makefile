@@ -29,6 +29,7 @@ script = $(SCRIPT_RUN) $(SCRIPT_DIR)/$(1)$(SCRIPT_EXT)
 MODULE_NAME  := bezel
 SBOM_FILE    := sbom.json
 COVERAGE_DIR := coverage
+SITE_DIR     := site
 
 MAKE_DIR := scripts/make
 
@@ -62,6 +63,6 @@ all: deps fmt docs lint security test-coverage govulncheck sbom vuln
 
 ## Remove coverage artifacts, installed tools and cache
 clean: clean-tools
-	@$(call script,remove) $(COVERAGE_DIR) $(SBOM_FILE)
+	@$(call script,remove) $(COVERAGE_DIR) $(SBOM_FILE) $(SITE_DIR)
 	@echo "Cleaning Go build and test cache..."
 	@go clean -cache -testcache

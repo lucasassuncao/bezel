@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bezel guide</title>
+  <meta name="description" content="Guides for bezel, a TUI framework for Bubble Tea v2.">
+  <link rel="icon" href="icons/bezel_icon_on_dark.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/themes/vue.css">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    // Links out of docs/ (../examples, ../component) only exist on GitHub.
+    var repo = "https://github.com/lucasassuncao/bezel/blob/main/";
+    window.$docsify = {
+      name: '<img class="logo-dark" src="icons/bezel_horizontal_on_dark.png" alt="bezel">' +
+        '<img class="logo-light" src="icons/bezel_horizontal_on_light.png" alt="bezel">',
+      nameLink: "./",
+      repo: "lucasassuncao/bezel",
+      homepage: "EXAMPLE.md",
+      loadSidebar: true,
+      subMaxLevel: 2,
+      relativePath: false,
+      search: { placeholder: "Search the guides", noData: "Nothing found", depth: 3 },
+      copyCode: { buttonText: "copy", successText: "copied" },
+      plugins: [
+        function (hook) {
+          hook.beforeEach(function (md) {
+            return md
+              .replace(/\]\(\.\.\/([^)\s]+)\)/g, "](" + repo + "$1)")
+              .replace(/\]\(recordings\)/g, "](" + repo + "docs/recordings)");
+          });
+          // The GIFs above a heading load late and push it down: scroll again.
+          hook.doneEach(function () {
+            var id = /[?&]id=([^&]+)/.exec(location.hash);
+            var el = id && document.getElementById(decodeURIComponent(id[1]));
+            if (!el) return;
+            [0, 600, 1500].forEach(function (ms) {
+              setTimeout(function () { el.scrollIntoView(); }, ms);
+            });
+          });
+        }
+      ]
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/docsify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2.1.1/dist/docsify-copy-code.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

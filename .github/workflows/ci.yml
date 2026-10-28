@@ -144,3 +144,60 @@ jobs:
           name: sbom
           path: sbom.json
           if-no-files-found: warn
+
+  # Publishes the docs site that `make stage-docs` assembles, after the checks
+  # confirm the docs are current, so Pages never ships pages they would catch.
+  pages:
+    name: Deploy GitHub Pages
+    needs: checks
+    # Never on a pull request: a deployment from an unmerged branch would
+    # overwrite the live site with it.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    # Job-level permissions replace the default for this job alone. contents:read
+    # is what checkout needs; the rest is what the Pages deployment needs.
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      actions: write
+
+    # Two deployments must never overlap, and cancelling one mid-publish can
+    # leave the site half-updated, so queue rather than cancel.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Stage site
+        run: make stage-docs
+
+      # A rerun of this workflow would find the previous attempt's artifact
+      # and refuse to upload another of the same name.
+      - name: Delete stale artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
+            --jq '.artifacts[] | select(.name == "github-pages") | .id' | \
+          xargs -I{} gh api --method DELETE repos/${{ github.repository }}/actions/artifacts/{} || true
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
