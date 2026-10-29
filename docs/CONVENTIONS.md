@@ -78,6 +78,7 @@ The mouse reaches a component the way a key does: the app hands it on, already m
 
 ## Constructor, With and Set
 
+- **`NewX` or a bare name**: a function that builds its own type is `NewX` (`NewTween` gives a `Tween`); one that is a variant of a type shared with others is named for the variant, as a preset is: `spinner.Dot()`, `effect.Wipe(...)`, `scene.Rain(...)`, `animation.Grow(...)`, `theme.Mint`.
 - **`NewX(required..., th)`**: what the component cannot work without, the theme last. A callback may be documented as accepting nil. A constructor returns only the value: a command to start it comes from `Init()`, as `form.Form.Init` does.
 - **Sizes are not required**: the rows and cells a pane has arrive after the first `tea.WindowSizeMsg`, so they come through `SetHeight` and `SetWidth` (`list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`; `browser` has `SetListHeight` and `SetPreviewHeight` for its two panes), never as a constructor parameter nor an argument of `View`. A model not sized yet draws nothing.
 - **`WithX(...) X`**: everything optional, set before the component is used. Each returns a copy and chains with the others. A switch takes its state, `WithX(on bool)`, never a bare `WithX()`, so an app can pass a setting it read: `WithWrap(cfg.Wrap)`, `WithYoyo(true)`.

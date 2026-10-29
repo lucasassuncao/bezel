@@ -199,8 +199,8 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(r Rubber\) Update\(msg tea.Msg\) \(Rubber, tea.Cmd\)](<#Rubber.Update>)
   - [func \(r Rubber\) WithGive\(g float64\) Rubber](<#Rubber.WithGive>)
 - [type Series](<#Series>)
-  - [func NewDraw\(values \[\]float64, dur time.Duration\) Series](<#NewDraw>)
-  - [func NewGrow\(values \[\]float64, dur time.Duration\) Series](<#NewGrow>)
+  - [func Draw\(values \[\]float64, dur time.Duration\) Series](<#Draw>)
+  - [func Grow\(values \[\]float64, dur time.Duration\) Series](<#Grow>)
   - [func \(s Series\) Active\(\) bool](<#Series.Active>)
   - [func \(s Series\) Advance\(now time.Time\) \(Series, bool\)](<#Series.Advance>)
   - [func \(s Series\) FrameAt\(at time.Time\) FrameMsg](<#Series.FrameAt>)
@@ -1991,23 +1991,23 @@ type Series struct {
 }
 ```
 
-<a name="NewDraw"></a>
-### func [NewDraw](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L34>)
+<a name="Draw"></a>
+### func [Draw](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L34>)
 
 ```go
-func NewDraw(values []float64, dur time.Duration) Series
+func Draw(values []float64, dur time.Duration) Series
 ```
 
-NewDraw reveals values from the left over dur, each rising as the front reaches it: a line drawn across a chart. Values not reached yet are zero.
+Draw reveals values from the left over dur, each rising as the front reaches it: a line drawn across a chart. Values not reached yet are zero.
 
-<a name="NewGrow"></a>
-### func [NewGrow](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L24>)
+<a name="Grow"></a>
+### func [Grow](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L24>)
 
 ```go
-func NewGrow(values []float64, dur time.Duration) Series
+func Grow(values []float64, dur time.Duration) Series
 ```
 
-NewGrow raises every one of values from zero over dur: bars that grow in.
+Grow raises every one of values from zero over dur: bars that grow in.
 
 <a name="Series.Active"></a>
 ### func \(Series\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L90>)

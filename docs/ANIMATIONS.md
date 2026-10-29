@@ -118,7 +118,7 @@ Every curve starts at exactly 0 and ends at exactly 1. `Back` and `Elastic` leav
 
 ![data](recordings/animation/data.gif)
 
-A `Series` animates the values a chart draws: `NewGrow` raises them all from zero, `NewDraw` reveals them from the left, and `Push` adds one at the right that rises while the oldest drops off. `Heat` moves a grid of values cell by cell for `chart.Heat`, and a `Spring` carries the needle of `progress.Gauge`.
+A `Series` animates the values a chart draws: `Grow` raises them all from zero, `Draw` reveals them from the left, and `Push` adds one at the right that rises while the oldest drops off. `Heat` moves a grid of values cell by cell for `chart.Heat`, and a `Spring` carries the needle of `progress.Gauge`.
 
 A `Race` moves a set of bars to new values and new places together, one that overtakes another sliding past it: sort its `Racers` by `Place` to draw them. `chart.Donut` draws a share as a ring filled clockwise from the top; carry the share on a `Float` and it sweeps.
 
@@ -204,12 +204,12 @@ text.NewTypewriter("Saved.", 400*time.Millisecond).WithYoyo(true).WithRepeat(1)
 
 ![scene](recordings/animation/scene.gif)
 
-The [`animation/scene`](../animation/scene) package draws a `Scene` from the time alone, at any size, for as long as it lives: `NewRain`, `NewSnow`, `NewConfetti`, `NewFireworks`, `NewStarfield`, `NewStatic`, `NewPlasma`, `NewFire`, `NewAurora`, `NewBubbles`, `NewSea` and `NewLife`, Conway's game on a board as large as the scene, each in the colours it is given.
+The [`animation/scene`](../animation/scene) package draws a `Scene` from the time alone, at any size, for as long as it lives: `Rain`, `Snow`, `Confetti`, `Fireworks`, `Starfield`, `Static`, `Plasma`, `Fire`, `Aurora`, `Bubbles`, `Sea` and `Life`, Conway's game on a board as large as the scene, each in the colours it is given.
 
 `View(w, h)` draws it on its own; `Under(block)` draws it behind a block, which hides it wherever the block draws something:
 
 ```go
-m.snow = scene.NewSnow(lipgloss.Color("#e0e8ff"))
+m.snow = scene.Snow(lipgloss.Color("#e0e8ff"))
 return m, m.snow.Tick()
 
 // on every animation.FrameMsg

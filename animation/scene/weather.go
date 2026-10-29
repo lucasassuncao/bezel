@@ -9,24 +9,24 @@ import (
 	"github.com/lucasassuncao/bezel/internal/cells"
 )
 
-// rainGlyphs is what a falling drop of NewRain is made of.
+// rainGlyphs is what a falling drop of Rain is made of.
 var rainGlyphs = []rune("ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄ0123456789")
 
 // confettiGlyphs turn over as a piece of confetti falls.
 var confettiGlyphs = []string{"▪", "•", "▴", "■", "◆"}
 
-// NewRain is a rain of characters down the columns, each drop's head in head
+// Rain is a rain of characters down the columns, each drop's head in head
 // and its trail in trail, fading out behind it.
-func NewRain(head, trail color.Color) Scene { return newScene(rain, head, trail) }
+func Rain(head, trail color.Color) Scene { return newScene(rain, head, trail) }
 
-// NewSnow is flakes in c drifting down and swaying.
-func NewSnow(c color.Color) Scene { return newScene(snow, c) }
+// Snow is flakes in c drifting down and swaying.
+func Snow(c color.Color) Scene { return newScene(snow, c) }
 
-// NewConfetti is pieces in colors tumbling down, faster than snow and wider.
-func NewConfetti(colors ...color.Color) Scene { return newScene(confetti, colors...) }
+// Confetti is pieces in colors tumbling down, faster than snow and wider.
+func Confetti(colors ...color.Color) Scene { return newScene(confetti, colors...) }
 
-// NewFireworks is rockets that climb and burst in colors, one after another.
-func NewFireworks(colors ...color.Color) Scene { return newScene(fireworks, colors...) }
+// Fireworks is rockets that climb and burst in colors, one after another.
+func Fireworks(colors ...color.Color) Scene { return newScene(fireworks, colors...) }
 
 // rain draws a drop in about two columns of three, each at its own speed and length.
 func (a Scene) rain(cv cells.Canvas, w, h int) {

@@ -12,12 +12,12 @@ import (
 // fireGlyphs are a flame's cells, coolest first.
 var fireGlyphs = []string{" ", ".", ":", "*", "#", "▓", "█"}
 
-// NewFire is flames licking up from the bottom, hot in hot and dying out
+// Fire is flames licking up from the bottom, hot in hot and dying out
 // in cool towards their tips: a campfire screen, a "this is fine".
-func NewFire(hot, cool color.Color) Scene { return newScene(fire, hot, cool) }
+func Fire(hot, cool color.Color) Scene { return newScene(fire, hot, cool) }
 
-// NewAurora is curtains of light in colors waving across the top of the sky.
-func NewAurora(colors ...color.Color) Scene { return newScene(aurora, colors...) }
+// Aurora is curtains of light in colors waving across the top of the sky.
+func Aurora(colors ...color.Color) Scene { return newScene(aurora, colors...) }
 
 // smooth is noise that changes gently between whole x and y: the hashes at
 // the four corners around a point, blended by how near each it is.

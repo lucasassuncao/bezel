@@ -10,7 +10,7 @@ import (
 	"github.com/lucasassuncao/bezel/internal/cells"
 )
 
-// staticGlyphs are the grains of NewStatic, lightest first.
+// staticGlyphs are the grains of Static, lightest first.
 var staticGlyphs = []string{" ", "░", "▒", "▓"}
 
 // starLayers are the starfield's depths: how fast each drifts, in columns a
@@ -20,15 +20,15 @@ var starLayers = []struct {
 	glyph string
 }{{0.5, "·"}, {1.5, "+"}, {3, "*"}}
 
-// NewStarfield is stars in c that twinkle and drift left, the nearer the faster.
-func NewStarfield(c color.Color) Scene { return newScene(starfield, c) }
+// Starfield is stars in c that twinkle and drift left, the nearer the faster.
+func Starfield(c color.Color) Scene { return newScene(starfield, c) }
 
-// NewStatic is the snow of a television with no signal, in c.
-func NewStatic(c color.Color) Scene { return newScene(static, c) }
+// Static is the snow of a television with no signal, in c.
+func Static(c color.Color) Scene { return newScene(static, c) }
 
-// NewPlasma is a field of colour between a and b that ripples without end,
+// Plasma is a field of colour between a and b that ripples without end,
 // drawn as background: a splash screen, an about page.
-func NewPlasma(a, b color.Color) Scene { return newScene(plasma, a, b) }
+func Plasma(a, b color.Color) Scene { return newScene(plasma, a, b) }
 
 // dark is the colour stars and static fade towards.
 var dark color.Color = color.RGBA{0, 0, 0, 255}

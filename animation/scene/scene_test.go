@@ -34,10 +34,10 @@ func size(t *testing.T, s string) (int, int) {
 // Every scene fills the size asked and changes as time passes.
 func TestSceneScenesFillTheirSizeAndMove(t *testing.T) {
 	for name, a := range map[string]Scene{
-		"rain": NewRain(white, grey), "snow": NewSnow(white), "confetti": NewConfetti(white, black),
-		"fireworks": NewFireworks(white), "stars": NewStarfield(white), "static": NewStatic(white), "plasma": NewPlasma(black, white),
-		"fire": NewFire(white, grey), "aurora": NewAurora(white, grey), "bubbles": NewBubbles(white), "sea": NewSea(white, grey),
-		"life": NewLife(white),
+		"rain": Rain(white, grey), "snow": Snow(white), "confetti": Confetti(white, black),
+		"fireworks": Fireworks(white), "stars": Starfield(white), "static": Static(white), "plasma": Plasma(black, white),
+		"fire": Fire(white, grey), "aurora": Aurora(white, grey), "bubbles": Bubbles(white), "sea": Sea(white, grey),
+		"life": Life(white),
 	} {
 		first := playedFor(a, 1).View(40, 12)
 		w, h := size(t, first)
@@ -49,19 +49,19 @@ func TestSceneScenesFillTheirSizeAndMove(t *testing.T) {
 }
 
 func TestSceneIsAFunctionOfTime(t *testing.T) {
-	a := NewRain(white, grey)
+	a := Rain(white, grey)
 	assert.Equal(t, playedFor(a, 3).View(30, 8), playedFor(a, 3).View(30, 8))
 }
 
 func TestSceneUnderKeepsTheBlockOnTop(t *testing.T) {
-	out := playedFor(NewStatic(white), 1).Under("hello\n     ")
+	out := playedFor(Static(white), 1).Under("hello\n     ")
 	lines := strings.Split(ansi.Strip(out), "\n")
 	assert.Equal(t, "hello", lines[0])
 	assert.Len(t, lines, 2)
 }
 
 func TestScenePlaysOnItsOwnFrames(t *testing.T) {
-	a := NewSnow(white)
+	a := Snow(white)
 	a, cmd := a.Update(a.FrameAt(time.Unix(1, 0)))
 	assert.NotNil(t, cmd)
 	a, done := a.Advance(time.Unix(100, 0))
@@ -71,7 +71,7 @@ func TestScenePlaysOnItsOwnFrames(t *testing.T) {
 
 func TestStillSceneHoldsItsFirstFrame(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
-	a := NewStarfield(white)
+	a := Starfield(white)
 	assert.False(t, a.Active())
 	assert.Equal(t, a.View(20, 5), playedFor(a, 5).View(20, 5))
 }

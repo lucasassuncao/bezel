@@ -20,9 +20,9 @@ func TestLifeFollowsConwaysRules(t *testing.T) {
 }
 
 func TestLifeIsTheSameBoardForTheSameTime(t *testing.T) {
-	a := playedFor(NewLife(white), 3).View(20, 8)
-	assert.Equal(t, a, playedFor(NewLife(white), 3).View(20, 8))
-	assert.NotEqual(t, a, playedFor(NewLife(white), 3.5).View(20, 8))
+	a := playedFor(Life(white), 3).View(20, 8)
+	assert.Equal(t, a, playedFor(Life(white), 3).View(20, 8))
+	assert.NotEqual(t, a, playedFor(Life(white), 3.5).View(20, 8))
 }
 
 func TestASeededBoardIsAboutAThirdAlive(t *testing.T) {

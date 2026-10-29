@@ -13,18 +13,18 @@ Package scene draws whole scenes from the time alone: rain, snow, confetti, fire
 ## Index
 
 - [type Scene](<#Scene>)
-  - [func NewAurora\(colors ...color.Color\) Scene](<#NewAurora>)
-  - [func NewBubbles\(c color.Color\) Scene](<#NewBubbles>)
-  - [func NewConfetti\(colors ...color.Color\) Scene](<#NewConfetti>)
-  - [func NewFire\(hot, cool color.Color\) Scene](<#NewFire>)
-  - [func NewFireworks\(colors ...color.Color\) Scene](<#NewFireworks>)
-  - [func NewLife\(c color.Color\) Scene](<#NewLife>)
-  - [func NewPlasma\(a, b color.Color\) Scene](<#NewPlasma>)
-  - [func NewRain\(head, trail color.Color\) Scene](<#NewRain>)
-  - [func NewSea\(foam, water color.Color\) Scene](<#NewSea>)
-  - [func NewSnow\(c color.Color\) Scene](<#NewSnow>)
-  - [func NewStarfield\(c color.Color\) Scene](<#NewStarfield>)
-  - [func NewStatic\(c color.Color\) Scene](<#NewStatic>)
+  - [func Aurora\(colors ...color.Color\) Scene](<#Aurora>)
+  - [func Bubbles\(c color.Color\) Scene](<#Bubbles>)
+  - [func Confetti\(colors ...color.Color\) Scene](<#Confetti>)
+  - [func Fire\(hot, cool color.Color\) Scene](<#Fire>)
+  - [func Fireworks\(colors ...color.Color\) Scene](<#Fireworks>)
+  - [func Life\(c color.Color\) Scene](<#Life>)
+  - [func Plasma\(a, b color.Color\) Scene](<#Plasma>)
+  - [func Rain\(head, trail color.Color\) Scene](<#Rain>)
+  - [func Sea\(foam, water color.Color\) Scene](<#Sea>)
+  - [func Snow\(c color.Color\) Scene](<#Snow>)
+  - [func Starfield\(c color.Color\) Scene](<#Starfield>)
+  - [func Static\(c color.Color\) Scene](<#Static>)
   - [func \(a Scene\) Active\(\) bool](<#Scene.Active>)
   - [func \(a Scene\) Advance\(now time.Time\) \(Scene, bool\)](<#Scene.Advance>)
   - [func \(a Scene\) FrameAt\(at time.Time\) animation.FrameMsg](<#Scene.FrameAt>)
@@ -45,113 +45,113 @@ type Scene struct {
 }
 ```
 
-<a name="NewAurora"></a>
-### func [NewAurora](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/fire.go#L20>)
+<a name="Aurora"></a>
+### func [Aurora](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/fire.go#L20>)
 
 ```go
-func NewAurora(colors ...color.Color) Scene
+func Aurora(colors ...color.Color) Scene
 ```
 
-NewAurora is curtains of light in colors waving across the top of the sky.
+Aurora is curtains of light in colors waving across the top of the sky.
 
-<a name="NewBubbles"></a>
-### func [NewBubbles](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/water.go#L17>)
+<a name="Bubbles"></a>
+### func [Bubbles](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/water.go#L17>)
 
 ```go
-func NewBubbles(c color.Color) Scene
+func Bubbles(c color.Color) Scene
 ```
 
-NewBubbles is bubbles in c rising from the bottom, swaying and growing, and popping at the top.
+Bubbles is bubbles in c rising from the bottom, swaying and growing, and popping at the top.
 
-<a name="NewConfetti"></a>
-### func [NewConfetti](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L26>)
+<a name="Confetti"></a>
+### func [Confetti](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L26>)
 
 ```go
-func NewConfetti(colors ...color.Color) Scene
+func Confetti(colors ...color.Color) Scene
 ```
 
-NewConfetti is pieces in colors tumbling down, faster than snow and wider.
+Confetti is pieces in colors tumbling down, faster than snow and wider.
 
-<a name="NewFire"></a>
-### func [NewFire](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/fire.go#L17>)
+<a name="Fire"></a>
+### func [Fire](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/fire.go#L17>)
 
 ```go
-func NewFire(hot, cool color.Color) Scene
+func Fire(hot, cool color.Color) Scene
 ```
 
-NewFire is flames licking up from the bottom, hot in hot and dying out in cool towards their tips: a campfire screen, a "this is fine".
+Fire is flames licking up from the bottom, hot in hot and dying out in cool towards their tips: a campfire screen, a "this is fine".
 
-<a name="NewFireworks"></a>
-### func [NewFireworks](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L29>)
+<a name="Fireworks"></a>
+### func [Fireworks](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L29>)
 
 ```go
-func NewFireworks(colors ...color.Color) Scene
+func Fireworks(colors ...color.Color) Scene
 ```
 
-NewFireworks is rockets that climb and burst in colors, one after another.
+Fireworks is rockets that climb and burst in colors, one after another.
 
-<a name="NewLife"></a>
-### func [NewLife](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/life.go#L19>)
+<a name="Life"></a>
+### func [Life](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/life.go#L19>)
 
 ```go
-func NewLife(c color.Color) Scene
+func Life(c color.Color) Scene
 ```
 
-NewLife is Conway's Game of Life in c, on a board as large as the scene that wraps at its edges, seeded afresh every twenty seconds.
+Life is Conway's Game of Life in c, on a board as large as the scene that wraps at its edges, seeded afresh every twenty seconds.
 
-<a name="NewPlasma"></a>
-### func [NewPlasma](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/sky.go#L31>)
+<a name="Plasma"></a>
+### func [Plasma](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/sky.go#L31>)
 
 ```go
-func NewPlasma(a, b color.Color) Scene
+func Plasma(a, b color.Color) Scene
 ```
 
-NewPlasma is a field of colour between a and b that ripples without end, drawn as background: a splash screen, an about page.
+Plasma is a field of colour between a and b that ripples without end, drawn as background: a splash screen, an about page.
 
-<a name="NewRain"></a>
-### func [NewRain](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L20>)
+<a name="Rain"></a>
+### func [Rain](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L20>)
 
 ```go
-func NewRain(head, trail color.Color) Scene
+func Rain(head, trail color.Color) Scene
 ```
 
-NewRain is a rain of characters down the columns, each drop's head in head and its trail in trail, fading out behind it.
+Rain is a rain of characters down the columns, each drop's head in head and its trail in trail, fading out behind it.
 
-<a name="NewSea"></a>
-### func [NewSea](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/water.go#L21>)
+<a name="Sea"></a>
+### func [Sea](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/water.go#L21>)
 
 ```go
-func NewSea(foam, water color.Color) Scene
+func Sea(foam, water color.Color) Scene
 ```
 
-NewSea is waves rolling along the bottom of the screen, foam in foam on their crests and the water in water below.
+Sea is waves rolling along the bottom of the screen, foam in foam on their crests and the water in water below.
 
-<a name="NewSnow"></a>
-### func [NewSnow](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L23>)
+<a name="Snow"></a>
+### func [Snow](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/weather.go#L23>)
 
 ```go
-func NewSnow(c color.Color) Scene
+func Snow(c color.Color) Scene
 ```
 
-NewSnow is flakes in c drifting down and swaying.
+Snow is flakes in c drifting down and swaying.
 
-<a name="NewStarfield"></a>
-### func [NewStarfield](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/sky.go#L24>)
+<a name="Starfield"></a>
+### func [Starfield](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/sky.go#L24>)
 
 ```go
-func NewStarfield(c color.Color) Scene
+func Starfield(c color.Color) Scene
 ```
 
-NewStarfield is stars in c that twinkle and drift left, the nearer the faster.
+Starfield is stars in c that twinkle and drift left, the nearer the faster.
 
-<a name="NewStatic"></a>
-### func [NewStatic](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/sky.go#L27>)
+<a name="Static"></a>
+### func [Static](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/sky.go#L27>)
 
 ```go
-func NewStatic(c color.Color) Scene
+func Static(c color.Color) Scene
 ```
 
-NewStatic is the snow of a television with no signal, in c.
+Static is the snow of a television with no signal, in c.
 
 <a name="Scene.Active"></a>
 ### func \(Scene\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L119>)

@@ -9,7 +9,7 @@ import (
 
 func TestGrowRaisesEveryValueFromZero(t *testing.T) {
 	start := time.Unix(1000, 0)
-	s := NewGrow([]float64{10, 20}, 100*ms)
+	s := Grow([]float64{10, 20}, 100*ms)
 	assert.Equal(t, []float64{0, 0}, s.Values())
 	s, _ = s.Advance(start)
 	s, done := s.Advance(start.Add(time.Second))
@@ -19,7 +19,7 @@ func TestGrowRaisesEveryValueFromZero(t *testing.T) {
 
 func TestDrawRevealsFromTheLeft(t *testing.T) {
 	start := time.Unix(1000, 0)
-	s := NewDraw([]float64{4, 4, 4, 4}, 100*ms)
+	s := Draw([]float64{4, 4, 4, 4}, 100*ms)
 	s.run.Ease = Linear
 	s, _ = s.Advance(start)
 	s, _ = s.Advance(start.Add(50 * ms))
@@ -28,7 +28,7 @@ func TestDrawRevealsFromTheLeft(t *testing.T) {
 
 func TestPushRisesAtTheRightAndKeepsAWindow(t *testing.T) {
 	start := time.Unix(1000, 0)
-	s := NewGrow([]float64{1, 2, 3}, 100*ms)
+	s := Grow([]float64{1, 2, 3}, 100*ms)
 	s, _ = s.Advance(start)
 	s, _ = s.Advance(start.Add(time.Second))
 	s, cmd := s.Push(9, 3)
@@ -41,7 +41,7 @@ func TestPushRisesAtTheRightAndKeepsAWindow(t *testing.T) {
 
 func TestSeriesWithDurationTimesTheNextPush(t *testing.T) {
 	start := time.Unix(1000, 0)
-	s, _ := NewGrow(nil, 0).WithDuration(100*ms).WithEase(Linear).Push(10, 0)
+	s, _ := Grow(nil, 0).WithDuration(100*ms).WithEase(Linear).Push(10, 0)
 	assert.True(t, s.Active())
 	s, _ = s.Advance(start)
 	s, _ = s.Advance(start.Add(25 * ms))

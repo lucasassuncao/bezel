@@ -20,8 +20,8 @@ type Series struct {
 	run      frames.Run
 }
 
-// NewGrow raises every one of values from zero over dur: bars that grow in.
-func NewGrow(values []float64, dur time.Duration) Series {
+// Grow raises every one of values from zero over dur: bars that grow in.
+func Grow(values []float64, dur time.Duration) Series {
 	s := Series{from: make([]float64, len(values)), to: slices.Clone(values), dur: dur, run: frames.NewRun(dur)}
 	if !s.Active() {
 		s.p = 1
@@ -29,10 +29,10 @@ func NewGrow(values []float64, dur time.Duration) Series {
 	return s
 }
 
-// NewDraw reveals values from the left over dur, each rising as the front
+// Draw reveals values from the left over dur, each rising as the front
 // reaches it: a line drawn across a chart. Values not reached yet are zero.
-func NewDraw(values []float64, dur time.Duration) Series {
-	s := NewGrow(values, dur)
+func Draw(values []float64, dur time.Duration) Series {
+	s := Grow(values, dur)
 	s.draw = true
 	return s
 }

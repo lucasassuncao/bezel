@@ -12,13 +12,13 @@ import (
 // bubbleGlyphs grow as a bubble rises, and the last is it popping.
 var bubbleGlyphs = []string{".", "o", "O", "*"}
 
-// NewBubbles is bubbles in c rising from the bottom, swaying and growing,
+// Bubbles is bubbles in c rising from the bottom, swaying and growing,
 // and popping at the top.
-func NewBubbles(c color.Color) Scene { return newScene(bubbles, c) }
+func Bubbles(c color.Color) Scene { return newScene(bubbles, c) }
 
-// NewSea is waves rolling along the bottom of the screen, foam in foam on
+// Sea is waves rolling along the bottom of the screen, foam in foam on
 // their crests and the water in water below.
-func NewSea(foam, water color.Color) Scene { return newScene(sea, foam, water) }
+func Sea(foam, water color.Color) Scene { return newScene(sea, foam, water) }
 
 // bubbles draws about one bubble for every forty cells, each on its own column,
 // speed and sway.

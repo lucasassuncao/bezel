@@ -19,25 +19,25 @@ var sceneKinds = []struct {
 	make func(th theme.Resolved) scene.Scene
 }{
 	{"rain", func(th theme.Resolved) scene.Scene {
-		return scene.NewRain(th.Success.GetForeground(), animation.Blend(black, th.Success.GetForeground(), 0.6))
+		return scene.Rain(th.Success.GetForeground(), animation.Blend(black, th.Success.GetForeground(), 0.6))
 	}},
-	{"snow", func(th theme.Resolved) scene.Scene { return scene.NewSnow(th.Bold.GetForeground()) }},
-	{"confetti", func(th theme.Resolved) scene.Scene { return scene.NewConfetti(seriesColors(th)...) }},
-	{"fireworks", func(th theme.Resolved) scene.Scene { return scene.NewFireworks(seriesColors(th)...) }},
-	{"starfield", func(th theme.Resolved) scene.Scene { return scene.NewStarfield(th.Bold.GetForeground()) }},
-	{"static", func(th theme.Resolved) scene.Scene { return scene.NewStatic(th.Bold.GetForeground()) }},
+	{"snow", func(th theme.Resolved) scene.Scene { return scene.Snow(th.Bold.GetForeground()) }},
+	{"confetti", func(th theme.Resolved) scene.Scene { return scene.Confetti(seriesColors(th)...) }},
+	{"fireworks", func(th theme.Resolved) scene.Scene { return scene.Fireworks(seriesColors(th)...) }},
+	{"starfield", func(th theme.Resolved) scene.Scene { return scene.Starfield(th.Bold.GetForeground()) }},
+	{"static", func(th theme.Resolved) scene.Scene { return scene.Static(th.Bold.GetForeground()) }},
 	{"plasma", func(th theme.Resolved) scene.Scene {
-		return scene.NewPlasma(black, animation.Blend(black, th.Accent.GetForeground(), 0.6))
+		return scene.Plasma(black, animation.Blend(black, th.Accent.GetForeground(), 0.6))
 	}},
 	{"fire", func(th theme.Resolved) scene.Scene {
-		return scene.NewFire(th.Warning.GetForeground(), th.Danger.GetForeground())
+		return scene.Fire(th.Warning.GetForeground(), th.Danger.GetForeground())
 	}},
-	{"aurora", func(th theme.Resolved) scene.Scene { return scene.NewAurora(seriesColors(th)[:3]...) }},
-	{"bubbles", func(th theme.Resolved) scene.Scene { return scene.NewBubbles(th.Info.GetForeground()) }},
+	{"aurora", func(th theme.Resolved) scene.Scene { return scene.Aurora(seriesColors(th)[:3]...) }},
+	{"bubbles", func(th theme.Resolved) scene.Scene { return scene.Bubbles(th.Info.GetForeground()) }},
 	{"sea", func(th theme.Resolved) scene.Scene {
-		return scene.NewSea(th.Bold.GetForeground(), animation.Blend(black, th.Info.GetForeground(), 0.5))
+		return scene.Sea(th.Bold.GetForeground(), animation.Blend(black, th.Info.GetForeground(), 0.5))
 	}},
-	{"life", func(th theme.Resolved) scene.Scene { return scene.NewLife(th.Success.GetForeground()) }},
+	{"life", func(th theme.Resolved) scene.Scene { return scene.Life(th.Success.GetForeground()) }},
 }
 
 // seriesColors are the theme's series colours, for the scenes that want many.

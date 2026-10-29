@@ -62,9 +62,9 @@ func newDatas() datas {
 		spark[i] = 50 + 30*math.Sin(float64(i)/3)
 	}
 	return datas{
-		bars:  animation.NewGrow(barValues, 0),
-		area:  animation.NewDraw(waves(chartWidth), 0),
-		spark: animation.NewGrow(spark, 0),
+		bars:  animation.Grow(barValues, 0),
+		area:  animation.Draw(waves(chartWidth), 0),
+		spark: animation.Grow(spark, 0),
 		gauge: animation.NewSpring(readouts[0]).WithDamping(0.5),
 		heat:  animation.NewHeat(heats[0], 900*time.Millisecond),
 	}
@@ -72,8 +72,8 @@ func newDatas() datas {
 
 // replay grows the bars and draws the line again.
 func (d datas) replay() datas {
-	d.bars = animation.NewGrow(barValues, grow).WithEase(animation.Out(animation.Back))
-	d.area = animation.NewDraw(waves(chartWidth), grow)
+	d.bars = animation.Grow(barValues, grow).WithEase(animation.Out(animation.Back))
+	d.area = animation.Draw(waves(chartWidth), grow)
 	return d
 }
 

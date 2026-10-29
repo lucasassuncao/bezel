@@ -14,9 +14,9 @@ const (
 	lifeSpan = 160
 )
 
-// NewLife is Conway's Game of Life in c, on a board as large as the scene
+// Life is Conway's Game of Life in c, on a board as large as the scene
 // that wraps at its edges, seeded afresh every twenty seconds.
-func NewLife(c color.Color) Scene { return newScene(life, c) }
+func Life(c color.Color) Scene { return newScene(life, c) }
 
 // life draws the board at the generation the time has reached, worked out
 // from its seed: the same time draws the same board at the same size.

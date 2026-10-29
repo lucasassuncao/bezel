@@ -9,18 +9,18 @@ import (
 )
 
 func TestRainFallsDownItsColumns(t *testing.T) {
-	a := NewRain(white, grey)
+	a := Rain(white, grey)
 	assert.NotEqual(t, strings.Repeat(" ", 20), strings.Split(ansi.Strip(playedFor(a, 2).View(20, 10)), "\n")[5], "drops cross the middle")
 }
 
 func TestConfettiTurnsAndColours(t *testing.T) {
-	v := playedFor(NewConfetti(white, black), 1).View(30, 10)
+	v := playedFor(Confetti(white, black), 1).View(30, 10)
 	assert.Contains(t, v, "\x1b[")
 }
 
 // A firework climbs from the bottom row before it bursts.
 func TestFireworksClimbThenBurst(t *testing.T) {
-	a := NewFireworks(white)
+	a := Fireworks(white)
 	early := strings.Split(ansi.Strip(playedFor(a, 0.05).View(30, 12)), "\n")
 	assert.Contains(t, early[11]+early[10], "|")
 	late := ansi.Strip(playedFor(a, 1).View(30, 12))
