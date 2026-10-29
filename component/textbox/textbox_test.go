@@ -474,7 +474,7 @@ func TestCursorModesAndTheTerminalCursor(t *testing.T) {
 	require.NotNil(t, cmd)
 	require.Equal(t, cursor.Blinking, m.CursorMode())
 
-	m, cmd = New(th()).SetWidth(20).SetHeight(2).WithTerminalCursor().SetValue("a\nb\nxyz").MoveTo(2, 1).Focus()
+	m, cmd = New(th()).SetWidth(20).SetHeight(2).WithTerminalCursor(true).SetValue("a\nb\nxyz").MoveTo(2, 1).Focus()
 	require.Nil(t, cmd, "the terminal blinks its own")
 	c := m.TerminalCursor()
 	require.Equal(t, draw.GutterWidth+1, c.X)

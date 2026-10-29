@@ -40,8 +40,8 @@ func (g Gradient) WithRepeat(n int) Gradient {
 }
 
 // WithYoyo sends every other turn back the way it came.
-func (g Gradient) WithYoyo() Gradient {
-	g.run.Yoyo = true
+func (g Gradient) WithYoyo(on bool) Gradient {
+	g.run.Yoyo = on
 	return g
 }
 

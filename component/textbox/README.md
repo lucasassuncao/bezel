@@ -65,7 +65,7 @@ Package textbox is a multi\-line text field: its lines numbered in draw's gutter
   - [func \(m Model\) WithPrompt\(p string\) Model](<#Model.WithPrompt>)
   - [func \(m Model\) WithPromptFunc\(width int, fn func\(line int\) string\) Model](<#Model.WithPromptFunc>)
   - [func \(m Model\) WithStyles\(edit func\(Styles\) Styles\) Model](<#Model.WithStyles>)
-  - [func \(m Model\) WithTerminalCursor\(\) Model](<#Model.WithTerminalCursor>)
+  - [func \(m Model\) WithTerminalCursor\(on bool\) Model](<#Model.WithTerminalCursor>)
   - [func \(m Model\) WithValue\(s string\) Model](<#Model.WithValue>)
   - [func \(m Model\) Word\(\) string](<#Model.Word>)
 - [type Position](<#Position>)
@@ -577,7 +577,7 @@ WithStyles changes the styles derived from the theme through edit, now and after
 ### func \(Model\) [WithTerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L567>)
 
 ```go
-func (m Model) WithTerminalCursor() Model
+func (m Model) WithTerminalCursor(on bool) Model
 ```
 
 WithTerminalCursor leaves the caret to the terminal's own cursor: View paints none, and TerminalCursor says where to put the real one.

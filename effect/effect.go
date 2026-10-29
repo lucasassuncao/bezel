@@ -154,8 +154,8 @@ func (e Effect) WithRepeat(n int) Effect {
 }
 
 // WithYoyo sends every other run of e back: in, then out again.
-func (e Effect) WithYoyo() Effect {
-	e.run.Yoyo = true
+func (e Effect) WithYoyo(on bool) Effect {
+	e.run.Yoyo = on
 	return e
 }
 

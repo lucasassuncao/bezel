@@ -66,7 +66,7 @@ Package effect changes a block that is already drawn, cell by cell: fades, disso
   - [func \(e Effect\) WithPattern\(p Pattern\) Effect](<#Effect.WithPattern>)
   - [func \(e Effect\) WithRepeat\(n int\) Effect](<#Effect.WithRepeat>)
   - [func \(e Effect\) WithStrength\(k float64\) Effect](<#Effect.WithStrength>)
-  - [func \(e Effect\) WithYoyo\(\) Effect](<#Effect.WithYoyo>)
+  - [func \(e Effect\) WithYoyo\(on bool\) Effect](<#Effect.WithYoyo>)
   - [func \(e Effect\) Within\(x, y, w, h int\) Effect](<#Effect.Within>)
 - [type Pattern](<#Pattern>)
   - [func Checker\(\) Pattern](<#Checker>)
@@ -603,7 +603,7 @@ WithStrength sets how far a light goes, in \[0,1\]: the share of c a tint, pulse
 ### func \(Effect\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L157>)
 
 ```go
-func (e Effect) WithYoyo() Effect
+func (e Effect) WithYoyo(on bool) Effect
 ```
 
 WithYoyo sends every other run of e back: in, then out again.

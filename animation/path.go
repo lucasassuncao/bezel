@@ -94,8 +94,8 @@ func (p Path) WithRepeat(n int) Path {
 }
 
 // WithYoyo travels every other pass of p back.
-func (p Path) WithYoyo() Path {
-	p.run.Yoyo = true
+func (p Path) WithYoyo(on bool) Path {
+	p.run.Yoyo = on
 	return p
 }
 

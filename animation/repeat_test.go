@@ -43,7 +43,7 @@ func TestRepeatRunsAgainThenLands(t *testing.T) {
 func TestYoyoComesBack(t *testing.T) {
 	moving(t)
 	start := time.Unix(1000, 0)
-	f := NewFloat(0, 1, 100*ms).WithEase(Linear).WithYoyo().WithRepeat(1)
+	f := NewFloat(0, 1, 100*ms).WithEase(Linear).WithYoyo(true).WithRepeat(1)
 	assert.InDelta(t, 0.75, at(f, start, 25*ms, 125*ms).Cur, 1e-9, "on the way back")
 	f = at(f, start, 250*ms)
 	assert.False(t, f.Active())
@@ -55,7 +55,7 @@ func TestYoyoComesBack(t *testing.T) {
 
 func TestForeverNeverLands(t *testing.T) {
 	moving(t)
-	f := at(NewFloat(0, 1, 100*ms).WithYoyo().WithRepeat(Forever), time.Unix(1000, 0), time.Hour)
+	f := at(NewFloat(0, 1, 100*ms).WithYoyo(true).WithRepeat(Forever), time.Unix(1000, 0), time.Hour)
 	assert.True(t, f.Active())
 	assert.NotNil(t, f.Tick())
 }
@@ -64,7 +64,7 @@ func TestForeverNeverLands(t *testing.T) {
 func TestTweenTakesDelayRepeatAndYoyo(t *testing.T) {
 	moving(t)
 	start := time.Unix(1000, 0)
-	tw := NewTween(0, 10, 100*ms).WithEase(Linear).WithDelay(100 * ms).WithYoyo().WithRepeat(1)
+	tw := NewTween(0, 10, 100*ms).WithEase(Linear).WithDelay(100 * ms).WithYoyo(true).WithRepeat(1)
 	tw, _ = tw.Update(tw.FrameAt(start))
 	tw, _ = tw.Update(tw.FrameAt(start.Add(150 * ms)))
 	assert.Equal(t, 5, tw.Cur)
@@ -80,7 +80,7 @@ func TestTweenTakesDelayRepeatAndYoyo(t *testing.T) {
 func TestAFadeRepeatsToo(t *testing.T) {
 	moving(t)
 	start := time.Unix(1000, 0)
-	fd := NewFade(black, white, 100*ms).WithEase(Linear).WithYoyo().WithRepeat(Forever)
+	fd := NewFade(black, white, 100*ms).WithEase(Linear).WithYoyo(true).WithRepeat(Forever)
 	fd, _ = fd.Update(fd.FrameAt(start))
 	fd, _ = fd.Update(fd.FrameAt(start.Add(150 * ms)))
 	assert.True(t, fd.Active())

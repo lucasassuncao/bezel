@@ -42,14 +42,14 @@ Package input is a one\-line text field: the caret moves and kills a shell's lin
   - [func \(m Model\) WithCharLimit\(n int\) Model](<#Model.WithCharLimit>)
   - [func \(m Model\) WithClipboard\(read func\(\) \(string, error\)\) Model](<#Model.WithClipboard>)
   - [func \(m Model\) WithCursorMode\(mode cursor.Mode\) Model](<#Model.WithCursorMode>)
-  - [func \(m Model\) WithHidden\(\) Model](<#Model.WithHidden>)
+  - [func \(m Model\) WithHidden\(on bool\) Model](<#Model.WithHidden>)
   - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
   - [func \(m Model\) WithMask\(mask rune\) Model](<#Model.WithMask>)
   - [func \(m Model\) WithPlaceholder\(s string\) Model](<#Model.WithPlaceholder>)
   - [func \(m Model\) WithPrompt\(p string\) Model](<#Model.WithPrompt>)
   - [func \(m Model\) WithStyles\(edit func\(Styles\) Styles\) Model](<#Model.WithStyles>)
   - [func \(m Model\) WithSuggestions\(list \[\]string\) Model](<#Model.WithSuggestions>)
-  - [func \(m Model\) WithTerminalCursor\(\) Model](<#Model.WithTerminalCursor>)
+  - [func \(m Model\) WithTerminalCursor\(on bool\) Model](<#Model.WithTerminalCursor>)
   - [func \(m Model\) WithValidate\(fn func\(string\) error\) Model](<#Model.WithValidate>)
   - [func \(m Model\) WithValue\(s string\) Model](<#Model.WithValue>)
   - [func \(m Model\) WithWidth\(w int\) Model](<#Model.WithWidth>)
@@ -342,7 +342,7 @@ WithCursorMode sets how the caret shows while focused: blinking at the theme's p
 ### func \(Model\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L186>)
 
 ```go
-func (m Model) WithHidden() Model
+func (m Model) WithHidden(on bool) Model
 ```
 
 WithHidden draws none of the text, not even a mask, so not even its length shows; the caret stays on the first cell. Word keys run to the ends.
@@ -405,7 +405,7 @@ WithSuggestions offers to complete the text with any of list it starts, matched 
 ### func \(Model\) [WithTerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L219>)
 
 ```go
-func (m Model) WithTerminalCursor() Model
+func (m Model) WithTerminalCursor(on bool) Model
 ```
 
 WithTerminalCursor leaves the caret to the terminal's own cursor: View paints none, and TerminalCursor says where to put the real one.

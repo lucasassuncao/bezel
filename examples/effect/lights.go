@@ -31,17 +31,17 @@ var lightKinds = []struct {
 	{"flash", func(th theme.Resolved) effect.Effect { return effect.Flash(th.Warning.GetForeground(), play) }},
 	{"invert", func(theme.Resolved) effect.Effect { return effect.Invert(700 * time.Millisecond) }},
 	{"spotlight", func(theme.Resolved) effect.Effect {
-		return effect.Spotlight(2, 1, 26, 1, black, 600*time.Millisecond).WithYoyo().WithDelay(0).WithRepeat(1)
+		return effect.Spotlight(2, 1, 26, 1, black, 600*time.Millisecond).WithYoyo(true).WithDelay(0).WithRepeat(1)
 	}},
-	{"vignette", func(theme.Resolved) effect.Effect { return effect.Vignette(black, play).WithYoyo().WithRepeat(1) }},
-	{"contrast", func(theme.Resolved) effect.Effect { return effect.Contrast(0.2, play).WithYoyo().WithRepeat(1) }},
+	{"vignette", func(theme.Resolved) effect.Effect { return effect.Vignette(black, play).WithYoyo(true).WithRepeat(1) }},
+	{"contrast", func(theme.Resolved) effect.Effect { return effect.Contrast(0.2, play).WithYoyo(true).WithRepeat(1) }},
 	{"hover", func(th theme.Resolved) effect.Effect {
 		return effect.Hover(black, animation.Blend(black, th.Accent.GetForeground(), 0.3), 300*time.Millisecond).
-			WithYoyo().WithRepeat(1).WithDelay(0)
+			WithYoyo(true).WithRepeat(1).WithDelay(0)
 	}},
-	{"melt", func(theme.Resolved) effect.Effect { return effect.Melt(nil, play).WithYoyo().WithRepeat(1) }},
+	{"melt", func(theme.Resolved) effect.Effect { return effect.Melt(nil, play).WithYoyo(true).WithRepeat(1) }},
 	{"enter", func(theme.Resolved) effect.Effect { return effect.Enter(black) }},
-	{"exit", func(theme.Resolved) effect.Effect { return effect.Exit(black).WithYoyo().WithRepeat(1) }},
+	{"exit", func(theme.Resolved) effect.Effect { return effect.Exit(black).WithYoyo(true).WithRepeat(1) }},
 	{"attention", func(th theme.Resolved) effect.Effect { return effect.Attention(th.Accent.GetForeground()) }},
 	{"success", func(th theme.Resolved) effect.Effect { return effect.Success(th.Success.GetForeground()) }},
 	{"failure", func(th theme.Resolved) effect.Effect { return effect.Failure(th.Danger.GetForeground()) }},

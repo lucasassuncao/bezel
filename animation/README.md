@@ -77,7 +77,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(f Fade\) WithDelay\(d time.Duration\) Fade](<#Fade.WithDelay>)
   - [func \(f Fade\) WithEase\(e Ease\) Fade](<#Fade.WithEase>)
   - [func \(f Fade\) WithRepeat\(n int\) Fade](<#Fade.WithRepeat>)
-  - [func \(f Fade\) WithYoyo\(\) Fade](<#Fade.WithYoyo>)
+  - [func \(f Fade\) WithYoyo\(on bool\) Fade](<#Fade.WithYoyo>)
 - [type Float](<#Float>)
   - [func NewFloat\(from, to float64, dur time.Duration\) Float](<#NewFloat>)
   - [func \(f Float\) Active\(\) bool](<#Float.Active>)
@@ -89,7 +89,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(f Float\) WithDelay\(d time.Duration\) Float](<#Float.WithDelay>)
   - [func \(f Float\) WithEase\(e Ease\) Float](<#Float.WithEase>)
   - [func \(f Float\) WithRepeat\(n int\) Float](<#Float.WithRepeat>)
-  - [func \(f Float\) WithYoyo\(\) Float](<#Float.WithYoyo>)
+  - [func \(f Float\) WithYoyo\(on bool\) Float](<#Float.WithYoyo>)
 - [type Flock](<#Flock>)
   - [func NewFlock\(n int, at Point\) Flock](<#NewFlock>)
   - [func \(f Flock\) Active\(\) bool](<#Flock.Active>)
@@ -132,7 +132,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(k Keyframes\) Update\(msg tea.Msg\) \(Keyframes, tea.Cmd\)](<#Keyframes.Update>)
   - [func \(k Keyframes\) WithDelay\(d time.Duration\) Keyframes](<#Keyframes.WithDelay>)
   - [func \(k Keyframes\) WithRepeat\(n int\) Keyframes](<#Keyframes.WithRepeat>)
-  - [func \(k Keyframes\) WithYoyo\(\) Keyframes](<#Keyframes.WithYoyo>)
+  - [func \(k Keyframes\) WithYoyo\(on bool\) Keyframes](<#Keyframes.WithYoyo>)
 - [type Move](<#Move>)
   - [func NewMove\(from, to Point, dur time.Duration\) Move](<#NewMove>)
   - [func \(m Move\) Active\(\) bool](<#Move.Active>)
@@ -143,7 +143,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(m Move\) WithDelay\(d time.Duration\) Move](<#Move.WithDelay>)
   - [func \(m Move\) WithEase\(e Ease\) Move](<#Move.WithEase>)
   - [func \(m Move\) WithRepeat\(n int\) Move](<#Move.WithRepeat>)
-  - [func \(m Move\) WithYoyo\(\) Move](<#Move.WithYoyo>)
+  - [func \(m Move\) WithYoyo\(on bool\) Move](<#Move.WithYoyo>)
 - [type Orbit](<#Orbit>)
   - [func NewOrbit\(centre Point, rx, ry float64, period time.Duration\) Orbit](<#NewOrbit>)
   - [func \(o Orbit\) Active\(\) bool](<#Orbit.Active>)
@@ -164,7 +164,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(p Path\) WithDelay\(d time.Duration\) Path](<#Path.WithDelay>)
   - [func \(p Path\) WithEase\(e Ease\) Path](<#Path.WithEase>)
   - [func \(p Path\) WithRepeat\(n int\) Path](<#Path.WithRepeat>)
-  - [func \(p Path\) WithYoyo\(\) Path](<#Path.WithYoyo>)
+  - [func \(p Path\) WithYoyo\(on bool\) Path](<#Path.WithYoyo>)
 - [type Pendulum](<#Pendulum>)
   - [func NewPendulum\(amp float64, period time.Duration\) Pendulum](<#NewPendulum>)
   - [func \(p Pendulum\) Active\(\) bool](<#Pendulum.Active>)
@@ -240,7 +240,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(t Timeline\) Update\(msg tea.Msg\) \(Timeline, tea.Cmd\)](<#Timeline.Update>)
   - [func \(t Timeline\) Value\(name string\) float64](<#Timeline.Value>)
   - [func \(t Timeline\) WithRepeat\(n int\) Timeline](<#Timeline.WithRepeat>)
-  - [func \(t Timeline\) WithYoyo\(\) Timeline](<#Timeline.WithYoyo>)
+  - [func \(t Timeline\) WithYoyo\(on bool\) Timeline](<#Timeline.WithYoyo>)
 - [type Tween](<#Tween>)
   - [func NewTween\(from, target int, dur time.Duration\) Tween](<#NewTween>)
   - [func \(t Tween\) Active\(\) bool](<#Tween.Active>)
@@ -252,7 +252,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(t Tween\) WithDelay\(d time.Duration\) Tween](<#Tween.WithDelay>)
   - [func \(t Tween\) WithEase\(e Ease\) Tween](<#Tween.WithEase>)
   - [func \(t Tween\) WithRepeat\(n int\) Tween](<#Tween.WithRepeat>)
-  - [func \(t Tween\) WithYoyo\(\) Tween](<#Tween.WithYoyo>)
+  - [func \(t Tween\) WithYoyo\(on bool\) Tween](<#Tween.WithYoyo>)
 
 
 ## Constants
@@ -858,7 +858,7 @@ WithRepeat runs f n more times after the first, or without end for Forever.
 ### func \(Fade\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L87>)
 
 ```go
-func (f Fade) WithYoyo() Fade
+func (f Fade) WithYoyo(on bool) Fade
 ```
 
 WithYoyo sends every other run of f back: with Forever, a pulse.
@@ -970,7 +970,7 @@ WithRepeat runs f n more times after the first, or without end for Forever.
 ### func \(Float\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L94>)
 
 ```go
-func (f Float) WithYoyo() Float
+func (f Float) WithYoyo(on bool) Float
 ```
 
 WithYoyo sends every other run of f back the way it came.
@@ -1370,7 +1370,7 @@ WithRepeat plays k n more times after the first, or without end for Forever.
 ### func \(Keyframes\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L79>)
 
 ```go
-func (k Keyframes) WithYoyo() Keyframes
+func (k Keyframes) WithYoyo(on bool) Keyframes
 ```
 
 WithYoyo plays every other pass of k backwards.
@@ -1473,7 +1473,7 @@ WithRepeat runs m n more times after the first, or without end for Forever.
 ### func \(Move\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L54>)
 
 ```go
-func (m Move) WithYoyo() Move
+func (m Move) WithYoyo(on bool) Move
 ```
 
 WithYoyo sends every other run of m back the way it came.
@@ -1667,7 +1667,7 @@ WithRepeat travels p n more times after the first, or without end for Forever.
 ### func \(Path\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L97>)
 
 ```go
-func (p Path) WithYoyo() Path
+func (p Path) WithYoyo(on bool) Path
 ```
 
 WithYoyo travels every other pass of p back.
@@ -2378,7 +2378,7 @@ WithRepeat plays t n more times after the first, or without end for Forever.
 ### func \(Timeline\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L108>)
 
 ```go
-func (t Timeline) WithYoyo() Timeline
+func (t Timeline) WithYoyo(on bool) Timeline
 ```
 
 WithYoyo plays every other pass of t backwards.
@@ -2492,7 +2492,7 @@ WithRepeat runs t n more times after the first, or without end for Forever.
 ### func \(Tween\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L132>)
 
 ```go
-func (t Tween) WithYoyo() Tween
+func (t Tween) WithYoyo(on bool) Tween
 ```
 
 WithYoyo sends every other run of t back the way it came.

@@ -51,8 +51,8 @@ func (m Move) WithRepeat(n int) Move {
 }
 
 // WithYoyo sends every other run of m back the way it came.
-func (m Move) WithYoyo() Move {
-	m.run.Yoyo = true
+func (m Move) WithYoyo(on bool) Move {
+	m.run.Yoyo = on
 	return m
 }
 

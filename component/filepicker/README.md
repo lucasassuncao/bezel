@@ -29,8 +29,8 @@ Package filepicker browses directories inside a pane: directories first, sizes a
   - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
   - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
   - [func \(m Model\) WithAllowedTypes\(exts ...string\) Model](<#Model.WithAllowedTypes>)
-  - [func \(m Model\) WithDirs\(\) Model](<#Model.WithDirs>)
-  - [func \(m Model\) WithHidden\(\) Model](<#Model.WithHidden>)
+  - [func \(m Model\) WithDirs\(on bool\) Model](<#Model.WithDirs>)
+  - [func \(m Model\) WithHidden\(on bool\) Model](<#Model.WithHidden>)
   - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
   - [func \(m Model\) WithPermissions\(on bool\) Model](<#Model.WithPermissions>)
   - [func \(m Model\) WithSizes\(on bool\) Model](<#Model.WithSizes>)
@@ -202,7 +202,7 @@ WithAllowedTypes limits the pick to names ending in one of exts, such as ".go"; 
 ### func \(Model\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L162>)
 
 ```go
-func (m Model) WithDirs() Model
+func (m Model) WithDirs(on bool) Model
 ```
 
 WithDirs lets enter pick a directory; → still opens one.
@@ -211,7 +211,7 @@ WithDirs lets enter pick a directory; → still opens one.
 ### func \(Model\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L169>)
 
 ```go
-func (m Model) WithHidden() Model
+func (m Model) WithHidden(on bool) Model
 ```
 
 WithHidden lists hidden entries too: dotfiles, and on Windows the ones marked hidden. Set it before Init.

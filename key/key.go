@@ -34,8 +34,8 @@ func (b Binding) WithHelp(key, desc string) Binding {
 }
 
 // WithDisabled is b switched off, keys and help kept.
-func (b Binding) WithDisabled() Binding {
-	b.Disabled = true
+func (b Binding) WithDisabled(on bool) Binding {
+	b.Disabled = on
 	return b
 }
 

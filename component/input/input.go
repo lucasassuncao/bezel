@@ -183,8 +183,8 @@ func (m Model) WithMask(mask rune) Model {
 
 // WithHidden draws none of the text, not even a mask, so not even its length
 // shows; the caret stays on the first cell. Word keys run to the ends.
-func (m Model) WithHidden() Model {
-	m.hidden = true
+func (m Model) WithHidden(on bool) Model {
+	m.hidden = on
 	return m.scroll()
 }
 
@@ -216,8 +216,8 @@ func (m *Model) blinks() bool { return m.focused && m.mode == cursor.Blinking &&
 
 // WithTerminalCursor leaves the caret to the terminal's own cursor: View
 // paints none, and TerminalCursor says where to put the real one.
-func (m Model) WithTerminalCursor() Model {
-	m.term = true
+func (m Model) WithTerminalCursor(on bool) Model {
+	m.term = on
 	return m
 }
 

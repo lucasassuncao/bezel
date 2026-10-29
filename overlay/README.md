@@ -60,8 +60,8 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p FilePicker\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#FilePicker.Update>)
   - [func \(p FilePicker\) View\(body layout.Rect\) string](<#FilePicker.View>)
   - [func \(p FilePicker\) WithAllowedTypes\(exts ...string\) FilePicker](<#FilePicker.WithAllowedTypes>)
-  - [func \(p FilePicker\) WithDirs\(\) FilePicker](<#FilePicker.WithDirs>)
-  - [func \(p FilePicker\) WithHidden\(\) FilePicker](<#FilePicker.WithHidden>)
+  - [func \(p FilePicker\) WithDirs\(on bool\) FilePicker](<#FilePicker.WithDirs>)
+  - [func \(p FilePicker\) WithHidden\(on bool\) FilePicker](<#FilePicker.WithHidden>)
   - [func \(p FilePicker\) WithKeys\(k FilePickerKeys\) FilePicker](<#FilePicker.WithKeys>)
   - [func \(p FilePicker\) WithKind\(k Kind\) FilePicker](<#FilePicker.WithKind>)
   - [func \(p FilePicker\) WithStyles\(edit func\(Styles\) Styles\) FilePicker](<#FilePicker.WithStyles>)
@@ -603,7 +603,7 @@ WithAllowedTypes limits the pick to names ending in one of exts, such as ".go"; 
 ### func \(FilePicker\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L80>)
 
 ```go
-func (p FilePicker) WithDirs() FilePicker
+func (p FilePicker) WithDirs(on bool) FilePicker
 ```
 
 WithDirs lets enter pick a directory; → still opens one.
@@ -612,7 +612,7 @@ WithDirs lets enter pick a directory; → still opens one.
 ### func \(FilePicker\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L87>)
 
 ```go
-func (p FilePicker) WithHidden() FilePicker
+func (p FilePicker) WithHidden(on bool) FilePicker
 ```
 
 WithHidden lists hidden entries too: dotfiles, and on Windows the ones marked hidden. Set it before Init.

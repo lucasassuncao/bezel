@@ -25,10 +25,10 @@ var retroKinds = []struct {
 	{"glitch", func(theme.Resolved) effect.Effect { return effect.Glitch(700 * time.Millisecond) }},
 	{"power off", func(th theme.Resolved) effect.Effect { return effect.PowerOff(th.Bold.GetForeground(), time.Second) }},
 	{"power on", func(th theme.Resolved) effect.Effect { return effect.PowerOn(th.Bold.GetForeground(), time.Second) }},
-	{"scanlines", func(theme.Resolved) effect.Effect { return effect.Scanlines(black, play).WithYoyo().WithRepeat(1) }},
+	{"scanlines", func(theme.Resolved) effect.Effect { return effect.Scanlines(black, play).WithYoyo(true).WithRepeat(1) }},
 	{"pixelate", func(theme.Resolved) effect.Effect { return effect.Pixelate(time.Second) }},
 	{"iris in", func(theme.Resolved) effect.Effect { return effect.IrisIn(play) }},
-	{"iris out", func(theme.Resolved) effect.Effect { return effect.IrisOut(play).WithYoyo().WithRepeat(1) }},
+	{"iris out", func(theme.Resolved) effect.Effect { return effect.IrisOut(play).WithYoyo(true).WithRepeat(1) }},
 }
 
 // retros is the fourth tab: one effect at a time on a card, and a panel

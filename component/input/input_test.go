@@ -279,7 +279,7 @@ func TestTheValidatorJudgesEveryChange(t *testing.T) {
 }
 
 func TestAHiddenFieldDrawsNoneOfItsText(t *testing.T) {
-	m := focused().WithHidden().WithWidth(6).WithValue("secret words")
+	m := focused().WithHidden(true).WithWidth(6).WithValue("secret words")
 	require.Equal(t, "      ", ansi.Strip(m.View()))
 	require.Contains(t, m.View(), th.Caret.Render(" "), "the caret on the first cell")
 	require.Empty(t, ansi.Strip(m.Blur().WithWidth(0).View()))
@@ -306,7 +306,7 @@ func TestASteadyCaretNeverBlinksAndAHiddenOneNeverShows(t *testing.T) {
 }
 
 func TestTheTerminalCursorStandsInForTheCaret(t *testing.T) {
-	m, cmd := New(th).WithTerminalCursor().WithPrompt("> ").WithWidth(4).Focus()
+	m, cmd := New(th).WithTerminalCursor(true).WithPrompt("> ").WithWidth(4).Focus()
 	require.Nil(t, cmd, "the terminal blinks its own")
 	m = run(m, typed("a"), typed("中"), typed("b"), typed("c"))
 	require.NotContains(t, m.View(), th.Caret.Render(" "), "no painted caret")

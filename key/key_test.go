@@ -26,7 +26,7 @@ func TestMatchesAnyKeyOfAnyBinding(t *testing.T) {
 }
 
 func TestADisabledOrEmptyBindingNeverMatches(t *testing.T) {
-	off := New("q").WithDisabled()
+	off := New("q").WithDisabled(true)
 	require.False(t, off.Enabled())
 	require.False(t, Matches(press('q', 0), off))
 

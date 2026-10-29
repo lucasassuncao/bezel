@@ -84,7 +84,7 @@ func (f Fade) WithRepeat(n int) Fade {
 }
 
 // WithYoyo sends every other run of f back: with Forever, a pulse.
-func (f Fade) WithYoyo() Fade {
-	f.mix = f.mix.WithYoyo()
+func (f Fade) WithYoyo(on bool) Fade {
+	f.mix = f.mix.WithYoyo(on)
 	return f
 }

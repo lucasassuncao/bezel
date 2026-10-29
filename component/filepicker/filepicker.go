@@ -159,15 +159,15 @@ func (m Model) WithAllowedTypes(exts ...string) Model {
 }
 
 // WithDirs lets enter pick a directory; → still opens one.
-func (m Model) WithDirs() Model {
-	m.dirs = true
+func (m Model) WithDirs(on bool) Model {
+	m.dirs = on
 	return m
 }
 
 // WithHidden lists hidden entries too: dotfiles, and on Windows the ones
 // marked hidden. Set it before Init.
-func (m Model) WithHidden() Model {
-	m.hidden = true
+func (m Model) WithHidden(on bool) Model {
+	m.hidden = on
 	return m
 }
 

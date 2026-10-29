@@ -564,9 +564,9 @@ func (m Model) CursorMode() cursor.Mode { return m.mode }
 
 // WithTerminalCursor leaves the caret to the terminal's own cursor: View
 // paints none, and TerminalCursor says where to put the real one.
-func (m Model) WithTerminalCursor() Model {
+func (m Model) WithTerminalCursor(on bool) Model {
 	m = m.ready()
-	m.term = true
+	m.term = on
 	return m
 }
 

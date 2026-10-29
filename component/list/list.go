@@ -152,8 +152,8 @@ func (m Model[T]) WithMatch(match func(query, label string) bool) Model[T] {
 
 // WithFuzzy filters by the typed letters in order, anywhere in the label,
 // best match first, and marks the letters that matched.
-func (m Model[T]) WithFuzzy() Model[T] {
-	m.fuzzy = true
+func (m Model[T]) WithFuzzy(on bool) Model[T] {
+	m.fuzzy = on
 	return m.refilter()
 }
 

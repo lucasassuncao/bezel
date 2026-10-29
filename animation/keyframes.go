@@ -76,8 +76,8 @@ func (k Keyframes) WithRepeat(n int) Keyframes {
 }
 
 // WithYoyo plays every other pass of k backwards.
-func (k Keyframes) WithYoyo() Keyframes {
-	k.run.Yoyo = true
+func (k Keyframes) WithYoyo(on bool) Keyframes {
+	k.run.Yoyo = on
 	return k
 }
 

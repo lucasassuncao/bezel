@@ -90,7 +90,7 @@ func TestATimelineTakesOnlyItsOwnFrames(t *testing.T) {
 
 func TestATimelineRepeatsAndYoyos(t *testing.T) {
 	moving(t)
-	tl := NewTimeline(Step("x", 0, 10, 100*ms).WithEase(Linear)).WithYoyo().WithRepeat(Forever)
+	tl := NewTimeline(Step("x", 0, 10, 100*ms).WithEase(Linear)).WithYoyo(true).WithRepeat(Forever)
 	got := playTo(tl, time.Unix(10, 0), 150*ms)
 	assert.True(t, got.Active())
 	assert.InDelta(t, 5, got.Value("x"), 1e-6, "on its way back")

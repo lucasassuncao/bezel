@@ -83,7 +83,7 @@ The move tab plays the points beside a `Path`, below.
 
 ![move](recordings/animation/move.gif)
 
-Every timed one takes `WithDelay` and `WithRepeat`, `animation.Forever` for no end, and `WithYoyo`, which runs every other pass back. Delays chain one animation after another: the gallery's cascade is six tweens, each delayed a little more than the one before. A pulse is a `Fade` with `WithYoyo().WithRepeat(animation.Forever)`.
+Every timed one takes `WithDelay` and `WithRepeat`, `animation.Forever` for no end, and `WithYoyo`, which runs every other pass back. Delays chain one animation after another: the gallery's cascade is six tweens, each delayed a little more than the one before. A pulse is a `Fade` with `WithYoyo(true).WithRepeat(animation.Forever)`.
 
 ### Curves
 
@@ -197,7 +197,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 The timed ones take `WithEase`, `WithDelay`, `WithRepeat` and, all but `Shake`, `WithYoyo`, as the [motion](#motion) kinds do:
 
 ```go
-text.NewTypewriter("Saved.", 400*time.Millisecond).WithYoyo().WithRepeat(1)
+text.NewTypewriter("Saved.", 400*time.Millisecond).WithYoyo(true).WithRepeat(1)
 ```
 
 ## Scenes

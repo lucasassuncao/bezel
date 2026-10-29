@@ -30,22 +30,22 @@ var effectKinds = []struct {
 	make func(th theme.Resolved) effect.Effect
 }{
 	{"fade in", func(theme.Resolved) effect.Effect { return effect.FadeIn(black, play) }},
-	{"fade out", func(theme.Resolved) effect.Effect { return effect.FadeOut(black, play).WithYoyo().WithRepeat(1) }},
-	{"dissolve", func(theme.Resolved) effect.Effect { return effect.Dissolve(play).WithYoyo().WithRepeat(1) }},
+	{"fade out", func(theme.Resolved) effect.Effect { return effect.FadeOut(black, play).WithYoyo(true).WithRepeat(1) }},
+	{"dissolve", func(theme.Resolved) effect.Effect { return effect.Dissolve(play).WithYoyo(true).WithRepeat(1) }},
 	{"coalesce", func(theme.Resolved) effect.Effect { return effect.Coalesce(play) }},
 	{"sweep in", func(th theme.Resolved) effect.Effect { return effect.SweepIn(th.Accent.GetForeground(), play) }},
 	{"slide in", func(theme.Resolved) effect.Effect { return effect.SlideIn(effect.Right, play) }},
 	{"slide out", func(theme.Resolved) effect.Effect {
-		return effect.SlideOut(effect.Up, play).WithYoyo().WithRepeat(1)
+		return effect.SlideOut(effect.Up, play).WithYoyo(true).WithRepeat(1)
 	}},
 	{"evolve", func(theme.Resolved) effect.Effect { return effect.Evolve(play) }},
-	{"explode", func(theme.Resolved) effect.Effect { return effect.Explode(play).WithYoyo().WithRepeat(1) }},
+	{"explode", func(theme.Resolved) effect.Effect { return effect.Explode(play).WithYoyo(true).WithRepeat(1) }},
 	{"expand", func(th theme.Resolved) effect.Effect { return effect.Expand(th.Accent.GetForeground(), play) }},
 	{"stretch", func(th theme.Resolved) effect.Effect {
 		return effect.Stretch(effect.Right, th.Accent.GetForeground(), play)
 	}},
-	{"hue shift", func(theme.Resolved) effect.Effect { return effect.HueShift(180, play).WithYoyo().WithRepeat(1) }},
-	{"desaturate", func(theme.Resolved) effect.Effect { return effect.Saturate(-1, play).WithYoyo().WithRepeat(1) }},
+	{"hue shift", func(theme.Resolved) effect.Effect { return effect.HueShift(180, play).WithYoyo(true).WithRepeat(1) }},
+	{"desaturate", func(theme.Resolved) effect.Effect { return effect.Saturate(-1, play).WithYoyo(true).WithRepeat(1) }},
 }
 
 // patterns are the orders the effect can reach the card's cells in; the

@@ -258,7 +258,7 @@ func filtered(m Model[int], text string) Model[int] {
 }
 
 func TestFuzzyRanksTheBestMatchFirstAndMarksIt(t *testing.T) {
-	m := New([]Row[int]{{Label: "carousel"}, {Label: "cherry-pick"}, {Label: "checkout"}}).SetHeight(10).WithFuzzy()
+	m := New([]Row[int]{{Label: "carousel"}, {Label: "cherry-pick"}, {Label: "checkout"}}).SetHeight(10).WithFuzzy(true)
 	m = filtered(m, "chk")
 	require.Equal(t, "checkout", m.Selected().Label, "a run beats scattered letters")
 	lines := strings.Split(ansi.Strip(m.View(th)), "\n")
@@ -266,7 +266,7 @@ func TestFuzzyRanksTheBestMatchFirstAndMarksIt(t *testing.T) {
 	require.Equal(t, "  cherry-pick", lines[1])
 	require.NotContains(t, ansi.Strip(m.View(th)), "carousel")
 	require.Contains(t, m.View(th), th.Cursor.Underline(true).Bold(true).Render("ch"))
-	plain := New([]Row[int]{{Label: "carousel"}, {Label: "cherry-pick"}}).SetHeight(10).WithFuzzy().WithMatch(nil)
+	plain := New([]Row[int]{{Label: "carousel"}, {Label: "cherry-pick"}}).SetHeight(10).WithFuzzy(true).WithMatch(nil)
 	require.Equal(t, "carousel", filtered(plain, "ar").Selected().Label, "WithMatch ends it: the cherry-pick letters are not a run")
 }
 
@@ -355,7 +355,7 @@ func TestLegendListsTheKeysOfTheMode(t *testing.T) {
 
 // Fuzzy ranking over many rows, as each keystroke reruns it.
 func BenchmarkFuzzyFilter(b *testing.B) {
-	m := bigList(10_000).WithFuzzy()
+	m := bigList(10_000).WithFuzzy(true)
 	m, _ = m.Update(tea.KeyPressMsg{Code: '/', Text: "/"})
 	m, _ = m.Update(tea.KeyPressMsg{Code: '7', Text: "7"})
 	for b.Loop() {

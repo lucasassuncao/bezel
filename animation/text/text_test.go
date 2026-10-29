@@ -88,7 +88,7 @@ func TestStillTextIsBornWhole(t *testing.T) {
 // A typewriter that yoyos types and then erases itself.
 func TestTextRepeatsToo(t *testing.T) {
 	start := time.Unix(1000, 0)
-	w := NewTypewriter("abcd", 25*ms).WithYoyo().WithRepeat(1).WithDelay(0)
+	w := NewTypewriter("abcd", 25*ms).WithYoyo(true).WithRepeat(1).WithDelay(0)
 	w, _ = w.Update(w.FrameAt(start))
 	w, _ = w.Update(w.FrameAt(start.Add(150 * ms)))
 	assert.Equal(t, "ab", w.View(), "erasing")

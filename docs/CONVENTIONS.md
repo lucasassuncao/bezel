@@ -80,7 +80,7 @@ The mouse reaches a component the way a key does: the app hands it on, already m
 
 - **`NewX(required..., th)`**: what the component cannot work without, the theme last. A callback may be documented as accepting nil. A constructor returns only the value: a command to start it comes from `Init()`, as `form.Form.Init` does.
 - **Sizes are not required**: the rows and cells a pane has arrive after the first `tea.WindowSizeMsg`, so they come through `SetHeight` and `SetWidth` (`list`, `tree`, `table.Model`, `viewport`, `filepicker`), never as a constructor parameter.
-- **`WithX(...) X`**: everything optional, set before the component is used. Each returns a copy and chains with the others.
+- **`WithX(...) X`**: everything optional, set before the component is used. Each returns a copy and chains with the others. A switch takes its state, `WithX(on bool)`, never a bare `WithX()`, so an app can pass a setting it read: `WithWrap(cfg.Wrap)`, `WithYoyo(true)`.
 - **`SetX(...) X`**: changes a live component after something happened: `SetItems` after a reload, `SetTheme` after `tea.BackgroundColorMsg`, `SetTabs`, `SetStatus`.
 - **`Config` struct**: only where an app sets many fields at once, most of them every time, as `shell.Config`.
 - **Getters** are the bare noun: `Cursor()`, `Value()`, `Selected()`, never `GetCursor()`.

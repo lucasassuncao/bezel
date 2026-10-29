@@ -91,8 +91,8 @@ func (w Typewriter) WithRepeat(n int) Typewriter {
 }
 
 // WithYoyo erases w on every other run, as if typed backwards.
-func (w Typewriter) WithYoyo() Typewriter {
-	w.run.Yoyo = true
+func (w Typewriter) WithYoyo(on bool) Typewriter {
+	w.run.Yoyo = on
 	return w
 }
 

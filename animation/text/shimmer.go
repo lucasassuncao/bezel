@@ -52,8 +52,8 @@ func (s Shimmer) WithRepeat(n int) Shimmer {
 }
 
 // WithYoyo sends every other sweep back from the right.
-func (s Shimmer) WithYoyo() Shimmer {
-	s.run.Yoyo = true
+func (s Shimmer) WithYoyo(on bool) Shimmer {
+	s.run.Yoyo = on
 	return s
 }
 

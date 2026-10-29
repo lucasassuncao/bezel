@@ -75,7 +75,7 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(g Gradient\) Update\(msg tea.Msg\) \(Gradient, tea.Cmd\)](<#Gradient.Update>)
   - [func \(g Gradient\) View\(\) string](<#Gradient.View>)
   - [func \(g Gradient\) WithRepeat\(n int\) Gradient](<#Gradient.WithRepeat>)
-  - [func \(g Gradient\) WithYoyo\(\) Gradient](<#Gradient.WithYoyo>)
+  - [func \(g Gradient\) WithYoyo\(on bool\) Gradient](<#Gradient.WithYoyo>)
 - [type Highlight](<#Highlight>)
   - [func NewHighlight\(text string, marker color.Color, dur time.Duration\) Highlight](<#NewHighlight>)
   - [func \(h Highlight\) Active\(\) bool](<#Highlight.Active>)
@@ -178,7 +178,7 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(s Shimmer\) WithBand\(n int\) Shimmer](<#Shimmer.WithBand>)
   - [func \(s Shimmer\) WithDelay\(d time.Duration\) Shimmer](<#Shimmer.WithDelay>)
   - [func \(s Shimmer\) WithRepeat\(n int\) Shimmer](<#Shimmer.WithRepeat>)
-  - [func \(s Shimmer\) WithYoyo\(\) Shimmer](<#Shimmer.WithYoyo>)
+  - [func \(s Shimmer\) WithYoyo\(on bool\) Shimmer](<#Shimmer.WithYoyo>)
 - [type Stream](<#Stream>)
   - [func NewStream\(perChar time.Duration\) Stream](<#NewStream>)
   - [func \(s Stream\) Active\(\) bool](<#Stream.Active>)
@@ -224,7 +224,7 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(w Typewriter\) View\(\) string](<#Typewriter.View>)
   - [func \(w Typewriter\) WithDelay\(d time.Duration\) Typewriter](<#Typewriter.WithDelay>)
   - [func \(w Typewriter\) WithRepeat\(n int\) Typewriter](<#Typewriter.WithRepeat>)
-  - [func \(w Typewriter\) WithYoyo\(\) Typewriter](<#Typewriter.WithYoyo>)
+  - [func \(w Typewriter\) WithYoyo\(on bool\) Typewriter](<#Typewriter.WithYoyo>)
 - [type Typist](<#Typist>)
   - [func NewTypist\(text string, perChar time.Duration\) Typist](<#NewTypist>)
   - [func \(t Typist\) Active\(\) bool](<#Typist.Active>)
@@ -832,7 +832,7 @@ WithRepeat turns g n more times after the first instead of forever.
 ### func \(Gradient\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/gradient.go#L43>)
 
 ```go
-func (g Gradient) WithYoyo() Gradient
+func (g Gradient) WithYoyo(on bool) Gradient
 ```
 
 WithYoyo sends every other turn back the way it came.
@@ -1779,7 +1779,7 @@ WithRepeat sweeps n more times after the first instead of forever.
 ### func \(Shimmer\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/shimmer.go#L55>)
 
 ```go
-func (s Shimmer) WithYoyo() Shimmer
+func (s Shimmer) WithYoyo(on bool) Shimmer
 ```
 
 WithYoyo sends every other sweep back from the right.
@@ -2201,7 +2201,7 @@ WithRepeat types w n more times after the first, or without end for Forever.
 ### func \(Typewriter\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L94>)
 
 ```go
-func (w Typewriter) WithYoyo() Typewriter
+func (w Typewriter) WithYoyo(on bool) Typewriter
 ```
 
 WithYoyo erases w on every other run, as if typed backwards.

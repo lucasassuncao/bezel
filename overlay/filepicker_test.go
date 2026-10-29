@@ -182,7 +182,7 @@ func sequence(t *testing.T, msg tea.Msg) []tea.Cmd {
 
 func TestFilePickerWithDirsPicksADirectory(t *testing.T) {
 	dir := pickerTree(t)
-	p := newPicker(dir).WithDirs()
+	p := newPicker(dir).WithDirs(true)
 	p = load(t, p, p.Init())
 
 	_, cmd := pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyEnter})
@@ -200,7 +200,7 @@ func TestFilePickerWithHiddenListsDotfiles(t *testing.T) {
 	p = load(t, p, p.Init())
 	require.NotContains(t, pickerView(p), ".env")
 
-	p = newPicker(dir).WithHidden()
+	p = newPicker(dir).WithHidden(true)
 	p = load(t, p, p.Init())
 	require.Contains(t, pickerView(p), ".env")
 }

@@ -129,7 +129,7 @@ func (t Tween) WithRepeat(n int) Tween {
 }
 
 // WithYoyo sends every other run of t back the way it came.
-func (t Tween) WithYoyo() Tween {
-	t.loop.Yoyo = true
+func (t Tween) WithYoyo(on bool) Tween {
+	t.loop.Yoyo = on
 	return t
 }

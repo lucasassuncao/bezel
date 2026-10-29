@@ -191,7 +191,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.pulse = animation.NewFade(m.th.Accent.GetForeground(), m.th.Muted.GetForeground(), 700*time.Millisecond).
-			WithYoyo().WithRepeat(animation.Forever)
+			WithYoyo(true).WithRepeat(animation.Forever)
 		return m.run(nil)
 	case toggleMsg:
 		m.open = !m.open

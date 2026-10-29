@@ -105,8 +105,8 @@ func (t Timeline) WithRepeat(n int) Timeline {
 }
 
 // WithYoyo plays every other pass of t backwards.
-func (t Timeline) WithYoyo() Timeline {
-	t.run.Yoyo = true
+func (t Timeline) WithYoyo(on bool) Timeline {
+	t.run.Yoyo = on
 	return t
 }
 

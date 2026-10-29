@@ -18,7 +18,7 @@ Package key binds keys to what they do: the keys that fire a binding, the help t
   - [func \(b Binding\) Enabled\(\) bool](<#Binding.Enabled>)
   - [func \(b Binding\) Help\(\) Help](<#Binding.Help>)
   - [func \(b Binding\) Keys\(\) \[\]string](<#Binding.Keys>)
-  - [func \(b Binding\) WithDisabled\(\) Binding](<#Binding.WithDisabled>)
+  - [func \(b Binding\) WithDisabled\(on bool\) Binding](<#Binding.WithDisabled>)
   - [func \(b Binding\) WithHelp\(key, desc string\) Binding](<#Binding.WithHelp>)
 - [type Help](<#Help>)
 
@@ -84,7 +84,7 @@ Keys are the keys that fire b.
 ### func \(Binding\) [WithDisabled](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L37>)
 
 ```go
-func (b Binding) WithDisabled() Binding
+func (b Binding) WithDisabled(on bool) Binding
 ```
 
 WithDisabled is b switched off, keys and help kept.

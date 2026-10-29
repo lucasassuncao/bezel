@@ -91,7 +91,7 @@ func (f Float) WithRepeat(n int) Float {
 }
 
 // WithYoyo sends every other run of f back the way it came.
-func (f Float) WithYoyo() Float {
-	f.run.Yoyo = true
+func (f Float) WithYoyo(on bool) Float {
+	f.run.Yoyo = on
 	return f
 }

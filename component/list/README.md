@@ -39,7 +39,7 @@ Package list is a cursor list with section headings, a scroll indicator or pages
   - [func \(m Model\[T\]\) Tick\(\) tea.Cmd](<#Model[T].Tick>)
   - [func \(m Model\[T\]\) Update\(msg tea.KeyPressMsg\) \(Model\[T\], Action\)](<#Model[T].Update>)
   - [func \(m Model\[T\]\) View\(th theme.Resolved\) string](<#Model[T].View>)
-  - [func \(m Model\[T\]\) WithFuzzy\(\) Model\[T\]](<#Model[T].WithFuzzy>)
+  - [func \(m Model\[T\]\) WithFuzzy\(on bool\) Model\[T\]](<#Model[T].WithFuzzy>)
   - [func \(m Model\[T\]\) WithKeys\(k Keys\) Model\[T\]](<#Model[T].WithKeys>)
   - [func \(m Model\[T\]\) WithMatch\(match func\(query, label string\) bool\) Model\[T\]](<#Model[T].WithMatch>)
   - [func \(m Model\[T\]\) WithMotion\(dur time.Duration\) Model\[T\]](<#Model[T].WithMotion>)
@@ -313,7 +313,7 @@ View renders the title, the visible rows or the filter prompt with its matches, 
 ### func \(Model\[T\]\) [WithFuzzy](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L155>)
 
 ```go
-func (m Model[T]) WithFuzzy() Model[T]
+func (m Model[T]) WithFuzzy(on bool) Model[T]
 ```
 
 WithFuzzy filters by the typed letters in order, anywhere in the label, best match first, and marks the letters that matched.

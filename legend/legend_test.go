@@ -83,7 +83,7 @@ func TestDisabledEntriesStayOutOfEveryView(t *testing.T) {
 }
 
 func TestFromBindingsSkipsDisabled(t *testing.T) {
-	off := key.New("x").WithHelp("x", "off").WithDisabled()
+	off := key.New("x").WithHelp("x", "off").WithDisabled(true)
 	on := key.New("y").WithHelp("y", "on")
 	es := FromBindings([]key.Binding{off, on})
 	require.Len(t, es, 1)

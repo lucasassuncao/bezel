@@ -77,15 +77,15 @@ func (p FilePicker) WithAllowedTypes(exts ...string) FilePicker {
 }
 
 // WithDirs lets enter pick a directory; → still opens one.
-func (p FilePicker) WithDirs() FilePicker {
-	p.m = p.m.WithDirs()
+func (p FilePicker) WithDirs(on bool) FilePicker {
+	p.m = p.m.WithDirs(on)
 	return p
 }
 
 // WithHidden lists hidden entries too: dotfiles, and on Windows the ones
 // marked hidden. Set it before Init.
-func (p FilePicker) WithHidden() FilePicker {
-	p.m = p.m.WithHidden()
+func (p FilePicker) WithHidden(on bool) FilePicker {
+	p.m = p.m.WithHidden(on)
 	return p
 }
 
