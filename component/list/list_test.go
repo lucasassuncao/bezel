@@ -2,6 +2,7 @@ package list
 
 import (
 	"fmt"
+	"github.com/lucasassuncao/bezel/key"
 	"strings"
 	"testing"
 
@@ -420,4 +421,15 @@ func TestVimKeysMoveOnLettersButFilterTakesThemAsText(t *testing.T) {
 	require.Equal(t, "item-01", sel(n).Label)
 	f := filtered(m, "j")
 	require.Equal(t, "j", f.Filter(), "the prompt types the letter")
+}
+
+// The filter's erase key is a binding like the rest, so it can be rebound.
+func TestEraseIsRebindable(t *testing.T) {
+	k := DefaultKeys()
+	k.Erase = key.New("ctrl+w")
+	m := filtered(New(numbered(5)).SetHeight(5).WithKeys(k), "it")
+	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyBackspace})
+	require.Equal(t, "it", m.Filter(), "backspace is no longer erase")
+	m, _ = m.Update(tea.KeyPressMsg{Code: 'w', Mod: tea.ModCtrl})
+	require.Equal(t, "i", m.Filter())
 }

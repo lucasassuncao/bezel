@@ -81,6 +81,7 @@ const margin = 2
 // bindings are the keys the browser answers to besides the table's.
 type bindings struct {
 	Copy, Filter, Clear, Quit key.Binding
+	Abort                     key.Binding // quits even while a filter is typed
 }
 
 // defaultBindings are enter to copy, / to filter, esc to clear it and q to quit.
@@ -90,6 +91,7 @@ func defaultBindings() bindings {
 		Filter: key.New("/").WithHelp("/", "filter"),
 		Clear:  key.New("esc").WithHelp("esc", "clear filter"),
 		Quit:   key.New("q", "ctrl+c").WithHelp("q", "quit"),
+		Abort:  key.New("ctrl+c"),
 	}
 }
 
@@ -317,7 +319,7 @@ func (m *browserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *browserModel) key(k tea.KeyPressMsg) tea.Cmd {
 	switch {
-	case k.String() == "ctrl+c", !m.typing && key.Matches(k, m.keys.Quit):
+	case key.Matches(k, m.keys.Abort), !m.typing && key.Matches(k, m.keys.Quit):
 		return tea.Quit
 	case key.Matches(k, m.keys.Copy):
 		m.typing, m.filter = false, m.filter.Blur()

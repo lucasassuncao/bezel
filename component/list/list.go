@@ -46,6 +46,7 @@ const (
 // Keys are the bindings the list answers to.
 type Keys struct {
 	Up, Down, PageUp, PageDown, Top, Bottom, Enter, Filter, Esc key.Binding
+	Erase                                                       key.Binding // the filter's last character
 }
 
 // DefaultKeys are the arrows, pgup/pgdown, home/end, enter, / and esc.
@@ -60,6 +61,7 @@ func DefaultKeys() Keys {
 		Enter:    key.New("enter").WithHelp("enter", "choose"),
 		Filter:   key.New("/").WithHelp("/", "filter"),
 		Esc:      key.New("esc").WithHelp("esc", "stop filtering"),
+		Erase:    key.New("backspace", "ctrl+h"),
 	}
 }
 
@@ -399,7 +401,7 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 		m.find = filterMode{}
 	case key.Matches(msg, m.keys.Enter):
 		return m.pickMatch()
-	case msg.String() == "backspace" || msg.String() == "ctrl+h":
+	case key.Matches(msg, m.keys.Erase):
 		if text := m.find.text; text != "" {
 			_, size := utf8.DecodeLastRuneInString(text)
 			m.find = m.filterFor(text[:len(text)-size])
