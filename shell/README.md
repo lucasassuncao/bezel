@@ -53,7 +53,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) ClearStatus\(\) Shell](<#Shell.ClearStatus>)
   - [func \(s Shell\) Context\(\) Context](<#Shell.Context>)
   - [func \(s Shell\) Copy\(text, done, failed string\) tea.Cmd](<#Shell.Copy>)
-  - [func \(s Shell\) Focus\(\) string](<#Shell.Focus>)
+  - [func \(s Shell\) Focused\(\) string](<#Shell.Focused>)
   - [func \(s Shell\) HasOverlay\(\) bool](<#Shell.HasOverlay>)
   - [func \(s Shell\) Idle\(\) Shell](<#Shell.Idle>)
   - [func \(s Shell\) Input\(\) \(input.Model, bool\)](<#Shell.Input>)
@@ -79,7 +79,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) SetTheme\(th theme.Resolved\) Shell](<#Shell.SetTheme>)
   - [func \(s Shell\) ShowHelp\(\) Shell](<#Shell.ShowHelp>)
   - [func \(s Shell\) Size\(\) \(int, int\)](<#Shell.Size>)
-  - [func \(s Shell\) Spinner\(\) string](<#Shell.Spinner>)
+  - [func \(s Shell\) SpinnerFrame\(\) string](<#Shell.SpinnerFrame>)
   - [func \(s Shell\) Status\(\) string](<#Shell.Status>)
   - [func \(s Shell\) StatusExpiry\(\) tea.Msg](<#Shell.StatusExpiry>)
   - [func \(s Shell\) StatusLevel\(\) Level](<#Shell.StatusLevel>)
@@ -531,14 +531,14 @@ func (s Shell) Copy(text, done, failed string) tea.Cmd
 
 Copy puts text on the clipboard off the event loop, then shows done on the status row, or "failed: why". A helper that hangs gives up after 5s instead of freezing the program.
 
-<a name="Shell.Focus"></a>
-### func \(Shell\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L184>)
+<a name="Shell.Focused"></a>
+### func \(Shell\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L184>)
 
 ```go
-func (s Shell) Focus() string
+func (s Shell) Focused() string
 ```
 
-Focus is the name of the focused leaf on the active tab.
+Focused is the name of the focused leaf on the active tab.
 
 <a name="Shell.HasOverlay"></a>
 ### func \(Shell\) [HasOverlay](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L290>)
@@ -765,14 +765,14 @@ func (s Shell) Size() (int, int)
 
 Size is the terminal's width and height, zero before the first resize.
 
-<a name="Shell.Spinner"></a>
-### func \(Shell\) [Spinner](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L37>)
+<a name="Shell.SpinnerFrame"></a>
+### func \(Shell\) [SpinnerFrame](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L37>)
 
 ```go
-func (s Shell) Spinner() string
+func (s Shell) SpinnerFrame() string
 ```
 
-Spinner is the current frame, unstyled, for a pane showing the same work.
+SpinnerFrame is the current frame, unstyled, for a pane showing the same work.
 
 <a name="Shell.Status"></a>
 ### func \(Shell\) [Status](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L278>)

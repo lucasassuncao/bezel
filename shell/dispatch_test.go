@@ -21,7 +21,7 @@ func TestChangePaneSendsFocusMsg(t *testing.T) {
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	s, handled, cmd := s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 	require.True(t, handled)
-	require.Equal(t, "detail", s.Focus())
+	require.Equal(t, "detail", s.Focused())
 	require.NotNil(t, cmd)
 	require.Equal(t, FocusMsg{From: "list", To: "detail"}, cmd())
 
@@ -51,7 +51,7 @@ func TestTheContextReachesTheAction(t *testing.T) {
 	var got string
 	s := sized(New(actionConfig()).SetActions(Custom("p", "ping", func(c ActionContext) tea.Cmd { got = c.Focus; return nil })))
 	s.Update(keyP)
-	require.Equal(t, s.Focus(), got)
+	require.Equal(t, s.Focused(), got)
 }
 
 func TestMoveNeverConsumesTheArrows(t *testing.T) {
@@ -81,10 +81,10 @@ func TestChangeTabWalksBothWays(t *testing.T) {
 
 func TestChangePaneMovesFocus(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(ChangePane()))
-	before := s.Focus()
+	before := s.Focused()
 	s, handled, _ := s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 	require.True(t, handled)
-	require.NotEqual(t, before, s.Focus())
+	require.NotEqual(t, before, s.Focused())
 }
 
 func TestQuitActionQuits(t *testing.T) {
@@ -95,10 +95,10 @@ func TestQuitActionQuits(t *testing.T) {
 
 func TestRunWithReplacesAPrebuiltsWork(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(ChangePane(RunWith(Send(ping{}))), Quit(RunWith(Send(ping{})))))
-	before := s.Focus()
+	before := s.Focused()
 	s, handled, cmd := s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 	require.True(t, handled)
-	require.Equal(t, before, s.Focus(), "the app moves its own focus")
+	require.Equal(t, before, s.Focused(), "the app moves its own focus")
 	require.Equal(t, ping{}, cmd())
 	_, _, cmd = s.Update(tea.KeyPressMsg{Code: 'q', Text: "q"})
 	require.Equal(t, ping{}, cmd())

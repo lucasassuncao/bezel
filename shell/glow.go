@@ -35,7 +35,7 @@ func (s Shell) glowColor(name string) color.Color {
 	accent, border := lipgloss.Color(s.cfg.Theme.Colors.Accent), lipgloss.Color(s.cfg.Theme.Colors.Border)
 	q := frames.Or(s.glow.run.Ease)(s.glow.p)
 	switch name {
-	case s.Focus():
+	case s.Focused():
 		return animation.Blend(border, accent, q)
 	case s.glow.from:
 		return animation.Blend(accent, border, q)

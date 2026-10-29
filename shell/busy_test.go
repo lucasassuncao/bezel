@@ -31,7 +31,7 @@ func TestBusyShowsTheSpinnerAndTextOnTheStatusRow(t *testing.T) {
 	require.NotNil(t, cmd, "going busy starts the spinner")
 	require.True(t, s.IsBusy())
 	v := view(s)
-	require.Contains(t, v, s.Spinner()+" refreshing…")
+	require.Contains(t, v, s.SpinnerFrame()+" refreshing…")
 	require.NotContains(t, v, "status of a", "busy outranks the tab's own status")
 
 	s, cmd = s.Busy("installing…")
@@ -63,11 +63,11 @@ func TestTheSpinnerTicksOnlyWhileBusy(t *testing.T) {
 	tick := cmd()
 	require.IsType(t, animation.FrameMsg{}, tick)
 
-	before := s.Spinner()
+	before := s.SpinnerFrame()
 	s, handled, next := s.Update(tick)
 	require.True(t, handled)
 	require.NotNil(t, next, "still busy: the loop re-arms")
-	require.NotEqual(t, before, s.Spinner(), "a tick advances the frame")
+	require.NotEqual(t, before, s.SpinnerFrame(), "a tick advances the frame")
 
 	s = s.Idle()
 	_, handled, next = s.Update(next())
@@ -89,12 +89,12 @@ func TestAStaleLoopsTickDoesNotDoubleTheSpinner(t *testing.T) {
 	s := busyShell()
 	s, first := s.Busy("refreshing…")
 	s, second := s.Idle().Busy("again")
-	before := s.Spinner()
+	before := s.SpinnerFrame()
 
 	s, handled, next := s.Update(first())
 	require.True(t, handled)
 	require.Nil(t, next, "the old loop stops")
-	require.Equal(t, before, s.Spinner())
+	require.Equal(t, before, s.SpinnerFrame())
 
 	_, _, next = s.Update(second())
 	require.NotNil(t, next, "the new loop runs on")
@@ -108,7 +108,7 @@ func TestIdleLeavesABannerAlone(t *testing.T) {
 
 func TestAZeroSpinnerIsTheDot(t *testing.T) {
 	s, _ := sized(New(actionConfig())).Busy("x")
-	require.Equal(t, "⣾ ", s.Spinner())
+	require.Equal(t, "⣾ ", s.SpinnerFrame())
 }
 
 func TestConfigSpinnerPicksTheBusyMark(t *testing.T) {

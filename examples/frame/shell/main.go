@@ -135,7 +135,7 @@ func (m model) View() tea.View {
 	return m.sh.Screen(map[string]shell.Pane{
 		"list": {Title: m.tabs[at].name, Body: func(layout.Rect) string { return l.View(m.th) }},
 		"detail": {Title: "detail", Body: func(r layout.Rect) string {
-			return fmt.Sprintf("selected: %s\nfocus: %s\npane: %dx%d", m.selected(), m.sh.Focus(), r.W, r.H)
+			return fmt.Sprintf("selected: %s\nfocus: %s\npane: %dx%d", m.selected(), m.sh.Focused(), r.W, r.H)
 		}},
 	})
 }

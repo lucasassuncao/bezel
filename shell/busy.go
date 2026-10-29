@@ -33,5 +33,5 @@ func (s Shell) Idle() Shell {
 // IsBusy reports whether Busy is in effect.
 func (s Shell) IsBusy() bool { return s.busy != "" }
 
-// Spinner is the current frame, unstyled, for a pane showing the same work.
-func (s Shell) Spinner() string { return s.spin.Frame() }
+// SpinnerFrame is the current frame, unstyled, for a pane showing the same work.
+func (s Shell) SpinnerFrame() string { return s.spin.Frame() }

@@ -101,9 +101,9 @@ func (s Shell) click(c tea.MouseClickMsg) (Shell, bool, tea.Cmd) {
 	}
 	clicked := ClickMsg{Pane: pane, MouseClickMsg: s.MouseIn(pane, c).(tea.MouseClickMsg)}
 	send := func() tea.Msg { return clicked }
-	if pane == s.Focus() || !slices.Contains(layout.Ring(s.cfg.Layout), pane) {
+	if pane == s.Focused() || !slices.Contains(layout.Ring(s.cfg.Layout), pane) {
 		return s, true, send
 	}
-	next, focus := s.focused(s.Focus(), s.focusOn(pane).relayout())
+	next, focus := s.focused(s.Focused(), s.focusOn(pane).relayout())
 	return next, true, tea.Batch(focus, send)
 }

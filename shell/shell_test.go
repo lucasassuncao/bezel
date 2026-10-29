@@ -37,7 +37,7 @@ func press(k string) tea.KeyPressMsg { return tea.KeyPressMsg{Code: rune(k[0]), 
 
 func TestNewStartsFocusedOnTheFirstLeaf(t *testing.T) {
 	s := newShell()
-	require.Equal(t, "list", s.Focus())
+	require.Equal(t, "list", s.Focused())
 	require.Equal(t, 0, s.ActiveTab())
 }
 
@@ -54,12 +54,12 @@ func TestSetTabsKeepsEachTabsFocusAndClampsTheActiveOne(t *testing.T) {
 	s := sized(newShell(a, b)).SetFocus("detail")
 
 	s = s.SetTabs(a, b, c)
-	require.Equal(t, "detail", s.Focus())
-	require.Equal(t, "list", s.SetTab(2).Focus())
+	require.Equal(t, "detail", s.Focused())
+	require.Equal(t, "list", s.SetTab(2).Focused())
 
 	s = s.SetTab(2).SetTabs(a)
 	require.Equal(t, 0, s.ActiveTab())
-	require.Equal(t, "detail", s.Focus())
+	require.Equal(t, "detail", s.Focused())
 }
 
 func TestStatusTTLDefaultsToFiveSeconds(t *testing.T) {
@@ -69,12 +69,12 @@ func TestStatusTTLDefaultsToFiveSeconds(t *testing.T) {
 func TestFocusMovesAlongTheLayoutOrderAndWraps(t *testing.T) {
 	s := newShell()
 	s = s.SetFocus("detail")
-	require.Equal(t, "detail", s.Focus())
+	require.Equal(t, "detail", s.Focused())
 	s = s.nextPane(false)
-	require.Equal(t, "list", s.Focus())
+	require.Equal(t, "list", s.Focused())
 	s = s.nextPane(true)
-	require.Equal(t, "detail", s.Focus())
-	require.Equal(t, "detail", s.SetFocus("nope").Focus()) // unknown leaf: unchanged
+	require.Equal(t, "detail", s.Focused())
+	require.Equal(t, "detail", s.SetFocus("nope").Focused()) // unknown leaf: unchanged
 }
 
 // An Info pane is skipped by tab both ways and never gets the first focus,
@@ -85,24 +85,24 @@ func TestTabSkipsInfoPanes(t *testing.T) {
 		Theme:  theme.Resolve(theme.Plain, true),
 	})
 	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
-	require.Equal(t, "list", s.Focus())
-	require.Equal(t, "detail", s.nextPane(false).Focus())
-	require.Equal(t, "list", s.nextPane(false).nextPane(false).Focus())
-	require.Equal(t, "detail", s.nextPane(true).Focus())
-	require.Equal(t, "hint", s.SetFocus("hint").Focus())
+	require.Equal(t, "list", s.Focused())
+	require.Equal(t, "detail", s.nextPane(false).Focused())
+	require.Equal(t, "list", s.nextPane(false).nextPane(false).Focused())
+	require.Equal(t, "detail", s.nextPane(true).Focused())
+	require.Equal(t, "hint", s.SetFocus("hint").Focused())
 	// Leaving an Info pane goes back to the ring pane that had focus, either way.
 	s = s.SetFocus("detail").SetFocus("hint")
-	require.Equal(t, "detail", s.nextPane(false).Focus())
-	require.Equal(t, "detail", s.nextPane(true).Focus())
+	require.Equal(t, "detail", s.nextPane(false).Focused())
+	require.Equal(t, "detail", s.nextPane(true).Focused())
 }
 
 func TestEachTabRemembersItsFocus(t *testing.T) {
 	s := newShell(stubTab{name: "a"}, stubTab{name: "b"})
 	s = s.SetFocus("detail")
 	s = s.SetTab(1)
-	require.Equal(t, "list", s.Focus())
+	require.Equal(t, "list", s.Focused())
 	s = s.SetTab(0)
-	require.Equal(t, "detail", s.Focus())
+	require.Equal(t, "detail", s.Focused())
 	require.Equal(t, 0, s.SetTab(5).ActiveTab()) // out of range: unchanged
 }
 
@@ -112,7 +112,7 @@ func TestNarrowIsReportedWhenTheLayoutCollapsed(t *testing.T) {
 	require.True(t, s.Narrow())
 	require.Equal(t, layout.Rect{}, s.Rect("list"))
 	require.Equal(t, 60, s.Rect("detail").W)
-	require.Equal(t, "detail", s.Focus()) // the vanished pane cannot keep focus
+	require.Equal(t, "detail", s.Focused()) // the vanished pane cannot keep focus
 }
 
 func TestSetActionsFeedsATablessShell(t *testing.T) {
@@ -130,7 +130,7 @@ func TestSetLayoutReplacesTheTree(t *testing.T) {
 	s = s.SetLayout(layout.Columns(layout.Fill("a"), layout.Fill("b"), layout.Fill("c")))
 	require.Equal(t, 30, s.Rect("a").W)
 	require.Equal(t, layout.Rect{}, s.Rect("list"))
-	require.Equal(t, "a", s.Focus()) // old focus vanished with the old tree
+	require.Equal(t, "a", s.Focused()) // old focus vanished with the old tree
 }
 
 func TestSubtitleStatusAndShowHelp(t *testing.T) {
@@ -189,8 +189,8 @@ func requireLaidOut(t *testing.T, s Shell, op string) {
 	want, collapsed := layout.Resolve(s.cfg.Layout, s.Body(), present)
 	require.Equal(t, want, s.rects, op)
 	require.Equal(t, collapsed, s.collapsed, op)
-	_, placed := s.rects[s.Focus()]
-	require.True(t, placed, "%s: focus on %q, which is not placed", op, s.Focus())
+	_, placed := s.rects[s.Focused()]
+	require.True(t, placed, "%s: focus on %q, which is not placed", op, s.Focused())
 }
 
 func send(msg tea.Msg) func(Shell) Shell {
@@ -266,7 +266,7 @@ func TestAConfigChangeIsTheCopysAlone(t *testing.T) {
 func TestTheZeroShellIsAnEmptyOne(t *testing.T) {
 	var s Shell
 	require.NotPanics(t, func() {
-		_ = s.Focus()
+		_ = s.Focused()
 		_ = s.Context()
 		_ = s.Body()
 		_ = s.View(nil)

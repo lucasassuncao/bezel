@@ -187,7 +187,7 @@ func (s Shell) paneCanvas(panes map[string]Pane, body layout.Rect) string {
 			continue
 		}
 		st := s.cfg.Theme.Panel
-		if name == s.Focus() {
+		if name == s.Focused() {
 			st = s.cfg.Theme.PanelFocused
 		}
 		if c := s.glowColor(name); c != nil {

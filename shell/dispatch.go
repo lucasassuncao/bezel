@@ -36,7 +36,7 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 	case kindChangeTab:
 		return s.showTab(cycle(s.tab, len(s.cfg.Tabs), backward(ac, pressed)))
 	case kindChangePane:
-		from := s.Focus()
+		from := s.Focused()
 		return s.focused(from, s.nextPane(backward(ac, pressed)).relayout()) // so FocusMsg names where focus really lands
 	}
 	return s, a.Run(ActionContext{Context: s.Context(), Arg: arg})
@@ -55,7 +55,7 @@ func (s Shell) showTab(i int) (Shell, tea.Cmd) {
 // focused is s after focus moved from from: the glow and a FocusMsg when it
 // landed somewhere else, nothing when it stayed.
 func (s Shell) focused(from string, next Shell) (Shell, tea.Cmd) {
-	to := next.Focus()
+	to := next.Focused()
 	if to == from {
 		return next, nil
 	}

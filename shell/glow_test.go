@@ -33,7 +33,7 @@ func TestTheFocusColourTravelsBetweenPanes(t *testing.T) {
 	s := glowing(t, 100*time.Millisecond)
 	s, _, cmd := s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 	require.NotNil(t, cmd)
-	require.Equal(t, "right", s.Focus())
+	require.Equal(t, "right", s.Focused())
 	accent := lipgloss.Color(s.cfg.Theme.Colors.Accent)
 	border := lipgloss.Color(s.cfg.Theme.Colors.Border)
 	assert.Equal(t, rgba(border), rgba(s.glowColor("right")), "the new pane starts cool")
@@ -50,7 +50,7 @@ func TestTheFocusColourTravelsBetweenPanes(t *testing.T) {
 func TestWithoutAFadeFocusJumps(t *testing.T) {
 	s := glowing(t, 0)
 	s, _, _ = s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
-	assert.Equal(t, "right", s.Focus())
+	assert.Equal(t, "right", s.Focused())
 	assert.Nil(t, s.glowColor("right"))
 }
 

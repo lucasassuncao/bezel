@@ -86,11 +86,11 @@ func clickOf(cmd tea.Cmd) (ClickMsg, bool) {
 
 func TestAClickOnAPaneFocusesItAndComesAsAClickMsg(t *testing.T) {
 	s := sizedShell()
-	require.Equal(t, "list", s.Focus())
+	require.Equal(t, "list", s.Focused())
 	inner := draw.InnerRect(s.Rect("detail"))
 	s, handled, cmd := s.Update(click(inner.X+3, inner.Y+2))
 	require.True(t, handled)
-	require.Equal(t, "detail", s.Focus())
+	require.Equal(t, "detail", s.Focused())
 	got, ok := clickOf(cmd)
 	require.True(t, ok, "the focus and the click, in one go")
 	require.Equal(t, "detail", got.Pane)
@@ -122,5 +122,5 @@ func TestAClickWithADialogOpenIsTheDialogs(t *testing.T) {
 	_, handled, cmd := s.Update(click(0, 0))
 	require.True(t, handled)
 	require.Nil(t, cmd, "off its buttons it does nothing")
-	require.Equal(t, "list", s.Focus())
+	require.Equal(t, "list", s.Focused())
 }
