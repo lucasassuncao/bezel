@@ -361,3 +361,11 @@ func TestWithStylesRecoloursTheEmptyMessage(t *testing.T) {
 	m := New([]node{}).SetHeight(3).WithStyles(func(s Styles) Styles { s.Empty = red; return s })
 	require.Equal(t, red.Render("  (empty)"), m.View(theme.Resolve(theme.Mint, true), nil))
 }
+
+func TestSelectedIsTheNodeUnderTheCursor(t *testing.T) {
+	n, ok := newTree(3).Selected()
+	require.True(t, ok)
+	require.Equal(t, label(newTree(3)), n.label)
+	_, ok = New[node](nil).Selected()
+	require.False(t, ok)
+}

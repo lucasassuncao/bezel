@@ -32,7 +32,7 @@ Package list is a cursor list with section headings, a scroll indicator or pages
   - [func \(m Model\[T\]\) RemoveRow\(i int\) Model\[T\]](<#Model[T].RemoveRow>)
   - [func \(m Model\[T\]\) Rows\(\) \[\]Row\[T\]](<#Model[T].Rows>)
   - [func \(m Model\[T\]\) Scroll\(\) layout.Scroll](<#Model[T].Scroll>)
-  - [func \(m Model\[T\]\) Selected\(\) \*Row\[T\]](<#Model[T].Selected>)
+  - [func \(m Model\[T\]\) Selected\(\) \(Row\[T\], bool\)](<#Model[T].Selected>)
   - [func \(m Model\[T\]\) SetHeight\(h int\) Model\[T\]](<#Model[T].SetHeight>)
   - [func \(m Model\[T\]\) SetRow\(i int, r Row\[T\]\) Model\[T\]](<#Model[T].SetRow>)
   - [func \(m Model\[T\]\) SetRows\(rows \[\]Row\[T\]\) Model\[T\]](<#Model[T].SetRows>)
@@ -157,7 +157,7 @@ func (m Model[T]) Animate(msg tea.Msg) (Model[T], tea.Cmd)
 Animate moves on the list's own frames and asks for the next until it settles; every other message leaves it alone.
 
 <a name="Model[T].Click"></a>
-### func \(Model\[T\]\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L419>)
+### func \(Model\[T\]\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L423>)
 
 ```go
 func (m Model[T]) Click(y int) (Model[T], Action)
@@ -250,10 +250,10 @@ Scroll is where the list shows its rows from, for a pane's scrollbar; while filt
 ### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L345>)
 
 ```go
-func (m Model[T]) Selected() *Row[T]
+func (m Model[T]) Selected() (Row[T], bool)
 ```
 
-Selected is the row under the cursor, or nil on a heading or an empty list. While filtering it is the row under the filter cursor.
+Selected is a copy of the row under the cursor, false on a heading or an empty list. While filtering it is the row under the filter cursor.
 
 <a name="Model[T].SetHeight"></a>
 ### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L313>)
@@ -292,7 +292,7 @@ func (m Model[T]) Tick() tea.Cmd
 Tick is the command for the list's next frame, nil while it is still: call it after Update or SetRows to start what they set moving.
 
 <a name="Model[T].Update"></a>
-### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L363>)
+### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L367>)
 
 ```go
 func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
@@ -301,7 +301,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
 Update handles one key. Keys the list does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L577>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L581>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved) string

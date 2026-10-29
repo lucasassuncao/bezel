@@ -66,8 +66,9 @@ func (m model) toList(key tea.KeyPressMsg) (model, tea.Cmd) {
 	var act list.Action
 	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
 	if m.list, act = m.list.Update(key); act == list.Chosen {
-		f := m.list.Selected().Value
-		m.chosen = &f
+		if r, ok := m.list.Selected(); ok {
+			m.chosen = &r.Value
+		}
 	}
 	return m, m.list.Tick()
 }

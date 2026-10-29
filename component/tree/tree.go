@@ -251,6 +251,16 @@ func (m Model[N]) Visible() []int {
 	return vis
 }
 
+// Selected is the node under the cursor, false when no row is visible.
+func (m Model[N]) Selected() (N, bool) {
+	i := m.CurrentIdx()
+	if i < 0 {
+		var zero N
+		return zero, false
+	}
+	return m.nodes[i], true
+}
+
 // CurrentIdx is the Nodes index under the cursor, or -1.
 func (m Model[N]) CurrentIdx() int { return At(m.cursor, m.Visible()) }
 

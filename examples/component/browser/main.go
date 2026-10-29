@@ -89,7 +89,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	switch act {
 	case browser.Chosen:
-		m.sh, cmd = m.sh.SetStatus("cooking "+m.browser.Selected().Label, shell.OK, 3*time.Second)
+		it, _ := m.browser.Selected()
+		m.sh, cmd = m.sh.SetStatus("cooking "+it.Label, shell.OK, 3*time.Second)
 		return m, cmd
 	case browser.Dismissed:
 		return m, tea.Quit

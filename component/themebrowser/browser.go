@@ -170,7 +170,7 @@ func (m *browserModel) build() {
 		return
 	}
 	prev := ""
-	if it := m.tbl.Selected(); it != nil {
+	if it, ok := m.tbl.Selected(); ok {
 		prev = it.Value
 	}
 	m.layout = at
@@ -352,8 +352,8 @@ func (m *browserModel) key(k tea.KeyPressMsg) tea.Cmd {
 
 // copy writes the name under the cursor to the clipboard.
 func (m *browserModel) copy() tea.Cmd {
-	it := m.tbl.Selected()
-	if it == nil {
+	it, ok := m.tbl.Selected()
+	if !ok {
 		return nil
 	}
 	name := it.Value

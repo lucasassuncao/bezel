@@ -19,6 +19,18 @@ var th = theme.Resolve(theme.Plain, true)
 var pkgCols = []Column{{Title: "NAME"}, {Title: "VERSION"}}
 
 // pkgs are n rows: pkg-0 at v0.0, pkg-1 at v0.1 and so on.
+// sel is the item under the cursor, the zero Item when there is none.
+func sel[T any](m Model[T]) Item[T] {
+	it, _ := m.Selected()
+	return it
+}
+
+// picked reports whether an item is under the cursor.
+func picked[T any](m Model[T]) bool {
+	_, ok := m.Selected()
+	return ok
+}
+
 func pkgs(n int) []Item[int] {
 	items := make([]Item[int], n)
 	for i := range items {
@@ -48,7 +60,7 @@ func TestModelMovesAndScrollsUnderTheHeader(t *testing.T) {
 	require.Equal(t, 1, m.Cursor())
 
 	m, _ = m.Update(press(tea.KeyEnd))
-	require.Equal(t, 9, m.Selected().Value)
+	require.Equal(t, 9, sel(m).Value)
 	lines := viewLines(m)
 	require.Equal(t, "  NAME   VERSION", lines[0], "the header stays put")
 	require.Equal(t, "▶ pkg-9  v0.9", lines[4])
@@ -75,16 +87,16 @@ func TestModelSetItemsKeepsTheCursorByTheFirstCell(t *testing.T) {
 	m := New(pkgCols, pkgs(5)).SetHeight(10)
 	m, _ = m.Update(press(tea.KeyDown))
 	m, _ = m.Update(press(tea.KeyDown))
-	require.Equal(t, "pkg-2", m.Selected().Cells[0])
+	require.Equal(t, "pkg-2", sel(m).Cells[0])
 
 	m = m.SetItems(pkgs(5)[1:])
-	require.Equal(t, "pkg-2", m.Selected().Cells[0], "followed its row up")
+	require.Equal(t, "pkg-2", sel(m).Cells[0], "followed its row up")
 
 	m = m.SetItems(append(pkgs(5)[:1], pkgs(5)[3:]...))
-	require.Equal(t, "pkg-3", m.Selected().Cells[0], "its row is gone: the one that took its place")
+	require.Equal(t, "pkg-3", sel(m).Cells[0], "its row is gone: the one that took its place")
 
 	m = m.SetItems(nil)
-	require.Nil(t, m.Selected())
+	require.False(t, picked(m))
 	require.Equal(t, 0, m.Cursor())
 }
 
@@ -138,8 +150,8 @@ func TestModelCopiesTheCells(t *testing.T) {
 	require.Equal(t, "pkg-0", m.Items()[0].Cells[0])
 
 	m.Items()[0].Cells[0] = "changed"
-	m.Selected().Cells[0] = "changed"
-	require.Equal(t, "pkg-0", m.Selected().Cells[0])
+	sel(m).Cells[0] = "changed"
+	require.Equal(t, "pkg-0", sel(m).Cells[0])
 
 	more := pkgs(3)
 	m = m.SetItems(more)

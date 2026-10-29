@@ -3,6 +3,7 @@ package themebrowser
 import (
 	"errors"
 	"fmt"
+	"github.com/lucasassuncao/bezel/component/table"
 	"slices"
 	"strings"
 	"testing"
@@ -86,8 +87,8 @@ func TestBrowserModel_NoOverflowTruncation(t *testing.T) {
 func TestBrowserModel_MarksTheCursorRow(t *testing.T) {
 	m := newBrowserModel(theme.Theme{}, true)
 	t.Log("\n" + ansi.Strip(m.View().Content))
-	first := m.tbl.Selected()
-	if first == nil {
+	first, ok := m.tbl.Selected()
+	if !ok {
 		t.Fatal("no row under the cursor")
 	}
 	row := rowOf(t, m, first.Value)
@@ -294,12 +295,12 @@ func TestBrowserModel_FiltersByName(t *testing.T) {
 	if m.tbl.Len() == 0 || m.tbl.Len() == len(theme.All()) {
 		t.Fatalf("the filter kept %d of %d themes", m.tbl.Len(), len(theme.All()))
 	}
-	if !strings.Contains(m.tbl.Selected().Value, "grap") {
-		t.Errorf("best match = %q, want a name with grap", m.tbl.Selected().Value)
+	if !strings.Contains(selValue(m.tbl), "grap") {
+		t.Errorf("best match = %q, want a name with grap", selValue(m.tbl))
 	}
 	m = press(m, tea.KeyPressMsg{Code: tea.KeyEnter})
-	if got != m.tbl.Selected().Value {
-		t.Errorf("copied %q, want %q", got, m.tbl.Selected().Value)
+	if got != selValue(m.tbl) {
+		t.Errorf("copied %q, want %q", got, selValue(m.tbl))
 	}
 	m = press(m, tea.KeyPressMsg{Code: tea.KeyEscape})
 	if m.tbl.Len() != len(theme.All()) {
@@ -313,9 +314,9 @@ func TestBrowserModel_ResizeKeepsTheCursor(t *testing.T) {
 	for range 5 {
 		m = press(m, tea.KeyPressMsg{Code: tea.KeyDown})
 	}
-	want := m.tbl.Selected().Value
+	want := selValue(m.tbl)
 	next, _ := m.Update(tea.WindowSizeMsg{Width: 80, Height: 30})
-	if got := next.(*browserModel).tbl.Selected().Value; got != want {
+	if got := selValue(next.(*browserModel).tbl); got != want {
 		t.Errorf("after the resize the cursor is on %q, want %q", got, want)
 	}
 }
@@ -337,4 +338,10 @@ func TestBrowserModel_SpacesTheColoursEvenly(t *testing.T) {
 			}
 		}
 	}
+}
+
+// selValue is the theme name under the table's cursor, "" when none is.
+func selValue(t table.Model[string]) string {
+	it, _ := t.Selected()
+	return it.Value
 }

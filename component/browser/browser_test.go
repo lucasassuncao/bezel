@@ -13,6 +13,12 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
+// sel is the item under the cursor, the zero Item when there is none.
+func sel(m Model) Item {
+	it, _ := m.Selected()
+	return it
+}
+
 func items(names ...string) []Item {
 	out := make([]Item, len(names))
 	for i, n := range names {
@@ -26,9 +32,9 @@ func press(code rune) tea.KeyPressMsg { return tea.KeyPressMsg{Code: code} }
 func TestWithCurrentPutsTheCursorOnTheLabel(t *testing.T) {
 	b := New(items("a", "b", "c")).WithCurrent("b")
 	require.Equal(t, 1, b.Cursor())
-	require.Equal(t, "b", b.Selected().Label)
+	require.Equal(t, "b", sel(b).Label)
 	require.Equal(t, 0, New(items("a")).WithCurrent("zzz").Cursor())
-	require.Equal(t, Item{}, New(nil).Selected())
+	require.Equal(t, Item{}, sel(New(nil)))
 }
 
 func TestArrowsMoveTheCursorAndClamp(t *testing.T) {
@@ -84,7 +90,7 @@ func TestSetItemsKeepsTheCursorInRange(t *testing.T) {
 	b := New(items("a", "b", "c")).WithCurrent("c")
 	b = b.SetItems(items("x"))
 	require.Equal(t, 0, b.Cursor())
-	require.Equal(t, "x", b.Selected().Label)
+	require.Equal(t, "x", sel(b).Label)
 }
 
 // Paging past the end must not bank scroll that the way back has to undo.
@@ -113,12 +119,12 @@ func TestNewAndSetItemsCopyTheSlice(t *testing.T) {
 	xs := items("a", "b")
 	b := New(xs)
 	xs[0].Label = "changed"
-	require.Equal(t, "a", b.Selected().Label)
+	require.Equal(t, "a", sel(b).Label)
 
 	ys := items("x")
 	b = b.SetItems(ys)
 	ys[0].Label = "changed"
-	require.Equal(t, "x", b.Selected().Label)
+	require.Equal(t, "x", sel(b).Label)
 }
 
 func TestWithStylesRecoloursTheCursorLabel(t *testing.T) {

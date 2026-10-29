@@ -91,7 +91,7 @@ func (m model) refresh() model {
 
 // current is the index of the task under the cursor, false when there is none.
 func (m model) current() (int, bool) {
-	if row := m.list.Selected(); row != nil {
+	if row, ok := m.list.Selected(); ok {
 		return row.Value, true
 	}
 	return 0, false

@@ -64,7 +64,7 @@ func TestTheCursorGlidesThroughTheRowsBetween(t *testing.T) {
 	end := playTo(m, time.Second)
 	assert.False(t, end.Active())
 	assert.Contains(t, marked(end.View(th)), "e")
-	assert.Equal(t, "e", end.Selected().Label, "the cursor itself is where it went at once")
+	assert.Equal(t, "e", sel(end).Label, "the cursor itself is where it went at once")
 }
 
 func TestAListWithoutMotionJumps(t *testing.T) {
@@ -139,5 +139,5 @@ func TestAClickLooksPastAGhost(t *testing.T) {
 	assert.Equal(t, None, act, "the ghost is no row")
 	assert.Equal(t, 0, m.win.Cursor)
 	m, _ = m.Click(2)
-	assert.Equal(t, "new", m.Selected().Label)
+	assert.Equal(t, "new", sel(m).Label)
 }

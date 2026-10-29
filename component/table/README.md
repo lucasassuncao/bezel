@@ -34,7 +34,7 @@ Package table sizes columns to their contents, giving way in a declared order wh
   - [func \(m Model\[T\]\) Legend\(\) \[\]legend.Entry](<#Model[T].Legend>)
   - [func \(m Model\[T\]\) Len\(\) int](<#Model[T].Len>)
   - [func \(m Model\[T\]\) Scroll\(\) layout.Scroll](<#Model[T].Scroll>)
-  - [func \(m Model\[T\]\) Selected\(\) \*Item\[T\]](<#Model[T].Selected>)
+  - [func \(m Model\[T\]\) Selected\(\) \(Item\[T\], bool\)](<#Model[T].Selected>)
   - [func \(m Model\[T\]\) SetHeight\(h int\) Model\[T\]](<#Model[T].SetHeight>)
   - [func \(m Model\[T\]\) SetItems\(items \[\]Item\[T\]\) Model\[T\]](<#Model[T].SetItems>)
   - [func \(m Model\[T\]\) Update\(msg tea.KeyPressMsg\) \(Model\[T\], Action\)](<#Model[T].Update>)
@@ -266,10 +266,10 @@ Scroll is where the table shows its rows from, for a pane's scrollbar.
 ### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L170>)
 
 ```go
-func (m Model[T]) Selected() *Item[T]
+func (m Model[T]) Selected() (Item[T], bool)
 ```
 
-Selected is the row under the cursor, or nil when there are none.
+Selected is a copy of the row under the cursor, false when there are none.
 
 <a name="Model[T].SetHeight"></a>
 ### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L206>)

@@ -81,7 +81,7 @@ func (m model) Init() tea.Cmd { return nil }
 
 // selected is the item under the active tab's cursor.
 func (m model) selected() string {
-	if r := m.lists[m.sh.ActiveTab()].Selected(); r != nil {
+	if r, ok := m.lists[m.sh.ActiveTab()].Selected(); ok {
 		return r.Label
 	}
 	return ""

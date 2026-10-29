@@ -166,14 +166,14 @@ func (m Model[T]) Len() int { return len(m.items) }
 // Cursor is the index of the row under the cursor.
 func (m Model[T]) Cursor() int { return m.win.Cursor }
 
-// Selected is the row under the cursor, or nil when there are none.
-func (m Model[T]) Selected() *Item[T] {
+// Selected is a copy of the row under the cursor, false when there are none.
+func (m Model[T]) Selected() (Item[T], bool) {
 	if m.win.Cursor >= len(m.items) {
-		return nil
+		return Item[T]{}, false
 	}
 	it := m.items[m.win.Cursor]
 	it.Cells = slices.Clone(it.Cells)
-	return &it
+	return it, true
 }
 
 // Scroll is where the table shows its rows from, for a pane's scrollbar.
@@ -186,8 +186,8 @@ func (m Model[T]) Scroll() layout.Scroll {
 // index: a refresh that drops a row lands on the one that took its place.
 func (m Model[T]) SetItems(items []Item[T]) Model[T] {
 	prev, at := "", m.win.Cursor
-	if it := m.Selected(); it != nil {
-		prev = first(*it)
+	if it, ok := m.Selected(); ok {
+		prev = first(it)
 	}
 	m = m.withItems(items)
 	if at < len(m.items) && first(m.items[at]) == prev {

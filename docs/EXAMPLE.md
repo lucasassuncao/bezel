@@ -105,7 +105,7 @@ func (m model) refresh() model {
 }
 
 func (m model) current() (int, bool) {
-	if row := m.list.Selected(); row != nil {
+	if row, ok := m.list.Selected(); ok {
 		return row.Value, true
 	}
 	return 0, false

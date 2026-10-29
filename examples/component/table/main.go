@@ -118,7 +118,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		var act table.Action
 		if m.tbl, act = m.tbl.Update(msg); act == table.Chosen {
-			m.sh, cmd = m.sh.SetStatus("chose "+m.tbl.Selected().Value, shell.OK, 2*time.Second)
+			it, _ := m.tbl.Selected()
+			m.sh, cmd = m.sh.SetStatus("chose "+it.Value, shell.OK, 2*time.Second)
 			return m, cmd
 		}
 	}
@@ -127,8 +128,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // detail is the row under the cursor, its description wrapped to the pane.
 func (m model) detail(r layout.Rect) string {
-	it := m.tbl.Selected()
-	if it == nil {
+	it, ok := m.tbl.Selected()
+	if !ok {
 		return ""
 	}
 	c := it.Cells
@@ -137,6 +138,7 @@ func (m model) detail(r layout.Rect) string {
 }
 
 func (m model) View() tea.View {
+	it, _ := m.tbl.Selected()
 	v := tea.NewView(m.sh.View(map[string]shell.Pane{
 		"table": {
 			Title:  "dependencies",
@@ -144,7 +146,7 @@ func (m model) View() tea.View {
 			Scroll: m.tbl.Scroll(),
 			Body:   func(r layout.Rect) string { return m.tbl.View(m.th, r.W) },
 		},
-		"detail": {Title: m.tbl.Selected().Value, Body: m.detail},
+		"detail": {Title: it.Value, Body: m.detail},
 	}))
 	v.AltScreen = true
 	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground

@@ -122,11 +122,10 @@ func (m model) row(e entry, _ int, selected bool) string {
 }
 
 func (m model) detail() string {
-	idx := m.tree.CurrentIdx()
-	if idx < 0 {
+	e, ok := m.tree.Selected()
+	if !ok {
 		return ""
 	}
-	e := m.tree.Nodes()[idx]
 	kind := "file"
 	if e.dir {
 		kind = "directory"

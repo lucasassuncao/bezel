@@ -152,12 +152,12 @@ func (m Model) Cursor() int { return m.cursor }
 // Len is how many rows there are.
 func (m Model) Len() int { return len(m.items) }
 
-// Selected is the item under the cursor, or the zero Item when there is none.
-func (m Model) Selected() Item {
+// Selected is the item under the cursor, false when there is none.
+func (m Model) Selected() (Item, bool) {
 	if m.cursor < 0 || m.cursor >= len(m.items) {
-		return Item{}
+		return Item{}, false
 	}
-	return m.items[m.cursor]
+	return m.items[m.cursor], true
 }
 
 // Legend is the keys the browser answers to: enter only while the list has
@@ -215,7 +215,7 @@ func (m Model) step(dir, n int) Model {
 
 // maxPreviewScroll is the scroll that shows the detail's last full page.
 func (m Model) maxPreviewScroll() int {
-	it := m.Selected()
+	it, _ := m.Selected()
 	if it.Detail == nil {
 		return 0
 	}
@@ -249,7 +249,7 @@ func (m Model) ListView(th theme.Resolved, height int) string {
 // PreviewView renders the selected item's detail, height rows of it from the
 // current scroll, clamped so the last page is full.
 func (m Model) PreviewView(height int) string {
-	it := m.Selected()
+	it, _ := m.Selected()
 	if it.Detail == nil {
 		return ""
 	}

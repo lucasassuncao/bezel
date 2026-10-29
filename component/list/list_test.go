@@ -33,21 +33,21 @@ func typed(s string) tea.KeyPressMsg  { return tea.KeyPressMsg{Code: []rune(s)[0
 
 func TestCursorStartsOnAndSkipsOverHeadings(t *testing.T) {
 	m := New(rows()).SetHeight(10)
-	require.Equal(t, "server", m.Selected().Label)
+	require.Equal(t, "server", sel(m).Label)
 	m, _ = m.Update(press(tea.KeyDown))
 	m, _ = m.Update(press(tea.KeyDown)) // hops the spacer and the heading
-	require.Equal(t, "cache", m.Selected().Label)
+	require.Equal(t, "cache", sel(m).Label)
 	m, _ = m.Update(press(tea.KeyDown))
 	m, _ = m.Update(press(tea.KeyDown)) // clamped at the end
-	require.Equal(t, "metrics", m.Selected().Label)
-	require.Equal(t, 4, m.Selected().Value)
+	require.Equal(t, "metrics", sel(m).Label)
+	require.Equal(t, 4, sel(m).Value)
 }
 
 func TestEnterChoosesASelectableRow(t *testing.T) {
 	m := New(rows()).SetHeight(10)
 	_, act := m.Update(press(tea.KeyEnter))
 	require.Equal(t, Chosen, act)
-	require.Nil(t, New([]Row[int]{{Section: true, Label: "x"}}).SetHeight(5).Selected())
+	require.False(t, picked(New([]Row[int]{{Section: true, Label: "x"}}).SetHeight(5)))
 }
 
 func TestFilterNarrowsAndEnterPicksTheMatch(t *testing.T) {
@@ -57,17 +57,17 @@ func TestFilterNarrowsAndEnterPicksTheMatch(t *testing.T) {
 	m, _ = m.Update(typed("m"))
 	m, _ = m.Update(typed("e"))
 	require.Equal(t, "me", m.Filter())
-	require.Equal(t, "metrics", m.Selected().Label)
+	require.Equal(t, "metrics", sel(m).Label)
 	require.Contains(t, ansi.Strip(m.View(th)), "/me▋")
 
 	m, act := m.Update(press(tea.KeyEnter))
 	require.Equal(t, Chosen, act)
 	require.False(t, m.Filtering())
-	require.Equal(t, "metrics", m.Selected().Label, "the pick becomes the cursor")
+	require.Equal(t, "metrics", sel(m).Label, "the pick becomes the cursor")
 
 	m, _ = m.Update(typed("/"))
 	m, _ = m.Update(typed("z"))
-	require.Nil(t, m.Selected())
+	require.False(t, picked(m))
 	m, _ = m.Update(press(tea.KeyBackspace))
 	require.Equal(t, "", m.Filter())
 	m, _ = m.Update(press(tea.KeyEscape))
@@ -77,11 +77,11 @@ func TestFilterNarrowsAndEnterPicksTheMatch(t *testing.T) {
 func TestSetRowsKeepsTheCursorByLabel(t *testing.T) {
 	m := New(rows()).SetHeight(10)
 	m, _ = m.Update(press(tea.KeyDown))
-	require.Equal(t, "logging", m.Selected().Label)
+	require.Equal(t, "logging", sel(m).Label)
 	m = m.SetRows([]Row[int]{{Label: "cache"}, {Label: "logging"}})
-	require.Equal(t, "logging", m.Selected().Label)
+	require.Equal(t, "logging", sel(m).Label)
 	m = m.SetRows([]Row[int]{{Label: "other"}})
-	require.Equal(t, "other", m.Selected().Label)
+	require.Equal(t, "other", sel(m).Label)
 }
 
 func TestViewShowsHeadingsMarksAndTheOverflowIndicator(t *testing.T) {
@@ -130,13 +130,13 @@ func TestFilterPicksTheRowItShowsAmongEqualLabels(t *testing.T) {
 	m, _ = m.Update(press(tea.KeyDown))
 	m, act := m.Update(press(tea.KeyEnter))
 	require.Equal(t, Chosen, act)
-	require.Equal(t, 2, m.Selected().Value)
+	require.Equal(t, 2, sel(m).Value)
 }
 
 func TestSetRowsKeepsTheSameRowAmongEqualLabels(t *testing.T) {
 	m := New(twins()).SetHeight(5)
 	m, _ = m.Update(press(tea.KeyDown))
-	require.Equal(t, 2, m.SetRows(twins()).Selected().Value)
+	require.Equal(t, 2, sel(m.SetRows(twins())).Value)
 }
 
 // The list is a value: the caller's slice must not reach into it.
@@ -173,7 +173,7 @@ func TestFilterScrollsItsMatchesAndCountsTheRest(t *testing.T) {
 	for range 10 {
 		m, _ = m.Update(press(tea.KeyDown))
 	}
-	require.Equal(t, "item-10", m.Selected().Label)
+	require.Equal(t, "item-10", sel(m).Label)
 	require.Contains(t, ansi.Strip(m.View(th)), "▶ item-10")
 }
 
@@ -181,7 +181,7 @@ func TestFilterScrollsItsMatchesAndCountsTheRest(t *testing.T) {
 func TestSelectedValueKeepsItsType(t *testing.T) {
 	m := New([]Row[string]{{Label: "a", Value: "payload"}}).SetHeight(5)
 	// strings.ToUpper compiles only while Value is a string, not an any.
-	require.Equal(t, "PAYLOAD", strings.ToUpper(m.Selected().Value))
+	require.Equal(t, "PAYLOAD", strings.ToUpper(sel(m).Value))
 }
 
 func TestWithMatchDecidesWhatTheFilterKeeps(t *testing.T) {
@@ -192,12 +192,12 @@ func TestWithMatchDecidesWhatTheFilterKeeps(t *testing.T) {
 		}
 		return m
 	}
-	require.Equal(t, "server", filter(New(rows()).SetHeight(10), "e").Selected().Label, "the default keeps any label holding the text")
+	require.Equal(t, "server", sel(filter(New(rows()).SetHeight(10), "e")).Label, "the default keeps any label holding the text")
 
 	prefix := New(rows()).SetHeight(10).WithMatch(Prefix)
-	require.Nil(t, filter(prefix, "e").Selected(), "no label starts with e")
-	require.Equal(t, "cache", filter(prefix, "c").Selected().Label)
-	require.Equal(t, "server", filter(prefix.WithMatch(nil), "e").Selected().Label, "nil is the default again")
+	require.False(t, picked(filter(prefix, "e")), "no label starts with e")
+	require.Equal(t, "cache", sel(filter(prefix, "c")).Label)
+	require.Equal(t, "server", sel(filter(prefix.WithMatch(nil), "e")).Label, "nil is the default again")
 }
 
 func TestTheMatchersIgnoreCase(t *testing.T) {
@@ -249,6 +249,18 @@ func BenchmarkListFrame(b *testing.B) {
 	}
 }
 
+// sel is the row under the cursor, the zero Row when there is none.
+func sel[T any](m Model[T]) Row[T] {
+	r, _ := m.Selected()
+	return r
+}
+
+// picked reports whether a row is under the cursor.
+func picked[T any](m Model[T]) bool {
+	_, ok := m.Selected()
+	return ok
+}
+
 func filtered(m Model[int], text string) Model[int] {
 	m, _ = m.Update(typed("/"))
 	for _, r := range text {
@@ -260,14 +272,14 @@ func filtered(m Model[int], text string) Model[int] {
 func TestFuzzyRanksTheBestMatchFirstAndMarksIt(t *testing.T) {
 	m := New([]Row[int]{{Label: "carousel"}, {Label: "cherry-pick"}, {Label: "checkout"}}).SetHeight(10).WithFuzzy(true)
 	m = filtered(m, "chk")
-	require.Equal(t, "checkout", m.Selected().Label, "a run beats scattered letters")
+	require.Equal(t, "checkout", sel(m).Label, "a run beats scattered letters")
 	lines := strings.Split(ansi.Strip(m.View(th)), "\n")
 	require.Equal(t, "▶ checkout", lines[0])
 	require.Equal(t, "  cherry-pick", lines[1])
 	require.NotContains(t, ansi.Strip(m.View(th)), "carousel")
 	require.Contains(t, m.View(th), th.Cursor.Underline(true).Bold(true).Render("ch"))
 	plain := New([]Row[int]{{Label: "carousel"}, {Label: "cherry-pick"}}).SetHeight(10).WithFuzzy(true).WithMatch(nil)
-	require.Equal(t, "carousel", filtered(plain, "ar").Selected().Label, "WithMatch ends it: the cherry-pick letters are not a run")
+	require.Equal(t, "carousel", sel(filtered(plain, "ar")).Label, "WithMatch ends it: the cherry-pick letters are not a run")
 }
 
 func TestTitleAndStatusFrameTheRows(t *testing.T) {
@@ -304,7 +316,7 @@ func TestDescriptionsGiveEveryRowTwoLines(t *testing.T) {
 	require.Contains(t, ansi.Strip(New(rows).SetHeight(4).View(th)), "↓ 2 more", "four lines hold one row and the count")
 	m, _ = m.Update(press(tea.KeyDown))
 	m, _ = m.Update(press(tea.KeyDown))
-	require.Equal(t, "c", m.Selected().Label)
+	require.Equal(t, "c", sel(m).Label)
 	require.Contains(t, ansi.Strip(m.View(th)), "  third")
 }
 
@@ -312,7 +324,7 @@ func TestRowsGoInComeOutAndChange(t *testing.T) {
 	m := New(numbered(3)).SetHeight(10)
 	m, _ = m.Update(press(tea.KeyDown))
 	m = m.InsertRow(0, Row[int]{Label: "new"})
-	require.Equal(t, "item-01", m.Selected().Label, "the cursor stays on its row")
+	require.Equal(t, "item-01", sel(m).Label, "the cursor stays on its row")
 	require.Equal(t, 4, m.Len())
 	m = m.RemoveRow(0).RemoveRow(99)
 	require.Equal(t, 3, m.Len())
@@ -324,21 +336,21 @@ func TestRowsGoInComeOutAndChange(t *testing.T) {
 func TestWrapGoesRoundTheEnds(t *testing.T) {
 	m := New(rows()).SetHeight(10).WithWrap(true)
 	m, _ = m.Update(press(tea.KeyUp))
-	require.Equal(t, "metrics", m.Selected().Label, "up from the first goes to the last")
+	require.Equal(t, "metrics", sel(m).Label, "up from the first goes to the last")
 	m, _ = m.Update(press(tea.KeyDown))
-	require.Equal(t, "server", m.Selected().Label, "down from the last, over the heading, to the first")
+	require.Equal(t, "server", sel(m).Label, "down from the last, over the heading, to the first")
 	n, _ := New(rows()).SetHeight(10).Update(press(tea.KeyUp))
-	require.Equal(t, "server", n.Selected().Label, "without wrap it stops")
+	require.Equal(t, "server", sel(n).Label, "without wrap it stops")
 }
 
 func TestPageAndEndKeysJump(t *testing.T) {
 	m := New(numbered(20)).SetHeight(5)
 	m, _ = m.Update(press(tea.KeyPgDown))
-	require.Equal(t, "item-05", m.Selected().Label)
+	require.Equal(t, "item-05", sel(m).Label)
 	m, _ = m.Update(press(tea.KeyEnd))
-	require.Equal(t, "item-19", m.Selected().Label)
+	require.Equal(t, "item-19", sel(m).Label)
 	m, _ = m.Update(press(tea.KeyHome))
-	require.Equal(t, "item-00", m.Selected().Label)
+	require.Equal(t, "item-00", sel(m).Label)
 }
 
 func TestLegendListsTheKeysOfTheMode(t *testing.T) {
@@ -367,28 +379,28 @@ func TestAClickMovesTheCursorAndASecondChooses(t *testing.T) {
 	m := New(rows()).SetHeight(10) // ADDED, server, logging, spacer, AVAILABLE, cache, metrics
 	m, act := m.Click(5)
 	require.Equal(t, None, act)
-	require.Equal(t, "cache", m.Selected().Label)
+	require.Equal(t, "cache", sel(m).Label)
 	_, act = m.Click(5)
 	require.Equal(t, Chosen, act, "the row under the cursor is chosen")
 	same, act := m.Click(0)
 	require.Equal(t, None, act, "a heading is not a row to land on")
-	require.Equal(t, "cache", same.Selected().Label)
+	require.Equal(t, "cache", sel(same).Label)
 	_, act = m.Click(40)
 	require.Equal(t, None, act)
 
 	titled := New(rows()).SetHeight(10).WithTitle("Plugins")
 	titled, _ = titled.Click(3)
-	require.Equal(t, "logging", titled.Selected().Label, "the title takes the first line")
+	require.Equal(t, "logging", sel(titled).Label, "the title takes the first line")
 }
 
 func TestAClickPicksAMatchWhileFiltering(t *testing.T) {
 	m := filtered(New(numbered(5)).SetHeight(10), "item")
 	m, _ = m.Click(2)
-	require.Equal(t, "item-02", m.Selected().Label)
+	require.Equal(t, "item-02", sel(m).Label)
 	m, act := m.Click(2)
 	require.Equal(t, Chosen, act)
 	require.False(t, m.Filtering())
-	require.Equal(t, "item-02", m.Selected().Label)
+	require.Equal(t, "item-02", sel(m).Label)
 }
 
 func TestWithStylesRecoloursOneList(t *testing.T) {
@@ -402,10 +414,10 @@ func TestWithStylesRecoloursOneList(t *testing.T) {
 func TestVimKeysMoveOnLettersButFilterTakesThemAsText(t *testing.T) {
 	m := New(numbered(5)).SetHeight(5)
 	n, _ := m.Update(typed("j"))
-	require.Equal(t, m.Selected().Label, n.Selected().Label, "no letters by default")
+	require.Equal(t, sel(m).Label, sel(n).Label, "no letters by default")
 	m = m.WithKeys(VimKeys())
 	n, _ = m.Update(typed("j"))
-	require.Equal(t, "item-01", n.Selected().Label)
+	require.Equal(t, "item-01", sel(n).Label)
 	f := filtered(m, "j")
 	require.Equal(t, "j", f.Filter(), "the prompt types the letter")
 }

@@ -291,7 +291,7 @@ func (m Model[T]) SetRows(rows []Row[T]) Model[T] {
 // setRows is SetRows without the motion.
 func (m Model[T]) setRows(rows []Row[T]) Model[T] {
 	prev, at := "", m.win.Cursor
-	if r := m.Selected(); r != nil {
+	if r, ok := m.Selected(); ok {
 		prev = r.Label
 	}
 	m.rows = slices.Clone(rows)
@@ -340,22 +340,26 @@ func (m Model[T]) SetRow(i int, r Row[T]) Model[T] {
 	return m.SetRows(rows)
 }
 
-// Selected is the row under the cursor, or nil on a heading or an empty
-// list. While filtering it is the row under the filter cursor.
-func (m Model[T]) Selected() *Row[T] {
+// Selected is a copy of the row under the cursor, false on a heading or an
+// empty list. While filtering it is the row under the filter cursor.
+func (m Model[T]) Selected() (Row[T], bool) {
 	if m.find.on {
 		idx := m.find.idx
 		if m.find.win.Cursor >= len(idx) {
-			return nil
+			return Row[T]{}, false
 		}
-		r := m.rows[idx[m.find.win.Cursor]]
-		return &r
+		return m.rows[idx[m.find.win.Cursor]], true
 	}
 	if m.win.Cursor >= len(m.rows) || m.rows[m.win.Cursor].Section {
-		return nil
+		return Row[T]{}, false
 	}
-	r := m.rows[m.win.Cursor]
-	return &r
+	return m.rows[m.win.Cursor], true
+}
+
+// picked reports whether a row is under the cursor.
+func (m Model[T]) picked() bool {
+	_, ok := m.Selected()
+	return ok
 }
 
 // Update handles one key. Keys the list does not know return None and
@@ -380,7 +384,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action) {
 	case key.Matches(msg, m.keys.Bottom):
 		return m.jump(len(m.rows)), None
 	case key.Matches(msg, m.keys.Enter):
-		if m.Selected() != nil {
+		if _, ok := m.Selected(); ok {
 			return m, Chosen
 		}
 	}
@@ -523,7 +527,7 @@ func (m Model[T]) ranked(query string) []int {
 // when the list wraps.
 func (m Model[T]) move(delta int) Model[T] {
 	moved := m.jump(delta)
-	if !m.wrap || moved.win.Cursor != m.win.Cursor || m.Selected() == nil {
+	if !m.wrap || moved.win.Cursor != m.win.Cursor || !m.picked() {
 		return moved
 	}
 	if delta > 0 {

@@ -26,7 +26,7 @@ Package browser is the pick\-from\-a\-list screen: labels on the left, the selec
   - [func \(m Model\) ListView\(th theme.Resolved, height int\) string](<#Model.ListView>)
   - [func \(m Model\) PreviewFocused\(\) bool](<#Model.PreviewFocused>)
   - [func \(m Model\) PreviewView\(height int\) string](<#Model.PreviewView>)
-  - [func \(m Model\) Selected\(\) Item](<#Model.Selected>)
+  - [func \(m Model\) Selected\(\) \(Item, bool\)](<#Model.Selected>)
   - [func \(m Model\) SetItems\(items \[\]Item\) Model](<#Model.SetItems>)
   - [func \(m Model\) SetPreviewFocus\(on bool\) Model](<#Model.SetPreviewFocus>)
   - [func \(m Model\) SetPreviewHeight\(h int\) Model](<#Model.SetPreviewHeight>)
@@ -185,10 +185,10 @@ PreviewView renders the selected item's detail, height rows of it from the curre
 ### func \(Model\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L156>)
 
 ```go
-func (m Model) Selected() Item
+func (m Model) Selected() (Item, bool)
 ```
 
-Selected is the item under the cursor, or the zero Item when there is none.
+Selected is the item under the cursor, false when there is none.
 
 <a name="Model.SetItems"></a>
 ### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L132>)
