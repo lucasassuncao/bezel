@@ -250,7 +250,7 @@ func NewAlert(kind Kind, title, message string, th theme.Resolved) Alert
 NewAlert is an alert of kind, its border in that kind's colour.
 
 <a name="Alert.Click"></a>
-### func \(Alert\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L46>)
+### func \(Alert\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L48>)
 
 ```go
 func (a Alert) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
@@ -259,7 +259,7 @@ func (a Alert) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
 Click closes the alert on a click on OK.
 
 <a name="Alert.Kind"></a>
-### func \(Alert\) [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L29>)
+### func \(Alert\) [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L31>)
 
 ```go
 func (a Alert) Kind() Kind
@@ -268,7 +268,7 @@ func (a Alert) Kind() Kind
 Kind is what the alert reports.
 
 <a name="Alert.Legend"></a>
-### func \(Alert\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L38>)
+### func \(Alert\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L40>)
 
 ```go
 func (a Alert) Legend() []legend.Entry
@@ -286,7 +286,7 @@ func (a Alert) SetTheme(th theme.Resolved) Overlay
 SetTheme repaints the alert under th; its Kind keeps its colour.
 
 <a name="Alert.Update"></a>
-### func \(Alert\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L31>)
+### func \(Alert\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L33>)
 
 ```go
 func (a Alert) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -295,7 +295,7 @@ func (a Alert) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Alert.View"></a>
-### func \(Alert\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L40>)
+### func \(Alert\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L42>)
 
 ```go
 func (a Alert) View(body layout.Rect) string

@@ -22,7 +22,9 @@ type Alert struct {
 
 // NewAlert is an alert of kind, its border in that kind's colour.
 func NewAlert(kind Kind, title, message string, th theme.Resolved) Alert {
-	return Alert{look: look{th: &th, kind: kind}, title: title, message: message}
+	l := lookOf(th)
+	l.kind = kind
+	return Alert{look: l, title: title, message: message}
 }
 
 // Kind is what the alert reports.

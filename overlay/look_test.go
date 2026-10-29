@@ -1,6 +1,7 @@
 package overlay
 
 import (
+	"github.com/charmbracelet/x/ansi"
 	"os"
 	"path/filepath"
 	"testing"
@@ -94,4 +95,23 @@ func TestStackSetThemeRepaintsTheDialogs(t *testing.T) {
 	body := layout.Rect{W: 60, H: 20}
 	s := Stack{}.Push(NewText("t", "body", plain)).SetTheme(mint)
 	require.Equal(t, NewText("t", "body", mint).View(body), s.Top().View(body))
+}
+
+// Every dialog draws the theme's modal box, Alert included: one built
+// without lookOf had no styles and so no border.
+func TestEveryDialogDrawsTheModalBorder(t *testing.T) {
+	th := theme.Resolve(theme.Mint, true)
+	body := layout.Rect{W: 60, H: 20}
+	for name, o := range map[string]Overlay{
+		"alert":   NewAlert(Success, "t", "m", th),
+		"confirm": NewConfirm("t", "m", nil, th),
+		"text":    NewText("t", "m", th),
+		"choice":  NewChoice("t", "m", nil, th),
+		"pick":    NewPick("t", []string{"a"}, nil, th),
+		"help":    NewHelp(nil, th),
+		"pager":   NewPager("t", "m", th),
+		"prompt":  NewPrompt("t", nil, th),
+	} {
+		require.Contains(t, ansi.Strip(o.View(body)), "╭", name)
+	}
 }
