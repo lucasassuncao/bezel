@@ -280,3 +280,12 @@ func TestTheZeroShellIsAnEmptyOne(t *testing.T) {
 	w, h := s.Size()
 	require.Equal(t, 0, w+h)
 }
+
+// A dialog open when the terminal's background is learned repaints with it.
+func TestSetThemeReachesAnOpenDialog(t *testing.T) {
+	plain, mint := theme.Resolve(theme.Plain, true), theme.Resolve(theme.Mint, true)
+	s := New(Config{Layout: layout.Columns(layout.Fill("a")), Theme: plain})
+	s = s.Push(overlay.NewText("t", "body", plain)).SetTheme(mint)
+	body := layout.Rect{W: 60, H: 20}
+	require.Equal(t, overlay.NewText("t", "body", mint).View(body), s.TopOverlay().View(body))
+}

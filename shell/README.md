@@ -515,7 +515,7 @@ func (s Shell) ClearStatus() Shell
 ClearStatus removes the banner now, and makes its pending timer a no\-op.
 
 <a name="Shell.Context"></a>
-### func \(Shell\) [Context](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L280>)
+### func \(Shell\) [Context](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L284>)
 
 ```go
 func (s Shell) Context() Context
@@ -542,7 +542,7 @@ func (s Shell) Focus() string
 Focus is the name of the focused leaf on the active tab.
 
 <a name="Shell.HasOverlay"></a>
-### func \(Shell\) [HasOverlay](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L286>)
+### func \(Shell\) [HasOverlay](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L290>)
 
 ```go
 func (s Shell) HasOverlay() bool
@@ -623,7 +623,7 @@ func (s Shell) PaneAt(x, y int) (string, bool)
 PaneAt is the pane drawn at the screen cell \(x, y\), border included, and false over the chrome, a gap or an open dialog, which covers the panes.
 
 <a name="Shell.Pop"></a>
-### func \(Shell\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L299>)
+### func \(Shell\) [Pop](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L303>)
 
 ```go
 func (s Shell) Pop() Shell
@@ -632,7 +632,7 @@ func (s Shell) Pop() Shell
 Pop closes the top modal, if any.
 
 <a name="Shell.Push"></a>
-### func \(Shell\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L292>)
+### func \(Shell\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L296>)
 
 ```go
 func (s Shell) Push(o overlay.Overlay) Shell
@@ -659,7 +659,7 @@ func (s Shell) Screen(panes map[string]Pane) tea.View
 Screen is the shell's view as the full\-screen tea.View a program returns, with mouse reporting on when Config.Mouse is.
 
 <a name="Shell.SetActions"></a>
-### func \(Shell\) [SetActions](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L260>)
+### func \(Shell\) [SetActions](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L264>)
 
 ```go
 func (s Shell) SetActions(actions ...Action) Shell
@@ -695,7 +695,7 @@ func (s Shell) SetLayout(n layout.Node) Shell
 SetLayout swaps the layout tree and re\-resolves it. For screens whose shape changes at runtime, such as a panel that animates open.
 
 <a name="Shell.SetLegendLines"></a>
-### func \(Shell\) [SetLegendLines](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L267>)
+### func \(Shell\) [SetLegendLines](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L271>)
 
 ```go
 func (s Shell) SetLegendLines(n int) Shell
@@ -713,7 +713,7 @@ func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, te
 SetStatus shows text on the status row, or as a toast in the Toast style. ttl \> 0 clears it later, unless a newer status has replaced it by then; a toast always leaves, after StatusTTL when ttl is not above zero.
 
 <a name="Shell.SetSubtitle"></a>
-### func \(Shell\) [SetSubtitle](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L252>)
+### func \(Shell\) [SetSubtitle](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L256>)
 
 ```go
 func (s Shell) SetSubtitle(text string) Shell
@@ -749,7 +749,7 @@ func (s Shell) SetTheme(th theme.Resolved) Shell
 SetTheme swaps the styles, for a terminal that answered light or dark after the shell was built.
 
 <a name="Shell.ShowHelp"></a>
-### func \(Shell\) [ShowHelp](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L277>)
+### func \(Shell\) [ShowHelp](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L281>)
 
 ```go
 func (s Shell) ShowHelp() Shell
@@ -776,7 +776,7 @@ func (s Shell) Spinner() string
 Spinner is the current frame, unstyled, for a pane showing the same work.
 
 <a name="Shell.Status"></a>
-### func \(Shell\) [Status](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L274>)
+### func \(Shell\) [Status](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L278>)
 
 ```go
 func (s Shell) Status() string
@@ -803,7 +803,7 @@ func (s Shell) StatusLevel() Level
 StatusLevel is how the current status is drawn.
 
 <a name="Shell.TopOverlay"></a>
-### func \(Shell\) [TopOverlay](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L289>)
+### func \(Shell\) [TopOverlay](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L293>)
 
 ```go
 func (s Shell) TopOverlay() overlay.Overlay

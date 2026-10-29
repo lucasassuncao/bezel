@@ -13,6 +13,7 @@ import (
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // Overlay is one floating modal. View gets the body rect and picks its own
@@ -46,6 +47,12 @@ type StatusLiner interface{ StatusLine(width int) string }
 // and whenever its body changes, so Update knows before anything is drawn.
 type Resizer interface {
 	Resize(body layout.Rect) Overlay
+}
+
+// Themer is implemented by overlays that repaint under a new theme; every
+// bezel dialog does. Stack.SetTheme hands the theme to each.
+type Themer interface {
+	SetTheme(th theme.Resolved) Overlay
 }
 
 // CloseMsg pops the top overlay.
@@ -106,6 +113,19 @@ func (s Stack) Pop() Stack {
 
 // Resize hands body to every Resizer layer, the hidden ones too. A shell does
 // it on each layout; an app driving a Stack itself calls it on every resize.
+// SetTheme repaints every overlay on the stack that is a Themer.
+func (s Stack) SetTheme(th theme.Resolved) Stack {
+	items := make([]Overlay, len(s.items))
+	for i, o := range s.items {
+		if t, ok := o.(Themer); ok {
+			o = t.SetTheme(th)
+		}
+		items[i] = o
+	}
+	s.items = items
+	return s
+}
+
 func (s Stack) Resize(body layout.Rect) Stack {
 	if body == s.body {
 		return s

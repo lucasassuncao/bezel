@@ -245,6 +245,10 @@ func (s Shell) SetLayout(n layout.Node) Shell {
 func (s Shell) SetTheme(th theme.Resolved) Shell {
 	s = s.ready()
 	s = s.withCfg(func(c *Config) { c.Theme = th })
+	s.overlays = s.overlays.SetTheme(th)
+	if s.typing {
+		s.input = s.input.SetTheme(th)
+	}
 	return s.relayout()
 }
 

@@ -22,6 +22,7 @@ Package palette is the ":" command line: the typed line on the status row and th
   - [func \(Model\) AnchorBottom\(\) bool](<#Model.AnchorBottom>)
   - [func \(m Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
   - [func \(m Model\) SetItems\(items \[\]Item\) Model](<#Model.SetItems>)
+  - [func \(m Model\) SetTheme\(th theme.Resolved\) overlay.Overlay](<#Model.SetTheme>)
   - [func \(m Model\) StatusLine\(width int\) string](<#Model.StatusLine>)
   - [func \(m Model\) Update\(msg tea.Msg\) \(overlay.Overlay, tea.Cmd\)](<#Model.Update>)
   - [func \(m Model\) Value\(\) string](<#Model.Value>)
@@ -106,7 +107,7 @@ func New(items []Item, th theme.Resolved) Model
 New opens a palette over items, sorted by name.
 
 <a name="Model.AnchorBottom"></a>
-### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L178>)
+### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L184>)
 
 ```go
 func (Model) AnchorBottom() bool
@@ -115,7 +116,7 @@ func (Model) AnchorBottom() bool
 
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L173>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L179>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -124,13 +125,22 @@ func (m Model) Legend() []legend.Entry
 
 
 <a name="Model.SetItems"></a>
-### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L139>)
+### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L145>)
 
 ```go
 func (m Model) SetItems(items []Item) Model
 ```
 
 SetItems replaces the commands, judged again by the owner, keeping the typed line; a pick past the new list's end is dropped.
+
+<a name="Model.SetTheme"></a>
+### func \(Model\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L132>)
+
+```go
+func (m Model) SetTheme(th theme.Resolved) overlay.Overlay
+```
+
+SetTheme repaints the palette and its typed line under th.
 
 <a name="Model.StatusLine"></a>
 ### func \(Model\) [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/palette/view.go#L67>)
@@ -142,7 +152,7 @@ func (m Model) StatusLine(width int) string
 StatusLine is the typed line, drawn where the status usually is.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L148>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L154>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
@@ -151,7 +161,7 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
 
 
 <a name="Model.Value"></a>
-### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L181>)
+### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L187>)
 
 ```go
 func (m Model) Value() string
@@ -169,7 +179,7 @@ func (m Model) View(body layout.Rect) string
 View is the candidate list, a rule above it, every line padded to the full width so the panes do not show through.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L132>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L138>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model

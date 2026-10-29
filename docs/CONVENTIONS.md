@@ -23,7 +23,7 @@ A component that draws takes a `theme.Resolved`; loose lipgloss styles reach it 
 | bezel, for the controls of a form | `form.New(th, fields...)`, first because the fields are variadic; the form hands it to every control and `SetTheme` replaces it | `form` |
 | the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport`, `accordion`, `toast` |
 | nobody: it is a plain function | after the data it draws | `progress`, `chart`, `inline`, `icon.Set.Render` |
-| `shell` | `shell.Config.Theme`, replaced with `SetTheme` | `shell` |
+| `shell` | `shell.Config.Theme`, replaced with `SetTheme`, which also repaints every open dialog (`overlay.Themer`) and the status row's input | `shell` |
 
 - A dialog that reports something is tinted with `WithKind(overlay.Danger)` and the like. `Alert` takes its `Kind` in the constructor, because it always reports one. The `Kind` colours stay the theme's success, warning and danger: a `WithStyles` edit never changes what a dialog reports.
 - `draw`, `legend` and `overlay.Box` sit below the theme and take the lipgloss style they paint with: `theme` imports them, so they cannot import it.
@@ -108,6 +108,6 @@ A new component reaches for one of these before it invents a shape.
 | Chain of responsibility | `Shell.Update`: the overlays, then the status input, then the actions; `handled` false hands the rest to the app. |
 | Command | `shell.Action`, `palette.Item`: a key, a name and what it runs, held as data the legend, the palette and the dispatch read. |
 | Functional options | `shell.Option` on the prebuilt actions, `With` on every model and on `key.Binding`: optional settings without a growing constructor. |
-| Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `Clicker`, `form.Holder`, `form.Initer`: an overlay or field opts into a behaviour by implementing one small interface. |
+| Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `Clicker`, `Themer`, `form.Holder`, `form.Initer`: an overlay or field opts into a behaviour by implementing one small interface. |
 | Strategy | `tree.View`'s row, `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies the answer. |
 | Cascade | `theme.Theme.Base`: each layer overrides the one under it, so a preset is a base to build on. |

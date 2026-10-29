@@ -85,3 +85,13 @@ func TestWithStylesReachesEveryNeutralDialog(t *testing.T) {
 		require.Equal(t, lipgloss.Color(th.Colors.Danger), l.style().GetBorderTopForeground(), name+": the kind keeps its colour")
 	}
 }
+
+// Every bezel dialog repaints under a new theme, so a stack can hand it on.
+var _ = []Themer{Alert{}, Confirm{}, Text{}, Choice{}, Pick{}, Help{}, Pager{}, Prompt{}, FilePicker{}}
+
+func TestStackSetThemeRepaintsTheDialogs(t *testing.T) {
+	plain, mint := theme.Resolve(theme.Plain, true), theme.Resolve(theme.Mint, true)
+	body := layout.Rect{W: 60, H: 20}
+	s := Stack{}.Push(NewText("t", "body", plain)).SetTheme(mint)
+	require.Equal(t, NewText("t", "body", mint).View(body), s.Top().View(body))
+}

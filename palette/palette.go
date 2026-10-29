@@ -128,6 +128,12 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model {
 	return m.restyle()
 }
 
+// SetTheme repaints the palette and its typed line under th.
+func (m Model) SetTheme(th theme.Resolved) overlay.Overlay {
+	m.th, m.input = &th, m.input.SetTheme(th)
+	return m.restyle()
+}
+
 // WithKeys rebinds the palette; its legend follows the bindings' help.
 func (m Model) WithKeys(k Keys) Model {
 	m.keys = k

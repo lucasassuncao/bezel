@@ -55,6 +55,11 @@ func (l look) restyle() look {
 	return l
 }
 
+func (l look) withTheme(th theme.Resolved) look {
+	l.th = &th
+	return l.restyle()
+}
+
 func (l look) withStyles(edit func(Styles) Styles) look {
 	l.edit = edit
 	return l.restyle()
@@ -128,6 +133,36 @@ func (p Prompt) WithStyles(edit func(Styles) Styles) Prompt { p.look = p.withSty
 // WithStyles changes the styles derived from the theme through edit.
 func (p FilePicker) WithStyles(edit func(Styles) Styles) FilePicker {
 	p.look = p.withStyles(edit)
+	return p
+}
+
+// SetTheme repaints the alert under th; its Kind keeps its colour.
+func (a Alert) SetTheme(th theme.Resolved) Overlay { a.look = a.withTheme(th); return a }
+
+// SetTheme repaints the confirm under th.
+func (c Confirm) SetTheme(th theme.Resolved) Overlay { c.look = c.withTheme(th); return c }
+
+// SetTheme repaints the text under th.
+func (t Text) SetTheme(th theme.Resolved) Overlay { t.look = t.withTheme(th); return t }
+
+// SetTheme repaints the choice under th.
+func (c Choice) SetTheme(th theme.Resolved) Overlay { c.look = c.withTheme(th); return c }
+
+// SetTheme repaints the pick under th.
+func (p Pick) SetTheme(th theme.Resolved) Overlay { p.look = p.withTheme(th); return p }
+
+// SetTheme repaints the help under th.
+func (h Help) SetTheme(th theme.Resolved) Overlay { h.look = h.withTheme(th); return h }
+
+// SetTheme repaints the pager under th.
+func (p Pager) SetTheme(th theme.Resolved) Overlay { p.look = p.withTheme(th); return p }
+
+// SetTheme repaints the file picker under th.
+func (p FilePicker) SetTheme(th theme.Resolved) Overlay { p.look = p.withTheme(th); return p }
+
+// SetTheme repaints the prompt and its field under th.
+func (p Prompt) SetTheme(th theme.Resolved) Overlay {
+	p.look, p.input = p.withTheme(th), p.input.SetTheme(th)
 	return p
 }
 
