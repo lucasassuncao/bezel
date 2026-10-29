@@ -200,6 +200,7 @@ func (m model) View() tea.View {
 		"detail": {Title: "detail", Body: m.detail},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

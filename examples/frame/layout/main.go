@@ -22,9 +22,11 @@ type model struct {
 	sh           shell.Shell
 	realW, realH int
 	narrow       bool
+	th           theme.Resolved
 }
 
 func newModel() model {
+	th := theme.Resolve(theme.Mint, true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(
 			layout.Fixed("header", layout.Lines(3)),
@@ -33,14 +35,14 @@ func newModel() model {
 				layout.Fill("main"),
 			).Collapse(72, "main"),
 		),
-		Theme: theme.Resolve(theme.Mint, true),
+		Theme: th,
 		Title: "layout",
 		Actions: []shell.Action{
 			shell.Custom("w", "narrow/wide", shell.Send(toggleWidthMsg{})),
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh}
+	return model{sh: sh, th: th}
 }
 
 func (m model) Init() tea.Cmd { return nil }
@@ -90,6 +92,7 @@ func (m model) View() tea.View {
 		"main":   {Title: "main", Body: rectBody("main")},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

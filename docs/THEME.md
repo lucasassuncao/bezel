@@ -14,6 +14,7 @@ A theme names what a colour is *for*. `theme.Colors` has one field per role:
 
 | Role | What it colours |
 |---|---|
+| `Background` | the whole screen, behind every pane; empty keeps the terminal's |
 | `Accent` | focused borders, section headings, legend keys |
 | `Selection` | the cursor row, the focused panel's title |
 | `Border` | unfocused borders, status and hint text |
@@ -28,11 +29,14 @@ Each value is a lipgloss colour string: a hex value (`"#7C3AED"`) or an ANSI cod
 
 ## Presets
 
-bezel ships 59 presets, in categories:
+bezel ships 92 presets, in categories:
 
 | Category | Presets |
 |---|---|
-| Miscellaneous | `Default`, `Plain`, `Terminal`, `Gruvbox` |
+| Miscellaneous | `Default`, `Plain`, `Terminal` |
+| Classic | the terminal schemes: `Gruvbox`, `Dracula`, `Nord`, `SolarizedDark`, `SolarizedLight`, `OneDark`, `Monokai`, `TokyoNight`, `CatppuccinMocha`, `CatppuccinLatte`, `RosePine`, `Everforest`, `Kanagawa`, `Ubuntu`, `Ayu`, `Cobalt2`, `GitHub`, `Iceberg`, `NightOwl`, `Nightfox`, `OneHalf`, `ShadesOfPurple`, `Sonokai`, `Tomorrow` |
+| Apps | the colours of well-known terminal tools: `ClaudeCode`, `Codex`, `GeminiCLI`, `Lazygit`, `K9s`, `Btop` |
+| Styles | a mood each: `Cyberpunk`, `Ocean`, `Retro`, `Minimal` |
 | Fruit | `Mint`, `Banana`, `Strawberry`, `Blueberry`, … 28 in all |
 | Horizon, Super Mario, Sonic | one per character |
 
@@ -41,6 +45,8 @@ Three are for when colour itself is the question:
 - **`Default`** leaves every role empty, so each follows the terminal's light or dark background.
 - **`Plain`** uses only the 16 ANSI colours, for a terminal with few.
 - **`Terminal`** takes every colour from the terminal's own palette, so the app matches the scheme the user already runs.
+
+Those three keep the terminal's background. Every other preset brings one of its own: the classics and the apps their own, light for `SolarizedLight` and `CatppuccinLatte`, a step off white; most fruits plain black; the rest a dark tint of their accent, as `Mario` a red near black.
 
 For a `--theme` flag, `theme.Lookup(name)` finds a preset by name in any case, empty being `Default`, and `theme.All()` and `theme.Categories()` list them. For `--list-themes`, [`themebrowser`](../component/themebrowser) draws every preset with its palette:
 
@@ -83,6 +89,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 ```
 
 The answer can come after the first frame, so the app starts from a guess, usually dark, and switches once. Code that resolves a theme outside a running program, a `--list-themes` or a plain CLI, asks with `theme.DarkTerminal()`.
+
+## The background
+
+A theme with a `Background` paints the whole screen, not just the text: `Resolved.Background` is that colour and `Resolved.Foreground` its `Text`, both nil when the theme has none. The app hands them to the terminal in `View`:
+
+```go
+v := tea.NewView(m.sh.View(panes))
+v.AltScreen = true
+v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
+```
+
+bubbletea sets the terminal's own colours while the program runs and puts them back when it quits, so the space between the styled text changes too. A terminal that cannot set them keeps its own, and nothing breaks.
+
+Such a theme decides light or dark from its background, not from the terminal: `Resolve` ignores `dark`, so a light background on a dark terminal still gets dark text. A program that prints into the terminal rather than take it over, as `inline` and `logger` do, leaves the background alone.
 
 ## Drawing with it
 

@@ -102,6 +102,7 @@ func (m model) View() tea.View {
 		"form": {Title: "new dev container", Body: func(r layout.Rect) string { return m.form.View(r.W) }},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

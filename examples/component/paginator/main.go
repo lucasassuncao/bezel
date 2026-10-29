@@ -85,6 +85,7 @@ func (m model) View() tea.View {
 		"paginator": {Title: "paginator", Body: m.body},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

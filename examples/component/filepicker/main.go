@@ -83,6 +83,7 @@ func (m model) View() tea.View {
 		"files": {Title: m.fp.Dir(), Body: func(r layout.Rect) string { return m.fp.SetHeight(r.H).View(m.th) }},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

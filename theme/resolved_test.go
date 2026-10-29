@@ -146,3 +146,34 @@ func TestResolveDerivesTheMatchAndSelectionStyles(t *testing.T) {
 	require.Equal(t, lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color(c.OnAccent)).Background(lipgloss.Color(c.Warning)), r.MatchCurrent)
 	require.Equal(t, lipgloss.NewStyle().Foreground(lipgloss.Color(c.Text)).Background(lipgloss.Color(c.Border)), r.Selected)
 }
+
+// A theme with its own background picks light or dark from it, whatever the
+// terminal answered: light text on a light background would vanish.
+func TestABackgroundDecidesLightOrDark(t *testing.T) {
+	rt := Resolve(Theme{Colors: Colors{Background: "#FBFAFF"}}, true)
+	assert.Equal(t, defaultColors(false).Text, rt.Colors.Text)
+	assert.Equal(t, lipgloss.Color("#FBFAFF"), rt.Background)
+	assert.Equal(t, lipgloss.Color(rt.Colors.Text), rt.Foreground)
+
+	assert.Equal(t, defaultColors(true).Text, Resolve(Theme{Colors: Colors{Background: "#101010"}}, false).Colors.Text)
+}
+
+func TestNoBackgroundKeepsTheTerminals(t *testing.T) {
+	rt := Resolve(Theme{}, true)
+	assert.Nil(t, rt.Background)
+	assert.Nil(t, rt.Foreground)
+}
+
+// Default, Plain and Terminal follow the terminal; every other preset brings
+// a background, so what the terminal answers changes nothing.
+func TestPresetsBringTheirOwnBackground(t *testing.T) {
+	for name, th := range All() {
+		c := ResolveColors(th, false)
+		if name == "default" || name == "plain" || name == "terminal" {
+			assert.Empty(t, c.Background, name)
+			continue
+		}
+		require.NotEmpty(t, c.Background, name)
+		assert.Equal(t, c, ResolveColors(th, true), name)
+	}
+}

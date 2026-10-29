@@ -43,6 +43,7 @@ var roles = []role{
 	{"warning", "warn", func(c theme.Colors) string { return c.Warning }},
 	{"danger", "err", func(c theme.Colors) string { return c.Danger }},
 	{"info", "info", func(c theme.Colors) string { return c.Info }},
+	{"bg", "bg", func(c theme.Colors) string { return c.Background }},
 }
 
 // narrowRoles are the colours that tell presets apart, all a narrow
@@ -55,17 +56,17 @@ var layouts = []struct {
 	roles []int
 	short bool
 }{
-	{[]int{0, 1, 2, 3, 4, 5, 6, 7, 8}, false},
-	{[]int{0, 1, 2, 3, 4, 5, 6, 7, 8}, true},
+	{[]int{9, 0, 1, 2, 3, 4, 5, 6, 7, 8}, false},
+	{[]int{9, 0, 1, 2, 3, 4, 5, 6, 7, 8}, true},
 	{narrowRoles, true},
 }
 
 // The size drawn before the terminal reports its own.
 const defaultWidth, defaultHeight = 80, 24
 
-// chrome is the lines around the table: the panel's two edges, the palette
-// heading, the status line, the key line and one left for the shell's prompt.
-const chrome = 6
+// chrome is the lines around the table: the panel's two edges, the status
+// line, the key line and one left for the shell's prompt.
+const chrome = 5
 
 // marker is the width table.Model gives its cursor mark.
 const marker = 2
@@ -368,7 +369,7 @@ func (m *browserModel) copied(msg copiedMsg) string {
 // View renders inline, without AltScreen: the panel as wide as its rows,
 // then the status line and the keys.
 func (m *browserModel) View() tea.View {
-	body := m.heading() + "\n" + m.tbl.View(m.th, m.inner())
+	body := m.tbl.View(m.th, m.inner())
 	h := strings.Count(body, "\n") + 3
 	pos := ""
 	if n := m.tbl.Len(); n > 0 {
@@ -382,18 +383,6 @@ func (m *browserModel) View() tea.View {
 		lines = append(lines, " "+keys[0])
 	}
 	return tea.NewView(strings.Join(lines, "\n"))
-}
-
-// heading is "Palette" over the colour columns, which the table's own
-// header names one by one.
-func (m *browserModel) heading() string {
-	cols := m.columns(m.layout)
-	widths := table.Fit(cols, rows(m.tbl.Items()), m.inner()-marker)
-	at := marker
-	for _, w := range widths[:3] {
-		at += w + table.Gap
-	}
-	return m.th.TableHeader.Render(strings.Repeat(" ", at) + "Palette")
 }
 
 func (m *browserModel) statusLine() string {

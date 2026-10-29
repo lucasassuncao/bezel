@@ -102,6 +102,7 @@ func (m model) View() tea.View {
 		"sample": {Title: "sample", Body: func(layout.Rect) string { return m.sample() }},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

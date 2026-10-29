@@ -98,6 +98,7 @@ func (m model) View() tea.View {
 		}},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

@@ -23,6 +23,7 @@ type (
 
 type model struct {
 	sh shell.Shell
+	th theme.Resolved
 	// canWrite is shared with Config.Can, which reads it on every frame.
 	canWrite *bool
 }
@@ -50,16 +51,17 @@ func actions() []shell.Action {
 
 func newModel() model {
 	canWrite := new(bool)
+	th := theme.Resolve(theme.Mint, true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("main")),
-		Theme:  theme.Resolve(theme.Mint, true),
+		Theme:  th,
 		Title:  "legend",
 		Can:    func(c shell.Capability) bool { return c != write || *canWrite },
 		// One row, so the cut and its count show even on a wide terminal.
 		LegendLines: 1,
 		Actions:     actions(),
 	})
-	return model{sh: sh, canWrite: canWrite}
+	return model{sh: sh, th: th, canWrite: canWrite}
 }
 
 func (m model) Init() tea.Cmd { return nil }
@@ -93,6 +95,7 @@ func (m model) View() tea.View {
 		"main": {Title: "legend", Body: func(layout.Rect) string { return mode }},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

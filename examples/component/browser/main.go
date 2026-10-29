@@ -103,6 +103,7 @@ func (m model) View() tea.View {
 		"preview": {Title: "recipe", Body: func(r layout.Rect) string { return m.browser.PreviewView(r.H) }},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

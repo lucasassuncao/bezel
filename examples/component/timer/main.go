@@ -96,6 +96,7 @@ func (m model) View() tea.View {
 		"timer": {Title: "timer", Body: m.body},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

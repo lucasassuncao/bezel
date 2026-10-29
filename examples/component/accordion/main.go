@@ -19,7 +19,7 @@ var faq = []accordion.Section{
 	{Title: "What is bezel?", Body: "The frame around a Bubble Tea app: tabs, panes, dialogs, the status row and the key legend. The app draws what goes inside."},
 	{Title: "Does it need a mouse?", Body: "No. Every action has a key, listed at the foot of the screen and in the help."},
 	{Title: "Can I turn the motion off?", Body: "Set BEZEL_NO_MOTION, or TERM=dumb, and everything lands where it would end. BEZEL_MOTION sets the speed instead."},
-	{Title: "Which themes are there?", Body: "Fifty-nine presets, from mint to gruvbox, and any theme of your own built on one."},
+	{Title: "Which themes are there?", Body: "Ninety-two presets, from mint to dracula, and any theme of your own built on one."},
 }
 
 type model struct {
@@ -60,6 +60,7 @@ func (m model) View() tea.View {
 		"faq": {Title: "faq", Body: func(r layout.Rect) string { return m.acc.View(m.th, r.W) }},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

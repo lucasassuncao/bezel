@@ -83,6 +83,7 @@ func (m model) View() tea.View {
 	screen := m.sh.View(map[string]shell.Pane{"doc": {Title: "doc", Body: m.body}})
 	v := tea.NewView(m.toasts.Over(screen, m.th))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

@@ -149,25 +149,22 @@ func sgr(hex string) string {
 	if _, err := fmt.Sscanf(hex, "#%02x%02x%02x", &r, &g, &b); err != nil {
 		panic(err)
 	}
-	return fmt.Sprintf("38;2;%d;%d;%dm", r, g, b)
+	return fmt.Sprintf("38;2;%d;%d;%d", r, g, b)
 }
 
 // On 80 columns each row shows six blocks, in the colours that tell one theme
 // from another: accent, selection, border, dim, success, danger.
 func TestBrowserModel_ShowsEachThemesPalette(t *testing.T) {
 	m := newBrowserModel(theme.Theme{}, true)
-	if view := ansi.Strip(m.View().Content); !strings.Contains(view, "Palette") {
-		t.Fatalf("the Palette column is missing:\n%s", view)
-	}
-	row := rowOf(t, m, "mint")
+	row := rowOf(t, m, "gruvbox")
 	if n := strings.Count(ansi.Strip(row), "██"); n != 6 {
-		t.Fatalf("want six blocks in the mint row, got %d: %q", n, ansi.Strip(row))
+		t.Fatalf("want six blocks in the gruvbox row, got %d: %q", n, ansi.Strip(row))
 	}
 	at := 0
-	for _, hex := range []string{"#3EB489", "#98DFAF", "#4A7B6F", "#2E4F46", "#2ECC71", "#E74C3C"} {
+	for _, hex := range []string{"#FE8019", "#FABD2F", "#7C6F64", "#A89984", "#B8BB26", "#FB4934"} {
 		i := strings.Index(row[at:], sgr(hex))
 		if i < 0 {
-			t.Fatalf("mint's %s is missing or out of order: %q", hex, row)
+			t.Fatalf("gruvbox's %s is missing or out of order: %q", hex, row)
 		}
 		at += i
 	}
@@ -235,16 +232,16 @@ func TestBrowserModel_FitsAShortTerminal(t *testing.T) {
 	}
 }
 
-// A wide terminal names all nine colours in full; a narrow one abbreviates.
+// A wide terminal names all ten colours in full; a narrow one abbreviates.
 func TestBrowserModel_NamesEachColour(t *testing.T) {
 	wide := ansi.Strip(sized(t, 140, 30).View().Content)
-	for _, name := range []string{"accent", "select", "border", "dim", "text", "success", "warning", "danger", "info"} {
+	for _, name := range []string{"accent", "select", "border", "dim", "text", "success", "warning", "danger", "info", "bg"} {
 		if !strings.Contains(wide, name) {
 			t.Errorf("a wide terminal does not name %q:\n%s", name, wide)
 		}
 	}
-	if n := strings.Count(ansi.Strip(rowOf(t, sized(t, 140, 30), "mint")), "██"); n != 9 {
-		t.Errorf("want nine blocks on a wide terminal, got %d", n)
+	if n := strings.Count(ansi.Strip(rowOf(t, sized(t, 140, 30), "gruvbox")), "██"); n != 10 {
+		t.Errorf("want ten blocks on a wide terminal, got %d", n)
 	}
 	narrow := ansi.Strip(sized(t, 80, 30).View().Content)
 	if strings.Contains(narrow, "select") || !strings.Contains(narrow, "sel") {
@@ -326,7 +323,7 @@ func TestBrowserModel_ResizeKeepsTheCursor(t *testing.T) {
 // The colour columns share one width, so the blocks sit evenly spaced.
 func TestBrowserModel_SpacesTheColoursEvenly(t *testing.T) {
 	for _, w := range []int{80, 200} {
-		row := []rune(ansi.Strip(rowOf(t, sized(t, w, 30), "mint")))
+		row := []rune(ansi.Strip(rowOf(t, sized(t, w, 30), "gruvbox")))
 		var starts []int
 		for i, r := range row {
 			if r == '█' && (i == 0 || row[i-1] != '█') && i < len(row)-1 && row[i+1] == '█' {

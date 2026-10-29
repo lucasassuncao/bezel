@@ -162,6 +162,7 @@ func (m model) View() tea.View {
 		"services": {Title: "services", Body: m.servicesPane},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

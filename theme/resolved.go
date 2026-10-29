@@ -1,6 +1,7 @@
 package theme
 
 import (
+	"image/color"
 	"time"
 
 	"charm.land/lipgloss/v2"
@@ -14,6 +15,11 @@ import (
 // per instance and only reads it afterwards.
 type Resolved struct {
 	Colors Colors
+
+	// Background and Foreground are for tea.View's fields of the same names:
+	// the theme's Background and Text, or nil to keep the terminal's.
+	Background color.Color
+	Foreground color.Color
 
 	// Text styles for content that says what kind of thing it is.
 	Success      lipgloss.Style
@@ -59,6 +65,9 @@ func Resolve(t Theme, dark bool) Resolved {
 
 	rt := buildDerivedStyles(c)
 	rt.Colors = c
+	if c.Background != "" {
+		rt.Background, rt.Foreground = lipgloss.Color(c.Background), lipgloss.Color(c.Text)
+	}
 
 	// Deepest base first, so each layer's Styles override the one under it.
 	for _, layer := range t.chain() {

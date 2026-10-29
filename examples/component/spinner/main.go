@@ -103,6 +103,7 @@ func (m model) View() tea.View {
 		"spinner": {Title: "spinner", Body: m.body},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

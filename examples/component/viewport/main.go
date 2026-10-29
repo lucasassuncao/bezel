@@ -139,6 +139,7 @@ func (m model) View() tea.View {
 		},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	v.MouseMode = tea.MouseModeCellMotion
 	return v
 }

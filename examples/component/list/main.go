@@ -112,6 +112,7 @@ func (m model) View() tea.View {
 		"detail": {Title: "payload", Body: func(layout.Rect) string { return m.detail() }},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

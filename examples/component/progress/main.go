@@ -113,6 +113,7 @@ func (m model) View() tea.View {
 		"progress": {Title: "progress", Body: m.body},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 

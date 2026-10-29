@@ -147,6 +147,7 @@ func (m model) View() tea.View {
 		"detail": {Title: m.tbl.Selected().Value, Body: m.detail},
 	}))
 	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v
 }
 
