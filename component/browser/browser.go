@@ -66,6 +66,7 @@ type Model struct {
 	previewFocus  bool // the right pane has the keys
 	previewScroll int  // first detail line shown
 	previewHeight int  // rows the preview pane has, for paging
+	listHeight    int  // rows the list pane has; 0 shows every label
 	edit          func(Styles) Styles
 }
 
@@ -133,6 +134,13 @@ func (m Model) SetItems(items []Item) Model {
 	m.items = slices.Clone(items)
 	m.cursor = min(max(m.cursor, 0), max(len(items)-1, 0))
 	m.previewScroll = 0
+	return m
+}
+
+// SetListHeight tells the browser how tall its list pane is; 0 shows every
+// label.
+func (m Model) SetListHeight(h int) Model {
+	m.listHeight = h
 	return m
 }
 
@@ -223,9 +231,10 @@ func (m Model) maxPreviewScroll() int {
 	return max(lines-max(m.previewHeight, 1), 0)
 }
 
-// ListView renders the labels, height rows of them, scrolled to keep the
-// cursor visible and centred where the list allows.
-func (m Model) ListView(th theme.Resolved, height int) string {
+// ListView renders the labels, SetListHeight rows of them, scrolled to keep
+// the cursor visible and centred where the list allows.
+func (m Model) ListView(th theme.Resolved) string {
+	height := m.listHeight
 	st := m.styles(th)
 	scroll := layout.ScrollStart(m.cursor, len(m.items), height)
 	end := len(m.items)
@@ -246,9 +255,10 @@ func (m Model) ListView(th theme.Resolved, height int) string {
 	return sb.String()
 }
 
-// PreviewView renders the selected item's detail, height rows of it from the
-// current scroll, clamped so the last page is full.
-func (m Model) PreviewView(height int) string {
+// PreviewView renders the selected item's detail, SetPreviewHeight rows of it
+// from the current scroll, clamped so the last page is full.
+func (m Model) PreviewView() string {
+	height := m.previewHeight
 	it, _ := m.Selected()
 	if it.Detail == nil {
 		return ""

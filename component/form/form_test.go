@@ -66,7 +66,7 @@ func TestTabMovesTheFocusAndWraps(t *testing.T) {
 }
 
 func TestViewLinesUpTheValues(t *testing.T) {
-	rows := strings.Split(ansi.Strip(sample(t).View(60)), "\n")
+	rows := strings.Split(ansi.Strip(sample(t).SetWidth(60).View()), "\n")
 	require.Len(t, rows, 6)
 	for i, r := range rows {
 		require.Equal(t, 60, ansi.StringWidth(r), "row %d", i)
@@ -121,13 +121,13 @@ func BenchmarkTypingInAForm(b *testing.B) {
 	for b.Loop() {
 		f, _ = f.Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
 		f, _ = f.Update(back)
-		_ = f.View(60)
+		_ = f.SetWidth(60).View()
 	}
 }
 
 func TestNilFieldsAreLeftOutAndFieldIsBounded(t *testing.T) {
 	f := New(th(), nil, NewCheckbox("a"), nil)
-	require.NotPanics(t, func() { _ = f.View(40) })
+	require.NotPanics(t, func() { _ = f.SetWidth(40).View() })
 	require.NotNil(t, f.Field(0), "the checkbox is first once the nil is gone")
 	require.Nil(t, f.Field(1))
 	require.Nil(t, f.Field(-1))
@@ -135,21 +135,21 @@ func TestNilFieldsAreLeftOutAndFieldIsBounded(t *testing.T) {
 
 func TestAClickFocusesAFieldAndPressesAButton(t *testing.T) {
 	f := sample(t)
-	f, cmd := f.Click(5, 60)
+	f, cmd := f.SetWidth(60).Click(5)
 	require.Equal(t, 5, f.Focused())
 	require.NotNil(t, cmd)
 	require.Equal(t, submitted{}, cmd())
 
-	f, _ = f.Click(3, 60)
+	f, _ = f.SetWidth(60).Click(3)
 	toggle, _ := Get[Toggle](f, 3)
 	require.True(t, toggle.On(), "a toggle flips")
-	f, _ = f.Click(4, 60)
+	f, _ = f.SetWidth(60).Click(4)
 	box, _ := Get[Checkbox](f, 4)
 	require.True(t, box.Checked())
 
-	f, _ = f.Click(0, 60)
+	f, _ = f.SetWidth(60).Click(0)
 	require.Equal(t, 0, f.Focused(), "an input only takes the focus")
-	same, cmd := f.Click(99, 60)
+	same, cmd := f.SetWidth(60).Click(99)
 	require.Equal(t, 0, same.Focused())
 	require.Nil(t, cmd)
 }
@@ -158,7 +158,7 @@ func TestAClickCountsTheRowsOfAnOpenSelect(t *testing.T) {
 	f, _ := press(sample(t), "tab", "enter") // the select, open under its row
 	_, h := draw.BlockSize(f.Field(1).View(true, 20, 60))
 	require.Greater(t, h, 1)
-	f, _ = f.Click(1+h, 60)
+	f, _ = f.SetWidth(60).Click(1 + h)
 	require.Equal(t, 2, f.Focused(), "the radio sits under the open list")
 }
 
@@ -166,10 +166,10 @@ func TestAClickCountsTheRowsOfAnOpenSelect(t *testing.T) {
 func TestTheFormPaintsItsControlsInItsTheme(t *testing.T) {
 	bare := NewCheckbox("a").WithChecked(true).View(false, 0, 20)
 	f := New(th(), NewCheckbox("a").WithChecked(true))
-	require.NotEqual(t, bare, f.View(20), "the form's theme reached the box")
+	require.NotEqual(t, bare, f.SetWidth(20).View(), "the form's theme reached the box")
 
 	other := theme.Resolve(theme.Mint, true)
-	require.Equal(t, New(other, NewCheckbox("a").WithChecked(true)).View(20), f.SetTheme(other).View(20))
+	require.Equal(t, New(other, NewCheckbox("a").WithChecked(true)).SetWidth(20).View(), f.SetTheme(other).SetWidth(20).View())
 }
 
 func TestInitIsNilWithoutAnIniterInFocus(t *testing.T) {
@@ -182,7 +182,7 @@ func TestWithStylesRecoloursEveryControl(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	f := New(th(), NewCheckbox("a").WithChecked(true)).WithStyles(func(s Styles) Styles { s.Chosen = red; return s })
 	f = f.SetTheme(theme.Resolve(theme.Mint, true))
-	require.Contains(t, f.View(20), red.Render("[x]"))
+	require.Contains(t, f.SetWidth(20).View(), red.Render("[x]"))
 }
 
 func TestLegendFollowsTheFocusedControl(t *testing.T) {

@@ -42,15 +42,15 @@ func opened(m Model, d time.Duration) Model {
 
 func TestASectionOpensALineAtATime(t *testing.T) {
 	m := New(sections())
-	assert.Equal(t, "▸ Install\n▸ Usage", ansi.Strip(m.View(th, 20)))
+	assert.Equal(t, "▸ Install\n▸ Usage", ansi.Strip(m.SetWidth(20).View(th)))
 	m, cmd := m.Update(bezeltest.Key("enter"))
 	require.NotNil(t, cmd)
 	assert.True(t, m.IsOpen(0))
-	half := ansi.Strip(opened(m, 100*time.Millisecond).View(th, 20))
+	half := ansi.Strip(opened(m, 100*time.Millisecond).SetWidth(20).View(th))
 	assert.Equal(t, "▾ Install\n  one\n  two\n▸ Usage", half)
 	full := opened(m, time.Second)
 	assert.False(t, full.Active())
-	assert.Len(t, strings.Split(full.View(th, 20), "\n"), 6)
+	assert.Len(t, strings.Split(full.SetWidth(20).View(th), "\n"), 6)
 }
 
 func TestASectionClosesFromWhereItIs(t *testing.T) {
@@ -60,7 +60,7 @@ func TestASectionClosesFromWhereItIs(t *testing.T) {
 	assert.False(t, m.IsOpen(0))
 	assert.InDelta(t, 0.5, m.folds[0].share(), 1e-9, "it starts closing from halfway")
 	shut := opened(m, time.Second)
-	assert.Equal(t, "▸ Install\n▸ Usage", ansi.Strip(shut.View(th, 20)))
+	assert.Equal(t, "▸ Install\n▸ Usage", ansi.Strip(shut.SetWidth(20).View(th)))
 }
 
 func TestTheArrowsMoveTheCursor(t *testing.T) {
@@ -77,7 +77,7 @@ func TestAStillAccordionSnaps(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	m, cmd := New(sections()).WithDuration(time.Second).Toggle(1)
 	assert.Nil(t, cmd)
-	assert.Equal(t, "▸ Install\n▾ Usage\n  run it", ansi.Strip(m.View(th, 20)))
+	assert.Equal(t, "▸ Install\n▾ Usage\n  run it", ansi.Strip(m.SetWidth(20).View(th)))
 	_, cmd = m.Toggle(9)
 	assert.Nil(t, cmd)
 }
@@ -94,5 +94,5 @@ func TestTheSectionsTakeOnlyTheirOwnFrames(t *testing.T) {
 func TestWithStylesRecoloursTheHeadings(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	m := New([]Section{{Title: "a"}, {Title: "b"}}).WithStyles(func(s Styles) Styles { s.Heading = red; return s })
-	require.Equal(t, red.Render("▸ b"), strings.Split(m.View(th, 20), "\n")[1])
+	require.Equal(t, red.Render("▸ b"), strings.Split(m.SetWidth(20).View(th), "\n")[1])
 }

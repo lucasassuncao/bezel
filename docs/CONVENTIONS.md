@@ -70,7 +70,7 @@ A new component picks the row whose "Why" fits it, not a fourth shape.
 The mouse reaches a component the way a key does: the app hands it on, already moved into the pane's cells by the shell's `ClickMsg`, `Mouse` or `MouseIn`.
 
 - A component that moves a cursor takes a click through **`Click(y int) (T, Action)`** beside its `Update`, with the same return: `list`, `table.Model`, `tree`. `y` is a line of what its `View` drew. The first click moves the cursor to the row; a click on the row already under it does what enter does there.
-- `form.Form` takes **`Click(y, width int) (Form, tea.Cmd)`**: the width is the one its `View` gets, which sets how tall an open select draws.
+- `form.Form` takes **`Click(y int) (Form, tea.Cmd)`**: the width it was given with `SetWidth` sets how tall an open select draws.
 - A leaf that tracks a press, a drag and a release, as `textbox` does, takes the mouse messages in its own `Update`, like its keys.
 - A dialog takes clicks by implementing `overlay.Clicker`, counted from the top left of what it drew.
 
@@ -79,7 +79,7 @@ The mouse reaches a component the way a key does: the app hands it on, already m
 ## Constructor, With and Set
 
 - **`NewX(required..., th)`**: what the component cannot work without, the theme last. A callback may be documented as accepting nil. A constructor returns only the value: a command to start it comes from `Init()`, as `form.Form.Init` does.
-- **Sizes are not required**: the rows and cells a pane has arrive after the first `tea.WindowSizeMsg`, so they come through `SetHeight` and `SetWidth` (`list`, `tree`, `table.Model`, `viewport`, `filepicker`), never as a constructor parameter.
+- **Sizes are not required**: the rows and cells a pane has arrive after the first `tea.WindowSizeMsg`, so they come through `SetHeight` and `SetWidth` (`list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`; `browser` has `SetListHeight` and `SetPreviewHeight` for its two panes), never as a constructor parameter nor an argument of `View`. A model not sized yet draws nothing.
 - **`WithX(...) X`**: everything optional, set before the component is used. Each returns a copy and chains with the others. A switch takes its state, `WithX(on bool)`, never a bare `WithX()`, so an app can pass a setting it read: `WithWrap(cfg.Wrap)`, `WithYoyo(true)`.
 - **`SetX(...) X`**: changes a live component after something happened: `SetItems` after a reload, `SetTheme` after `tea.BackgroundColorMsg`, `SetTabs`, `SetStatus`.
 - **`Config` struct**: only where an app sets many fields at once, most of them every time, as `shell.Config`.

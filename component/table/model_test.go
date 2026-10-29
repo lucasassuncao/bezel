@@ -42,7 +42,7 @@ func pkgs(n int) []Item[int] {
 func press(code rune) tea.KeyPressMsg { return tea.KeyPressMsg{Code: code} }
 
 func viewLines(m Model[int]) []string {
-	return strings.Split(ansi.Strip(m.View(th, 40)), "\n")
+	return strings.Split(ansi.Strip(m.SetWidth(40).View(th)), "\n")
 }
 
 func TestModelViewIsTheHeaderTheRowsAndTheMoreRow(t *testing.T) {
@@ -119,7 +119,7 @@ func TestModelCursorRowPaintsThePlainCells(t *testing.T) {
 		{Cells: []string{"api", red.Render("Failed")}},
 		{Cells: []string{"web", red.Render("Failed")}},
 	}
-	lines := strings.Split(New(pkgCols, items).SetHeight(5).View(mint, 40), "\n")
+	lines := strings.Split(New(pkgCols, items).SetHeight(5).SetWidth(40).View(mint), "\n")
 	require.Contains(t, lines[1], mint.Cursor.Render("▶ ")+mint.Cursor.Render("api"))
 	require.Contains(t, lines[1], red.Render("Failed"), "a coloured cell keeps its colour under the cursor")
 	require.Equal(t, "  web   Failed", ansi.Strip(lines[2]))
@@ -127,7 +127,7 @@ func TestModelCursorRowPaintsThePlainCells(t *testing.T) {
 }
 
 func TestModelViewIsEmptyBeforeSized(t *testing.T) {
-	require.Empty(t, New(pkgCols, pkgs(3)).View(th, 40))
+	require.Empty(t, New(pkgCols, pkgs(3)).SetWidth(40).View(th))
 	require.Equal(t, []string{"  NAME   VERSION"}, viewLines(New(pkgCols, pkgs(3)).SetHeight(1)), "a one-row table is its header")
 }
 
@@ -172,8 +172,8 @@ func TestABlurredTableDimsItsCursorAndTakesNoKeys(t *testing.T) {
 	require.False(t, m.Focused())
 	m, _ = m.Update(press(tea.KeyDown))
 	require.Equal(t, 0, m.Cursor())
-	require.Contains(t, m.View(th, 40), th.Dim.Render(marker))
-	require.NotContains(t, m.View(th, 40), th.Cursor.Render("pkg-0"))
+	require.Contains(t, m.SetWidth(40).View(th), th.Dim.Render(marker))
+	require.NotContains(t, m.SetWidth(40).View(th), th.Cursor.Render("pkg-0"))
 	m, _ = m.Focus().Update(press(tea.KeyDown))
 	require.Equal(t, 1, m.Cursor())
 }
@@ -211,6 +211,6 @@ func TestAClickMovesTheCursorAndASecondChooses(t *testing.T) {
 func TestWithStylesRecoloursTheHeader(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	m := New(pkgCols, pkgs(2)).SetHeight(5).WithStyles(func(s Styles) Styles { s.Header = red; return s })
-	head := strings.Split(m.View(theme.Resolve(theme.Mint, true), 40), "\n")[0]
+	head := strings.Split(m.SetWidth(40).View(theme.Resolve(theme.Mint, true)), "\n")[0]
 	require.Equal(t, red.Render(ansi.Strip(head)), head, "the edit holds under another theme")
 }

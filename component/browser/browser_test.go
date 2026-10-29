@@ -67,21 +67,21 @@ func TestEnterChoosesEscDismissesTabMovesFocus(t *testing.T) {
 
 func TestPreviewScrollsWhenFocused(t *testing.T) {
 	b := New(items("a")).SetPreviewHeight(2)
-	require.Equal(t, "detail of a\nline 2", b.PreviewView(2))
+	require.Equal(t, "detail of a\nline 2", b.SetPreviewHeight(2).PreviewView())
 	b, _ = b.Update(press(tea.KeyTab))
 	b, _ = b.Update(press(tea.KeyDown))
-	require.Equal(t, "line 2\nline 3", b.PreviewView(2))
+	require.Equal(t, "line 2\nline 3", b.SetPreviewHeight(2).PreviewView())
 	b, _ = b.Update(press(tea.KeyPgDown))
-	require.Equal(t, "line 3\nline 4", b.PreviewView(2), "clamped at the end")
+	require.Equal(t, "line 3\nline 4", b.SetPreviewHeight(2).PreviewView(), "clamped at the end")
 	b, _ = b.Update(press(tea.KeyPgUp))
 	b, _ = b.Update(press(tea.KeyPgUp))
 	b, _ = b.Update(press(tea.KeyPgUp))
-	require.Equal(t, "detail of a\nline 2", b.PreviewView(2))
+	require.Equal(t, "detail of a\nline 2", b.SetPreviewHeight(2).PreviewView())
 }
 
 func TestListViewMarksTheCursorAndScrollsToIt(t *testing.T) {
 	b := New(items("a", "b", "c", "d")).WithCurrent("d")
-	got := ansi.Strip(b.ListView(theme.Resolve(theme.Plain, true), 2))
+	got := ansi.Strip(b.SetListHeight(2).ListView(theme.Resolve(theme.Plain, true)))
 	require.Contains(t, got, "▶  d")
 	require.NotContains(t, got, "a")
 }
@@ -100,9 +100,9 @@ func TestPreviewScrollStopsAtTheEnd(t *testing.T) {
 	for range 5 {
 		b, _ = b.Update(press(tea.KeyPgDown))
 	}
-	require.Equal(t, "line 3\nline 4", b.PreviewView(2))
+	require.Equal(t, "line 3\nline 4", b.SetPreviewHeight(2).PreviewView())
 	b, _ = b.Update(press(tea.KeyUp))
-	require.Equal(t, "line 2\nline 3", b.PreviewView(2))
+	require.Equal(t, "line 2\nline 3", b.SetPreviewHeight(2).PreviewView())
 }
 
 // Stepping back up from the bottom moves the cursor, not the whole window.
@@ -110,7 +110,7 @@ func TestListViewDoesNotPinTheCursorToTheBottom(t *testing.T) {
 	th := theme.Resolve(theme.Plain, true)
 	b := New(items("a", "b", "c", "d", "e", "f", "g", "h")).WithCurrent("h")
 	b, _ = b.Update(press(tea.KeyUp))
-	lines := strings.Split(ansi.Strip(b.ListView(th, 4)), "\n")
+	lines := strings.Split(ansi.Strip(b.SetListHeight(4).ListView(th)), "\n")
 	require.Len(t, lines, 4)
 	require.NotContains(t, lines[3], "▶", "cursor is not on the last row")
 }
@@ -130,7 +130,7 @@ func TestNewAndSetItemsCopyTheSlice(t *testing.T) {
 func TestWithStylesRecoloursTheCursorLabel(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	b := New(items("a", "b")).WithStyles(func(s Styles) Styles { s.Cursor = red; return s })
-	require.Equal(t, red.Render("▶  a"), strings.Split(b.ListView(theme.Resolve(theme.Mint, true), 2), "\n")[0])
+	require.Equal(t, red.Render("▶  a"), strings.Split(b.SetListHeight(2).ListView(theme.Resolve(theme.Mint, true)), "\n")[0])
 }
 
 func TestLegendDropsEnterWhileThePreviewHasTheKeys(t *testing.T) {

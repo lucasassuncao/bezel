@@ -104,6 +104,7 @@ type Form struct {
 	fields []Field
 	focus  int
 	keys   Keys
+	width  int
 	th     *theme.Resolved // shared by every copy and never written
 	edit   func(Styles) Styles
 }
@@ -256,10 +257,16 @@ type pressable interface{ press() tea.Cmd }
 // flippable is a field a click turns over: a checkbox or a toggle.
 type flippable interface{ flip() Field }
 
-// Click focuses the field drawn on row y of View(width) and presses it when
-// it is a button, a checkbox or a toggle. A row past the fields does nothing.
-func (f Form) Click(y, width int) (Form, tea.Cmd) {
-	i := f.fieldAt(y, width)
+// SetWidth changes the cells every row of the form takes.
+func (f Form) SetWidth(w int) Form {
+	f.width = w
+	return f
+}
+
+// Click focuses the field drawn on row y of View and presses it when it is a
+// button, a checkbox or a toggle. A row past the fields does nothing.
+func (f Form) Click(y int) (Form, tea.Cmd) {
+	i := f.fieldAt(y)
 	if i < 0 {
 		return f, nil
 	}
@@ -279,14 +286,14 @@ func (f Form) Click(y, width int) (Form, tea.Cmd) {
 
 // fieldAt is the field drawn on row y, counting the rows an open select
 // takes; -1 past them.
-func (f Form) fieldAt(y, width int) int {
+func (f Form) fieldAt(y int) int {
 	labelW := 0
 	for _, fl := range f.fields {
 		labelW = max(labelW, draw.Width(fl.Label()))
 	}
 	top := 0
 	for i, fl := range f.fields {
-		_, h := draw.BlockSize(fl.View(i == f.focus, labelW, width))
+		_, h := draw.BlockSize(fl.View(i == f.focus, labelW, f.width))
 		if y >= top && y < top+h {
 			return i
 		}
@@ -304,15 +311,19 @@ func (f Form) move(by int) (Form, tea.Cmd) {
 	return f, cmd
 }
 
-// View is every field, width cells wide, labels in one column.
-func (f Form) View(width int) string {
+// View is every field, SetWidth cells wide, labels in one column; nothing
+// until SetWidth sizes it.
+func (f Form) View() string {
+	if f.width <= 0 {
+		return ""
+	}
 	labelW := 0
 	for _, fl := range f.fields {
 		labelW = max(labelW, draw.Width(fl.Label()))
 	}
 	rows := make([]string, len(f.fields))
 	for i, fl := range f.fields {
-		rows[i] = fl.View(i == f.focus, labelW, width)
+		rows[i] = fl.View(i == f.focus, labelW, f.width)
 	}
 	return strings.Join(rows, "\n")
 }

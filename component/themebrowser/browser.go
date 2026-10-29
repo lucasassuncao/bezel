@@ -370,7 +370,7 @@ func (m *browserModel) copied(msg copiedMsg) string {
 // View renders inline, without AltScreen: the panel as wide as its rows,
 // then the status line and the keys.
 func (m *browserModel) View() tea.View {
-	body := m.tbl.View(m.th, m.inner())
+	body := m.tbl.SetWidth(m.inner()).View(m.th)
 	h := strings.Count(body, "\n") + 3
 	pos := ""
 	if n := m.tbl.Len(); n > 0 {

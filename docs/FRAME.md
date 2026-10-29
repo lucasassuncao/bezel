@@ -171,7 +171,7 @@ case shell.ClickMsg:
 	case "list":
 		m.list, act = m.list.Click(msg.Y) // act is list.Chosen on a second click
 	case "form":
-		m.form, cmd = m.form.Click(msg.Y, width)
+		m.form, cmd = m.form.Click(msg.Y) // the width SetWidth gave it says how tall an open select is
 	case "notes":
 		m.notes, cmd = m.notes.Update(msg.MouseClickMsg) // a textbox takes the press itself
 	}

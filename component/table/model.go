@@ -72,6 +72,7 @@ type Model[T any] struct {
 	items  []Item[T]
 	widths []int // natural column widths over items, measured when they change
 	height int
+	width  int
 	win    layout.Window // over the rows, one shorter than height for the header
 	keys   Keys
 	blur   bool // drawn without the cursor's colour, and deaf to keys
@@ -278,13 +279,20 @@ func (m Model[T]) withItems(items []Item[T]) Model[T] {
 	return m
 }
 
-// View is the header and the rows in its window, width cells wide. Columns
-// are sized over every row, not the ones shown, so scrolling never moves
-// them. On the cursor row a cell with no colour of its own wears the cursor's.
-func (m Model[T]) View(th theme.Resolved, width int) string {
-	if m.height <= 0 {
+// SetWidth changes the cells the table takes; columns shrink to fit.
+func (m Model[T]) SetWidth(w int) Model[T] {
+	m.width = w
+	return m
+}
+
+// View is the header and the rows in its window, SetWidth cells wide, and
+// nothing until SetHeight and SetWidth size it. Columns are sized over every
+// row, so scrolling never moves them; a plain cell wears the cursor's colour.
+func (m Model[T]) View(th theme.Resolved) string {
+	if m.height <= 0 || m.width <= 0 {
 		return ""
 	}
+	width := m.width
 	st := m.styles(th)
 	pad := strings.Repeat(" ", draw.Width(marker))
 	widths := shrink(m.cols, slices.Clone(m.widths), width-len(pad))

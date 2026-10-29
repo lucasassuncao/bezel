@@ -57,7 +57,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	v := tea.NewView(m.sh.View(map[string]shell.Pane{
-		"faq": {Title: "faq", Body: func(r layout.Rect) string { return m.acc.View(m.th, r.W) }},
+		"faq": {Title: "faq", Body: func(r layout.Rect) string { return m.acc.SetWidth(r.W).View(m.th) }},
 	}))
 	v.AltScreen = true
 	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground

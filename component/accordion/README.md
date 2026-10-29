@@ -22,9 +22,10 @@ Package accordion is a column of sections, each a heading that opens and closes 
   - [func \(m Model\) FrameAt\(i int, at time.Time\) tea.Msg](<#Model.FrameAt>)
   - [func \(m Model\) IsOpen\(i int\) bool](<#Model.IsOpen>)
   - [func \(m Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
+  - [func \(m Model\) SetWidth\(w int\) Model](<#Model.SetWidth>)
   - [func \(m Model\) Toggle\(i int\) \(Model, tea.Cmd\)](<#Model.Toggle>)
   - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
-  - [func \(m Model\) View\(th theme.Resolved, width int\) string](<#Model.View>)
+  - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
   - [func \(m Model\) WithDuration\(d time.Duration\) Model](<#Model.WithDuration>)
   - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
   - [func \(m Model\) WithStyles\(edit func\(Styles\) Styles\) Model](<#Model.WithStyles>)
@@ -63,7 +64,7 @@ func VimKeys() Keys
 VimKeys are DefaultKeys with k/j added to move.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L63-L70>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L63-L71>)
 
 Model is a value: every method returns the new accordion.
 
@@ -74,7 +75,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L87>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L88>)
 
 ```go
 func New(sections []Section) Model
@@ -83,7 +84,7 @@ func New(sections []Section) Model
 New is sections, every one closed, the cursor on the first; each opens and closes over 200ms.
 
 <a name="Model.Active"></a>
-### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L139>)
+### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L140>)
 
 ```go
 func (m Model) Active() bool
@@ -92,7 +93,7 @@ func (m Model) Active() bool
 Active reports whether any section is still opening or closing.
 
 <a name="Model.Cursor"></a>
-### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L120>)
+### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L121>)
 
 ```go
 func (m Model) Cursor() int
@@ -101,7 +102,7 @@ func (m Model) Cursor() int
 Cursor is the section the cursor is on.
 
 <a name="Model.FrameAt"></a>
-### func \(Model\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L149>)
+### func \(Model\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L150>)
 
 ```go
 func (m Model) FrameAt(i int, at time.Time) tea.Msg
@@ -110,7 +111,7 @@ func (m Model) FrameAt(i int, at time.Time) tea.Msg
 FrameAt is section i's frame for at, for a test that delivers frames itself.
 
 <a name="Model.IsOpen"></a>
-### func \(Model\) [IsOpen](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L123>)
+### func \(Model\) [IsOpen](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L124>)
 
 ```go
 func (m Model) IsOpen(i int) bool
@@ -119,7 +120,7 @@ func (m Model) IsOpen(i int) bool
 IsOpen reports whether section i is open, or opening.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L179>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L180>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -127,8 +128,17 @@ func (m Model) Legend() []legend.Entry
 
 Legend is the keys the accordion answers to.
 
+<a name="Model.SetWidth"></a>
+### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L185>)
+
+```go
+func (m Model) SetWidth(w int) Model
+```
+
+SetWidth changes the cells the accordion takes; bodies wrap to it.
+
 <a name="Model.Toggle"></a>
-### func \(Model\) [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L126>)
+### func \(Model\) [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L127>)
 
 ```go
 func (m Model) Toggle(i int) (Model, tea.Cmd)
@@ -137,7 +147,7 @@ func (m Model) Toggle(i int) (Model, tea.Cmd)
 Toggle opens section i when it is closed and closes it when it is open.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L153>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L154>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
@@ -146,16 +156,16 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
 Update moves the cursor and toggles on keys, and slides the sections on their own frames.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L185>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L192>)
 
 ```go
-func (m Model) View(th theme.Resolved, width int) string
+func (m Model) View(th theme.Resolved) string
 ```
 
-View is every heading, and under each as much of its body as it is open, wrapped to width.
+View is every heading, and under each as much of its body as it is open, wrapped to SetWidth; nothing until SetWidth sizes it.
 
 <a name="Model.WithDuration"></a>
-### func \(Model\) [WithDuration](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L92>)
+### func \(Model\) [WithDuration](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L93>)
 
 ```go
 func (m Model) WithDuration(d time.Duration) Model
@@ -164,7 +174,7 @@ func (m Model) WithDuration(d time.Duration) Model
 WithDuration opens and closes each section over d; 0 snaps.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L114>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L115>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
@@ -173,7 +183,7 @@ func (m Model) WithKeys(k Keys) Model
 WithKeys rebinds the accordion.
 
 <a name="Model.WithStyles"></a>
-### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L99>)
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L100>)
 
 ```go
 func (m Model) WithStyles(edit func(Styles) Styles) Model
@@ -193,7 +203,7 @@ type Section struct {
 ```
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L73-L77>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L74-L78>)
 
 Styles are how an accordion paints its headings and bodies.
 
@@ -206,7 +216,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L81>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L82>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles

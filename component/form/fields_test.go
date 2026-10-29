@@ -21,7 +21,7 @@ func TestInputTakesWhatIsTyped(t *testing.T) {
 func TestSelectHoldsTheKeysWhileOpen(t *testing.T) {
 	f, _ := press(sample(t), "tab", "enter")
 	require.True(t, f.Field(1).(Select).Holding())
-	require.Contains(t, ansi.Strip(f.View(60)), "alpine", "the options open under it")
+	require.Contains(t, ansi.Strip(f.SetWidth(60).View()), "alpine", "the options open under it")
 
 	f, _ = press(f, "tab")
 	require.Equal(t, 1, f.Focused(), "tab does not leave an open select")
@@ -59,7 +59,7 @@ func TestEmptyChoicesDoNotPanic(t *testing.T) {
 		f := New(th(), fl)
 		require.NotPanics(t, func() {
 			f, _ = press(f, "enter", "down", "up", "right", "left", "enter")
-			_ = f.View(40)
+			_ = f.SetWidth(40).View()
 		})
 	}
 	require.Empty(t, NewSelect("Image", nil).Value())

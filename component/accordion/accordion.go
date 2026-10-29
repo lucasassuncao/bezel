@@ -65,6 +65,7 @@ type Model struct {
 	folds    []fold
 	cursor   int
 	dur      time.Duration
+	width    int
 	keys     Keys
 	edit     func(Styles) Styles
 }
@@ -180,9 +181,19 @@ func (m Model) Legend() []legend.Entry {
 	return legend.FromBindings([]key.Binding{m.keys.Up, m.keys.Down, m.keys.Toggle})
 }
 
+// SetWidth changes the cells the accordion takes; bodies wrap to it.
+func (m Model) SetWidth(w int) Model {
+	m.width = w
+	return m
+}
+
 // View is every heading, and under each as much of its body as it is open,
-// wrapped to width.
-func (m Model) View(th theme.Resolved, width int) string {
+// wrapped to SetWidth; nothing until SetWidth sizes it.
+func (m Model) View(th theme.Resolved) string {
+	width := m.width
+	if width <= 0 {
+		return ""
+	}
 	st := m.styles(th)
 	var out []string
 	for i, s := range m.sections {

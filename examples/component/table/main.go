@@ -144,7 +144,7 @@ func (m model) View() tea.View {
 			Title:  "dependencies",
 			Bottom: fmt.Sprintf("%d/%d", m.tbl.Cursor()+1, m.tbl.Len()),
 			Scroll: m.tbl.Scroll(),
-			Body:   func(r layout.Rect) string { return m.tbl.View(m.th, r.W) },
+			Body:   func(r layout.Rect) string { return m.tbl.SetWidth(r.W).View(m.th) },
 		},
 		"detail": {Title: it.Value, Body: m.detail},
 	}))
