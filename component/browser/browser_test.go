@@ -48,13 +48,13 @@ func TestEnterChoosesEscDismissesTabMovesFocus(t *testing.T) {
 
 	b, act = b.Update(press(tea.KeyTab))
 	require.Equal(t, None, act)
-	require.True(t, b.PreviewFocus)
+	require.True(t, b.PreviewFocused())
 	_, act = b.Update(press(tea.KeyEnter))
 	require.Equal(t, None, act, "enter on the preview does nothing")
 
 	b, act = b.Update(press(tea.KeyEscape))
 	require.Equal(t, None, act, "esc on the preview only returns to the list")
-	require.False(t, b.PreviewFocus)
+	require.False(t, b.PreviewFocused())
 	_, act = b.Update(press(tea.KeyEscape))
 	require.Equal(t, Dismissed, act)
 }
@@ -136,6 +136,6 @@ func TestLegendDropsEnterWhileThePreviewHasTheKeys(t *testing.T) {
 	}
 	b := New(items("a"))
 	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "tab", "enter", "esc"}, keys(b.Legend()))
-	b.PreviewFocus = true
+	b = b.SetPreviewFocus(true)
 	require.NotContains(t, keys(b.Legend()), "enter")
 }

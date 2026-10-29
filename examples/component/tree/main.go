@@ -89,7 +89,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, handled, cmd = m.sh.Update(msg); handled {
 		return m, cmd
 	}
-	m.tree.Height = draw.InnerRect(m.sh.Rect("tree")).H
+	m.tree = m.tree.SetHeight(draw.InnerRect(m.sh.Rect("tree")).H)
 	switch msg := msg.(type) {
 	case revealMsg:
 		var ok bool
@@ -97,7 +97,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.sh, cmd = m.sh.SetStatus("no such path: "+msg.path, shell.Error, 0)
 			return m, cmd
 		}
-		m.tree = m.tree.ClampOffset()
 	case tea.KeyPressMsg:
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
@@ -127,7 +126,7 @@ func (m model) detail() string {
 	if idx < 0 {
 		return ""
 	}
-	e := m.tree.Nodes[idx]
+	e := m.tree.Nodes()[idx]
 	kind := "file"
 	if e.dir {
 		kind = "directory"
@@ -138,9 +137,7 @@ func (m model) detail() string {
 func (m model) View() tea.View {
 	v := tea.NewView(m.sh.View(map[string]shell.Pane{
 		"tree": {Title: "files", Body: func(r layout.Rect) string {
-			t := m.tree
-			t.Height = r.H
-			return t.View(m.th, m.row)
+			return m.tree.SetHeight(r.H).View(m.th, m.row)
 		}},
 		"detail": {Title: "detail", Body: func(layout.Rect) string { return m.detail() }},
 	}))

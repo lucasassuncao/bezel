@@ -23,9 +23,11 @@ Package browser is the pick\-from\-a\-list screen: labels on the left, the selec
   - [func \(m Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
   - [func \(m Model\) Len\(\) int](<#Model.Len>)
   - [func \(m Model\) ListView\(th theme.Resolved, height int\) string](<#Model.ListView>)
+  - [func \(m Model\) PreviewFocused\(\) bool](<#Model.PreviewFocused>)
   - [func \(m Model\) PreviewView\(height int\) string](<#Model.PreviewView>)
   - [func \(m Model\) Selected\(\) Item](<#Model.Selected>)
   - [func \(m Model\) SetItems\(items \[\]Item\) Model](<#Model.SetItems>)
+  - [func \(m Model\) SetPreviewFocus\(on bool\) Model](<#Model.SetPreviewFocus>)
   - [func \(m Model\) SetPreviewHeight\(h int\) Model](<#Model.SetPreviewHeight>)
   - [func \(m Model\) Update\(msg tea.KeyPressMsg\) \(Model, Action\)](<#Model.Update>)
   - [func \(m Model\) WithCurrent\(label string\) Model](<#Model.WithCurrent>)
@@ -93,7 +95,6 @@ Model is a value: Update returns the new one.
 
 ```go
 type Model struct {
-    PreviewFocus bool // the right pane has the keys
     // contains filtered or unexported fields
 }
 ```
@@ -108,7 +109,7 @@ func New(items []Item) Model
 New builds a browser over items with the cursor on the first.
 
 <a name="Model.Cursor"></a>
-### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L134>)
+### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L143>)
 
 ```go
 func (m Model) Cursor() int
@@ -117,7 +118,7 @@ func (m Model) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Model.Items"></a>
-### func \(Model\) [Items](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L131>)
+### func \(Model\) [Items](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L140>)
 
 ```go
 func (m Model) Items() []Item
@@ -126,7 +127,7 @@ func (m Model) Items() []Item
 Items is a copy of the rows.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L149>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L158>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -135,7 +136,7 @@ func (m Model) Legend() []legend.Entry
 Legend is the keys the browser answers to: enter only while the list has the keys.
 
 <a name="Model.Len"></a>
-### func \(Model\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L137>)
+### func \(Model\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L146>)
 
 ```go
 func (m Model) Len() int
@@ -144,7 +145,7 @@ func (m Model) Len() int
 Len is how many rows there are.
 
 <a name="Model.ListView"></a>
-### func \(Model\) [ListView](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L212>)
+### func \(Model\) [ListView](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L221>)
 
 ```go
 func (m Model) ListView(th theme.Resolved, height int) string
@@ -152,8 +153,17 @@ func (m Model) ListView(th theme.Resolved, height int) string
 
 ListView renders the labels, height rows of them, scrolled to keep the cursor visible and centred where the list allows.
 
+<a name="Model.PreviewFocused"></a>
+### func \(Model\) [PreviewFocused](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L109>)
+
+```go
+func (m Model) PreviewFocused() bool
+```
+
+PreviewFocused reports whether the preview pane has the keys.
+
 <a name="Model.PreviewView"></a>
-### func \(Model\) [PreviewView](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L235>)
+### func \(Model\) [PreviewView](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L244>)
 
 ```go
 func (m Model) PreviewView(height int) string
@@ -162,7 +172,7 @@ func (m Model) PreviewView(height int) string
 PreviewView renders the selected item's detail, height rows of it from the current scroll, clamped so the last page is full.
 
 <a name="Model.Selected"></a>
-### func \(Model\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L140>)
+### func \(Model\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L149>)
 
 ```go
 func (m Model) Selected() Item
@@ -171,7 +181,7 @@ func (m Model) Selected() Item
 Selected is the item under the cursor, or the zero Item when there is none.
 
 <a name="Model.SetItems"></a>
-### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L116>)
+### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L125>)
 
 ```go
 func (m Model) SetItems(items []Item) Model
@@ -179,8 +189,17 @@ func (m Model) SetItems(items []Item) Model
 
 SetItems replaces the rows, keeping the cursor in range and the preview at the top: a new list is a new thing to read.
 
+<a name="Model.SetPreviewFocus"></a>
+### func \(Model\) [SetPreviewFocus](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L112>)
+
+```go
+func (m Model) SetPreviewFocus(on bool) Model
+```
+
+SetPreviewFocus hands the keys to the preview pane, or back to the list.
+
 <a name="Model.SetPreviewHeight"></a>
-### func \(Model\) [SetPreviewHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L125>)
+### func \(Model\) [SetPreviewHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L134>)
 
 ```go
 func (m Model) SetPreviewHeight(h int) Model
@@ -189,7 +208,7 @@ func (m Model) SetPreviewHeight(h int) Model
 SetPreviewHeight tells the browser how tall its preview pane is, which is what a page is. Call it from the owner's relayout.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L159>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L168>)
 
 ```go
 func (m Model) Update(msg tea.KeyPressMsg) (Model, Action)
@@ -207,7 +226,7 @@ func (m Model) WithCurrent(label string) Model
 WithCurrent puts the cursor on the item labelled label; an unknown label leaves it where it was.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L109>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L118>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model

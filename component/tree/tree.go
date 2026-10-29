@@ -67,21 +67,18 @@ func DefaultConnectors() Connectors {
 	return Connectors{Mid: "├─ ", Last: "└─ ", Pipe: "│  ", Space: "   "}
 }
 
-// Model is a value: every method returns the new tree. Nodes is exported for
-// wholesale rebuilds, but never write through a shared backing array (see
-// WithNodeMutated). The zero value is usable and answers to DefaultKeys.
+// Model is a value: every method returns the new tree. The zero value is
+// usable and answers to DefaultKeys.
 type Model[N Noder[N]] struct {
-	Nodes  []N
-	Cursor int // position within the visible list
-	Offset int // scroll offset within the visible list
-	Height int
-
-	// EmptyMessage is shown when nothing is visible.
-	EmptyMessage string
-	keys         *Keys
-	lines        *Connectors
-	scrollOff    int
-	edit         func(Styles) Styles
+	nodes     []N
+	cursor    int // position within the visible list
+	offset    int // scroll offset within the visible list
+	height    int
+	empty     string // shown when nothing is visible
+	keys      *Keys
+	lines     *Connectors
+	scrollOff int
+	edit      func(Styles) Styles
 }
 
 // Styles are how a tree paints what it draws itself; each row is the app's.
@@ -96,19 +93,42 @@ func DefaultStyles(th theme.Resolved) Styles { return Styles{Empty: th.Dim, More
 // New builds a tree over nodes with the cursor on the first row that is not
 // a section; SetHeight gives it the rows its pane has.
 func New[N Noder[N]](nodes []N) Model[N] {
-	m := Model[N]{Nodes: slices.Clone(nodes)}
+	m := Model[N]{nodes: slices.Clone(nodes)}
 	vis := m.Visible()
-	for m.Cursor < len(vis) && nodes[vis[m.Cursor]].TreeInfo().Section {
-		m.Cursor++
+	for m.cursor < len(vis) && nodes[vis[m.cursor]].TreeInfo().Section {
+		m.cursor++
 	}
 	return m
 }
 
 // SetHeight changes the rows the tree takes and keeps the cursor in view.
 func (m Model[N]) SetHeight(h int) Model[N] {
-	m.Height = h
-	return m.ClampOffset()
+	m.height = h
+	return m.clamp()
 }
+
+// SetNodes replaces the nodes after a reload, keeping the cursor on a row
+// and in view.
+func (m Model[N]) SetNodes(nodes []N) Model[N] {
+	m.nodes = slices.Clone(nodes)
+	return m.clamp()
+}
+
+// WithEmptyMessage is shown, dimmed, when no row is visible; "  (empty)"
+// until set.
+func (m Model[N]) WithEmptyMessage(s string) Model[N] {
+	m.empty = s
+	return m
+}
+
+// Nodes is a copy of the nodes, every one, folded or not.
+func (m Model[N]) Nodes() []N { return slices.Clone(m.nodes) }
+
+// Cursor is the cursor's place among the visible rows.
+func (m Model[N]) Cursor() int { return m.cursor }
+
+// Height is the rows the tree takes.
+func (m Model[N]) Height() int { return m.height }
 
 // WithStyles changes the styles derived from the theme through edit, under
 // whatever theme View gets. It replaces an earlier edit.
@@ -148,7 +168,7 @@ func (m Model[N]) WithConnectors(c Connectors) Model[N] {
 // moves, where the tree has them.
 func (m Model[N]) WithScrollOff(n int) Model[N] {
 	m.scrollOff = max(n, 0)
-	return m.ClampOffset()
+	return m.clamp()
 }
 
 // Guides is the connector prefix of every visible row, in Visible's order,
@@ -162,7 +182,7 @@ func (m Model[N]) Guides() []string {
 	out := make([]string, len(vis))
 	var after []bool // after[d]: a row of depth d follows, no shallower one between
 	for vi := len(vis) - 1; vi >= 0; vi-- {
-		d := m.Nodes[vis[vi]].TreeInfo().Depth
+		d := m.nodes[vis[vi]].TreeInfo().Depth
 		for len(after) <= d {
 			after = append(after, false)
 		}
@@ -200,9 +220,9 @@ func (m Model[N]) bindings() Keys {
 // Visible returns the indices into Nodes that are rendered, honouring each
 // parent's collapsed state.
 func (m Model[N]) Visible() []int {
-	vis := make([]int, 0, len(m.Nodes))
+	vis := make([]int, 0, len(m.nodes))
 	var collapsed []int // depths of collapsed or hidden ancestors: inside one, rows are skipped
-	for i, n := range m.Nodes {
+	for i, n := range m.nodes {
 		in := n.TreeInfo()
 		for len(collapsed) > 0 && in.Depth <= collapsed[len(collapsed)-1] {
 			collapsed = collapsed[:len(collapsed)-1]
@@ -223,7 +243,7 @@ func (m Model[N]) Visible() []int {
 }
 
 // CurrentIdx is the Nodes index under the cursor, or -1.
-func (m Model[N]) CurrentIdx() int { return At(m.Cursor, m.Visible()) }
+func (m Model[N]) CurrentIdx() int { return At(m.cursor, m.Visible()) }
 
 // At maps a cursor position into a visible index list, or -1 when out of
 // range. For callers that already hold the Visible() result.
@@ -238,13 +258,13 @@ func At(cursor int, vis []int) int {
 // nodes[idx] was changed by mut: copy-on-write, never in place. A nil mut
 // changes nothing.
 func (m Model[N]) WithNodeMutated(idx int, mut func(*N)) Model[N] {
-	if idx < 0 || idx >= len(m.Nodes) || mut == nil {
+	if idx < 0 || idx >= len(m.nodes) || mut == nil {
 		return m
 	}
-	nodes := make([]N, len(m.Nodes))
-	copy(nodes, m.Nodes)
+	nodes := make([]N, len(m.nodes))
+	copy(nodes, m.nodes)
 	mut(&nodes[idx])
-	m.Nodes = nodes
+	m.nodes = nodes
 	return m
 }
 
@@ -286,13 +306,13 @@ func (m Model[N]) Move(delta int) Model[N] {
 
 // isSection reports the visible rows the cursor passes over.
 func (m Model[N]) isSection(vis []int) func(int) bool {
-	return func(i int) bool { return m.Nodes[vis[i]].TreeInfo().Section }
+	return func(i int) bool { return m.nodes[vis[i]].TreeInfo().Section }
 }
 
 // window is the tree's scroll as a layout.Window. Cursor, Offset and Height
 // stay fields of their own: callers read and set them.
 func (m Model[N]) window() layout.Window {
-	return layout.Window{Cursor: m.Cursor, Offset: m.Offset, Height: m.Height}
+	return layout.Window{Cursor: m.cursor, Offset: m.offset, Height: m.height}
 }
 
 // Scroll is where the tree shows its visible rows from, for a pane's scrollbar.
@@ -306,7 +326,7 @@ func (m Model[N]) withWindow(w layout.Window, n int) Model[N] {
 	if m.scrollOff > 0 && w.Height > 0 {
 		w = m.keepOff(w, n)
 	}
-	m.Cursor, m.Offset = w.Cursor, w.Offset
+	m.cursor, m.offset = w.Cursor, w.Offset
 	return m
 }
 
@@ -334,13 +354,13 @@ func (m Model[N]) Click(y int) (Model[N], Action) {
 	start, end, _ := w.Bounds(len(vis))
 	vi := start + y
 	switch {
-	case y < 0 || vi >= end || m.Nodes[vis[vi]].TreeInfo().Section:
+	case y < 0 || vi >= end || m.nodes[vis[vi]].TreeInfo().Section:
 		return m, None
 	case vi != w.Cursor:
-		m.Cursor = vi
+		m.cursor = vi
 		return m.clampOffset(len(vis)), None
 	}
-	if in := m.Nodes[vis[vi]].TreeInfo(); !in.Leaf && in.Expanded {
+	if in := m.nodes[vis[vi]].TreeInfo(); !in.Leaf && in.Expanded {
 		return m.WithNodeMutated(vis[vi], func(n *N) { *n = (*n).Expand(false) }), Collapsed
 	}
 	return m.expand(vis)
@@ -354,13 +374,13 @@ func (m Model[N]) MoveTo(i int) Model[N] {
 		return m
 	}
 	i = min(max(i, 0), len(vis)-1)
-	for i > 0 && m.Nodes[vis[i]].TreeInfo().Section {
+	for i > 0 && m.nodes[vis[i]].TreeInfo().Section {
 		i--
 	}
-	for i < len(vis)-1 && m.Nodes[vis[i]].TreeInfo().Section {
+	for i < len(vis)-1 && m.nodes[vis[i]].TreeInfo().Section {
 		i++
 	}
-	m.Cursor = i
+	m.cursor = i
 	return m.clampOffset(len(vis))
 }
 
@@ -368,11 +388,11 @@ func (m Model[N]) MoveTo(i int) Model[N] {
 func (m Model[N]) Expand() (Model[N], Action) { return m.expand(m.Visible()) }
 
 func (m Model[N]) expand(vis []int) (Model[N], Action) {
-	idx := At(m.Cursor, vis)
+	idx := At(m.cursor, vis)
 	if idx < 0 {
 		return m, None
 	}
-	if in := m.Nodes[idx].TreeInfo(); !in.Leaf && !in.Expanded {
+	if in := m.nodes[idx].TreeInfo(); !in.Leaf && !in.Expanded {
 		return m.WithNodeMutated(idx, func(n *N) { *n = (*n).Expand(true) }), Expanded
 	}
 	return m, None
@@ -381,18 +401,18 @@ func (m Model[N]) expand(vis []int) (Model[N], Action) {
 // collapse closes an expanded parent, or moves the cursor to the parent of
 // a nested row.
 func (m Model[N]) collapse(vis []int) (Model[N], Action) {
-	idx := At(m.Cursor, vis)
+	idx := At(m.cursor, vis)
 	if idx < 0 {
 		return m, None
 	}
-	in := m.Nodes[idx].TreeInfo()
+	in := m.nodes[idx].TreeInfo()
 	if !in.Leaf && in.Expanded {
 		return m.WithNodeMutated(idx, func(n *N) { *n = (*n).Expand(false) }), Collapsed
 	}
 	if in.Depth > 0 {
-		for vi := m.Cursor - 1; vi >= 0; vi-- {
-			if m.Nodes[vis[vi]].TreeInfo().Depth == in.Depth-1 {
-				m.Cursor = vi
+		for vi := m.cursor - 1; vi >= 0; vi-- {
+			if m.nodes[vis[vi]].TreeInfo().Depth == in.Depth-1 {
+				m.cursor = vi
 				return m.clampOffset(len(vis)), None
 			}
 		}
@@ -400,20 +420,11 @@ func (m Model[N]) collapse(vis []int) (Model[N], Action) {
 	return m, None
 }
 
-// ClampOffset scrolls so the cursor row stays visible, moving a cursor past
-// the last row back onto it.
-func (m Model[N]) ClampOffset() Model[N] { return m.clampOffset(len(m.Visible())) }
+// clamp puts the cursor back on a visible row and scrolls it into view.
+func (m Model[N]) clamp() Model[N] { return m.clampOffset(len(m.Visible())) }
 
-// clampOffset is ClampOffset for a caller already holding n visible rows.
+// clampOffset is clamp for a caller already holding n visible rows.
 func (m Model[N]) clampOffset(n int) Model[N] { return m.withWindow(m.window().Clamp(n), n) }
-
-// ClampCursor forces the cursor back into the visible range, for state
-// restores whose cursor may no longer be valid against the restored nodes.
-func (m Model[N]) ClampCursor() Model[N] {
-	vis := m.Visible()
-	m.Cursor = min(max(m.Cursor, 0), max(len(vis)-1, 0))
-	return m
-}
 
 // CursorTo moves the cursor to the first visible row match accepts, or
 // leaves it when none does, as a nil match. Reports whether it moved.
@@ -423,8 +434,8 @@ func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool) {
 	}
 	vis := m.Visible()
 	for vi, ni := range vis {
-		if match(m.Nodes[ni]) {
-			m.Cursor = vi
+		if match(m.nodes[ni]) {
+			m.cursor = vi
 			return m.clampOffset(len(vis)), true
 		}
 	}
@@ -442,7 +453,7 @@ func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool) {
 		return m2, true
 	}
 	target := -1
-	for i, n := range m.Nodes {
+	for i, n := range m.nodes {
 		if match(n) {
 			target = i
 			break
@@ -451,8 +462,8 @@ func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool) {
 	if target < 0 {
 		return m, false
 	}
-	nodes := make([]N, len(m.Nodes))
-	copy(nodes, m.Nodes)
+	nodes := make([]N, len(m.nodes))
+	copy(nodes, m.nodes)
 	depth := nodes[target].TreeInfo().Depth
 	for i := target - 1; i >= 0 && depth > 0; i-- {
 		if in := nodes[i].TreeInfo(); in.Depth < depth {
@@ -462,7 +473,7 @@ func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool) {
 			depth = in.Depth
 		}
 	}
-	m.Nodes = nodes
+	m.nodes = nodes
 	return m.CursorTo(match)
 }
 
@@ -474,12 +485,12 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 	if row == nil {
 		row = func(N, int, bool) string { return "" }
 	}
-	if m.Height <= 0 {
+	if m.height <= 0 {
 		return ""
 	}
 	vis := m.Visible()
 	if len(vis) == 0 {
-		msg := m.EmptyMessage
+		msg := m.empty
 		if msg == "" {
 			msg = "  (empty)"
 		}
@@ -491,13 +502,13 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 
 	var sb strings.Builder
 	for vi := start; vi < end; vi++ {
-		sb.WriteString(row(m.Nodes[vis[vi]], vis[vi], vi == w.Cursor))
+		sb.WriteString(row(m.nodes[vis[vi]], vis[vi], vi == w.Cursor))
 		sb.WriteByte('\n')
 	}
 	if below > 0 {
 		sb.WriteString(draw.More(below, 2, m.styles(th).More))
 	} else {
-		for i := end - start; i < m.Height; i++ {
+		for i := end - start; i < m.height; i++ {
 			sb.WriteByte('\n')
 		}
 	}

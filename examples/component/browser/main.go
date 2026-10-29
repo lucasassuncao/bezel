@@ -82,7 +82,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.browser = m.browser.SetPreviewHeight(draw.InnerRect(m.sh.Rect("preview")).H)
 	m.browser, act = m.browser.Update(key)
 	// The shell's focus is only the border; the browser owns which side moves.
-	if m.browser.PreviewFocus {
+	if m.browser.PreviewFocused() {
 		m.sh = m.sh.SetFocus("preview")
 	} else {
 		m.sh = m.sh.SetFocus("list")

@@ -56,7 +56,7 @@ type Model struct {
 	cursor int
 	keys   Keys
 
-	PreviewFocus  bool // the right pane has the keys
+	previewFocus  bool // the right pane has the keys
 	previewScroll int  // first detail line shown
 	previewHeight int  // rows the preview pane has, for paging
 	edit          func(Styles) Styles
@@ -105,6 +105,15 @@ func (m Model) styles(th theme.Resolved) Styles {
 	return st
 }
 
+// PreviewFocused reports whether the preview pane has the keys.
+func (m Model) PreviewFocused() bool { return m.previewFocus }
+
+// SetPreviewFocus hands the keys to the preview pane, or back to the list.
+func (m Model) SetPreviewFocus(on bool) Model {
+	m.previewFocus = on
+	return m
+}
+
 // WithKeys rebinds the browser.
 func (m Model) WithKeys(k Keys) Model {
 	m.keys = k
@@ -148,7 +157,7 @@ func (m Model) Selected() Item {
 // the keys.
 func (m Model) Legend() []legend.Entry {
 	bs := []key.Binding{m.keys.Up, m.keys.PageUp, m.keys.Tab}
-	if !m.PreviewFocus {
+	if !m.previewFocus {
 		bs = append(bs, m.keys.Enter)
 	}
 	return legend.FromBindings(append(bs, m.keys.Esc))
@@ -159,15 +168,15 @@ func (m Model) Legend() []legend.Entry {
 func (m Model) Update(msg tea.KeyPressMsg) (Model, Action) {
 	switch {
 	case key.Matches(msg, m.keys.Esc):
-		if m.PreviewFocus {
-			m.PreviewFocus = false
+		if m.previewFocus {
+			m.previewFocus = false
 			return m, None
 		}
 		return m, Dismissed
 	case key.Matches(msg, m.keys.Tab):
-		m.PreviewFocus = !m.PreviewFocus
+		m.previewFocus = !m.previewFocus
 	case key.Matches(msg, m.keys.Enter):
-		if !m.PreviewFocus && len(m.items) > 0 {
+		if !m.previewFocus && len(m.items) > 0 {
 			return m, Chosen
 		}
 	case key.Matches(msg, m.keys.Up):
@@ -185,7 +194,7 @@ func (m Model) Update(msg tea.KeyPressMsg) (Model, Action) {
 // step moves the cursor by dir when the list has focus, or scrolls the
 // preview by dir*n when it does.
 func (m Model) step(dir, n int) Model {
-	if m.PreviewFocus {
+	if m.previewFocus {
 		m.previewScroll = min(max(0, m.previewScroll+dir*n), m.maxPreviewScroll())
 		return m
 	}

@@ -49,7 +49,7 @@ func newTree(h int) Model[node] { return New(nodes()).SetHeight(h) }
 
 func press(code rune) tea.KeyPressMsg { return tea.KeyPressMsg{Code: code} }
 
-func label(m Model[node]) string { return m.Nodes[m.CurrentIdx()].label }
+func label(m Model[node]) string { return m.Nodes()[m.CurrentIdx()].label }
 
 func TestVisibleHidesCollapsedChildrenAndCursorSkipsSections(t *testing.T) {
 	m := newTree(10)
@@ -98,11 +98,11 @@ func TestRightExpandsLeftCollapsesOrGoesToParent(t *testing.T) {
 
 func TestMutationsAreCopyOnWrite(t *testing.T) {
 	m := newTree(10)
-	before := m.Nodes
+	before := m.Nodes()
 	m2 := m.WithNodeMutated(1, func(n *node) { n.expanded = false })
 	require.True(t, before[1].expanded, "the old slice is untouched")
-	require.False(t, m2.Nodes[1].expanded)
-	require.Equal(t, m.Nodes, m.WithNodeMutated(99, func(n *node) { n.label = "x" }).Nodes, "stale index is a no-op")
+	require.False(t, m2.Nodes()[1].expanded)
+	require.Equal(t, m.Nodes(), m.WithNodeMutated(99, func(n *node) { n.label = "x" }).Nodes(), "stale index is a no-op")
 }
 
 func TestRevealExpandsAncestorsAndCursorToMatches(t *testing.T) {
@@ -110,7 +110,7 @@ func TestRevealExpandsAncestorsAndCursorToMatches(t *testing.T) {
 	m, ok := m.Reveal(func(n node) bool { return n.label == "ttl" })
 	require.True(t, ok)
 	require.Equal(t, "ttl", label(m))
-	require.True(t, m.Nodes[5].expanded)
+	require.True(t, m.Nodes()[5].expanded)
 
 	m, ok = m.CursorTo(func(n node) bool { return n.label == "host" })
 	require.True(t, ok)
@@ -119,13 +119,17 @@ func TestRevealExpandsAncestorsAndCursorToMatches(t *testing.T) {
 	require.False(t, ok)
 }
 
-func TestClampCursorAfterNodesShrink(t *testing.T) {
-	m := newTree(10)
-	m.Cursor = 5
-	m.Nodes = m.Nodes[:2]
-	require.Equal(t, 1, m.ClampCursor().Cursor)
-	m.Nodes = nil
-	require.Equal(t, 0, m.ClampCursor().Cursor)
+func TestSetNodesKeepsTheCursorOnARow(t *testing.T) {
+	m := newTree(10).MoveTo(5)
+	m = m.SetNodes(m.Nodes()[:2])
+	require.Equal(t, 1, m.Cursor())
+	require.Equal(t, 0, m.SetNodes(nil).Cursor())
+}
+
+func TestNodesIsACopy(t *testing.T) {
+	m := newTree(3)
+	m.Nodes()[0].label = "changed"
+	require.NotEqual(t, "changed", m.Nodes()[0].label)
 }
 
 func TestViewPadsShortTreesAndMarksOverflow(t *testing.T) {
@@ -148,8 +152,7 @@ func TestViewPadsShortTreesAndMarksOverflow(t *testing.T) {
 	require.Len(t, strings.Split(tall.View(th, row), "\n"), 10, "padded to the height")
 	require.Contains(t, ansi.Strip(tall.View(th, row)), "    host")
 
-	empty := New[node](nil).SetHeight(5)
-	empty.EmptyMessage = "  (no fields)"
+	empty := New[node](nil).SetHeight(5).WithEmptyMessage("  (no fields)")
 	require.Contains(t, empty.View(th, row), "(no fields)")
 }
 
@@ -206,18 +209,17 @@ func TestOneRowTreeShowsTheCursorNotTheIndicator(t *testing.T) {
 	require.Equal(t, "> a", m.View(theme.Resolved{}, labelRow))
 }
 
-// Nodes is exported, so an app can shrink it under a scrolled tree.
 func TestViewStaysHeightTallAfterNodesShrink(t *testing.T) {
 	m := New(leaves(20)).SetHeight(5).MoveTo(15)
-	m.Nodes = leaves(3)
+	m = m.SetNodes(leaves(3))
 	require.Len(t, strings.Split(m.View(theme.Resolved{}, labelRow), "\n"), 5)
 }
 
-// Cursor is exported, so a caller can leave it out of range.
+// A zero tree, or one whose cursor sits past its rows, still moves.
 func TestOutOfRangeCursorDoesNotPanic(t *testing.T) {
 	for _, c := range []int{-3, 99} {
 		m := newTree(10)
-		m.Cursor = c
+		m.cursor = c
 		require.NotPanics(t, func() {
 			m, _ = m.Update(press(tea.KeyDown))
 			m = m.Move(-1)
@@ -267,7 +269,7 @@ func BenchmarkView(b *testing.B) {
 // A nil func matches nothing, changes nothing and draws empty rows.
 func TestNilFuncsAreHarmless(t *testing.T) {
 	m := newTree(4)
-	require.Equal(t, m.Nodes, m.WithNodeMutated(0, nil).Nodes)
+	require.Equal(t, m.Nodes(), m.WithNodeMutated(0, nil).Nodes())
 	_, moved := m.CursorTo(nil)
 	require.False(t, moved)
 	_, moved = m.Reveal(nil)
@@ -281,7 +283,7 @@ func TestAHiddenNodeTakesItsBranchWithIt(t *testing.T) {
 	m := New(ns).SetHeight(10)
 	var labels []string
 	for _, i := range m.Visible() {
-		labels = append(labels, m.Nodes[i].label)
+		labels = append(labels, m.Nodes()[i].label)
 	}
 	require.Equal(t, []string{"ADDED", "AVAILABLE", "cache"}, labels)
 	require.Equal(t, "cache", label(m), "the cursor skips what is gone")
@@ -311,13 +313,13 @@ func TestScrollOffKeepsRowsAroundTheCursor(t *testing.T) {
 	for range 7 {
 		m, _ = m.Update(press(tea.KeyDown))
 	}
-	require.Equal(t, 7, m.Cursor)
-	require.Equal(t, 1, m.Offset, "two rows and the more row below the cursor")
+	require.Equal(t, 7, m.Cursor())
+	require.Equal(t, 1, m.Scroll().Offset, "two rows and the more row below the cursor")
 	for range 6 {
 		m, _ = m.Update(press(tea.KeyUp))
 	}
-	require.Equal(t, 1, m.Cursor)
-	require.Equal(t, 0, m.Offset, "the top can show no more than it has")
+	require.Equal(t, 1, m.Cursor())
+	require.Equal(t, 0, m.Scroll().Offset, "the top can show no more than it has")
 }
 
 func TestTheTreeLegendNamesItsKeys(t *testing.T) {
@@ -349,7 +351,7 @@ func TestAClickMovesTheCursorAndASecondOpensOrCloses(t *testing.T) {
 func labelsOf(m Model[node]) []string {
 	var out []string
 	for _, i := range m.Visible() {
-		out = append(out, m.Nodes[i].label)
+		out = append(out, m.Nodes()[i].label)
 	}
 	return out
 }
