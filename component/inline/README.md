@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/component/inline"
 ```
 
-Package inline is for CLIs that print logs and now and then ask one question, beside progress.Bar redrawn with : nothing takes the screen. Theme only: the functions take a theme but keep no Styles to edit.
+Package inline is for CLIs that print logs and now and then ask one question, beside progress.Bar redrawn with \\r: nothing takes the screen. Theme only: the functions take a theme but keep no Styles to edit.
 
 ## Index
 
