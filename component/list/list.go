@@ -264,8 +264,8 @@ func (m Model[T]) Rows() []Row[T] { return slices.Clone(m.rows) }
 // Len is how many rows there are, headings included.
 func (m Model[T]) Len() int { return len(m.rows) }
 
-// IsFiltering reports whether the / prompt is open and taking the keys.
-func (m Model[T]) IsFiltering() bool { return m.find.on }
+// Filtering reports whether the / prompt is open and taking the keys.
+func (m Model[T]) Filtering() bool { return m.find.on }
 
 // Filter is the text typed at the / prompt.
 func (m Model[T]) Filter() string { return m.find.text }

@@ -24,9 +24,9 @@ Package list is a cursor list with section headings, a scroll indicator or pages
   - [func \(m Model\[T\]\) Animate\(msg tea.Msg\) \(Model\[T\], tea.Cmd\)](<#Model[T].Animate>)
   - [func \(m Model\[T\]\) Click\(y int\) \(Model\[T\], Action\)](<#Model[T].Click>)
   - [func \(m Model\[T\]\) Filter\(\) string](<#Model[T].Filter>)
+  - [func \(m Model\[T\]\) Filtering\(\) bool](<#Model[T].Filtering>)
   - [func \(m Model\[T\]\) FrameAt\(at time.Time\) tea.Msg](<#Model[T].FrameAt>)
   - [func \(m Model\[T\]\) InsertRow\(i int, r Row\[T\]\) Model\[T\]](<#Model[T].InsertRow>)
-  - [func \(m Model\[T\]\) IsFiltering\(\) bool](<#Model[T].IsFiltering>)
   - [func \(m Model\[T\]\) Legend\(\) \[\]legend.Entry](<#Model[T].Legend>)
   - [func \(m Model\[T\]\) Len\(\) int](<#Model[T].Len>)
   - [func \(m Model\[T\]\) RemoveRow\(i int\) Model\[T\]](<#Model[T].RemoveRow>)
@@ -174,6 +174,15 @@ func (m Model[T]) Filter() string
 
 Filter is the text typed at the / prompt.
 
+<a name="Model[T].Filtering"></a>
+### func \(Model\[T\]\) [Filtering](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L268>)
+
+```go
+func (m Model[T]) Filtering() bool
+```
+
+Filtering reports whether the / prompt is open and taking the keys.
+
 <a name="Model[T].FrameAt"></a>
 ### func \(Model\[T\]\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L107>)
 
@@ -191,15 +200,6 @@ func (m Model[T]) InsertRow(i int, r Row[T]) Model[T]
 ```
 
 InsertRow puts r before row i, i kept within the rows, the cursor staying on the row it was on.
-
-<a name="Model[T].IsFiltering"></a>
-### func \(Model\[T\]\) [IsFiltering](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L268>)
-
-```go
-func (m Model[T]) IsFiltering() bool
-```
-
-IsFiltering reports whether the / prompt is open and taking the keys.
 
 <a name="Model[T].Legend"></a>
 ### func \(Model\[T\]\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L187>)

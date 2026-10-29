@@ -53,7 +53,7 @@ func TestEnterChoosesASelectableRow(t *testing.T) {
 func TestFilterNarrowsAndEnterPicksTheMatch(t *testing.T) {
 	m := New(rows()).SetHeight(10)
 	m, _ = m.Update(typed("/"))
-	require.True(t, m.IsFiltering())
+	require.True(t, m.Filtering())
 	m, _ = m.Update(typed("m"))
 	m, _ = m.Update(typed("e"))
 	require.Equal(t, "me", m.Filter())
@@ -62,7 +62,7 @@ func TestFilterNarrowsAndEnterPicksTheMatch(t *testing.T) {
 
 	m, act := m.Update(press(tea.KeyEnter))
 	require.Equal(t, Chosen, act)
-	require.False(t, m.IsFiltering())
+	require.False(t, m.Filtering())
 	require.Equal(t, "metrics", m.Selected().Label, "the pick becomes the cursor")
 
 	m, _ = m.Update(typed("/"))
@@ -71,7 +71,7 @@ func TestFilterNarrowsAndEnterPicksTheMatch(t *testing.T) {
 	m, _ = m.Update(press(tea.KeyBackspace))
 	require.Equal(t, "", m.Filter())
 	m, _ = m.Update(press(tea.KeyEscape))
-	require.False(t, m.IsFiltering())
+	require.False(t, m.Filtering())
 }
 
 func TestSetRowsKeepsTheCursorByLabel(t *testing.T) {
@@ -387,7 +387,7 @@ func TestAClickPicksAMatchWhileFiltering(t *testing.T) {
 	require.Equal(t, "item-02", m.Selected().Label)
 	m, act := m.Click(2)
 	require.Equal(t, Chosen, act)
-	require.False(t, m.IsFiltering())
+	require.False(t, m.Filtering())
 	require.Equal(t, "item-02", m.Selected().Label)
 }
 

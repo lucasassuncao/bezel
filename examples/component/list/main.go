@@ -74,7 +74,7 @@ func (m model) toList(key tea.KeyPressMsg) (model, tea.Cmd) {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// While filtering every key is text for the filter, q included.
-	if key, ok := msg.(tea.KeyPressMsg); ok && m.list.IsFiltering() {
+	if key, ok := msg.(tea.KeyPressMsg); ok && m.list.Filtering() {
 		return m.toList(key)
 	}
 	var handled bool
