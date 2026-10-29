@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/themes/vue.css">
   <link rel="stylesheet" href="docs.css">
+  <script src="theme.js"></script>
 </head>
 <body>
   <div id="app"></div>
@@ -34,6 +35,15 @@
             return md
               .replace(/\]\(\.\.\/([^)\s]+)\)/g, "](" + repo + "$1)")
               .replace(/\]\(recordings\)/g, "](" + repo + "docs/recordings)");
+          });
+          // The light/dark switch sits under the logo.
+          hook.mounted(function () {
+            var button = document.createElement("button");
+            button.className = "theme-toggle";
+            button.type = "button";
+            button.setAttribute("data-theme-toggle", "");
+            button.textContent = "◐ light / dark";
+            document.querySelector(".sidebar > h1").after(button);
           });
           // The GIFs above a heading load late and push it down: scroll again.
           hook.doneEach(function () {
