@@ -29,10 +29,13 @@ Package browser is the pick\-from\-a\-list screen: labels on the left, the selec
   - [func \(m Model\) Update\(msg tea.KeyPressMsg\) \(Model, Action\)](<#Model.Update>)
   - [func \(m Model\) WithCurrent\(label string\) Model](<#Model.WithCurrent>)
   - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
+  - [func \(m Model\) WithStyles\(edit func\(Styles\) Styles\) Model](<#Model.WithStyles>)
+- [type Styles](<#Styles>)
+  - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
 
 
 <a name="Action"></a>
-## type [Action](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L25>)
+## type [Action](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L26>)
 
 Action is what a key did.
 
@@ -51,7 +54,7 @@ const (
 ```
 
 <a name="Item"></a>
-## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L19-L22>)
+## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L20-L23>)
 
 Item is one row: what the list prints and what the preview shows for it. Detail is called on render, so an expensive body is only built when shown.
 
@@ -63,7 +66,7 @@ type Item struct {
 ```
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L34-L36>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L35-L37>)
 
 Keys are the bindings the browser answers to.
 
@@ -74,7 +77,7 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L39>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L40>)
 
 ```go
 func DefaultKeys() Keys
@@ -83,7 +86,7 @@ func DefaultKeys() Keys
 DefaultKeys are the arrows, pgup/pgdown, enter, esc and tab.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L52-L60>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L53-L62>)
 
 Model is a value: Update returns the new one.
 
@@ -95,7 +98,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L63>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L75>)
 
 ```go
 func New(items []Item) Model
@@ -104,7 +107,7 @@ func New(items []Item) Model
 New builds a browser over items with the cursor on the first.
 
 <a name="Model.Cursor"></a>
-### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L105>)
+### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L133>)
 
 ```go
 func (m Model) Cursor() int
@@ -113,7 +116,7 @@ func (m Model) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Model.Items"></a>
-### func \(Model\) [Items](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L102>)
+### func \(Model\) [Items](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L130>)
 
 ```go
 func (m Model) Items() []Item
@@ -122,7 +125,7 @@ func (m Model) Items() []Item
 Items is a copy of the rows.
 
 <a name="Model.Len"></a>
-### func \(Model\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L108>)
+### func \(Model\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L136>)
 
 ```go
 func (m Model) Len() int
@@ -131,7 +134,7 @@ func (m Model) Len() int
 Len is how many rows there are.
 
 <a name="Model.ListView"></a>
-### func \(Model\) [ListView](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L173>)
+### func \(Model\) [ListView](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L201>)
 
 ```go
 func (m Model) ListView(th theme.Resolved, height int) string
@@ -140,7 +143,7 @@ func (m Model) ListView(th theme.Resolved, height int) string
 ListView renders the labels, height rows of them, scrolled to keep the cursor visible and centred where the list allows.
 
 <a name="Model.PreviewView"></a>
-### func \(Model\) [PreviewView](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L195>)
+### func \(Model\) [PreviewView](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L224>)
 
 ```go
 func (m Model) PreviewView(height int) string
@@ -149,7 +152,7 @@ func (m Model) PreviewView(height int) string
 PreviewView renders the selected item's detail, height rows of it from the current scroll, clamped so the last page is full.
 
 <a name="Model.Selected"></a>
-### func \(Model\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L111>)
+### func \(Model\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L139>)
 
 ```go
 func (m Model) Selected() Item
@@ -158,7 +161,7 @@ func (m Model) Selected() Item
 Selected is the item under the cursor, or the zero Item when there is none.
 
 <a name="Model.SetItems"></a>
-### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L87>)
+### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L115>)
 
 ```go
 func (m Model) SetItems(items []Item) Model
@@ -167,7 +170,7 @@ func (m Model) SetItems(items []Item) Model
 SetItems replaces the rows, keeping the cursor in range and the preview at the top: a new list is a new thing to read.
 
 <a name="Model.SetPreviewHeight"></a>
-### func \(Model\) [SetPreviewHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L96>)
+### func \(Model\) [SetPreviewHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L124>)
 
 ```go
 func (m Model) SetPreviewHeight(h int) Model
@@ -176,7 +179,7 @@ func (m Model) SetPreviewHeight(h int) Model
 SetPreviewHeight tells the browser how tall its preview pane is, which is what a page is. Call it from the owner's relayout.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L120>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L148>)
 
 ```go
 func (m Model) Update(msg tea.KeyPressMsg) (Model, Action)
@@ -185,7 +188,7 @@ func (m Model) Update(msg tea.KeyPressMsg) (Model, Action)
 Update handles one key. Keys the browser does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model.WithCurrent"></a>
-### func \(Model\) [WithCurrent](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L69>)
+### func \(Model\) [WithCurrent](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L81>)
 
 ```go
 func (m Model) WithCurrent(label string) Model
@@ -194,13 +197,43 @@ func (m Model) WithCurrent(label string) Model
 WithCurrent puts the cursor on the item labelled label; an unknown label leaves it where it was.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L80>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L108>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
 ```
 
 WithKeys rebinds the browser.
+
+<a name="Model.WithStyles"></a>
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L93>)
+
+```go
+func (m Model) WithStyles(edit func(Styles) Styles) Model
+```
+
+WithStyles changes the styles derived from the theme through edit, under whatever theme View gets. It replaces an earlier edit.
+
+<a name="Styles"></a>
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L66-L69>)
+
+Styles are how the list pane paints its labels; the preview is the item's own text.
+
+```go
+type Styles struct {
+    Cursor lipgloss.Style // the label under the cursor
+    Label  lipgloss.Style // every other label
+}
+```
+
+<a name="DefaultStyles"></a>
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/browser/browser.go#L72>)
+
+```go
+func DefaultStyles(th theme.Resolved) Styles
+```
+
+DefaultStyles paint the cursor in the cursor role over dim labels.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 

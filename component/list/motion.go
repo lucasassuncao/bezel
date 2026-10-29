@@ -9,7 +9,6 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/internal/frames"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // motion is what a list with motion keeps of its last change: where the
@@ -128,27 +127,27 @@ func (m Model[T]) cursorRow() int {
 
 // arriving is the style of a row that just arrived, fading from the accent
 // to the row's own colour; nil when the row is settled.
-func (m Model[T]) arriving(r Row[T], th *theme.Resolved) *lipgloss.Style {
+func (m Model[T]) arriving(r Row[T], st *Styles) *lipgloss.Style {
 	if !m.Active() || !m.mo.fresh[r.Label] {
 		return nil
 	}
-	own := th.Dim
+	own := st.Row
 	if r.Style != nil {
 		own = *r.Style
 	}
-	s := own.Foreground(mix(lipgloss.Color(th.Colors.Accent), own.GetForeground(), m.mo.p))
+	s := own.Foreground(mix(st.Arrive.GetForeground(), own.GetForeground(), m.mo.p))
 	return &s
 }
 
 // ghostLine is the ghost at row i, faded by how far the motion is, and false
 // when no ghost sits there.
-func (m Model[T]) ghostLine(i int, th *theme.Resolved) (string, bool) {
+func (m Model[T]) ghostLine(i int, st *Styles) (string, bool) {
 	if !m.Active() {
 		return "", false
 	}
 	for _, g := range m.mo.gone {
 		if g.at == i {
-			fg := mix(th.Dim.GetForeground(), lipgloss.Color(th.Colors.Border), m.mo.p)
+			fg := mix(st.Row.GetForeground(), st.Gone.GetForeground(), m.mo.p)
 			return lipgloss.NewStyle().Foreground(fg).Strikethrough(true).Render("  " + g.label), true
 		}
 	}

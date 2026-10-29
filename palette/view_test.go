@@ -1,6 +1,7 @@
 package palette
 
 import (
+	"charm.land/lipgloss/v2"
 	"strings"
 	"testing"
 
@@ -62,4 +63,10 @@ func TestTheColumnsDoNotShiftAsTheListScrolls(t *testing.T) {
 	out := ansi.Strip(New(its, theme.Resolve(theme.Plain, true)).View(layout.Rect{W: 80, H: 5}))
 	require.NotContains(t, out, "z-much-longer-name")
 	require.Contains(t, out, ":a"+strings.Repeat(" ", len(":z-much-longer-name")-len(":a")+2))
+}
+
+func TestWithStylesRecoloursTheNote(t *testing.T) {
+	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+	m := New(nil, theme.Resolve(theme.Mint, true)).WithStyles(func(s Styles) Styles { s.Note = red; return s })
+	require.Contains(t, m.View(layout.Rect{W: 40, H: 5}), red.Render("  no command matches"))
 }

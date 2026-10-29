@@ -25,7 +25,7 @@ A component that draws takes a `theme.Resolved`; loose lipgloss styles reach it 
 | nobody: it is a plain function | after the data it draws | `progress`, `chart`, `inline`, `icon.Set.Render` |
 | `shell` | `shell.Config.Theme`, replaced with `SetTheme` | `shell` |
 
-- A dialog that reports something is tinted with `WithKind(overlay.Danger)` and the like. `Alert` takes its `Kind` in the constructor, because it always reports one.
+- A dialog that reports something is tinted with `WithKind(overlay.Danger)` and the like. `Alert` takes its `Kind` in the constructor, because it always reports one. The `Kind` colours stay the theme's success, warning and danger: a `WithStyles` edit never changes what a dialog reports.
 - `draw`, `legend` and `overlay.Box` sit below the theme and take the lipgloss style they paint with: `theme` imports them, so they cannot import it.
 - How an input looks travels with the theme too, the caret's blink included: `Resolved.CaretBlink`, zero for `draw.DefaultBlink`. Tests shrink it there; there is no package variable to set.
 
@@ -37,6 +37,14 @@ The theme sets how everything looks; a component's own styles let an app recolou
 - `DefaultStyles(th)` derives them from the theme, and is the only place that does.
 - `WithStyles(edit)` stores `edit func(Styles) Styles` and applies it to `DefaultStyles(th)` whenever the component has a theme: when built, on `SetTheme`, or in `View(th, ...)`. The app's change outlives a theme switch. A second `WithStyles` replaces the first edit.
 - A part that no role in `theme.Resolved` fits gets a new role there, derived in `buildDerivedStyles`, never a colour written into the component.
+
+Not everything can follow the theme. Each package sits in one of three classes, and one that is not themable says so in its doc comment:
+
+| Class | What the app can do | Packages |
+| --- | --- | --- |
+| Themable | switch the theme, and recolour this one component with `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `input`, `textbox`, `form`, `palette`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, and every `overlay` dialog but `Alert` (one `overlay.Styles` for all of them) |
+| Theme only | switch the theme; a plain function keeps no edit, so it has no `Styles` | `chart`, `progress.Bar` and its siblings, `inline`, `icon.Set.Render` |
+| Non-themable | nothing: the colours report something, or arrive as arguments | `overlay.Alert` and the `Kind` tint of any dialog, `toast`, `animation` and its subpackages, `effect`, `themebrowser` |
 
 ## Three shapes of Update
 

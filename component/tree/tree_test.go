@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"charm.land/lipgloss/v2"
 	"fmt"
 	"strings"
 	"testing"
@@ -351,4 +352,10 @@ func labelsOf(m Model[node]) []string {
 		out = append(out, m.Nodes[i].label)
 	}
 	return out
+}
+
+func TestWithStylesRecoloursTheEmptyMessage(t *testing.T) {
+	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+	m := New([]node{}).SetHeight(3).WithStyles(func(s Styles) Styles { s.Empty = red; return s })
+	require.Equal(t, red.Render("  (empty)"), m.View(theme.Resolve(theme.Mint, true), nil))
 }

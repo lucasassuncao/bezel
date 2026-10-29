@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"charm.land/lipgloss/v2"
 	"strings"
 	"testing"
 
@@ -117,4 +118,10 @@ func TestNewAndSetItemsCopyTheSlice(t *testing.T) {
 	b = b.SetItems(ys)
 	ys[0].Label = "changed"
 	require.Equal(t, "x", b.Selected().Label)
+}
+
+func TestWithStylesRecoloursTheCursorLabel(t *testing.T) {
+	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+	b := New(items("a", "b")).WithStyles(func(s Styles) Styles { s.Cursor = red; return s })
+	require.Equal(t, red.Render("▶  a"), strings.Split(b.ListView(theme.Resolve(theme.Mint, true), 2), "\n")[0])
 }

@@ -27,6 +27,9 @@ Package palette is the ":" command line: the typed line on the status row and th
   - [func \(m Model\) Value\(\) string](<#Model.Value>)
   - [func \(m Model\) View\(body layout.Rect\) string](<#Model.View>)
   - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
+  - [func \(m Model\) WithStyles\(edit func\(Styles\) Styles\) Model](<#Model.WithStyles>)
+- [type Styles](<#Styles>)
+  - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
 
 
 ## Constants
@@ -38,7 +41,7 @@ const Rows = 8
 ```
 
 <a name="DoneMsg"></a>
-## type [DoneMsg](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L31-L34>)
+## type [DoneMsg](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L32-L35>)
 
 DoneMsg is the palette finishing. The owner pops it, then runs Cmd or shows Err; both empty means the line was empty.
 
@@ -50,7 +53,7 @@ type DoneMsg struct {
 ```
 
 <a name="Item"></a>
-## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L23-L27>)
+## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L24-L28>)
 
 Item is one command. Available false keeps it off the list but known, so typing it says "not available here" instead of "unknown command".
 
@@ -63,7 +66,7 @@ type Item struct {
 ```
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L41-L43>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L42-L44>)
 
 Keys are the bindings the palette answers to besides esc and the typing. Down has no help of its own: Up's "↑/↓" names both.
 
@@ -74,7 +77,7 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L46>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L47>)
 
 ```go
 func DefaultKeys() Keys
@@ -83,7 +86,7 @@ func DefaultKeys() Keys
 DefaultKeys are enter, tab and the arrows.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L56-L63>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L57-L66>)
 
 Model is the open palette. It is an overlay anchored to the bottom.
 
@@ -94,7 +97,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L66>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L89>)
 
 ```go
 func New(items []Item, th theme.Resolved) Model
@@ -103,7 +106,7 @@ func New(items []Item, th theme.Resolved) Model
 New opens a palette over items, sorted by name.
 
 <a name="Model.AnchorBottom"></a>
-### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L130>)
+### func \(Model\) [AnchorBottom](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L178>)
 
 ```go
 func (Model) AnchorBottom() bool
@@ -112,7 +115,7 @@ func (Model) AnchorBottom() bool
 
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L125>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L173>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -121,7 +124,7 @@ func (m Model) Legend() []legend.Entry
 
 
 <a name="Model.SetItems"></a>
-### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L91>)
+### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L139>)
 
 ```go
 func (m Model) SetItems(items []Item) Model
@@ -139,7 +142,7 @@ func (m Model) StatusLine(width int) string
 StatusLine is the typed line, drawn where the status usually is.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L100>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L148>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
@@ -148,7 +151,7 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd)
 
 
 <a name="Model.Value"></a>
-### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L133>)
+### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L181>)
 
 ```go
 func (m Model) Value() string
@@ -166,13 +169,48 @@ func (m Model) View(body layout.Rect) string
 View is the candidate list, a rule above it, every line padded to the full width so the panes do not show through.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L84>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L132>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
 ```
 
 WithKeys rebinds the palette; its legend follows the bindings' help.
+
+<a name="Model.WithStyles"></a>
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L126>)
+
+```go
+func (m Model) WithStyles(edit func(Styles) Styles) Model
+```
+
+WithStyles changes the styles derived from the theme through edit. It replaces an earlier edit.
+
+<a name="Styles"></a>
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L69-L77>)
+
+Styles are how the palette paints its list; the typed line is an input's.
+
+```go
+type Styles struct {
+    Cursor  lipgloss.Style // the picked row
+    Name    lipgloss.Style
+    Key     lipgloss.Style
+    Desc    lipgloss.Style
+    Note    lipgloss.Style // "no command matches" and "… N more"
+    Error   lipgloss.Style
+    Divider lipgloss.Style // the rule above the list
+}
+```
+
+<a name="DefaultStyles"></a>
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/palette/palette.go#L81>)
+
+```go
+func DefaultStyles(th theme.Resolved) Styles
+```
+
+DefaultStyles take the names and keys from the theme's key roles, dim the rest and paint an error in danger.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 

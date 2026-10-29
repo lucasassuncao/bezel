@@ -1,6 +1,7 @@
 package input
 
 import (
+	"charm.land/lipgloss/v2"
 	"errors"
 	"strings"
 	"testing"
@@ -319,4 +320,12 @@ func TestTheTerminalCursorStandsInForTheCaret(t *testing.T) {
 	require.Nil(t, m.Blur().TerminalCursor())
 	require.Nil(t, m.WithCursorMode(cursor.Hidden).TerminalCursor())
 	require.Nil(t, focused().TerminalCursor(), "a field painting its own caret has none")
+}
+
+// The edit survives a theme switch: SetTheme rebuilds the styles under it.
+func TestWithStylesHoldsAcrossSetTheme(t *testing.T) {
+	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+	m := New(theme.Resolve(theme.Plain, true)).WithPrompt("> ").WithStyles(func(s Styles) Styles { s.Prompt = red; return s })
+	m = m.SetTheme(theme.Resolve(theme.Mint, true))
+	require.True(t, strings.HasPrefix(m.View(), red.Render("> ")))
 }

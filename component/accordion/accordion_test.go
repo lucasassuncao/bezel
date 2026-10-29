@@ -1,6 +1,7 @@
 package accordion
 
 import (
+	"charm.land/lipgloss/v2"
 	"os"
 	"strings"
 	"testing"
@@ -88,4 +89,10 @@ func TestTheSectionsTakeOnlyTheirOwnFrames(t *testing.T) {
 	assert.Nil(t, cmd)
 	_, cmd = m.Update(m.FrameAt(0, time.Unix(1, 0)))
 	assert.NotNil(t, cmd)
+}
+
+func TestWithStylesRecoloursTheHeadings(t *testing.T) {
+	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+	m := New([]Section{{Title: "a"}, {Title: "b"}}).WithStyles(func(s Styles) Styles { s.Heading = red; return s })
+	require.Equal(t, red.Render("▸ b"), strings.Split(m.View(th, 20), "\n")[1])
 }

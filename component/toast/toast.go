@@ -1,5 +1,6 @@
 // Package toast shows short notices in a corner of the screen, stacked,
 // sliding in and out on their own: saved, copied, failed to connect.
+// Non-themable: each Kind keeps its fixed colour, so there are no Styles.
 package toast
 
 import (

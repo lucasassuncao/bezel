@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/component/inline"
 ```
 
-Package inline is for CLIs that print logs and now and then ask one question or show one bar: nothing here takes over the screen.
+Package inline is for CLIs that print logs and now and then ask one question or show one bar: nothing here takes over the screen. Theme only: the functions take a theme but keep no Styles to edit.
 
 ## Index
 
@@ -26,7 +26,7 @@ var ErrAborted = errors.New("inline: aborted")
 ```
 
 <a name="Bar"></a>
-## func [Bar](<https://github.com/lucasassuncao/bezel/blob/main/component/inline/inline.go#L138>)
+## func [Bar](<https://github.com/lucasassuncao/bezel/blob/main/component/inline/inline.go#L139>)
 
 ```go
 func Bar(done, total, width int, th theme.Resolved) string
@@ -35,7 +35,7 @@ func Bar(done, total, width int, th theme.Resolved) string
 Bar is a done/total progress bar width cells wide, for a caller that redraws it in place with \\r. It is progress.Bar, kept here for CLIs.
 
 <a name="Confirm"></a>
-## func [Confirm](<https://github.com/lucasassuncao/bezel/blob/main/component/inline/inline.go#L24>)
+## func [Confirm](<https://github.com/lucasassuncao/bezel/blob/main/component/inline/inline.go#L25>)
 
 ```go
 func Confirm(title string, th theme.Resolved, opts ...tea.ProgramOption) (bool, error)

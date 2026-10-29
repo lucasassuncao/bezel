@@ -1,5 +1,6 @@
 // Package effect changes a block that is already drawn, cell by cell: fades,
 // dissolves, slides, lights and the transitions from one block to the next.
+// Non-themable: colours come as arguments, never from the theme.
 package effect
 
 import (

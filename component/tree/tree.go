@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
@@ -80,7 +81,17 @@ type Model[N Noder[N]] struct {
 	keys         *Keys
 	lines        *Connectors
 	scrollOff    int
+	edit         func(Styles) Styles
 }
+
+// Styles are how a tree paints what it draws itself; each row is the app's.
+type Styles struct {
+	Empty lipgloss.Style // EmptyMessage, or "(empty)"
+	More  lipgloss.Style // the "↓ N more" row
+}
+
+// DefaultStyles dim both.
+func DefaultStyles(th theme.Resolved) Styles { return Styles{Empty: th.Dim, More: th.Dim} }
 
 // New builds a tree over nodes with the cursor on the first row that is not
 // a section; SetHeight gives it the rows its pane has.
@@ -97,6 +108,22 @@ func New[N Noder[N]](nodes []N) Model[N] {
 func (m Model[N]) SetHeight(h int) Model[N] {
 	m.Height = h
 	return m.ClampOffset()
+}
+
+// WithStyles changes the styles derived from the theme through edit, under
+// whatever theme View gets. It replaces an earlier edit.
+func (m Model[N]) WithStyles(edit func(Styles) Styles) Model[N] {
+	m.edit = edit
+	return m
+}
+
+// styles is DefaultStyles of th with the app's edit applied.
+func (m Model[N]) styles(th theme.Resolved) Styles {
+	st := DefaultStyles(th)
+	if m.edit != nil {
+		st = m.edit(st)
+	}
+	return st
 }
 
 // WithKeys rebinds the tree.
@@ -456,7 +483,7 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 		if msg == "" {
 			msg = "  (empty)"
 		}
-		return th.Dim.Render(msg)
+		return m.styles(th).Empty.Render(msg)
 	}
 	// Nodes may have shrunk under a scrolled tree; Clamp never scrolls past the end.
 	w := m.window().Clamp(len(vis))
@@ -468,7 +495,7 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 		sb.WriteByte('\n')
 	}
 	if below > 0 {
-		sb.WriteString(draw.More(below, 2, th.Dim))
+		sb.WriteString(draw.More(below, 2, m.styles(th).More))
 	} else {
 		for i := end - start; i < m.Height; i++ {
 			sb.WriteByte('\n')

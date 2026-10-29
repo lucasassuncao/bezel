@@ -1,5 +1,6 @@
 // Package themebrowser provides an inline (not full-screen) terminal table
 // listing bezel's built-in themes next to their category and named colours.
+// Non-themable: it shows every theme, so it is painted by none.
 package themebrowser
 
 import (

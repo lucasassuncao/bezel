@@ -39,6 +39,9 @@ Package table sizes columns to their contents, giving way in a declared order wh
   - [func \(m Model\[T\]\) Update\(msg tea.KeyPressMsg\) \(Model\[T\], Action\)](<#Model[T].Update>)
   - [func \(m Model\[T\]\) View\(th theme.Resolved, width int\) string](<#Model[T].View>)
   - [func \(m Model\[T\]\) WithKeys\(k Keys\) Model\[T\]](<#Model[T].WithKeys>)
+  - [func \(m Model\[T\]\) WithStyles\(edit func\(Styles\) Styles\) Model\[T\]](<#Model[T].WithStyles>)
+- [type Styles](<#Styles>)
+  - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
 
 
 ## Constants
@@ -77,7 +80,7 @@ func Titles(cols []Column, widths []int) string
 Titles is the header row: every column's title in its width.
 
 <a name="Action"></a>
-## type [Action](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L25>)
+## type [Action](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L26>)
 
 Action is what a key did.
 
@@ -108,7 +111,7 @@ type Column struct {
 ```
 
 <a name="Item"></a>
-## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L19-L22>)
+## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L20-L23>)
 
 Item is one row of a Model: its cells in column order, and a payload of the caller's type T. A cell may carry its own colour.
 
@@ -120,7 +123,7 @@ type Item[T any] struct {
 ```
 
 <a name="FromValues"></a>
-### func [FromValues](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L107>)
+### func [FromValues](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L139>)
 
 ```go
 func FromValues[T any](text, sep string) []Item[T]
@@ -129,7 +132,7 @@ func FromValues[T any](text, sep string) []Item[T]
 FromValues is the rows of delimited text, one per line, its cells split at sep; blank lines are skipped. The payload is left zero.
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L33-L35>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L34-L36>)
 
 Keys are the bindings the table answers to.
 
@@ -140,7 +143,7 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L39>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L40>)
 
 ```go
 func DefaultKeys() Keys
@@ -149,7 +152,7 @@ func DefaultKeys() Keys
 DefaultKeys are the arrows, pgup/pgdown, ctrl\+u/ctrl\+d for half a page, home/end and enter.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L59-L67>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L60-L69>)
 
 Model is a table with a cursor: the header stays put and the rows under it scroll. A value: every method returns the new table.
 
@@ -160,7 +163,7 @@ type Model[T any] struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L71>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L87>)
 
 ```go
 func New[T any](cols []Column, items []Item[T]) Model[T]
@@ -169,7 +172,7 @@ func New[T any](cols []Column, items []Item[T]) Model[T]
 New builds a table with the cursor on the first row; SetHeight gives it the rows its pane has, header included.
 
 <a name="Model[T].Blur"></a>
-### func \(Model\[T\]\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L91>)
+### func \(Model\[T\]\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L123>)
 
 ```go
 func (m Model[T]) Blur() Model[T]
@@ -178,7 +181,7 @@ func (m Model[T]) Blur() Model[T]
 Blur stops the table taking keys and draws its cursor row dimmed, for a pane that lost the focus.
 
 <a name="Model[T].Click"></a>
-### func \(Model\[T\]\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L205>)
+### func \(Model\[T\]\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L237>)
 
 ```go
 func (m Model[T]) Click(y int) (Model[T], Action)
@@ -187,7 +190,7 @@ func (m Model[T]) Click(y int) (Model[T], Action)
 Click is a left click on line y of View: on a row it moves the cursor there, and on the row already under the cursor it chooses it. The header and the "more" row do nothing. A blurred table takes it too.
 
 <a name="Model[T].Cursor"></a>
-### func \(Model\[T\]\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L125>)
+### func \(Model\[T\]\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L157>)
 
 ```go
 func (m Model[T]) Cursor() int
@@ -196,7 +199,7 @@ func (m Model[T]) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Model[T].Focus"></a>
-### func \(Model\[T\]\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L84>)
+### func \(Model\[T\]\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L116>)
 
 ```go
 func (m Model[T]) Focus() Model[T]
@@ -205,7 +208,7 @@ func (m Model[T]) Focus() Model[T]
 Focus lets the table take keys and paints its cursor row; a table is focused when built.
 
 <a name="Model[T].Focused"></a>
-### func \(Model\[T\]\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L97>)
+### func \(Model\[T\]\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L129>)
 
 ```go
 func (m Model[T]) Focused() bool
@@ -214,7 +217,7 @@ func (m Model[T]) Focused() bool
 Focused reports whether the table takes keys.
 
 <a name="Model[T].Items"></a>
-### func \(Model\[T\]\) [Items](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L119>)
+### func \(Model\[T\]\) [Items](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L151>)
 
 ```go
 func (m Model[T]) Items() []Item[T]
@@ -223,7 +226,7 @@ func (m Model[T]) Items() []Item[T]
 Items is a copy of every row, cells included.
 
 <a name="Model[T].Legend"></a>
-### func \(Model\[T\]\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L100>)
+### func \(Model\[T\]\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L132>)
 
 ```go
 func (m Model[T]) Legend() []legend.Entry
@@ -232,7 +235,7 @@ func (m Model[T]) Legend() []legend.Entry
 Legend lists the keys the table answers to.
 
 <a name="Model[T].Len"></a>
-### func \(Model\[T\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L122>)
+### func \(Model\[T\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L154>)
 
 ```go
 func (m Model[T]) Len() int
@@ -241,7 +244,7 @@ func (m Model[T]) Len() int
 Len is how many rows there are.
 
 <a name="Model[T].Scroll"></a>
-### func \(Model\[T\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L138>)
+### func \(Model\[T\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L170>)
 
 ```go
 func (m Model[T]) Scroll() layout.Scroll
@@ -250,7 +253,7 @@ func (m Model[T]) Scroll() layout.Scroll
 Scroll is where the table shows its rows from, for a pane's scrollbar.
 
 <a name="Model[T].Selected"></a>
-### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L128>)
+### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L160>)
 
 ```go
 func (m Model[T]) Selected() *Item[T]
@@ -259,7 +262,7 @@ func (m Model[T]) Selected() *Item[T]
 Selected is the row under the cursor, or nil when there are none.
 
 <a name="Model[T].SetHeight"></a>
-### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L164>)
+### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L196>)
 
 ```go
 func (m Model[T]) SetHeight(h int) Model[T]
@@ -268,7 +271,7 @@ func (m Model[T]) SetHeight(h int) Model[T]
 SetHeight updates the rows the table takes, header included.
 
 <a name="Model[T].SetItems"></a>
-### func \(Model\[T\]\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L145>)
+### func \(Model\[T\]\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L177>)
 
 ```go
 func (m Model[T]) SetItems(items []Item[T]) Model[T]
@@ -277,7 +280,7 @@ func (m Model[T]) SetItems(items []Item[T]) Model[T]
 SetItems replaces the rows, keeping the cursor on the row with the same first cell when it survives \(at the same index first\), else at the same index: a refresh that drops a row lands on the one that took its place.
 
 <a name="Model[T].Update"></a>
-### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L172>)
+### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L204>)
 
 ```go
 func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
@@ -286,7 +289,7 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action)
 Update handles one key. Keys the table does not know return None and leave it unchanged, so the caller can layer its own on top.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L242>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L274>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved, width int) string
@@ -295,13 +298,45 @@ func (m Model[T]) View(th theme.Resolved, width int) string
 View is the header and the rows in its window, width cells wide. Columns are sized over every row, not the ones shown, so scrolling never moves them. On the cursor row a cell with no colour of its own wears the cursor's.
 
 <a name="Model[T].WithKeys"></a>
-### func \(Model\[T\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L77>)
+### func \(Model\[T\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L109>)
 
 ```go
 func (m Model[T]) WithKeys(k Keys) Model[T]
 ```
 
 WithKeys rebinds the table.
+
+<a name="Model[T].WithStyles"></a>
+### func \(Model\[T\]\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L94>)
+
+```go
+func (m Model[T]) WithStyles(edit func(Styles) Styles) Model[T]
+```
+
+WithStyles changes the styles derived from the theme through edit, under whatever theme View gets. It replaces an earlier edit.
+
+<a name="Styles"></a>
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L72-L77>)
+
+Styles are how a table paints its parts.
+
+```go
+type Styles struct {
+    Header  lipgloss.Style // the column titles
+    Cursor  lipgloss.Style // the cursor row's marker and its plain cells
+    Blurred lipgloss.Style // the cursor row's marker while the table is blurred
+    More    lipgloss.Style // the "↓ N more" row
+}
+```
+
+<a name="DefaultStyles"></a>
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L81>)
+
+```go
+func DefaultStyles(th theme.Resolved) Styles
+```
+
+DefaultStyles take the header from the theme's table role and paint the cursor row in the cursor role.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 

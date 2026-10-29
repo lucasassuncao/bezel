@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
@@ -388,4 +389,12 @@ func TestAClickPicksAMatchWhileFiltering(t *testing.T) {
 	require.Equal(t, Chosen, act)
 	require.False(t, m.IsFiltering())
 	require.Equal(t, "item-02", m.Selected().Label)
+}
+
+func TestWithStylesRecoloursOneList(t *testing.T) {
+	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+	m := New(rows()).SetHeight(10).WithTitle("Plugins").WithStyles(func(s Styles) Styles { s.Title = red; return s })
+	for _, under := range []theme.Resolved{th, theme.Resolve(theme.Mint, true)} {
+		require.Equal(t, red.Render("Plugins"), strings.Split(m.View(under), "\n")[0], "the edit holds under any theme")
+	}
 }

@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/animation/text"
 ```
 
-Package text animates a line of text: typed, scrolled, shimmered, rolled like an odometer or a departures board, waved, struck and highlighted.
+Package text animates a line of text: typed, scrolled, shimmered, rolled like an odometer or a departures board, waved, struck and highlighted. Non\-themable: colours come as arguments, never from the theme.
 
 ## Index
 
@@ -930,7 +930,7 @@ func (h Highlight) WithEase(e animation.Ease) Highlight
 WithEase is h following e instead of EaseInOut.
 
 <a name="Marquee"></a>
-## type [Marquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L103-L111>)
+## type [Marquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L104-L112>)
 
 Marquee scrolls text that is wider than its room, a cell at a time, round and round until stopped: a long name in a list row under the cursor.
 
@@ -941,7 +941,7 @@ type Marquee struct {
 ```
 
 <a name="NewMarquee"></a>
-### func [NewMarquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L114>)
+### func [NewMarquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L115>)
 
 ```go
 func NewMarquee(text string, width int) Marquee
@@ -950,7 +950,7 @@ func NewMarquee(text string, width int) Marquee
 NewMarquee is text in width cells, still until Start, stepping every 120ms.
 
 <a name="Marquee.Active"></a>
-### func \(Marquee\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L148>)
+### func \(Marquee\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L149>)
 
 ```go
 func (m Marquee) Active() bool
@@ -959,7 +959,7 @@ func (m Marquee) Active() bool
 Active reports whether the text is moving.
 
 <a name="Marquee.Advance"></a>
-### func \(Marquee\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L182>)
+### func \(Marquee\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L183>)
 
 ```go
 func (m Marquee) Advance(now time.Time) (Marquee, bool)
@@ -968,7 +968,7 @@ func (m Marquee) Advance(now time.Time) (Marquee, bool)
 Advance is m at now; it never finishes, so done is only true when stopped.
 
 <a name="Marquee.FrameAt"></a>
-### func \(Marquee\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L168>)
+### func \(Marquee\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L169>)
 
 ```go
 func (m Marquee) FrameAt(at time.Time) animation.FrameMsg
@@ -977,7 +977,7 @@ func (m Marquee) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is m's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Marquee.Start"></a>
-### func \(Marquee\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L128>)
+### func \(Marquee\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L129>)
 
 ```go
 func (m Marquee) Start() (Marquee, tea.Cmd)
@@ -986,7 +986,7 @@ func (m Marquee) Start() (Marquee, tea.Cmd)
 Start sets the text moving; text that fits, or motion that is Still, is left alone and asks nothing.
 
 <a name="Marquee.Stop"></a>
-### func \(Marquee\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L141>)
+### func \(Marquee\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L142>)
 
 ```go
 func (m Marquee) Stop() Marquee
@@ -995,7 +995,7 @@ func (m Marquee) Stop() Marquee
 Stop halts the text back at its start; ticks already sent are dropped.
 
 <a name="Marquee.Tick"></a>
-### func \(Marquee\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L160>)
+### func \(Marquee\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L161>)
 
 ```go
 func (m Marquee) Tick() tea.Cmd
@@ -1004,7 +1004,7 @@ func (m Marquee) Tick() tea.Cmd
 Tick is the command for m's next step, nil while it is still.
 
 <a name="Marquee.Update"></a>
-### func \(Marquee\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L171>)
+### func \(Marquee\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L172>)
 
 ```go
 func (m Marquee) Update(msg tea.Msg) (Marquee, tea.Cmd)
@@ -1013,7 +1013,7 @@ func (m Marquee) Update(msg tea.Msg) (Marquee, tea.Cmd)
 Update steps on its own ticks and asks for the next while it runs.
 
 <a name="Marquee.View"></a>
-### func \(Marquee\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L151>)
+### func \(Marquee\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L152>)
 
 ```go
 func (m Marquee) View() string
@@ -1022,7 +1022,7 @@ func (m Marquee) View() string
 View is exactly width cells of the text, from where it has scrolled to.
 
 <a name="Marquee.WithEvery"></a>
-### func \(Marquee\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L119>)
+### func \(Marquee\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L120>)
 
 ```go
 func (m Marquee) WithEvery(d time.Duration) Marquee
@@ -2097,7 +2097,7 @@ func (t Ticker) WithUp(c color.Color) Ticker
 WithUp is the colour the number flashes when it rises.
 
 <a name="Typewriter"></a>
-## type [Typewriter](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L20-L24>)
+## type [Typewriter](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L21-L25>)
 
 Typewriter shows text a grapheme at a time, for a status or a banner that arrives rather than appears.
 
@@ -2108,7 +2108,7 @@ type Typewriter struct {
 ```
 
 <a name="NewTypewriter"></a>
-### func [NewTypewriter](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L28>)
+### func [NewTypewriter](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L29>)
 
 ```go
 func NewTypewriter(text string, perChar time.Duration) Typewriter
@@ -2117,7 +2117,7 @@ func NewTypewriter(text string, perChar time.Duration) Typewriter
 NewTypewriter reveals text at one grapheme per perChar. Plain text only: an escape sequence cut half way would colour the rest of the line.
 
 <a name="Typewriter.Active"></a>
-### func \(Typewriter\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L47>)
+### func \(Typewriter\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L48>)
 
 ```go
 func (w Typewriter) Active() bool
@@ -2126,7 +2126,7 @@ func (w Typewriter) Active() bool
 Active reports whether w is still typing.
 
 <a name="Typewriter.Advance"></a>
-### func \(Typewriter\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L70>)
+### func \(Typewriter\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L71>)
 
 ```go
 func (w Typewriter) Advance(now time.Time) (Typewriter, bool)
@@ -2135,7 +2135,7 @@ func (w Typewriter) Advance(now time.Time) (Typewriter, bool)
 Advance is w at now, and whether it is done.
 
 <a name="Typewriter.FrameAt"></a>
-### func \(Typewriter\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L53>)
+### func \(Typewriter\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L54>)
 
 ```go
 func (w Typewriter) FrameAt(at time.Time) animation.FrameMsg
@@ -2144,7 +2144,7 @@ func (w Typewriter) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is w's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Typewriter.Skip"></a>
-### func \(Typewriter\) [Skip](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L41>)
+### func \(Typewriter\) [Skip](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L42>)
 
 ```go
 func (w Typewriter) Skip() Typewriter
@@ -2153,7 +2153,7 @@ func (w Typewriter) Skip() Typewriter
 Skip is w with all its text shown, for a key that hurries it.
 
 <a name="Typewriter.Tick"></a>
-### func \(Typewriter\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L50>)
+### func \(Typewriter\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L51>)
 
 ```go
 func (w Typewriter) Tick() tea.Cmd
@@ -2162,7 +2162,7 @@ func (w Typewriter) Tick() tea.Cmd
 Tick is the command for w's next frame, nil once it is done.
 
 <a name="Typewriter.Update"></a>
-### func \(Typewriter\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L56>)
+### func \(Typewriter\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L57>)
 
 ```go
 func (w Typewriter) Update(msg tea.Msg) (Typewriter, tea.Cmd)
@@ -2171,7 +2171,7 @@ func (w Typewriter) Update(msg tea.Msg) (Typewriter, tea.Cmd)
 Update types on its own frames and asks for the next until it is done.
 
 <a name="Typewriter.View"></a>
-### func \(Typewriter\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L38>)
+### func \(Typewriter\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L39>)
 
 ```go
 func (w Typewriter) View() string
@@ -2180,7 +2180,7 @@ func (w Typewriter) View() string
 View is the text shown so far.
 
 <a name="Typewriter.WithDelay"></a>
-### func \(Typewriter\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L81>)
+### func \(Typewriter\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L82>)
 
 ```go
 func (w Typewriter) WithDelay(d time.Duration) Typewriter
@@ -2189,7 +2189,7 @@ func (w Typewriter) WithDelay(d time.Duration) Typewriter
 WithDelay holds w empty for d after its first frame.
 
 <a name="Typewriter.WithRepeat"></a>
-### func \(Typewriter\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L87>)
+### func \(Typewriter\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L88>)
 
 ```go
 func (w Typewriter) WithRepeat(n int) Typewriter
@@ -2198,7 +2198,7 @@ func (w Typewriter) WithRepeat(n int) Typewriter
 WithRepeat types w n more times after the first, or without end for Forever.
 
 <a name="Typewriter.WithYoyo"></a>
-### func \(Typewriter\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L93>)
+### func \(Typewriter\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L94>)
 
 ```go
 func (w Typewriter) WithYoyo() Typewriter

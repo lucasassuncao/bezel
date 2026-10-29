@@ -77,6 +77,32 @@ type Model[T any] struct {
 	status bool
 	pages  bool
 	wrap   bool
+	edit   func(Styles) Styles
+}
+
+// Styles are how a list paints its parts.
+type Styles struct {
+	Title       lipgloss.Style
+	Section     lipgloss.Style // a heading row
+	Row         lipgloss.Style // a row off the cursor without a Style of its own
+	Cursor      lipgloss.Style // the row under the cursor, and the filter prompt
+	Description lipgloss.Style // the second line of a two-line row
+	More        lipgloss.Style // the "↓ N more" row
+	Status      lipgloss.Style
+	Arrive      lipgloss.Style // its foreground is where a new row fades from
+	Gone        lipgloss.Style // its foreground is where a removed row fades to
+}
+
+// DefaultStyles draw the cursor row in the cursor role over dim rows, the
+// title in bold accent and the new and removed rows fading through the
+// accent and the border.
+func DefaultStyles(th theme.Resolved) Styles {
+	return Styles{
+		Title: th.Accent.Bold(true), Section: th.Section, Row: th.Dim, Cursor: th.Cursor,
+		Description: th.Muted, More: th.Dim, Status: th.Muted,
+		Arrive: lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Accent)),
+		Gone:   lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Border)),
+	}
 }
 
 // Contains is the filter's default match: the label holds the query, in any case.
@@ -204,6 +230,22 @@ func (m Model[T]) filterRows() int {
 func (m Model[T]) WithKeys(k Keys) Model[T] {
 	m.keys = k
 	return m
+}
+
+// WithStyles changes the styles derived from the theme through edit, under
+// whatever theme View gets. It replaces an earlier edit.
+func (m Model[T]) WithStyles(edit func(Styles) Styles) Model[T] {
+	m.edit = edit
+	return m
+}
+
+// styles is DefaultStyles of th with the app's edit applied.
+func (m Model[T]) styles(th theme.Resolved) Styles {
+	st := DefaultStyles(th)
+	if m.edit != nil {
+		st = m.edit(st)
+	}
+	return st
 }
 
 // Rows is a copy of every row, headings included.
@@ -387,7 +429,7 @@ func (m Model[T]) Click(y int) (Model[T], Action) {
 		return m, None
 	}
 	i := -1
-	lines, of := m.rowLines(new(theme.Resolved)) // what View draws, ghosts included
+	lines, of := m.rowLines(new(Styles)) // what View draws, ghosts included
 	for k, l := range lines {
 		if y -= strings.Count(l, "\n") + 1; y < 0 {
 			i = of[k]
@@ -528,18 +570,19 @@ func (m Model[T]) View(th theme.Resolved) string {
 	if m.height <= 0 {
 		return ""
 	}
+	st := m.styles(th)
 	var body string
 	if m.find.on {
-		body = m.viewFilter(&th)
+		body = m.viewFilter(&st)
 	} else {
-		body = m.viewRows(&th)
+		body = m.viewRows(&st)
 	}
 	if m.title == "" && !m.status && !m.pages {
 		return body
 	}
 	var lines []string
 	if m.title != "" {
-		lines = append(lines, th.Accent.Bold(true).Render(m.title))
+		lines = append(lines, st.Title.Render(m.title))
 	}
 	rows := strings.Split(body, "\n")
 	for len(rows) < m.body() {
@@ -550,7 +593,7 @@ func (m Model[T]) View(th theme.Resolved) string {
 		lines = append(lines, m.pager(th))
 	}
 	if m.status {
-		lines = append(lines, th.Muted.Render(m.statusText()))
+		lines = append(lines, st.Status.Render(m.statusText()))
 	}
 	return strings.Join(lines, "\n")
 }
@@ -586,8 +629,8 @@ func (m Model[T]) statusText() string {
 }
 
 // viewRows is the rows in the window, or on the cursor's page.
-func (m Model[T]) viewRows(th *theme.Resolved) string {
-	lines, _ := m.rowLines(th)
+func (m Model[T]) viewRows(st *Styles) string {
+	lines, _ := m.rowLines(st)
 	return strings.Join(lines, "\n")
 }
 
@@ -603,7 +646,7 @@ func (m Model[T]) bounds() (start, end, below int) {
 
 // rowLines is what viewRows draws, a row or a ghost a piece, with the row
 // each piece is: -1 for a ghost or the "more" row.
-func (m Model[T]) rowLines(th *theme.Resolved) (lines []string, of []int) {
+func (m Model[T]) rowLines(st *Styles) (lines []string, of []int) {
 	if m.win.Height <= 0 {
 		return nil, nil
 	}
@@ -613,32 +656,32 @@ func (m Model[T]) rowLines(th *theme.Resolved) (lines []string, of []int) {
 	two := m.itemLines() == 2
 	lines, of = make([]string, 0, end-start), make([]int, 0, end-start)
 	for i := start; i < end; i++ {
-		if g, ok := m.ghostLine(i, th); ok {
+		if g, ok := m.ghostLine(i, st); ok {
 			lines, of = append(lines, g), append(of, -1)
 		}
-		r, arriving := m.rows[i], m.arriving(m.rows[i], th)
+		r, arriving := m.rows[i], m.arriving(m.rows[i], st)
 		switch {
 		case r.Section:
-			heading := th.Section.Render(r.Label)
+			heading := st.Section.Render(r.Label)
 			if two {
 				heading += "\n"
 			}
 			lines = append(lines, heading)
 		case i != cursor && arriving != nil:
 			r.Style = arriving
-			lines = append(lines, renderRow(r, false, th, nil, two))
+			lines = append(lines, renderRow(r, false, st, nil, two))
 		default:
-			lines = append(lines, renderRow(r, i == cursor, th, nil, two))
+			lines = append(lines, renderRow(r, i == cursor, st, nil, two))
 		}
 		of = append(of, i)
 	}
-	if g, ok := m.ghostLine(end, th); ok && below == 0 {
+	if g, ok := m.ghostLine(end, st); ok && below == 0 {
 		lines, of = append(lines, g), append(of, -1)
 	}
 	room := max(end-start, m.win.Height-boolInt(below > 0)) // a ghost never pushes the list past its height
 	lines, of = lines[:min(len(lines), room)], of[:min(len(of), room)]
 	if below > 0 {
-		lines, of = append(lines, moreRow(below, th)), append(of, -1)
+		lines, of = append(lines, moreRow(below, st)), append(of, -1)
 	}
 	return lines, of
 }
@@ -651,7 +694,7 @@ func boolInt(b bool) int {
 }
 
 // viewFilter is the matches in the filter's window, padded to it, then the prompt.
-func (m Model[T]) viewFilter(th *theme.Resolved) string {
+func (m Model[T]) viewFilter(st *Styles) string {
 	idx := m.find.idx
 	w := m.find.win.Clamp(len(idx))
 	start, end, below := w.Bounds(len(idx))
@@ -664,28 +707,28 @@ func (m Model[T]) viewFilter(th *theme.Resolved) string {
 		if m.fuzzy {
 			_, hits, _ = fuzzy.Match(m.find.text, r.Label)
 		}
-		lines = append(lines, renderRow(r, i == w.Cursor, th, hits, two))
+		lines = append(lines, renderRow(r, i == w.Cursor, st, hits, two))
 	}
 	if below > 0 {
-		lines = append(lines, moreRow(below, th))
+		lines = append(lines, moreRow(below, st))
 	}
 	for len(lines) < w.Height {
 		lines = append(lines, "")
 	}
-	lines = append(lines, th.Cursor.Render("/"+m.find.text+"▋"))
+	lines = append(lines, st.Cursor.Render("/"+m.find.text+"▋"))
 	return strings.Join(lines, "\n")
 }
 
 // moreRow stands in for the last row while n rows are hidden below it.
-func moreRow(n int, th *theme.Resolved) string { return draw.More(n, 2, th.Dim) }
+func moreRow(n int, st *Styles) string { return draw.More(n, 2, st.More) }
 
 // renderRow is a row in its style, the runes of its label at hits
 // underlined, and with two its description, or a blank, under it.
-func renderRow[T any](r Row[T], selected bool, th *theme.Resolved, hits []int, two bool) string {
-	style, lead := th.Dim, "  "
+func renderRow[T any](r Row[T], selected bool, st *Styles, hits []int, two bool) string {
+	style, lead := st.Row, "  "
 	switch {
 	case selected:
-		style, lead = th.Cursor, "▶ "
+		style, lead = st.Cursor, "▶ "
 	case r.Style != nil:
 		style = *r.Style
 	}
@@ -695,7 +738,7 @@ func renderRow[T any](r Row[T], selected bool, th *theme.Resolved, hits []int, t
 	row := style.Render(lead) + underlined(r.Label, hits, style)
 	if two {
 		indent := strings.Repeat(" ", utf8.RuneCountInString(lead))
-		row += "\n" + th.Muted.Render(indent+r.Description)
+		row += "\n" + st.Description.Render(indent+r.Description)
 	}
 	return row
 }

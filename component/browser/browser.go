@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -57,7 +58,18 @@ type Model struct {
 	PreviewFocus  bool // the right pane has the keys
 	previewScroll int  // first detail line shown
 	previewHeight int  // rows the preview pane has, for paging
+	edit          func(Styles) Styles
 }
+
+// Styles are how the list pane paints its labels; the preview is the
+// item's own text.
+type Styles struct {
+	Cursor lipgloss.Style // the label under the cursor
+	Label  lipgloss.Style // every other label
+}
+
+// DefaultStyles paint the cursor in the cursor role over dim labels.
+func DefaultStyles(th theme.Resolved) Styles { return Styles{Cursor: th.Cursor, Label: th.Dim} }
 
 // New builds a browser over items with the cursor on the first.
 func New(items []Item) Model {
@@ -74,6 +86,22 @@ func (m Model) WithCurrent(label string) Model {
 		}
 	}
 	return m
+}
+
+// WithStyles changes the styles derived from the theme through edit, under
+// whatever theme View gets. It replaces an earlier edit.
+func (m Model) WithStyles(edit func(Styles) Styles) Model {
+	m.edit = edit
+	return m
+}
+
+// styles is DefaultStyles of th with the app's edit applied.
+func (m Model) styles(th theme.Resolved) Styles {
+	st := DefaultStyles(th)
+	if m.edit != nil {
+		st = m.edit(st)
+	}
+	return st
 }
 
 // WithKeys rebinds the browser.
@@ -171,6 +199,7 @@ func (m Model) maxPreviewScroll() int {
 // ListView renders the labels, height rows of them, scrolled to keep the
 // cursor visible and centred where the list allows.
 func (m Model) ListView(th theme.Resolved, height int) string {
+	st := m.styles(th)
 	scroll := layout.ScrollStart(m.cursor, len(m.items), height)
 	end := len(m.items)
 	if height > 0 {
@@ -182,9 +211,9 @@ func (m Model) ListView(th theme.Resolved, height int) string {
 			sb.WriteByte('\n')
 		}
 		if i == m.cursor {
-			sb.WriteString(th.Cursor.Render("▶  " + m.items[i].Label))
+			sb.WriteString(st.Cursor.Render("▶  " + m.items[i].Label))
 		} else {
-			sb.WriteString(th.Dim.Render("   " + m.items[i].Label))
+			sb.WriteString(st.Label.Render("   " + m.items[i].Label))
 		}
 	}
 	return sb.String()

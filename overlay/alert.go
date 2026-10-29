@@ -13,6 +13,7 @@ import (
 )
 
 // Alert is a message box with an OK button; any key dismisses it.
+// Non-themable: its Kind sets its colours, so it has no WithStyles.
 type Alert struct {
 	look
 	title   string
@@ -58,7 +59,7 @@ func accent(style lipgloss.Style) lipgloss.Style {
 // button is the theme's button with the focused one filled in the dialog's
 // colour: its border's, which the dialog's kind tints.
 func (l look) button(label string, focused bool) string {
-	st := l.styles().Button
+	st := l.own().Button
 	st.Focused = st.Focused.Background(l.style().GetBorderTopForeground())
 	return draw.Button(label, st, focused)
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -64,6 +65,21 @@ type Model[T any] struct {
 	win    layout.Window // over the rows, one shorter than height for the header
 	keys   Keys
 	blur   bool // drawn without the cursor's colour, and deaf to keys
+	edit   func(Styles) Styles
+}
+
+// Styles are how a table paints its parts.
+type Styles struct {
+	Header  lipgloss.Style // the column titles
+	Cursor  lipgloss.Style // the cursor row's marker and its plain cells
+	Blurred lipgloss.Style // the cursor row's marker while the table is blurred
+	More    lipgloss.Style // the "↓ N more" row
+}
+
+// DefaultStyles take the header from the theme's table role and paint the
+// cursor row in the cursor role.
+func DefaultStyles(th theme.Resolved) Styles {
+	return Styles{Header: th.TableHeader, Cursor: th.Cursor, Blurred: th.Dim, More: th.Dim}
 }
 
 // New builds a table with the cursor on the first row; SetHeight gives it
@@ -71,6 +87,22 @@ type Model[T any] struct {
 func New[T any](cols []Column, items []Item[T]) Model[T] {
 	m := Model[T]{cols: slices.Clone(cols), keys: DefaultKeys()}
 	return m.withItems(items).SetHeight(0)
+}
+
+// WithStyles changes the styles derived from the theme through edit, under
+// whatever theme View gets. It replaces an earlier edit.
+func (m Model[T]) WithStyles(edit func(Styles) Styles) Model[T] {
+	m.edit = edit
+	return m
+}
+
+// styles is DefaultStyles of th with the app's edit applied.
+func (m Model[T]) styles(th theme.Resolved) Styles {
+	st := DefaultStyles(th)
+	if m.edit != nil {
+		st = m.edit(st)
+	}
+	return st
 }
 
 // WithKeys rebinds the table.
@@ -243,36 +275,37 @@ func (m Model[T]) View(th theme.Resolved, width int) string {
 	if m.height <= 0 {
 		return ""
 	}
+	st := m.styles(th)
 	pad := strings.Repeat(" ", draw.Width(marker))
 	widths := shrink(m.cols, slices.Clone(m.widths), width-len(pad))
-	lines := []string{th.TableHeader.Render(pad + Titles(m.cols, widths))}
+	lines := []string{st.Header.Render(pad + Titles(m.cols, widths))}
 
 	w := m.win.Clamp(len(m.items))
 	start, end, below := w.Bounds(len(m.items))
 	for i := start; i < end; i++ {
 		switch {
 		case i == w.Cursor && m.blur:
-			lines = append(lines, th.Dim.Render(marker)+Row(widths, m.items[i].Cells))
+			lines = append(lines, st.Blurred.Render(marker)+Row(widths, m.items[i].Cells))
 		case i == w.Cursor:
-			lines = append(lines, th.Cursor.Render(marker)+Row(widths, cursorCells(m.items[i].Cells, &th)))
+			lines = append(lines, st.Cursor.Render(marker)+Row(widths, cursorCells(m.items[i].Cells, st.Cursor)))
 		default:
 			lines = append(lines, pad+Row(widths, m.items[i].Cells))
 		}
 	}
 	if below > 0 {
-		lines = append(lines, draw.More(below, draw.Width(marker), th.Dim))
+		lines = append(lines, draw.More(below, draw.Width(marker), st.More))
 	}
 	return strings.Join(lines, "\n")
 }
 
 // cursorCells paints each plain cell in the cursor's style, one by one, so a
 // coloured cell keeps its colour and its reset ends nothing but itself.
-func cursorCells(cells []string, th *theme.Resolved) []string {
+func cursorCells(cells []string, cursor lipgloss.Style) []string {
 	out := make([]string, len(cells))
 	for i, c := range cells {
 		out[i] = c
 		if c != "" && ansi.Strip(c) == c {
-			out[i] = th.Cursor.Render(c)
+			out[i] = cursor.Render(c)
 		}
 	}
 	return out

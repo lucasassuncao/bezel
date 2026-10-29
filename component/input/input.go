@@ -76,6 +76,8 @@ type Model struct {
 	keys        Keys
 	clipboard   func() (string, error) // nil is the system's
 	th          *theme.Resolved        // shared by every copy and never written
+	edit        func(Styles) Styles
+	st          *Styles // DefaultStyles of th, edited; rebuilt, never written
 	suggestions []string
 	lower       []string // suggestions lowercased once, for match
 	matches     []int    // the suggestions the text starts, in order
@@ -85,21 +87,62 @@ type Model struct {
 	err         error // validate's answer for the text as it is
 }
 
-// New is an empty field, not focused, as wide as its text.
-func New(th theme.Resolved) Model {
-	return Model{id: frames.NextID(), keys: DefaultKeys(), th: &th, caretOn: true}
+// Styles are how a field paints its parts.
+type Styles struct {
+	Prompt      lipgloss.Style
+	Caret       lipgloss.Style // the cell under a lit caret
+	Placeholder lipgloss.Style
+	Suggestion  lipgloss.Style // the rest of a suggestion past the text
 }
 
-// noTheme is what a zero Model draws with; it is never written.
-var noTheme theme.Resolved
+// DefaultStyles draw the prompt in the accent, the caret in the theme's
+// Caret and the placeholder and suggestions muted.
+func DefaultStyles(th theme.Resolved) Styles {
+	return Styles{Prompt: th.Accent, Caret: th.Caret, Placeholder: th.Muted, Suggestion: th.Muted}
+}
 
-// styles is the theme, held by pointer so a copy of the Model costs a word,
+// New is an empty field, not focused, as wide as its text.
+func New(th theme.Resolved) Model {
+	return Model{id: frames.NextID(), keys: DefaultKeys(), th: &th, caretOn: true}.restyle()
+}
+
+// noTheme and noStyles are what a zero Model works with; never written.
+var (
+	noTheme  theme.Resolved
+	noStyles Styles
+)
+
+// resolved is the theme, held by pointer so a copy of the Model costs a word,
 // not the 29KB a theme.Resolved takes; the zero one for a Model never built.
-func (m *Model) styles() *theme.Resolved {
+func (m *Model) resolved() *theme.Resolved {
 	if m.th == nil {
 		return &noTheme
 	}
 	return m.th
+}
+
+func (m *Model) styles() *Styles {
+	if m.st == nil {
+		return &noStyles
+	}
+	return m.st
+}
+
+// restyle derives the styles from the theme and applies the app's edit.
+func (m Model) restyle() Model {
+	st := DefaultStyles(*m.resolved())
+	if m.edit != nil {
+		st = m.edit(st)
+	}
+	m.st = &st
+	return m
+}
+
+// WithStyles changes the styles derived from the theme through edit, now and
+// after every SetTheme. It replaces an earlier edit.
+func (m Model) WithStyles(edit func(Styles) Styles) Model {
+	m.edit = edit
+	return m.restyle()
 }
 
 // WithPrompt is drawn before the text in the accent, as ":" or "> ".
@@ -127,7 +170,7 @@ func (m Model) SetWidth(w int) Model { return m.WithWidth(w) }
 // SetTheme repaints the field after the terminal's background was learned.
 func (m Model) SetTheme(th theme.Resolved) Model {
 	m.th = &th
-	return m
+	return m.restyle()
 }
 
 // WithMask draws every character as mask, for a password; word moves and
@@ -357,7 +400,7 @@ func (m Model) Blink() tea.Cmd {
 // tick is the next flip under the current tag.
 func (m Model) tick() tea.Cmd {
 	msg := BlinkMsg{id: m.id, tag: m.tag}
-	return tea.Tick(draw.Blink(m.styles().CaretBlink), func(time.Time) tea.Msg { return msg })
+	return tea.Tick(draw.Blink(m.resolved().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
 // Update edits on a key or a paste while focused, and flips the caret on its
@@ -523,7 +566,7 @@ func (m Model) scroll() Model {
 func (m Model) View() string {
 	prompt := ""
 	if m.prompt != "" {
-		prompt = m.styles().Accent.Render(m.prompt)
+		prompt = m.styles().Prompt.Render(m.prompt)
 	}
 	if m.line.Len() == 0 && m.placeholder != "" {
 		return prompt + m.placeholderView()
@@ -557,7 +600,7 @@ func (m Model) View() string {
 // end draws the cell after the text, and the rest of a suggestion from it,
 // into what the width leaves; it returns the cells it took.
 func (m *Model) end(b *strings.Builder, used int, caret bool) int {
-	ghost, rest := m.ghost(), m.styles().Muted
+	ghost, rest := m.ghost(), m.styles().Suggestion
 	if len(ghost) == 0 {
 		ghost, rest = []string{" "}, lipgloss.NewStyle()
 	}
@@ -603,8 +646,8 @@ func (m Model) placeholderView() string {
 		text = draw.Fit(text, m.width)
 	}
 	if !m.shows() {
-		return m.styles().Muted.Render(text)
+		return m.styles().Placeholder.Render(text)
 	}
 	g := edit.Graphemes(text)
-	return m.styles().Caret.Render(g[0]) + m.styles().Muted.Render(strings.Join(g[1:], ""))
+	return m.styles().Caret.Render(g[0]) + m.styles().Placeholder.Render(strings.Join(g[1:], ""))
 }

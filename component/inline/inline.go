@@ -1,5 +1,6 @@
 // Package inline is for CLIs that print logs and now and then ask one
 // question or show one bar: nothing here takes over the screen.
+// Theme only: the functions take a theme but keep no Styles to edit.
 package inline
 
 import (

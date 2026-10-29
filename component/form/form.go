@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
@@ -61,9 +62,31 @@ func DefaultKeys() Keys {
 // keyed is a bezel control, which Form.WithKeys rebinds along with the form.
 type keyed interface{ rebind(k Keys) Field }
 
-// themed is a bezel control, which paints in the form's theme.
+// themed is a bezel control, which paints in the form's theme and styles.
 type themed interface {
-	retheme(th *theme.Resolved) Field
+	retheme(th *theme.Resolved, st *Styles) Field
+}
+
+// Styles are how a form paints its controls; one set serves every control.
+type Styles struct {
+	Marker       lipgloss.Style // the › before the focused row
+	Label        lipgloss.Style
+	FocusedLabel lipgloss.Style // the focused row's label, and the option under an open select's cursor
+	Edge         lipgloss.Style // brackets and empty marks
+	FocusedEdge  lipgloss.Style // the brackets of the focused input or select
+	Chosen       lipgloss.Style // a ticked box, the chosen radio, an open select's arrow
+	Option       lipgloss.Style // an option not chosen, and "off"
+	On           lipgloss.Style // a switch that is on
+	Button       draw.ButtonStyle
+}
+
+// DefaultStyles mark the focus and the chosen in the accent, mute the
+// empty marks and paint a switch that is on in the success colour.
+func DefaultStyles(th theme.Resolved) Styles {
+	return Styles{
+		Marker: th.Accent, Label: th.Dim, FocusedLabel: th.Bold, Edge: th.Muted, FocusedEdge: th.Accent,
+		Chosen: th.Accent, Option: th.Dim, On: th.Success, Button: th.Button,
+	}
 }
 
 // Form is fields in a column. tab and shift+tab move the focus; every other key
@@ -72,6 +95,8 @@ type Form struct {
 	fields []Field
 	focus  int
 	keys   Keys
+	th     *theme.Resolved // shared by every copy and never written
+	edit   func(Styles) Styles
 }
 
 // New is a form over fields, painted in th and focused on the first; nil
@@ -100,10 +125,31 @@ func (f Form) Init() tea.Cmd {
 // SetTheme repaints every bezel control in the form; a Field of the app's
 // own keeps its look.
 func (f Form) SetTheme(th theme.Resolved) Form {
+	f.th = &th
+	return f.restyle()
+}
+
+// WithStyles changes the styles derived from the theme through edit, now and
+// after every SetTheme. It replaces an earlier edit.
+func (f Form) WithStyles(edit func(Styles) Styles) Form {
+	f.edit = edit
+	return f.restyle()
+}
+
+// restyle hands every bezel control the theme and the styles derived from it.
+func (f Form) restyle() Form {
+	th := &noTheme
+	if f.th != nil {
+		th = f.th
+	}
+	st := DefaultStyles(*th)
+	if f.edit != nil {
+		st = f.edit(st)
+	}
 	f.fields = slices.Clone(f.fields)
 	for i, fl := range f.fields {
 		if tf, ok := fl.(themed); ok {
-			f.fields[i] = tf.retheme(&th)
+			f.fields[i] = tf.retheme(th, &st)
 		}
 	}
 	return f
@@ -237,27 +283,30 @@ func (f Form) View(width int) string {
 	return strings.Join(rows, "\n")
 }
 
-// noTheme is what a zero field draws with; it is never written.
-var noTheme theme.Resolved
+// noTheme and noStyles are what a field outside a form works with; never written.
+var (
+	noTheme  theme.Resolved
+	noStyles Styles
+)
 
-// styles is a field's theme, held by pointer so a copy of the field costs a
-// word, not the 29KB a theme.Resolved takes; the zero one for a field never built.
-func styles(th *theme.Resolved) *theme.Resolved {
-	if th == nil {
-		return &noTheme
+// styles is a field's styles, held by pointer so a copy of the field costs a
+// word; the zero ones for a field no form has painted.
+func styles(st *Styles) *Styles {
+	if st == nil {
+		return &noStyles
 	}
-	return th
+	return st
 }
 
 // row is a field's frame: the focus marker, the label in its column, the control.
-func row(th *theme.Resolved, focused bool, label string, labelW, width int, control string) string {
+func row(st *Styles, focused bool, label string, labelW, width int, control string) string {
 	mark := "  "
 	if focused {
-		mark = th.Accent.Render("›") + " "
+		mark = st.Marker.Render("›") + " "
 	}
-	name := th.Dim.Render(draw.Pad(label, labelW))
+	name := st.Label.Render(draw.Pad(label, labelW))
 	if focused {
-		name = th.Bold.Render(draw.Pad(label, labelW))
+		name = st.FocusedLabel.Render(draw.Pad(label, labelW))
 	}
 	if labelW == 0 {
 		return draw.Fit(mark+control, width)

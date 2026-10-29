@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/key"
@@ -59,25 +60,72 @@ type Model struct {
 	cursor int // -1 until an arrow picks, so enter obeys what was typed
 	err    string
 	th     *theme.Resolved // shared by every copy and never written
+	edit   func(Styles) Styles
+	st     *Styles // DefaultStyles of th, edited; rebuilt, never written
 	keys   Keys
+}
+
+// Styles are how the palette paints its list; the typed line is an input's.
+type Styles struct {
+	Cursor  lipgloss.Style // the picked row
+	Name    lipgloss.Style
+	Key     lipgloss.Style
+	Desc    lipgloss.Style
+	Note    lipgloss.Style // "no command matches" and "… N more"
+	Error   lipgloss.Style
+	Divider lipgloss.Style // the rule above the list
+}
+
+// DefaultStyles take the names and keys from the theme's key roles, dim the
+// rest and paint an error in danger.
+func DefaultStyles(th theme.Resolved) Styles {
+	return Styles{
+		Cursor: th.Cursor, Name: th.Key, Key: th.Legend.Key, Desc: th.Dim,
+		Note: th.Dim, Error: th.Danger, Divider: th.Dim,
+	}
 }
 
 // New opens a palette over items, sorted by name.
 func New(items []Item, th theme.Resolved) Model {
 	in, _ := input.New(th).WithPrompt(":").Focus()
-	return Model{input: in, cursor: -1, th: &th, keys: DefaultKeys()}.SetItems(items)
+	return Model{input: in, cursor: -1, th: &th, keys: DefaultKeys()}.restyle().SetItems(items)
 }
 
-// noTheme is what a zero Model draws with; it is never written.
-var noTheme theme.Resolved
+// noTheme and noStyles are what a zero Model works with; never written.
+var (
+	noTheme  theme.Resolved
+	noStyles Styles
+)
 
-// styles is the theme, held by pointer so a copy of the Model costs a word,
-// not the 29KB a theme.Resolved takes; the zero one for a Model never built.
-func (m *Model) styles() *theme.Resolved {
+func (m *Model) resolved() *theme.Resolved {
 	if m.th == nil {
 		return &noTheme
 	}
 	return m.th
+}
+
+func (m *Model) styles() *Styles {
+	if m.st == nil {
+		return &noStyles
+	}
+	return m.st
+}
+
+// restyle derives the styles from the theme and applies the app's edit.
+func (m Model) restyle() Model {
+	st := DefaultStyles(*m.resolved())
+	if m.edit != nil {
+		st = m.edit(st)
+	}
+	m.st = &st
+	return m
+}
+
+// WithStyles changes the styles derived from the theme through edit. It
+// replaces an earlier edit.
+func (m Model) WithStyles(edit func(Styles) Styles) Model {
+	m.edit = edit
+	return m.restyle()
 }
 
 // WithKeys rebinds the palette; its legend follows the bindings' help.

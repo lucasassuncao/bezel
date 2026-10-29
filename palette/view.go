@@ -19,7 +19,7 @@ func (m Model) View(body layout.Rect) string {
 	var lines []string
 	cands := m.candidates()
 	if len(cands) == 0 {
-		lines = append(lines, m.styles().Dim.Render("  no command matches"))
+		lines = append(lines, m.styles().Note.Render("  no command matches"))
 	} else {
 		limit := m.rowLimit(body.H, len(cands))
 		// The window follows the cursor, clamped so a stale one cannot overrun.
@@ -34,13 +34,13 @@ func (m Model) View(body layout.Rect) string {
 			lines = append(lines, m.row(cands[i], nameW, i == m.cursor, w))
 		}
 		if end < len(cands) {
-			lines = append(lines, m.styles().Dim.Render(fmt.Sprintf("  … %d more", len(cands)-end)))
+			lines = append(lines, m.styles().Note.Render(fmt.Sprintf("  … %d more", len(cands)-end)))
 		}
 	}
 	if m.err != "" {
-		lines = append(lines, m.styles().Danger.Render("  "+m.err))
+		lines = append(lines, m.styles().Error.Render("  "+m.err))
 	}
-	lines = append([]string{draw.Divider(w, "", m.styles().Dim, m.styles().Dim)}, lines...)
+	lines = append([]string{draw.Divider(w, "", m.styles().Divider, m.styles().Divider)}, lines...)
 	for i, l := range lines {
 		lines[i] = draw.Pad(draw.Cut(l, w), w)
 	}
@@ -72,7 +72,7 @@ func (m Model) row(it Item, nameW int, picked bool, w int) string {
 	if picked {
 		return draw.Cut(m.styles().Cursor.Render("› "+name+"  "+k+"  "+it.Desc), w)
 	}
-	return draw.Cut("  "+m.styles().Key.Render(name)+"  "+m.styles().Legend.Key.Render(k)+"  "+m.styles().Dim.Render(it.Desc), w)
+	return draw.Cut("  "+m.styles().Name.Render(name)+"  "+m.styles().Key.Render(k)+"  "+m.styles().Desc.Render(it.Desc), w)
 }
 
 // label is how a command is written: ":goto <path>" for one taking an argument.

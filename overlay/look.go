@@ -3,6 +3,7 @@ package overlay
 import (
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -17,19 +18,61 @@ const (
 	Danger
 )
 
-// look is what every dialog draws with: the theme, and the Kind tinting it.
-// The theme is held by pointer, shared by every copy and never written, so
-// copying a dialog costs a word, not the 29KB a theme.Resolved takes.
+// Styles are what every dialog but Alert paints with. A Kind other than Info
+// still recolours the border, the title and the focused button: those
+// colours report something and stay the theme's.
+type Styles struct {
+	Box    lipgloss.Style   // the modal box
+	Hint   legend.Style     // the keys a dialog lists inside its box
+	Button draw.ButtonStyle // the focused one is filled in the border's colour
+}
+
+// DefaultStyles are the theme's modal box, legend and buttons.
+func DefaultStyles(th theme.Resolved) Styles {
+	return Styles{Box: th.Modal, Hint: th.Legend, Button: th.Button}
+}
+
+// look is what every dialog draws with: the theme, its styles and the Kind
+// tinting them. Both are held by pointer, shared by every copy and never
+// written, so copying a dialog costs a word, not the 29KB a theme takes.
 type look struct {
 	th   *theme.Resolved
+	st   *Styles
+	edit func(Styles) Styles
 	kind Kind
 }
 
 // lookOf is a look at th, untinted.
-func lookOf(th theme.Resolved) look { return look{th: &th} }
+func lookOf(th theme.Resolved) look { return look{th: &th}.restyle() }
 
-// noTheme is what a zero look draws with; it is never written.
-var noTheme theme.Resolved
+// restyle derives the styles from the theme and applies the app's edit.
+func (l look) restyle() look {
+	st := DefaultStyles(*l.styles())
+	if l.edit != nil {
+		st = l.edit(st)
+	}
+	l.st = &st
+	return l
+}
+
+func (l look) withStyles(edit func(Styles) Styles) look {
+	l.edit = edit
+	return l.restyle()
+}
+
+// own is the look's styles, or the zero ones for a dialog never built.
+func (l look) own() *Styles {
+	if l.st == nil {
+		return &noStyles
+	}
+	return l.st
+}
+
+// noTheme and noStyles are what a zero look draws with; never written.
+var (
+	noTheme  theme.Resolved
+	noStyles Styles
+)
 
 // styles is the look's theme, or the zero one for a dialog never built.
 func (l look) styles() *theme.Resolved {
@@ -52,13 +95,41 @@ func (l look) style() lipgloss.Style {
 	case Danger:
 		border = c.Danger
 	default:
-		return l.styles().Modal
+		return l.own().Box
 	}
-	return l.styles().Modal.BorderForeground(lipgloss.Color(border))
+	return l.own().Box.BorderForeground(lipgloss.Color(border))
 }
 
 // hint is how a dialog draws the keys it lists inside its box.
-func (l look) hint() legend.Style { return l.styles().Legend }
+func (l look) hint() legend.Style { return l.own().Hint }
+
+// WithStyles changes the styles derived from the theme through edit; it
+// replaces an earlier edit.
+func (c Confirm) WithStyles(edit func(Styles) Styles) Confirm { c.look = c.withStyles(edit); return c }
+
+// WithStyles changes the styles derived from the theme through edit.
+func (t Text) WithStyles(edit func(Styles) Styles) Text { t.look = t.withStyles(edit); return t }
+
+// WithStyles changes the styles derived from the theme through edit.
+func (c Choice) WithStyles(edit func(Styles) Styles) Choice { c.look = c.withStyles(edit); return c }
+
+// WithStyles changes the styles derived from the theme through edit.
+func (p Pick) WithStyles(edit func(Styles) Styles) Pick { p.look = p.withStyles(edit); return p }
+
+// WithStyles changes the styles derived from the theme through edit.
+func (h Help) WithStyles(edit func(Styles) Styles) Help { h.look = h.withStyles(edit); return h }
+
+// WithStyles changes the styles derived from the theme through edit.
+func (p Pager) WithStyles(edit func(Styles) Styles) Pager { p.look = p.withStyles(edit); return p }
+
+// WithStyles changes the styles derived from the theme through edit.
+func (p Prompt) WithStyles(edit func(Styles) Styles) Prompt { p.look = p.withStyles(edit); return p }
+
+// WithStyles changes the styles derived from the theme through edit.
+func (p FilePicker) WithStyles(edit func(Styles) Styles) FilePicker {
+	p.look = p.withStyles(edit)
+	return p
+}
 
 // WithKind tints the confirm, such as Danger for one that deletes.
 func (c Confirm) WithKind(k Kind) Confirm { c.kind = k; return c }

@@ -63,3 +63,25 @@ func TestPromptCaretBlinksAtTheThemesPace(t *testing.T) {
 	_, next := p.Update(blink)
 	require.NotNil(t, next, "the prompt's own blink re-arms")
 }
+
+// Every dialog but Alert takes the edit, and a Kind still tints the border.
+func TestWithStylesReachesEveryNeutralDialog(t *testing.T) {
+	th := theme.Resolve(theme.Mint, true)
+	box := lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Padding(0, 1)
+	edit := func(s Styles) Styles { s.Box = box; return s }
+	looks := map[string]look{
+		"confirm": NewConfirm("t", "m", nil, th).WithStyles(edit).look,
+		"text":    NewText("t", "", th).WithStyles(edit).look,
+		"choice":  NewChoice("t", "", nil, th).WithStyles(edit).look,
+		"pick":    NewPick("t", nil, nil, th).WithStyles(edit).look,
+		"help":    NewHelp(nil, th).WithStyles(edit).look,
+		"pager":   NewPager("t", "", th).WithStyles(edit).look,
+		"prompt":  NewPrompt("t", nil, th).WithStyles(edit).look,
+		"files":   NewFilePicker("t", ".", nil, th).WithStyles(edit).look,
+	}
+	for name, l := range looks {
+		require.Equal(t, lipgloss.NormalBorder(), l.style().GetBorderStyle(), name)
+		l.kind = Danger
+		require.Equal(t, lipgloss.Color(th.Colors.Danger), l.style().GetBorderTopForeground(), name+": the kind keeps its colour")
+	}
+}

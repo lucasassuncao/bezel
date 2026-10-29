@@ -505,3 +505,12 @@ func TestABlurredFieldIgnoresTheMouse(t *testing.T) {
 	m := run(focused("abc").Blur(), tea.MouseClickMsg{X: draw.GutterWidth, Y: 0, Button: tea.MouseLeft})
 	require.Equal(t, 3, m.Column())
 }
+
+// The edit survives a theme switch: SetTheme rebuilds the styles under it.
+func TestWithStylesHoldsAcrossSetTheme(t *testing.T) {
+	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+	m := New(theme.Resolve(theme.Plain, true)).WithPlaceholder("say").SetWidth(20).SetHeight(1).
+		WithStyles(func(s Styles) Styles { s.Placeholder = red; return s })
+	m = m.SetTheme(theme.Resolve(theme.Mint, true))
+	require.Contains(t, m.View(), red.Render("say"))
+}

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/frames"
@@ -58,6 +59,20 @@ type Model struct {
 	cursor   int
 	dur      time.Duration
 	keys     Keys
+	edit     func(Styles) Styles
+}
+
+// Styles are how an accordion paints its headings and bodies.
+type Styles struct {
+	Cursor  lipgloss.Style // the heading under the cursor
+	Heading lipgloss.Style // every other heading
+	Body    lipgloss.Style // the open part of a section
+}
+
+// DefaultStyles paint the cursor in the cursor role, headings bold and
+// bodies dim.
+func DefaultStyles(th theme.Resolved) Styles {
+	return Styles{Cursor: th.Cursor, Heading: th.Bold, Body: th.Dim}
 }
 
 // New is sections, every one closed, the cursor on the first; each opens and
@@ -70,6 +85,22 @@ func New(sections []Section) Model {
 func (m Model) WithDuration(d time.Duration) Model {
 	m.dur = max(d, 0)
 	return m
+}
+
+// WithStyles changes the styles derived from the theme through edit, under
+// whatever theme View gets. It replaces an earlier edit.
+func (m Model) WithStyles(edit func(Styles) Styles) Model {
+	m.edit = edit
+	return m
+}
+
+// styles is DefaultStyles of th with the app's edit applied.
+func (m Model) styles(th theme.Resolved) Styles {
+	st := DefaultStyles(th)
+	if m.edit != nil {
+		st = m.edit(st)
+	}
+	return st
 }
 
 // WithKeys rebinds the accordion.
@@ -145,6 +176,7 @@ func (m Model) Legend() []legend.Entry {
 // View is every heading, and under each as much of its body as it is open,
 // wrapped to width.
 func (m Model) View(th theme.Resolved, width int) string {
+	st := m.styles(th)
 	var out []string
 	for i, s := range m.sections {
 		share := m.folds[i].share()
@@ -154,9 +186,9 @@ func (m Model) View(th theme.Resolved, width int) string {
 		}
 		head := draw.Truncate(mark+s.Title, width)
 		if i == m.cursor {
-			out = append(out, th.Cursor.Render(head))
+			out = append(out, st.Cursor.Render(head))
 		} else {
-			out = append(out, th.Bold.Render(head))
+			out = append(out, st.Heading.Render(head))
 		}
 		if share == 0 {
 			continue // a closed section shows none of its body: skip wrapping it
@@ -164,7 +196,7 @@ func (m Model) View(th theme.Resolved, width int) string {
 		body := draw.Wrap(s.Body, max(width-2, 1))
 		shown := int(math.Round(share * float64(len(body))))
 		for _, l := range body[:shown] {
-			out = append(out, "  "+th.Dim.Render(l))
+			out = append(out, "  "+st.Body.Render(l))
 		}
 	}
 	return strings.Join(out, "\n")

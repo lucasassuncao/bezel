@@ -133,6 +133,16 @@ Who calls `View` decides where a component takes its theme, and [CONVENTIONS.md]
 - a form, as `form.New(th, fields...)`, which paints every control in it;
 - a plain function, such as a progress bar or a chart, after the data it draws.
 
+## What follows the theme
+
+Most components follow the theme and also take a `WithStyles` edit. A plain function such as `chart.Bars` or `progress.Bar` follows the theme but keeps no edit. Some things do not follow it at all, on purpose:
+
+- `overlay.Alert`, the `Kind` tint of any dialog, and `toast`: green, yellow and red say what happened, so they keep the theme's success, warning and danger whatever an app edits;
+- `animation`, `animation/text`, `animation/scene` and `effect`: their colours are arguments, often read from the theme by the app (`th.Accent.GetForeground()`);
+- `themebrowser`, which shows every theme and so is painted by none.
+
+[CONVENTIONS.md](CONVENTIONS.md#styles) lists every package's class.
+
 ## One component, recoloured
 
 Where one component should look different from the theme, without a new theme for everything, its `WithStyles` edits the styles derived from the theme:

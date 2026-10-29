@@ -134,6 +134,8 @@ type Model struct {
 	clipboard func() (string, error) // nil is the system's
 	write     func(string) error     // nil is the system's
 	th        *theme.Resolved        // shared by every copy and never written
+	edit      func(Styles) Styles
+	st        *Styles // DefaultStyles of th, edited; rebuilt, never written
 	highlight func(string) [][]Span
 	marks     [][]Span // highlight's answer for painted
 	painted   string
@@ -155,10 +157,30 @@ type Span struct {
 	Style      lipgloss.Style
 }
 
+// Styles are how a field paints its parts.
+type Styles struct {
+	Gutter      lipgloss.Style // line numbers, and the "~" rows past the text
+	Prompt      lipgloss.Style
+	Caret       lipgloss.Style // the cell under a lit caret
+	Selection   lipgloss.Style
+	Placeholder lipgloss.Style
+	Blurred     lipgloss.Style // the text while the field is not focused
+}
+
+// DefaultStyles mute the gutter and the placeholder, draw the prompt in the
+// accent and dim the text of a blurred field.
+func DefaultStyles(th theme.Resolved) Styles {
+	return Styles{
+		Gutter: th.Muted, Prompt: th.Accent, Caret: th.Caret, Selection: th.Selected,
+		Placeholder: th.Muted, Blurred: th.Dim,
+	}
+}
+
 // New is an empty field, not focused, sized by its text until SetWidth and
 // SetHeight say otherwise.
 func New(th theme.Resolved) Model {
-	return Model{lines: []line{{starts: []int{0}}}, goal: -1, id: frames.NextID(), keys: DefaultKeys(), th: &th, caretOn: true}
+	m := Model{lines: []line{{starts: []int{0}}}, goal: -1, id: frames.NextID(), keys: DefaultKeys(), th: &th, caretOn: true}
+	return m.restyle()
 }
 
 // ready is m, or for the zero Model the empty field New builds, so a field
@@ -167,19 +189,46 @@ func (m Model) ready() Model {
 	if len(m.lines) > 0 {
 		return m
 	}
-	return New(*m.styles())
+	return New(*m.resolved())
 }
 
-// noTheme is what a zero Model draws with; it is never written.
-var noTheme theme.Resolved
+// noTheme and noStyles are what a zero Model works with; never written.
+var (
+	noTheme  theme.Resolved
+	noStyles Styles
+)
 
-// styles is the theme, held by pointer so a copy of the Model costs a word,
+// resolved is the theme, held by pointer so a copy of the Model costs a word,
 // not the 29KB a theme.Resolved takes; the zero one for a Model never built.
-func (m *Model) styles() *theme.Resolved {
+func (m *Model) resolved() *theme.Resolved {
 	if m.th == nil {
 		return &noTheme
 	}
 	return m.th
+}
+
+func (m *Model) styles() *Styles {
+	if m.st == nil {
+		return &noStyles
+	}
+	return m.st
+}
+
+// restyle derives the styles from the theme and applies the app's edit.
+func (m Model) restyle() Model {
+	st := DefaultStyles(*m.resolved())
+	if m.edit != nil {
+		st = m.edit(st)
+	}
+	m.st = &st
+	return m
+}
+
+// WithStyles changes the styles derived from the theme through edit, now and
+// after every SetTheme. It replaces an earlier edit.
+func (m Model) WithStyles(edit func(Styles) Styles) Model {
+	m.edit = edit
+	return m.restyle()
 }
 
 // wrap is l with its rows worked out at the field's width. The helpers a loop
@@ -289,7 +338,7 @@ func (m Model) repaint(force bool) Model {
 func (m Model) SetTheme(th theme.Resolved) Model {
 	m = m.ready()
 	m.th = &th
-	return m
+	return m.restyle()
 }
 
 // WithValue is the field holding s, the caret at its end. CRLF and lone CRs
@@ -409,16 +458,16 @@ func (m *Model) margin(i, k int) string {
 	switch {
 	case m.noNumbers:
 	case k == 0:
-		b.WriteString(draw.Gutter(i+1, m.styles().Muted))
+		b.WriteString(draw.Gutter(i+1, m.styles().Gutter))
 	default:
-		b.WriteString(m.styles().Muted.Render(strings.Repeat(" ", draw.GutterWidth-2) + "│ "))
+		b.WriteString(m.styles().Gutter.Render(strings.Repeat(" ", draw.GutterWidth-2) + "│ "))
 	}
 	if m.prompt != nil {
 		p := strings.Repeat(" ", m.promptW)
 		if k == 0 {
 			p = draw.Fit(m.prompt(i), m.promptW)
 		}
-		b.WriteString(m.styles().Accent.Render(p))
+		b.WriteString(m.styles().Prompt.Render(p))
 	}
 	return b.String()
 }
@@ -889,7 +938,7 @@ func (m Model) arm() (Model, tea.Cmd) {
 
 func (m Model) tick() tea.Cmd {
 	msg := BlinkMsg{id: m.id, tag: m.tag}
-	return tea.Tick(draw.Blink(m.styles().CaretBlink), func(time.Time) tea.Msg { return msg })
+	return tea.Tick(draw.Blink(m.resolved().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
 // breaks folds every line break to "\n" and turns tabs into spaces; a
@@ -1126,7 +1175,7 @@ func (m Model) View() string {
 	caret := m.shows()
 	text := lipgloss.NewStyle()
 	if !m.focused {
-		text = m.styles().Dim
+		text = m.styles().Blurred
 	}
 	start, end := m.window()
 	var rows []string
@@ -1158,7 +1207,7 @@ func (m Model) View() string {
 	}
 	filler := strings.Repeat(" ", m.lead())
 	if !m.noNumbers {
-		filler = m.styles().Muted.Render(strings.Repeat(" ", draw.GutterWidth-4)+"~ │ ") + strings.Repeat(" ", m.promptW)
+		filler = m.styles().Gutter.Render(strings.Repeat(" ", draw.GutterWidth-4)+"~ │ ") + strings.Repeat(" ", m.promptW)
 	}
 	for len(rows) < m.height {
 		rows = append(rows, filler+m.pad(""))
@@ -1174,13 +1223,13 @@ func (m Model) placeholderRow() string {
 		text = draw.Truncate(text, max(m.width-m.lead(), 0))
 	}
 	if !m.shows() {
-		return m.pad(m.styles().Muted.Render(text))
+		return m.pad(m.styles().Placeholder.Render(text))
 	}
 	g := edit.Graphemes(text)
 	if len(g) == 0 {
 		return m.pad(m.styles().Caret.Render(" "))
 	}
-	return m.pad(m.styles().Caret.Render(g[0]) + m.styles().Muted.Render(strings.Join(g[1:], "")))
+	return m.pad(m.styles().Caret.Render(g[0]) + m.styles().Placeholder.Render(strings.Join(g[1:], "")))
 }
 
 // selectedOn is the characters [from, to) of line i the selection covers;
@@ -1220,7 +1269,7 @@ func (m *Model) piece(l edit.Line, spans []Span, from, to int, onCaret bool, sel
 		case onCaret && a == c:
 			b.WriteString(m.styles().Caret.Render(l.Slice(a, z)))
 		case a >= sel[0] && z <= sel[1]:
-			b.WriteString(m.styles().Selected.Render(l.Slice(a, z)))
+			b.WriteString(m.styles().Selection.Render(l.Slice(a, z)))
 		default:
 			b.WriteString(paint(l, spans, a, z, style))
 		}

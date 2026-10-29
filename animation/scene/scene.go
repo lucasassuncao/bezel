@@ -1,5 +1,6 @@
 // Package scene draws whole scenes from the time alone: rain, snow, confetti,
 // fireworks, stars, static and plasma, on their own or behind a block.
+// Non-themable: colours come as arguments, never from the theme.
 package scene
 
 import (

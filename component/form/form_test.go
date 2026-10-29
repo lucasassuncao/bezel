@@ -1,6 +1,7 @@
 package form
 
 import (
+	"charm.land/lipgloss/v2"
 	"strings"
 	"testing"
 
@@ -174,4 +175,12 @@ func TestTheFormPaintsItsControlsInItsTheme(t *testing.T) {
 func TestInitIsNilWithoutAnIniterInFocus(t *testing.T) {
 	require.Nil(t, New(th()).Init(), "no fields")
 	require.Nil(t, New(th(), NewCheckbox("a")).Init())
+}
+
+// One edit reaches every control, and outlives a theme switch.
+func TestWithStylesRecoloursEveryControl(t *testing.T) {
+	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+	f := New(th(), NewCheckbox("a").WithChecked(true)).WithStyles(func(s Styles) Styles { s.Chosen = red; return s })
+	f = f.SetTheme(theme.Resolve(theme.Mint, true))
+	require.Contains(t, f.View(20), red.Render("[x]"))
 }
