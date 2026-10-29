@@ -61,6 +61,7 @@ A new component picks the row whose "Why" fits it, not a fourth shape.
 - Bindings live in a struct: `Keys` where a package has one component (`list`, `tree`, `browser`, `palette`, `form`, `paginator`, `viewport`), `XKeys` where it has several (`overlay.ConfirmKeys`, `overlay.PickKeys`, ...). `DefaultKeys()` or `DefaultXKeys()` builds them and `WithKeys` replaces them. `form.Keys` serves the form and every control in it, and `Form.WithKeys` rebinds them all.
 - `Update` matches with `key.Matches`, never a key string, and `Legend` comes from the same bindings through `legend.FromBindings`, so a component lists exactly what it answers to.
 - Every component with a `Keys` struct has a `Legend()`, which follows its state: a list's esc only while filtering, a form's for the control in focus. A text field lists only the keys worth a hint (paste, complete, copy); its editing keys are the terminal's usual ones and go unlisted.
+- No `DefaultKeys` binds a letter: the arrows, pgup/pgdown, home/end and named keys only. Vim's letters are a `VimKeys()` (`VimXKeys()`) preset beside the defaults, for every component that moves a cursor or scrolls; a field that is typed into has none.
 - A pair that reads as one entry gives its help to the first binding (`Up` as "↑/↓") and none to the second, which `FromBindings` then leaves out.
 - Esc belongs to the stack, which closes the top dialog before the dialog sees the key. A dialog still lists it; its own binding for it only reaches a host that drives the dialog without a stack.
 

@@ -15,6 +15,7 @@ Package viewport is scrollable text the app sizes: wrapped at its width or panne
 - [type GutterRow](<#GutterRow>)
 - [type Keys](<#Keys>)
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
+  - [func VimKeys\(\) Keys](<#VimKeys>)
 - [type Model](<#Model>)
   - [func New\(\) Model](<#New>)
   - [func \(m Model\) AtBottom\(\) bool](<#Model.AtBottom>)
@@ -71,7 +72,7 @@ Package viewport is scrollable text the app sizes: wrapped at its width or panne
 
 
 <a name="GutterRow"></a>
-## type [GutterRow](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L80-L84>)
+## type [GutterRow](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L92-L96>)
 
 GutterRow is what a gutter function is asked to draw for one row.
 
@@ -105,8 +106,17 @@ func DefaultKeys() Keys
 
 DefaultKeys are the arrows, pgup/pgdown and home/end; half a page has no key until an app gives it one.
 
+<a name="VimKeys"></a>
+### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L52>)
+
+```go
+func VimKeys() Keys
+```
+
+VimKeys are DefaultKeys with vim's letters added: k/j to scroll, h/l to pan, g/G to the ends, ctrl\+b/f a page and ctrl\+u/d half of one.
+
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L62-L77>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L74-L89>)
 
 Model is a value: every method returns the new viewport.
 
@@ -117,7 +127,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L115>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L127>)
 
 ```go
 func New() Model
@@ -126,7 +136,7 @@ func New() Model
 New is an empty viewport, 0 x 0 until sized, that pans six cells and scrolls three lines a wheel notch.
 
 <a name="Model.AtBottom"></a>
-### func \(Model\) [AtBottom](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L371>)
+### func \(Model\) [AtBottom](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L383>)
 
 ```go
 func (m Model) AtBottom() bool
@@ -135,7 +145,7 @@ func (m Model) AtBottom() bool
 AtBottom reports whether the last row shows at the bottom.
 
 <a name="Model.AtTop"></a>
-### func \(Model\) [AtTop](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L368>)
+### func \(Model\) [AtTop](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L380>)
 
 ```go
 func (m Model) AtTop() bool
@@ -153,7 +163,7 @@ func (m Model) ClearHighlights() Model
 ClearHighlights removes every match.
 
 <a name="Model.Content"></a>
-### func \(Model\) [Content](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L347>)
+### func \(Model\) [Content](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L359>)
 
 ```go
 func (m Model) Content() string
@@ -162,7 +172,7 @@ func (m Model) Content() string
 Content is the text, its lines joined by "\\n".
 
 <a name="Model.EnsureVisible"></a>
-### func \(Model\) [EnsureVisible](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L331>)
+### func \(Model\) [EnsureVisible](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L343>)
 
 ```go
 func (m Model) EnsureVisible(line, colStart, colEnd int) Model
@@ -171,7 +181,7 @@ func (m Model) EnsureVisible(line, colStart, colEnd int) Model
 EnsureVisible scrolls line to the top unless it shows already, and pans to a step left of colStart unless colEnd fits from the left edge. Before the viewport has a size nothing shows, so nothing moves.
 
 <a name="Model.HalfPageDown"></a>
-### func \(Model\) [HalfPageDown](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L316>)
+### func \(Model\) [HalfPageDown](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L328>)
 
 ```go
 func (m Model) HalfPageDown() Model
@@ -180,7 +190,7 @@ func (m Model) HalfPageDown() Model
 HalfPageDown moves half a page down.
 
 <a name="Model.HalfPageUp"></a>
-### func \(Model\) [HalfPageUp](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L319>)
+### func \(Model\) [HalfPageUp](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L331>)
 
 ```go
 func (m Model) HalfPageUp() Model
@@ -189,7 +199,7 @@ func (m Model) HalfPageUp() Model
 HalfPageUp moves half a page up.
 
 <a name="Model.Height"></a>
-### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L356>)
+### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L368>)
 
 ```go
 func (m Model) Height() int
@@ -216,7 +226,7 @@ func (m Model) Highlights() int
 Highlights is how many matches there are.
 
 <a name="Model.HorizontalScrollPercent"></a>
-### func \(Model\) [HorizontalScrollPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L388>)
+### func \(Model\) [HorizontalScrollPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L400>)
 
 ```go
 func (m Model) HorizontalScrollPercent() float64
@@ -225,7 +235,7 @@ func (m Model) HorizontalScrollPercent() float64
 HorizontalScrollPercent is how far right the pan is, from 0 to 1.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L475>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L487>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -234,7 +244,7 @@ func (m Model) Legend() []legend.Entry
 Legend lists the scrolling keys; panning drops out while wrapping.
 
 <a name="Model.Lines"></a>
-### func \(Model\) [Lines](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L350>)
+### func \(Model\) [Lines](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L362>)
 
 ```go
 func (m Model) Lines() []string
@@ -252,7 +262,7 @@ func (m Model) NextHighlight() Model
 NextHighlight makes the next match current, the first after the last, and brings it into view.
 
 <a name="Model.PageDown"></a>
-### func \(Model\) [PageDown](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L310>)
+### func \(Model\) [PageDown](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L322>)
 
 ```go
 func (m Model) PageDown() Model
@@ -261,7 +271,7 @@ func (m Model) PageDown() Model
 PageDown moves a page down.
 
 <a name="Model.PageUp"></a>
-### func \(Model\) [PageUp](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L313>)
+### func \(Model\) [PageUp](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L325>)
 
 ```go
 func (m Model) PageUp() Model
@@ -270,7 +280,7 @@ func (m Model) PageUp() Model
 PageUp moves a page up.
 
 <a name="Model.PastBottom"></a>
-### func \(Model\) [PastBottom](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L375>)
+### func \(Model\) [PastBottom](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L387>)
 
 ```go
 func (m Model) PastBottom() bool
@@ -288,7 +298,7 @@ func (m Model) PrevHighlight() Model
 PrevHighlight makes the previous match current, the last before the first, and brings it into view.
 
 <a name="Model.Scroll"></a>
-### func \(Model\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L405>)
+### func \(Model\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L417>)
 
 ```go
 func (m Model) Scroll() layout.Scroll
@@ -297,7 +307,7 @@ func (m Model) Scroll() layout.Scroll
 Scroll is where the view sits in the text, for a pane's scrollbar.
 
 <a name="Model.ScrollDown"></a>
-### func \(Model\) [ScrollDown](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L297>)
+### func \(Model\) [ScrollDown](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L309>)
 
 ```go
 func (m Model) ScrollDown(n int) Model
@@ -306,7 +316,7 @@ func (m Model) ScrollDown(n int) Model
 ScrollDown moves n rows down, stopping at the last; the current match becomes the first at or below the new top.
 
 <a name="Model.ScrollLeft"></a>
-### func \(Model\) [ScrollLeft](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L307>)
+### func \(Model\) [ScrollLeft](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L319>)
 
 ```go
 func (m Model) ScrollLeft(n int) Model
@@ -315,7 +325,7 @@ func (m Model) ScrollLeft(n int) Model
 ScrollLeft pans n cells left.
 
 <a name="Model.ScrollPercent"></a>
-### func \(Model\) [ScrollPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L379>)
+### func \(Model\) [ScrollPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L391>)
 
 ```go
 func (m Model) ScrollPercent() float64
@@ -324,7 +334,7 @@ func (m Model) ScrollPercent() float64
 ScrollPercent is how far down the view is, from 0 to 1; 1 when every row shows.
 
 <a name="Model.ScrollRight"></a>
-### func \(Model\) [ScrollRight](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L304>)
+### func \(Model\) [ScrollRight](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L316>)
 
 ```go
 func (m Model) ScrollRight(n int) Model
@@ -333,7 +343,7 @@ func (m Model) ScrollRight(n int) Model
 ScrollRight pans n cells right.
 
 <a name="Model.ScrollUp"></a>
-### func \(Model\) [ScrollUp](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L301>)
+### func \(Model\) [ScrollUp](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L313>)
 
 ```go
 func (m Model) ScrollUp(n int) Model
@@ -342,7 +352,7 @@ func (m Model) ScrollUp(n int) Model
 ScrollUp moves n rows up, stopping at the first; the current match becomes the first at or below the new top.
 
 <a name="Model.SetContent"></a>
-### func \(Model\) [SetContent](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L153>)
+### func \(Model\) [SetContent](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L165>)
 
 ```go
 func (m Model) SetContent(s string) Model
@@ -351,7 +361,7 @@ func (m Model) SetContent(s string) Model
 SetContent shows s, one line per "\\n"; see SetLines.
 
 <a name="Model.SetHeight"></a>
-### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L238>)
+### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L250>)
 
 ```go
 func (m Model) SetHeight(h int) Model
@@ -369,7 +379,7 @@ func (m Model) SetHighlights(matches [][]int) Model
 SetHighlights paints matches: byte ranges into the content's plain text, escape sequences stripped, in order and not overlapping, as regexp.FindAllStringIndex returns them. It shows the first at or below the top.
 
 <a name="Model.SetLines"></a>
-### func \(Model\) [SetLines](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L157>)
+### func \(Model\) [SetLines](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L169>)
 
 ```go
 func (m Model) SetLines(lines []string) Model
@@ -378,7 +388,7 @@ func (m Model) SetLines(lines []string) Model
 SetLines shows lines, copied. CRLF and lone CRs break lines too, and a tab becomes spaces to the next multiple of four cells, which a width can count.
 
 <a name="Model.SetWidth"></a>
-### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L230>)
+### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L242>)
 
 ```go
 func (m Model) SetWidth(w int) Model
@@ -387,7 +397,7 @@ func (m Model) SetWidth(w int) Model
 SetWidth is the viewport's width in cells, the gutter included; the line at the top stays there.
 
 <a name="Model.SetWrap"></a>
-### func \(Model\) [SetWrap](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L245>)
+### func \(Model\) [SetWrap](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L257>)
 
 ```go
 func (m Model) SetWrap(on bool) Model
@@ -396,7 +406,7 @@ func (m Model) SetWrap(on bool) Model
 SetWrap folds long lines into rows, or cuts them for panning; the line at the top stays there.
 
 <a name="Model.SetXOffset"></a>
-### func \(Model\) [SetXOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L290>)
+### func \(Model\) [SetXOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L302>)
 
 ```go
 func (m Model) SetXOffset(n int) Model
@@ -405,7 +415,7 @@ func (m Model) SetXOffset(n int) Model
 SetXOffset pans to cell n, kept within the longest line; nothing while wrapping.
 
 <a name="Model.SetYOffset"></a>
-### func \(Model\) [SetYOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L283>)
+### func \(Model\) [SetYOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L295>)
 
 ```go
 func (m Model) SetYOffset(n int) Model
@@ -414,7 +424,7 @@ func (m Model) SetYOffset(n int) Model
 SetYOffset makes row n the top, kept within the text.
 
 <a name="Model.ToBottom"></a>
-### func \(Model\) [ToBottom](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L326>)
+### func \(Model\) [ToBottom](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L338>)
 
 ```go
 func (m Model) ToBottom() Model
@@ -423,7 +433,7 @@ func (m Model) ToBottom() Model
 ToBottom shows the last row at the bottom; the current match becomes the first at or below the new top.
 
 <a name="Model.ToTop"></a>
-### func \(Model\) [ToTop](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L322>)
+### func \(Model\) [ToTop](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L334>)
 
 ```go
 func (m Model) ToTop() Model
@@ -432,7 +442,7 @@ func (m Model) ToTop() Model
 ToTop shows the first row, and makes the first match current.
 
 <a name="Model.TotalRows"></a>
-### func \(Model\) [TotalRows](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L397>)
+### func \(Model\) [TotalRows](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L409>)
 
 ```go
 func (m Model) TotalRows() int
@@ -441,7 +451,7 @@ func (m Model) TotalRows() int
 TotalRows is how many rows the text takes, wrapped rows counted.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L411>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L423>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
@@ -450,7 +460,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
 Update scrolls and pans on its keys and the mouse wheel; the command is always nil.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L487>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L499>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
@@ -459,7 +469,7 @@ func (m Model) View(th theme.Resolved) string
 View is the rows from the offset, exactly Width cells by Height rows; "" before both are above zero.
 
 <a name="Model.VisibleRows"></a>
-### func \(Model\) [VisibleRows](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L400>)
+### func \(Model\) [VisibleRows](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L412>)
 
 ```go
 func (m Model) VisibleRows() int
@@ -468,7 +478,7 @@ func (m Model) VisibleRows() int
 VisibleRows is how many rows of text show, the blank ones after it left out.
 
 <a name="Model.Width"></a>
-### func \(Model\) [Width](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L353>)
+### func \(Model\) [Width](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L365>)
 
 ```go
 func (m Model) Width() int
@@ -477,7 +487,7 @@ func (m Model) Width() int
 Width is the viewport's width in cells.
 
 <a name="Model.WithFill"></a>
-### func \(Model\) [WithFill](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L108>)
+### func \(Model\) [WithFill](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L120>)
 
 ```go
 func (m Model) WithFill(on bool) Model
@@ -486,7 +496,7 @@ func (m Model) WithFill(on bool) Model
 WithFill gives the rows past the end of the text the gutter too, as a column of "\~" does; without it they are blank.
 
 <a name="Model.WithGutter"></a>
-### func \(Model\) [WithGutter](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L89>)
+### func \(Model\) [WithGutter](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L101>)
 
 ```go
 func (m Model) WithGutter(f func(GutterRow) string) Model
@@ -495,7 +505,7 @@ func (m Model) WithGutter(f func(GutterRow) string) Model
 WithGutter draws f's text before every row, kept in place while panning: line numbers, marks. Every row's must be as wide as f\(GutterRow\{\}\); nil removes it.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L132>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L144>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
@@ -504,7 +514,7 @@ func (m Model) WithKeys(k Keys) Model
 WithKeys rebinds the scrolling keys.
 
 <a name="Model.WithLineStyle"></a>
-### func \(Model\) [WithLineStyle](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L101>)
+### func \(Model\) [WithLineStyle](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L113>)
 
 ```go
 func (m Model) WithLineStyle(f func(line int) lipgloss.Style) Model
@@ -513,7 +523,7 @@ func (m Model) WithLineStyle(f func(line int) lipgloss.Style) Model
 WithLineStyle paints each whole line in f's style for it, before the line is cut or wrapped.
 
 <a name="Model.WithStep"></a>
-### func \(Model\) [WithStep](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L120>)
+### func \(Model\) [WithStep](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L132>)
 
 ```go
 func (m Model) WithStep(cells int) Model
@@ -522,7 +532,7 @@ func (m Model) WithStep(cells int) Model
 WithStep pans cells at a time; below 0 is 0, which stops the keys panning.
 
 <a name="Model.WithStyles"></a>
-### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L139>)
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L151>)
 
 ```go
 func (m Model) WithStyles(edit func(Styles) Styles) Model
@@ -531,7 +541,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit, under whatever theme View gets. It replaces an earlier edit.
 
 <a name="Model.WithWheel"></a>
-### func \(Model\) [WithWheel](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L126>)
+### func \(Model\) [WithWheel](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L138>)
 
 ```go
 func (m Model) WithWheel(lines int) Model
@@ -540,7 +550,7 @@ func (m Model) WithWheel(lines int) Model
 WithWheel scrolls lines a wheel notch; 0 or less turns the wheel off.
 
 <a name="Model.Wrap"></a>
-### func \(Model\) [Wrap](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L359>)
+### func \(Model\) [Wrap](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L371>)
 
 ```go
 func (m Model) Wrap() bool
@@ -549,7 +559,7 @@ func (m Model) Wrap() bool
 Wrap reports whether long lines fold into rows.
 
 <a name="Model.XOffset"></a>
-### func \(Model\) [XOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L365>)
+### func \(Model\) [XOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L377>)
 
 ```go
 func (m Model) XOffset() int
@@ -558,7 +568,7 @@ func (m Model) XOffset() int
 XOffset is the first cell of each line shown.
 
 <a name="Model.YOffset"></a>
-### func \(Model\) [YOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L362>)
+### func \(Model\) [YOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L374>)
 
 ```go
 func (m Model) YOffset() int
@@ -567,7 +577,7 @@ func (m Model) YOffset() int
 YOffset is the first row shown.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L51-L54>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L63-L66>)
 
 Styles are how search matches are painted.
 
@@ -579,7 +589,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L57>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L69>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles

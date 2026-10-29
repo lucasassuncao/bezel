@@ -30,21 +30,12 @@ type FilePickerKeys struct {
 	Back, Open, Pick                        key.Binding
 }
 
-// DefaultFilePickerKeys are the arrows and hjkl, pgup/pgdown, home/end with
-// g/G, backspace to go up and enter to pick.
-func DefaultFilePickerKeys() FilePickerKeys {
-	return FilePickerKeys{
-		Up:       key.New("up", "k", "ctrl+p").WithHelp("↑/↓", "move"),
-		Down:     key.New("down", "j", "ctrl+n"),
-		PageUp:   key.New("pgup", "K"),
-		PageDown: key.New("pgdown", "J"),
-		Top:      key.New("home", "g"),
-		Bottom:   key.New("end", "G"),
-		Back:     key.New("left", "h", "backspace").WithHelp("←", "up"),
-		Open:     key.New("right", "l").WithHelp("→", "open"),
-		Pick:     key.New("enter").WithHelp("enter", "pick"),
-	}
-}
+// DefaultFilePickerKeys are filepicker.DefaultKeys: the arrows,
+// pgup/pgdown, home/end, backspace to go up and enter to pick.
+func DefaultFilePickerKeys() FilePickerKeys { return FilePickerKeys(filepicker.DefaultKeys()) }
+
+// VimFilePickerKeys are filepicker.VimKeys: the defaults with vim's letters.
+func VimFilePickerKeys() FilePickerKeys { return FilePickerKeys(filepicker.VimKeys()) }
 
 // pickerChrome is the lines a FilePicker spends around its entries: the
 // title, the directory and the hint, and a gap after each of the first two.

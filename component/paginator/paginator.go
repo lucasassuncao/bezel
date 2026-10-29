@@ -38,12 +38,19 @@ type Keys struct {
 	Prev, Next key.Binding
 }
 
-// DefaultKeys are pgup/pgdown, the arrows and h/l.
+// DefaultKeys are pgup/pgdown and the arrows.
 func DefaultKeys() Keys {
 	return Keys{
-		Prev: key.New("pgup", "left", "h").WithHelp("←/→", "page"),
-		Next: key.New("pgdown", "right", "l"),
+		Prev: key.New("pgup", "left").WithHelp("←/→", "page"),
+		Next: key.New("pgdown", "right"),
 	}
+}
+
+// VimKeys are DefaultKeys with h/l added to turn the page.
+func VimKeys() Keys {
+	k := DefaultKeys()
+	k.Prev, k.Next = key.New("pgup", "left", "h").WithHelp("h/l", "page"), key.New("pgdown", "right", "l")
+	return k
 }
 
 // Styles are how the page is painted.

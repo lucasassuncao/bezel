@@ -57,6 +57,15 @@ func DefaultKeys() Keys {
 	}
 }
 
+// VimKeys are DefaultKeys with vim's letters added: k/j to move, h/l to
+// close and open.
+func VimKeys() Keys {
+	k := DefaultKeys()
+	k.Up, k.Down = key.New("up", "k").WithHelp("↑/↓ k/j", "move"), key.New("down", "j")
+	k.Left, k.Right = key.New("left", "h").WithHelp("h/l", "close/open"), key.New("right", "l")
+	return k
+}
+
 // Connectors are what Guides draws before a row, one piece per level under
 // the top: Mid for a row with siblings after it, Last for the last one,
 // Pipe where an outer level runs on below and Space where it ended.

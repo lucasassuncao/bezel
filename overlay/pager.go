@@ -36,6 +36,13 @@ func DefaultPagerKeys() PagerKeys {
 	return PagerKeys{Keys: viewport.DefaultKeys(), Close: key.New("q", "enter")}
 }
 
+// VimPagerKeys scroll with viewport.VimKeys and close as DefaultPagerKeys do.
+func VimPagerKeys() PagerKeys {
+	k := DefaultPagerKeys()
+	k.Keys = viewport.VimKeys()
+	return k
+}
+
 // pagerChrome is the rows a Pager spends around its text: border and padding,
 // the title and its gap, and the position line and its gap.
 const pagerChrome = 2 + 2 + 2 + 2

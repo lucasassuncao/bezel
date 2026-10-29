@@ -15,6 +15,7 @@ Package paginator is pages over a run of items: which page shows, the slice of i
 - [type Action](<#Action>)
 - [type Keys](<#Keys>)
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
+  - [func VimKeys\(\) Keys](<#VimKeys>)
 - [type Kind](<#Kind>)
 - [type Model](<#Model>)
   - [func New\(perPage int\) Model](<#New>)
@@ -78,7 +79,16 @@ type Keys struct {
 func DefaultKeys() Keys
 ```
 
-DefaultKeys are pgup/pgdown, the arrows and h/l.
+DefaultKeys are pgup/pgdown and the arrows.
+
+<a name="VimKeys"></a>
+### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L50>)
+
+```go
+func VimKeys() Keys
+```
+
+VimKeys are DefaultKeys with h/l added to turn the page.
 
 <a name="Kind"></a>
 ## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L20>)
@@ -99,7 +109,7 @@ const (
 ```
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L62-L71>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L69-L78>)
 
 Model is a value: every method returns the new paginator.
 
@@ -110,7 +120,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L75>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L82>)
 
 ```go
 func New(perPage int) Model
@@ -119,7 +129,7 @@ func New(perPage int) Model
 New is one page of perPage items, drawn as numbers, until SetItems says how many there are. A perPage below 1 is 1.
 
 <a name="Model.Bounds"></a>
-### func \(Model\) [Bounds](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L159>)
+### func \(Model\) [Bounds](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L166>)
 
 ```go
 func (m Model) Bounds(n int) (start, end int)
@@ -128,7 +138,7 @@ func (m Model) Bounds(n int) (start, end int)
 Bounds is the slice \[start, end\) of n items the current page shows, both within n, so a page left past the end after the items shrank is empty.
 
 <a name="Model.ItemsOnPage"></a>
-### func \(Model\) [ItemsOnPage](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L166>)
+### func \(Model\) [ItemsOnPage](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L173>)
 
 ```go
 func (m Model) ItemsOnPage(n int) int
@@ -137,7 +147,7 @@ func (m Model) ItemsOnPage(n int) int
 ItemsOnPage is how many of n items the current page shows.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L187>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L194>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -146,7 +156,7 @@ func (m Model) Legend() []legend.Entry
 Legend lists the page keys, for the shell's legend or a help overlay.
 
 <a name="Model.Next"></a>
-### func \(Model\) [Next](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L137>)
+### func \(Model\) [Next](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L144>)
 
 ```go
 func (m Model) Next() Model
@@ -155,7 +165,7 @@ func (m Model) Next() Model
 Next moves on a page; on the last it stays.
 
 <a name="Model.OnFirst"></a>
-### func \(Model\) [OnFirst](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L152>)
+### func \(Model\) [OnFirst](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L159>)
 
 ```go
 func (m Model) OnFirst() bool
@@ -164,7 +174,7 @@ func (m Model) OnFirst() bool
 OnFirst reports whether the current page is the first.
 
 <a name="Model.OnLast"></a>
-### func \(Model\) [OnLast](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L155>)
+### func \(Model\) [OnLast](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L162>)
 
 ```go
 func (m Model) OnLast() bool
@@ -173,7 +183,7 @@ func (m Model) OnLast() bool
 OnLast reports whether the current page is the last.
 
 <a name="Model.Page"></a>
-### func \(Model\) [Page](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L140>)
+### func \(Model\) [Page](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L147>)
 
 ```go
 func (m Model) Page() int
@@ -182,7 +192,7 @@ func (m Model) Page() int
 Page is the current page, from 0.
 
 <a name="Model.Pages"></a>
-### func \(Model\) [Pages](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L143>)
+### func \(Model\) [Pages](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L150>)
 
 ```go
 func (m Model) Pages() int
@@ -191,7 +201,7 @@ func (m Model) Pages() int
 Pages is how many pages the items fill, at least one.
 
 <a name="Model.PerPage"></a>
-### func \(Model\) [PerPage](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L149>)
+### func \(Model\) [PerPage](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L156>)
 
 ```go
 func (m Model) PerPage() int
@@ -200,7 +210,7 @@ func (m Model) PerPage() int
 PerPage is how many items a page holds.
 
 <a name="Model.Prev"></a>
-### func \(Model\) [Prev](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L134>)
+### func \(Model\) [Prev](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L141>)
 
 ```go
 func (m Model) Prev() Model
@@ -209,7 +219,7 @@ func (m Model) Prev() Model
 Prev moves back a page; on the first it stays.
 
 <a name="Model.SetItems"></a>
-### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L114>)
+### func \(Model\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L121>)
 
 ```go
 func (m Model) SetItems(n int) Model
@@ -218,7 +228,7 @@ func (m Model) SetItems(n int) Model
 SetItems makes as many pages as n items fill, at least one, keeping the page within them.
 
 <a name="Model.SetPage"></a>
-### func \(Model\) [SetPage](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L128>)
+### func \(Model\) [SetPage](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L135>)
 
 ```go
 func (m Model) SetPage(p int) Model
@@ -227,7 +237,7 @@ func (m Model) SetPage(p int) Model
 SetPage moves to page p, from 0, kept within the pages.
 
 <a name="Model.SetPerPage"></a>
-### func \(Model\) [SetPerPage](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L121>)
+### func \(Model\) [SetPerPage](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L128>)
 
 ```go
 func (m Model) SetPerPage(n int) Model
@@ -236,7 +246,7 @@ func (m Model) SetPerPage(n int) Model
 SetPerPage makes a page hold n items, at least one, as after a resize; the page turns to the one holding the item that led the page before.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L172>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L179>)
 
 ```go
 func (m Model) Update(msg tea.KeyPressMsg) (Model, Action)
@@ -245,7 +255,7 @@ func (m Model) Update(msg tea.KeyPressMsg) (Model, Action)
 Update turns the page on Prev and Next. Paged says the page changed.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L192>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L199>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
@@ -254,7 +264,7 @@ func (m Model) View(th theme.Resolved) string
 View is the page as dots or numbers, in the theme's styles.
 
 <a name="Model.WithFormat"></a>
-### func \(Model\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L87>)
+### func \(Model\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L94>)
 
 ```go
 func (m Model) WithFormat(f string) Model
@@ -263,7 +273,7 @@ func (m Model) WithFormat(f string) Model
 WithFormat writes Numbers with f, which gets the page from 1 and the count of pages, as "%d/%d" does.
 
 <a name="Model.WithIcons"></a>
-### func \(Model\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L94>)
+### func \(Model\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L101>)
 
 ```go
 func (m Model) WithIcons(set icon.Set) Model
@@ -272,7 +282,7 @@ func (m Model) WithIcons(set icon.Set) Model
 WithIcons draws Dots with set: Running for the current page, Pending for the rest.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L100>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L107>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
@@ -281,7 +291,7 @@ func (m Model) WithKeys(k Keys) Model
 WithKeys rebinds the page keys.
 
 <a name="Model.WithKind"></a>
-### func \(Model\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L80>)
+### func \(Model\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L87>)
 
 ```go
 func (m Model) WithKind(k Kind) Model
@@ -290,7 +300,7 @@ func (m Model) WithKind(k Kind) Model
 WithKind sets how the page is drawn.
 
 <a name="Model.WithStyles"></a>
-### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L107>)
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L114>)
 
 ```go
 func (m Model) WithStyles(edit func(Styles) Styles) Model
@@ -299,7 +309,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit, under whatever theme View gets. It replaces an earlier edit.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L50-L54>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L57-L61>)
 
 Styles are how the page is painted.
 
@@ -312,7 +322,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L57>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L64>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles

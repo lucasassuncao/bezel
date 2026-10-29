@@ -63,6 +63,16 @@ func DefaultKeys() Keys {
 	}
 }
 
+// VimKeys are DefaultKeys with vim's letters added: k/j to move, g/G to the
+// ends and ctrl+b/f to page. The filter prompt still takes them as text.
+func VimKeys() Keys {
+	k := DefaultKeys()
+	k.Up, k.Down = key.New("up", "k").WithHelp("↑/↓ k/j", "move"), key.New("down", "j")
+	k.Top, k.Bottom = key.New("home", "g").WithHelp("g/G", "ends"), key.New("end", "G")
+	k.PageUp, k.PageDown = key.New("pgup", "ctrl+b").WithHelp("^b/^f", "page"), key.New("pgdown", "ctrl+f")
+	return k
+}
+
 // Model is a value: every method returns the new list.
 type Model[T any] struct {
 	rows   []Row[T]
@@ -390,17 +400,15 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 			_, size := utf8.DecodeLastRuneInString(text)
 			m.find = m.filterFor(text[:len(text)-size])
 		}
+	case utf8.RuneCountInString(msg.Key().Text) == 1:
+		// Text before the moves, so vim's j and k stay typeable while filtering.
+		m.find = m.filterFor(m.find.text + msg.Key().Text)
 	case key.Matches(msg, m.keys.Up, m.keys.Down):
 		d, n := 1, len(m.find.idx)
 		if key.Matches(msg, m.keys.Up) {
 			d = -1
 		}
 		m.find.win = m.find.win.Move(m.wrapped(d, m.find.win.Cursor, n), n, nil)
-	default:
-		// Only arrows navigate while filtering, so letters stay typeable.
-		if typed := msg.Key().Text; utf8.RuneCountInString(typed) == 1 {
-			m.find = m.filterFor(m.find.text + typed)
-		}
 	}
 	return m, None
 }

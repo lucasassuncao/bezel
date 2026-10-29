@@ -398,3 +398,14 @@ func TestWithStylesRecoloursOneList(t *testing.T) {
 		require.Equal(t, red.Render("Plugins"), strings.Split(m.View(under), "\n")[0], "the edit holds under any theme")
 	}
 }
+
+func TestVimKeysMoveOnLettersButFilterTakesThemAsText(t *testing.T) {
+	m := New(numbered(5)).SetHeight(5)
+	n, _ := m.Update(typed("j"))
+	require.Equal(t, m.Selected().Label, n.Selected().Label, "no letters by default")
+	m = m.WithKeys(VimKeys())
+	n, _ = m.Update(typed("j"))
+	require.Equal(t, "item-01", n.Selected().Label)
+	f := filtered(m, "j")
+	require.Equal(t, "j", f.Filter(), "the prompt types the letter")
+}

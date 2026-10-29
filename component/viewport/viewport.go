@@ -47,6 +47,18 @@ func DefaultKeys() Keys {
 	}
 }
 
+// VimKeys are DefaultKeys with vim's letters added: k/j to scroll, h/l to
+// pan, g/G to the ends, ctrl+b/f a page and ctrl+u/d half of one.
+func VimKeys() Keys {
+	k := DefaultKeys()
+	k.Up, k.Down = key.New("up", "k").WithHelp("↑/↓ k/j", "scroll"), key.New("down", "j")
+	k.Left, k.Right = key.New("left", "h").WithHelp("h/l", "pan"), key.New("right", "l")
+	k.Top, k.Bottom = key.New("home", "g"), key.New("end", "G")
+	k.PageUp, k.PageDown = key.New("pgup", "ctrl+b").WithHelp("^b/^f", "page"), key.New("pgdown", "ctrl+f")
+	k.HalfPageUp, k.HalfPageDown = key.New("ctrl+u").WithHelp("^u/^d", "half page"), key.New("ctrl+d")
+	return k
+}
+
 // Styles are how search matches are painted.
 type Styles struct {
 	Match   lipgloss.Style // every match

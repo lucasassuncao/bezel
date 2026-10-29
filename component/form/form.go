@@ -45,19 +45,27 @@ type Keys struct {
 	Close       key.Binding // an open select, leaving its value as it was
 }
 
-// DefaultKeys are tab and shift+tab, space or enter, the arrows with h/l and
-// k/j, and esc.
+// DefaultKeys are tab and shift+tab, space or enter, the arrows and esc.
 func DefaultKeys() Keys {
 	return Keys{
 		Next:  key.New("tab").WithHelp("tab", "next"),
 		Prev:  key.New("shift+tab").WithHelp("shift+tab", "previous"),
 		Press: key.New("space", "enter").WithHelp("space", "press"),
-		Left:  key.New("left", "h").WithHelp("←/→", "choose"),
-		Right: key.New("right", "l"),
-		Up:    key.New("up", "k").WithHelp("↑/↓", "move"),
-		Down:  key.New("down", "j"),
+		Left:  key.New("left").WithHelp("←/→", "choose"),
+		Right: key.New("right"),
+		Up:    key.New("up").WithHelp("↑/↓", "move"),
+		Down:  key.New("down"),
 		Close: key.New("esc").WithHelp("esc", "close"),
 	}
+}
+
+// VimKeys are DefaultKeys with h/l added to a radio and a toggle and k/j to
+// an open select. An input still takes them as text.
+func VimKeys() Keys {
+	k := DefaultKeys()
+	k.Left, k.Right = key.New("left", "h").WithHelp("h/l", "choose"), key.New("right", "l")
+	k.Up, k.Down = key.New("up", "k").WithHelp("k/j", "move"), key.New("down", "j")
+	return k
 }
 
 // keyed is a bezel control, which Form.WithKeys rebinds along with the form.

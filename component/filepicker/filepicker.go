@@ -44,6 +44,18 @@ func DefaultKeys() Keys {
 	}
 }
 
+// VimKeys are DefaultKeys with vim's letters added: k/j to move, K/J to page,
+// g/G to the ends, h to go up and l to open.
+func VimKeys() Keys {
+	k := DefaultKeys()
+	k.Up, k.Down = key.New("up", "k", "ctrl+p").WithHelp("↑/↓ k/j", "move"), key.New("down", "j", "ctrl+n")
+	k.PageUp, k.PageDown = key.New("pgup", "K"), key.New("pgdown", "J")
+	k.Top, k.Bottom = key.New("home", "g"), key.New("end", "G")
+	k.Back = key.New("left", "h", "backspace").WithHelp("h", "up")
+	k.Open = key.New("right", "l").WithHelp("l", "open")
+	return k
+}
+
 // Styles are how the rows are painted.
 type Styles struct {
 	Cursor   lipgloss.Style // the row under the cursor, after its mark

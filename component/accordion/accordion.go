@@ -37,6 +37,13 @@ func DefaultKeys() Keys {
 	}
 }
 
+// VimKeys are DefaultKeys with k/j added to move.
+func VimKeys() Keys {
+	k := DefaultKeys()
+	k.Up, k.Down = key.New("up", "k").WithHelp("↑/↓ k/j", "move"), key.New("down", "j")
+	return k
+}
+
 // fold is how open one section is, and the run moving it.
 type fold struct {
 	from, to float64 // 0 closed, 1 open

@@ -291,16 +291,16 @@ l := list.New(rows).SetHeight(10).WithKeys(k)
 
 - **The legend follows.** A component's `Legend` is built from the same bindings it matches against, so a new key or new help shows up in the legend with nothing else to change. A disabled binding stops matching and drops out of the legend.
 - **A pair shows as one entry.** In `Up`/`Down`, `PageUp`/`PageDown` and the like, the first binding carries the help for both, and the second has none and stays out of the legend. Keep it that way when you rebind them, as `k.Down` does above.
-- **Scrolling stays off the letters.** `viewport` and `overlay.Pager` default to the arrows, pgup/pgdown and home/end, so a letter is never taken from the app. For vim keys, or the half-page moves that have no default key, bind them yourself:
+- **No default takes a letter.** Every `DefaultKeys` is the arrows, pgup/pgdown, home/end and named keys, so a letter is never taken from the app. Vim's letters are a preset beside the defaults, handed in through the same `WithKeys`; their help names the letters, so the legend follows:
 
   ```go
-  k := viewport.DefaultKeys()
-  k.Up = key.New("up", "k").WithHelp("↑/↓", "scroll")
-  k.Down = key.New("down", "j")
-  k.HalfPageDown = key.New("ctrl+d").WithHelp("^d/^u", "half page")
-  k.HalfPageUp = key.New("ctrl+u")
-  vp = vp.WithKeys(k)
+  l := list.New(rows).WithKeys(list.VimKeys())            // k/j, g/G, ctrl+b/f
+  vp := viewport.New().WithKeys(viewport.VimKeys())       // and h/l, ctrl+u/d
+  f := form.New(th, fields...).WithKeys(form.VimKeys())   // h/l and k/j in the controls
+  p := overlay.NewPick(title, rows, onPick, th).WithKeys(overlay.VimPickKeys())
   ```
+
+  `VimKeys()` is in `list`, `tree`, `table`, `browser`, `accordion`, `viewport`, `paginator`, `filepicker` and `form`; `overlay` has `VimPickKeys`, `VimFilePickerKeys` and `VimPagerKeys`. A preset is a starting point like the defaults: change one binding of it as above. Where a field is typed into (`input`, `textbox`, `palette`, a list's filter prompt) letters stay text.
 
 - **A form takes one set.** `form.Keys` covers the form and every control in it, and `Form.WithKeys` rebinds all of them at once.
 - **Esc belongs to the overlay stack.** The stack closes the top dialog before the dialog sees esc, so rebinding a dialog's esc only matters when you drive the dialog without a stack.

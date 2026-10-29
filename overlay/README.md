@@ -67,6 +67,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p FilePicker\) WithStyles\(edit func\(Styles\) Styles\) FilePicker](<#FilePicker.WithStyles>)
 - [type FilePickerKeys](<#FilePickerKeys>)
   - [func DefaultFilePickerKeys\(\) FilePickerKeys](<#DefaultFilePickerKeys>)
+  - [func VimFilePickerKeys\(\) FilePickerKeys](<#VimFilePickerKeys>)
 - [type Help](<#Help>)
   - [func NewHelp\(sections \[\]HelpSection, th theme.Resolved\) Help](<#NewHelp>)
   - [func \(h Help\) Legend\(\) \[\]legend.Entry](<#Help.Legend>)
@@ -95,6 +96,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p Pager\) WithStyles\(edit func\(Styles\) Styles\) Pager](<#Pager.WithStyles>)
 - [type PagerKeys](<#PagerKeys>)
   - [func DefaultPagerKeys\(\) PagerKeys](<#DefaultPagerKeys>)
+  - [func VimPagerKeys\(\) PagerKeys](<#VimPagerKeys>)
 - [type Pick](<#Pick>)
   - [func NewPick\(title string, rows \[\]string, onPick func\(i int\) tea.Cmd, th theme.Resolved\) Pick](<#NewPick>)
   - [func \(p Pick\) Cursor\(\) int](<#Pick.Cursor>)
@@ -109,6 +111,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p Pick\) WithStyles\(edit func\(Styles\) Styles\) Pick](<#Pick.WithStyles>)
 - [type PickKeys](<#PickKeys>)
   - [func DefaultPickKeys\(\) PickKeys](<#DefaultPickKeys>)
+  - [func VimPickKeys\(\) PickKeys](<#VimPickKeys>)
 - [type Prompt](<#Prompt>)
   - [func NewPrompt\(title string, onAccept func\(value string\) tea.Cmd, th theme.Resolved\) Prompt](<#NewPrompt>)
   - [func \(p Prompt\) Accepts\(\) bool](<#Prompt.Accepts>)
@@ -507,7 +510,7 @@ type FilePicker struct {
 ```
 
 <a name="NewFilePicker"></a>
-### func [NewFilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L59>)
+### func [NewFilePicker](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L50>)
 
 ```go
 func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, th theme.Resolved) FilePicker
@@ -516,7 +519,7 @@ func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, th theme
 NewFilePicker browses dir, files only, without hidden entries. onPick, which may be nil, gets the absolute path.
 
 <a name="FilePicker.Dir"></a>
-### func \(FilePicker\) [Dir](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L109>)
+### func \(FilePicker\) [Dir](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L100>)
 
 ```go
 func (p FilePicker) Dir() string
@@ -525,7 +528,7 @@ func (p FilePicker) Dir() string
 Dir is the directory being browsed.
 
 <a name="FilePicker.Highlighted"></a>
-### func \(FilePicker\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L112>)
+### func \(FilePicker\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L103>)
 
 ```go
 func (p FilePicker) Highlighted() string
@@ -534,7 +537,7 @@ func (p FilePicker) Highlighted() string
 Highlighted is the path under the cursor, or "" in an empty directory.
 
 <a name="FilePicker.Init"></a>
-### func \(FilePicker\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L103>)
+### func \(FilePicker\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L94>)
 
 ```go
 func (p FilePicker) Init() tea.Cmd
@@ -543,7 +546,7 @@ func (p FilePicker) Init() tea.Cmd
 Init reads the first directory, answering through TopMsg. The picker must already be on top of the stack to receive it: push it first, as Open does.
 
 <a name="FilePicker.Legend"></a>
-### func \(FilePicker\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L133>)
+### func \(FilePicker\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L124>)
 
 ```go
 func (p FilePicker) Legend() []legend.Entry
@@ -552,7 +555,7 @@ func (p FilePicker) Legend() []legend.Entry
 
 
 <a name="FilePicker.Open"></a>
-### func \(FilePicker\) [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L106>)
+### func \(FilePicker\) [Open](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L97>)
 
 ```go
 func (p FilePicker) Open() tea.Cmd
@@ -561,7 +564,7 @@ func (p FilePicker) Open() tea.Cmd
 Open pushes the picker and then reads its directory, in that order.
 
 <a name="FilePicker.Resize"></a>
-### func \(FilePicker\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L71>)
+### func \(FilePicker\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L62>)
 
 ```go
 func (p FilePicker) Resize(body layout.Rect) Overlay
@@ -570,7 +573,7 @@ func (p FilePicker) Resize(body layout.Rect) Overlay
 Resize shows as many entries as fit in body.
 
 <a name="FilePicker.Update"></a>
-### func \(FilePicker\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L114>)
+### func \(FilePicker\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L105>)
 
 ```go
 func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -579,7 +582,7 @@ func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="FilePicker.View"></a>
-### func \(FilePicker\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L137>)
+### func \(FilePicker\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L128>)
 
 ```go
 func (p FilePicker) View(body layout.Rect) string
@@ -588,7 +591,7 @@ func (p FilePicker) View(body layout.Rect) string
 
 
 <a name="FilePicker.WithAllowedTypes"></a>
-### func \(FilePicker\) [WithAllowedTypes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L83>)
+### func \(FilePicker\) [WithAllowedTypes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L74>)
 
 ```go
 func (p FilePicker) WithAllowedTypes(exts ...string) FilePicker
@@ -597,7 +600,7 @@ func (p FilePicker) WithAllowedTypes(exts ...string) FilePicker
 WithAllowedTypes limits the pick to names ending in one of exts, such as ".go"; other files stay listed but enter refuses them and says why.
 
 <a name="FilePicker.WithDirs"></a>
-### func \(FilePicker\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L89>)
+### func \(FilePicker\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L80>)
 
 ```go
 func (p FilePicker) WithDirs() FilePicker
@@ -606,7 +609,7 @@ func (p FilePicker) WithDirs() FilePicker
 WithDirs lets enter pick a directory; → still opens one.
 
 <a name="FilePicker.WithHidden"></a>
-### func \(FilePicker\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L96>)
+### func \(FilePicker\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L87>)
 
 ```go
 func (p FilePicker) WithHidden() FilePicker
@@ -615,7 +618,7 @@ func (p FilePicker) WithHidden() FilePicker
 WithHidden lists hidden entries too: dotfiles, and on Windows the ones marked hidden. Set it before Init.
 
 <a name="FilePicker.WithKeys"></a>
-### func \(FilePicker\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L65>)
+### func \(FilePicker\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L56>)
 
 ```go
 func (p FilePicker) WithKeys(k FilePickerKeys) FilePicker
@@ -660,7 +663,16 @@ type FilePickerKeys struct {
 func DefaultFilePickerKeys() FilePickerKeys
 ```
 
-DefaultFilePickerKeys are the arrows and hjkl, pgup/pgdown, home/end with g/G, backspace to go up and enter to pick.
+DefaultFilePickerKeys are filepicker.DefaultKeys: the arrows, pgup/pgdown, home/end, backspace to go up and enter to pick.
+
+<a name="VimFilePickerKeys"></a>
+### func [VimFilePickerKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/filepicker.go#L38>)
+
+```go
+func VimFilePickerKeys() FilePickerKeys
+```
+
+VimFilePickerKeys are filepicker.VimKeys: the defaults with vim's letters.
 
 <a name="Help"></a>
 ## type [Help](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L23-L28>)
@@ -844,7 +856,7 @@ type Pager struct {
 ```
 
 <a name="NewPager"></a>
-### func [NewPager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L45>)
+### func [NewPager](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L52>)
 
 ```go
 func NewPager(title, text string, th theme.Resolved) Pager
@@ -853,7 +865,7 @@ func NewPager(title, text string, th theme.Resolved) Pager
 NewPager shows text from its first line. CRLF reads as LF and trailing blank lines are dropped.
 
 <a name="Pager.Legend"></a>
-### func \(Pager\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L83>)
+### func \(Pager\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L90>)
 
 ```go
 func (p Pager) Legend() []legend.Entry
@@ -862,7 +874,7 @@ func (p Pager) Legend() []legend.Entry
 
 
 <a name="Pager.Offset"></a>
-### func \(Pager\) [Offset](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L73>)
+### func \(Pager\) [Offset](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L80>)
 
 ```go
 func (p Pager) Offset() int
@@ -871,7 +883,7 @@ func (p Pager) Offset() int
 Offset is the index of the first line shown.
 
 <a name="Pager.Resize"></a>
-### func \(Pager\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L60>)
+### func \(Pager\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L67>)
 
 ```go
 func (p Pager) Resize(body layout.Rect) Overlay
@@ -880,7 +892,7 @@ func (p Pager) Resize(body layout.Rect) Overlay
 Resize sizes the viewport to what fits in body.
 
 <a name="Pager.Update"></a>
-### func \(Pager\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L75>)
+### func \(Pager\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L82>)
 
 ```go
 func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -889,7 +901,7 @@ func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pager.View"></a>
-### func \(Pager\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L88>)
+### func \(Pager\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L95>)
 
 ```go
 func (p Pager) View(body layout.Rect) string
@@ -898,7 +910,7 @@ func (p Pager) View(body layout.Rect) string
 
 
 <a name="Pager.WithKeys"></a>
-### func \(Pager\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L53>)
+### func \(Pager\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L60>)
 
 ```go
 func (p Pager) WithKeys(k PagerKeys) Pager
@@ -945,6 +957,15 @@ func DefaultPagerKeys() PagerKeys
 
 DefaultPagerKeys are the viewport's own, and q or enter to close.
 
+<a name="VimPagerKeys"></a>
+### func [VimPagerKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/pager.go#L40>)
+
+```go
+func VimPagerKeys() PagerKeys
+```
+
+VimPagerKeys scroll with viewport.VimKeys and close as DefaultPagerKeys do.
+
 <a name="Pick"></a>
 ## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L135-L143>)
 
@@ -957,7 +978,7 @@ type Pick struct {
 ```
 
 <a name="NewPick"></a>
-### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L162>)
+### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L169>)
 
 ```go
 func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick
@@ -966,7 +987,7 @@ func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.R
 NewPick lists rows with the cursor on the first. onPick may be nil, which makes enter only close.
 
 <a name="Pick.Cursor"></a>
-### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L187>)
+### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L194>)
 
 ```go
 func (p Pick) Cursor() int
@@ -975,7 +996,7 @@ func (p Pick) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Pick.Legend"></a>
-### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L225>)
+### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L232>)
 
 ```go
 func (p Pick) Legend() []legend.Entry
@@ -984,7 +1005,7 @@ func (p Pick) Legend() []legend.Entry
 
 
 <a name="Pick.Resize"></a>
-### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L190>)
+### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L197>)
 
 ```go
 func (p Pick) Resize(body layout.Rect) Overlay
@@ -993,7 +1014,7 @@ func (p Pick) Resize(body layout.Rect) Overlay
 Resize shows as many rows as fit in body, scrolled to keep the cursor's.
 
 <a name="Pick.Update"></a>
-### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L206>)
+### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L213>)
 
 ```go
 func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -1002,7 +1023,7 @@ func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pick.View"></a>
-### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L230>)
+### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L237>)
 
 ```go
 func (p Pick) View(body layout.Rect) string
@@ -1011,7 +1032,7 @@ func (p Pick) View(body layout.Rect) string
 
 
 <a name="Pick.WithCursor"></a>
-### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L180>)
+### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L187>)
 
 ```go
 func (p Pick) WithCursor(i int) Pick
@@ -1020,7 +1041,7 @@ func (p Pick) WithCursor(i int) Pick
 WithCursor starts the cursor on row i, such as the value already chosen; an index outside the rows is clamped to them.
 
 <a name="Pick.WithKeys"></a>
-### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L167>)
+### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L174>)
 
 ```go
 func (p Pick) WithKeys(k PickKeys) Pick
@@ -1038,7 +1059,7 @@ func (p Pick) WithKind(k Kind) Pick
 WithKind tints the pick for what it decides.
 
 <a name="Pick.WithNotes"></a>
-### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L173>)
+### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L180>)
 
 ```go
 func (p Pick) WithNotes(notes ...string) Pick
@@ -1074,6 +1095,15 @@ func DefaultPickKeys() PickKeys
 ```
 
 DefaultPickKeys are the arrows and enter.
+
+<a name="VimPickKeys"></a>
+### func [VimPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L161>)
+
+```go
+func VimPickKeys() PickKeys
+```
+
+VimPickKeys are DefaultPickKeys with k/j added to choose.
 
 <a name="Prompt"></a>
 ## type [Prompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L23-L36>)

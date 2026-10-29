@@ -51,6 +51,16 @@ func DefaultKeys() Keys {
 	}
 }
 
+// VimKeys are DefaultKeys with vim's letters added: k/j to move, g/G to the
+// ends and ctrl+b/f to page.
+func VimKeys() Keys {
+	k := DefaultKeys()
+	k.Up, k.Down = key.New("up", "k").WithHelp("↑/↓ k/j", "move"), key.New("down", "j")
+	k.Top, k.Bottom = key.New("home", "g").WithHelp("g/G", "ends"), key.New("end", "G")
+	k.PageUp, k.PageDown = key.New("pgup", "ctrl+b").WithHelp("^b/^f", "page"), key.New("pgdown", "ctrl+f")
+	return k
+}
+
 // marker is what the cursor row starts with. Every row keeps its width, so
 // the columns stay put when the cursor lands.
 const marker = "▶ "

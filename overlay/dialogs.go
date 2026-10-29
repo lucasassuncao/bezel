@@ -157,6 +157,13 @@ func DefaultPickKeys() PickKeys {
 	}
 }
 
+// VimPickKeys are DefaultPickKeys with k/j added to choose.
+func VimPickKeys() PickKeys {
+	k := DefaultPickKeys()
+	k.Up, k.Down = key.New("up", "k").WithHelp("↑/↓ k/j", "choose"), key.New("down", "j")
+	return k
+}
+
 // NewPick lists rows with the cursor on the first. onPick may be nil, which
 // makes enter only close.
 func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick {

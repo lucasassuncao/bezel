@@ -310,3 +310,15 @@ func TestEnsureVisibleWaitsForASize(t *testing.T) {
 	m = m.SetWidth(20).SetHeight(10)
 	require.Equal(t, []int{0, 0}, []int{m.YOffset(), m.XOffset()}, "nothing shows yet, so nothing scrolls")
 }
+
+// Letters scroll only once the app asks for vim's keys.
+func TestVimKeysAddTheLetters(t *testing.T) {
+	m := sized(numbered(40), 20, 10)
+	got, _ := m.Update(bezeltest.Key("j"))
+	require.Zero(t, got.YOffset(), "no letters by default")
+	m = m.WithKeys(VimKeys())
+	for k, want := range map[string]int{"j": 1, "ctrl+f": 10, "ctrl+d": 5, "G": 30, "down": 1} {
+		got, _ := m.Update(bezeltest.Key(k))
+		require.Equal(t, want, got.YOffset(), k)
+	}
+}
