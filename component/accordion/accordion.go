@@ -30,9 +30,9 @@ type Keys struct {
 // DefaultKeys are the arrows, and enter or space to open and close.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:     key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "move")),
-		Down:   key.NewBinding(key.WithKeys("down")),
-		Toggle: key.NewBinding(key.WithKeys("enter", "space"), key.WithHelp("enter", "open/close")),
+		Up:     key.New("up").WithHelp("↑/↓", "move"),
+		Down:   key.New("down"),
+		Toggle: key.New("enter", "space").WithHelp("enter", "open/close"),
 	}
 }
 

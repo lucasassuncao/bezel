@@ -62,7 +62,7 @@ func newModel() model {
 		for j, it := range t.items {
 			rows[j] = list.Row[int]{Label: it, Value: j}
 		}
-		lists[i] = list.New(rows, 0)
+		lists[i] = list.New(rows)
 	}
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fixed("list", layout.Ratio(1, 3), layout.Min(24)), layout.Fill("detail")),

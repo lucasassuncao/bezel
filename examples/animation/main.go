@@ -201,7 +201,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		// A toggle mid-slide starts from where the pane is; the old tween's
 		// frame still on its way is not this one's.
-		m.tween = animation.New(m.height, target, slide)
+		m.tween = animation.NewTween(m.height, target, slide)
 		return m, m.tween.Tick()
 	case animation.FrameMsg:
 		return m.frame(msg)
@@ -269,13 +269,13 @@ func (m model) familyKey(msg tea.Msg) (model, bool) {
 func (m model) replay() model {
 	m.bars = make([]animation.Tween, len(eases))
 	for i, e := range eases {
-		m.bars[i] = animation.New(0, track, race).WithEase(e.ease)
+		m.bars[i] = animation.NewTween(0, track, race).WithEase(e.ease)
 	}
 	m.smooth = animation.NewFloat(0, 1, race).WithEase(animation.Linear)
-	m.count = animation.New(0, counts, race).WithEase(animation.EaseOut)
+	m.count = animation.NewTween(0, counts, race).WithEase(animation.EaseOut)
 	m.cascade = make([]animation.Tween, blocks)
 	for i := range m.cascade {
-		m.cascade[i] = animation.New(0, block, 300*time.Millisecond).WithEase(animation.EaseOut).WithDelay(time.Duration(i) * stagger)
+		m.cascade[i] = animation.NewTween(0, block, 300*time.Millisecond).WithEase(animation.EaseOut).WithDelay(time.Duration(i) * stagger)
 	}
 	return m
 }

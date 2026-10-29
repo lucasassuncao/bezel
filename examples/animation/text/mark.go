@@ -52,11 +52,11 @@ func newTexts(th theme.Resolved) texts {
 		caret:    text.NewCaret("▌", time.Second),
 		ellipsis: text.NewEllipsis(3, 1200*time.Millisecond),
 		decrypt:  text.NewDecrypt(boarding, 0),
-		ticker: text.NewTicker(prices[0], th.Bold.GetForeground(), th.Success.GetForeground(),
-			th.Danger.GetForeground(), 900*time.Millisecond),
+		ticker: text.NewTicker(prices[0], 900*time.Millisecond).WithBase(th.Bold.GetForeground()).
+			WithUp(th.Success.GetForeground()).WithDown(th.Danger.GetForeground()),
 		mark:   text.NewHighlight(searched, th.Accent.GetForeground(), 0),
 		strike: text.NewStrike(chore, 0).WithInk(th.Muted.GetForeground()),
-		rise:   text.NewRise("copied!", 2, th.Success.GetForeground(), black, 0),
+		rise:   text.NewRise("copied!", 2, 0).WithFade(th.Success.GetForeground(), black),
 		th:     th,
 	}
 }
@@ -90,7 +90,7 @@ func (x texts) cross() texts {
 }
 
 func (x texts) copied() texts {
-	x.rise = text.NewRise("copied!", 2, x.th.Success.GetForeground(), black, 900*time.Millisecond)
+	x.rise = text.NewRise("copied!", 2, 900*time.Millisecond).WithFade(x.th.Success.GetForeground(), black)
 	return x
 }
 

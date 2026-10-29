@@ -78,7 +78,7 @@ func newModel() model {
 		Title:   "tree",
 		Actions: actions(),
 	})
-	return model{sh: sh, th: th, tree: tree.New(files, 0)}
+	return model{sh: sh, th: th, tree: tree.New(files)}
 }
 
 func (m model) Init() tea.Cmd { return nil }

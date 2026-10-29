@@ -144,6 +144,19 @@ Source: [`examples/component/form/main.go`](../examples/component/form/main.go)
 
 One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
 
+```go
+f := form.New(th,
+	form.NewInput("Name").WithPlaceholder("my-project").WithWidth(28),
+	form.NewSelect("Image", []string{"ubuntu", "debian", "alpine"}),
+	form.NewToggle("Docker").WithOn(saved.Docker),
+	form.NewButton("Create", create),
+)
+// Init starts the caret of the input the form opens on.
+func (m model) Init() tea.Cmd { return m.form.Init() }
+```
+
+The form paints every control in its theme, and `SetTheme` repaints them all.
+
 ![form](recordings/component/form.gif)
 
 ### Input
@@ -270,10 +283,10 @@ Every component that answers to keys keeps them in a struct of [`key.Binding`](.
 
 ```go
 k := list.DefaultKeys()
-k.Up = key.NewBinding(key.WithKeys("up", "k"), key.WithHelp("↑/↓ k/j", "move"))
-k.Down = key.NewBinding(key.WithKeys("down", "j"))
+k.Up = key.New("up", "k").WithHelp("↑/↓ k/j", "move")
+k.Down = key.New("down", "j")
 k.Filter.Disabled = true // no filtering here
-l := list.New(rows, 10).WithKeys(k)
+l := list.New(rows).SetHeight(10).WithKeys(k)
 ```
 
 - **The legend follows.** A component's `Legend` is built from the same bindings it matches against, so a new key or new help shows up in the legend with nothing else to change. A disabled binding stops matching and drops out of the legend.
@@ -282,10 +295,10 @@ l := list.New(rows, 10).WithKeys(k)
 
   ```go
   k := viewport.DefaultKeys()
-  k.Up = key.NewBinding(key.WithKeys("up", "k"), key.WithHelp("↑/↓", "scroll"))
-  k.Down = key.NewBinding(key.WithKeys("down", "j"))
-  k.HalfPageDown = key.NewBinding(key.WithKeys("ctrl+d"), key.WithHelp("^d/^u", "half page"))
-  k.HalfPageUp = key.NewBinding(key.WithKeys("ctrl+u"))
+  k.Up = key.New("up", "k").WithHelp("↑/↓", "scroll")
+  k.Down = key.New("down", "j")
+  k.HalfPageDown = key.New("ctrl+d").WithHelp("^d/^u", "half page")
+  k.HalfPageUp = key.New("ctrl+u")
   vp = vp.WithKeys(k)
   ```
 

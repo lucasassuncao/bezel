@@ -49,10 +49,10 @@ type Keys struct {
 // DefaultKeys are the four arrows.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:    key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "move")),
-		Down:  key.NewBinding(key.WithKeys("down")),
-		Left:  key.NewBinding(key.WithKeys("left"), key.WithHelp("←/→", "close/open")),
-		Right: key.NewBinding(key.WithKeys("right")),
+		Up:    key.New("up").WithHelp("↑/↓", "move"),
+		Down:  key.New("down"),
+		Left:  key.New("left").WithHelp("←/→", "close/open"),
+		Right: key.New("right"),
 	}
 }
 
@@ -82,15 +82,21 @@ type Model[N Noder[N]] struct {
 	scrollOff    int
 }
 
-// New builds a tree over nodes, height rows tall, with the cursor on the
-// first row that is not a section.
-func New[N Noder[N]](nodes []N, height int) Model[N] {
-	m := Model[N]{Nodes: slices.Clone(nodes), Height: height}
+// New builds a tree over nodes with the cursor on the first row that is not
+// a section; SetHeight gives it the rows its pane has.
+func New[N Noder[N]](nodes []N) Model[N] {
+	m := Model[N]{Nodes: slices.Clone(nodes)}
 	vis := m.Visible()
 	for m.Cursor < len(vis) && nodes[vis[m.Cursor]].TreeInfo().Section {
 		m.Cursor++
 	}
 	return m
+}
+
+// SetHeight changes the rows the tree takes and keeps the cursor in view.
+func (m Model[N]) SetHeight(h int) Model[N] {
+	m.Height = h
+	return m.ClampOffset()
 }
 
 // WithKeys rebinds the tree.

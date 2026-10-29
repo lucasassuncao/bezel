@@ -41,8 +41,8 @@ type Keys struct {
 // DefaultKeys are pgup/pgdown, the arrows and h/l.
 func DefaultKeys() Keys {
 	return Keys{
-		Prev: key.NewBinding(key.WithKeys("pgup", "left", "h"), key.WithHelp("←/→", "page")),
-		Next: key.NewBinding(key.WithKeys("pgdown", "right", "l")),
+		Prev: key.New("pgup", "left", "h").WithHelp("←/→", "page"),
+		Next: key.New("pgdown", "right", "l"),
 	}
 }
 

@@ -81,7 +81,7 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, tbl: table.New(cols, items(), 0)}
+	return model{sh: sh, th: th, tbl: table.New(cols, items())}
 }
 
 func (m model) Init() tea.Cmd { return nil }

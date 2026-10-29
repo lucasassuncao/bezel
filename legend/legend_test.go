@@ -83,8 +83,8 @@ func TestDisabledEntriesStayOutOfEveryView(t *testing.T) {
 }
 
 func TestFromBindingsSkipsDisabled(t *testing.T) {
-	off := key.NewBinding(key.WithKeys("x"), key.WithHelp("x", "off"), key.WithDisabled())
-	on := key.NewBinding(key.WithKeys("y"), key.WithHelp("y", "on"))
+	off := key.New("x").WithHelp("x", "off").WithDisabled()
+	on := key.New("y").WithHelp("y", "on")
 	es := FromBindings([]key.Binding{off, on})
 	require.Len(t, es, 1)
 	require.Equal(t, "y", es[0].Help().Key)
@@ -92,8 +92,8 @@ func TestFromBindingsSkipsDisabled(t *testing.T) {
 
 // The second of a pair carries no help: the first one's "↑/↓" names both.
 func TestFromBindingsSkipsBindingsWithoutHelp(t *testing.T) {
-	up := key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "move"))
-	down := key.NewBinding(key.WithKeys("down"))
+	up := key.New("up").WithHelp("↑/↓", "move")
+	down := key.New("down")
 	es := FromBindings([]key.Binding{up, down})
 	require.Len(t, es, 1)
 	require.Equal(t, "↑/↓", es[0].Help().Key)

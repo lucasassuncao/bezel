@@ -12,7 +12,7 @@ import (
 )
 
 func TestAModelSpringsToItsPercent(t *testing.T) {
-	m, cmd := NewModel(15).SetPercent(0.5)
+	m, cmd := New(15).SetPercent(0.5)
 	require.NotNil(t, cmd, "a bar that has somewhere to go moves")
 	require.Equal(t, 0.5, m.Percent())
 	require.Zero(t, m.Shown(), "it starts where it was")
@@ -28,7 +28,7 @@ func TestAModelSpringsToItsPercent(t *testing.T) {
 }
 
 func TestAModelKeepsWithinItsEnds(t *testing.T) {
-	m, _ := NewModel(10).SetPercent(1.5)
+	m, _ := New(10).SetPercent(1.5)
 	require.Equal(t, 1.0, m.Percent())
 	m, _ = m.DecrPercent(2)
 	require.Zero(t, m.Percent())
@@ -37,15 +37,15 @@ func TestAModelKeepsWithinItsEnds(t *testing.T) {
 }
 
 func TestCharsPercentageAndFormat(t *testing.T) {
-	m := NewModel(6).WithChars('=', '.').WithPercentage(false)
+	m := New(6).WithChars('=', '.').WithPercentage(false)
 	require.Equal(t, "===...", ansi.Strip(m.ViewAs(0.5, th())))
-	m = NewModel(10).WithFormat(" %.0f")
+	m = New(10).WithFormat(" %.0f")
 	require.Equal(t, "████░░░ 50", ansi.Strip(m.ViewAs(0.5, th())), "the bar takes what the percentage leaves")
 }
 
 func TestAGradientColoursTheFillEndToEnd(t *testing.T) {
 	red, blue := lipgloss.Color("#ff0000"), lipgloss.Color("#0000ff")
-	m := NewModel(4).WithPercentage(false).WithGradient(red, blue)
+	m := New(4).WithPercentage(false).WithGradient(red, blue)
 	got := m.ViewAs(1, th())
 	require.Contains(t, got, lipgloss.NewStyle().Foreground(red).Render("█"))
 	require.Contains(t, got, lipgloss.NewStyle().Foreground(blue).Render("█"))
@@ -54,7 +54,7 @@ func TestAGradientColoursTheFillEndToEnd(t *testing.T) {
 
 func TestAStillModelJumps(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
-	m, cmd := NewModel(10).SetPercent(1)
+	m, cmd := New(10).SetPercent(1)
 	require.Nil(t, cmd)
 	require.Equal(t, 1.0, m.Shown())
 }

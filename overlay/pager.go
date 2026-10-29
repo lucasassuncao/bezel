@@ -33,7 +33,7 @@ type PagerKeys struct {
 
 // DefaultPagerKeys are the viewport's own, and q or enter to close.
 func DefaultPagerKeys() PagerKeys {
-	return PagerKeys{Keys: viewport.DefaultKeys(), Close: key.NewBinding(key.WithKeys("q", "enter"))}
+	return PagerKeys{Keys: viewport.DefaultKeys(), Close: key.New("q", "enter")}
 }
 
 // pagerChrome is the rows a Pager spends around its text: border and padding,

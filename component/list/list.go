@@ -51,15 +51,15 @@ type Keys struct {
 // DefaultKeys are the arrows, pgup/pgdown, home/end, enter, / and esc.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:       key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "move")),
-		Down:     key.NewBinding(key.WithKeys("down")),
-		PageUp:   key.NewBinding(key.WithKeys("pgup"), key.WithHelp("pgup/pgdn", "page")),
-		PageDown: key.NewBinding(key.WithKeys("pgdown")),
-		Top:      key.NewBinding(key.WithKeys("home"), key.WithHelp("home/end", "ends")),
-		Bottom:   key.NewBinding(key.WithKeys("end")),
-		Enter:    key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "choose")),
-		Filter:   key.NewBinding(key.WithKeys("/"), key.WithHelp("/", "filter")),
-		Esc:      key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "stop filtering")),
+		Up:       key.New("up").WithHelp("↑/↓", "move"),
+		Down:     key.New("down"),
+		PageUp:   key.New("pgup").WithHelp("pgup/pgdn", "page"),
+		PageDown: key.New("pgdown"),
+		Top:      key.New("home").WithHelp("home/end", "ends"),
+		Bottom:   key.New("end"),
+		Enter:    key.New("enter").WithHelp("enter", "choose"),
+		Filter:   key.New("/").WithHelp("/", "filter"),
+		Esc:      key.New("esc").WithHelp("esc", "stop filtering"),
 	}
 }
 
@@ -99,10 +99,10 @@ type filterMode struct {
 	win  layout.Window
 }
 
-// New builds a list height rows tall with the cursor on the first
-// selectable row.
-func New[T any](rows []Row[T], height int) Model[T] {
-	m := Model[T]{rows: slices.Clone(rows), keys: DefaultKeys(), height: height}
+// New builds a list with the cursor on the first selectable row; SetHeight
+// gives it the rows its pane has.
+func New[T any](rows []Row[T]) Model[T] {
+	m := Model[T]{rows: slices.Clone(rows), keys: DefaultKeys()}
 	m.win = layout.Window{Cursor: firstSelectable(rows)}
 	return m.fit()
 }

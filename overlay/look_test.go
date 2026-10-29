@@ -30,8 +30,8 @@ func TestWithKindTintsEveryDialog(t *testing.T) {
 	for name, l := range map[string]look{
 		"alert":   NewAlert(Danger, "t", "m", th).look,
 		"confirm": NewConfirm("t", "m", nil, th).WithKind(Danger).look,
-		"text":    NewText("t", nil, th).WithKind(Danger).look,
-		"choice":  NewChoice("t", nil, nil, th).WithKind(Danger).look,
+		"text":    NewText("t", "", th).WithKind(Danger).look,
+		"choice":  NewChoice("t", "", nil, th).WithKind(Danger).look,
 		"pick":    NewPick("t", nil, nil, th).WithKind(Danger).look,
 		"help":    NewHelp(nil, th).WithKind(Danger).look,
 		"pager":   NewPager("t", "x", th).WithKind(Danger).look,

@@ -172,8 +172,8 @@ func TestTheLegendNamesThePalettesKeys(t *testing.T) {
 
 func TestThePaletteAnswersToTheKeysItWasGiven(t *testing.T) {
 	keys := DefaultKeys()
-	keys.Up = key.NewBinding(key.WithKeys("ctrl+p"), key.WithHelp("ctrl+p/n", "choose"))
-	keys.Down = key.NewBinding(key.WithKeys("ctrl+n"))
+	keys.Up = key.New("ctrl+p").WithHelp("ctrl+p/n", "choose")
+	keys.Down = key.New("ctrl+n")
 	m := open().WithKeys(keys)
 
 	m, _ = press(m, tea.KeyDown)

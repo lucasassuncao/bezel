@@ -13,7 +13,7 @@ import (
 
 func TestRiseFloatsUpAndFades(t *testing.T) {
 	start := time.Unix(1000, 0)
-	r := NewRise("copied!", 2, white, black, 100*ms)
+	r := NewRise("copied!", 2, 100*ms).WithFade(white, black)
 	lines := strings.Split(ansi.Strip(r.View()), "\n")
 	assert.Equal(t, []string{"       ", "       ", "copied!"}, lines, "it starts on its own line, the bottom")
 

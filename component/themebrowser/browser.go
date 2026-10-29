@@ -85,10 +85,10 @@ type bindings struct {
 // defaultBindings are enter to copy, / to filter, esc to clear it and q to quit.
 func defaultBindings() bindings {
 	return bindings{
-		Copy:   key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "copy name")),
-		Filter: key.NewBinding(key.WithKeys("/"), key.WithHelp("/", "filter")),
-		Clear:  key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "clear filter")),
-		Quit:   key.NewBinding(key.WithKeys("q", "ctrl+c"), key.WithHelp("q", "quit")),
+		Copy:   key.New("enter").WithHelp("enter", "copy name"),
+		Filter: key.New("/").WithHelp("/", "filter"),
+		Clear:  key.New("esc").WithHelp("esc", "clear filter"),
+		Quit:   key.New("q", "ctrl+c").WithHelp("q", "quit"),
 	}
 }
 
@@ -173,7 +173,7 @@ func (m *browserModel) build() {
 		prev = it.Value
 	}
 	m.layout = at
-	m.tbl = table.New(m.columns(at), m.items(shown, at), height)
+	m.tbl = table.New(m.columns(at), m.items(shown, at)).SetHeight(height)
 	for i, e := range shown {
 		if e.name == prev {
 			m.tbl = moveTo(m.tbl, i)

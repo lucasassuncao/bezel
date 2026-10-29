@@ -60,7 +60,7 @@ type action struct {
 type Option func(*action)
 
 func (a *action) Entry() legend.Entry {
-	b := key.NewBinding(key.WithKeys(a.keys...), key.WithHelp(a.label, a.desc))
+	b := key.New(a.keys...).WithHelp(a.label, a.desc)
 	return legend.Entry{Binding: b, Needs: a.needs, Group: a.group}
 }
 

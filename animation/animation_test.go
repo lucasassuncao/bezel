@@ -56,12 +56,12 @@ func TestZeroTweenIsInactive(t *testing.T) {
 
 func TestNewDeclinesWhenPointless(t *testing.T) {
 	is := assert.New(t)
-	is.False(New(0, 10, 0).Active(), "duration 0 means no animation")
-	is.False(New(7, 7, time.Second).Active(), "no distance means no animation")
-	is.True(New(0, 10, time.Second).Active(), "a real move animates")
+	is.False(NewTween(0, 10, 0).Active(), "duration 0 means no animation")
+	is.False(NewTween(7, 7, time.Second).Active(), "no distance means no animation")
+	is.True(NewTween(0, 10, time.Second).Active(), "a real move animates")
 	// An app that draws Cur after every Update must not see a declined tween at 0.
-	is.Equal(10, New(0, 10, 0).Cur, "a declined tween rests at its target")
-	is.Equal(7, New(7, 7, time.Second).Cur)
+	is.Equal(10, NewTween(0, 10, 0).Cur, "a declined tween rests at its target")
+	is.Equal(7, NewTween(7, 7, time.Second).Cur)
 }
 
 // TestCurveDoesNotStallOrLurch is the smoothness contract: heights are whole
@@ -131,7 +131,7 @@ func TestAdvanceReturnsTheSampledTween(t *testing.T) {
 
 // New reads no clock: time reaches a tween only through the frames it gets.
 func TestNewLeavesTheClockToTheFirstFrame(t *testing.T) {
-	tw := New(0, 10, 100*time.Millisecond)
+	tw := NewTween(0, 10, 100*time.Millisecond)
 	assert.True(t, tw.Start.IsZero())
 
 	at := time.Unix(1000, 0)
@@ -143,7 +143,7 @@ func TestNewLeavesTheClockToTheFirstFrame(t *testing.T) {
 
 func TestUpdateFollowsItsOwnFramesUntilItLands(t *testing.T) {
 	start := time.Unix(1000, 0)
-	tw := New(0, 10, 100*time.Millisecond)
+	tw := NewTween(0, 10, 100*time.Millisecond)
 
 	tw, cmd := tw.Update(tw.FrameAt(start))
 	assert.NotNil(t, cmd, "an unfinished tween asks for the next frame")
@@ -158,7 +158,7 @@ func TestUpdateFollowsItsOwnFramesUntilItLands(t *testing.T) {
 // A tween replaced mid-flight still has a frame on its way: the new one must not take it.
 func TestUpdateIgnoresAnotherTweensFrames(t *testing.T) {
 	start := time.Unix(1000, 0)
-	old, tw := New(0, 10, time.Second), New(0, 10, time.Second)
+	old, tw := NewTween(0, 10, time.Second), NewTween(0, 10, time.Second)
 
 	next, cmd := tw.Update(old.FrameAt(start))
 	assert.Nil(t, cmd)
@@ -172,7 +172,7 @@ func TestUpdateIgnoresAnotherTweensFrames(t *testing.T) {
 }
 
 func TestTickDeliversAFrameForThisTween(t *testing.T) {
-	tw := New(0, 10, time.Second)
+	tw := NewTween(0, 10, time.Second)
 	next, cmd := tw.Update(tw.Tick()())
 	assert.False(t, next.Start.IsZero(), "the tick's frame started the clock")
 	assert.NotNil(t, cmd)
@@ -181,14 +181,14 @@ func TestTickDeliversAFrameForThisTween(t *testing.T) {
 // Landing ends the tween: Active turns false and no further frame is asked.
 func TestALandedTweenIsInactiveAtItsEnd(t *testing.T) {
 	start := time.Unix(1000, 0)
-	tw := New(0, 10, 100*time.Millisecond)
+	tw := NewTween(0, 10, 100*time.Millisecond)
 	tw, _ = tw.Update(tw.FrameAt(start))
 	tw, _ = tw.Update(tw.FrameAt(start.Add(time.Second)))
 	assert.False(t, tw.Active())
 	assert.Nil(t, tw.Tick())
 	assert.Equal(t, 10, tw.Cur)
 
-	next, _ := New(0, 10, 100*time.Millisecond).Advance(start)
+	next, _ := NewTween(0, 10, 100*time.Millisecond).Advance(start)
 	next, done := next.Advance(start.Add(time.Second))
 	assert.True(t, done)
 	assert.False(t, next.Active(), "Advance lands it too")
@@ -197,7 +197,7 @@ func TestALandedTweenIsInactiveAtItsEnd(t *testing.T) {
 // Tick called twice sends two frames for one step; the tween takes one.
 func TestASecondClockIsDropped(t *testing.T) {
 	start := time.Unix(1000, 0)
-	tw := New(0, 10, time.Second)
+	tw := NewTween(0, 10, time.Second)
 	first, second := tw.FrameAt(start), tw.FrameAt(start)
 	tw, cmd := tw.Update(first)
 	assert.NotNil(t, cmd)

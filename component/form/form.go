@@ -1,6 +1,7 @@
 // Package form is the controls that ask for a value: a text input, a select,
 // checkboxes, radios, a toggle and a button, stacked in a Form that moves focus
-// with tab and shift+tab. Each control is one row, its label in a shared column.
+// with tab and shift+tab. Each control is one row, its label in a shared column,
+// painted in the theme the Form was built with.
 package form
 
 import (
@@ -24,6 +25,10 @@ type Field interface {
 	Label() string
 }
 
+// Initer is a Field with a command to run when the form opens focused on it.
+// Form.Init runs it.
+type Initer interface{ Init() tea.Cmd }
+
 // Holder is a Field that wants the keys a Form would otherwise take, such as an
 // open Select keeping tab and esc until it closes.
 type Holder interface{ Holding() bool }
@@ -42,19 +47,24 @@ type Keys struct {
 // k/j, and esc.
 func DefaultKeys() Keys {
 	return Keys{
-		Next:  key.NewBinding(key.WithKeys("tab")),
-		Prev:  key.NewBinding(key.WithKeys("shift+tab")),
-		Press: key.NewBinding(key.WithKeys("space", "enter")),
-		Left:  key.NewBinding(key.WithKeys("left", "h")),
-		Right: key.NewBinding(key.WithKeys("right", "l")),
-		Up:    key.NewBinding(key.WithKeys("up", "k")),
-		Down:  key.NewBinding(key.WithKeys("down", "j")),
-		Close: key.NewBinding(key.WithKeys("esc")),
+		Next:  key.New("tab"),
+		Prev:  key.New("shift+tab"),
+		Press: key.New("space", "enter"),
+		Left:  key.New("left", "h"),
+		Right: key.New("right", "l"),
+		Up:    key.New("up", "k"),
+		Down:  key.New("down", "j"),
+		Close: key.New("esc"),
 	}
 }
 
 // keyed is a bezel control, which Form.WithKeys rebinds along with the form.
 type keyed interface{ rebind(k Keys) Field }
+
+// themed is a bezel control, which paints in the form's theme.
+type themed interface {
+	retheme(th *theme.Resolved) Field
+}
 
 // Form is fields in a column. tab and shift+tab move the focus; every other key
 // goes to the field in focus.
@@ -64,15 +74,39 @@ type Form struct {
 	keys   Keys
 }
 
-// New is a form focused on its first field; nil fields are left out.
-func New(fields ...Field) (Form, tea.Cmd) {
+// New is a form over fields, painted in th and focused on the first; nil
+// fields are left out. Init starts the focused field.
+func New(th theme.Resolved, fields ...Field) Form {
 	f := Form{fields: slices.DeleteFunc(slices.Clone(fields), func(fl Field) bool { return fl == nil }), keys: DefaultKeys()}
-	if len(f.fields) == 0 {
-		return f, nil
+	f = f.SetTheme(th)
+	if len(f.fields) > 0 {
+		f.fields[0], _ = f.fields[0].Focus()
 	}
-	var cmd tea.Cmd
-	f.fields[0], cmd = f.fields[0].Focus()
-	return f, cmd
+	return f
+}
+
+// Init is the focused field's command when it is an Initer, such as the
+// caret blink of the input the form opens on.
+func (f Form) Init() tea.Cmd {
+	if len(f.fields) == 0 {
+		return nil
+	}
+	if in, ok := f.fields[f.focus].(Initer); ok {
+		return in.Init()
+	}
+	return nil
+}
+
+// SetTheme repaints every bezel control in the form; a Field of the app's
+// own keeps its look.
+func (f Form) SetTheme(th theme.Resolved) Form {
+	f.fields = slices.Clone(f.fields)
+	for i, fl := range f.fields {
+		if tf, ok := fl.(themed); ok {
+			f.fields[i] = tf.retheme(&th)
+		}
+	}
+	return f
 }
 
 // WithKeys rebinds the form and every bezel control in it; a Field of the

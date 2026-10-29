@@ -55,7 +55,7 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, list: list.New(rows(), 0).WithMotion(120 * time.Millisecond)}
+	return model{sh: sh, th: th, list: list.New(rows()).WithMotion(120 * time.Millisecond)}
 }
 
 func (m model) Init() tea.Cmd { return nil }

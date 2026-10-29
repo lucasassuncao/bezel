@@ -39,10 +39,10 @@ func TestKeyCarriesTextOnlyForAPlainCharacter(t *testing.T) {
 
 func TestKeyMatchesTheBindingItNames(t *testing.T) {
 	for _, n := range []string{"ctrl+s", "shift+tab", "V", "enter", " "} {
-		b := key.NewBinding(key.WithKeys(Key(n).String()))
+		b := key.New(Key(n).String())
 		require.True(t, key.Matches(Key(n), b), n)
 	}
-	require.False(t, key.Matches(Key("v"), key.NewBinding(key.WithKeys("V"))))
+	require.False(t, key.Matches(Key("v"), key.New("V")))
 }
 
 // A typo in a test must fail loudly, not send some other key.

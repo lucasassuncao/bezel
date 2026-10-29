@@ -55,37 +55,38 @@ func TestButtonRunsItsCommand(t *testing.T) {
 }
 
 func TestEmptyChoicesDoNotPanic(t *testing.T) {
-	for _, fl := range []Field{NewSelect("Image", nil, 0, th()), NewRadio("Shell", nil, 0, th())} {
-		f, _ := New(fl)
+	for _, fl := range []Field{NewSelect("Image", nil), NewRadio("Shell", nil)} {
+		f := New(th(), fl)
 		require.NotPanics(t, func() {
 			f, _ = press(f, "enter", "down", "up", "right", "left", "enter")
 			_ = f.View(40)
 		})
 	}
-	require.Empty(t, NewSelect("Image", nil, 0, th()).Value())
-	require.Empty(t, NewRadio("Shell", nil, 0, th()).Value())
+	require.Empty(t, NewSelect("Image", nil).Value())
+	require.Empty(t, NewRadio("Shell", nil).Value())
 }
 
 // The environment only picks the default: a host that chose a set keeps it.
 func TestWithIconsOverridesTheEnvironment(t *testing.T) {
 	t.Setenv("BEZEL_ASCII", "1")
-	r := NewRadio("Shell", []string{"bash"}, 0, th())
+	r := NewRadio("Shell", []string{"bash"})
 	require.Contains(t, ansi.Strip(r.View(false, 5, 40)), "(*)")
 	require.Contains(t, ansi.Strip(r.WithIcons(icon.Unicode()).View(false, 5, 40)), "(•)")
 
-	sw := NewToggle("Docker", true, th()).WithIcons(icon.Unicode())
+	sw := NewToggle("Docker").WithOn(true).WithIcons(icon.Unicode())
 	require.Contains(t, ansi.Strip(sw.View(false, 6, 40)), "──●")
 }
 
 func TestInputCaretBlinksAtTheThemesPace(t *testing.T) {
-	_, cmd := NewInput("Name", "", 10, theme.Resolved{CaretBlink: time.Nanosecond}).Focus()
+	cmd := New(theme.Resolved{CaretBlink: time.Nanosecond}, NewInput("Name").WithWidth(10)).Init()
+	require.NotNil(t, cmd, "Init starts the focused input's blink")
 	start := time.Now()
 	cmd()
 	require.Less(t, time.Since(start), time.Second, "the blink came from the theme, not the half-second default")
 }
 
 func TestInputMaskHidesTheValue(t *testing.T) {
-	in := NewInput("Token", "", 10, th()).WithValue("s3cret").WithMask('*')
+	in := NewInput("Token").WithWidth(10).WithValue("s3cret").WithMask('*')
 	view := ansi.Strip(in.View(false, 6, 40))
 	require.Contains(t, view, "******")
 	require.NotContains(t, view, "s3cret")
@@ -96,12 +97,12 @@ func TestEachControlTakesItsOwnKeys(t *testing.T) {
 	keys := DefaultKeys()
 	keys.Right, keys.Down, keys.Close = binding("n"), binding("ctrl+j"), binding("q")
 
-	r, _ := NewRadio("r", []string{"a", "b"}, 0, th()).WithKeys(keys).Update(bezelKey("right"))
+	r, _ := NewRadio("r", []string{"a", "b"}).WithKeys(keys).Update(bezelKey("right"))
 	require.Equal(t, 0, r.(Radio).Selected())
 	r, _ = r.Update(bezelKey("n"))
 	require.Equal(t, 1, r.(Radio).Selected())
 
-	s := Field(NewSelect("s", []string{"a", "b"}, 0, th()).WithKeys(keys))
+	s := Field(NewSelect("s", []string{"a", "b"}).WithKeys(keys))
 	for _, k := range []string{"enter", "down", "ctrl+j", "q"} {
 		s, _ = s.Update(bezelKey(k))
 	}
@@ -114,3 +115,14 @@ func TestEachControlTakesItsOwnKeys(t *testing.T) {
 }
 
 func bezelKey(k string) tea.KeyPressMsg { return bezeltest.Key(k) }
+
+func TestWithsOpenTheControlsOnSavedValues(t *testing.T) {
+	require.True(t, NewCheckbox("a").WithChecked(true).Checked())
+	require.True(t, NewToggle("a").WithOn(true).On())
+	require.Equal(t, "zsh", NewRadio("r", []string{"bash", "zsh"}).WithSelected(1).Value())
+	require.Equal(t, 1, NewSelect("s", []string{"a", "b"}).WithSelected(9).Selected(), "clamped to the last")
+	require.Equal(t, 0, NewSelect("s", nil).WithSelected(3).Selected(), "no options: 0")
+
+	in := NewInput("Name").WithPlaceholder("my-project").WithWidth(12)
+	require.Contains(t, ansi.Strip(in.View(false, 4, 40)), "my-project")
+}

@@ -34,7 +34,7 @@ func viewLines(m Model[int]) []string {
 }
 
 func TestModelViewIsTheHeaderTheRowsAndTheMoreRow(t *testing.T) {
-	lines := viewLines(New(pkgCols, pkgs(10), 5))
+	lines := viewLines(New(pkgCols, pkgs(10)).SetHeight(5))
 	require.Len(t, lines, 5)
 	require.Equal(t, "  NAME   VERSION", lines[0])
 	require.Equal(t, "▶ pkg-0  v0.0", lines[1])
@@ -43,7 +43,7 @@ func TestModelViewIsTheHeaderTheRowsAndTheMoreRow(t *testing.T) {
 }
 
 func TestModelMovesAndScrollsUnderTheHeader(t *testing.T) {
-	m := New(pkgCols, pkgs(10), 5)
+	m := New(pkgCols, pkgs(10)).SetHeight(5)
 	m, _ = m.Update(press(tea.KeyDown))
 	require.Equal(t, 1, m.Cursor())
 
@@ -63,16 +63,16 @@ func TestModelMovesAndScrollsUnderTheHeader(t *testing.T) {
 }
 
 func TestModelEnterChoosesARow(t *testing.T) {
-	_, act := New(pkgCols, pkgs(3), 5).Update(press(tea.KeyEnter))
+	_, act := New(pkgCols, pkgs(3)).SetHeight(5).Update(press(tea.KeyEnter))
 	require.Equal(t, Chosen, act)
-	_, act = New(pkgCols, pkgs(0), 5).Update(press(tea.KeyEnter))
+	_, act = New(pkgCols, pkgs(0)).SetHeight(5).Update(press(tea.KeyEnter))
 	require.Equal(t, None, act, "nothing to choose")
-	_, act = New(pkgCols, pkgs(3), 5).Update(press('x'))
+	_, act = New(pkgCols, pkgs(3)).SetHeight(5).Update(press('x'))
 	require.Equal(t, None, act)
 }
 
 func TestModelSetItemsKeepsTheCursorByTheFirstCell(t *testing.T) {
-	m := New(pkgCols, pkgs(5), 10)
+	m := New(pkgCols, pkgs(5)).SetHeight(10)
 	m, _ = m.Update(press(tea.KeyDown))
 	m, _ = m.Update(press(tea.KeyDown))
 	require.Equal(t, "pkg-2", m.Selected().Cells[0])
@@ -93,7 +93,7 @@ func TestModelSetItemsKeepsTheCursorByTheFirstCell(t *testing.T) {
 func TestModelSizesColumnsOverEveryRow(t *testing.T) {
 	items := pkgs(10)
 	items[9].Cells[0] = "a-much-longer-name"
-	m := New(pkgCols, items, 3)
+	m := New(pkgCols, items).SetHeight(3)
 	before := viewLines(m)[0]
 	m, _ = m.Update(press(tea.KeyEnd))
 	require.Equal(t, before, viewLines(m)[0])
@@ -107,7 +107,7 @@ func TestModelCursorRowPaintsThePlainCells(t *testing.T) {
 		{Cells: []string{"api", red.Render("Failed")}},
 		{Cells: []string{"web", red.Render("Failed")}},
 	}
-	lines := strings.Split(New(pkgCols, items, 5).View(mint, 40), "\n")
+	lines := strings.Split(New(pkgCols, items).SetHeight(5).View(mint, 40), "\n")
 	require.Contains(t, lines[1], mint.Cursor.Render("▶ ")+mint.Cursor.Render("api"))
 	require.Contains(t, lines[1], red.Render("Failed"), "a coloured cell keeps its colour under the cursor")
 	require.Equal(t, "  web   Failed", ansi.Strip(lines[2]))
@@ -115,13 +115,13 @@ func TestModelCursorRowPaintsThePlainCells(t *testing.T) {
 }
 
 func TestModelViewIsEmptyBeforeSized(t *testing.T) {
-	require.Empty(t, New(pkgCols, pkgs(3), 0).View(th, 40))
-	require.Equal(t, []string{"  NAME   VERSION"}, viewLines(New(pkgCols, pkgs(3), 1)), "a one-row table is its header")
+	require.Empty(t, New(pkgCols, pkgs(3)).View(th, 40))
+	require.Equal(t, []string{"  NAME   VERSION"}, viewLines(New(pkgCols, pkgs(3)).SetHeight(1)), "a one-row table is its header")
 }
 
 func TestModelCopiesTheSlices(t *testing.T) {
 	items := pkgs(2)
-	m := New(pkgCols, items, 5)
+	m := New(pkgCols, items).SetHeight(5)
 	items[0].Value = 99
 	require.Equal(t, 0, m.Items()[0].Value)
 	got := m.Items()
@@ -133,7 +133,7 @@ func TestModelCopiesTheSlices(t *testing.T) {
 // handed out, changes nothing it shows.
 func TestModelCopiesTheCells(t *testing.T) {
 	items := pkgs(2)
-	m := New(pkgCols, items, 5)
+	m := New(pkgCols, items).SetHeight(5)
 	items[0].Cells[0] = "changed"
 	require.Equal(t, "pkg-0", m.Items()[0].Cells[0])
 
@@ -148,7 +148,7 @@ func TestModelCopiesTheCells(t *testing.T) {
 }
 
 func TestHalfPageKeysMoveHalfThePage(t *testing.T) {
-	m := New(pkgCols, pkgs(30), 11) // ten rows, nine a page beside the more row
+	m := New(pkgCols, pkgs(30)).SetHeight(11) // ten rows, nine a page beside the more row
 	m, _ = m.Update(tea.KeyPressMsg{Code: 'd', Mod: tea.ModCtrl})
 	require.Equal(t, 4, m.Cursor())
 	m, _ = m.Update(tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl})
@@ -156,7 +156,7 @@ func TestHalfPageKeysMoveHalfThePage(t *testing.T) {
 }
 
 func TestABlurredTableDimsItsCursorAndTakesNoKeys(t *testing.T) {
-	m := New(pkgCols, pkgs(3), 5).Blur()
+	m := New(pkgCols, pkgs(3)).SetHeight(5).Blur()
 	require.False(t, m.Focused())
 	m, _ = m.Update(press(tea.KeyDown))
 	require.Equal(t, 0, m.Cursor())
@@ -174,14 +174,14 @@ func TestFromValuesSplitsLinesIntoCells(t *testing.T) {
 
 func TestTheLegendNamesTheKeys(t *testing.T) {
 	var keys []string
-	for _, e := range New(pkgCols, pkgs(3), 5).Legend() {
+	for _, e := range New(pkgCols, pkgs(3)).SetHeight(5).Legend() {
 		keys = append(keys, e.Help().Key)
 	}
 	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "ctrl+u/d", "home/end", "enter"}, keys)
 }
 
 func TestAClickMovesTheCursorAndASecondChooses(t *testing.T) {
-	m := New(pkgCols, pkgs(10), 5) // header, three rows, the more row
+	m := New(pkgCols, pkgs(10)).SetHeight(5) // header, three rows, the more row
 	m, act := m.Click(3)
 	require.Equal(t, None, act)
 	require.Equal(t, 2, m.Cursor())

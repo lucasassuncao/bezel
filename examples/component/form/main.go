@@ -30,7 +30,6 @@ type model struct {
 	sh   shell.Shell
 	th   theme.Resolved
 	form form.Form
-	init tea.Cmd // the input's caret blink, started once the program runs
 }
 
 func newModel() model {
@@ -45,18 +44,19 @@ func newModel() model {
 			shell.Custom("ctrl+c", "quit", nil, shell.DisplayOnly()),
 		},
 	})
-	f, cmd := form.New(
-		form.NewInput("Name", "my-project", 28, th),
-		form.NewSelect("Image", []string{"ubuntu", "debian", "alpine"}, 0, th),
-		form.NewRadio("Shell", []string{"bash", "zsh", "fish"}, 0, th),
-		form.NewToggle("Docker", false, th),
-		form.NewCheckbox("Forward port 3000", false, th),
-		form.NewButton("Create", func() tea.Msg { return createMsg{} }, th),
+	f := form.New(th,
+		form.NewInput("Name").WithPlaceholder("my-project").WithWidth(28),
+		form.NewSelect("Image", []string{"ubuntu", "debian", "alpine"}),
+		form.NewRadio("Shell", []string{"bash", "zsh", "fish"}),
+		form.NewToggle("Docker"),
+		form.NewCheckbox("Forward port 3000"),
+		form.NewButton("Create", func() tea.Msg { return createMsg{} }),
 	)
-	return model{sh: sh, th: th, form: f, init: cmd}
+	return model{sh: sh, th: th, form: f}
 }
 
-func (m model) Init() tea.Cmd { return m.init }
+// Init starts the caret blinking in the input the form opens on.
+func (m model) Init() tea.Cmd { return m.form.Init() }
 
 // summary is what Create reports: every value the form holds.
 func (m model) summary() string {

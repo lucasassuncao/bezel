@@ -45,10 +45,10 @@ type Keys struct {
 // DefaultKeys are enter, tab and the arrows.
 func DefaultKeys() Keys {
 	return Keys{
-		Run:      key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "run")),
-		Complete: key.NewBinding(key.WithKeys("tab"), key.WithHelp("tab", "complete")),
-		Up:       key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "choose")),
-		Down:     key.NewBinding(key.WithKeys("down")),
+		Run:      key.New("enter").WithHelp("enter", "run"),
+		Complete: key.New("tab").WithHelp("tab", "complete"),
+		Up:       key.New("up").WithHelp("↑/↓", "choose"),
+		Down:     key.New("down"),
 	}
 }
 

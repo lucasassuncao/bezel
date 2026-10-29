@@ -100,10 +100,10 @@ func (t Tween) At(now time.Time) (int, bool) {
 	return t.From + int(math.Round(float64(t.To-t.From)*frames.Or(t.ease)(p))), false
 }
 
-// New builds the tween taking a panel from its on-screen height to target
+// NewTween builds the tween taking a panel from its on-screen height to target
 // over dur, its clock started by the first frame Tick delivers. When dur <= 0
 // or from == target, or motion is Still, it is inactive and already at target.
-func New(from, target int, dur time.Duration) Tween {
+func NewTween(from, target int, dur time.Duration) Tween {
 	if dur <= 0 || from == target || Still() {
 		return Tween{From: target, To: target, Cur: target}
 	}

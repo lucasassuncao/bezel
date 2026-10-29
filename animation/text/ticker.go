@@ -23,10 +23,28 @@ type Ticker struct {
 	run            frames.Run
 }
 
-// NewTicker shows value in base; each change rolls over dur in up when the
-// number rises and down when it falls.
-func NewTicker(value int, base, up, down color.Color, dur time.Duration) Ticker {
-	return Ticker{from: value, to: value, base: base, up: up, down: down, dur: dur, p: 1}
+// NewTicker shows value; each change rolls over dur. It keeps the terminal's
+// colour until WithBase, WithUp and WithDown give it some.
+func NewTicker(value int, dur time.Duration) Ticker {
+	return Ticker{from: value, to: value, dur: dur, p: 1}
+}
+
+// WithBase is the colour the number rests in.
+func (t Ticker) WithBase(c color.Color) Ticker {
+	t.base = c
+	return t
+}
+
+// WithUp is the colour the number flashes when it rises.
+func (t Ticker) WithUp(c color.Color) Ticker {
+	t.up = c
+	return t
+}
+
+// WithDown is the colour the number flashes when it falls.
+func (t Ticker) WithDown(c color.Color) Ticker {
+	t.down = c
+	return t
 }
 
 // To rolls the number from where it is now to v.

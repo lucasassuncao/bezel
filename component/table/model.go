@@ -38,15 +38,15 @@ type Keys struct {
 // home/end and enter.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:           key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "move")),
-		Down:         key.NewBinding(key.WithKeys("down")),
-		PageUp:       key.NewBinding(key.WithKeys("pgup"), key.WithHelp("pgup/pgdn", "page")),
-		PageDown:     key.NewBinding(key.WithKeys("pgdown")),
-		HalfPageUp:   key.NewBinding(key.WithKeys("ctrl+u"), key.WithHelp("ctrl+u/d", "half page")),
-		HalfPageDown: key.NewBinding(key.WithKeys("ctrl+d")),
-		Top:          key.NewBinding(key.WithKeys("home"), key.WithHelp("home/end", "ends")),
-		Bottom:       key.NewBinding(key.WithKeys("end")),
-		Enter:        key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "choose")),
+		Up:           key.New("up").WithHelp("↑/↓", "move"),
+		Down:         key.New("down"),
+		PageUp:       key.New("pgup").WithHelp("pgup/pgdn", "page"),
+		PageDown:     key.New("pgdown"),
+		HalfPageUp:   key.New("ctrl+u").WithHelp("ctrl+u/d", "half page"),
+		HalfPageDown: key.New("ctrl+d"),
+		Top:          key.New("home").WithHelp("home/end", "ends"),
+		Bottom:       key.New("end"),
+		Enter:        key.New("enter").WithHelp("enter", "choose"),
 	}
 }
 
@@ -66,11 +66,11 @@ type Model[T any] struct {
 	blur   bool // drawn without the cursor's colour, and deaf to keys
 }
 
-// New builds a table height rows tall, header included, with the cursor on
-// the first row.
-func New[T any](cols []Column, items []Item[T], height int) Model[T] {
+// New builds a table with the cursor on the first row; SetHeight gives it
+// the rows its pane has, header included.
+func New[T any](cols []Column, items []Item[T]) Model[T] {
 	m := Model[T]{cols: slices.Clone(cols), keys: DefaultKeys()}
-	return m.withItems(items).SetHeight(height)
+	return m.withItems(items).SetHeight(0)
 }
 
 // WithKeys rebinds the table.

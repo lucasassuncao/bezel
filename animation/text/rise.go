@@ -24,13 +24,21 @@ type Rise struct {
 	run    frames.Run
 }
 
-// NewRise floats text rows rows up over dur, fading from fg into bg.
-func NewRise(text string, rows int, fg, bg color.Color, dur time.Duration) Rise {
-	r := Rise{text: text, rows: max(rows, 1), fg: fg, bg: bg, run: frames.NewRun(dur)}
+// NewRise floats text rows rows up over dur, in the terminal's colour until
+// WithFade.
+func NewRise(text string, rows int, dur time.Duration) Rise {
+	r := Rise{text: text, rows: max(rows, 1), run: frames.NewRun(dur)}
 	r.run.Ease = animation.EaseOut
 	if !r.Active() {
 		r.p = 1
 	}
+	return r
+}
+
+// WithFade fades the text from fg into bg as it rises; bg is usually the
+// background it rises over.
+func (r Rise) WithFade(fg, bg color.Color) Rise {
+	r.fg, r.bg = fg, bg
 	return r
 }
 

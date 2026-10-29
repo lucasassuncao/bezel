@@ -19,7 +19,7 @@ Package progress draws how far along something is: bars, a meter and a stepper o
 - [func Smooth\(done, total, width int, th theme.Resolved, opts ...Option\) string](<#Smooth>)
 - [func Stepper\(steps \[\]string, current, width int, th theme.Resolved, set icon.Set\) string](<#Stepper>)
 - [type Model](<#Model>)
-  - [func NewModel\(width int\) Model](<#NewModel>)
+  - [func New\(width int\) Model](<#New>)
   - [func \(m Model\) Active\(\) bool](<#Model.Active>)
   - [func \(m Model\) DecrPercent\(d float64\) \(Model, tea.Cmd\)](<#Model.DecrPercent>)
   - [func \(m Model\) IncrPercent\(d float64\) \(Model, tea.Cmd\)](<#Model.IncrPercent>)
@@ -108,14 +108,14 @@ type Model struct {
 }
 ```
 
-<a name="NewModel"></a>
-### func [NewModel](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L44>)
+<a name="New"></a>
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L44>)
 
 ```go
-func NewModel(width int) Model
+func New(width int) Model
 ```
 
-NewModel is an empty bar width cells wide, the percentage included, with █ over ░ and the percentage shown.
+New is an empty bar width cells wide, the percentage included, with █ over ░ and the percentage shown.
 
 <a name="Model.Active"></a>
 ### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L119>)

@@ -32,15 +32,15 @@ type Keys struct {
 // enter to pick.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:       key.NewBinding(key.WithKeys("up", "ctrl+p"), key.WithHelp("↑/↓", "move")),
-		Down:     key.NewBinding(key.WithKeys("down", "ctrl+n")),
-		PageUp:   key.NewBinding(key.WithKeys("pgup")),
-		PageDown: key.NewBinding(key.WithKeys("pgdown")),
-		Top:      key.NewBinding(key.WithKeys("home")),
-		Bottom:   key.NewBinding(key.WithKeys("end")),
-		Back:     key.NewBinding(key.WithKeys("left", "backspace"), key.WithHelp("←", "up")),
-		Open:     key.NewBinding(key.WithKeys("right"), key.WithHelp("→", "open")),
-		Pick:     key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "pick")),
+		Up:       key.New("up", "ctrl+p").WithHelp("↑/↓", "move"),
+		Down:     key.New("down", "ctrl+n"),
+		PageUp:   key.New("pgup"),
+		PageDown: key.New("pgdown"),
+		Top:      key.New("home"),
+		Bottom:   key.New("end"),
+		Back:     key.New("left", "backspace").WithHelp("←", "up"),
+		Open:     key.New("right").WithHelp("→", "open"),
+		Pick:     key.New("enter").WithHelp("enter", "pick"),
 	}
 }
 

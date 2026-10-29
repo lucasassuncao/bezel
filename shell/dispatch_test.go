@@ -128,7 +128,7 @@ func TestARefusedActionDoesNotRun(t *testing.T) {
 func TestActionsStandAsideForAnOverlay(t *testing.T) {
 	ran := false
 	s := sized(New(actionConfig()).SetActions(Custom("p", "ping", func(ActionContext) tea.Cmd { ran = true; return nil })))
-	s = s.Push(overlay.NewText("t", []string{"x"}, theme.Resolved{}))
+	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
 	s.Update(keyP)
 	require.False(t, ran)
 }

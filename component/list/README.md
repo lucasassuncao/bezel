@@ -18,7 +18,7 @@ Package list is a cursor list with section headings, a scroll indicator or pages
 - [type Keys](<#Keys>)
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
 - [type Model](<#Model>)
-  - [func New\[T any\]\(rows \[\]Row\[T\], height int\) Model\[T\]](<#New>)
+  - [func New\[T any\]\(rows \[\]Row\[T\]\) Model\[T\]](<#New>)
   - [func \(m Model\[T\]\) Active\(\) bool](<#Model[T].Active>)
   - [func \(m Model\[T\]\) Animate\(msg tea.Msg\) \(Model\[T\], tea.Cmd\)](<#Model[T].Animate>)
   - [func \(m Model\[T\]\) Click\(y int\) \(Model\[T\], Action\)](<#Model[T].Click>)
@@ -120,10 +120,10 @@ type Model[T any] struct {
 ### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L104>)
 
 ```go
-func New[T any](rows []Row[T], height int) Model[T]
+func New[T any](rows []Row[T]) Model[T]
 ```
 
-New builds a list height rows tall with the cursor on the first selectable row.
+New builds a list with the cursor on the first selectable row; SetHeight gives it the rows its pane has.
 
 <a name="Model[T].Active"></a>
 ### func \(Model\[T\]\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L101>)

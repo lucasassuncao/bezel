@@ -53,7 +53,7 @@ func marked(out string) string {
 func TestTheCursorGlidesThroughTheRowsBetween(t *testing.T) {
 	moving(t)
 	th := theme.Resolve(theme.Plain, true)
-	m := New(plainRows("a", "b", "c", "d", "e"), 5).WithMotion(100 * ms)
+	m := New(plainRows("a", "b", "c", "d", "e")).SetHeight(5).WithMotion(100 * ms)
 	for range 4 {
 		m, _ = m.Update(bezeltest.Key("down"))
 	}
@@ -69,7 +69,7 @@ func TestTheCursorGlidesThroughTheRowsBetween(t *testing.T) {
 
 func TestAListWithoutMotionJumps(t *testing.T) {
 	moving(t)
-	m := New(plainRows("a", "b"), 2)
+	m := New(plainRows("a", "b")).SetHeight(2)
 	m, _ = m.Update(bezeltest.Key("down"))
 	assert.Nil(t, m.Tick())
 	assert.False(t, m.Active())
@@ -78,22 +78,22 @@ func TestAListWithoutMotionJumps(t *testing.T) {
 func TestANewRowLightsUpAndALeavingRowFades(t *testing.T) {
 	moving(t)
 	th := theme.Resolve(theme.Plain, true)
-	m := New(plainRows("keep", "old"), 4).WithMotion(100 * ms)
+	m := New(plainRows("keep", "old")).SetHeight(4).WithMotion(100 * ms)
 	m = m.SetRows(plainRows("keep", "new"))
 	require.NotNil(t, m.Tick())
 	out := playTo(m, 20*ms).View(th)
 	lines := strings.Split(ansi.Strip(out), "\n")
 	assert.Equal(t, []string{"▶ keep", "  old", "  new"}, lines, "the old row is still there, fading")
 	assert.Contains(t, out, ";9m", "and struck through")
-	assert.NotEqual(t, New(plainRows("keep", "new"), 4).View(th), out, "the new row is lit")
+	assert.NotEqual(t, New(plainRows("keep", "new")).SetHeight(4).View(th), out, "the new row is lit")
 	settled := playTo(m, time.Second).View(th)
-	assert.Equal(t, New(plainRows("keep", "new"), 4).View(th), settled)
+	assert.Equal(t, New(plainRows("keep", "new")).SetHeight(4).View(th), settled)
 }
 
 func TestAGhostNeverMakesTheListTaller(t *testing.T) {
 	moving(t)
 	th := theme.Resolve(theme.Plain, true)
-	m := New(plainRows("a", "b", "c"), 3).WithMotion(100 * ms)
+	m := New(plainRows("a", "b", "c")).SetHeight(3).WithMotion(100 * ms)
 	m = m.SetRows(plainRows("a", "c", "d"))
 	out := playTo(m, 20*ms).View(th)
 	assert.Len(t, strings.Split(out, "\n"), 3)
@@ -101,9 +101,9 @@ func TestAGhostNeverMakesTheListTaller(t *testing.T) {
 
 func TestTheListTakesOnlyItsOwnFrames(t *testing.T) {
 	moving(t)
-	m := New(plainRows("a", "b"), 2).WithMotion(100 * ms)
+	m := New(plainRows("a", "b")).SetHeight(2).WithMotion(100 * ms)
 	m, _ = m.Update(bezeltest.Key("down"))
-	other := New(plainRows("x", "y"), 2).WithMotion(100 * ms)
+	other := New(plainRows("x", "y")).SetHeight(2).WithMotion(100 * ms)
 	other, _ = other.Update(bezeltest.Key("down"))
 	_, cmd := m.Animate(other.FrameAt(time.Unix(1, 0)))
 	assert.Nil(t, cmd)
@@ -115,7 +115,7 @@ func TestTheListTakesOnlyItsOwnFrames(t *testing.T) {
 
 func TestStillListsDoNotMove(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
-	m := New(plainRows("a", "b"), 2).WithMotion(100 * ms)
+	m := New(plainRows("a", "b")).SetHeight(2).WithMotion(100 * ms)
 	m, _ = m.Update(bezeltest.Key("down"))
 	assert.False(t, m.Active())
 	assert.Nil(t, m.Tick())
@@ -133,7 +133,7 @@ func TestMixBlendsAndGivesWayToAMissingColour(t *testing.T) {
 // one line off.
 func TestAClickLooksPastAGhost(t *testing.T) {
 	moving(t)
-	m := New(plainRows("keep", "old"), 4).WithMotion(100 * ms)
+	m := New(plainRows("keep", "old")).SetHeight(4).WithMotion(100 * ms)
 	m = playTo(m.SetRows(plainRows("keep", "new")), 20*ms) // "keep", the ghost, "new"
 	m, act := m.Click(1)
 	assert.Equal(t, None, act, "the ghost is no row")

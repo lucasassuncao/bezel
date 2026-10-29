@@ -18,7 +18,7 @@ type pickedMsg struct{ i int }
 
 func TestChoiceRunsTheOptionAndCloses(t *testing.T) {
 	ran := ""
-	c := NewChoice("Apply?", []string{"one", "two"}, []Option{
+	c := NewChoice("Apply?", "one\ntwo", []Option{
 		Opt("enter/y", "apply", func() tea.Msg { ran = "apply"; return nil }),
 		Opt("d", "dry-run", func() tea.Msg { ran = "dry"; return nil }),
 	}, theme.Resolved{})
@@ -128,15 +128,21 @@ func TestPickShowsItsKeysInItsBox(t *testing.T) {
 }
 
 func TestTextClosesOnAnyKey(t *testing.T) {
-	x := NewText("Help", []string{"a line"}, theme.Resolved{})
+	x := NewText("Help", "a line", theme.Resolved{})
 	require.Contains(t, ansi.Strip(x.View(layout.Rect{W: 40, H: 10})), "a line")
 	_, cmd := x.Update(press("q"))
 	require.IsType(t, CloseMsg{}, cmd())
 }
 
+func TestTextLinesReadCRLFAndDropTrailingBlanks(t *testing.T) {
+	require.Equal(t, []string{"a", "", "b"}, textLines("a\r\n\nb\n\n"))
+	require.Nil(t, textLines(""))
+	require.Nil(t, textLines("\n\n"))
+}
+
 func TestPickAnswersToTheKeysItWasGiven(t *testing.T) {
 	keys := DefaultPickKeys()
-	keys.Up, keys.Down = bind("k", "move"), key.NewBinding(key.WithKeys("j"))
+	keys.Up, keys.Down = bind("k", "move"), key.New("j")
 	p := NewPick("t", []string{"a", "b"}, nil, theme.Resolved{}).WithKeys(keys)
 
 	o, _ := p.Update(press("j"))
@@ -151,7 +157,7 @@ func TestChoiceRunsTheOptionClicked(t *testing.T) {
 	opt := func(label, k string) Option {
 		return Opt(k, label, func() tea.Msg { ran = label; return nil })
 	}
-	s := Stack{}.Push(NewChoice("Save?", []string{"unsaved"}, []Option{opt("Save", "s"), opt("Discard", "d")}, theme.Resolved{}))
+	s := Stack{}.Push(NewChoice("Save?", "unsaved", []Option{opt("Save", "s"), opt("Discard", "d")}, theme.Resolved{}))
 	x, y := cellOf(t, s, "Discard")
 	_, cmd := s.Click(x, y, clickBody)
 	require.True(t, isClose(cmd))

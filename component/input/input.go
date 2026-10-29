@@ -36,22 +36,22 @@ type Keys struct {
 // tab takes a suggestion, ctrl+n and ctrl+p turn through them.
 func DefaultKeys() Keys {
 	return Keys{
-		Left:              key.NewBinding(key.WithKeys("left", "ctrl+b")),
-		Right:             key.NewBinding(key.WithKeys("right", "ctrl+f")),
-		WordLeft:          key.NewBinding(key.WithKeys("alt+left", "ctrl+left", "alt+b")),
-		WordRight:         key.NewBinding(key.WithKeys("alt+right", "ctrl+right", "alt+f")),
-		Home:              key.NewBinding(key.WithKeys("home", "ctrl+a")),
-		End:               key.NewBinding(key.WithKeys("end", "ctrl+e")),
-		DeleteBack:        key.NewBinding(key.WithKeys("backspace", "ctrl+h")),
-		DeleteForward:     key.NewBinding(key.WithKeys("delete", "ctrl+d")),
-		DeleteWordBack:    key.NewBinding(key.WithKeys("alt+backspace", "ctrl+w", "ctrl+backspace")),
-		DeleteWordForward: key.NewBinding(key.WithKeys("alt+delete", "alt+d", "ctrl+delete")),
-		KillToStart:       key.NewBinding(key.WithKeys("ctrl+u")),
-		KillToEnd:         key.NewBinding(key.WithKeys("ctrl+k")),
-		Paste:             key.NewBinding(key.WithKeys("ctrl+v")),
-		Accept:            key.NewBinding(key.WithKeys("tab")),
-		NextSuggestion:    key.NewBinding(key.WithKeys("ctrl+n")),
-		PrevSuggestion:    key.NewBinding(key.WithKeys("ctrl+p")),
+		Left:              key.New("left", "ctrl+b"),
+		Right:             key.New("right", "ctrl+f"),
+		WordLeft:          key.New("alt+left", "ctrl+left", "alt+b"),
+		WordRight:         key.New("alt+right", "ctrl+right", "alt+f"),
+		Home:              key.New("home", "ctrl+a"),
+		End:               key.New("end", "ctrl+e"),
+		DeleteBack:        key.New("backspace", "ctrl+h"),
+		DeleteForward:     key.New("delete", "ctrl+d"),
+		DeleteWordBack:    key.New("alt+backspace", "ctrl+w", "ctrl+backspace"),
+		DeleteWordForward: key.New("alt+delete", "alt+d", "ctrl+delete"),
+		KillToStart:       key.New("ctrl+u"),
+		KillToEnd:         key.New("ctrl+k"),
+		Paste:             key.New("ctrl+v"),
+		Accept:            key.New("tab"),
+		NextSuggestion:    key.New("ctrl+n"),
+		PrevSuggestion:    key.New("ctrl+p"),
 	}
 }
 

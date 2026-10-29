@@ -20,9 +20,19 @@ type Text struct {
 	lines []string
 }
 
-// NewText shows lines under title until any key.
-func NewText(title string, lines []string, th theme.Resolved) Text {
-	return Text{title: title, lines: slices.Clone(lines), look: lookOf(th)}
+// NewText shows text under title until any key.
+func NewText(title, text string, th theme.Resolved) Text {
+	return Text{title: title, lines: textLines(text), look: lookOf(th)}
+}
+
+// textLines is text split into lines, CRLF read as LF and trailing blank
+// lines dropped; none for "".
+func textLines(text string) []string {
+	text = strings.TrimRight(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
+	if text == "" {
+		return nil
+	}
+	return strings.Split(text, "\n")
 }
 
 func (t Text) Update(msg tea.Msg) (Overlay, tea.Cmd) {
@@ -48,7 +58,7 @@ type Option struct {
 
 // Opt builds an Option from a key label and what it does.
 func Opt(keys, label string, do tea.Cmd) Option {
-	return Option{Key: key.NewBinding(key.WithKeys(strings.Split(keys, "/")...), key.WithHelp(keys, label)), Label: label, Do: do}
+	return Option{Key: key.New(strings.Split(keys, "/")...).WithHelp(keys, label), Label: label, Do: do}
 }
 
 // Choice is a dialog with a body and keyed options: apply / dry-run / cancel.
@@ -60,9 +70,9 @@ type Choice struct {
 	options []Option
 }
 
-// NewChoice shows lines under title with options as its buttons.
-func NewChoice(title string, lines []string, options []Option, th theme.Resolved) Choice {
-	return Choice{title: title, lines: slices.Clone(lines), options: slices.Clone(options), look: lookOf(th)}
+// NewChoice shows text under title with options as its buttons.
+func NewChoice(title, text string, options []Option, th theme.Resolved) Choice {
+	return Choice{title: title, lines: textLines(text), options: slices.Clone(options), look: lookOf(th)}
 }
 
 func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd) {
@@ -141,9 +151,9 @@ type PickKeys struct {
 // DefaultPickKeys are the arrows and enter.
 func DefaultPickKeys() PickKeys {
 	return PickKeys{
-		Up:    key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "choose")),
-		Down:  key.NewBinding(key.WithKeys("down")),
-		Enter: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "pick")),
+		Up:    key.New("up").WithHelp("↑/↓", "choose"),
+		Down:  key.New("down"),
+		Enter: key.New("enter").WithHelp("enter", "pick"),
 	}
 }
 

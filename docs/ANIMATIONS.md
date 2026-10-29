@@ -25,7 +25,7 @@ go run ./examples/animation/scene  # the scenes, one at a time
 
 ```go
 case toggleMsg:
-	m.slide = animation.New(m.height, 8, 300*time.Millisecond)
+	m.slide = animation.NewTween(m.height, 8, 300*time.Millisecond)
 	return m, m.slide.Tick()
 case animation.FrameMsg:
 	var cmd tea.Cmd
@@ -92,7 +92,7 @@ Every timed one takes `WithDelay` and `WithRepeat`, `animation.Forever` for no e
 `Linear`, `EaseIn`, `EaseOut` and `EaseInOut`, the default, and nine more, each easing in: `Sine`, `Cubic`, `Quart`, `Quint`, `Expo`, `Circ`, `Back`, `Elastic` and `Bounce`. `Out` and `InOut` turn any of them round, and `Steps(n)` moves in whole jumps:
 
 ```go
-animation.New(0, 40, time.Second).WithEase(animation.Out(animation.Back))
+animation.NewTween(0, 40, time.Second).WithEase(animation.Out(animation.Back))
 ```
 
 Every curve starts at exactly 0 and ends at exactly 1. `Back` and `Elastic` leave that range on the way, so what they move overshoots and settles. The text and effect kinds take the same curves.

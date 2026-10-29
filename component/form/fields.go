@@ -19,6 +19,11 @@ func is(msg tea.Msg, bs ...key.Binding) bool {
 	return ok && key.Matches(k, bs...)
 }
 
+// clampOption is i kept within options, 0 when there are none.
+func clampOption(i int, options []string) int {
+	return min(max(i, 0), max(0, len(options)-1))
+}
+
 // optionAt is options[i], or "" when there are none to choose from.
 func optionAt(options []string, i int) string {
 	if i < 0 || i >= len(options) {
@@ -34,10 +39,21 @@ type Input struct {
 	th    *theme.Resolved
 }
 
-// NewInput is an empty field width cells wide, placeholder shown until typed in.
-func NewInput(label, placeholder string, width int, th theme.Resolved) Input {
-	in := input.New(th).WithPlaceholder(placeholder).WithWidth(width)
-	return Input{label: label, in: in, th: &th}
+// NewInput is an empty field as wide as its text.
+func NewInput(label string) Input {
+	return Input{label: label, in: input.New(theme.Resolved{})}
+}
+
+// WithPlaceholder shows s, dimmed, until the field is typed in.
+func (i Input) WithPlaceholder(s string) Input {
+	i.in = i.in.WithPlaceholder(s)
+	return i
+}
+
+// WithWidth keeps the field width cells wide whatever it holds.
+func (i Input) WithWidth(width int) Input {
+	i.in = i.in.WithWidth(width)
+	return i
 }
 
 // WithValue is the field holding s, the way a form opens on saved values.
@@ -55,6 +71,14 @@ func (i Input) WithMask(mask rune) Input {
 // Value is the text in the field.
 func (i Input) Value() string { return i.in.Value() }
 func (i Input) Label() string { return i.label }
+
+// Init starts the caret blinking when the form opens focused on the field.
+func (i Input) Init() tea.Cmd { return i.in.Blink() }
+
+func (i Input) retheme(th *theme.Resolved) Field {
+	i.th, i.in = th, i.in.SetTheme(*th)
+	return i
+}
 
 func (i Input) Update(msg tea.Msg) (Field, tea.Cmd) {
 	var cmd tea.Cmd
@@ -89,9 +113,15 @@ type Checkbox struct {
 	keys    Keys
 }
 
-// NewCheckbox is a box labelled label, ticked when checked.
-func NewCheckbox(label string, checked bool, th theme.Resolved) Checkbox {
-	return Checkbox{label: label, checked: checked, th: &th, keys: DefaultKeys()}
+// NewCheckbox is an empty box labelled label.
+func NewCheckbox(label string) Checkbox {
+	return Checkbox{label: label, keys: DefaultKeys()}
+}
+
+// WithChecked ticks the box when on, the way a form opens on saved values.
+func (c Checkbox) WithChecked(on bool) Checkbox {
+	c.checked = on
+	return c
 }
 
 // WithKeys rebinds the box: Press flips it.
@@ -101,6 +131,11 @@ func (c Checkbox) WithKeys(k Keys) Checkbox {
 }
 
 func (c Checkbox) rebind(k Keys) Field { return c.WithKeys(k) }
+
+func (c Checkbox) retheme(th *theme.Resolved) Field {
+	c.th = th
+	return c
+}
 
 // Checked reports whether the box is ticked.
 func (c Checkbox) Checked() bool { return c.checked }
@@ -147,10 +182,15 @@ type Radio struct {
 	keys     Keys
 }
 
-// NewRadio offers options with the one at selected chosen, clamped in range.
-func NewRadio(label string, options []string, selected int, th theme.Resolved) Radio {
-	selected = min(max(selected, 0), max(0, len(options)-1))
-	return Radio{label: label, options: slices.Clone(options), selected: selected, th: &th, set: icon.FromEnv(), keys: DefaultKeys()}
+// NewRadio offers options with the first one chosen.
+func NewRadio(label string, options []string) Radio {
+	return Radio{label: label, options: slices.Clone(options), set: icon.FromEnv(), keys: DefaultKeys()}
+}
+
+// WithSelected chooses the option at i, clamped in range.
+func (r Radio) WithSelected(i int) Radio {
+	r.selected = clampOption(i, r.options)
+	return r
 }
 
 // WithKeys rebinds the radio: Left and Right move the choice.
@@ -160,6 +200,11 @@ func (r Radio) WithKeys(k Keys) Radio {
 }
 
 func (r Radio) rebind(k Keys) Field { return r.WithKeys(k) }
+
+func (r Radio) retheme(th *theme.Resolved) Field {
+	r.th = th
+	return r
+}
 
 // WithIcons draws the chosen mark from set instead of icon.FromEnv's.
 func (r Radio) WithIcons(set icon.Set) Radio {
@@ -207,9 +252,15 @@ type Toggle struct {
 	keys  Keys
 }
 
-// NewToggle is a switch labelled label, on when on.
-func NewToggle(label string, on bool, th theme.Resolved) Toggle {
-	return Toggle{label: label, on: on, th: &th, set: icon.FromEnv(), keys: DefaultKeys()}
+// NewToggle is a switch labelled label, off.
+func NewToggle(label string) Toggle {
+	return Toggle{label: label, set: icon.FromEnv(), keys: DefaultKeys()}
+}
+
+// WithOn turns the switch on when on, the way a form opens on saved values.
+func (t Toggle) WithOn(on bool) Toggle {
+	t.on = on
+	return t
 }
 
 // WithKeys rebinds the switch: Press, Left and Right flip it.
@@ -219,6 +270,11 @@ func (t Toggle) WithKeys(k Keys) Toggle {
 }
 
 func (t Toggle) rebind(k Keys) Field { return t.WithKeys(k) }
+
+func (t Toggle) retheme(th *theme.Resolved) Field {
+	t.th = th
+	return t
+}
 
 // WithIcons draws the switch from set instead of icon.FromEnv's.
 func (t Toggle) WithIcons(set icon.Set) Toggle {
@@ -265,13 +321,16 @@ type Select struct {
 	keys     Keys
 }
 
-// NewSelect offers options with the one at selected chosen, clamped in range.
-func NewSelect(label string, options []string, selected int, th theme.Resolved) Select {
-	selected = min(max(selected, 0), max(0, len(options)-1))
-	return Select{
-		label: label, options: slices.Clone(options), selected: selected, cursor: selected,
-		th: &th, set: icon.FromEnv(), keys: DefaultKeys(),
-	}
+// NewSelect offers options with the first one chosen.
+func NewSelect(label string, options []string) Select {
+	return Select{label: label, options: slices.Clone(options), set: icon.FromEnv(), keys: DefaultKeys()}
+}
+
+// WithSelected chooses the option at i, clamped in range.
+func (s Select) WithSelected(i int) Select {
+	s.selected = clampOption(i, s.options)
+	s.cursor = s.selected
+	return s
 }
 
 // WithKeys rebinds the select: Press opens and picks, Up and Down move, Close closes.
@@ -281,6 +340,11 @@ func (s Select) WithKeys(k Keys) Select {
 }
 
 func (s Select) rebind(k Keys) Field { return s.WithKeys(k) }
+
+func (s Select) retheme(th *theme.Resolved) Field {
+	s.th = th
+	return s
+}
 
 // WithIcons draws the list's marks from set instead of icon.FromEnv's.
 func (s Select) WithIcons(set icon.Set) Select {
@@ -358,8 +422,8 @@ type Button struct {
 }
 
 // NewButton is a button labelled label; onPress may be nil.
-func NewButton(label string, onPress tea.Cmd, th theme.Resolved) Button {
-	return Button{label: label, onPress: onPress, th: &th, keys: DefaultKeys()}
+func NewButton(label string, onPress tea.Cmd) Button {
+	return Button{label: label, onPress: onPress, keys: DefaultKeys()}
 }
 
 // WithKeys rebinds the button: Press presses it.
@@ -369,6 +433,11 @@ func (b Button) WithKeys(k Keys) Button {
 }
 
 func (b Button) rebind(k Keys) Field { return b.WithKeys(k) }
+
+func (b Button) retheme(th *theme.Resolved) Field {
+	b.th = th
+	return b
+}
 
 // Label is empty on purpose: a button sits in the value column and must not
 // widen the label column.

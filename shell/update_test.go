@@ -135,14 +135,14 @@ type answer struct{}
 // An async answer landing while a modal is up belongs to the app.
 func TestForeignMessagesPassAnOpenOverlay(t *testing.T) {
 	s := sized(New(actionConfig()))
-	s = s.Push(overlay.NewText("t", []string{"x"}, theme.Resolved{}))
+	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
 	_, handled, _ := s.Update(answer{})
 	require.False(t, handled)
 }
 
 func TestKeysStillReachAnOpenOverlay(t *testing.T) {
 	s := sized(New(actionConfig()))
-	s = s.Push(overlay.NewText("t", []string{"x"}, theme.Resolved{}))
+	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
 	_, handled, _ := s.Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
 	require.True(t, handled)
 }
@@ -151,7 +151,7 @@ func TestKeysStillReachAnOpenOverlay(t *testing.T) {
 // non-key messages pass it by for the app.
 func TestTopMsgReachesAnOpenOverlay(t *testing.T) {
 	s := sized(New(actionConfig()))
-	s = s.Push(overlay.NewText("t", []string{"x"}, theme.Resolved{}))
+	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
 	_, handled, _ := s.Update(overlay.TopMsg{Msg: answer{}})
 	require.True(t, handled)
 }

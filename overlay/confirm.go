@@ -32,10 +32,10 @@ type ConfirmKeys struct {
 // or n to answer at once; q answers no.
 func DefaultConfirmKeys() ConfirmKeys {
 	return ConfirmKeys{
-		Toggle: key.NewBinding(key.WithKeys("left", "right", "tab", "shift+tab"), key.WithHelp("←/→", "choose")),
-		Accept: key.NewBinding(key.WithKeys("enter", "space", " "), key.WithHelp("enter", "pick")),
-		Yes:    key.NewBinding(key.WithKeys("y", "Y"), key.WithHelp("y/n", "answer")),
-		No:     key.NewBinding(key.WithKeys("n", "N", "esc", "q")),
+		Toggle: key.New("left", "right", "tab", "shift+tab").WithHelp("←/→", "choose"),
+		Accept: key.New("enter", "space", " ").WithHelp("enter", "pick"),
+		Yes:    key.New("y", "Y").WithHelp("y/n", "answer"),
+		No:     key.New("n", "N", "esc", "q"),
 	}
 }
 

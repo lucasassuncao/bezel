@@ -34,7 +34,7 @@ type HelpKeys struct {
 
 // DefaultHelpKeys close on ?, esc, q or enter.
 func DefaultHelpKeys() HelpKeys {
-	return HelpKeys{Close: key.NewBinding(key.WithKeys("?", "esc", "q", "enter"), key.WithHelp("esc", "close"))}
+	return HelpKeys{Close: key.New("?", "esc", "q", "enter").WithHelp("esc", "close")}
 }
 
 // NewHelp lists sections, with no title over them.

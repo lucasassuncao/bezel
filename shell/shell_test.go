@@ -227,7 +227,7 @@ func TestEveryChangeLeavesTheLayoutResolved(t *testing.T) {
 		{"SetLegendLines", func(s Shell) Shell { return s.SetLegendLines(3) }},
 		{"ShowHelp", func(s Shell) Shell { return s.ShowHelp() }},
 		{"OpenCommands", func(s Shell) Shell { return s.OpenCommands() }},
-		{"Push", func(s Shell) Shell { return s.Push(overlay.NewText("t", []string{"x"}, theme.Resolved{})) }},
+		{"Push", func(s Shell) Shell { return s.Push(overlay.NewText("t", "x", theme.Resolved{})) }},
 		{"Pop", func(s Shell) Shell { return s.ShowHelp().Pop() }},
 		{"SetInput", func(s Shell) Shell { return s.SetInput(in) }},
 		{"ClearInput", func(s Shell) Shell { return s.SetInput(in).ClearInput() }},

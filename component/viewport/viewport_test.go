@@ -74,7 +74,7 @@ func TestLettersDoNotScroll(t *testing.T) {
 
 func TestHalfPageKeysCanBeBound(t *testing.T) {
 	k := DefaultKeys()
-	k.HalfPageDown = key.NewBinding(key.WithKeys("ctrl+d"))
+	k.HalfPageDown = key.New("ctrl+d")
 	got, _ := sized(numbered(40), 20, 10).WithKeys(k).Update(bezeltest.Key("ctrl+d"))
 	require.Equal(t, 5, got.YOffset())
 }

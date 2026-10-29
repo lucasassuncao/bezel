@@ -155,7 +155,7 @@ func TestStackSizesItsOverlays(t *testing.T) {
 	s, _, _ = s.Update(pgdown)
 	require.Equal(t, 10, s.Top().(Pager).Offset(), "pushed onto a sized stack")
 
-	s = s.Push(NewText("t", nil, theme.Resolved{})).Resize(layout.Rect{W: 60, H: 13}).Pop()
+	s = s.Push(NewText("t", "", theme.Resolved{})).Resize(layout.Rect{W: 60, H: 13}).Pop()
 	s, _, _ = s.Update(pgdown)
 	require.Equal(t, 15, s.Top().(Pager).Offset(), "a layer under the top was resized too")
 
@@ -186,7 +186,7 @@ func TestDialogLegendsNameTheirKeys(t *testing.T) {
 }
 
 func bind(keys, help string) key.Binding {
-	return key.NewBinding(key.WithKeys(strings.Split(keys, "/")...), key.WithHelp(keys, help))
+	return key.New(strings.Split(keys, "/")...).WithHelp(keys, help)
 }
 
 func TestPushingNilLeavesTheStackAlone(t *testing.T) {

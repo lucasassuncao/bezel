@@ -21,16 +21,16 @@ func items(names ...string) []Item {
 
 func press(code rune) tea.KeyPressMsg { return tea.KeyPressMsg{Code: code} }
 
-func TestNewSelectsCurrentAndClampsCursor(t *testing.T) {
-	b := New(items("a", "b", "c"), "b")
+func TestWithCurrentPutsTheCursorOnTheLabel(t *testing.T) {
+	b := New(items("a", "b", "c")).WithCurrent("b")
 	require.Equal(t, 1, b.Cursor())
 	require.Equal(t, "b", b.Selected().Label)
-	require.Equal(t, 0, New(items("a"), "zzz").Cursor())
-	require.Equal(t, Item{}, New(nil, "").Selected())
+	require.Equal(t, 0, New(items("a")).WithCurrent("zzz").Cursor())
+	require.Equal(t, Item{}, New(nil).Selected())
 }
 
 func TestArrowsMoveTheCursorAndClamp(t *testing.T) {
-	b := New(items("a", "b", "c"), "")
+	b := New(items("a", "b", "c"))
 	b, act := b.Update(press(tea.KeyDown))
 	require.Equal(t, None, act)
 	require.Equal(t, 1, b.Cursor())
@@ -40,7 +40,7 @@ func TestArrowsMoveTheCursorAndClamp(t *testing.T) {
 }
 
 func TestEnterChoosesEscDismissesTabMovesFocus(t *testing.T) {
-	b := New(items("a", "b"), "")
+	b := New(items("a", "b"))
 	_, act := b.Update(press(tea.KeyEnter))
 	require.Equal(t, Chosen, act)
 
@@ -58,7 +58,7 @@ func TestEnterChoosesEscDismissesTabMovesFocus(t *testing.T) {
 }
 
 func TestPreviewScrollsWhenFocused(t *testing.T) {
-	b := New(items("a"), "").SetPreviewHeight(2)
+	b := New(items("a")).SetPreviewHeight(2)
 	require.Equal(t, "detail of a\nline 2", b.PreviewView(2))
 	b, _ = b.Update(press(tea.KeyTab))
 	b, _ = b.Update(press(tea.KeyDown))
@@ -72,14 +72,14 @@ func TestPreviewScrollsWhenFocused(t *testing.T) {
 }
 
 func TestListViewMarksTheCursorAndScrollsToIt(t *testing.T) {
-	b := New(items("a", "b", "c", "d"), "d")
+	b := New(items("a", "b", "c", "d")).WithCurrent("d")
 	got := ansi.Strip(b.ListView(theme.Resolve(theme.Plain, true), 2))
 	require.Contains(t, got, "▶  d")
 	require.NotContains(t, got, "a")
 }
 
 func TestSetItemsKeepsTheCursorInRange(t *testing.T) {
-	b := New(items("a", "b", "c"), "c")
+	b := New(items("a", "b", "c")).WithCurrent("c")
 	b = b.SetItems(items("x"))
 	require.Equal(t, 0, b.Cursor())
 	require.Equal(t, "x", b.Selected().Label)
@@ -87,7 +87,7 @@ func TestSetItemsKeepsTheCursorInRange(t *testing.T) {
 
 // Paging past the end must not bank scroll that the way back has to undo.
 func TestPreviewScrollStopsAtTheEnd(t *testing.T) {
-	b := New(items("a"), "").SetPreviewHeight(2)
+	b := New(items("a")).SetPreviewHeight(2)
 	b, _ = b.Update(press(tea.KeyTab))
 	for range 5 {
 		b, _ = b.Update(press(tea.KeyPgDown))
@@ -100,7 +100,7 @@ func TestPreviewScrollStopsAtTheEnd(t *testing.T) {
 // Stepping back up from the bottom moves the cursor, not the whole window.
 func TestListViewDoesNotPinTheCursorToTheBottom(t *testing.T) {
 	th := theme.Resolve(theme.Plain, true)
-	b := New(items("a", "b", "c", "d", "e", "f", "g", "h"), "h")
+	b := New(items("a", "b", "c", "d", "e", "f", "g", "h")).WithCurrent("h")
 	b, _ = b.Update(press(tea.KeyUp))
 	lines := strings.Split(ansi.Strip(b.ListView(th, 4)), "\n")
 	require.Len(t, lines, 4)
@@ -109,7 +109,7 @@ func TestListViewDoesNotPinTheCursorToTheBottom(t *testing.T) {
 
 func TestNewAndSetItemsCopyTheSlice(t *testing.T) {
 	xs := items("a", "b")
-	b := New(xs, "")
+	b := New(xs)
 	xs[0].Label = "changed"
 	require.Equal(t, "a", b.Selected().Label)
 

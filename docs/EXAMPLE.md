@@ -97,7 +97,7 @@ func (m model) refresh() model {
 		}
 	}
 	if m.list.Len() == 0 {
-		m.list = list.New(rows, 0)
+		m.list = list.New(rows)
 	} else {
 		m.list = m.list.SetRows(rows)
 	}

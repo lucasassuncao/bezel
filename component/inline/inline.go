@@ -52,11 +52,11 @@ type confirmKeys struct {
 
 func defaultConfirmKeys() confirmKeys {
 	return confirmKeys{
-		Toggle: key.NewBinding(key.WithKeys("left", "right", "tab", "shift+tab"), key.WithHelp("←/→", "choose")),
-		Yes:    key.NewBinding(key.WithKeys("y", "Y"), key.WithHelp("y/n", "answer")),
-		No:     key.NewBinding(key.WithKeys("n", "N")),
-		Accept: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "confirm")),
-		Abort:  key.NewBinding(key.WithKeys("esc", "ctrl+c"), key.WithHelp("esc", "cancel")),
+		Toggle: key.New("left", "right", "tab", "shift+tab").WithHelp("←/→", "choose"),
+		Yes:    key.New("y", "Y").WithHelp("y/n", "answer"),
+		No:     key.New("n", "N"),
+		Accept: key.New("enter").WithHelp("enter", "confirm"),
+		Abort:  key.New("esc", "ctrl+c").WithHelp("esc", "cancel"),
 	}
 }
 

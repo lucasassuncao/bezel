@@ -38,13 +38,13 @@ type Keys struct {
 // DefaultKeys are the arrows, pgup/pgdown, enter, esc and tab.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:       key.NewBinding(key.WithKeys("up")),
-		Down:     key.NewBinding(key.WithKeys("down")),
-		PageUp:   key.NewBinding(key.WithKeys("pgup")),
-		PageDown: key.NewBinding(key.WithKeys("pgdown")),
-		Enter:    key.NewBinding(key.WithKeys("enter")),
-		Esc:      key.NewBinding(key.WithKeys("esc")),
-		Tab:      key.NewBinding(key.WithKeys("tab")),
+		Up:       key.New("up"),
+		Down:     key.New("down"),
+		PageUp:   key.New("pgup"),
+		PageDown: key.New("pgdown"),
+		Enter:    key.New("enter"),
+		Esc:      key.New("esc"),
+		Tab:      key.New("tab"),
 	}
 }
 
@@ -59,12 +59,16 @@ type Model struct {
 	previewHeight int  // rows the preview pane has, for paging
 }
 
-// New builds a browser over items with the cursor on the one labelled
-// current, or the first when none is.
-func New(items []Item, current string) Model {
-	m := Model{items: slices.Clone(items), keys: DefaultKeys()}
-	for i, it := range items {
-		if it.Label == current {
+// New builds a browser over items with the cursor on the first.
+func New(items []Item) Model {
+	return Model{items: slices.Clone(items), keys: DefaultKeys()}
+}
+
+// WithCurrent puts the cursor on the item labelled label; an unknown label
+// leaves it where it was.
+func (m Model) WithCurrent(label string) Model {
+	for i, it := range m.items {
+		if it.Label == label {
 			m.cursor = i
 			break
 		}

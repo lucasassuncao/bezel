@@ -31,7 +31,7 @@ type Entry struct {
 // New builds an entry from the key label, its description and, optionally,
 // the capability it needs. keys is what the legend prints, e.g. "↑/↓".
 func New(keys, desc string, needs ...Capability) Entry {
-	e := Entry{Binding: key.NewBinding(key.WithKeys(keys), key.WithHelp(keys, desc))}
+	e := Entry{Binding: key.New(keys).WithHelp(keys, desc)}
 	if len(needs) > 0 {
 		e.Needs = needs[0]
 	}

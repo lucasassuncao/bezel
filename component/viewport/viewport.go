@@ -36,14 +36,14 @@ type Keys struct {
 // key until an app gives it one.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:       key.NewBinding(key.WithKeys("up"), key.WithHelp("↑/↓", "scroll")),
-		Down:     key.NewBinding(key.WithKeys("down")),
-		Left:     key.NewBinding(key.WithKeys("left"), key.WithHelp("←/→", "pan")),
-		Right:    key.NewBinding(key.WithKeys("right")),
-		PageUp:   key.NewBinding(key.WithKeys("pgup"), key.WithHelp("pgup/pgdn", "page")),
-		PageDown: key.NewBinding(key.WithKeys("pgdown")),
-		Top:      key.NewBinding(key.WithKeys("home")),
-		Bottom:   key.NewBinding(key.WithKeys("end")),
+		Up:       key.New("up").WithHelp("↑/↓", "scroll"),
+		Down:     key.New("down"),
+		Left:     key.New("left").WithHelp("←/→", "pan"),
+		Right:    key.New("right"),
+		PageUp:   key.New("pgup").WithHelp("pgup/pgdn", "page"),
+		PageDown: key.New("pgdown"),
+		Top:      key.New("home"),
+		Bottom:   key.New("end"),
 	}
 }
 

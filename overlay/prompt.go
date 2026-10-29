@@ -43,7 +43,7 @@ type PromptKeys struct {
 
 // DefaultPromptKeys accept on enter.
 func DefaultPromptKeys() PromptKeys {
-	return PromptKeys{Accept: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "accept"))}
+	return PromptKeys{Accept: key.New("enter").WithHelp("enter", "accept")}
 }
 
 // NewPrompt builds a prompt with a "> " input; onAccept may be nil.

@@ -242,7 +242,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(t Timeline\) WithRepeat\(n int\) Timeline](<#Timeline.WithRepeat>)
   - [func \(t Timeline\) WithYoyo\(\) Timeline](<#Timeline.WithYoyo>)
 - [type Tween](<#Tween>)
-  - [func New\(from, target int, dur time.Duration\) Tween](<#New>)
+  - [func NewTween\(from, target int, dur time.Duration\) Tween](<#NewTween>)
   - [func \(t Tween\) Active\(\) bool](<#Tween.Active>)
   - [func \(t Tween\) Advance\(now time.Time\) \(Tween, bool\)](<#Tween.Advance>)
   - [func \(t Tween\) At\(now time.Time\) \(int, bool\)](<#Tween.At>)
@@ -2398,14 +2398,14 @@ type Tween struct {
 }
 ```
 
-<a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L106>)
+<a name="NewTween"></a>
+### func [NewTween](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L106>)
 
 ```go
-func New(from, target int, dur time.Duration) Tween
+func NewTween(from, target int, dur time.Duration) Tween
 ```
 
-New builds the tween taking a panel from its on\-screen height to target over dur, its clock started by the first frame Tick delivers. When dur \<= 0 or from == target, or motion is Still, it is inactive and already at target.
+NewTween builds the tween taking a panel from its on\-screen height to target over dur, its clock started by the first frame Tick delivers. When dur \<= 0 or from == target, or motion is Still, it is inactive and already at target.
 
 <a name="Tween.Active"></a>
 ### func \(Tween\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L66>)

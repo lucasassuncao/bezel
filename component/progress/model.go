@@ -39,9 +39,9 @@ type Model struct {
 	edit        func(Styles) Styles
 }
 
-// NewModel is an empty bar width cells wide, the percentage included, with
+// New is an empty bar width cells wide, the percentage included, with
 // █ over ░ and the percentage shown.
-func NewModel(width int) Model {
+func New(width int) Model {
 	return Model{spring: animation.NewSpring(0), width: max(width, 1), full: "█", empty: "░", percent: true, format: " %3.0f%%"}
 }
 

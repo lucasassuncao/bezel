@@ -78,9 +78,9 @@ func TestPagerCopiesScrollApart(t *testing.T) {
 // A dialog keeps the lines it was given, whatever the caller does after.
 func TestDialogsKeepTheirLines(t *testing.T) {
 	lines := []string{"original"}
-	text := NewText("T", lines, theme.Resolved{})
+	text := NewText("T", strings.Join(lines, "\n"), theme.Resolved{})
 	pick := NewPick("P", lines, nil, theme.Resolved{}).WithNotes(lines...)
-	choice := NewChoice("C", lines, []Option{Opt("y", "yes", nil)}, theme.Resolved{})
+	choice := NewChoice("C", strings.Join(lines, "\n"), []Option{Opt("y", "yes", nil)}, theme.Resolved{})
 	lines[0] = "changed"
 
 	body := layout.Rect{W: 60, H: 18}
@@ -91,7 +91,7 @@ func TestDialogsKeepTheirLines(t *testing.T) {
 
 func TestPagerScrollsOnTheKeysItWasGiven(t *testing.T) {
 	keys := DefaultPagerKeys()
-	keys.Down = key.NewBinding(key.WithKeys("n"))
+	keys.Down = key.New("n")
 	p := NewPager("t", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12", theme.Resolved{}).WithKeys(keys)
 	o := p.Resize(layout.Rect{W: 60, H: 12})
 

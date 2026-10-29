@@ -161,7 +161,7 @@ func TestNoOverlayChangesTheLegend(t *testing.T) {
 	st := lipgloss.NewStyle()
 	for name, o := range map[string]overlay.Overlay{
 		"alert":   overlay.NewAlert(overlay.Info, "t", "m", theme.Resolved{Modal: st}),
-		"text":    overlay.NewText("t", []string{"body"}, theme.Resolved{Modal: st}),
+		"text":    overlay.NewText("t", "body", theme.Resolved{Modal: st}),
 		"confirm": overlay.NewConfirm("t", "m", nil, theme.Resolved{Modal: st}),
 		"pick":    overlay.NewPick("t", []string{"a", "b"}, nil, theme.Resolved{Modal: st}),
 		"prompt":  overlay.NewPrompt("t", nil, theme.Resolved{Modal: st}),

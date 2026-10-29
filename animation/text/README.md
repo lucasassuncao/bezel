@@ -138,13 +138,14 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(r Rainbow\) WithSpread\(degrees float64\) Rainbow](<#Rainbow.WithSpread>)
   - [func \(r Rainbow\) WithTone\(c color.Color\) Rainbow](<#Rainbow.WithTone>)
 - [type Rise](<#Rise>)
-  - [func NewRise\(text string, rows int, fg, bg color.Color, dur time.Duration\) Rise](<#NewRise>)
+  - [func NewRise\(text string, rows int, dur time.Duration\) Rise](<#NewRise>)
   - [func \(r Rise\) Active\(\) bool](<#Rise.Active>)
   - [func \(r Rise\) Advance\(now time.Time\) \(Rise, bool\)](<#Rise.Advance>)
   - [func \(r Rise\) FrameAt\(at time.Time\) animation.FrameMsg](<#Rise.FrameAt>)
   - [func \(r Rise\) Tick\(\) tea.Cmd](<#Rise.Tick>)
   - [func \(r Rise\) Update\(msg tea.Msg\) \(Rise, tea.Cmd\)](<#Rise.Update>)
   - [func \(r Rise\) View\(\) string](<#Rise.View>)
+  - [func \(r Rise\) WithFade\(fg, bg color.Color\) Rise](<#Rise.WithFade>)
 - [type Scramble](<#Scramble>)
   - [func NewScramble\(text string, dur time.Duration\) Scramble](<#NewScramble>)
   - [func \(s Scramble\) Active\(\) bool](<#Scramble.Active>)
@@ -199,7 +200,7 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(s Strike\) View\(\) string](<#Strike.View>)
   - [func \(s Strike\) WithInk\(c color.Color\) Strike](<#Strike.WithInk>)
 - [type Ticker](<#Ticker>)
-  - [func NewTicker\(value int, base, up, down color.Color, dur time.Duration\) Ticker](<#NewTicker>)
+  - [func NewTicker\(value int, dur time.Duration\) Ticker](<#NewTicker>)
   - [func \(t Ticker\) Active\(\) bool](<#Ticker.Active>)
   - [func \(t Ticker\) Advance\(now time.Time\) \(Ticker, bool\)](<#Ticker.Advance>)
   - [func \(t Ticker\) Color\(\) color.Color](<#Ticker.Color>)
@@ -209,6 +210,9 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled like an
   - [func \(t Ticker\) Update\(msg tea.Msg\) \(Ticker, tea.Cmd\)](<#Ticker.Update>)
   - [func \(t Ticker\) Value\(\) int](<#Ticker.Value>)
   - [func \(t Ticker\) View\(\) string](<#Ticker.View>)
+  - [func \(t Ticker\) WithBase\(c color.Color\) Ticker](<#Ticker.WithBase>)
+  - [func \(t Ticker\) WithDown\(c color.Color\) Ticker](<#Ticker.WithDown>)
+  - [func \(t Ticker\) WithUp\(c color.Color\) Ticker](<#Ticker.WithUp>)
 - [type Typewriter](<#Typewriter>)
   - [func NewTypewriter\(text string, perChar time.Duration\) Typewriter](<#NewTypewriter>)
   - [func \(w Typewriter\) Active\(\) bool](<#Typewriter.Active>)
@@ -1406,16 +1410,16 @@ type Rise struct {
 ```
 
 <a name="NewRise"></a>
-### func [NewRise](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L28>)
+### func [NewRise](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L29>)
 
 ```go
-func NewRise(text string, rows int, fg, bg color.Color, dur time.Duration) Rise
+func NewRise(text string, rows int, dur time.Duration) Rise
 ```
 
-NewRise floats text rows rows up over dur, fading from fg into bg.
+NewRise floats text rows rows up over dur, in the terminal's colour until WithFade.
 
 <a name="Rise.Active"></a>
-### func \(Rise\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L54>)
+### func \(Rise\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L62>)
 
 ```go
 func (r Rise) Active() bool
@@ -1424,7 +1428,7 @@ func (r Rise) Active() bool
 Active reports whether the text is still rising.
 
 <a name="Rise.Advance"></a>
-### func \(Rise\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L72>)
+### func \(Rise\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L80>)
 
 ```go
 func (r Rise) Advance(now time.Time) (Rise, bool)
@@ -1433,7 +1437,7 @@ func (r Rise) Advance(now time.Time) (Rise, bool)
 Advance is r at now, and whether it is gone.
 
 <a name="Rise.FrameAt"></a>
-### func \(Rise\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L60>)
+### func \(Rise\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L68>)
 
 ```go
 func (r Rise) FrameAt(at time.Time) animation.FrameMsg
@@ -1442,7 +1446,7 @@ func (r Rise) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is r's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Rise.Tick"></a>
-### func \(Rise\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L57>)
+### func \(Rise\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L65>)
 
 ```go
 func (r Rise) Tick() tea.Cmd
@@ -1451,7 +1455,7 @@ func (r Rise) Tick() tea.Cmd
 Tick is the command for r's next frame, nil once it is gone.
 
 <a name="Rise.Update"></a>
-### func \(Rise\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L63>)
+### func \(Rise\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L71>)
 
 ```go
 func (r Rise) Update(msg tea.Msg) (Rise, tea.Cmd)
@@ -1460,13 +1464,22 @@ func (r Rise) Update(msg tea.Msg) (Rise, tea.Cmd)
 Update rises on its own frames and asks for the next until it is gone.
 
 <a name="Rise.View"></a>
-### func \(Rise\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L39>)
+### func \(Rise\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L47>)
 
 ```go
 func (r Rise) View() string
 ```
 
 View is rows\+1 lines as wide as the text, the text on the line it has risen to; blank once it is gone.
+
+<a name="Rise.WithFade"></a>
+### func \(Rise\) [WithFade](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rise.go#L40>)
+
+```go
+func (r Rise) WithFade(fg, bg color.Color) Rise
+```
+
+WithFade fades the text from fg into bg as it rises; bg is usually the background it rises over.
 
 <a name="Scramble"></a>
 ## type [Scramble](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/scramble.go#L23-L29>)
@@ -1970,13 +1983,13 @@ type Ticker struct {
 ### func [NewTicker](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L28>)
 
 ```go
-func NewTicker(value int, base, up, down color.Color, dur time.Duration) Ticker
+func NewTicker(value int, dur time.Duration) Ticker
 ```
 
-NewTicker shows value in base; each change rolls over dur in up when the number rises and down when it falls.
+NewTicker shows value; each change rolls over dur. It keeps the terminal's colour until WithBase, WithUp and WithDown give it some.
 
 <a name="Ticker.Active"></a>
-### func \(Ticker\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L71>)
+### func \(Ticker\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L89>)
 
 ```go
 func (t Ticker) Active() bool
@@ -1985,7 +1998,7 @@ func (t Ticker) Active() bool
 Active reports whether the number is still rolling.
 
 <a name="Ticker.Advance"></a>
-### func \(Ticker\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L90>)
+### func \(Ticker\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L108>)
 
 ```go
 func (t Ticker) Advance(now time.Time) (Ticker, bool)
@@ -1994,7 +2007,7 @@ func (t Ticker) Advance(now time.Time) (Ticker, bool)
 Advance is t at now, and whether it settled.
 
 <a name="Ticker.Color"></a>
-### func \(Ticker\) [Color](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L54>)
+### func \(Ticker\) [Color](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L72>)
 
 ```go
 func (t Ticker) Color() color.Color
@@ -2003,7 +2016,7 @@ func (t Ticker) Color() color.Color
 Color is the number's colour now: its direction's, fading back to base.
 
 <a name="Ticker.FrameAt"></a>
-### func \(Ticker\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L77>)
+### func \(Ticker\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L95>)
 
 ```go
 func (t Ticker) FrameAt(at time.Time) animation.FrameMsg
@@ -2012,7 +2025,7 @@ func (t Ticker) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is t's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Ticker.Tick"></a>
-### func \(Ticker\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L74>)
+### func \(Ticker\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L92>)
 
 ```go
 func (t Ticker) Tick() tea.Cmd
@@ -2021,7 +2034,7 @@ func (t Ticker) Tick() tea.Cmd
 Tick is the command for t's next frame, nil at rest.
 
 <a name="Ticker.To"></a>
-### func \(Ticker\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L33>)
+### func \(Ticker\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L51>)
 
 ```go
 func (t Ticker) To(v int) (Ticker, tea.Cmd)
@@ -2030,7 +2043,7 @@ func (t Ticker) To(v int) (Ticker, tea.Cmd)
 To rolls the number from where it is now to v.
 
 <a name="Ticker.Update"></a>
-### func \(Ticker\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L80>)
+### func \(Ticker\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L98>)
 
 ```go
 func (t Ticker) Update(msg tea.Msg) (Ticker, tea.Cmd)
@@ -2039,7 +2052,7 @@ func (t Ticker) Update(msg tea.Msg) (Ticker, tea.Cmd)
 Update rolls on its own frames and asks for the next until it settles.
 
 <a name="Ticker.Value"></a>
-### func \(Ticker\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L45>)
+### func \(Ticker\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L63>)
 
 ```go
 func (t Ticker) Value() int
@@ -2048,13 +2061,40 @@ func (t Ticker) Value() int
 Value is the number shown now.
 
 <a name="Ticker.View"></a>
-### func \(Ticker\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L66>)
+### func \(Ticker\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L84>)
 
 ```go
 func (t Ticker) View() string
 ```
 
 View is the number in its colour.
+
+<a name="Ticker.WithBase"></a>
+### func \(Ticker\) [WithBase](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L33>)
+
+```go
+func (t Ticker) WithBase(c color.Color) Ticker
+```
+
+WithBase is the colour the number rests in.
+
+<a name="Ticker.WithDown"></a>
+### func \(Ticker\) [WithDown](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L45>)
+
+```go
+func (t Ticker) WithDown(c color.Color) Ticker
+```
+
+WithDown is the colour the number flashes when it falls.
+
+<a name="Ticker.WithUp"></a>
+### func \(Ticker\) [WithUp](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/ticker.go#L39>)
+
+```go
+func (t Ticker) WithUp(c color.Color) Ticker
+```
+
+WithUp is the colour the number flashes when it rises.
 
 <a name="Typewriter"></a>
 ## type [Typewriter](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L20-L24>)

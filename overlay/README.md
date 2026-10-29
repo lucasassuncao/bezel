@@ -28,7 +28,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(a Alert\) View\(body layout.Rect\) string](<#Alert.View>)
 - [type BottomAnchored](<#BottomAnchored>)
 - [type Choice](<#Choice>)
-  - [func NewChoice\(title string, lines \[\]string, options \[\]Option, th theme.Resolved\) Choice](<#NewChoice>)
+  - [func NewChoice\(title, text string, options \[\]Option, th theme.Resolved\) Choice](<#NewChoice>)
   - [func \(c Choice\) Click\(x, y int, body layout.Rect\) \(Overlay, tea.Cmd\)](<#Choice.Click>)
   - [func \(c Choice\) Legend\(\) \[\]legend.Entry](<#Choice.Legend>)
   - [func \(c Choice\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Choice.Update>)
@@ -135,7 +135,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(s Stack\) View\(body layout.Rect, background string\) string](<#Stack.View>)
 - [type StatusLiner](<#StatusLiner>)
 - [type Text](<#Text>)
-  - [func NewText\(title string, lines \[\]string, th theme.Resolved\) Text](<#NewText>)
+  - [func NewText\(title, text string, th theme.Resolved\) Text](<#NewText>)
   - [func \(t Text\) Legend\(\) \[\]legend.Entry](<#Text.Legend>)
   - [func \(t Text\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Text.Update>)
   - [func \(t Text\) View\(body layout.Rect\) string](<#Text.View>)
@@ -280,7 +280,7 @@ type BottomAnchored interface{ AnchorBottom() bool }
 ```
 
 <a name="Choice"></a>
-## type [Choice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L56-L61>)
+## type [Choice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L66-L71>)
 
 Choice is a dialog with a body and keyed options: apply / dry\-run / cancel. Picking one runs its command and closes the dialog. Esc closes it too.
 
@@ -291,16 +291,16 @@ type Choice struct {
 ```
 
 <a name="NewChoice"></a>
-### func [NewChoice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L64>)
+### func [NewChoice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L74>)
 
 ```go
-func NewChoice(title string, lines []string, options []Option, th theme.Resolved) Choice
+func NewChoice(title, text string, options []Option, th theme.Resolved) Choice
 ```
 
-NewChoice shows lines under title with options as its buttons.
+NewChoice shows text under title with options as its buttons.
 
 <a name="Choice.Click"></a>
-### func \(Choice\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L114>)
+### func \(Choice\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L124>)
 
 ```go
 func (c Choice) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
@@ -309,7 +309,7 @@ func (c Choice) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
 Click runs the option whose button it lands on, as its key would.
 
 <a name="Choice.Legend"></a>
-### func \(Choice\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L83>)
+### func \(Choice\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L93>)
 
 ```go
 func (c Choice) Legend() []legend.Entry
@@ -318,7 +318,7 @@ func (c Choice) Legend() []legend.Entry
 Legend is the options, plus esc unless an option already names it: esc always closes, the stack sees to that.
 
 <a name="Choice.Update"></a>
-### func \(Choice\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L68>)
+### func \(Choice\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L78>)
 
 ```go
 func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -327,7 +327,7 @@ func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Choice.View"></a>
-### func \(Choice\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L100>)
+### func \(Choice\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L110>)
 
 ```go
 func (c Choice) View(body layout.Rect) string
@@ -752,7 +752,7 @@ const (
 ```
 
 <a name="Option"></a>
-## type [Option](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L43-L47>)
+## type [Option](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L53-L57>)
 
 Option is one thing a Choice offers: the key that picks it, what it says in the hint, and what it does. A nil Do only closes the dialog.
 
@@ -765,7 +765,7 @@ type Option struct {
 ```
 
 <a name="Opt"></a>
-### func [Opt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L50>)
+### func [Opt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L60>)
 
 ```go
 func Opt(keys, label string, do tea.Cmd) Option
@@ -891,7 +891,7 @@ func DefaultPagerKeys() PagerKeys
 DefaultPagerKeys are the viewport's own, and q or enter to close.
 
 <a name="Pick"></a>
-## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L125-L133>)
+## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L135-L143>)
 
 Pick is a dialog that chooses one row of a list with the arrows: which source manages this, which preset to apply. Enter runs OnPick with the cursor; esc closes with nothing. A list taller than the body scrolls.
 
@@ -902,7 +902,7 @@ type Pick struct {
 ```
 
 <a name="NewPick"></a>
-### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L152>)
+### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L162>)
 
 ```go
 func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick
@@ -911,7 +911,7 @@ func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.R
 NewPick lists rows with the cursor on the first. onPick may be nil, which makes enter only close.
 
 <a name="Pick.Cursor"></a>
-### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L177>)
+### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L187>)
 
 ```go
 func (p Pick) Cursor() int
@@ -920,7 +920,7 @@ func (p Pick) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Pick.Legend"></a>
-### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L215>)
+### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L225>)
 
 ```go
 func (p Pick) Legend() []legend.Entry
@@ -929,7 +929,7 @@ func (p Pick) Legend() []legend.Entry
 
 
 <a name="Pick.Resize"></a>
-### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L180>)
+### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L190>)
 
 ```go
 func (p Pick) Resize(body layout.Rect) Overlay
@@ -938,7 +938,7 @@ func (p Pick) Resize(body layout.Rect) Overlay
 Resize shows as many rows as fit in body, scrolled to keep the cursor's.
 
 <a name="Pick.Update"></a>
-### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L196>)
+### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L206>)
 
 ```go
 func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -947,7 +947,7 @@ func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Pick.View"></a>
-### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L220>)
+### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L230>)
 
 ```go
 func (p Pick) View(body layout.Rect) string
@@ -956,7 +956,7 @@ func (p Pick) View(body layout.Rect) string
 
 
 <a name="Pick.WithCursor"></a>
-### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L170>)
+### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L180>)
 
 ```go
 func (p Pick) WithCursor(i int) Pick
@@ -965,7 +965,7 @@ func (p Pick) WithCursor(i int) Pick
 WithCursor starts the cursor on row i, such as the value already chosen; an index outside the rows is clamped to them.
 
 <a name="Pick.WithKeys"></a>
-### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L157>)
+### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L167>)
 
 ```go
 func (p Pick) WithKeys(k PickKeys) Pick
@@ -983,7 +983,7 @@ func (p Pick) WithKind(k Kind) Pick
 WithKind tints the pick for what it decides.
 
 <a name="Pick.WithNotes"></a>
-### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L163>)
+### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L173>)
 
 ```go
 func (p Pick) WithNotes(notes ...string) Pick
@@ -992,7 +992,7 @@ func (p Pick) WithNotes(notes ...string) Pick
 WithNotes are lines drawn under the rows, such as what the picked one does.
 
 <a name="PickKeys"></a>
-## type [PickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L137-L139>)
+## type [PickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L147-L149>)
 
 PickKeys are the bindings a Pick answers to besides esc. Down has no help of its own: Up's "↑/↓" names both.
 
@@ -1003,7 +1003,7 @@ type PickKeys struct {
 ```
 
 <a name="DefaultPickKeys"></a>
-### func [DefaultPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L142>)
+### func [DefaultPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L152>)
 
 ```go
 func DefaultPickKeys() PickKeys
@@ -1313,13 +1313,13 @@ type Text struct {
 ### func [NewText](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L24>)
 
 ```go
-func NewText(title string, lines []string, th theme.Resolved) Text
+func NewText(title, text string, th theme.Resolved) Text
 ```
 
-NewText shows lines under title until any key.
+NewText shows text under title until any key.
 
 <a name="Text.Legend"></a>
-### func \(Text\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L35>)
+### func \(Text\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L45>)
 
 ```go
 func (t Text) Legend() []legend.Entry
@@ -1328,7 +1328,7 @@ func (t Text) Legend() []legend.Entry
 
 
 <a name="Text.Update"></a>
-### func \(Text\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L28>)
+### func \(Text\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L38>)
 
 ```go
 func (t Text) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -1337,7 +1337,7 @@ func (t Text) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Text.View"></a>
-### func \(Text\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L37>)
+### func \(Text\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L47>)
 
 ```go
 func (t Text) View(body layout.Rect) string

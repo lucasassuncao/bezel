@@ -32,7 +32,7 @@ func TestStillIsReadFromTheEnvironment(t *testing.T) {
 func TestStillAnimationsAreBornAtTheirEnd(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 
-	tw := New(0, 10, time.Second)
+	tw := NewTween(0, 10, time.Second)
 	assert.False(t, tw.Active())
 	assert.Equal(t, 10, tw.Cur)
 	assert.Nil(t, tw.Tick())
@@ -71,7 +71,7 @@ func TestSpeedScalesEveryClock(t *testing.T) {
 	moving(t)
 	t.Setenv("BEZEL_MOTION", "2")
 	start := time.Unix(100, 0)
-	tw := New(0, 10, time.Second)
+	tw := NewTween(0, 10, time.Second)
 	tw, _ = tw.Advance(start)
 	tw, done := tw.Advance(start.Add(500 * time.Millisecond))
 	assert.True(t, done)

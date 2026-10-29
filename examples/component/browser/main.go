@@ -60,7 +60,7 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, browser: browser.New(recipes, "")}
+	return model{sh: sh, th: th, browser: browser.New(recipes)}
 }
 
 func (m model) Init() tea.Cmd { return nil }

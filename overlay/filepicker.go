@@ -34,15 +34,15 @@ type FilePickerKeys struct {
 // g/G, backspace to go up and enter to pick.
 func DefaultFilePickerKeys() FilePickerKeys {
 	return FilePickerKeys{
-		Up:       key.NewBinding(key.WithKeys("up", "k", "ctrl+p"), key.WithHelp("↑/↓", "move")),
-		Down:     key.NewBinding(key.WithKeys("down", "j", "ctrl+n")),
-		PageUp:   key.NewBinding(key.WithKeys("pgup", "K")),
-		PageDown: key.NewBinding(key.WithKeys("pgdown", "J")),
-		Top:      key.NewBinding(key.WithKeys("home", "g")),
-		Bottom:   key.NewBinding(key.WithKeys("end", "G")),
-		Back:     key.NewBinding(key.WithKeys("left", "h", "backspace"), key.WithHelp("←", "up")),
-		Open:     key.NewBinding(key.WithKeys("right", "l"), key.WithHelp("→", "open")),
-		Pick:     key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "pick")),
+		Up:       key.New("up", "k", "ctrl+p").WithHelp("↑/↓", "move"),
+		Down:     key.New("down", "j", "ctrl+n"),
+		PageUp:   key.New("pgup", "K"),
+		PageDown: key.New("pgdown", "J"),
+		Top:      key.New("home", "g"),
+		Bottom:   key.New("end", "G"),
+		Back:     key.New("left", "h", "backspace").WithHelp("←", "up"),
+		Open:     key.New("right", "l").WithHelp("→", "open"),
+		Pick:     key.New("enter").WithHelp("enter", "pick"),
 	}
 }
 

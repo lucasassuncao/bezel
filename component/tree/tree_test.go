@@ -44,7 +44,7 @@ func nodes() []node {
 	}
 }
 
-func newTree(h int) Model[node] { return New(nodes(), h) }
+func newTree(h int) Model[node] { return New(nodes()).SetHeight(h) }
 
 func press(code rune) tea.KeyPressMsg { return tea.KeyPressMsg{Code: code} }
 
@@ -147,7 +147,7 @@ func TestViewPadsShortTreesAndMarksOverflow(t *testing.T) {
 	require.Len(t, strings.Split(tall.View(th, row), "\n"), 10, "padded to the height")
 	require.Contains(t, ansi.Strip(tall.View(th, row)), "    host")
 
-	empty := New[node](nil, 5)
+	empty := New[node](nil).SetHeight(5)
 	empty.EmptyMessage = "  (no fields)"
 	require.Contains(t, empty.View(th, row), "(no fields)")
 }
@@ -180,34 +180,34 @@ func labelRow(n node, _ int, selected bool) string {
 }
 
 func TestViewIsEmptyBeforeSized(t *testing.T) {
-	m := New(leaves(3), 0)
+	m := New(leaves(3))
 	require.Empty(t, m.View(theme.Resolved{}, labelRow))
 }
 
 func TestCursorNeverHidesBehindMoreIndicator(t *testing.T) {
-	m := New(leaves(5), 3)
+	m := New(leaves(5)).SetHeight(3)
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	require.Contains(t, m.View(theme.Resolved{}, labelRow), "> c")
 }
 
 func TestScrollIsWhereTheWindowSits(t *testing.T) {
-	m := New(leaves(5), 3)
+	m := New(leaves(5)).SetHeight(3)
 	require.Equal(t, layout.Scroll{Visible: 2, Total: 5}, m.Scroll(), "the more row is not a row shown")
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	require.Equal(t, layout.Scroll{Offset: 1, Visible: 2, Total: 5}, m.Scroll())
-	require.Equal(t, layout.Scroll{}, New[node](nil, 5).Scroll())
+	require.Equal(t, layout.Scroll{}, New[node](nil).SetHeight(5).Scroll())
 }
 
 func TestOneRowTreeShowsTheCursorNotTheIndicator(t *testing.T) {
-	m := New(leaves(3), 1)
+	m := New(leaves(3)).SetHeight(1)
 	require.Equal(t, "> a", m.View(theme.Resolved{}, labelRow))
 }
 
 // Nodes is exported, so an app can shrink it under a scrolled tree.
 func TestViewStaysHeightTallAfterNodesShrink(t *testing.T) {
-	m := New(leaves(20), 5).MoveTo(15)
+	m := New(leaves(20)).SetHeight(5).MoveTo(15)
 	m.Nodes = leaves(3)
 	require.Len(t, strings.Split(m.View(theme.Resolved{}, labelRow), "\n"), 5)
 }
@@ -233,7 +233,7 @@ func bigTree(parents, height int) Model[node] {
 			nodes = append(nodes, node{label: fmt.Sprint("l", j), depth: 1, leaf: true})
 		}
 	}
-	return New(nodes, height)
+	return New(nodes).SetHeight(height)
 }
 
 var benchSizes = []int{100, 10_000}
@@ -277,7 +277,7 @@ func TestNilFuncsAreHarmless(t *testing.T) {
 func TestAHiddenNodeTakesItsBranchWithIt(t *testing.T) {
 	ns := nodes()
 	ns[1].hidden = true // server, open, with host and port under it
-	m := New(ns, 10)
+	m := New(ns).SetHeight(10)
 	var labels []string
 	for _, i := range m.Visible() {
 		labels = append(labels, m.Nodes[i].label)
@@ -295,7 +295,7 @@ func TestGuidesDrawTheBranches(t *testing.T) {
 		{label: "b", depth: 1, expanded: true},
 		{label: "b1", depth: 2, leaf: true},
 	}
-	m := New(ns, 10)
+	m := New(ns).SetHeight(10)
 	require.Equal(t, []string{"", "├─ ", "│  ├─ ", "│  └─ ", "└─ ", "   └─ "}, m.Guides())
 	m = m.WithConnectors(Connectors{Mid: "+ ", Last: "` ", Pipe: "| ", Space: "  "})
 	require.Equal(t, "| + ", m.Guides()[2])
@@ -306,7 +306,7 @@ func TestScrollOffKeepsRowsAroundTheCursor(t *testing.T) {
 	for i := range ns {
 		ns[i] = node{label: fmt.Sprint(i), leaf: true}
 	}
-	m := New(ns, 10).WithScrollOff(2)
+	m := New(ns).SetHeight(10).WithScrollOff(2)
 	for range 7 {
 		m, _ = m.Update(press(tea.KeyDown))
 	}

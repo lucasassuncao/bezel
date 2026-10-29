@@ -21,13 +21,13 @@ func th() theme.Resolved { return theme.Resolve(theme.Plain, true) }
 // sample is one of each control, in the order the tests index them.
 func sample(t *testing.T) Form {
 	t.Helper()
-	f, _ := New(
-		NewInput("Name", "my-project", 24, th()),
-		NewSelect("Image", []string{"ubuntu", "debian", "alpine"}, 0, th()),
-		NewRadio("Shell", []string{"bash", "zsh", "fish"}, 0, th()),
-		NewToggle("Docker", false, th()),
-		NewCheckbox("Forward port 3000", false, th()),
-		NewButton("Create", func() tea.Msg { return submitted{} }, th()),
+	f := New(th(),
+		NewInput("Name").WithPlaceholder("my-project").WithWidth(24),
+		NewSelect("Image", []string{"ubuntu", "debian", "alpine"}),
+		NewRadio("Shell", []string{"bash", "zsh", "fish"}),
+		NewToggle("Docker"),
+		NewCheckbox("Forward port 3000"),
+		NewButton("Create", func() tea.Msg { return submitted{} }),
 	)
 	return f
 }
@@ -82,8 +82,8 @@ func TestViewLinesUpTheValues(t *testing.T) {
 // A Form is a value: updating one must not reach the copy it came from, nor
 // the slice the fields were handed in.
 func TestUpdateLeavesEarlierCopiesAlone(t *testing.T) {
-	fields := []Field{NewCheckbox("a", false, th())}
-	before, _ := New(fields...)
+	fields := []Field{NewCheckbox("a")}
+	before := New(th(), fields...)
 	after, _ := press(before, "space")
 
 	require.True(t, after.Field(0).(Checkbox).Checked())
@@ -91,13 +91,13 @@ func TestUpdateLeavesEarlierCopiesAlone(t *testing.T) {
 	require.False(t, fields[0].(Checkbox).Checked(), "the caller's slice changed")
 }
 
-func binding(keys ...string) key.Binding { return key.NewBinding(key.WithKeys(keys...)) }
+func binding(keys ...string) key.Binding { return key.New(keys...) }
 
 // One call rebinds the form's focus keys and the keys of every control in it.
 func TestFormWithKeysRebindsTheFocusAndItsControls(t *testing.T) {
 	keys := DefaultKeys()
 	keys.Next, keys.Press = binding("ctrl+n"), binding("x")
-	f, _ := New(NewCheckbox("a", false, th()), NewButton("go", func() tea.Msg { return submitted{} }, th()))
+	f := New(th(), NewCheckbox("a"), NewButton("go", func() tea.Msg { return submitted{} }))
 	f = f.WithKeys(keys)
 
 	f, _ = press(f, "space")
@@ -115,7 +115,7 @@ func TestFormWithKeysRebindsTheFocusAndItsControls(t *testing.T) {
 
 // A keystroke into the focused input and the form's frame.
 func BenchmarkTypingInAForm(b *testing.B) {
-	f, _ := New(NewInput("Name", "", 30, th()), NewCheckbox("Port", false, th()), NewToggle("Docker", false, th()))
+	f := New(th(), NewInput("Name").WithWidth(30), NewCheckbox("Port"), NewToggle("Docker"))
 	back := tea.KeyPressMsg{Code: tea.KeyBackspace}
 	for b.Loop() {
 		f, _ = f.Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
@@ -125,7 +125,7 @@ func BenchmarkTypingInAForm(b *testing.B) {
 }
 
 func TestNilFieldsAreLeftOutAndFieldIsBounded(t *testing.T) {
-	f, _ := New(nil, NewCheckbox("a", false, th()), nil)
+	f := New(th(), nil, NewCheckbox("a"), nil)
 	require.NotPanics(t, func() { _ = f.View(40) })
 	require.NotNil(t, f.Field(0), "the checkbox is first once the nil is gone")
 	require.Nil(t, f.Field(1))
@@ -159,4 +159,19 @@ func TestAClickCountsTheRowsOfAnOpenSelect(t *testing.T) {
 	require.Greater(t, h, 1)
 	f, _ = f.Click(1+h, 60)
 	require.Equal(t, 2, f.Focused(), "the radio sits under the open list")
+}
+
+// The form hands its theme to every bezel control, at New and on SetTheme.
+func TestTheFormPaintsItsControlsInItsTheme(t *testing.T) {
+	bare := NewCheckbox("a").WithChecked(true).View(false, 0, 20)
+	f := New(th(), NewCheckbox("a").WithChecked(true))
+	require.NotEqual(t, bare, f.View(20), "the form's theme reached the box")
+
+	other := theme.Resolve(theme.Mint, true)
+	require.Equal(t, New(other, NewCheckbox("a").WithChecked(true)).View(20), f.SetTheme(other).View(20))
+}
+
+func TestInitIsNilWithoutAnIniterInFocus(t *testing.T) {
+	require.Nil(t, New(th()).Init(), "no fields")
+	require.Nil(t, New(th(), NewCheckbox("a")).Init())
 }

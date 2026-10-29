@@ -23,7 +23,7 @@ Package table sizes columns to their contents, giving way in a declared order wh
 - [type Keys](<#Keys>)
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
 - [type Model](<#Model>)
-  - [func New\[T any\]\(cols \[\]Column, items \[\]Item\[T\], height int\) Model\[T\]](<#New>)
+  - [func New\[T any\]\(cols \[\]Column, items \[\]Item\[T\]\) Model\[T\]](<#New>)
   - [func \(m Model\[T\]\) Blur\(\) Model\[T\]](<#Model[T].Blur>)
   - [func \(m Model\[T\]\) Click\(y int\) \(Model\[T\], Action\)](<#Model[T].Click>)
   - [func \(m Model\[T\]\) Cursor\(\) int](<#Model[T].Cursor>)
@@ -163,10 +163,10 @@ type Model[T any] struct {
 ### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L71>)
 
 ```go
-func New[T any](cols []Column, items []Item[T], height int) Model[T]
+func New[T any](cols []Column, items []Item[T]) Model[T]
 ```
 
-New builds a table height rows tall, header included, with the cursor on the first row.
+New builds a table with the cursor on the first row; SetHeight gives it the rows its pane has, header included.
 
 <a name="Model[T].Blur"></a>
 ### func \(Model\[T\]\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L91>)

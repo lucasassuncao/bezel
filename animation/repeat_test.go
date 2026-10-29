@@ -64,7 +64,7 @@ func TestForeverNeverLands(t *testing.T) {
 func TestTweenTakesDelayRepeatAndYoyo(t *testing.T) {
 	moving(t)
 	start := time.Unix(1000, 0)
-	tw := New(0, 10, 100*ms).WithEase(Linear).WithDelay(100 * ms).WithYoyo().WithRepeat(1)
+	tw := NewTween(0, 10, 100*ms).WithEase(Linear).WithDelay(100 * ms).WithYoyo().WithRepeat(1)
 	tw, _ = tw.Update(tw.FrameAt(start))
 	tw, _ = tw.Update(tw.FrameAt(start.Add(150 * ms)))
 	assert.Equal(t, 5, tw.Cur)
