@@ -133,6 +133,25 @@ func (m Model[N]) WithEmptyMessage(s string) Model[N] {
 // Nodes is a copy of the nodes, every one, folded or not.
 func (m Model[N]) Nodes() []N { return slices.Clone(m.nodes) }
 
+// Node is the node at index i of Nodes, folded or not; the zero N out of range.
+func (m Model[N]) Node(i int) N {
+	if i < 0 || i >= len(m.nodes) {
+		var zero N
+		return zero
+	}
+	return m.nodes[i]
+}
+
+// Len is how many nodes the tree holds, folded or not.
+func (m Model[N]) Len() int { return len(m.nodes) }
+
+// SetOffset scrolls the visible rows to start at n, as a restored view was,
+// clamped so the cursor stays in view.
+func (m Model[N]) SetOffset(n int) Model[N] {
+	m.offset = n
+	return m.clamp()
+}
+
 // Cursor is the cursor's place among the visible rows.
 func (m Model[N]) Cursor() int { return m.cursor }
 

@@ -369,3 +369,13 @@ func TestSelectedIsTheNodeUnderTheCursor(t *testing.T) {
 	_, ok = New[node](nil).Selected()
 	require.False(t, ok)
 }
+
+func TestNodeLenAndSetOffsetRestoreAView(t *testing.T) {
+	m := New(leaves(20)).SetHeight(5).MoveTo(12)
+	saved := m.Scroll().Offset
+	r := New(leaves(20)).SetHeight(5).MoveTo(12).SetOffset(0).SetOffset(saved)
+	require.Equal(t, saved, r.Scroll().Offset)
+	require.Equal(t, 20, r.Len())
+	require.Equal(t, m.Nodes()[3], r.Node(3))
+	require.Equal(t, node{}, r.Node(99), "out of range is the zero node")
+}
