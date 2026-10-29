@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/lucasassuncao/bezel/component/inline"
+	"github.com/lucasassuncao/bezel/component/progress"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -31,7 +32,7 @@ func run(w io.Writer, th theme.Resolved, confirm func(string) (bool, error), pau
 	}
 	for i := 0; i <= files; i++ {
 		// \r redraws the bar on its own line instead of printing a new one.
-		fmt.Fprintf(w, "\r%s %2d/%d", inline.Bar(i, files, 30, th), i, files)
+		fmt.Fprintf(w, "\r%s %2d/%d", progress.Bar(i, files, 30, th), i, files)
 		time.Sleep(pause)
 	}
 	fmt.Fprintln(w, "\ndone")

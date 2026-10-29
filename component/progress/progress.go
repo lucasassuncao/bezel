@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel/component/chart"
 	"github.com/lucasassuncao/bezel/component/icon"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/theme"
@@ -92,30 +93,13 @@ func Meter(done, total, width int, th theme.Resolved) string {
 	return b.String() + th.Muted.Render(strings.Repeat("□", width-filled))
 }
 
-// Option changes how Smooth draws its bar.
-type Option func(*look)
-
-type look struct{ series int }
-
-// InSeries fills the bar in the theme's i-th series colour instead of the accent.
-func InSeries(i int) Option { return func(l *look) { l.series = i } }
-
 // eighths are a cell filled from the left, one eighth at a time.
 var eighths = []rune("▏▎▍▌▋▊▉")
 
 // Smooth is done/total as a bar width cells wide whose edge is cut to an
 // eighth of a cell, over a muted track as Bar's.
-func Smooth(done, total, width int, th theme.Resolved, opts ...Option) string {
-	l := look{series: -1}
-	for _, o := range opts {
-		if o != nil {
-			o(&l)
-		}
-	}
-	fill := th.Accent
-	if l.series >= 0 {
-		fill = th.Series[l.series%len(th.Series)]
-	}
+func Smooth(done, total, width int, th theme.Resolved, opts ...chart.Option) string {
+	fill := chart.Fill(th, opts...)
 	width = max(width, 1)
 	n := 0
 	if total > 0 {

@@ -16,7 +16,7 @@ Package progress draws how far along something is: bars, a meter and a stepper o
 - [func Gauge\(value, total float64, width int, th theme.Resolved\) string](<#Gauge>)
 - [func Line\(label string, done, total, width int, th theme.Resolved\) string](<#Line>)
 - [func Meter\(done, total, width int, th theme.Resolved\) string](<#Meter>)
-- [func Smooth\(done, total, width int, th theme.Resolved, opts ...Option\) string](<#Smooth>)
+- [func Smooth\(done, total, width int, th theme.Resolved, opts ...chart.Option\) string](<#Smooth>)
 - [func Stepper\(steps \[\]string, current, width int, th theme.Resolved, set icon.Set\) string](<#Stepper>)
 - [type Model](<#Model>)
   - [func New\(width int\) Model](<#New>)
@@ -37,14 +37,12 @@ Package progress draws how far along something is: bars, a meter and a stepper o
   - [func \(m Model\) WithPercentage\(on bool\) Model](<#Model.WithPercentage>)
   - [func \(m Model\) WithSpring\(freq, damping float64\) Model](<#Model.WithSpring>)
   - [func \(m Model\) WithStyles\(edit func\(Styles\) Styles\) Model](<#Model.WithStyles>)
-- [type Option](<#Option>)
-  - [func InSeries\(i int\) Option](<#InSeries>)
 - [type Styles](<#Styles>)
   - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
 
 
 <a name="Bar"></a>
-## func [Bar](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L19>)
+## func [Bar](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L20>)
 
 ```go
 func Bar(done, total, width int, th theme.Resolved) string
@@ -62,7 +60,7 @@ func Gauge(value, total float64, width int, th theme.Resolved) string
 Gauge is value out of total as a needle under a ruled track width cells wide, two rows: the track with a tick every quarter, then the needle. The value is a float, so a Spring can carry the needle smoothly.
 
 <a name="Line"></a>
-## func [Line](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L34>)
+## func [Line](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L35>)
 
 ```go
 func Line(label string, done, total, width int, th theme.Resolved) string
@@ -71,7 +69,7 @@ func Line(label string, done, total, width int, th theme.Resolved) string
 Line is label, a bar and "done/total" in one row width cells wide. The bar takes what the label and the count leave; when space runs out the bar goes first, then the label is cut, and the count stays.
 
 <a name="Meter"></a>
-## func [Meter](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L76>)
+## func [Meter](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L77>)
 
 ```go
 func Meter(done, total, width int, th theme.Resolved) string
@@ -80,16 +78,16 @@ func Meter(done, total, width int, th theme.Resolved) string
 Meter is done/total as width squares: the filled ones coloured along the theme's ramp from the left, the rest hollow, so it reads without colour.
 
 <a name="Smooth"></a>
-## func [Smooth](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L108>)
+## func [Smooth](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L101>)
 
 ```go
-func Smooth(done, total, width int, th theme.Resolved, opts ...Option) string
+func Smooth(done, total, width int, th theme.Resolved, opts ...chart.Option) string
 ```
 
 Smooth is done/total as a bar width cells wide whose edge is cut to an eighth of a cell, over a muted track as Bar's.
 
 <a name="Stepper"></a>
-## func [Stepper](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L47>)
+## func [Stepper](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L48>)
 
 ```go
 func Stepper(steps []string, current, width int, th theme.Resolved, set icon.Set) string
@@ -269,24 +267,6 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 ```
 
 WithStyles changes the styles derived from the theme through edit.
-
-<a name="Option"></a>
-## type [Option](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L96>)
-
-Option changes how Smooth draws its bar.
-
-```go
-type Option func(*look)
-```
-
-<a name="InSeries"></a>
-### func [InSeries](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L101>)
-
-```go
-func InSeries(i int) Option
-```
-
-InSeries fills the bar in the theme's i\-th series colour instead of the accent.
 
 <a name="Styles"></a>
 ## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L18-L22>)

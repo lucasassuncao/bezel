@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"github.com/lucasassuncao/bezel/component/chart"
 	"testing"
 
 	"github.com/charmbracelet/x/ansi"
@@ -67,7 +68,7 @@ func TestSmoothSplitsACellInEighths(t *testing.T) {
 }
 
 func TestSmoothInASeriesColour(t *testing.T) {
-	require.Contains(t, Smooth(8, 8, 2, gruvbox(), InSeries(4)), gruvbox().Series[4].Render("██"))
+	require.Contains(t, Smooth(8, 8, 2, gruvbox(), chart.InSeries(4)), gruvbox().Series[4].Render("██"))
 }
 
 func TestANilOptionIsSkipped(t *testing.T) {

@@ -21,6 +21,16 @@ type look struct{ series int }
 // of along the ramp (Area) or in the accent (Spark).
 func InSeries(i int) Option { return func(l *look) { l.series = i } }
 
+// Fill is the style a bar or a line in opts is filled with: the theme's i-th
+// series colour under InSeries(i), the accent otherwise. progress.Smooth reads
+// it too, so one InSeries serves both packages.
+func Fill(th theme.Resolved, opts ...Option) lipgloss.Style {
+	if l := options(opts); l.series >= 0 && len(th.Series) > 0 {
+		return th.Series[l.series%len(th.Series)]
+	}
+	return th.Accent
+}
+
 func options(opts []Option) look {
 	l := look{series: -1}
 	for _, o := range opts {
@@ -66,10 +76,7 @@ func Spark(values []float64, top float64, width int, th theme.Resolved, opts ...
 	if width <= 0 {
 		return ""
 	}
-	st := th.Accent
-	if l := options(opts); l.series >= 0 {
-		st = th.Series[l.series%len(th.Series)]
-	}
+	st := Fill(th, opts...)
 	cells := make([]rune, width)
 	for c, h := range columns(values, top, width, 8) {
 		cells[c] = cell(h)

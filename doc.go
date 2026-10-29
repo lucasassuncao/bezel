@@ -72,8 +72,8 @@
 //     Unicode or ASCII, in the theme's colours.
 //   - [github.com/lucasassuncao/bezel/component/toast]: notices that slide into
 //     a corner, stack and leave on their own.
-//   - [github.com/lucasassuncao/bezel/component/inline]: yes/no questions and
-//     progress bars for CLIs that print logs, without taking the screen.
+//   - [github.com/lucasassuncao/bezel/component/inline]: yes/no questions for
+//     CLIs that print logs, without taking the screen.
 //   - [github.com/lucasassuncao/bezel/component/logger]: a slog.Handler that
 //     prints each attribute under its message as a tree, wrapped at the width.
 //   - [github.com/lucasassuncao/bezel/component/themebrowser]: an inline table

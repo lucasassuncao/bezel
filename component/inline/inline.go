@@ -1,5 +1,5 @@
 // Package inline is for CLIs that print logs and now and then ask one
-// question or show one bar: nothing here takes over the screen.
+// question, beside progress.Bar redrawn with : nothing takes the screen.
 // Theme only: the functions take a theme but keep no Styles to edit.
 package inline
 
@@ -10,7 +10,6 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/lucasassuncao/bezel/component/progress"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
@@ -132,10 +131,4 @@ func (c confirm) hint() string {
 		parts = append(parts, e.Help().Key+" "+e.Help().Desc)
 	}
 	return strings.Join(parts, " · ")
-}
-
-// Bar is a done/total progress bar width cells wide, for a caller that
-// redraws it in place with \r. It is progress.Bar, kept here for CLIs.
-func Bar(done, total, width int, th theme.Resolved) string {
-	return progress.Bar(done, total, width, th)
 }

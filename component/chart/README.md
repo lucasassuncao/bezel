@@ -15,6 +15,7 @@ Package chart draws numbers in cells: Area and Spark a run of them over time, th
 - [func Area\(values \[\]float64, top float64, width, height int, th theme.Resolved, opts ...Option\) string](<#Area>)
 - [func Bars\(bars \[\]Bar, top float64, width int, th theme.Resolved, opts ...Option\) string](<#Bars>)
 - [func Donut\(value, total float64, size int, th theme.Resolved\) string](<#Donut>)
+- [func Fill\(th theme.Resolved, opts ...Option\) lipgloss.Style](<#Fill>)
 - [func Heat\(values \[\]\[\]float64, top float64, th theme.Resolved\) string](<#Heat>)
 - [func Spark\(values \[\]float64, top float64, width int, th theme.Resolved, opts ...Option\) string](<#Spark>)
 - [type Bar](<#Bar>)
@@ -23,7 +24,7 @@ Package chart draws numbers in cells: Area and Spark a run of them over time, th
 
 
 <a name="Area"></a>
-## func [Area](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/chart.go#L40>)
+## func [Area](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/chart.go#L50>)
 
 ```go
 func Area(values []float64, top float64, width, height int, th theme.Resolved, opts ...Option) string
@@ -49,6 +50,15 @@ func Donut(value, total float64, size int, th theme.Resolved) string
 
 Donut is a ring size rows tall and twice as wide, filled clockwise from the top by value's share of total, with the share in its middle: a quota, a disk, a goal. Animate value with a Float to sweep it in.
 
+<a name="Fill"></a>
+## func [Fill](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/chart.go#L27>)
+
+```go
+func Fill(th theme.Resolved, opts ...Option) lipgloss.Style
+```
+
+Fill is the style a bar or a line in opts is filled with: the theme's i\-th series colour under InSeries\(i\), the accent otherwise. progress.Smooth reads it too, so one InSeries serves both packages.
+
 <a name="Heat"></a>
 ## func [Heat](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/heat.go#L12>)
 
@@ -59,7 +69,7 @@ func Heat(values [][]float64, top float64, th theme.Resolved) string
 Heat is values as a grid of cells two columns wide, each coloured along the theme's ramp by its share of top; a value at or below zero is a muted dot.
 
 <a name="Spark"></a>
-## func [Spark](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/chart.go#L65>)
+## func [Spark](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/chart.go#L75>)
 
 ```go
 func Spark(values []float64, top float64, width int, th theme.Resolved, opts ...Option) string

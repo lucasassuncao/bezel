@@ -87,7 +87,6 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) Transition\(\) effect.Effect](<#Shell.Transition>)
   - [func \(s Shell\) Update\(msg tea.Msg\) \(Shell, bool, tea.Cmd\)](<#Shell.Update>)
   - [func \(s Shell\) View\(panes map\[string\]Pane\) string](<#Shell.View>)
-  - [func \(s Shell\) WithClipboard\(write func\(string\) error\) Shell](<#Shell.WithClipboard>)
 - [type StatusStyle](<#StatusStyle>)
 - [type Tab](<#Tab>)
 
@@ -524,7 +523,7 @@ func (s Shell) Context() Context
 Context is what the shell hands tabs and actions about where the user is.
 
 <a name="Shell.Copy"></a>
-### func \(Shell\) [Copy](<https://github.com/lucasassuncao/bezel/blob/main/shell/copy.go#L33>)
+### func \(Shell\) [Copy](<https://github.com/lucasassuncao/bezel/blob/main/shell/copy.go#L25>)
 
 ```go
 func (s Shell) Copy(text, done, failed string) tea.Cmd
@@ -837,15 +836,6 @@ func (s Shell) View(panes map[string]Pane) string
 ```
 
 View draws header, tabs, panes, status and legend, then the overlays on top. It is pure: nothing here writes back to the shell the app holds.
-
-<a name="Shell.WithClipboard"></a>
-### func \(Shell\) [WithClipboard](<https://github.com/lucasassuncao/bezel/blob/main/shell/copy.go#L24>)
-
-```go
-func (s Shell) WithClipboard(write func(string) error) Shell
-```
-
-WithClipboard replaces the system clipboard with write, for a test that must not touch the machine's own.
 
 <a name="StatusStyle"></a>
 ## type [StatusStyle](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L94>)

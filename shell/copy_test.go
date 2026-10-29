@@ -2,7 +2,6 @@ package shell
 
 import (
 	"errors"
-	"sync"
 	"testing"
 	"time"
 
@@ -22,7 +21,7 @@ func run(t *testing.T, s Shell, cmd func() any) Shell {
 
 func TestCopyWritesTheTextAndSaysDone(t *testing.T) {
 	var got string
-	s := sized(New(actionConfig())).WithClipboard(func(text string) error { got = text; return nil })
+	s := sized(New(clipConfig(func(text string) error { got = text; return nil })))
 
 	cmd := s.Copy("kv/app/db", "copied: kv/app/db", "copy path")
 	s = run(t, s, func() any { return cmd() })
@@ -33,7 +32,7 @@ func TestCopyWritesTheTextAndSaysDone(t *testing.T) {
 }
 
 func TestCopyReportsTheFailureInTheAppsWords(t *testing.T) {
-	s := sized(New(actionConfig())).WithClipboard(func(string) error { return errors.New("xclip: not found") })
+	s := sized(New(clipConfig(func(string) error { return errors.New("xclip: not found") })))
 
 	cmd := s.Copy("secret", "copied", "copy policy")
 	s = run(t, s, func() any { return cmd() })
@@ -51,7 +50,7 @@ func TestCopyGivesUpOnAHelperThatHangs(t *testing.T) {
 
 	block := make(chan struct{})
 	defer close(block)
-	s := sized(New(actionConfig())).WithClipboard(func(string) error { <-block; return nil })
+	s := sized(New(clipConfig(func(string) error { <-block; return nil })))
 
 	cmd := s.Copy("x", "copied", "copy")
 	s = run(t, s, func() any { return cmd() })
@@ -60,23 +59,9 @@ func TestCopyGivesUpOnAHelperThatHangs(t *testing.T) {
 	require.Contains(t, s.Status(), "did not answer")
 }
 
-// The writer is chosen when Copy is called, on the loop, so replacing it
-// afterwards cannot race with a copy already under way.
-func TestCopyUsesTheWriterSetWhenItWasCalled(t *testing.T) {
-	var mu sync.Mutex
-	var first, second []string
-	s := sized(New(actionConfig())).WithClipboard(func(t string) error { mu.Lock(); first = append(first, t); mu.Unlock(); return nil })
-	cmd := s.Copy("a", "copied", "copy")
-	s = s.WithClipboard(func(t string) error { mu.Lock(); second = append(second, t); mu.Unlock(); return nil })
-	run(t, s, func() any { return cmd() })
-
-	require.Equal(t, []string{"a"}, first)
-	require.Empty(t, second)
-}
-
 // Error text from a helper process reaches the screen, so it is sanitised.
 func TestCopyStatusIsSafeToDraw(t *testing.T) {
-	s := sized(New(actionConfig())).WithClipboard(func(string) error { return errors.New("bad\x1b]52;c;aGk=\x07") })
+	s := sized(New(clipConfig(func(string) error { return errors.New("bad\x1b]52;c;aGk=\x07") })))
 	cmd := s.Copy("x", "copied", "copy")
 	s = run(t, s, func() any { return cmd() })
 	require.NotContains(t, s.Status(), "\x1b")
@@ -90,7 +75,7 @@ func TestCopyUsesTheTimeoutSetWhenItWasCalled(t *testing.T) {
 
 	block := make(chan struct{})
 	defer close(block)
-	s := sized(New(actionConfig())).WithClipboard(func(string) error { <-block; return nil })
+	s := sized(New(clipConfig(func(string) error { <-block; return nil })))
 	cmd := s.Copy("x", "copied", "copy")
 	clip.Timeout = time.Hour
 
@@ -101,4 +86,11 @@ func TestCopyUsesTheTimeoutSetWhenItWasCalled(t *testing.T) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("the copy waited on the timeout set after it was called")
 	}
+}
+
+// clipConfig is actionConfig writing the clipboard through write.
+func clipConfig(write func(string) error) Config {
+	c := actionConfig()
+	c.Clipboard = write
+	return c
 }

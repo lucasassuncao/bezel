@@ -19,14 +19,6 @@ type copiedMsg struct {
 // almost always a missing or wedged helper, not anything about the text.
 var errClipboardTimeout = errors.New("the clipboard did not answer: check that xclip, wl-copy or pbcopy is installed and working")
 
-// WithClipboard replaces the system clipboard with write, for a test that
-// must not touch the machine's own.
-func (s Shell) WithClipboard(write func(string) error) Shell {
-	s = s.ready()
-	s = s.withCfg(func(c *Config) { c.Clipboard = write })
-	return s
-}
-
 // Copy puts text on the clipboard off the event loop, then shows done on the
 // status row, or "failed: why". A helper that hangs gives up after 5s
 // instead of freezing the program.

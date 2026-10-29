@@ -99,13 +99,3 @@ func TestConfirmStopsWhenTheContextIsCancelled(t *testing.T) {
 	_, err := run(t, tea.WithInput(pr), tea.WithContext(ctx))
 	assert.ErrorIs(t, err, tea.ErrProgramKilled)
 }
-
-func TestBarWidths(t *testing.T) {
-	for _, tc := range []struct{ done, total, filled int }{
-		{0, 10, 0}, {5, 10, 5}, {10, 10, 10}, {20, 10, 10}, {3, 0, 0},
-	} {
-		got := ansi.Strip(Bar(tc.done, tc.total, 10, th))
-		assert.Equal(t, 10, ansi.StringWidth(got))
-		assert.Equal(t, tc.filled, strings.Count(got, "█"), "%d/%d", tc.done, tc.total)
-	}
-}
