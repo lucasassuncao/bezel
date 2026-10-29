@@ -102,7 +102,7 @@ func Check(actions ...Action) error
 Check reports every key two actions share, display\-only ones included. Apps call it in a test over each screen's set; at runtime the first match runs.
 
 <a name="IsStatusExpiry"></a>
-## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L193>)
+## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L191>)
 
 ```go
 func IsStatusExpiry(msg tea.Msg) bool
@@ -488,7 +488,7 @@ func (s Shell) Body() layout.Rect
 Body is the rect the panes share: the terminal minus header, tabs, status and legend. Pure in the shell's state, so Update and View agree on it.
 
 <a name="Shell.Busy"></a>
-### func \(Shell\) [Busy](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L12>)
+### func \(Shell\) [Busy](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L10>)
 
 ```go
 func (s Shell) Busy(text string) (Shell, tea.Cmd)
@@ -497,7 +497,7 @@ func (s Shell) Busy(text string) (Shell, tea.Cmd)
 Busy shows a spinner and text on the status row until Idle, which an empty text also is. A banner set meanwhile shows over it until it expires. The command starts the spinner; nil when it is already spinning.
 
 <a name="Shell.ClearInput"></a>
-### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L218>)
+### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L216>)
 
 ```go
 func (s Shell) ClearInput() Shell
@@ -506,7 +506,7 @@ func (s Shell) ClearInput() Shell
 ClearInput takes the input off the status row and gives the keys back.
 
 <a name="Shell.ClearStatus"></a>
-### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L202>)
+### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L200>)
 
 ```go
 func (s Shell) ClearStatus() Shell
@@ -551,7 +551,7 @@ func (s Shell) HasOverlay() bool
 HasOverlay reports whether a modal is open.
 
 <a name="Shell.Idle"></a>
-### func \(Shell\) [Idle](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L28>)
+### func \(Shell\) [Idle](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L26>)
 
 ```go
 func (s Shell) Idle() Shell
@@ -560,7 +560,7 @@ func (s Shell) Idle() Shell
 Idle ends Busy. A banner on the status row is left alone.
 
 <a name="Shell.Input"></a>
-### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L225>)
+### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L223>)
 
 ```go
 func (s Shell) Input() (input.Model, bool)
@@ -569,7 +569,7 @@ func (s Shell) Input() (input.Model, bool)
 Input is the status row's input as edited so far, and false when none is set.
 
 <a name="Shell.IsBusy"></a>
-### func \(Shell\) [IsBusy](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L36>)
+### func \(Shell\) [IsBusy](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L34>)
 
 ```go
 func (s Shell) IsBusy() bool
@@ -677,7 +677,7 @@ func (s Shell) SetFocus(name string) Shell
 SetFocus moves focus to a leaf of the layout. Unknown names are ignored, and a leaf the layout dropped hands focus to one on screen.
 
 <a name="Shell.SetInput"></a>
-### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L211>)
+### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L209>)
 
 ```go
 func (s Shell) SetInput(m input.Model) Shell
@@ -704,7 +704,7 @@ func (s Shell) SetLegendLines(n int) Shell
 SetLegendLines changes how many rows the legend keeps, 1 or more.
 
 <a name="Shell.SetStatus"></a>
-### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L153>)
+### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L151>)
 
 ```go
 func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, tea.Cmd)
@@ -767,7 +767,7 @@ func (s Shell) Size() (int, int)
 Size is the terminal's width and height, zero before the first resize.
 
 <a name="Shell.Spinner"></a>
-### func \(Shell\) [Spinner](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L39>)
+### func \(Shell\) [Spinner](<https://github.com/lucasassuncao/bezel/blob/main/shell/busy.go#L37>)
 
 ```go
 func (s Shell) Spinner() string
@@ -785,7 +785,7 @@ func (s Shell) Status() string
 Status is the banner text currently set, empty when none.
 
 <a name="Shell.StatusExpiry"></a>
-### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L189>)
+### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L187>)
 
 ```go
 func (s Shell) StatusExpiry() tea.Msg
@@ -794,7 +794,7 @@ func (s Shell) StatusExpiry() tea.Msg
 StatusExpiry is the message that would clear the current status, for a test harness that drops timers and delivers them itself.
 
 <a name="Shell.StatusLevel"></a>
-### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L185>)
+### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L183>)
 
 ```go
 func (s Shell) StatusLevel() Level
@@ -821,7 +821,7 @@ func (s Shell) Transition() effect.Effect
 Transition is the effect playing over the panes now, for a test or a host that delivers its frames itself; it is inactive when none plays.
 
 <a name="Shell.Update"></a>
-### func \(Shell\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L34>)
+### func \(Shell\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L33>)
 
 ```go
 func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd)

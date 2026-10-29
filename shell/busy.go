@@ -2,8 +2,6 @@ package shell
 
 import (
 	tea "charm.land/bubbletea/v2"
-
-	"github.com/lucasassuncao/bezel/component/spinner"
 )
 
 // Busy shows a spinner and text on the status row until Idle, which an empty
@@ -37,10 +35,3 @@ func (s Shell) IsBusy() bool { return s.busy != "" }
 
 // Spinner is the current frame, unstyled, for a pane showing the same work.
 func (s Shell) Spinner() string { return s.spin.Frame() }
-
-// tick advances the spinner on its own tick; a stopped one lets the loop end.
-func (s Shell) tick(msg spinner.TickMsg) (Shell, tea.Cmd) {
-	var cmd tea.Cmd
-	s.spin, cmd = s.spin.Update(msg)
-	return s, cmd
-}

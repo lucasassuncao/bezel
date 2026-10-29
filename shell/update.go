@@ -7,7 +7,6 @@ import (
 
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/component/input"
-	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/component/toast"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/palette"
@@ -54,6 +53,11 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 			s.trans, cmd = s.trans.Update(m)
 			return s, true, cmd
 		}
+		if s.spin.Owns(m) {
+			var cmd tea.Cmd
+			s.spin, cmd = s.spin.Update(m)
+			return s, true, cmd
+		}
 		if run, p, ok, cmd := s.glow.run.Update(m); ok {
 			s.glow.run, s.glow.p = run, p
 			return s, true, cmd
@@ -73,12 +77,6 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		var cmd tea.Cmd
 		s.toasts, cmd = s.toasts.Update(m.Msg)
 		return s, true, toastCmd(cmd)
-
-	case spinner.TickMsg:
-		if m.ID == s.spin.ID() {
-			next, cmd := s.tick(m)
-			return next, true, cmd
-		}
 
 	case copiedMsg:
 		next, cmd := s.copied(m)

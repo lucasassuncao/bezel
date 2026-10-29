@@ -29,6 +29,13 @@ func Is(msg tea.Msg, id, tag int64) (Msg, bool) {
 	return f, ok && f.id == id && f.tag == tag
 }
 
+// Of reports whether msg is one of id's frames, of any step: a spent one is
+// still id's to drop, never another's to take.
+func Of(msg tea.Msg, id int64) bool {
+	f, ok := msg.(Msg)
+	return ok && f.id == id
+}
+
 // Tick is the command that delivers id's frame for step tag after every.
 func Tick(every time.Duration, id, tag int64) tea.Cmd {
 	return tea.Tick(every, func(at time.Time) tea.Msg { return Msg{At: at, id: id, tag: tag} })

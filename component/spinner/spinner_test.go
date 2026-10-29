@@ -1,6 +1,7 @@
 package spinner
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -12,6 +13,13 @@ import (
 )
 
 var th = theme.Resolve(theme.Mint, true)
+
+func TestMain(m *testing.M) {
+	_ = os.Setenv("BEZEL_NO_MOTION", "")
+	_ = os.Setenv("BEZEL_MOTION", "")
+	_ = os.Setenv("TERM", "xterm-256color")
+	os.Exit(m.Run())
+}
 
 // fast is s turning every nanosecond, so a test that runs a tick never waits.
 func fast(s Spinner) Spinner {
@@ -101,4 +109,25 @@ func TestASpinnerWithoutFramesDrawsNothingAndNeverTicks(t *testing.T) {
 
 func TestAnEveryOfZeroIsATenthOfASecond(t *testing.T) {
 	require.Equal(t, time.Second/10, New(Spinner{Frames: []string{"a"}}).Spinner().Every)
+}
+
+// With motion off the spinner runs on its first frame and asks for none.
+func TestAStillSpinnerHoldsItsFirstFrame(t *testing.T) {
+	t.Setenv("BEZEL_NO_MOTION", "1")
+	m, cmd := New(Line()).Start()
+	require.True(t, m.Running())
+	require.Nil(t, cmd)
+	require.Equal(t, "|", m.Frame())
+}
+
+// A host that delivers frames itself drives it through FrameAt.
+func TestFrameAtTurnsItAndOwnsTellsItsFrames(t *testing.T) {
+	m, _ := New(Line()).Start()
+	other, _ := New(Line()).Start()
+	f := m.FrameAt(time.Now())
+	require.True(t, m.Owns(f))
+	require.False(t, other.Owns(f))
+	m, cmd := m.Update(f)
+	require.Equal(t, "/", m.Frame())
+	require.NotNil(t, cmd)
 }

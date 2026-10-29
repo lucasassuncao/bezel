@@ -87,13 +87,6 @@ func Ellipsis() Spinner {
 // defaultEvery is the pace of a Spinner that sets none.
 const defaultEvery = time.Second / 10
 
-// TickMsg turns the spinner whose ID it carries. A host hands it on the way
-// it hands on keys; a spinner ignores every other spinner's.
-type TickMsg struct {
-	ID  int64
-	tag int64 // the loop that armed it; one Stop ended lands spent
-}
-
 // Styles are how the frame is painted.
 type Styles struct {
 	Frame lipgloss.Style
@@ -133,15 +126,16 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model {
 	return m
 }
 
-// Start turns the spinner. The command is its first tick; nil when it is
-// already turning or has no frames.
+// Start turns the spinner. The command is its first frame; nil when it is
+// already turning, has no frames, or motion is Still, where it holds its
+// first frame while Running.
 func (m Model) Start() (Model, tea.Cmd) {
 	if m.running || len(m.spinner.Frames) == 0 {
 		return m, nil
 	}
 	m.running = true
 	m.tag++
-	return m, m.tick()
+	return m, m.Tick()
 }
 
 // Stop holds the spinner on its frame; a tick already on its way lands spent.
@@ -151,20 +145,31 @@ func (m Model) Stop() Model {
 	return m
 }
 
-func (m Model) tick() tea.Cmd {
-	msg := TickMsg{ID: m.id, tag: m.tag}
-	return tea.Tick(m.spinner.Every, func(time.Time) tea.Msg { return msg })
+// Tick is the command for the next frame, Every apart at BEZEL_MOTION's
+// speed; nil while stopped or Still.
+func (m Model) Tick() tea.Cmd {
+	if !m.running || len(m.spinner.Frames) == 0 || frames.Still() {
+		return nil
+	}
+	return frames.Tick(time.Duration(float64(m.spinner.Every)/frames.Speed()), m.id, m.tag)
 }
 
-// Update turns to the next frame on its own tick and arms the one after.
+// FrameAt is the spinner's next frame for at, for a test or a host that
+// delivers frames itself.
+func (m Model) FrameAt(at time.Time) tea.Msg { return frames.NewMsg(at, m.id, m.tag) }
+
+// Owns reports whether msg is one of this spinner's frames, a spent one
+// included, so a host routing frames hands it here and nowhere else.
+func (m Model) Owns(msg tea.Msg) bool { return frames.Of(msg, m.id) }
+
+// Update turns to the next frame on its own frame and arms the one after.
 // Any other message leaves it as it was, with no command.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	t, ok := msg.(TickMsg)
-	if !ok || !m.running || t.ID != m.id || t.tag != m.tag {
+	if _, ok := frames.Is(msg, m.id, m.tag); !ok || !m.running || len(m.spinner.Frames) == 0 {
 		return m, nil
 	}
 	m.frame = (m.frame + 1) % len(m.spinner.Frames)
-	return m, m.tick()
+	return m, m.Tick()
 }
 
 // Frame is the frame showing, unstyled and unpadded; "" without frames.
@@ -184,9 +189,6 @@ func (m Model) Spinner() Spinner {
 
 // Running reports whether the spinner is turning.
 func (m Model) Running() bool { return m.running }
-
-// ID tells this spinner's TickMsg from another's.
-func (m Model) ID() int64 { return m.id }
 
 // View is the frame in the theme's style, padded to the widest frame.
 func (m Model) View(th theme.Resolved) string {

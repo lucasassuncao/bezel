@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/component/spinner"
 )
 
@@ -60,7 +61,7 @@ func TestTheSpinnerTicksOnlyWhileBusy(t *testing.T) {
 	s := busyShell()
 	s, cmd := s.Busy("refreshing…")
 	tick := cmd()
-	require.IsType(t, spinner.TickMsg{}, tick)
+	require.IsType(t, animation.FrameMsg{}, tick)
 
 	before := s.Spinner()
 	s, handled, next := s.Update(tick)
