@@ -139,8 +139,8 @@ func (p FilePicker) View(body layout.Rect) string {
 		lines = append(lines, rows)
 	}
 	h := legend.HintLine(p.Legend(), p.hint())
-	if problem := p.m.Problem(); problem != "" {
-		h = hint.Render(problem) + "   " + h
+	if err := p.m.Err(); err != nil {
+		h = hint.Render(err.Error()) + "   " + h
 	}
 	return Box(append(lines, "", h), body, p.style())
 }

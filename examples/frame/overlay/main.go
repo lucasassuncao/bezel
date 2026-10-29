@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -70,11 +71,11 @@ func (m model) modal() overlay.Overlay {
 	case "Prompt":
 		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return done("created " + v) }, m.th).
 			WithLabel("name").
-			WithValidate(func(s string) string {
+			WithValidate(func(s string) error {
 				if strings.TrimSpace(s) == "" {
-					return "a name is required"
+					return errors.New("a name is required")
 				}
-				return ""
+				return nil
 			})
 	case "Pager":
 		return overlay.NewPager("go test ./...", testLog(), m.th)

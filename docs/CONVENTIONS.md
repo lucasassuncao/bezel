@@ -83,6 +83,7 @@ The mouse reaches a component the way a key does: the app hands it on, already m
 - **`WithX(...) X`**: everything optional, set before the component is used. Each returns a copy and chains with the others. A switch takes its state, `WithX(on bool)`, never a bare `WithX()`, so an app can pass a setting it read: `WithWrap(cfg.Wrap)`, `WithYoyo(true)`.
 - **`SetX(...) X`**: changes a live component after something happened: `SetItems` after a reload, `SetTheme` after `tea.BackgroundColorMsg`, `SetTabs`, `SetStatus`.
 - **`Config` struct**: only where an app sets many fields at once, most of them every time, as `shell.Config`.
+- **What went wrong** is an `error`: a check an app hands in is `func(string) error` (`input.WithValidate`, `overlay.Prompt.WithValidate`), and the getter is `Err() error`, nil when all is well (`input`, `filepicker`, `overlay.Prompt`).
 - **What the cursor is on** is `Selected() (T, bool)` in every model with a cursor over items (`list`, `tree`, `table.Model`, `browser`): a copy, and false when nothing is under it. A form control's `Selected() int` is the index of its chosen option, read with `Value()`.
 - **Getters** are the bare noun: `Cursor()`, `Value()`, `Selected()`, never `GetCursor()`. A bool is an adjective or a participle: `Running()`, `Focused()`, `Filtering()`, `Active()`. `Is` or `Has` leads it only where the bare word would read as an action on the same type: `IsOpen(i)` beside `Toggle(i)`, `IsBusy()` beside `Busy(text)`, `HasSelection()` beside `Select`, `HasOverlay()` beside `Push`.
 

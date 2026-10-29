@@ -115,8 +115,8 @@ Package overlay is the stack of modals floating over the panes. The top one gets
 - [type Prompt](<#Prompt>)
   - [func NewPrompt\(title string, onAccept func\(value string\) tea.Cmd, th theme.Resolved\) Prompt](<#NewPrompt>)
   - [func \(p Prompt\) Accepts\(\) bool](<#Prompt.Accepts>)
+  - [func \(p Prompt\) Err\(\) error](<#Prompt.Err>)
   - [func \(p Prompt\) Legend\(\) \[\]legend.Entry](<#Prompt.Legend>)
-  - [func \(p Prompt\) Problem\(\) string](<#Prompt.Problem>)
   - [func \(p Prompt\) Update\(msg tea.Msg\) \(Overlay, tea.Cmd\)](<#Prompt.Update>)
   - [func \(p Prompt\) Value\(\) string](<#Prompt.Value>)
   - [func \(p Prompt\) View\(body layout.Rect\) string](<#Prompt.View>)
@@ -129,7 +129,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p Prompt\) WithPreview\(label string, preview func\(typed string\) string\) Prompt](<#Prompt.WithPreview>)
   - [func \(p Prompt\) WithRequire\(want string\) Prompt](<#Prompt.WithRequire>)
   - [func \(p Prompt\) WithStyles\(edit func\(Styles\) Styles\) Prompt](<#Prompt.WithStyles>)
-  - [func \(p Prompt\) WithValidate\(check func\(typed string\) string\) Prompt](<#Prompt.WithValidate>)
+  - [func \(p Prompt\) WithValidate\(check func\(typed string\) error\) Prompt](<#Prompt.WithValidate>)
 - [type PromptKeys](<#PromptKeys>)
   - [func DefaultPromptKeys\(\) PromptKeys](<#DefaultPromptKeys>)
 - [type PushMsg](<#PushMsg>)
@@ -1106,7 +1106,7 @@ func VimPickKeys() PickKeys
 VimPickKeys are DefaultPickKeys with k/j added to choose.
 
 <a name="Prompt"></a>
-## type [Prompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L23-L36>)
+## type [Prompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L24-L37>)
 
 Prompt asks for one line of text. Enter accepts once the text passes WithRequire and WithValidate, running onAccept and closing; esc is the stack's. A host that owns its keys can drive it with Value and Accepts.
 
@@ -1117,7 +1117,7 @@ type Prompt struct {
 ```
 
 <a name="NewPrompt"></a>
-### func [NewPrompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L50>)
+### func [NewPrompt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L51>)
 
 ```go
 func NewPrompt(title string, onAccept func(value string) tea.Cmd, th theme.Resolved) Prompt
@@ -1126,7 +1126,7 @@ func NewPrompt(title string, onAccept func(value string) tea.Cmd, th theme.Resol
 NewPrompt builds a prompt with a "\> " input; onAccept may be nil.
 
 <a name="Prompt.Accepts"></a>
-### func \(Prompt\) [Accepts](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L126>)
+### func \(Prompt\) [Accepts](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L127>)
 
 ```go
 func (p Prompt) Accepts() bool
@@ -1134,8 +1134,17 @@ func (p Prompt) Accepts() bool
 
 Accepts reports whether enter would accept the text now.
 
+<a name="Prompt.Err"></a>
+### func \(Prompt\) [Err](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L116>)
+
+```go
+func (p Prompt) Err() error
+```
+
+Err is why the text cannot be accepted yet, or nil.
+
 <a name="Prompt.Legend"></a>
-### func \(Prompt\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L144>)
+### func \(Prompt\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L145>)
 
 ```go
 func (p Prompt) Legend() []legend.Entry
@@ -1143,17 +1152,8 @@ func (p Prompt) Legend() []legend.Entry
 
 Legend offers enter only when it would do something.
 
-<a name="Prompt.Problem"></a>
-### func \(Prompt\) [Problem](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L115>)
-
-```go
-func (p Prompt) Problem() string
-```
-
-Problem is why the text cannot be accepted yet, or "".
-
 <a name="Prompt.Update"></a>
-### func \(Prompt\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L128>)
+### func \(Prompt\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L129>)
 
 ```go
 func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd)
@@ -1162,7 +1162,7 @@ func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd)
 
 
 <a name="Prompt.Value"></a>
-### func \(Prompt\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L112>)
+### func \(Prompt\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L113>)
 
 ```go
 func (p Prompt) Value() string
@@ -1171,7 +1171,7 @@ func (p Prompt) Value() string
 Value is the text typed so far.
 
 <a name="Prompt.View"></a>
-### func \(Prompt\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L152>)
+### func \(Prompt\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L153>)
 
 ```go
 func (p Prompt) View(body layout.Rect) string
@@ -1180,7 +1180,7 @@ func (p Prompt) View(body layout.Rect) string
 
 
 <a name="Prompt.WithAcceptHint"></a>
-### func \(Prompt\) [WithAcceptHint](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L106>)
+### func \(Prompt\) [WithAcceptHint](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L107>)
 
 ```go
 func (p Prompt) WithAcceptHint(desc string) Prompt
@@ -1189,7 +1189,7 @@ func (p Prompt) WithAcceptHint(desc string) Prompt
 WithAcceptHint is what the hint says enter does; "confirm" by default.
 
 <a name="Prompt.WithInput"></a>
-### func \(Prompt\) [WithInput](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L63>)
+### func \(Prompt\) [WithInput](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L64>)
 
 ```go
 func (p Prompt) WithInput(in input.Model) Prompt
@@ -1198,7 +1198,7 @@ func (p Prompt) WithInput(in input.Model) Prompt
 WithInput replaces the input, for a caller that configures its own prompt, placeholder, width or mask.
 
 <a name="Prompt.WithKeys"></a>
-### func \(Prompt\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L56>)
+### func \(Prompt\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L57>)
 
 ```go
 func (p Prompt) WithKeys(k PromptKeys) Prompt
@@ -1216,7 +1216,7 @@ func (p Prompt) WithKind(k Kind) Prompt
 WithKind tints the prompt, such as Danger for a typed confirmation.
 
 <a name="Prompt.WithLabel"></a>
-### func \(Prompt\) [WithLabel](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L76>)
+### func \(Prompt\) [WithLabel](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L77>)
 
 ```go
 func (p Prompt) WithLabel(label string) Prompt
@@ -1225,7 +1225,7 @@ func (p Prompt) WithLabel(label string) Prompt
 WithLabel draws the input as a labelled row leading the prompt; without a label the input follows the lines, the way a typed confirmation reads.
 
 <a name="Prompt.WithLines"></a>
-### func \(Prompt\) [WithLines](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L69>)
+### func \(Prompt\) [WithLines](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L70>)
 
 ```go
 func (p Prompt) WithLines(lines ...string) Prompt
@@ -1234,7 +1234,7 @@ func (p Prompt) WithLines(lines ...string) Prompt
 WithLines is the explanation drawn with the input.
 
 <a name="Prompt.WithPreview"></a>
-### func \(Prompt\) [WithPreview](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L83>)
+### func \(Prompt\) [WithPreview](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L84>)
 
 ```go
 func (p Prompt) WithPreview(label string, preview func(typed string) string) Prompt
@@ -1243,7 +1243,7 @@ func (p Prompt) WithPreview(label string, preview func(typed string) string) Pro
 WithPreview draws a labelled row under the input computed from the text, such as the path a name will create. It needs WithLabel to be drawn.
 
 <a name="Prompt.WithRequire"></a>
-### func \(Prompt\) [WithRequire](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L90>)
+### func \(Prompt\) [WithRequire](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L91>)
 
 ```go
 func (p Prompt) WithRequire(want string) Prompt
@@ -1261,16 +1261,16 @@ func (p Prompt) WithStyles(edit func(Styles) Styles) Prompt
 WithStyles changes the styles derived from the theme through edit.
 
 <a name="Prompt.WithValidate"></a>
-### func \(Prompt\) [WithValidate](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L100>)
+### func \(Prompt\) [WithValidate](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L101>)
 
 ```go
-func (p Prompt) WithValidate(check func(typed string) string) Prompt
+func (p Prompt) WithValidate(check func(typed string) error) Prompt
 ```
 
-WithValidate refuses text for which check returns a problem, shown in place of the hint.
+WithValidate refuses text for which check returns an error, shown in place of the hint.
 
 <a name="PromptKeys"></a>
-## type [PromptKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L40-L42>)
+## type [PromptKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L41-L43>)
 
 PromptKeys are the bindings a Prompt answers to besides esc and the typing. The legend prints Accept's key; what it does is WithAcceptHint's.
 
@@ -1281,7 +1281,7 @@ type PromptKeys struct {
 ```
 
 <a name="DefaultPromptKeys"></a>
-### func [DefaultPromptKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L45>)
+### func [DefaultPromptKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/prompt.go#L46>)
 
 ```go
 func DefaultPromptKeys() PromptKeys

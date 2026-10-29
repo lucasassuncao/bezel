@@ -124,7 +124,7 @@ type Model struct {
 	perms    bool
 	drives   drives
 	keys     Keys
-	problem  string
+	err      error
 	picked   string // the path the last Update picked
 	volumes  func() []string
 	edit     func(Styles) Styles
@@ -212,9 +212,9 @@ func (m Model) Dir() string { return m.dir }
 // Browsing reports whether a directory shows, false while the drive list does.
 func (m Model) Browsing() bool { return !m.drives.open() }
 
-// Problem is why the last key did nothing, such as a file of the wrong type;
+// Err is why the last key did nothing, such as a file of the wrong type;
 // "" when it did.
-func (m Model) Problem() string { return m.problem }
+func (m Model) Err() error { return m.err }
 
 // Picked is the absolute path the last Update picked, and whether it picked.
 func (m Model) Picked() (string, bool) { return m.picked, m.picked != "" }
@@ -313,7 +313,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.drives = drives{roots: msg.roots, win: layout.Window{Cursor: at, Height: m.win.Height}.Clamp(len(msg.roots))}
 		}
 	case tea.KeyPressMsg:
-		m.problem = ""
+		m.err = nil
 		if m.drives.open() {
 			return m.updateDrives(msg)
 		}
@@ -329,7 +329,7 @@ func (m Model) listed(msg listedMsg) Model {
 		return m
 	}
 	if msg.err != nil {
-		m.problem = "cannot read it: " + msg.err.Error()
+		m.err = fmt.Errorf("cannot read it: %w", msg.err)
 	}
 	m.entries = msg.entries
 	if m.entries == nil {
@@ -384,7 +384,7 @@ func (m Model) pick() (Model, tea.Cmd) {
 	case e.dir && !m.dirs:
 		return m.browse(filepath.Join(m.dir, e.name), "")
 	case !e.dir && !m.allows(e.name):
-		m.problem = fmt.Sprintf("%s is not %s", e.name, strings.Join(m.allowed, " or "))
+		m.err = fmt.Errorf("%s is not %s", e.name, strings.Join(m.allowed, " or "))
 	default:
 		m.picked = filepath.Join(m.dir, e.name)
 	}

@@ -19,12 +19,12 @@ Package filepicker browses directories inside a pane: directories first, sizes a
   - [func New\(dir string\) Model](<#New>)
   - [func \(m Model\) Browsing\(\) bool](<#Model.Browsing>)
   - [func \(m Model\) Dir\(\) string](<#Model.Dir>)
+  - [func \(m Model\) Err\(\) error](<#Model.Err>)
   - [func \(m Model\) Height\(\) int](<#Model.Height>)
   - [func \(m Model\) Highlighted\(\) string](<#Model.Highlighted>)
   - [func \(m Model\) Init\(\) tea.Cmd](<#Model.Init>)
   - [func \(m Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
   - [func \(m Model\) Picked\(\) \(string, bool\)](<#Model.Picked>)
-  - [func \(m Model\) Problem\(\) string](<#Model.Problem>)
   - [func \(m Model\) SetHeight\(h int\) Model](<#Model.SetHeight>)
   - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
   - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
@@ -108,6 +108,15 @@ func (m Model) Dir() string
 
 Dir is the directory being browsed.
 
+<a name="Model.Err"></a>
+### func \(Model\) [Err](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L217>)
+
+```go
+func (m Model) Err() error
+```
+
+Err is why the last key did nothing, such as a file of the wrong type; "" when it did.
+
 <a name="Model.Height"></a>
 ### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L204>)
 
@@ -152,15 +161,6 @@ func (m Model) Picked() (string, bool)
 ```
 
 Picked is the absolute path the last Update picked, and whether it picked.
-
-<a name="Model.Problem"></a>
-### func \(Model\) [Problem](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L217>)
-
-```go
-func (m Model) Problem() string
-```
-
-Problem is why the last key did nothing, such as a file of the wrong type; "" when it did.
 
 <a name="Model.SetHeight"></a>
 ### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L195>)

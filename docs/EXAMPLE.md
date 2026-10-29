@@ -147,11 +147,11 @@ The background colour comes before it all: `Init` asks the terminal for it, and 
 case askAddMsg:
 	ask := overlay.NewPrompt("New task", func(title string) tea.Cmd {
 		return func() tea.Msg { return addMsg{title: title} }
-	}, m.th).WithValidate(func(typed string) string {
+	}, m.th).WithValidate(func(typed string) error {
 		if strings.TrimSpace(typed) == "" {
-			return "a task needs a title"
+			return errors.New("a task needs a title")
 		}
-		return ""
+		return nil
 	})
 	return m, overlay.Open(ask)
 case addMsg:

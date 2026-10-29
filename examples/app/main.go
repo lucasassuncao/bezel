@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -114,11 +115,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case askAddMsg:
 		ask := overlay.NewPrompt("New task", func(title string) tea.Cmd {
 			return func() tea.Msg { return addMsg{title: title} }
-		}, m.th).WithValidate(func(typed string) string {
+		}, m.th).WithValidate(func(typed string) error {
 			if strings.TrimSpace(typed) == "" {
-				return "a task needs a title"
+				return errors.New("a task needs a title")
 			}
-			return ""
+			return nil
 		})
 		return m, overlay.Open(ask)
 	case addMsg:

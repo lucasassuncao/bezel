@@ -1,6 +1,7 @@
 package overlay
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 
@@ -14,8 +15,8 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-// unlockHint is the problem an unmatched WithRequire reports.
-const unlockHint = "type the exact text to unlock"
+// errLocked is what an unmatched WithRequire reports.
+var errLocked = errors.New("type the exact text to unlock")
 
 // Prompt asks for one line of text. Enter accepts once the text passes
 // WithRequire and WithValidate, running onAccept and closing; esc is the
@@ -29,7 +30,7 @@ type Prompt struct {
 	preview  func(string) string
 	previewL string
 	require  string
-	validate func(string) string
+	validate func(string) error
 	accept   string
 	onAccept func(value string) tea.Cmd
 	keys     PromptKeys
@@ -95,9 +96,9 @@ func (p Prompt) WithRequire(want string) Prompt {
 	return p
 }
 
-// WithValidate refuses text for which check returns a problem, shown in place
+// WithValidate refuses text for which check returns an error, shown in place
 // of the hint.
-func (p Prompt) WithValidate(check func(typed string) string) Prompt {
+func (p Prompt) WithValidate(check func(typed string) error) Prompt {
 	p.validate = check
 	return p
 }
@@ -111,19 +112,19 @@ func (p Prompt) WithAcceptHint(desc string) Prompt {
 // Value is the text typed so far.
 func (p Prompt) Value() string { return p.input.Value() }
 
-// Problem is why the text cannot be accepted yet, or "".
-func (p Prompt) Problem() string {
+// Err is why the text cannot be accepted yet, or nil.
+func (p Prompt) Err() error {
 	if p.require != "" && p.Value() != p.require {
-		return unlockHint
+		return errLocked
 	}
 	if p.validate != nil {
 		return p.validate(p.Value())
 	}
-	return ""
+	return nil
 }
 
 // Accepts reports whether enter would accept the text now.
-func (p Prompt) Accepts() bool { return p.Problem() == "" }
+func (p Prompt) Accepts() bool { return p.Err() == nil }
 
 func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 	if k, ok := msg.(tea.KeyPressMsg); ok && key.Matches(k, p.keys.Accept) {
@@ -173,8 +174,8 @@ func (p Prompt) row(label string, width int, content string) string {
 
 // hintLine says what the keys do, or what stands in the way of enter.
 func (p Prompt) hintLine() string {
-	if problem := p.Problem(); problem != "" {
-		return p.hint().Text.Render(problem) + "   " + legend.HintLine(p.Legend(), p.hint())
+	if err := p.Err(); err != nil {
+		return p.hint().Text.Render(err.Error()) + "   " + legend.HintLine(p.Legend(), p.hint())
 	}
 	return legend.HintLine(p.Legend(), p.hint())
 }

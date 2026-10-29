@@ -1,6 +1,7 @@
 package overlay
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -59,11 +60,11 @@ func TestPromptWithRequireLocksEnterUntilTheTextMatches(t *testing.T) {
 }
 
 func TestPromptWithValidateShowsTheProblemAndBlocks(t *testing.T) {
-	p := newPrompt().WithValidate(func(v string) string {
+	p := newPrompt().WithValidate(func(v string) error {
 		if strings.Contains(v, " ") {
-			return "no spaces in a name"
+			return errors.New("no spaces in a name")
 		}
-		return ""
+		return nil
 	})
 	p = typeInto(p, "a b")
 	require.False(t, p.Accepts())

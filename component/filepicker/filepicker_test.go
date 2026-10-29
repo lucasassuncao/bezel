@@ -76,7 +76,7 @@ func TestAFileOfTheWrongTypeIsRefused(t *testing.T) {
 	m, _ = press(m, tea.KeyEnter)
 	_, ok := m.Picked()
 	require.False(t, ok)
-	require.Equal(t, "notes.txt is not .go", m.Problem())
+	require.EqualError(t, m.Err(), "notes.txt is not .go")
 }
 
 func TestTheColumnsComeAndGo(t *testing.T) {
