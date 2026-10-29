@@ -264,6 +264,36 @@ Source: [`examples/frame/bezeltest/main_test.go`](../examples/frame/bezeltest/ma
 
 No recording: this one is a test. A counter, and the test that drives it with the key presses a terminal would send.
 
+## Changing the keys
+
+Every component that answers to keys keeps them in a struct of [`key.Binding`](../key)s. Packages with one component call it `Keys`: `list`, `tree`, `table`, `browser`, `viewport`, `input`, `textbox`, `form`, `accordion`, `paginator`, `filepicker`, `palette`. In `overlay`, each dialog has its own: `ConfirmKeys`, `PickKeys`, `PromptKeys`, `PagerKeys`, `HelpKeys`, `FilePickerKeys`. `DefaultKeys()` (or `DefaultConfirmKeys()` and so on) builds the defaults, and `WithKeys` hands the component a new set. Start from the defaults and change only what you need:
+
+```go
+k := list.DefaultKeys()
+k.Up = key.NewBinding(key.WithKeys("up", "k"), key.WithHelp("↑/↓ k/j", "move"))
+k.Down = key.NewBinding(key.WithKeys("down", "j"))
+k.Filter.Disabled = true // no filtering here
+l := list.New(rows, 10).WithKeys(k)
+```
+
+- **The legend follows.** A component's `Legend` is built from the same bindings it matches against, so a new key or new help shows up in the legend with nothing else to change. A disabled binding stops matching and drops out of the legend.
+- **A pair shows as one entry.** In `Up`/`Down`, `PageUp`/`PageDown` and the like, the first binding carries the help for both, and the second has none and stays out of the legend. Keep it that way when you rebind them, as `k.Down` does above.
+- **Scrolling stays off the letters.** `viewport` and `overlay.Pager` default to the arrows, pgup/pgdown and home/end, so a letter is never taken from the app. For vim keys, or the half-page moves that have no default key, bind them yourself:
+
+  ```go
+  k := viewport.DefaultKeys()
+  k.Up = key.NewBinding(key.WithKeys("up", "k"), key.WithHelp("↑/↓", "scroll"))
+  k.Down = key.NewBinding(key.WithKeys("down", "j"))
+  k.HalfPageDown = key.NewBinding(key.WithKeys("ctrl+d"), key.WithHelp("^d/^u", "half page"))
+  k.HalfPageUp = key.NewBinding(key.WithKeys("ctrl+u"))
+  vp = vp.WithKeys(k)
+  ```
+
+- **A form takes one set.** `form.Keys` covers the form and every control in it, and `Form.WithKeys` rebinds all of them at once.
+- **Esc belongs to the overlay stack.** The stack closes the top dialog before the dialog sees esc, so rebinding a dialog's esc only matters when you drive the dialog without a stack.
+
+The frame's own keys are not a struct. Each one is a [`shell.Action`](FRAME.md#actions), so the app picks the key when it builds the action, `WithKey` adds more keys under the same label, and one definition covers the key, the legend, the help and the `:` palette.
+
 ## Recording
 
 The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the three that print into the terminal rather than take it over, `inline`, `logger` and `themebrowser`, run behind a `clear` so their command line never shows. The galleries, of animation, text, scenes and effects, have a tape per tab. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
