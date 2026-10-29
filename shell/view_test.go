@@ -113,7 +113,7 @@ func TestStatusRowShowsInputThenBannerThenTabStatus(t *testing.T) {
 	s, _ = s.SetStatus("saved!", OK, 0)
 	require.Contains(t, ansi.Strip(s.View(demoPanes())), "saved!")
 
-	in := input.New(theme.Resolved{}).WithPrompt(":").WithValue("cmd")
+	in := input.New(theme.Resolved{}).WithPrompt(":").SetValue("cmd")
 	s = s.SetInput(in)
 	plain := ansi.Strip(s.View(demoPanes()))
 	require.Contains(t, plain, ":cmd")
@@ -274,7 +274,7 @@ func TestTheToastStyleShowsTheRowOnlyWhenItHasALine(t *testing.T) {
 	require.Greater(t, strings.Index(rows[at], "saved"), 60, "on the right")
 	require.Equal(t, "saved notes.md", s.Status(), "Status still reads it")
 
-	typing := s.SetInput(input.New(th).WithValue("kv/"))
+	typing := s.SetInput(input.New(th).SetValue("kv/"))
 	require.Equal(t, bar.Body().H, typing.Body().H, "typing brings the row back")
 	busy, _ := s.Busy("indexing")
 	require.Equal(t, bar.Body().H, busy.Body().H, "and so does Busy")

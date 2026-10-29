@@ -50,7 +50,7 @@ func TestAnUnfocusedFieldTakesNothing(t *testing.T) {
 }
 
 func TestTheReadlineKeysEdit(t *testing.T) {
-	m := focused().WithValue("git commit -m")
+	m := focused().SetValue("git commit -m")
 	m = run(m, press('w', tea.ModCtrl))
 	require.Equal(t, "git commit ", m.Value(), "ctrl+w eats the word before")
 	m = run(m, press('a', tea.ModCtrl), press('f', tea.ModAlt), press('k', tea.ModCtrl))
@@ -62,7 +62,7 @@ func TestTheReadlineKeysEdit(t *testing.T) {
 }
 
 func TestAKeyItDoesNotKnowIsLeftToTheHost(t *testing.T) {
-	m := focused().WithValue("x")
+	m := focused().SetValue("x")
 	for _, k := range []tea.KeyPressMsg{press(tea.KeyEnter, 0), press(tea.KeyUp, 0), {Code: 'x', Text: "x", Mod: tea.ModCtrl}} {
 		got, cmd := m.Update(k)
 		require.Equal(t, "x", got.Value(), "%v", k)
@@ -76,21 +76,21 @@ func TestAPasteIsOneLine(t *testing.T) {
 }
 
 func TestTheMaskHidesTheTextAndItsWords(t *testing.T) {
-	m := focused().WithMask('•').WithValue("hunter two")
+	m := focused().WithMask('•').SetValue("hunter two")
 	require.Equal(t, "••••••••••", ansi.Strip(m.Blur().View()))
 	m = run(m, press(tea.KeyBackspace, tea.ModAlt))
 	require.Empty(t, m.Value(), "a word kill runs to the start: no boundary shows")
 }
 
 func TestTheViewIsTheWidthSet(t *testing.T) {
-	m := focused().WithWidth(8).WithValue("ab")
+	m := focused().SetWidth(8).SetValue("ab")
 	require.Equal(t, "ab      ", ansi.Strip(m.View()))
 	require.Contains(t, m.View(), th.Caret.Render(" "), "the caret on the cell after the text")
-	require.Equal(t, "ab", ansi.Strip(m.Blur().WithWidth(0).View()), "no width, no caret: just the text")
+	require.Equal(t, "ab", ansi.Strip(m.Blur().SetWidth(0).View()), "no width, no caret: just the text")
 }
 
 func TestALongValueScrollsToKeepTheCaret(t *testing.T) {
-	m := focused().WithWidth(5).WithValue("abcdefgh")
+	m := focused().SetWidth(5).SetValue("abcdefgh")
 	require.Equal(t, "efgh ", ansi.Strip(m.View()), "the end and the caret's cell")
 
 	m = run(m, press(tea.KeyHome, 0))
@@ -103,7 +103,7 @@ func TestALongValueScrollsToKeepTheCaret(t *testing.T) {
 }
 
 func TestAWideCharacterNeverSplitsAtTheEdge(t *testing.T) {
-	m := focused().WithWidth(4).WithValue("a中中")
+	m := focused().SetWidth(4).SetValue("a中中")
 	got := ansi.Strip(m.View())
 	require.Equal(t, 4, ansi.StringWidth(got))
 	require.Equal(t, "中  ", got, "a would need half of 中's room: the window starts at 中")
@@ -118,7 +118,7 @@ func TestThePlaceholderShowsWhileEmpty(t *testing.T) {
 }
 
 func TestThePromptLeads(t *testing.T) {
-	require.Equal(t, ":cmd", ansi.Strip(New(th).WithPrompt(":").WithValue("cmd").View()))
+	require.Equal(t, ":cmd", ansi.Strip(New(th).WithPrompt(":").SetValue("cmd").View()))
 }
 
 func TestTheCaretBlinksOnItsOwnTicksOnly(t *testing.T) {
@@ -145,7 +145,7 @@ func TestTheCaretBlinksOnItsOwnTicksOnly(t *testing.T) {
 }
 
 func TestEditsLeaveTheOldFieldAlone(t *testing.T) {
-	before := focused().WithValue("abc")
+	before := focused().SetValue("abc")
 	after := run(before, press(tea.KeyBackspace, 0))
 	require.Equal(t, "abc", before.Value())
 	require.Equal(t, "ab", after.Value())
@@ -155,7 +155,7 @@ func FuzzInputNeverOutgrowsItsWidth(f *testing.F) {
 	f.Add("hello 中👍🏽 world", 6, 3)
 	f.Fuzz(func(t *testing.T, s string, width, left int) {
 		width = (width%40+40)%40 + 1
-		m := focused().WithWidth(width).WithValue(s)
+		m := focused().SetWidth(width).SetValue(s)
 		for range (left%50 + 50) % 50 {
 			m, _ = m.Update(press(tea.KeyLeft, 0))
 		}
@@ -166,7 +166,7 @@ func FuzzInputNeverOutgrowsItsWidth(f *testing.F) {
 }
 
 func TestSetWidthAndSetThemeChangeALiveField(t *testing.T) {
-	m := focused().WithValue("abcdefgh").SetWidth(4)
+	m := focused().SetValue("abcdefgh").SetWidth(4)
 	require.Equal(t, "fgh ", ansi.Strip(m.View()), "narrowed, the caret stays in view")
 
 	plain := theme.Resolve(theme.Plain, true)
@@ -201,7 +201,7 @@ func TestCtrlVPastesTheClipboard(t *testing.T) {
 // Home and End on a long value: the window is found from the caret, so the
 // cost follows the field's width, not the value's length.
 func BenchmarkJumpingAcrossALongValue(b *testing.B) {
-	m := focused().WithWidth(40).WithValue(strings.Repeat("a", 40_000))
+	m := focused().SetWidth(40).SetValue(strings.Repeat("a", 40_000))
 	home, end := press(tea.KeyHome, 0), press(tea.KeyEnd, 0)
 	for b.Loop() {
 		m, _ = m.Update(home)
@@ -210,7 +210,7 @@ func BenchmarkJumpingAcrossALongValue(b *testing.B) {
 }
 
 func TestASuggestionShowsTheRestAndTabTakesIt(t *testing.T) {
-	m := focused().WithSuggestions([]string{"commit", "Checkout", "cherry-pick"})
+	m := focused().SetSuggestions([]string{"commit", "Checkout", "cherry-pick"})
 	m = run(m, typed("c"))
 	require.Equal(t, []string{"commit", "Checkout", "cherry-pick"}, m.MatchedSuggestions())
 	require.Equal(t, "commit", ansi.Strip(m.View()), "the rest muted after the caret")
@@ -228,22 +228,22 @@ func TestASuggestionShowsTheRestAndTabTakesIt(t *testing.T) {
 }
 
 func TestWithoutAMatchTabIsLeftToTheHost(t *testing.T) {
-	m := focused().WithSuggestions([]string{"commit"}).WithValue("x")
+	m := focused().SetSuggestions([]string{"commit"}).SetValue("x")
 	got, cmd := m.Update(press(tea.KeyTab, 0))
 	require.Equal(t, "x", got.Value())
 	require.Nil(t, cmd)
-	require.Empty(t, focused().WithSuggestions([]string{"a"}).CurrentSuggestion(), "an empty field suggests nothing")
+	require.Empty(t, focused().SetSuggestions([]string{"a"}).CurrentSuggestion(), "an empty field suggests nothing")
 }
 
 func TestASuggestionKeepsToTheWidth(t *testing.T) {
-	m := focused().WithWidth(4).WithSuggestions([]string{"abcdefgh"}).WithValue("ab")
+	m := focused().SetWidth(4).SetSuggestions([]string{"abcdefgh"}).SetValue("ab")
 	require.Equal(t, "abcd", ansi.Strip(m.View()))
 	m = run(m, press(tea.KeyLeft, 0))
 	require.Equal(t, "ab  ", ansi.Strip(m.View()), "only with the caret at the end")
 }
 
 func TestTheCharLimitStopsTypingAndCutsAPaste(t *testing.T) {
-	m := focused().WithCharLimit(4).WithValue("abcdef")
+	m := focused().WithCharLimit(4).SetValue("abcdef")
 	require.Equal(t, "abcd", m.Value(), "a value is cut too")
 	got, cmd := m.Update(typed("x"))
 	require.Equal(t, "abcd", got.Value())
@@ -252,11 +252,11 @@ func TestTheCharLimitStopsTypingAndCutsAPaste(t *testing.T) {
 	m = run(m, press(tea.KeyBackspace, 0), press(tea.KeyBackspace, 0), tea.PasteMsg{Content: "中xyz"})
 	require.Equal(t, "ab中x", m.Value(), "characters, not bytes")
 	require.Equal(t, 4, m.CharLimit())
-	require.Equal(t, "abcdef", focused().WithCharLimit(-1).WithValue("abcdef").Value(), "below one is no cap")
+	require.Equal(t, "abcdef", focused().WithCharLimit(-1).SetValue("abcdef").Value(), "below one is no cap")
 }
 
 func TestTheCharLimitCutsATakenSuggestion(t *testing.T) {
-	m := focused().WithCharLimit(3).WithSuggestions([]string{"commit"})
+	m := focused().WithCharLimit(3).SetSuggestions([]string{"commit"})
 	m = run(m, typed("c"), press(tea.KeyTab, 0))
 	require.Equal(t, "com", m.Value())
 }
@@ -268,21 +268,21 @@ func TestTheValidatorJudgesEveryChange(t *testing.T) {
 		}
 		return nil
 	}
-	m := focused().WithValidate(digits).WithValue("12")
+	m := focused().WithValidate(digits).SetValue("12")
 	require.NoError(t, m.Err())
 	m = run(m, typed("x"))
 	require.EqualError(t, m.Err(), "digits only")
 	require.Equal(t, "12x", m.Value(), "the text stays as typed")
 	m = run(m, press(tea.KeyBackspace, 0))
 	require.NoError(t, m.Err())
-	require.NoError(t, m.WithValidate(nil).WithValue("x").Err(), "nil checks nothing")
+	require.NoError(t, m.WithValidate(nil).SetValue("x").Err(), "nil checks nothing")
 }
 
 func TestAHiddenFieldDrawsNoneOfItsText(t *testing.T) {
-	m := focused().WithHidden(true).WithWidth(6).WithValue("secret words")
+	m := focused().WithHidden(true).SetWidth(6).SetValue("secret words")
 	require.Equal(t, "      ", ansi.Strip(m.View()))
 	require.Contains(t, m.View(), th.Caret.Render(" "), "the caret on the first cell")
-	require.Empty(t, ansi.Strip(m.Blur().WithWidth(0).View()))
+	require.Empty(t, ansi.Strip(m.Blur().SetWidth(0).View()))
 	m = run(m, press(tea.KeyBackspace, tea.ModAlt))
 	require.Empty(t, m.Value(), "no word boundary to give away")
 }
@@ -306,7 +306,7 @@ func TestASteadyCaretNeverBlinksAndAHiddenOneNeverShows(t *testing.T) {
 }
 
 func TestTheTerminalCursorStandsInForTheCaret(t *testing.T) {
-	m, cmd := New(th).WithTerminalCursor(true).WithPrompt("> ").WithWidth(4).Focus()
+	m, cmd := New(th).WithTerminalCursor(true).WithPrompt("> ").SetWidth(4).Focus()
 	require.Nil(t, cmd, "the terminal blinks its own")
 	m = run(m, typed("a"), typed("中"), typed("b"), typed("c"))
 	require.NotContains(t, m.View(), th.Caret.Render(" "), "no painted caret")
@@ -331,8 +331,8 @@ func TestWithStylesHoldsAcrossSetTheme(t *testing.T) {
 }
 
 func TestLegendOffersCompletionOnlyWithASuggestion(t *testing.T) {
-	m := New(theme.Resolved{}).WithSuggestions([]string{"deploy"})
+	m := New(theme.Resolved{}).SetSuggestions([]string{"deploy"})
 	require.Len(t, m.Legend(), 1, "paste alone")
-	m = m.WithValue("dep")
+	m = m.SetValue("dep")
 	require.Len(t, m.Legend(), 3, "complete, the next suggestion, paste")
 }

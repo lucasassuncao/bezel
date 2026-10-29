@@ -267,7 +267,7 @@ func (m Model) Copy() tea.Cmd {
 func (m Model) WithCharLimit(n int) Model {
 	m = m.ready()
 	m.charLimit = max(n, 0)
-	return m.WithValue(m.Value())
+	return m.SetValue(m.Value())
 }
 
 // WithMaxLines caps the text at n lines: enter stops making new ones and a
@@ -275,7 +275,7 @@ func (m Model) WithCharLimit(n int) Model {
 func (m Model) WithMaxLines(n int) Model {
 	m = m.ready()
 	m.maxLines = max(n, 0)
-	return m.WithValue(m.Value())
+	return m.SetValue(m.Value())
 }
 
 // CharLimit is the most characters the text holds; zero is no cap.
@@ -342,9 +342,9 @@ func (m Model) SetTheme(th theme.Resolved) Model {
 	return m.restyle()
 }
 
-// WithValue is the field holding s, the caret at its end. CRLF and lone CRs
+// SetValue is the field holding s, the caret at its end. CRLF and lone CRs
 // read as line breaks, so a Windows file comes back one line per line.
-func (m Model) WithValue(s string) Model {
+func (m Model) SetValue(s string) Model {
 	m = m.ready()
 	m.lines = []line{m.wrap(edit.NewLine(""))}
 	parts := strings.Split(m.fit(clean(s)), "\n")
@@ -358,7 +358,6 @@ func (m Model) WithValue(s string) Model {
 
 // SetValue replaces the text after something happened, a reload say, with
 // the caret at its end.
-func (m Model) SetValue(s string) Model { return m.WithValue(s) }
 
 // Value is the text, its lines joined by "\n".
 func (m Model) Value() string {

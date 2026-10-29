@@ -53,7 +53,7 @@ func newModel() model {
 			}
 			return nil
 		})
-	command := input.New(th).WithPrompt(prompt).WithPlaceholder("tab completes").WithSuggestions(commands)
+	command := input.New(th).WithPrompt(prompt).WithPlaceholder("tab completes").SetSuggestions(commands)
 	password := input.New(th).WithPlaceholder("never shown").WithMask('•')
 	fields := []input.Model{name, command, password}
 	fields[0], _ = fields[0].Focus()
@@ -121,7 +121,7 @@ func (m model) body(r layout.Rect) string {
 		if i == 1 {
 			fw -= len(prompt)
 		}
-		out = append(out, " "+label+f.WithWidth(fw).View())
+		out = append(out, " "+label+f.SetWidth(fw).View())
 		if err := f.Err(); err != nil && i != m.focus {
 			out = append(out, " "+strings.Repeat(" ", labelWidth)+m.th.Danger.Render(err.Error()))
 		}

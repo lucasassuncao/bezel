@@ -52,13 +52,13 @@ func (i Input) WithPlaceholder(s string) Input {
 
 // WithWidth keeps the field width cells wide whatever it holds.
 func (i Input) WithWidth(width int) Input {
-	i.in = i.in.WithWidth(width)
+	i.in = i.in.SetWidth(width)
 	return i
 }
 
 // WithValue is the field holding s, the way a form opens on saved values.
 func (i Input) WithValue(s string) Input {
-	i.in = i.in.WithValue(s)
+	i.in = i.in.SetValue(s)
 	return i
 }
 

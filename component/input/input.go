@@ -158,15 +158,12 @@ func (m Model) WithPlaceholder(s string) Model {
 	return m
 }
 
-// WithWidth draws the text exactly w cells wide, scrolled to keep the caret
+// SetWidth draws the text exactly w cells wide, scrolled to keep the caret
 // in view; zero draws it whole.
-func (m Model) WithWidth(w int) Model {
+func (m Model) SetWidth(w int) Model {
 	m.width = max(w, 0)
 	return m.scroll()
 }
-
-// SetWidth changes the width after a resize, keeping the caret in view.
-func (m Model) SetWidth(w int) Model { return m.WithWidth(w) }
 
 // SetTheme repaints the field after the terminal's background was learned.
 func (m Model) SetTheme(th theme.Resolved) Model {
@@ -252,9 +249,9 @@ func (m Model) WithKeys(k Keys) Model {
 	return m
 }
 
-// WithValue is the field holding s, the caret at its end, as a form opens on
+// SetValue is the field holding s, the caret at its end, as a form opens on
 // a saved value.
-func (m Model) WithValue(s string) Model {
+func (m Model) SetValue(s string) Model {
 	m.line = edit.NewLine(m.capped(oneLine(s), 0))
 	return m.scroll().match().check()
 }
@@ -263,7 +260,7 @@ func (m Model) WithValue(s string) Model {
 // paste is cut to what fits. Zero or less is no cap.
 func (m Model) WithCharLimit(n int) Model {
 	m.limit = max(n, 0)
-	return m.WithValue(m.Value())
+	return m.SetValue(m.Value())
 }
 
 // CharLimit is the most characters the field holds; zero is no cap.
@@ -297,9 +294,9 @@ func (m Model) check() Model {
 	return m
 }
 
-// WithSuggestions offers to complete the text with any of list it starts,
+// SetSuggestions offers to complete the text with any of list it starts,
 // matched case-blind: the rest of one shows muted after the caret.
-func (m Model) WithSuggestions(list []string) Model {
+func (m Model) SetSuggestions(list []string) Model {
 	m.suggestions = slices.Clone(list)
 	m.lower = make([]string, len(list))
 	for i, s := range list {
@@ -310,7 +307,6 @@ func (m Model) WithSuggestions(list []string) Model {
 
 // SetSuggestions replaces the list after something happened, a directory
 // read say.
-func (m Model) SetSuggestions(list []string) Model { return m.WithSuggestions(list) }
 
 // Suggestions is the whole list the field completes from.
 func (m Model) Suggestions() []string { return slices.Clone(m.suggestions) }
@@ -363,7 +359,6 @@ func (m *Model) ghost() []string {
 
 // SetValue replaces the text after something happened, a completion say,
 // with the caret at its end.
-func (m Model) SetValue(s string) Model { return m.WithValue(s) }
 
 // Value is the text in the field.
 func (m Model) Value() string { return m.line.String() }

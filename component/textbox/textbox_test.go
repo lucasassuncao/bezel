@@ -24,7 +24,7 @@ func typed(s string) tea.KeyPressMsg { return tea.KeyPressMsg{Code: []rune(s)[0]
 func press(code rune, mod tea.KeyMod) tea.KeyPressMsg { return tea.KeyPressMsg{Code: code, Mod: mod} }
 
 func focused(value string) Model {
-	m, _ := New(th()).WithValue(value).Focus()
+	m, _ := New(th()).SetValue(value).Focus()
 	return m
 }
 
@@ -289,7 +289,7 @@ func keysBold(calls *int) func(string) [][]Span {
 func TestHighlightPaintsTheSpansItIsGiven(t *testing.T) {
 	bold := lipgloss.NewStyle().Bold(true)
 	calls := 0
-	m, _ := New(th()).WithHighlight(keysBold(&calls)).WithValue("café: x\nkey: y").Focus()
+	m, _ := New(th()).WithHighlight(keysBold(&calls)).SetValue("café: x\nkey: y").Focus()
 	require.Contains(t, m.View(), bold.Render("café"), "spans are bytes; é is two")
 	require.Contains(t, m.View(), bold.Render("key"))
 
@@ -306,7 +306,7 @@ func TestHighlightPaintsTheSpansItIsGiven(t *testing.T) {
 
 func TestABlurredFieldIsDimmedNotHighlighted(t *testing.T) {
 	calls := 0
-	m := New(th()).WithHighlight(keysBold(&calls)).WithValue("key: y")
+	m := New(th()).WithHighlight(keysBold(&calls)).SetValue("key: y")
 	require.NotContains(t, m.View(), lipgloss.NewStyle().Bold(true).Render("key"))
 }
 
@@ -395,7 +395,7 @@ func TestTheCharLimitCountsLineBreaks(t *testing.T) {
 	require.Equal(t, "ab\ncd", m.Value())
 	m = run(m, press(tea.KeyBackspace, 0), tea.PasteMsg{Content: "中xyz"})
 	require.Equal(t, "ab\nc中", m.Value(), "characters, not bytes")
-	require.Equal(t, "abcde", New(th()).WithCharLimit(5).WithValue("abcdefgh").Value())
+	require.Equal(t, "abcde", New(th()).WithCharLimit(5).SetValue("abcdefgh").Value())
 	require.Equal(t, 5, m.CharLimit())
 }
 
@@ -405,7 +405,7 @@ func TestMaxLinesStopsNewLines(t *testing.T) {
 	require.Equal(t, "one\nxy", m.Value())
 	m = run(m, tea.PasteMsg{Content: "z\nlost"})
 	require.Equal(t, "one\nxyz", m.Value(), "a paste is cut at the last line that fits")
-	require.Equal(t, "a\nb", New(th()).WithMaxLines(2).WithValue("a\nb\nc").Value())
+	require.Equal(t, "a\nb", New(th()).WithMaxLines(2).SetValue("a\nb\nc").Value())
 	require.Equal(t, 2, m.MaxLines())
 }
 
@@ -516,7 +516,7 @@ func TestWithStylesHoldsAcrossSetTheme(t *testing.T) {
 }
 
 func TestLegendOffersCopyOnlyWithASelection(t *testing.T) {
-	m := New(theme.Resolved{}).WithValue("hello")
+	m := New(theme.Resolved{}).SetValue("hello")
 	require.Len(t, m.Legend(), 3, "new line, select all, paste")
 	m = m.Select(Position{0, 0}, Position{0, 2})
 	require.Len(t, m.Legend(), 5, "copy and cut join them")
