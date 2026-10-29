@@ -12,6 +12,7 @@ import (
 
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
+	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -39,13 +40,13 @@ type Keys struct {
 // DefaultKeys are the arrows, pgup/pgdown, enter, esc and tab.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:       key.New("up"),
+		Up:       key.New("up").WithHelp("↑/↓", "move"),
 		Down:     key.New("down"),
-		PageUp:   key.New("pgup"),
+		PageUp:   key.New("pgup").WithHelp("pgup/pgdn", "page"),
 		PageDown: key.New("pgdown"),
-		Enter:    key.New("enter"),
-		Esc:      key.New("esc"),
-		Tab:      key.New("tab"),
+		Enter:    key.New("enter").WithHelp("enter", "choose"),
+		Esc:      key.New("esc").WithHelp("esc", "back"),
+		Tab:      key.New("tab").WithHelp("tab", "preview"),
 	}
 }
 
@@ -141,6 +142,16 @@ func (m Model) Selected() Item {
 		return Item{}
 	}
 	return m.items[m.cursor]
+}
+
+// Legend is the keys the browser answers to: enter only while the list has
+// the keys.
+func (m Model) Legend() []legend.Entry {
+	bs := []key.Binding{m.keys.Up, m.keys.PageUp, m.keys.Tab}
+	if !m.PreviewFocus {
+		bs = append(bs, m.keys.Enter)
+	}
+	return legend.FromBindings(append(bs, m.keys.Esc))
 }
 
 // Update handles one key. Keys the browser does not know return None and

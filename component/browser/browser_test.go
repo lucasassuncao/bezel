@@ -2,6 +2,7 @@ package browser
 
 import (
 	"charm.land/lipgloss/v2"
+	"github.com/lucasassuncao/bezel/legend"
 	"strings"
 	"testing"
 
@@ -124,4 +125,17 @@ func TestWithStylesRecoloursTheCursorLabel(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	b := New(items("a", "b")).WithStyles(func(s Styles) Styles { s.Cursor = red; return s })
 	require.Equal(t, red.Render("▶  a"), strings.Split(b.ListView(theme.Resolve(theme.Mint, true), 2), "\n")[0])
+}
+
+func TestLegendDropsEnterWhileThePreviewHasTheKeys(t *testing.T) {
+	keys := func(es []legend.Entry) (out []string) {
+		for _, e := range es {
+			out = append(out, e.Help().Key)
+		}
+		return out
+	}
+	b := New(items("a"))
+	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "tab", "enter", "esc"}, keys(b.Legend()))
+	b.PreviewFocus = true
+	require.NotContains(t, keys(b.Legend()), "enter")
 }

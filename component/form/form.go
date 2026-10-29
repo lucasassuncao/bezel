@@ -13,6 +13,7 @@ import (
 
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
+	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -48,14 +49,14 @@ type Keys struct {
 // k/j, and esc.
 func DefaultKeys() Keys {
 	return Keys{
-		Next:  key.New("tab"),
-		Prev:  key.New("shift+tab"),
-		Press: key.New("space", "enter"),
-		Left:  key.New("left", "h"),
+		Next:  key.New("tab").WithHelp("tab", "next"),
+		Prev:  key.New("shift+tab").WithHelp("shift+tab", "previous"),
+		Press: key.New("space", "enter").WithHelp("space", "press"),
+		Left:  key.New("left", "h").WithHelp("←/→", "choose"),
 		Right: key.New("right", "l"),
-		Up:    key.New("up", "k"),
+		Up:    key.New("up", "k").WithHelp("↑/↓", "move"),
 		Down:  key.New("down", "j"),
-		Close: key.New("esc"),
+		Close: key.New("esc").WithHelp("esc", "close"),
 	}
 }
 
@@ -186,6 +187,31 @@ func Get[T Field](f Form, i int) (T, bool) {
 	}
 	v, ok := f.fields[i].(T)
 	return v, ok
+}
+
+// Legend is the keys for where the focus is: an open select's own, or tab
+// and shift+tab with what the focused control answers to. An app's own Field
+// adds nothing.
+func (f Form) Legend() []legend.Entry {
+	if len(f.fields) == 0 {
+		return nil
+	}
+	k := f.keys
+	var own []key.Binding
+	switch fl := f.fields[f.focus].(type) {
+	case Select:
+		if fl.Holding() {
+			return legend.FromBindings([]key.Binding{k.Up, k.Press, k.Close})
+		}
+		own = []key.Binding{k.Press}
+	case Checkbox, Toggle, Button:
+		own = []key.Binding{k.Press}
+	case Radio:
+		own = []key.Binding{k.Left}
+	case Input:
+		return append(legend.FromBindings([]key.Binding{k.Next, k.Prev}), fl.in.Legend()...)
+	}
+	return legend.FromBindings(append([]key.Binding{k.Next, k.Prev}, own...))
 }
 
 // Focused is the index of the field in focus.

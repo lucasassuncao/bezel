@@ -514,3 +514,10 @@ func TestWithStylesHoldsAcrossSetTheme(t *testing.T) {
 	m = m.SetTheme(theme.Resolve(theme.Mint, true))
 	require.Contains(t, m.View(), red.Render("say"))
 }
+
+func TestLegendOffersCopyOnlyWithASelection(t *testing.T) {
+	m := New(theme.Resolved{}).WithValue("hello")
+	require.Len(t, m.Legend(), 3, "new line, select all, paste")
+	m = m.Select(Position{0, 0}, Position{0, 2})
+	require.Len(t, m.Legend(), 5, "copy and cut join them")
+}

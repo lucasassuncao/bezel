@@ -18,6 +18,7 @@ import (
 	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/key"
+	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -48,9 +49,9 @@ func DefaultKeys() Keys {
 		DeleteWordForward: key.New("alt+delete", "alt+d", "ctrl+delete"),
 		KillToStart:       key.New("ctrl+u"),
 		KillToEnd:         key.New("ctrl+k"),
-		Paste:             key.New("ctrl+v"),
-		Accept:            key.New("tab"),
-		NextSuggestion:    key.New("ctrl+n"),
+		Paste:             key.New("ctrl+v").WithHelp("ctrl+v", "paste"),
+		Accept:            key.New("tab").WithHelp("tab", "complete"),
+		NextSuggestion:    key.New("ctrl+n").WithHelp("ctrl+n/p", "suggestion"),
 		PrevSuggestion:    key.New("ctrl+p"),
 	}
 }
@@ -372,6 +373,16 @@ func (m Model) Placeholder() string { return m.placeholder }
 
 // Cursor is how many characters sit before the caret.
 func (m Model) Cursor() int { return m.line.Cursor() }
+
+// Legend is the keys worth a hint: completing while a suggestion shows, and
+// pasting. The editing keys are the terminal's usual ones and go unlisted.
+func (m Model) Legend() []legend.Entry {
+	var bs []key.Binding
+	if m.CurrentSuggestion() != "" {
+		bs = append(bs, m.keys.Accept, m.keys.NextSuggestion)
+	}
+	return legend.FromBindings(append(bs, m.keys.Paste))
+}
 
 // Focused reports whether the field takes keys and shows its caret.
 func (m Model) Focused() bool { return m.focused }

@@ -21,6 +21,7 @@ import (
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
+	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -60,14 +61,14 @@ func DefaultKeys() Keys {
 		LineEnd:           key.New("end", "ctrl+e"),
 		Top:               key.New("ctrl+home", "alt+<"),
 		Bottom:            key.New("ctrl+end", "alt+>"),
-		Newline:           key.New("enter", "ctrl+m"),
+		Newline:           key.New("enter", "ctrl+m").WithHelp("enter", "new line"),
 		DeleteBack:        key.New("backspace", "ctrl+h"),
 		DeleteForward:     key.New("delete", "ctrl+d"),
 		DeleteWordBack:    key.New("alt+backspace", "ctrl+w", "ctrl+backspace"),
 		DeleteWordForward: key.New("alt+delete", "alt+d", "ctrl+delete"),
 		KillToStart:       key.New("ctrl+u"),
 		KillToEnd:         key.New("ctrl+k"),
-		Paste:             key.New("ctrl+v"),
+		Paste:             key.New("ctrl+v").WithHelp("ctrl+v", "paste"),
 		SelectLeft:        key.New("shift+left"),
 		SelectRight:       key.New("shift+right"),
 		SelectWordLeft:    key.New("ctrl+shift+left", "alt+shift+left"),
@@ -76,13 +77,13 @@ func DefaultKeys() Keys {
 		SelectDown:        key.New("shift+down"),
 		SelectLineStart:   key.New("shift+home"),
 		SelectLineEnd:     key.New("shift+end"),
-		SelectAll:         key.New("alt+a"),
+		SelectAll:         key.New("alt+a").WithHelp("alt+a", "select all"),
 		UpperWord:         key.New("alt+u"),
 		LowerWord:         key.New("alt+l"),
 		CapitalizeWord:    key.New("alt+c"),
 		Transpose:         key.New("ctrl+t"),
-		Copy:              key.New("alt+w"),
-		Cut:               key.New("alt+x"),
+		Copy:              key.New("alt+w").WithHelp("alt+w", "copy"),
+		Cut:               key.New("alt+x").WithHelp("alt+x", "cut"),
 	}
 }
 
@@ -497,6 +498,16 @@ func (m Model) Width() int { return m.width }
 
 // Height is how many rows the field shows.
 func (m Model) Height() int { return m.height }
+
+// Legend is the keys worth a hint: a new line, the selection's and pasting;
+// copy and cut only while something is selected.
+func (m Model) Legend() []legend.Entry {
+	bs := []key.Binding{m.keys.Newline, m.keys.SelectAll}
+	if m.HasSelection() {
+		bs = append(bs, m.keys.Copy, m.keys.Cut)
+	}
+	return legend.FromBindings(append(bs, m.keys.Paste))
+}
 
 // Focused reports whether the field takes keys and shows its caret.
 func (m Model) Focused() bool { return m.focused }

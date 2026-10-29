@@ -329,3 +329,10 @@ func TestWithStylesHoldsAcrossSetTheme(t *testing.T) {
 	m = m.SetTheme(theme.Resolve(theme.Mint, true))
 	require.True(t, strings.HasPrefix(m.View(), red.Render("> ")))
 }
+
+func TestLegendOffersCompletionOnlyWithASuggestion(t *testing.T) {
+	m := New(theme.Resolved{}).WithSuggestions([]string{"deploy"})
+	require.Len(t, m.Legend(), 1, "paste alone")
+	m = m.WithValue("dep")
+	require.Len(t, m.Legend(), 3, "complete, the next suggestion, paste")
+}

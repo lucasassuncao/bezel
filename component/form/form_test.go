@@ -184,3 +184,20 @@ func TestWithStylesRecoloursEveryControl(t *testing.T) {
 	f = f.SetTheme(theme.Resolve(theme.Mint, true))
 	require.Contains(t, f.View(20), red.Render("[x]"))
 }
+
+func TestLegendFollowsTheFocusedControl(t *testing.T) {
+	descs := func(f Form) (out []string) {
+		for _, e := range f.Legend() {
+			out = append(out, e.Help().Desc)
+		}
+		return out
+	}
+	f := sample(t)
+	f, _ = press(f, "tab")
+	require.Equal(t, []string{"next", "previous", "press"}, descs(f), "a closed select opens on a press")
+	f, _ = press(f, "enter")
+	require.Equal(t, []string{"move", "press", "close"}, descs(f), "an open select keeps its keys")
+	f, _ = press(f, "esc", "tab")
+	require.Equal(t, []string{"next", "previous", "choose"}, descs(f), "a radio")
+	require.Empty(t, New(th()).Legend())
+}
