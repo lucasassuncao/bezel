@@ -21,6 +21,7 @@ Package list is a cursor list with section headings, a scroll indicator or pages
 - [type Model](<#Model>)
   - [func New\[T any\]\(rows \[\]Row\[T\]\) Model\[T\]](<#New>)
   - [func \(m Model\[T\]\) Active\(\) bool](<#Model[T].Active>)
+  - [func \(m Model\[T\]\) Advance\(now time.Time\) \(Model\[T\], bool\)](<#Model[T].Advance>)
   - [func \(m Model\[T\]\) Animate\(msg tea.Msg\) \(Model\[T\], tea.Cmd\)](<#Model[T].Animate>)
   - [func \(m Model\[T\]\) Click\(y int\) \(Model\[T\], Action\)](<#Model[T].Click>)
   - [func \(m Model\[T\]\) Filter\(\) string](<#Model[T].Filter>)
@@ -147,8 +148,17 @@ func (m Model[T]) Active() bool
 
 Active reports whether the list is still moving.
 
+<a name="Model[T].Advance"></a>
+### func \(Model\[T\]\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L111>)
+
+```go
+func (m Model[T]) Advance(now time.Time) (Model[T], bool)
+```
+
+Advance is the list at now and whether it settled, for a host that keeps its own clock.
+
 <a name="Model[T].Animate"></a>
-### func \(Model\[T\]\) [Animate](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L111>)
+### func \(Model\[T\]\) [Animate](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L124>)
 
 ```go
 func (m Model[T]) Animate(msg tea.Msg) (Model[T], tea.Cmd)

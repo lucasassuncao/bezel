@@ -102,7 +102,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if !ok || !m.running {
 		return m, nil
 	}
-	m = m.Advance(f.At)
+	m, _ = m.Advance(f.At)
 	if len(m.items) == 0 {
 		m.running = false
 		return m, nil
@@ -111,8 +111,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, frames.Tick(frames.Frame, m.id, m.tag)
 }
 
-// Advance is the stack at now: newcomers stamped, the expired gone.
-func (m Model) Advance(now time.Time) Model {
+// Active reports whether a toast is showing.
+func (m Model) Active() bool { return len(m.items) > 0 }
+
+// Advance is the stack at now, newcomers stamped and the expired gone, and
+// whether it emptied.
+func (m Model) Advance(now time.Time) (Model, bool) {
 	items := make([]item, len(m.items))
 	copy(items, m.items)
 	for i := range items {
@@ -122,7 +126,7 @@ func (m Model) Advance(now time.Time) Model {
 	}
 	m.items = drop(items, func(it item) bool { return frames.Paced(now.Sub(it.born)) >= m.ttl })
 	m.now = now
-	return m
+	return m, len(m.items) == 0
 }
 
 // FrameAt is the stack's frame for at, for a test that delivers frames itself.

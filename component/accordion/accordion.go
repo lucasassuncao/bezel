@@ -146,8 +146,18 @@ func (m Model) Active() bool {
 	return false
 }
 
-// FrameAt is section i's frame for at, for a test that delivers frames itself.
-func (m Model) FrameAt(i int, at time.Time) tea.Msg { return m.folds[i].run.FrameAt(at) }
+// Advance is every opening or closing section at now, and whether all have
+// settled; each section keeps its own clock, so there is no one FrameAt.
+func (m Model) Advance(now time.Time) (Model, bool) {
+	m.folds = slices.Clone(m.folds)
+	for i, f := range m.folds {
+		if f.run.Active() {
+			f.run, f.p = f.run.Advance(now)
+			m.folds[i] = f
+		}
+	}
+	return m, !m.Active()
+}
 
 // Update moves the cursor and toggles on keys, and slides the sections on
 // their own frames.

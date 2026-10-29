@@ -106,6 +106,19 @@ func (m Model[T]) Tick() tea.Cmd { return m.mo.run.Tick() }
 // FrameAt is the list's frame for at, for a test that delivers frames itself.
 func (m Model[T]) FrameAt(at time.Time) tea.Msg { return m.mo.run.FrameAt(at) }
 
+// Advance is the list at now and whether it settled, for a host that keeps
+// its own clock.
+func (m Model[T]) Advance(now time.Time) (Model[T], bool) {
+	if !m.Active() {
+		return m, true
+	}
+	m.mo.run, m.mo.p = m.mo.run.Advance(now)
+	if !m.Active() {
+		m.mo = motion{dur: m.mo.dur, p: 1}
+	}
+	return m, !m.Active()
+}
+
 // Animate moves on the list's own frames and asks for the next until it
 // settles; every other message leaves it alone.
 func (m Model[T]) Animate(msg tea.Msg) (Model[T], tea.Cmd) {

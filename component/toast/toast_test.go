@@ -29,14 +29,14 @@ func TestAToastSlidesInStaysAndLeaves(t *testing.T) {
 	m, cmd := New().WithWidth(20).WithTTL(time.Second).Push("saved", Success)
 	require.NotNil(t, cmd)
 	start := time.Unix(10, 0)
-	m = m.Advance(start)
+	m, _ = m.Advance(start)
 	assert.Equal(t, 21, m.offset(m.items[0]), "it arrives from beyond the edge")
-	m = m.Advance(start.Add(500 * ms))
+	m, _ = m.Advance(start.Add(500 * ms))
 	assert.Equal(t, 0, m.offset(m.items[0]), "in place")
 	assert.Contains(t, ansi.Strip(m.View(th)), "saved")
-	leaving := m.Advance(start.Add(900 * ms))
+	leaving, _ := m.Advance(start.Add(900 * ms))
 	assert.Positive(t, leaving.offset(leaving.items[0]))
-	gone := m.Advance(start.Add(1100 * ms))
+	gone, _ := m.Advance(start.Add(1100 * ms))
 	assert.Zero(t, gone.Len())
 }
 
@@ -44,7 +44,8 @@ func TestToastsStackNewestFirst(t *testing.T) {
 	m, _ := New().WithWidth(20).Push("first", Info)
 	m, cmd := m.Push("second", Error)
 	assert.Nil(t, cmd, "one chain of frames serves the stack")
-	m = m.Advance(time.Unix(10, 0)).Advance(time.Unix(11, 0))
+	m, _ = m.Advance(time.Unix(10, 0))
+	m, _ = m.Advance(time.Unix(11, 0))
 	out := ansi.Strip(m.View(th))
 	assert.Less(t, strings.Index(out, "second"), strings.Index(out, "first"))
 	for _, l := range strings.Split(out, "\n") {
@@ -55,7 +56,8 @@ func TestToastsStackNewestFirst(t *testing.T) {
 func TestOverDrawsOnTheTopRightCorner(t *testing.T) {
 	screen := strings.TrimSuffix(strings.Repeat(strings.Repeat(".", 40)+"\n", 8), "\n")
 	m, _ := New().WithWidth(16).Push("hi", Info)
-	m = m.Advance(time.Unix(10, 0)).Advance(time.Unix(11, 0))
+	m, _ = m.Advance(time.Unix(10, 0))
+	m, _ = m.Advance(time.Unix(11, 0))
 	lines := strings.Split(ansi.Strip(m.Over(screen, th)), "\n")
 	require.Len(t, lines, 8)
 	assert.Equal(t, strings.Repeat(".", 40), lines[0], "a row is left above it")
@@ -82,7 +84,8 @@ func TestStillToastsDoNotSlideAndStillExpire(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	m, cmd := New().WithTTL(10*ms).Push("now", Warning)
 	require.NotNil(t, cmd)
-	assert.Equal(t, 0, m.Advance(time.Unix(10, 0)).offset(m.Advance(time.Unix(10, 0)).items[0]))
+	now, _ := m.Advance(time.Unix(10, 0))
+	assert.Equal(t, 0, now.offset(now.items[0]))
 	m, _ = m.Update(cmd())
 	assert.Zero(t, m.Len())
 }

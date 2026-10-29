@@ -35,8 +35,8 @@ func sections() []Section {
 // opened is m's first section played from its first frame to d after it.
 func opened(m Model, d time.Duration) Model {
 	start := time.Unix(10, 0)
-	m, _ = m.Update(m.FrameAt(0, start))
-	m, _ = m.Update(m.FrameAt(0, start.Add(d)))
+	m, _ = m.Advance(start)
+	m, _ = m.Advance(start.Add(d))
 	return m
 }
 
@@ -83,12 +83,22 @@ func TestAStillAccordionSnaps(t *testing.T) {
 }
 
 func TestTheSectionsTakeOnlyTheirOwnFrames(t *testing.T) {
-	m, _ := New(sections()).WithKeys(DefaultKeys()).Toggle(0)
-	other, _ := New(sections()).Toggle(0)
-	_, cmd := m.Update(other.FrameAt(0, time.Unix(1, 0)))
+	m, own := New(sections()).WithKeys(DefaultKeys()).Toggle(0)
+	_, other := New(sections()).Toggle(0)
+	_, cmd := m.Update(other())
 	assert.Nil(t, cmd)
-	_, cmd = m.Update(m.FrameAt(0, time.Unix(1, 0)))
+	_, cmd = m.Update(own())
 	assert.NotNil(t, cmd)
+}
+
+func TestAdvanceSettlesEverySection(t *testing.T) {
+	m, _ := New(sections()).Toggle(0)
+	m, _ = m.Toggle(1)
+	m, done := m.Advance(time.Unix(10, 0))
+	assert.False(t, done)
+	m, done = m.Advance(time.Unix(11, 0))
+	assert.True(t, done)
+	assert.True(t, m.IsOpen(0) && m.IsOpen(1))
 }
 
 func TestWithStylesRecoloursTheHeadings(t *testing.T) {

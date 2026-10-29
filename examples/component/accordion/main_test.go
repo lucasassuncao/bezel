@@ -3,7 +3,6 @@ package main
 import (
 	"strings"
 	"testing"
-	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
@@ -34,10 +33,11 @@ func TestTheAccordionOpensTheSectionUnderTheCursor(t *testing.T) {
 	m, _ = m.Update(bezeltest.Key("down"))
 	m, cmd := m.Update(bezeltest.Key("enter"))
 	require.NotNil(t, cmd, "opening asks for frames")
-	acc := m.(model).acc
-	start := time.Unix(10, 0)
-	m, _ = frame(t, m, acc.FrameAt(1, start))
-	_, out = frame(t, m, m.(model).acc.FrameAt(1, start.Add(time.Second)))
+	t.Setenv("BEZEL_MOTION", "20") // the frames come quickly and the fold lands in a few
+	for i := 0; cmd != nil && i < 100; i++ {
+		m, cmd = m.Update(cmd())
+	}
+	_, out = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
 	t.Log("\n" + out)
 	require.Contains(t, out, "▾ Does it need a mouse?")
 	require.Contains(t, out, "Every action has a key")
