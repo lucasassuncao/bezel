@@ -31,8 +31,8 @@ func landed(t *testing.T, e Effect) Effect {
 	t.Helper()
 	start := time.Unix(1000, 0)
 	e, _ = e.Update(e.FrameAt(start))
-	e, cmd := e.Update(e.FrameAt(start.Add(time.Hour)))
-	require.Nil(t, cmd)
+	e, res := e.Update(e.FrameAt(start.Add(time.Hour)))
+	require.Nil(t, res.Cmd)
 	require.False(t, e.Active())
 	return e
 }

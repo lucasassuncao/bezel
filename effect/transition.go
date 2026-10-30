@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/cells"
 	"github.com/lucasassuncao/bezel/internal/frames"
@@ -38,6 +39,8 @@ type Transition struct {
 	p       float64 // raw progress: 0 is all from, 1 all to
 	run     frames.Run
 }
+
+var _ bezel.Model[Transition] = Transition{}
 
 func newTransition(kind transitionKind, dur time.Duration) Transition {
 	t := Transition{kind: kind, run: frames.NewRun(dur)}
@@ -303,12 +306,12 @@ func (t Transition) Owns(msg tea.Msg) bool {
 }
 
 // Update advances on its own frames and asks for the next until it ends.
-func (t Transition) Update(msg tea.Msg) (Transition, tea.Cmd) {
+func (t Transition) Update(msg tea.Msg) (Transition, bezel.Result) {
 	r, p, ok, cmd := t.run.Update(msg)
 	if ok {
 		t.run, t.p = r, p
 	}
-	return t, cmd
+	return t, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is t at now, and whether it ended.

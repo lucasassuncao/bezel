@@ -5,6 +5,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel"
 )
 
 func TestTweenAtEndpointsAndMidpoint(t *testing.T) {
@@ -145,14 +148,14 @@ func TestUpdateFollowsItsOwnFramesUntilItLands(t *testing.T) {
 	start := time.Unix(1000, 0)
 	tw := NewTween(0, 10, 100*time.Millisecond)
 
-	tw, cmd := tw.Update(tw.FrameAt(start))
-	assert.NotNil(t, cmd, "an unfinished tween asks for the next frame")
-	tw, cmd = tw.Update(tw.FrameAt(start.Add(50 * time.Millisecond)))
+	tw, res := tw.Update(tw.FrameAt(start))
+	assert.NotNil(t, res.Cmd, "an unfinished tween asks for the next frame")
+	tw, res = tw.Update(tw.FrameAt(start.Add(50 * time.Millisecond)))
 	assert.Equal(t, 5, tw.Cur)
-	assert.NotNil(t, cmd)
-	tw, cmd = tw.Update(tw.FrameAt(start.Add(100 * time.Millisecond)))
+	assert.NotNil(t, res.Cmd)
+	tw, res = tw.Update(tw.FrameAt(start.Add(100 * time.Millisecond)))
 	assert.Equal(t, 10, tw.Cur)
-	assert.Nil(t, cmd, "a tween that landed stops its clock")
+	assert.Nil(t, res.Cmd, "a tween that landed stops its clock")
 }
 
 // A tween replaced mid-flight still has a frame on its way: the new one must not take it.
@@ -160,22 +163,22 @@ func TestUpdateIgnoresAnotherTweensFrames(t *testing.T) {
 	start := time.Unix(1000, 0)
 	old, tw := NewTween(0, 10, time.Second), NewTween(0, 10, time.Second)
 
-	next, cmd := tw.Update(old.FrameAt(start))
-	assert.Nil(t, cmd)
+	next, res := tw.Update(old.FrameAt(start))
+	assert.Nil(t, res.Cmd)
 	assert.Equal(t, tw, next)
 
 	var zero Tween
 	assert.Nil(t, zero.Tick(), "nothing to animate, no clock")
-	next, cmd = zero.Update(old.FrameAt(start))
-	assert.Nil(t, cmd)
+	next, res = zero.Update(old.FrameAt(start))
+	assert.Nil(t, res.Cmd)
 	assert.Equal(t, zero, next)
 }
 
 func TestTickDeliversAFrameForThisTween(t *testing.T) {
 	tw := NewTween(0, 10, time.Second)
-	next, cmd := tw.Update(tw.Tick()())
+	next, res := tw.Update(tw.Tick()())
 	assert.False(t, next.Start.IsZero(), "the tick's frame started the clock")
-	assert.NotNil(t, cmd)
+	assert.NotNil(t, res.Cmd)
 }
 
 // Landing ends the tween: Active turns false and no further frame is asked.
@@ -199,9 +202,24 @@ func TestASecondClockIsDropped(t *testing.T) {
 	start := time.Unix(1000, 0)
 	tw := NewTween(0, 10, time.Second)
 	first, second := tw.FrameAt(start), tw.FrameAt(start)
-	tw, cmd := tw.Update(first)
-	assert.NotNil(t, cmd)
-	next, cmd := tw.Update(second)
-	assert.Nil(t, cmd, "the twin frame starts no second clock")
+	tw, res := tw.Update(first)
+	assert.NotNil(t, res.Cmd)
+	next, res := tw.Update(second)
+	assert.Nil(t, res.Cmd, "the twin frame starts no second clock")
 	assert.Equal(t, tw, next)
+}
+
+var frame0 = time.Unix(0, 0)
+
+func TestOwnFrameIsHandledAndAsksForTheNext(t *testing.T) {
+	tw := NewTween(0, 1, time.Second)
+	tw, r := tw.Update(tw.FrameAt(frame0))
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd)
+}
+
+func TestForeignFrameIsNotHandled(t *testing.T) {
+	a, b := NewTween(0, 1, time.Second), NewTween(0, 1, time.Second)
+	_, r := a.Update(b.FrameAt(frame0))
+	require.Equal(t, bezel.Result{}, r)
 }

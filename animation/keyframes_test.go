@@ -46,8 +46,8 @@ func TestStillKeyframesAreBornAtTheirLastKey(t *testing.T) {
 func TestKeyframesTakeOnlyTheirOwnFrames(t *testing.T) {
 	moving(t)
 	k := NewKeyframes(100*ms, Key{At: 0, Value: 0}, Key{At: 1, Value: 1}).WithDelay(10 * ms).WithYoyo(true).WithRepeat(1)
-	_, cmd := k.Update(NewFloat(0, 1, ms).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = k.Update(k.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := k.Update(NewFloat(0, 1, ms).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = k.Update(k.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -31,6 +32,8 @@ type Morph struct {
 	run      frames.Run
 	from, to string
 }
+
+var _ bezel.Model[Morph] = Morph{}
 
 // NewMorph turns from into to over dur.
 func NewMorph(from, to string, dur time.Duration) Morph {
@@ -137,12 +140,12 @@ func (m Morph) Tick() tea.Cmd { return m.run.Tick() }
 func (m Morph) FrameAt(at time.Time) animation.FrameMsg { return m.run.FrameAt(at) }
 
 // Update changes on its own frames and asks for the next until it lands.
-func (m Morph) Update(msg tea.Msg) (Morph, tea.Cmd) {
+func (m Morph) Update(msg tea.Msg) (Morph, bezel.Result) {
 	r, p, ok, cmd := m.run.Update(msg)
 	if ok {
 		m.run, m.p = r, p
 	}
-	return m, cmd
+	return m, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is m at now, and whether it landed.

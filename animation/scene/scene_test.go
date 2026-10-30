@@ -62,8 +62,8 @@ func TestSceneUnderKeepsTheBlockOnTop(t *testing.T) {
 
 func TestScenePlaysOnItsOwnFrames(t *testing.T) {
 	a := Snow(white)
-	a, cmd := a.Update(a.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	a, res := a.Update(a.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 	a, done := a.Advance(time.Unix(100, 0))
 	assert.False(t, done, "a scene never ends on its own")
 	assert.Equal(t, "", a.View(0, 3))

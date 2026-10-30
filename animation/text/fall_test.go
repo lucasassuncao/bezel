@@ -48,8 +48,8 @@ func TestStillFallIsBornLanded(t *testing.T) {
 
 func TestFallTakesOnlyItsOwnFrames(t *testing.T) {
 	f := NewFall("ab", 2, 100*ms).WithDelay(ms)
-	_, cmd := f.Update(NewFall("x", 1, ms).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = f.Update(f.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := f.Update(NewFall("x", 1, ms).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = f.Update(f.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

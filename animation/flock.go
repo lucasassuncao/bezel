@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -21,6 +22,8 @@ type Flock struct {
 	moving        bool
 	id, tag       int64
 }
+
+var _ bezel.Model[Flock] = Flock{}
 
 // NewFlock is n points at rest at at, springs of stiffness 14 and damping 0.8.
 func NewFlock(n int, at Point) Flock {
@@ -84,16 +87,16 @@ func (f Flock) Tick() tea.Cmd {
 func (f Flock) FrameAt(at time.Time) FrameMsg { return frames.NewMsg(at, f.id, f.tag) }
 
 // Update moves f on its own frames and asks for the next until it rests.
-func (f Flock) Update(msg tea.Msg) (Flock, tea.Cmd) {
+func (f Flock) Update(msg tea.Msg) (Flock, bezel.Result) {
 	fm, ok := frames.Is(msg, f.id, f.tag)
 	if !ok || !f.moving {
-		return f, nil
+		return f, bezel.Result{Handled: ok}
 	}
 	if f, _ = f.Advance(fm.At); !f.moving {
-		return f, nil
+		return f, bezel.Result{Handled: true}
 	}
 	f.tag++
-	return f, f.Tick()
+	return f, bezel.Result{Handled: true, Cmd: f.Tick()}
 }
 
 // Advance is f moved to now, and whether every point came to rest. Each point

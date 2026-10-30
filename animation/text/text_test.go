@@ -8,6 +8,9 @@ import (
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel"
 )
 
 func TestTypewriterRevealsAGraphemeAtATime(t *testing.T) {
@@ -15,12 +18,12 @@ func TestTypewriterRevealsAGraphemeAtATime(t *testing.T) {
 	w := NewTypewriter("héllo", 10*time.Millisecond)
 	assert.Equal(t, "", w.View())
 
-	w, cmd := w.Update(w.FrameAt(start))
-	assert.NotNil(t, cmd)
+	w, res := w.Update(w.FrameAt(start))
+	assert.NotNil(t, res.Cmd)
 	w, _ = w.Update(w.FrameAt(start.Add(25 * time.Millisecond)))
 	assert.Equal(t, "hé", w.View())
-	w, cmd = w.Update(w.FrameAt(start.Add(time.Second)))
-	assert.Nil(t, cmd)
+	w, res = w.Update(w.FrameAt(start.Add(time.Second)))
+	assert.Nil(t, res.Cmd)
 	assert.Equal(t, "héllo", w.View())
 	assert.False(t, w.Active())
 
@@ -57,12 +60,12 @@ func TestMarqueeLeavesTextThatFitsAlone(t *testing.T) {
 func TestMarqueeTakesItsOwnTicks(t *testing.T) {
 	m, _ := NewMarquee("abcdefghij", 4).WithEvery(100 * time.Millisecond).Start()
 	start := time.Unix(1000, 0)
-	m, cmd := m.Update(m.FrameAt(start))
-	assert.NotNil(t, cmd)
+	m, res := m.Update(m.FrameAt(start))
+	assert.NotNil(t, res.Cmd)
 	m, _ = m.Update(m.FrameAt(start.Add(100 * time.Millisecond)))
 	assert.Equal(t, "bcde", m.View())
-	_, cmd = m.Stop().Update(m.FrameAt(start))
-	assert.Nil(t, cmd, "a stopped marquee drops its ticks")
+	_, res = m.Stop().Update(m.FrameAt(start))
+	assert.Nil(t, res.Cmd, "a stopped marquee drops its ticks")
 }
 
 func TestStillEffectsAreBornAtTheirEnd(t *testing.T) {
@@ -114,4 +117,16 @@ func TestMain(m *testing.M) {
 	_ = os.Setenv("BEZEL_MOTION", "")
 	_ = os.Setenv("TERM", "xterm-256color")
 	os.Exit(m.Run())
+}
+
+func TestOwnFrameIsHandled(t *testing.T) {
+	w := NewTypewriter("abc", 10*time.Millisecond)
+	_, r := w.Update(w.FrameAt(time.Unix(0, 0)))
+	require.True(t, r.Handled)
+}
+
+func TestForeignFrameIsNotHandled(t *testing.T) {
+	a, b := NewTypewriter("abc", time.Second), NewTypewriter("abc", time.Second)
+	_, r := a.Update(b.FrameAt(time.Unix(0, 0)))
+	require.Equal(t, bezel.Result{}, r)
 }

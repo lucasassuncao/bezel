@@ -52,8 +52,8 @@ func TestAStillRaceJumps(t *testing.T) {
 func TestARaceTakesOnlyItsOwnFrames(t *testing.T) {
 	moving(t)
 	r, _ := NewRace([]string{"a"}, []float64{0}, 100*ms).Set([]float64{1})
-	_, cmd := r.Update(NewFloat(0, 1, ms).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = r.Update(r.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := r.Update(NewFloat(0, 1, ms).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = r.Update(r.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -25,6 +26,8 @@ type Keyframes struct {
 	Cur  float64 // the value the last frame sampled
 	run  frames.Run
 }
+
+var _ bezel.Model[Keyframes] = Keyframes{}
 
 // NewKeyframes plays keys over dur, sorted by At. With motion Still, no
 // time or fewer than two keys it is inactive at the last key's value.
@@ -91,17 +94,17 @@ func (k Keyframes) Tick() tea.Cmd { return k.run.Tick() }
 func (k Keyframes) FrameAt(at time.Time) FrameMsg { return k.run.FrameAt(at) }
 
 // Update moves on its own frames and asks for the next until it ends.
-func (k Keyframes) Update(msg tea.Msg) (Keyframes, tea.Cmd) {
+func (k Keyframes) Update(msg tea.Msg) (Keyframes, bezel.Result) {
 	f, ok := k.run.Own(msg)
 	if !ok {
-		return k, nil
+		return k, bezel.Result{Handled: ok}
 	}
 	if k, _ = k.Advance(f.At); !k.Active() {
-		return k, nil
+		return k, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	k.run, cmd = k.run.Next()
-	return k, cmd
+	return k, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is k at now, and whether it ended.

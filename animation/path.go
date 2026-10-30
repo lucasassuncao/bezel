@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -17,6 +18,8 @@ type Path struct {
 	Cur  Point     // where the last frame put it
 	run  frames.Run
 }
+
+var _ bezel.Model[Path] = Path{}
 
 // NewPath travels points over dur. With fewer than two points, a path of no
 // length, or motion Still, it is inactive at the last point.
@@ -109,17 +112,17 @@ func (p Path) Tick() tea.Cmd { return p.run.Tick() }
 func (p Path) FrameAt(at time.Time) FrameMsg { return p.run.FrameAt(at) }
 
 // Update travels on its own frames and asks for the next until it arrives.
-func (p Path) Update(msg tea.Msg) (Path, tea.Cmd) {
+func (p Path) Update(msg tea.Msg) (Path, bezel.Result) {
 	f, ok := p.run.Own(msg)
 	if !ok {
-		return p, nil
+		return p, bezel.Result{Handled: ok}
 	}
 	if p, _ = p.Advance(f.At); !p.Active() {
-		return p, nil
+		return p, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	p.run, cmd = p.run.Next()
-	return p, cmd
+	return p, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is p at now, and whether it arrived.

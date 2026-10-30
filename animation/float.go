@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -16,6 +17,8 @@ type Float struct {
 	Cur      float64 // the value the last frame sampled
 	run      frames.Run
 }
+
+var _ bezel.Model[Float] = Float{}
 
 // NewFloat eases from from to to over dur, its clock started by its first
 // frame. When dur <= 0, from == to or motion is Still it is inactive at to.
@@ -45,17 +48,17 @@ func (f Float) Tick() tea.Cmd { return f.run.Tick() }
 func (f Float) FrameAt(at time.Time) FrameMsg { return f.run.FrameAt(at) }
 
 // Update samples f on its own frames and asks for the next until it lands.
-func (f Float) Update(msg tea.Msg) (Float, tea.Cmd) {
+func (f Float) Update(msg tea.Msg) (Float, bezel.Result) {
 	fm, ok := f.run.Own(msg)
 	if !ok {
-		return f, nil
+		return f, bezel.Result{Handled: ok}
 	}
 	if f, _ = f.Advance(fm.At); !f.Active() {
-		return f, nil
+		return f, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	f.run, cmd = f.run.Next()
-	return f, cmd
+	return f, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is f sampled at now, and whether it landed: for a host driving

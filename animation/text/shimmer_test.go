@@ -28,8 +28,8 @@ func TestAShimmerThatEndsGoesDark(t *testing.T) {
 	start := time.Unix(1000, 0)
 	s := NewShimmer("abc", black, white, 100*ms).WithRepeat(0)
 	s, _ = s.Update(s.FrameAt(start))
-	s, cmd := s.Update(s.FrameAt(start.Add(time.Second)))
-	assert.Nil(t, cmd)
+	s, res := s.Update(s.FrameAt(start.Add(time.Second)))
+	assert.Nil(t, res.Cmd)
 	for i := range 3 {
 		assert.Equal(t, black, s.colorAt(i))
 	}

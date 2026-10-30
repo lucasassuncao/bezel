@@ -9,6 +9,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/noise"
 
@@ -37,6 +38,8 @@ type Burn struct {
 	p    float64
 	run  frames.Run
 }
+
+var _ bezel.Model[Burn] = Burn{}
 
 // NewBurn burns text away over dur.
 func NewBurn(text string, dur time.Duration) Burn {
@@ -84,12 +87,12 @@ func (b Burn) Tick() tea.Cmd { return b.run.Tick() }
 func (b Burn) FrameAt(at time.Time) animation.FrameMsg { return b.run.FrameAt(at) }
 
 // Update burns on its own frames and asks for the next until it is gone.
-func (b Burn) Update(msg tea.Msg) (Burn, tea.Cmd) {
+func (b Burn) Update(msg tea.Msg) (Burn, bezel.Result) {
 	r, p, ok, cmd := b.run.Update(msg)
 	if ok {
 		b.run, b.p = r, p
 	}
-	return b, cmd
+	return b, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is b at now, and whether it is gone.

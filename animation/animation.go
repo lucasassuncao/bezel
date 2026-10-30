@@ -9,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -31,6 +32,8 @@ type Tween struct {
 	tag      int64 // which step: a twin frame from a second Tick is dropped
 }
 
+var _ bezel.Model[Tween] = Tween{}
+
 // FrameMsg is one tick of an animation's clock, at the time it fired. Hand it
 // to every running animation's Update: each one takes only its own.
 type FrameMsg = frames.Msg
@@ -49,17 +52,17 @@ func (t Tween) FrameAt(at time.Time) FrameMsg { return frames.NewMsg(at, t.id, t
 // Update samples t on one of its own frames and asks for the next until it
 // lands. Other messages, frames meant for another tween and a twin frame from
 // a second Tick leave it alone.
-func (t Tween) Update(msg tea.Msg) (Tween, tea.Cmd) {
+func (t Tween) Update(msg tea.Msg) (Tween, bezel.Result) {
 	f, ok := frames.Is(msg, t.id, t.tag)
 	if !ok || !t.Active() {
-		return t, nil
+		return t, bezel.Result{Handled: ok}
 	}
 	next, done := t.Advance(f.At)
 	if done {
-		return next, nil
+		return next, bezel.Result{Handled: true}
 	}
 	next.tag++
-	return next, next.Tick()
+	return next, bezel.Result{Handled: true, Cmd: next.Tick()}
 }
 
 // Active reports whether t is currently in flight.

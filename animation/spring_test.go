@@ -7,15 +7,18 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel"
 )
 
 // settle drives s with 16ms frames until it rests, and the highest Pos seen.
 func settle(t *testing.T, s Spring, cmd tea.Cmd) (Spring, float64) {
 	t.Helper()
+	res := bezel.Result{Cmd: cmd}
 	at, peak := time.Unix(1000, 0), s.Pos
-	for i := 0; cmd != nil; i++ {
+	for i := 0; res.Cmd != nil; i++ {
 		require.Less(t, i, 1000, "the spring never came to rest")
-		s, cmd = s.Update(s.FrameAt(at))
+		s, res = s.Update(s.FrameAt(at))
 		at = at.Add(Frame)
 		peak = max(peak, s.Pos)
 	}

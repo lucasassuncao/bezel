@@ -6,6 +6,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel"
 )
 
 // Fade moves a colour from one to another: a status that dims once read, a
@@ -14,6 +16,8 @@ type Fade struct {
 	from, to color.Color
 	mix      Float
 }
+
+var _ bezel.Model[Fade] = Fade{}
 
 // NewFade goes from from to to over dur. A nil colour is the terminal's
 // own, which cannot be mixed: Blend switches to the other half way.
@@ -40,10 +44,10 @@ func (f Fade) Tick() tea.Cmd { return f.mix.Tick() }
 func (f Fade) FrameAt(at time.Time) FrameMsg { return f.mix.FrameAt(at) }
 
 // Update samples f on its own frames and asks for the next until it lands.
-func (f Fade) Update(msg tea.Msg) (Fade, tea.Cmd) {
-	var cmd tea.Cmd
-	f.mix, cmd = f.mix.Update(msg)
-	return f, cmd
+func (f Fade) Update(msg tea.Msg) (Fade, bezel.Result) {
+	var r bezel.Result
+	f.mix, r = f.mix.Update(msg)
+	return f, r
 }
 
 // Advance is f sampled at now, and whether it landed.

@@ -52,8 +52,8 @@ func TestStillFlipShowsTheNewText(t *testing.T) {
 
 func TestFlipTakesOnlyItsOwnFrames(t *testing.T) {
 	f := NewFlip("ab", "cd", 100*ms).WithDelay(ms)
-	_, cmd := f.Update(NewFlip("x", "y", ms).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = f.Update(f.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := f.Update(NewFlip("x", "y", ms).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = f.Update(f.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

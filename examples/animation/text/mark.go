@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/animation/text"
 	"github.com/lucasassuncao/bezel/theme"
@@ -96,12 +97,12 @@ func (x texts) copied() texts {
 
 // update hands a frame to the four on their own ticks.
 func (x texts) update(msg tea.Msg) (texts, tea.Cmd) {
-	var a, b, c, d tea.Cmd
+	var a, b, c, d bezel.Result
 	x.wave, a = x.wave.Update(msg)
 	x.rainbow, b = x.rainbow.Update(msg)
 	x.caret, c = x.caret.Update(msg)
 	x.ellipsis, d = x.ellipsis.Update(msg)
-	return x, tea.Batch(a, b, c, d)
+	return x, tea.Batch(a.Cmd, b.Cmd, c.Cmd, d.Cmd)
 }
 
 // advance moves the ones on the shared clock to at.

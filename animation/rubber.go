@@ -4,6 +4,8 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel"
 )
 
 // Rubber is a value kept between two limits that gives past them, harder the
@@ -14,6 +16,8 @@ type Rubber struct {
 	give   float64 // the most it ever goes past a limit
 	s      Spring
 }
+
+var _ bezel.Model[Rubber] = Rubber{}
 
 // NewRubber holds a value in [lo, hi], at lo to begin with.
 func NewRubber(lo, hi float64) Rubber {
@@ -64,10 +68,10 @@ func (r Rubber) Tick() tea.Cmd { return r.s.Tick() }
 func (r Rubber) FrameAt(at time.Time) FrameMsg { return r.s.FrameAt(at) }
 
 // Update springs back on its own frames and asks for the next until it rests.
-func (r Rubber) Update(msg tea.Msg) (Rubber, tea.Cmd) {
-	var cmd tea.Cmd
-	r.s, cmd = r.s.Update(msg)
-	return r, cmd
+func (r Rubber) Update(msg tea.Msg) (Rubber, bezel.Result) {
+	var res bezel.Result
+	r.s, res = r.s.Update(msg)
+	return r, res
 }
 
 // Advance is r at now, and whether it rests.

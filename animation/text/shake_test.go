@@ -17,8 +17,8 @@ func TestShakeSwingsAndSettles(t *testing.T) {
 	s, _ = s.Update(s.FrameAt(start))
 	s, _ = s.Update(s.FrameAt(start.Add(25 * time.Millisecond))) // the first swing's peak
 	assert.Equal(t, 3, s.Offset())
-	s, cmd := s.Update(s.FrameAt(start.Add(time.Second)))
-	assert.Nil(t, cmd)
+	s, res := s.Update(s.FrameAt(start.Add(time.Second)))
+	assert.Nil(t, res.Cmd)
 	assert.Equal(t, 0, s.Offset())
 	assert.False(t, s.Active())
 }

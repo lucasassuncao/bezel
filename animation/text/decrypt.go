@@ -9,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -29,6 +30,8 @@ type Decrypt struct {
 	p    float64
 	run  frames.Run
 }
+
+var _ bezel.Model[Decrypt] = Decrypt{}
 
 // NewDecrypt lands every letter of text within dur.
 func NewDecrypt(text string, dur time.Duration) Decrypt {
@@ -84,12 +87,12 @@ func (d Decrypt) Tick() tea.Cmd { return d.run.Tick() }
 func (d Decrypt) FrameAt(at time.Time) animation.FrameMsg { return d.run.FrameAt(at) }
 
 // Update turns on its own frames and asks for the next until every letter lands.
-func (d Decrypt) Update(msg tea.Msg) (Decrypt, tea.Cmd) {
+func (d Decrypt) Update(msg tea.Msg) (Decrypt, bezel.Result) {
 	r, p, ok, cmd := d.run.Update(msg)
 	if ok {
 		d.run, d.p = r, p
 	}
-	return d, cmd
+	return d, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is d at now, and whether every letter landed.

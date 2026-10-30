@@ -20,8 +20,8 @@ func TestScrambleSettlesFromTheLeft(t *testing.T) {
 	assert.True(t, strings.HasPrefix(s.View(), "ab-"), "three of five have settled")
 	assert.Equal(t, s.View(), s.View(), "a frame draws the same every time")
 
-	s, cmd := s.Update(s.FrameAt(start.Add(time.Second)))
-	assert.Nil(t, cmd)
+	s, res := s.Update(s.FrameAt(start.Add(time.Second)))
+	assert.Nil(t, res.Cmd)
 	assert.Equal(t, "ab-cd", s.View())
 	assert.False(t, s.Active())
 }

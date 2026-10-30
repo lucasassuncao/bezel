@@ -9,6 +9,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/theme"
@@ -120,9 +121,9 @@ func (m Model) Active() bool { return m.spring.Active() }
 
 // Update moves the bar on its own frames until it settles.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	var cmd tea.Cmd
-	m.spring, cmd = m.spring.Update(msg)
-	return m, cmd
+	var r bezel.Result
+	m.spring, r = m.spring.Update(msg)
+	return m, r.Cmd
 }
 
 // View is the bar where it is now, then the percentage it is aimed at.

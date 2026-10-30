@@ -8,6 +8,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/noise"
 
@@ -28,6 +29,8 @@ type Fall struct {
 	p    float64
 	run  frames.Run
 }
+
+var _ bezel.Model[Fall] = Fall{}
 
 // NewFall drops text from rows rows above its line over dur.
 func NewFall(text string, rows int, dur time.Duration) Fall {
@@ -84,12 +87,12 @@ func (f Fall) Tick() tea.Cmd { return f.run.Tick() }
 func (f Fall) FrameAt(at time.Time) animation.FrameMsg { return f.run.FrameAt(at) }
 
 // Update drops on its own frames and asks for the next until every letter lands.
-func (f Fall) Update(msg tea.Msg) (Fall, tea.Cmd) {
+func (f Fall) Update(msg tea.Msg) (Fall, bezel.Result) {
 	r, p, ok, cmd := f.run.Update(msg)
 	if ok {
 		f.run, f.p = r, p
 	}
-	return f, cmd
+	return f, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is f at now, and whether every letter landed.

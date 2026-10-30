@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -23,6 +24,8 @@ type Drop struct {
 	t        float64    // seconds since it let go
 	run      frames.Run // its frames only; the motion is solved from the time
 }
+
+var _ bezel.Model[Drop] = Drop{}
 
 // NewDrop falls from from to the floor at to, either way up the screen.
 func NewDrop(from, to float64) Drop {
@@ -80,17 +83,17 @@ func (d Drop) Tick() tea.Cmd { return d.run.Tick() }
 func (d Drop) FrameAt(at time.Time) FrameMsg { return d.run.FrameAt(at) }
 
 // Update falls on its own frames and asks for the next until it settles.
-func (d Drop) Update(msg tea.Msg) (Drop, tea.Cmd) {
+func (d Drop) Update(msg tea.Msg) (Drop, bezel.Result) {
 	f, ok := d.run.Own(msg)
 	if !ok {
-		return d, nil
+		return d, bezel.Result{Handled: ok}
 	}
 	if d, _ = d.Advance(f.At); !d.Active() {
-		return d, nil
+		return d, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	d.run, cmd = d.run.Next()
-	return d, cmd
+	return d, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is d at now, and whether it settled.

@@ -10,6 +10,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -23,6 +24,8 @@ type Typewriter struct {
 	shown int
 	run   frames.Run
 }
+
+var _ bezel.Model[Typewriter] = Typewriter{}
 
 // NewTypewriter reveals text at one grapheme per perChar. Plain text only: an
 // escape sequence cut half way would colour the rest of the line.
@@ -54,17 +57,17 @@ func (w Typewriter) Tick() tea.Cmd { return w.run.Tick() }
 func (w Typewriter) FrameAt(at time.Time) animation.FrameMsg { return w.run.FrameAt(at) }
 
 // Update types on its own frames and asks for the next until it is done.
-func (w Typewriter) Update(msg tea.Msg) (Typewriter, tea.Cmd) {
+func (w Typewriter) Update(msg tea.Msg) (Typewriter, bezel.Result) {
 	f, ok := w.run.Own(msg)
 	if !ok {
-		return w, nil
+		return w, bezel.Result{Handled: ok}
 	}
 	if w, _ = w.Advance(f.At); !w.Active() {
-		return w, nil
+		return w, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	w.run, cmd = w.run.Next()
-	return w, cmd
+	return w, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is w at now, and whether it is done.
@@ -110,6 +113,8 @@ type Marquee struct {
 	running bool
 	id, tag int64
 }
+
+var _ bezel.Model[Marquee] = Marquee{}
 
 // NewMarquee is text in width cells, still until Start, stepping every 120ms.
 func NewMarquee(text string, width int) Marquee {
@@ -169,14 +174,14 @@ func (m Marquee) Tick() tea.Cmd {
 func (m Marquee) FrameAt(at time.Time) animation.FrameMsg { return frames.NewMsg(at, m.id, m.tag) }
 
 // Update steps on its own ticks and asks for the next while it runs.
-func (m Marquee) Update(msg tea.Msg) (Marquee, tea.Cmd) {
+func (m Marquee) Update(msg tea.Msg) (Marquee, bezel.Result) {
 	f, ok := frames.Is(msg, m.id, m.tag)
 	if !ok || !m.running {
-		return m, nil
+		return m, bezel.Result{Handled: ok}
 	}
 	m, _ = m.Advance(f.At)
 	m.tag++
-	return m, m.Tick()
+	return m, bezel.Result{Handled: true, Cmd: m.Tick()}
 }
 
 // Advance is m at now; it never finishes, so done is only true when stopped.

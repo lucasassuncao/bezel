@@ -7,6 +7,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/effect"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -79,10 +80,10 @@ func (r retros) ticks() tea.Cmd {
 
 // update takes the skeleton's and the trace's own frames.
 func (r retros) update(msg tea.Msg) (retros, tea.Cmd) {
-	var a, b tea.Cmd
+	var a, b bezel.Result
 	r.trace, a = r.trace.Update(msg)
 	r.shape, b = r.shape.Update(msg)
-	return r, tea.Batch(a, b)
+	return r, tea.Batch(a.Cmd, b.Cmd)
 }
 
 func (r retros) advance(at time.Time) retros {

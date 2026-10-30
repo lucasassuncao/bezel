@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation/text"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -56,9 +57,9 @@ func (y typed) refuse() typed {
 
 // update takes the marquee's own ticks.
 func (y typed) update(msg tea.Msg) (typed, tea.Cmd) {
-	var cmd tea.Cmd
-	y.marquee, cmd = y.marquee.Update(msg)
-	return y, cmd
+	var r bezel.Result
+	y.marquee, r = y.marquee.Update(msg)
+	return y, r.Cmd
 }
 
 func (y typed) advance(at time.Time) typed {

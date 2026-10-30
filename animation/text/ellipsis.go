@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
@@ -18,6 +19,8 @@ type Ellipsis struct {
 	p    float64
 	run  frames.Run
 }
+
+var _ bezel.Model[Ellipsis] = Ellipsis{}
 
 // NewEllipsis grows up to dots dots, one round every period.
 func NewEllipsis(dots int, period time.Duration) Ellipsis {
@@ -45,12 +48,12 @@ func (e Ellipsis) Tick() tea.Cmd { return e.run.Tick() }
 func (e Ellipsis) FrameAt(at time.Time) animation.FrameMsg { return e.run.FrameAt(at) }
 
 // Update grows on its own frames and asks for the next while it runs.
-func (e Ellipsis) Update(msg tea.Msg) (Ellipsis, tea.Cmd) {
+func (e Ellipsis) Update(msg tea.Msg) (Ellipsis, bezel.Result) {
 	r, p, ok, cmd := e.run.Update(msg)
 	if ok {
 		e.run, e.p = r, p
 	}
-	return e, cmd
+	return e, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is e at now, and whether it stopped.

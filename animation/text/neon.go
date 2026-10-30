@@ -8,6 +8,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/noise"
 
@@ -29,6 +30,8 @@ type Neon struct {
 	slot    int64 // how many neonSlots since the first frame
 	run     frames.Run
 }
+
+var _ bezel.Model[Neon] = Neon{}
 
 // NewNeon lights text in on, dropping towards off when it flickers.
 func NewNeon(text string, on, off color.Color) Neon {
@@ -81,15 +84,15 @@ func (n Neon) Tick() tea.Cmd { return n.run.Tick() }
 func (n Neon) FrameAt(at time.Time) animation.FrameMsg { return n.run.FrameAt(at) }
 
 // Update flickers on its own frames and asks for the next while it lives.
-func (n Neon) Update(msg tea.Msg) (Neon, tea.Cmd) {
+func (n Neon) Update(msg tea.Msg) (Neon, bezel.Result) {
 	f, ok := n.run.Own(msg)
 	if !ok {
-		return n, nil
+		return n, bezel.Result{Handled: ok}
 	}
 	n, _ = n.Advance(f.At)
 	var cmd tea.Cmd
 	n.run, cmd = n.run.Next()
-	return n, cmd
+	return n, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is n at now; a sign never ends on its own, so done is false while it lives.

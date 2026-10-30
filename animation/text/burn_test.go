@@ -42,8 +42,8 @@ func TestStillBurnIsBornGone(t *testing.T) {
 
 func TestBurnTakesOnlyItsOwnFrames(t *testing.T) {
 	b := NewBurn("ab", 100*ms).WithDelay(ms)
-	_, cmd := b.Update(NewBurn("x", ms).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = b.Update(b.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := b.Update(NewBurn("x", ms).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = b.Update(b.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

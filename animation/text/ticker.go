@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
@@ -22,6 +23,8 @@ type Ticker struct {
 	p              float64
 	run            frames.Run
 }
+
+var _ bezel.Model[Ticker] = Ticker{}
 
 // NewTicker shows value; each change rolls over dur. It keeps the terminal's
 // colour until WithBase, WithUp and WithDown give it some.
@@ -95,13 +98,13 @@ func (t Ticker) Tick() tea.Cmd { return t.run.Tick() }
 func (t Ticker) FrameAt(at time.Time) animation.FrameMsg { return t.run.FrameAt(at) }
 
 // Update rolls on its own frames and asks for the next until it settles.
-func (t Ticker) Update(msg tea.Msg) (Ticker, tea.Cmd) {
+func (t Ticker) Update(msg tea.Msg) (Ticker, bezel.Result) {
 	r, p, ok, cmd := t.run.Update(msg)
 	if ok {
 		t.run, t.p = r, p
 		t.settle()
 	}
-	return t, cmd
+	return t, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is t at now, and whether it settled.

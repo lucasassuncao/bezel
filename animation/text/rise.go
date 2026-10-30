@@ -10,6 +10,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
@@ -23,6 +24,8 @@ type Rise struct {
 	p      float64
 	run    frames.Run
 }
+
+var _ bezel.Model[Rise] = Rise{}
 
 // NewRise floats text rows rows up over dur, in the terminal's colour until
 // WithFade.
@@ -68,12 +71,12 @@ func (r Rise) Tick() tea.Cmd { return r.run.Tick() }
 func (r Rise) FrameAt(at time.Time) animation.FrameMsg { return r.run.FrameAt(at) }
 
 // Update rises on its own frames and asks for the next until it is gone.
-func (r Rise) Update(msg tea.Msg) (Rise, tea.Cmd) {
+func (r Rise) Update(msg tea.Msg) (Rise, bezel.Result) {
 	run, p, ok, cmd := r.run.Update(msg)
 	if ok {
 		r.run, r.p = run, p
 	}
-	return r, cmd
+	return r, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is r at now, and whether it is gone.

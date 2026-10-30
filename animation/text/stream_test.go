@@ -48,10 +48,10 @@ func TestAStreamFarBehindSpeedsUp(t *testing.T) {
 func TestAStreamTakesOnlyItsOwnFrames(t *testing.T) {
 	s, _ := NewStream(10 * ms).Push("abc")
 	other, _ := NewStream(10 * ms).Push("xyz")
-	_, cmd := s.Update(other.FrameAt(time.Unix(10, 0)))
-	assert.Nil(t, cmd)
-	s, cmd = s.Update(s.FrameAt(time.Unix(10, 0)))
-	assert.NotNil(t, cmd)
+	_, res := s.Update(other.FrameAt(time.Unix(10, 0)))
+	assert.Nil(t, res.Cmd)
+	s, res = s.Update(s.FrameAt(time.Unix(10, 0)))
+	assert.NotNil(t, res.Cmd)
 	assert.True(t, s.Active())
 }
 

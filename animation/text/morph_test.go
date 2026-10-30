@@ -48,8 +48,8 @@ func TestStillMorphIsBornAtItsEnd(t *testing.T) {
 
 func TestMorphTakesOnlyItsOwnFrames(t *testing.T) {
 	m := NewMorph("ab", "cd", 100*ms)
-	_, cmd := m.Update(NewMorph("x", "y", ms).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = m.Update(m.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := m.Update(NewMorph("x", "y", ms).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = m.Update(m.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

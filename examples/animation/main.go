@@ -13,6 +13,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/component/progress"
 	"github.com/lucasassuncao/bezel/layout"
@@ -290,8 +291,9 @@ func (m model) run(cmd tea.Cmd) (tea.Model, tea.Cmd) {
 // frame hands a frame to whoever owns it: the hints tween, the pendulum and
 // the orbit take their own, and the clock's moves everything else to its time.
 func (m model) frame(msg animation.FrameMsg) (tea.Model, tea.Cmd) {
-	var slideCmd, phCmd, clockCmd tea.Cmd
-	if m.tween, slideCmd = m.tween.Update(msg); m.tween.Cur != m.height {
+	var phCmd, clockCmd tea.Cmd
+	var slide bezel.Result
+	if m.tween, slide = m.tween.Update(msg); m.tween.Cur != m.height {
 		m.height = m.tween.Cur
 		m.sh = m.sh.SetLayout(shape(m.height))
 	}
@@ -306,7 +308,7 @@ func (m model) frame(msg animation.FrameMsg) (tea.Model, tea.Cmd) {
 			m.clock = m.clock.Stop()
 		}
 	}
-	return m, tea.Batch(slideCmd, phCmd, clockCmd)
+	return m, tea.Batch(slide.Cmd, phCmd, clockCmd)
 }
 
 // advance moves every animation on the shared clock to at.

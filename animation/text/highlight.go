@@ -7,6 +7,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -21,6 +22,8 @@ type Highlight struct {
 	p      float64
 	run    frames.Run
 }
+
+var _ bezel.Model[Highlight] = Highlight{}
 
 // NewHighlight marks text with marker over dur. Still, it is born marked.
 func NewHighlight(text string, marker color.Color, dur time.Duration) Highlight {
@@ -58,12 +61,12 @@ func (h Highlight) Tick() tea.Cmd { return h.run.Tick() }
 func (h Highlight) FrameAt(at time.Time) animation.FrameMsg { return h.run.FrameAt(at) }
 
 // Update marks on its own frames and asks for the next until it ends.
-func (h Highlight) Update(msg tea.Msg) (Highlight, tea.Cmd) {
+func (h Highlight) Update(msg tea.Msg) (Highlight, bezel.Result) {
 	r, p, ok, cmd := h.run.Update(msg)
 	if ok {
 		h.run, h.p = r, p
 	}
-	return h, cmd
+	return h, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is h at now, and whether it ended.

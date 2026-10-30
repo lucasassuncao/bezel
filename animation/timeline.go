@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -85,6 +86,8 @@ type Timeline struct {
 	run     frames.Run
 }
 
+var _ bezel.Model[Timeline] = Timeline{}
+
 // NewTimeline plays s once, its clock started by its first frame. Empty, or
 // with motion Still, it is inactive with every value at its end.
 func NewTimeline(s Span) Timeline {
@@ -161,17 +164,17 @@ func (t Timeline) Tick() tea.Cmd { return t.run.Tick() }
 func (t Timeline) FrameAt(at time.Time) FrameMsg { return t.run.FrameAt(at) }
 
 // Update plays on its own frames and asks for the next until it ends.
-func (t Timeline) Update(msg tea.Msg) (Timeline, tea.Cmd) {
+func (t Timeline) Update(msg tea.Msg) (Timeline, bezel.Result) {
 	f, ok := t.run.Own(msg)
 	if !ok {
-		return t, nil
+		return t, bezel.Result{Handled: ok}
 	}
 	if t, _ = t.Advance(f.At); !t.Active() {
-		return t, nil
+		return t, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	t.run, cmd = t.run.Next()
-	return t, cmd
+	return t, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is t at now, and whether it ended.

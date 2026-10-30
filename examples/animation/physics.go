@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -74,10 +75,10 @@ func (p physics) stretch() physics {
 }
 
 func (p physics) update(msg tea.Msg) (physics, tea.Cmd) {
-	var a, b tea.Cmd
+	var a, b bezel.Result
 	p.pend, a = p.pend.Update(msg)
 	p.orbit, b = p.orbit.Update(msg)
-	return p, tea.Batch(a, b)
+	return p, tea.Batch(a.Cmd, b.Cmd)
 }
 
 func (p physics) advance(at time.Time) physics {

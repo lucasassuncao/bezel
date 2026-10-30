@@ -39,8 +39,8 @@ func TestWaveWithRepeatEndsFlat(t *testing.T) {
 
 func TestWaveTicksOnItsOwnFrames(t *testing.T) {
 	w := NewWave("abc", 2, time.Second)
-	w, cmd := w.Update(w.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
-	_, cmd = w.Update(animation.FrameMsg{At: time.Unix(2, 0)})
-	assert.Nil(t, cmd, "a frame that is not its own is ignored")
+	w, res := w.Update(w.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
+	_, res = w.Update(animation.FrameMsg{At: time.Unix(2, 0)})
+	assert.Nil(t, res.Cmd, "a frame that is not its own is ignored")
 }

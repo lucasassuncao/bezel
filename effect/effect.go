@@ -12,6 +12,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/cells"
 	"github.com/lucasassuncao/bezel/internal/frames"
@@ -74,6 +75,8 @@ type Effect struct {
 	p        float64 // raw progress: 0 before the first frame, 1 at the end
 	run      frames.Run
 }
+
+var _ bezel.Model[Effect] = Effect{}
 
 func newEffect(kind effectKind, pattern Pattern, dur time.Duration) Effect {
 	e := Effect{kind: kind, pattern: pattern, run: frames.NewRun(dur)}
@@ -359,17 +362,17 @@ func (e Effect) Tick() tea.Cmd { return e.run.Tick() }
 func (e Effect) FrameAt(at time.Time) animation.FrameMsg { return e.run.FrameAt(at) }
 
 // Update advances on its own frames and asks for the next until it ends.
-func (e Effect) Update(msg tea.Msg) (Effect, tea.Cmd) {
+func (e Effect) Update(msg tea.Msg) (Effect, bezel.Result) {
 	f, ok := e.run.Own(msg)
 	if !ok {
-		return e, nil
+		return e, bezel.Result{Handled: ok}
 	}
 	if e, _ = e.Advance(f.At); !e.Active() {
-		return e, nil
+		return e, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	e.run, cmd = e.run.Next()
-	return e, cmd
+	return e, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is e at now, and whether it ended.

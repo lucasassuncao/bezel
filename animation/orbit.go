@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -17,6 +18,8 @@ type Orbit struct {
 	p      float64
 	run    frames.Run
 }
+
+var _ bezel.Model[Orbit] = Orbit{}
 
 // NewOrbit circles centre at rx columns and ry rows; a terminal cell is about
 // twice as tall as wide, so ry near rx/2 looks round.
@@ -55,12 +58,12 @@ func (o Orbit) Tick() tea.Cmd { return o.run.Tick() }
 func (o Orbit) FrameAt(at time.Time) FrameMsg { return o.run.FrameAt(at) }
 
 // Update goes round on its own frames and asks for the next while it runs.
-func (o Orbit) Update(msg tea.Msg) (Orbit, tea.Cmd) {
+func (o Orbit) Update(msg tea.Msg) (Orbit, bezel.Result) {
 	r, p, ok, cmd := o.run.Update(msg)
 	if ok {
 		o.run, o.p = r, p
 	}
-	return o, cmd
+	return o, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is o at now, and whether it stopped.

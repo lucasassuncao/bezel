@@ -81,10 +81,10 @@ func TestATimelineTakesOnlyItsOwnFrames(t *testing.T) {
 	moving(t)
 	tl := NewTimeline(Step("x", 0, 1, 100*ms))
 	other := NewTimeline(Step("x", 0, 1, 100*ms))
-	_, cmd := tl.Update(other.FrameAt(time.Unix(10, 0)))
-	assert.Nil(t, cmd)
-	next, cmd := tl.Update(tl.FrameAt(time.Unix(10, 0)))
-	require.NotNil(t, cmd)
+	_, res := tl.Update(other.FrameAt(time.Unix(10, 0)))
+	assert.Nil(t, res.Cmd)
+	next, res := tl.Update(tl.FrameAt(time.Unix(10, 0)))
+	require.NotNil(t, res.Cmd)
 	assert.True(t, next.Active())
 }
 

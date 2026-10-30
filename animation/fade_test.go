@@ -30,12 +30,12 @@ func TestFadeEndsOnTo(t *testing.T) {
 	f := NewFade(black, white, 100*time.Millisecond).WithEase(Linear)
 	assert.Equal(t, black, f.Color(), "before its first frame it is From")
 
-	f, cmd := f.Update(f.FrameAt(start))
-	assert.NotNil(t, cmd)
+	f, res := f.Update(f.FrameAt(start))
+	assert.NotNil(t, res.Cmd)
 	f, _ = f.Update(f.FrameAt(start.Add(50 * time.Millisecond)))
 	assert.Equal(t, color.RGBA{128, 128, 128, 255}, f.Color())
-	f, cmd = f.Update(f.FrameAt(start.Add(time.Second)))
-	assert.Nil(t, cmd)
+	f, res = f.Update(f.FrameAt(start.Add(time.Second)))
+	assert.Nil(t, res.Cmd)
 	assert.Equal(t, white, f.Color())
 	assert.False(t, f.Active())
 }

@@ -8,6 +8,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -25,6 +26,8 @@ type Wave struct {
 	p    float64
 	run  frames.Run
 }
+
+var _ bezel.Model[Wave] = Wave{}
 
 // NewWave lifts text up to amp rows either way, a wave passing once every dur
 // for as long as it lives; WithRepeat gives it an end. It draws 2·amp+1 rows.
@@ -76,12 +79,12 @@ func (w Wave) Tick() tea.Cmd { return w.run.Tick() }
 func (w Wave) FrameAt(at time.Time) animation.FrameMsg { return w.run.FrameAt(at) }
 
 // Update moves on its own frames and asks for the next while it runs.
-func (w Wave) Update(msg tea.Msg) (Wave, tea.Cmd) {
+func (w Wave) Update(msg tea.Msg) (Wave, bezel.Result) {
 	r, p, ok, cmd := w.run.Update(msg)
 	if ok {
 		w.run, w.p = r, p
 	}
-	return w, cmd
+	return w, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is w at now, and whether it ended.

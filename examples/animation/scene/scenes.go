@@ -6,6 +6,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/animation/scene"
 	"github.com/lucasassuncao/bezel/theme"
@@ -65,9 +66,9 @@ func (s scenes) next(th theme.Resolved) (scenes, tea.Cmd) {
 }
 
 func (s scenes) update(msg tea.Msg) (scenes, tea.Cmd) {
-	var cmd tea.Cmd
-	s.scene, cmd = s.scene.Update(msg)
-	return s, cmd
+	var r bezel.Result
+	s.scene, r = s.scene.Update(msg)
+	return s, r.Cmd
 }
 
 // rows is a line naming the scene, then the scene w×h with a title over it.

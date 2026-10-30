@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation/text"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -112,10 +113,10 @@ func (w words) drop() words {
 
 // update takes the stream's and the neon's own frames.
 func (w words) update(msg tea.Msg) (words, tea.Cmd) {
-	var a, b tea.Cmd
+	var a, b bezel.Result
 	w.stream, a = w.stream.Update(msg)
 	w.neon, b = w.neon.Update(msg)
-	return w, tea.Batch(a, b)
+	return w, tea.Batch(a.Cmd, b.Cmd)
 }
 
 func (w words) advance(at time.Time) words {

@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -18,6 +19,8 @@ type Pendulum struct {
 	decay  time.Duration // how long a swing takes to shrink to a third; 0 never
 	run    frames.Run
 }
+
+var _ bezel.Model[Pendulum] = Pendulum{}
 
 // NewPendulum swings amp cells either way, once every period, for as long as
 // it lives. WithDecay lets it come to rest.
@@ -59,17 +62,17 @@ func (p Pendulum) Tick() tea.Cmd { return p.run.Tick() }
 func (p Pendulum) FrameAt(at time.Time) FrameMsg { return p.run.FrameAt(at) }
 
 // Update swings on its own frames and asks for the next until it rests.
-func (p Pendulum) Update(msg tea.Msg) (Pendulum, tea.Cmd) {
+func (p Pendulum) Update(msg tea.Msg) (Pendulum, bezel.Result) {
 	f, ok := p.run.Own(msg)
 	if !ok {
-		return p, nil
+		return p, bezel.Result{Handled: ok}
 	}
 	if p, _ = p.Advance(f.At); !p.Active() {
-		return p, nil
+		return p, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	p.run, cmd = p.run.Next()
-	return p, cmd
+	return p, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is p at now, and whether it came to rest.

@@ -24,8 +24,8 @@ func TestOdometerRollsEveryDigitToTheNewValue(t *testing.T) {
 	}
 	assert.Greater(t, len(right), len(left), "the right-hand digit spins more")
 
-	o, cmd := o.Update(o.FrameAt(start.Add(time.Second)))
-	assert.Nil(t, cmd)
+	o, res := o.Update(o.FrameAt(start.Add(time.Second)))
+	assert.Nil(t, res.Cmd)
 	assert.Equal(t, "123", o.View())
 	assert.Equal(t, 123, o.Value())
 }

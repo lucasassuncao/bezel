@@ -26,8 +26,8 @@ func TestPulseRepeatsUntilReplaced(t *testing.T) {
 	e := Pulse(black, 100*ms)
 	start := time.Unix(1000, 0)
 	e, _ = e.Update(e.FrameAt(start))
-	e, cmd := e.Update(e.FrameAt(start.Add(time.Hour)))
-	assert.NotNil(t, cmd, "a pulse keeps going")
+	e, res := e.Update(e.FrameAt(start.Add(time.Hour)))
+	assert.NotNil(t, res.Cmd, "a pulse keeps going")
 	assert.True(t, e.Active())
 }
 

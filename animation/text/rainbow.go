@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -25,6 +26,8 @@ type Rainbow struct {
 	p      float64
 	run    frames.Run
 }
+
+var _ bezel.Model[Rainbow] = Rainbow{}
 
 // NewRainbow spreads the wheel along text, turning it once every dur for as
 // long as it lives. Still, the colours stay where they start.
@@ -75,12 +78,12 @@ func (r Rainbow) Tick() tea.Cmd { return r.run.Tick() }
 func (r Rainbow) FrameAt(at time.Time) animation.FrameMsg { return r.run.FrameAt(at) }
 
 // Update turns on its own frames and asks for the next while it runs.
-func (r Rainbow) Update(msg tea.Msg) (Rainbow, tea.Cmd) {
+func (r Rainbow) Update(msg tea.Msg) (Rainbow, bezel.Result) {
 	run, p, ok, cmd := r.run.Update(msg)
 	if ok {
 		r.run, r.p = run, p
 	}
-	return r, cmd
+	return r, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is r at now, and whether it ended.

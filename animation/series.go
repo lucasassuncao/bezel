@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -19,6 +20,8 @@ type Series struct {
 	p        float64
 	run      frames.Run
 }
+
+var _ bezel.Model[Series] = Series{}
 
 // Grow raises every one of values from zero over dur: bars that grow in.
 func Grow(values []float64, dur time.Duration) Series {
@@ -96,12 +99,12 @@ func (s Series) Tick() tea.Cmd { return s.run.Tick() }
 func (s Series) FrameAt(at time.Time) FrameMsg { return s.run.FrameAt(at) }
 
 // Update moves on its own frames and asks for the next until it settles.
-func (s Series) Update(msg tea.Msg) (Series, tea.Cmd) {
+func (s Series) Update(msg tea.Msg) (Series, bezel.Result) {
 	r, p, ok, cmd := s.run.Update(msg)
 	if ok {
 		s.run, s.p = r, p
 	}
-	return s, cmd
+	return s, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is s at now, and whether it settled.

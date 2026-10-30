@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -26,6 +27,8 @@ type Spring struct {
 	moving  bool
 	id, tag int64
 }
+
+var _ bezel.Model[Spring] = Spring{}
 
 // NewSpring is a spring at rest at pos, stiffness 12 and damping 1.
 func NewSpring(pos float64) Spring {
@@ -81,16 +84,16 @@ func (s Spring) Tick() tea.Cmd {
 func (s Spring) FrameAt(at time.Time) FrameMsg { return frames.NewMsg(at, s.id, s.tag) }
 
 // Update moves s on its own frames and asks for the next until it rests.
-func (s Spring) Update(msg tea.Msg) (Spring, tea.Cmd) {
+func (s Spring) Update(msg tea.Msg) (Spring, bezel.Result) {
 	f, ok := frames.Is(msg, s.id, s.tag)
 	if !ok || !s.moving {
-		return s, nil
+		return s, bezel.Result{Handled: ok}
 	}
 	if s, _ = s.Advance(f.At); !s.moving {
-		return s, nil
+		return s, bezel.Result{Handled: true}
 	}
 	s.tag++
-	return s, s.Tick()
+	return s, bezel.Result{Handled: true, Cmd: s.Tick()}
 }
 
 // Advance is s moved to now, and whether it came to rest. The first frame

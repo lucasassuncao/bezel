@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -28,6 +29,8 @@ type Race struct {
 	p                float64
 	run              frames.Run
 }
+
+var _ bezel.Model[Race] = Race{}
 
 // NewRace is labels at values, placed largest first, still until Set.
 func NewRace(labels []string, values []float64, dur time.Duration) Race {
@@ -106,12 +109,12 @@ func (r Race) Tick() tea.Cmd { return r.run.Tick() }
 func (r Race) FrameAt(at time.Time) FrameMsg { return r.run.FrameAt(at) }
 
 // Update moves on its own frames and asks for the next until the bars settle.
-func (r Race) Update(msg tea.Msg) (Race, tea.Cmd) {
+func (r Race) Update(msg tea.Msg) (Race, bezel.Result) {
 	run, p, ok, cmd := r.run.Update(msg)
 	if ok {
 		r.run, r.p = run, p
 	}
-	return r, cmd
+	return r, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is r at now, and whether the bars settled.

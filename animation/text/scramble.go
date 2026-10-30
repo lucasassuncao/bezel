@@ -8,6 +8,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -27,6 +28,8 @@ type Scramble struct {
 	seed    uint64 // the last frame's time: the noise is a function of it, not of a source
 	run     frames.Run
 }
+
+var _ bezel.Model[Scramble] = Scramble{}
 
 // NewScramble settles text over dur. Letters and digits churn; spaces and
 // punctuation stand still, so the shape of the text reads from the start.
@@ -84,17 +87,17 @@ func (s Scramble) Tick() tea.Cmd { return s.run.Tick() }
 func (s Scramble) FrameAt(at time.Time) animation.FrameMsg { return s.run.FrameAt(at) }
 
 // Update churns on its own frames and asks for the next until it settles.
-func (s Scramble) Update(msg tea.Msg) (Scramble, tea.Cmd) {
+func (s Scramble) Update(msg tea.Msg) (Scramble, bezel.Result) {
 	f, ok := s.run.Own(msg)
 	if !ok {
-		return s, nil
+		return s, bezel.Result{Handled: ok}
 	}
 	if s, _ = s.Advance(f.At); !s.Active() {
-		return s, nil
+		return s, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	s.run, cmd = s.run.Next()
-	return s, cmd
+	return s, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is s at now, and whether it settled.

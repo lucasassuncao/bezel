@@ -45,8 +45,8 @@ func TestBezierRunsFromItsFirstToItsLastPoint(t *testing.T) {
 func TestAPathTakesOnlyItsOwnFrames(t *testing.T) {
 	moving(t)
 	p := NewPath(100*ms, Point{0, 0}, Point{4, 0}).WithDelay(ms).WithYoyo(true).WithRepeat(1)
-	_, cmd := p.Update(NewFloat(0, 1, ms).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = p.Update(p.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := p.Update(NewFloat(0, 1, ms).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = p.Update(p.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

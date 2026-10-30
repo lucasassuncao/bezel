@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -24,6 +25,8 @@ type Shimmer struct {
 	p          float64 // raw progress of the current sweep
 	run        frames.Run
 }
+
+var _ bezel.Model[Shimmer] = Shimmer{}
 
 // NewShimmer is text in base with a glow sweeping across it once every dur,
 // for as long as it lives. Plain text only; WithRepeat gives it an end.
@@ -89,17 +92,17 @@ func (s Shimmer) Tick() tea.Cmd { return s.run.Tick() }
 func (s Shimmer) FrameAt(at time.Time) animation.FrameMsg { return s.run.FrameAt(at) }
 
 // Update sweeps on its own frames and asks for the next while it runs.
-func (s Shimmer) Update(msg tea.Msg) (Shimmer, tea.Cmd) {
+func (s Shimmer) Update(msg tea.Msg) (Shimmer, bezel.Result) {
 	f, ok := s.run.Own(msg)
 	if !ok {
-		return s, nil
+		return s, bezel.Result{Handled: ok}
 	}
 	if s, _ = s.Advance(f.At); !s.Active() {
-		return s, nil
+		return s, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	s.run, cmd = s.run.Next()
-	return s, cmd
+	return s, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is s at now, and whether its sweeps are over.

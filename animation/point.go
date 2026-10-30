@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -22,6 +23,8 @@ type Move struct {
 	Cur      Point // where the last frame put it
 	run      frames.Run
 }
+
+var _ bezel.Model[Move] = Move{}
 
 // NewMove goes from from to to over dur. When dur <= 0, from == to or motion
 // is Still it is inactive and already at to.
@@ -66,17 +69,17 @@ func (m Move) Tick() tea.Cmd { return m.run.Tick() }
 func (m Move) FrameAt(at time.Time) FrameMsg { return m.run.FrameAt(at) }
 
 // Update moves on its own frames and asks for the next until it lands.
-func (m Move) Update(msg tea.Msg) (Move, tea.Cmd) {
+func (m Move) Update(msg tea.Msg) (Move, bezel.Result) {
 	f, ok := m.run.Own(msg)
 	if !ok {
-		return m, nil
+		return m, bezel.Result{Handled: ok}
 	}
 	if m, _ = m.Advance(f.At); !m.Active() {
-		return m, nil
+		return m, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	m.run, cmd = m.run.Next()
-	return m, cmd
+	return m, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is m at now, and whether it landed.
@@ -104,6 +107,8 @@ type Follow struct {
 	x, y    Spring
 	id, tag int64
 }
+
+var _ bezel.Model[Follow] = Follow{}
 
 // NewFollow is a point at rest at at, each axis a NewSpring.
 func NewFollow(at Point) Follow {
@@ -156,16 +161,16 @@ func (f Follow) Tick() tea.Cmd {
 func (f Follow) FrameAt(at time.Time) FrameMsg { return frames.NewMsg(at, f.id, f.tag) }
 
 // Update moves f on its own frames and asks for the next until it rests.
-func (f Follow) Update(msg tea.Msg) (Follow, tea.Cmd) {
+func (f Follow) Update(msg tea.Msg) (Follow, bezel.Result) {
 	fm, ok := frames.Is(msg, f.id, f.tag)
 	if !ok || !f.Active() {
-		return f, nil
+		return f, bezel.Result{Handled: ok}
 	}
 	if f, _ = f.Advance(fm.At); !f.Active() {
-		return f, nil
+		return f, bezel.Result{Handled: true}
 	}
 	f.tag++
-	return f, f.Tick()
+	return f, bezel.Result{Handled: true, Cmd: f.Tick()}
 }
 
 // Advance is f moved to now, and whether it came to rest.

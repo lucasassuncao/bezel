@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/component/toast"
@@ -52,9 +53,9 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 
 	case animation.FrameMsg:
 		if s.trans.Owns(m) {
-			var cmd tea.Cmd
-			s.trans, cmd = s.trans.Update(m)
-			return s, true, cmd
+			var r bezel.Result
+			s.trans, r = s.trans.Update(m)
+			return s, true, r.Cmd
 		}
 		if s.spin.Owns(m) {
 			var cmd tea.Cmd

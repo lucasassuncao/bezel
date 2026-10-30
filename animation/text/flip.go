@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -29,6 +30,8 @@ type Flip struct {
 	p        float64
 	run      frames.Run
 }
+
+var _ bezel.Model[Flip] = Flip{}
 
 // NewFlip turns from into to over dur.
 func NewFlip(from, to string, dur time.Duration) Flip {
@@ -91,12 +94,12 @@ func (f Flip) Tick() tea.Cmd { return f.run.Tick() }
 func (f Flip) FrameAt(at time.Time) animation.FrameMsg { return f.run.FrameAt(at) }
 
 // Update turns on its own frames and asks for the next until every letter lands.
-func (f Flip) Update(msg tea.Msg) (Flip, tea.Cmd) {
+func (f Flip) Update(msg tea.Msg) (Flip, bezel.Result) {
 	r, p, ok, cmd := f.run.Update(msg)
 	if ok {
 		f.run, f.p = r, p
 	}
-	return f, cmd
+	return f, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is f at now, and whether every letter landed.

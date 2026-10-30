@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
@@ -16,6 +17,8 @@ type Heat struct {
 	p        float64
 	run      frames.Run
 }
+
+var _ bezel.Model[Heat] = Heat{}
 
 // NewHeat is values at rest; each Set moves them over dur.
 func NewHeat(values [][]float64, dur time.Duration) Heat {
@@ -77,12 +80,12 @@ func (h Heat) Tick() tea.Cmd { return h.run.Tick() }
 func (h Heat) FrameAt(at time.Time) FrameMsg { return h.run.FrameAt(at) }
 
 // Update moves on its own frames and asks for the next until it settles.
-func (h Heat) Update(msg tea.Msg) (Heat, tea.Cmd) {
+func (h Heat) Update(msg tea.Msg) (Heat, bezel.Result) {
 	r, p, ok, cmd := h.run.Update(msg)
 	if ok {
 		h.run, h.p = r, p
 	}
-	return h, cmd
+	return h, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is h at now, and whether it settled.

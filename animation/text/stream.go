@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -28,6 +29,8 @@ type Stream struct {
 	running bool
 	id, tag int64
 }
+
+var _ bezel.Model[Stream] = Stream{}
 
 // NewStream reveals what it is pushed at one grapheme per perChar, 10ms when
 // perChar is not positive.
@@ -85,16 +88,16 @@ func (s Stream) Tick() tea.Cmd {
 func (s Stream) FrameAt(at time.Time) animation.FrameMsg { return frames.NewMsg(at, s.id, s.tag) }
 
 // Update reveals on its own frames and asks for the next until it caught up.
-func (s Stream) Update(msg tea.Msg) (Stream, tea.Cmd) {
+func (s Stream) Update(msg tea.Msg) (Stream, bezel.Result) {
 	f, ok := frames.Is(msg, s.id, s.tag)
 	if !ok || !s.running {
-		return s, nil
+		return s, bezel.Result{Handled: ok}
 	}
 	if s, _ = s.Advance(f.At); !s.running {
-		return s, nil
+		return s, bezel.Result{Handled: true}
 	}
 	s.tag++
-	return s, s.Tick()
+	return s, bezel.Result{Handled: true, Cmd: s.Tick()}
 }
 
 // Advance is s at now, and whether it caught up.

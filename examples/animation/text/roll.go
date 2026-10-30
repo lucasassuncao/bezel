@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation/text"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -65,10 +66,10 @@ func (e rolls) roll() rolls {
 
 // update hands a frame to the two that keep their own ticks.
 func (e rolls) update(msg tea.Msg) (rolls, tea.Cmd) {
-	var a, b tea.Cmd
+	var a, b bezel.Result
 	e.shimmer, a = e.shimmer.Update(msg)
 	e.gradient, b = e.gradient.Update(msg)
-	return e, tea.Batch(a, b)
+	return e, tea.Batch(a.Cmd, b.Cmd)
 }
 
 // advance moves the ones on the shared clock to at.

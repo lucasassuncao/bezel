@@ -60,8 +60,8 @@ func TestASpentBurstHasNoSparks(t *testing.T) {
 func TestABurstTakesOnlyItsOwnFrames(t *testing.T) {
 	moving(t)
 	b := NewBurst(Point{0, 0}, 3, 100*ms)
-	_, cmd := b.Update(NewFloat(0, 1, ms).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = b.Update(b.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := b.Update(NewFloat(0, 1, ms).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = b.Update(b.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

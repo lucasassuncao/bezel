@@ -43,6 +43,6 @@ func TestStillDropStartsLanded(t *testing.T) {
 
 func TestDropTicksOnItsOwnFrames(t *testing.T) {
 	d := NewDrop(0, 5)
-	_, cmd := d.Update(d.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := d.Update(d.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

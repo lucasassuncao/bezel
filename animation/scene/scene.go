@@ -10,6 +10,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/cells"
 	"github.com/lucasassuncao/bezel/internal/frames"
@@ -41,6 +42,8 @@ type Scene struct {
 	t      float64 // seconds since the first frame, at Speed
 	run    frames.Run
 }
+
+var _ bezel.Model[Scene] = Scene{}
 
 func newScene(kind sceneKind, colors ...color.Color) Scene {
 	a := Scene{kind: kind, colors: colors, run: frames.NewRun(time.Second)}
@@ -125,15 +128,15 @@ func (a Scene) Tick() tea.Cmd { return a.run.Tick() }
 func (a Scene) FrameAt(at time.Time) animation.FrameMsg { return a.run.FrameAt(at) }
 
 // Update plays on its own frames and asks for the next while it runs.
-func (a Scene) Update(msg tea.Msg) (Scene, tea.Cmd) {
+func (a Scene) Update(msg tea.Msg) (Scene, bezel.Result) {
 	f, ok := a.run.Own(msg)
 	if !ok {
-		return a, nil
+		return a, bezel.Result{Handled: ok}
 	}
 	a, _ = a.Advance(f.At)
 	var cmd tea.Cmd
 	a.run, cmd = a.run.Next()
-	return a, cmd
+	return a, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is a at now; a scene never ends on its own, so done is false while

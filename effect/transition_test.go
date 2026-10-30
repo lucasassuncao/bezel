@@ -79,7 +79,7 @@ func TestTransitionPadsToTheLargerBlock(t *testing.T) {
 func TestTransitionTicksOnItsOwnFrames(t *testing.T) {
 	tr := Shuffle(100 * ms)
 	assert.True(t, tr.Owns(tr.FrameAt(time.Unix(1, 0))))
-	tr, cmd := tr.Update(tr.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	tr, res := tr.Update(tr.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 	assert.False(t, tr.Owns(animation.FrameMsg{}))
 }

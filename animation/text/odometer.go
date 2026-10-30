@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
@@ -21,6 +22,8 @@ type Odometer struct {
 	p        float64
 	run      frames.Run
 }
+
+var _ bezel.Model[Odometer] = Odometer{}
 
 // NewOdometer rolls from from to to over dur, easing out. Values below zero
 // read as zero.
@@ -77,17 +80,17 @@ func (o Odometer) Tick() tea.Cmd { return o.run.Tick() }
 func (o Odometer) FrameAt(at time.Time) animation.FrameMsg { return o.run.FrameAt(at) }
 
 // Update turns on its own frames and asks for the next until it rests.
-func (o Odometer) Update(msg tea.Msg) (Odometer, tea.Cmd) {
+func (o Odometer) Update(msg tea.Msg) (Odometer, bezel.Result) {
 	f, ok := o.run.Own(msg)
 	if !ok {
-		return o, nil
+		return o, bezel.Result{Handled: ok}
 	}
 	if o, _ = o.Advance(f.At); !o.Active() {
-		return o, nil
+		return o, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	o.run, cmd = o.run.Next()
-	return o, cmd
+	return o, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is o at now, and whether it came to rest.

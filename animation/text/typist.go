@@ -8,6 +8,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/noise"
 
@@ -42,6 +43,8 @@ type Typist struct {
 	shown   []string
 	run     frames.Run
 }
+
+var _ bezel.Model[Typist] = Typist{}
 
 // NewTypist types text at about one grapheme per perChar, with a typo in
 // roughly one letter of every twenty; a perChar of 0 shows it at once.
@@ -122,17 +125,17 @@ func (t Typist) Tick() tea.Cmd { return t.run.Tick() }
 func (t Typist) FrameAt(at time.Time) animation.FrameMsg { return t.run.FrameAt(at) }
 
 // Update types on its own frames and asks for the next until it is done.
-func (t Typist) Update(msg tea.Msg) (Typist, tea.Cmd) {
+func (t Typist) Update(msg tea.Msg) (Typist, bezel.Result) {
 	f, ok := t.run.Own(msg)
 	if !ok {
-		return t, nil
+		return t, bezel.Result{Handled: ok}
 	}
 	if t, _ = t.Advance(f.At); !t.Active() {
-		return t, nil
+		return t, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	t.run, cmd = t.run.Next()
-	return t, cmd
+	return t, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is t at now, and whether it is done.

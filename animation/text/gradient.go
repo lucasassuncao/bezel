@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -23,6 +24,8 @@ type Gradient struct {
 	p      float64
 	run    frames.Run
 }
+
+var _ bezel.Model[Gradient] = Gradient{}
 
 // NewGradient spreads colors evenly round text, back to the first at the
 // end, and turns them once every dur for as long as it lives. Still, it is
@@ -77,17 +80,17 @@ func (g Gradient) Tick() tea.Cmd { return g.run.Tick() }
 func (g Gradient) FrameAt(at time.Time) animation.FrameMsg { return g.run.FrameAt(at) }
 
 // Update flows on its own frames and asks for the next while it runs.
-func (g Gradient) Update(msg tea.Msg) (Gradient, tea.Cmd) {
+func (g Gradient) Update(msg tea.Msg) (Gradient, bezel.Result) {
 	f, ok := g.run.Own(msg)
 	if !ok {
-		return g, nil
+		return g, bezel.Result{Handled: ok}
 	}
 	if g, _ = g.Advance(f.At); !g.Active() {
-		return g, nil
+		return g, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	g.run, cmd = g.run.Next()
-	return g, cmd
+	return g, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is g at now, and whether it stopped.

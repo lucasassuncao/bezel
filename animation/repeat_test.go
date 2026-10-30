@@ -70,8 +70,8 @@ func TestTweenTakesDelayRepeatAndYoyo(t *testing.T) {
 	assert.Equal(t, 5, tw.Cur)
 	tw, _ = tw.Update(tw.FrameAt(start.Add(250 * ms)))
 	assert.Equal(t, 5, tw.Cur, "half way back")
-	tw, cmd := tw.Update(tw.FrameAt(start.Add(time.Second)))
-	assert.Nil(t, cmd)
+	tw, res := tw.Update(tw.FrameAt(start.Add(time.Second)))
+	assert.Nil(t, res.Cmd)
 	assert.False(t, tw.Active())
 	assert.Equal(t, 0, tw.Cur)
 }

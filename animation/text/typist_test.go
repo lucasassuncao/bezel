@@ -61,10 +61,10 @@ func TestStillTypistShowsTheTextWhole(t *testing.T) {
 
 func TestATypistTakesOnlyItsOwnFrames(t *testing.T) {
 	ty := NewTypist("abc", 20*ms).WithDelay(ms)
-	_, cmd := ty.Update(NewTypist("x", ms).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = ty.Update(ty.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := ty.Update(NewTypist("x", ms).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = ty.Update(ty.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }
 
 func TestATypistWithNoTimeShowsTheTextAtOnce(t *testing.T) {

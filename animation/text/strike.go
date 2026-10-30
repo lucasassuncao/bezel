@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/edit"
 
 	"github.com/lucasassuncao/bezel/animation"
@@ -23,6 +24,8 @@ type Strike struct {
 	p    float64
 	run  frames.Run
 }
+
+var _ bezel.Model[Strike] = Strike{}
 
 // NewStrike strikes text through over dur. Still, it is born struck.
 func NewStrike(text string, dur time.Duration) Strike {
@@ -68,12 +71,12 @@ func (s Strike) Tick() tea.Cmd { return s.run.Tick() }
 func (s Strike) FrameAt(at time.Time) animation.FrameMsg { return s.run.FrameAt(at) }
 
 // Update draws on its own frames and asks for the next until it ends.
-func (s Strike) Update(msg tea.Msg) (Strike, tea.Cmd) {
+func (s Strike) Update(msg tea.Msg) (Strike, bezel.Result) {
 	r, p, ok, cmd := s.run.Update(msg)
 	if ok {
 		s.run, s.p = r, p
 	}
-	return s, cmd
+	return s, bezel.Result{Handled: ok, Cmd: cmd}
 }
 
 // Advance is s at now, and whether it ended.

@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/internal/noise"
 )
@@ -30,6 +31,8 @@ type Burst struct {
 	p       float64
 	run     frames.Run
 }
+
+var _ bezel.Model[Burst] = Burst{}
 
 // NewBurst throws n sparks out of at over dur.
 func NewBurst(at Point, n int, dur time.Duration) Burst {
@@ -89,17 +92,17 @@ func (b Burst) Tick() tea.Cmd { return b.run.Tick() }
 func (b Burst) FrameAt(at time.Time) FrameMsg { return b.run.FrameAt(at) }
 
 // Update flies on its own frames and asks for the next until it is spent.
-func (b Burst) Update(msg tea.Msg) (Burst, tea.Cmd) {
+func (b Burst) Update(msg tea.Msg) (Burst, bezel.Result) {
 	f, ok := b.run.Own(msg)
 	if !ok {
-		return b, nil
+		return b, bezel.Result{Handled: ok}
 	}
 	if b, _ = b.Advance(f.At); !b.Active() {
-		return b, nil
+		return b, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	b.run, cmd = b.run.Next()
-	return b, cmd
+	return b, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is b at now, and whether it is spent.

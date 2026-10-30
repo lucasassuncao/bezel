@@ -50,8 +50,8 @@ func TestStillNeonNeverFlickers(t *testing.T) {
 
 func TestNeonTakesOnlyItsOwnFrames(t *testing.T) {
 	n := NewNeon("ON", pink, black)
-	_, cmd := n.Update(NewNeon("X", pink, black).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = n.Update(n.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, res := n.Update(NewNeon("X", pink, black).FrameAt(time.Unix(1, 0)))
+	assert.Nil(t, res.Cmd)
+	_, res = n.Update(n.FrameAt(time.Unix(1, 0)))
+	assert.NotNil(t, res.Cmd)
 }

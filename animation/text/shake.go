@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
@@ -21,6 +22,8 @@ type Shake struct {
 	p   float64 // raw progress, 1 at rest
 	run frames.Run
 }
+
+var _ bezel.Model[Shake] = Shake{}
 
 // NewShake swings up to amp cells either way over dur.
 func NewShake(amp int, dur time.Duration) Shake {
@@ -57,17 +60,17 @@ func (s Shake) Tick() tea.Cmd { return s.run.Tick() }
 func (s Shake) FrameAt(at time.Time) animation.FrameMsg { return s.run.FrameAt(at) }
 
 // Update samples s on its own frames and asks for the next until it settles.
-func (s Shake) Update(msg tea.Msg) (Shake, tea.Cmd) {
+func (s Shake) Update(msg tea.Msg) (Shake, bezel.Result) {
 	f, ok := s.run.Own(msg)
 	if !ok {
-		return s, nil
+		return s, bezel.Result{Handled: ok}
 	}
 	if s, _ = s.Advance(f.At); !s.Active() {
-		return s, nil
+		return s, bezel.Result{Handled: true}
 	}
 	var cmd tea.Cmd
 	s.run, cmd = s.run.Next()
-	return s, cmd
+	return s, bezel.Result{Handled: true, Cmd: cmd}
 }
 
 // Advance is s sampled at now, and whether it settled.
