@@ -432,7 +432,7 @@ func WithKey(keys ...string) Option
 WithKey rebinds the action. A prebuilt, or a Command that had no key, prints the first key; a custom keeps the label it was given.
 
 <a name="Pane"></a>
-## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L97-L104>)
+## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L96-L103>)
 
 Pane is what the app hands the shell for one leaf: a title for the border and a body drawn into the inner rect the shell computed.
 
@@ -837,7 +837,7 @@ func (s Shell) Update(msg tea.Msg) (Shell, bezel.Result)
 Update handles what is the shell's: resize, status ticks, overlays, the status\-row input, help, tabs and focus, and a left click on a dialog, a tab or a pane, which comes back as a ClickMsg. Handled false means the app's turn. A resize takes the size and stays false, so the app sizes its own models from Rect on the same message.
 
 <a name="Shell.View"></a>
-### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L118>)
+### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L117>)
 
 ```go
 func (s Shell) View(panes map[string]Pane) string

@@ -28,19 +28,13 @@ type Entry struct {
 	Group int
 }
 
-// New builds an entry from the key label, its description and, optionally,
-// the capability it needs. keys is what the legend prints, e.g. "↑/↓".
-func New(keys, desc string, needs ...Capability) Entry {
-	e := Entry{Binding: key.New(keys).WithHelp(keys, desc)}
-	if len(needs) > 0 {
-		e.Needs = needs[0]
-	}
-	return e
-}
+// New is an entry that only shows: keys is what the legend prints, "↑/↓",
+// not keys it fires on. Set Needs for the capability it needs.
+func New(keys, desc string) Entry { return Entry{Binding: key.New().WithHelp(keys, desc)} }
 
-// switchedOff reports an entry whose Disabled is set. Enabled() is also
-// false for an entry with no keys, which still shows, so check both.
-func (e Entry) switchedOff() bool { return len(e.Keys()) > 0 && !e.Enabled() }
+// switchedOff reports an entry whose Disabled is set: Enabled() is false too
+// for one New made, which has no keys and still shows.
+func (e Entry) switchedOff() bool { return e.Disabled }
 
 // shown drops the switched-off entries, in a new slice.
 func shown(entries []Entry) []Entry {
@@ -59,20 +53,18 @@ func Filter(entries []Entry, can func(Capability) bool) []Entry {
 	return kept
 }
 
-// Style colours the bracketed key and the action text. HelpKey is the key
-// that opens the full list: when set, "[HelpKey] help" opens the legend and
-// the dropped-count mark names it. Empty means the app has none.
+// Style is how entries look: the colours of the bracketed key and of the
+// action text, the brackets, the separators and the dropped-count mark.
 type Style struct {
-	Key     lipgloss.Style
-	Text    lipgloss.Style
-	HelpKey string
-	Bare    bool // keys without their brackets: "r run" for "[r] run"
+	Key  lipgloss.Style
+	Text lipgloss.Style
+	Bare bool // keys without their brackets: "r run" for "[r] run"
 
 	// Sep goes between entries: "" is two spaces in Pack, " · " in HintLine.
 	// GroupSep goes between two groups sharing a row; "" is Sep.
 	Sep, GroupSep string
 	// More is the dropped-count mark, a format for the count: "" is
-	// "  +%d more", or "  +%d in [HelpKey]" when there is a help key.
+	// "  +%d more", or "  +%d in [helpKey]" when Pack has a help key.
 	More string
 }
 
@@ -105,19 +97,19 @@ func HintLine(entries []Entry, st Style) string {
 	return strings.Join(parts, st.sep(" · "))
 }
 
-// Pack lays entries over up to maxLines rows of width. Entries are dropped
-// whole from the end, never the first, and the last row says how many. An
-// entry for HelpKey stays where it was put; without one, help is pinned first.
-func Pack(entries []Entry, width, maxLines int, st Style) []string {
+// Pack lays entries over up to maxLines rows of width, dropping whole ones
+// from the end and counting them on the last row. helpKey opens the full
+// list: its entry stays put, or help is pinned first; "" means there is none.
+func Pack(entries []Entry, width, maxLines int, helpKey string, st Style) []string {
 	entries = shown(entries)
 	slices.SortStableFunc(entries, func(a, b Entry) int { return a.Group - b.Group })
 
 	parts := make([]string, 0, len(entries)+1)
 	// starts marks where each group begins in parts; help belongs to the first.
 	starts := []int{0}
-	listed := slices.ContainsFunc(entries, func(e Entry) bool { return e.Help().Key == st.HelpKey })
-	if st.HelpKey != "" && !listed {
-		parts = append(parts, st.pair(New(st.HelpKey, "help")))
+	listed := slices.ContainsFunc(entries, func(e Entry) bool { return e.Help().Key == helpKey })
+	if helpKey != "" && !listed {
+		parts = append(parts, st.pair(New(helpKey, "help")))
 	}
 	for i, e := range entries {
 		if i > 0 && e.Group != entries[i-1].Group && len(parts) > starts[len(starts)-1] {
@@ -143,10 +135,10 @@ func Pack(entries []Entry, width, maxLines int, st Style) []string {
 		switch {
 		case st.More != "":
 			return st.Text.Render(fmt.Sprintf(st.More, dropped))
-		case st.HelpKey == "":
+		case helpKey == "":
 			return st.Text.Render(fmt.Sprintf("  +%d more", dropped))
 		}
-		return st.Text.Render(fmt.Sprintf("  +%d in %s", dropped, st.key(st.HelpKey)))
+		return st.Text.Render(fmt.Sprintf("  +%d in %s", dropped, st.key(helpKey)))
 	}
 
 	if width <= 0 || maxLines < 1 {

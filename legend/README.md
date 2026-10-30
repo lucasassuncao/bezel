@@ -13,17 +13,17 @@ Package legend is the key legend: entries tagged with the capability they need, 
 ## Index
 
 - [func HintLine\(entries \[\]Entry, st Style\) string](<#HintLine>)
-- [func Pack\(entries \[\]Entry, width, maxLines int, st Style\) \[\]string](<#Pack>)
+- [func Pack\(entries \[\]Entry, width, maxLines int, helpKey string, st Style\) \[\]string](<#Pack>)
 - [type Capability](<#Capability>)
 - [type Entry](<#Entry>)
   - [func Filter\(entries \[\]Entry, can func\(Capability\) bool\) \[\]Entry](<#Filter>)
   - [func FromBindings\(bs \[\]key.Binding\) \[\]Entry](<#FromBindings>)
-  - [func New\(keys, desc string, needs ...Capability\) Entry](<#New>)
+  - [func New\(keys, desc string\) Entry](<#New>)
 - [type Style](<#Style>)
 
 
 <a name="HintLine"></a>
-## func [HintLine](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L99>)
+## func [HintLine](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L91>)
 
 ```go
 func HintLine(entries []Entry, st Style) string
@@ -32,13 +32,13 @@ func HintLine(entries []Entry, st Style) string
 HintLine is every entry on one line, for a modal's own footer.
 
 <a name="Pack"></a>
-## func [Pack](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L111>)
+## func [Pack](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L103>)
 
 ```go
-func Pack(entries []Entry, width, maxLines int, st Style) []string
+func Pack(entries []Entry, width, maxLines int, helpKey string, st Style) []string
 ```
 
-Pack lays entries over up to maxLines rows of width. Entries are dropped whole from the end, never the first, and the last row says how many. An entry for HelpKey stays where it was put; without one, help is pinned first.
+Pack lays entries over up to maxLines rows of width, dropping whole ones from the end and counting them on the last row. helpKey opens the full list: its entry stays put, or help is pinned first; "" means there is none.
 
 <a name="Capability"></a>
 ## type [Capability](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L21>)
@@ -63,7 +63,7 @@ type Entry struct {
 ```
 
 <a name="Filter"></a>
-### func [Filter](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L52>)
+### func [Filter](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L46>)
 
 ```go
 func Filter(entries []Entry, can func(Capability) bool) []Entry
@@ -72,7 +72,7 @@ func Filter(entries []Entry, can func(Capability) bool) []Entry
 Filter keeps the entries can allows and that are not disabled, in a new slice. A nil can allows every capability.
 
 <a name="FromBindings"></a>
-### func [FromBindings](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L241>)
+### func [FromBindings](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L233>)
 
 ```go
 func FromBindings(bs []key.Binding) []Entry
@@ -84,28 +84,27 @@ FromBindings turns bindings into entries, skipping disabled ones and those witho
 ### func [New](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L33>)
 
 ```go
-func New(keys, desc string, needs ...Capability) Entry
+func New(keys, desc string) Entry
 ```
 
-New builds an entry from the key label, its description and, optionally, the capability it needs. keys is what the legend prints, e.g. "↑/↓".
+New is an entry that only shows: keys is what the legend prints, "↑/↓", not keys it fires on. Set Needs for the capability it needs.
 
 <a name="Style"></a>
-## type [Style](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L65-L77>)
+## type [Style](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L58-L69>)
 
-Style colours the bracketed key and the action text. HelpKey is the key that opens the full list: when set, "\[HelpKey\] help" opens the legend and the dropped\-count mark names it. Empty means the app has none.
+Style is how entries look: the colours of the bracketed key and of the action text, the brackets, the separators and the dropped\-count mark.
 
 ```go
 type Style struct {
-    Key     lipgloss.Style
-    Text    lipgloss.Style
-    HelpKey string
-    Bare    bool // keys without their brackets: "r run" for "[r] run"
+    Key  lipgloss.Style
+    Text lipgloss.Style
+    Bare bool // keys without their brackets: "r run" for "[r] run"
 
     // Sep goes between entries: "" is two spaces in Pack, " · " in HintLine.
     // GroupSep goes between two groups sharing a row; "" is Sep.
     Sep, GroupSep string
     // More is the dropped-count mark, a format for the count: "" is
-    // "  +%d more", or "  +%d in [HelpKey]" when there is a help key.
+    // "  +%d more", or "  +%d in [helpKey]" when Pack has a help key.
     More string
 }
 ```
