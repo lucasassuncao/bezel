@@ -24,12 +24,13 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
-      # Keyed on scripts/make/tools.mk, where the tool versions are pinned.
+      # Keyed on scripts/make/tools.mk, where the tool versions are pinned, and on
+      # go.mod, whose toolchain builds them: a stale build refuses a newer Go.
       - name: Cache pinned tools
         uses: actions/cache@v6
         with:
           path: .gobin
-          key: gobin-${{ runner.os }}-${{ hashFiles('scripts/make/tools.mk') }}
+          key: gobin-${{ runner.os }}-${{ hashFiles('scripts/make/tools.mk', 'go.mod') }}
 
       - name: Check dependencies
         run: |
@@ -86,7 +87,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .gobin
-          key: gobin-${{ runner.os }}-${{ hashFiles('scripts/make/tools.mk') }}
+          key: gobin-${{ runner.os }}-${{ hashFiles('scripts/make/tools.mk', 'go.mod') }}
 
       - name: Lint
         run: make lint
@@ -126,7 +127,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .gobin
-          key: gobin-${{ runner.os }}-${{ hashFiles('scripts/make/tools.mk') }}
+          key: gobin-${{ runner.os }}-${{ hashFiles('scripts/make/tools.mk', 'go.mod') }}
 
       # Runs first so the reachability answer is in the log even when grype
       # fails the job on an advisory nothing here can execute.

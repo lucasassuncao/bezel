@@ -50,6 +50,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) Busy\(text string\) \(Shell, tea.Cmd\)](<#Shell.Busy>)
   - [func \(s Shell\) ClearInput\(\) Shell](<#Shell.ClearInput>)
   - [func \(s Shell\) ClearStatus\(\) Shell](<#Shell.ClearStatus>)
+  - [func \(s Shell\) CommandLine\(\) \(string, bool\)](<#Shell.CommandLine>)
   - [func \(s Shell\) Context\(\) Context](<#Shell.Context>)
   - [func \(s Shell\) Copy\(text, done, failed string\) tea.Cmd](<#Shell.Copy>)
   - [func \(s Shell\) Focused\(\) string](<#Shell.Focused>)
@@ -493,6 +494,15 @@ func (s Shell) ClearStatus() Shell
 ```
 
 ClearStatus removes the banner now, and makes its pending timer a no\-op.
+
+<a name="Shell.CommandLine"></a>
+### func \(Shell\) [CommandLine](<https://github.com/lucasassuncao/bezel/blob/main/shell/palette.go#L53>)
+
+```go
+func (s Shell) CommandLine() (string, bool)
+```
+
+CommandLine is what is typed on the ":" command line, and whether it is open on top of the overlays.
 
 <a name="Shell.Context"></a>
 ### func \(Shell\) [Context](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L278>)

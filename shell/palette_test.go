@@ -184,3 +184,14 @@ func TestPaletteErrorsUseTheConfiguredTTL(t *testing.T) {
 		t.Fatal("the status timer ignored Config.StatusTTL")
 	}
 }
+
+func TestCommandLineSaysWhatIsTypedWhileItIsOpen(t *testing.T) {
+	s := sized(New(actionConfig()).SetActions(Commands(), Custom("r", "reveal", nil, Named("reveal"))))
+	_, open := s.CommandLine()
+	require.False(t, open)
+	s, _ = s.Update(colon)
+	s = typeLine(s, "rev")
+	line, open := s.CommandLine()
+	require.True(t, open)
+	require.Equal(t, "rev", line)
+}

@@ -2,7 +2,7 @@ module github.com/lucasassuncao/bezel
 
 go 1.26.4
 
-toolchain go1.27.3
+toolchain go1.26.10
 
 require (
 	charm.land/bubbletea/v2 v2.1.0

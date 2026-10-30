@@ -47,3 +47,13 @@ func (s Shell) OpenCommands() Shell {
 	s = s.ready()
 	return s.Push(palette.New(s.paletteItems(), s.cfg.Theme)).relayout()
 }
+
+// CommandLine is what is typed on the ":" command line, and whether it is
+// open on top of the overlays.
+func (s Shell) CommandLine() (string, bool) {
+	p, ok := s.TopOverlay().(palette.Model)
+	if !ok {
+		return "", false
+	}
+	return p.Value(), true
+}
