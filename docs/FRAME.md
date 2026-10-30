@@ -52,7 +52,7 @@ func (m model) View() tea.View {
 ```
 
 1. **`shell.Config`** says everything up front: the layout, the theme, the title, the tabs and the keys that hold on every screen.
-2. **`Update`** hands every message to the shell first. `handled` true means it was the shell's (a resize, a key an action took, a dialog's) and the app returns at once; false means the app's turn.
+2. **`Update`** hands every message to the shell first. `handled` true means it was the shell's (a key an action took, a dialog's) and the app returns at once; false means the app's turn. A resize is both: the shell lays the panes out and hands it on, so the app sizes its models from `Rect` on the same message.
 3. **`View`** hands the shell a `Pane` per leaf of the layout: a title and a `Body` that draws into the inner rect the shell computed. A leaf missing from the map gives its space back that frame.
 4. **`Init`** asks the terminal for its background, so the theme can be resolved [light or dark](THEME.md#light-and-dark).
 
@@ -143,7 +143,18 @@ shell.Config{
 
 ## Focus
 
-The shell knows which pane has focus and draws its border in the accent. `Focus()` names it, `SetFocus(name)` moves it, and `ChangePane` steps through the layout's leaves, skipping the `Info` ones. Each move sends a `shell.FocusMsg{From, To}`, so the app can run what entering and leaving a pane means for it. With `Config.FocusFade` set, the accent colour travels from the pane left to the pane gained over that long instead of jumping. Keys the actions leave alone fall through to the app, which hands them to the component in the focused pane.
+```go
+case shell.FocusMsg: // sent on every move, by key or click
+	if msg.To == "detail" {
+		m = m.loadDetail() // the app's own: what entering the pane means
+	}
+case tea.KeyPressMsg: // keys no action took go to the focused pane
+	if m.sh.Focused() == "list" {
+		m.list, _ = m.list.Update(msg)
+	}
+```
+
+The shell knows which pane has focus and draws its border in the accent. `Focused()` names it, `SetFocus(name)` moves it, and `ChangePane` steps through the layout's leaves, skipping the `Info` ones. Each move sends a `shell.FocusMsg{From, To}`, so the app can run what entering and leaving a pane means for it. With `Config.FocusFade` set, the accent colour travels from the pane left to the pane gained over that long instead of jumping. Keys the actions leave alone fall through to the app, which hands them to the component in the focused pane.
 
 ## The mouse
 
@@ -188,6 +199,16 @@ A dialog of the app's own takes clicks by implementing `overlay.Clicker`: `Click
 
 ## The status row
 
+```go
+case saveMsg:
+	m.sh, cmd = m.sh.SetStatus("saved", shell.OK, 2*time.Second)
+case indexMsg:
+	m.sh, cmd = m.sh.Busy("indexing") // a spinner until Idle
+	return m, tea.Batch(cmd, index())
+case indexedMsg:
+	m.sh = m.sh.Idle()
+```
+
 The row under the panes says what is happening:
 
 - `SetStatus(text, level, ttl)` shows a message, `shell.Info`, `shell.OK` or `shell.Error`, and clears it after `ttl`, unless a newer one replaced it.
@@ -215,6 +236,12 @@ shell.Custom("d", "delete", func(shell.ActionContext) tea.Cmd {
 A dialog of the app's own is any type with `Update`, `View(body)` and `Legend()`. Small interfaces opt it into more: `Resizer` hears the body's size before it draws, `EscOwner` keeps `esc` for itself, `StatusLiner` draws the status row while on top, `BottomAnchored` sits at the foot of the screen instead of the middle, and `Clicker` takes [the mouse](#the-mouse).
 
 ## The palette and the legend
+
+```go
+shell.Command("goto", "open a path", func(c shell.ActionContext) tea.Cmd {
+	return func() tea.Msg { return gotoMsg{path: c.Arg} } // ":goto kv/app" gives Arg "kv/app"
+}, shell.Arg("path"))
+```
 
 `:` opens the command palette at the foot of the screen. It lists every action with a name, completes it with `tab`, and passes what follows the name to the action as `ActionContext.Arg`: `:goto kv/app` runs the action `Named("goto")` with `Arg` `kv/app`. An unknown command, or one the session refuses, says so on the status row.
 

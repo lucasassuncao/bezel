@@ -127,7 +127,7 @@ func (m model) detail(r layout.Rect) string {
 
 Who calls `View` decides where a component takes its theme, and [CONVENTIONS.md](CONVENTIONS.md#the-theme) has the full table:
 
-- the shell, from `Config.Theme`, replaced with `SetTheme`;
+- the shell, from `Config.Theme`, replaced with `SetTheme` and read back with `Theme()`;
 - a component the app draws, in `View(th, ...)`, so one model draws under any theme;
 - a dialog, which bezel draws, as its constructor's last argument;
 - a form, as `form.New(th, fields...)`, which paints every control in it;

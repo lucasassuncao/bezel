@@ -29,9 +29,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     var handled bool
     var cmd tea.Cmd
     if m.sh, handled, cmd = m.sh.Update(msg); handled {
-        return m, cmd // resize, overlays and every action: the shell's
+        return m, cmd // overlays and every action: the shell's
     }
-    // the messages your actions Send, and the keys no action claims
+    // the resize, laid out; the messages your actions Send; the keys no action claims
 }
 
 func (m model) View() tea.View {

@@ -1,114 +1,189 @@
 # Conventions
 
-The rules every bezel package follows, so a new one reads like the rest. A change that breaks one is a bug in the change, not a new convention.
+The rules every bezel package follows, so a new one reads like the rest. Each rule is a snippet first, then why. A change that breaks one is a bug in the change, not a new convention.
 
-## Values, not pointers
-
-Every model is a value: a method that changes it returns the changed copy and leaves the receiver as it was.
+## Models are values
 
 ```go
-p = p.WithCursor(2)            // p before the call still has its old cursor
-sh, handled, cmd := sh.Update(msg)
+next := l.SetHeight(10)   // l is untouched; next has the new height
+m.list = m.list.SetHeight(10)
 ```
 
-The shell keeps what it is handed by value too: `SetInput` takes the status row's input and `Input` reads it back after `Update`; a `Tab` that changes goes back through `SetTabs`.
+Every method that changes a model returns the changed copy. Keep the result, or the change is lost. The shell works the same way: a `Tab` that changes goes back through `SetTabs`, and the status row's input goes in with `SetInput` and comes back out with `Input`.
+
+## Building a component
+
+```go
+l := list.New(rows).        // NewX(required...)
+	WithWrap(cfg.Wrap).       // WithX: optional, set before use, chains
+	WithKeys(list.VimKeys())
+
+m.list = m.list.SetRows(reloaded) // SetX: a live change, after something happened
+```
+
+- **`NewX(required..., th)`** takes only what the component cannot work without, the theme last when it takes one. It returns only the value; a command to start it comes from `Init()`.
+- **`WithX`** is everything optional. A switch takes its state, `WithWrap(on bool)`, so an app can pass a setting it read. An argument most callers would pass as `nil`, `""`, `0` or `false` is a `With`, and so is each of two same-typed parameters in a row: `text.NewTicker(v, dur).WithUp(c).WithDown(c)` cannot be swapped by mistake.
+- **`SetX`** changes a live model: `SetRows`, `SetTheme`, `SetStatus`. What can change live has only the `Set`, never a `With` doing the same.
+- **A variant is named, not built**: a preset of a shared type is a bare name, `spinner.Dot()`, `effect.Wipe(...)`, `theme.Mint`.
+- **`Config` struct** only where an app sets many fields at once, as `shell.Config`.
+
+### Sizes
+
+```go
+case tea.WindowSizeMsg: // the shell laid out the panes and handed the size on
+	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("items")).H)
+```
+
+A size is never a constructor parameter nor an argument of `View`: it comes through `SetHeight`/`SetWidth` once the terminal says how big it is. A model not sized yet draws nothing. A layout that changes without a resize (`SetLayout`) sizes again after the change.
+
+Sized this way: `list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`; `browser` has `SetListHeight` and `SetPreviewHeight`.
+
+### Getters and errors
+
+```go
+row, ok := m.list.Selected() // a copy; false when nothing is under the cursor
+if err := in.Err(); err != nil { ... }
+if m.acc.IsOpen(i) { ... }
+```
+
+- Getters are the bare noun: `Cursor()`, `Value()`, never `GetCursor()`.
+- A bool is an adjective or participle: `Running()`, `Focused()`, `Active()`. `Is`/`Has` leads only when the bare word is already an action on the type: `IsOpen` beside `Toggle`, `IsBusy` beside `Busy`, `HasOverlay` beside `Push`.
+- Every model with a cursor over items has `Selected() (T, bool)`: `list`, `tree`, `table.Model`, `browser`. A form control's `Selected() int` is an index instead.
+- What went wrong is an `error`: checks are `func(string) error` (`input.WithValidate`, `Prompt.WithValidate`), and the getter is `Err()`.
 
 ## The theme
 
-A component that draws takes a `theme.Resolved`; loose lipgloss styles reach it only through `WithStyles`, below. Where the theme goes depends on who calls `View`:
+```go
+overlay.NewConfirm("Delete", item, yes, th) // bezel calls View: theme in the constructor
+m.list.View(th)                             // the app calls View: theme in View
+progress.Line("tasks", done, total, w, th)  // a plain function: theme after the data
+shell.New(shell.Config{Theme: th})          // the shell: in Config, SetTheme to change
+```
+
+Where the theme goes depends on who calls `View`. If bezel does, the component keeps the theme from its constructor. If the app does, the app passes it each time, so one model draws under any theme.
 
 | Who calls `View` | Where the theme goes | Packages |
 | --- | --- | --- |
-| bezel, through a fixed interface (`overlay.Overlay`, `slog.Handler`), or a field that needs the theme before it draws (a caret's blink pace) | the constructor's last parameter | `overlay`, `palette`, `textbox`, `input`, `cursor`, `logger` |
-| bezel, for the controls of a form | `form.New(th, fields...)`, first because the fields are variadic; the form hands it to every control and `SetTheme` replaces it | `form` |
-| the app | `View(th, ...)`, so one model draws under any theme | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport`, `accordion`, `toast` |
-| nobody: it is a plain function | after the data it draws | `progress`, `chart`, `inline`, `icon.Set.Render` |
-| `shell` | `shell.Config.Theme`, replaced with `SetTheme`, which also repaints every open dialog (`overlay.Themer`) and the status row's input | `shell` |
+| bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `overlay`, `palette`, `textbox`, `input`, `cursor`, `logger` |
+| bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic | `form` |
+| the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport`, `accordion`, `toast` |
+| nobody: a plain function | after the data | `progress`, `chart`, `inline`, `icon.Set.Render` |
+| the shell | `Config.Theme`; `SetTheme` also repaints open dialogs | `shell` |
 
-- A dialog that reports something is tinted with `WithKind(overlay.Danger)` and the like. `Alert` takes its `Kind` in the constructor, because it always reports one. The `Kind` colours stay the theme's success, warning and danger: a `WithStyles` edit never changes what a dialog reports.
-- `draw`, `legend` and `overlay.Box` sit below the theme and take the lipgloss style they paint with: `theme` imports them, so they cannot import it.
-- How an input looks travels with the theme too, the caret's blink included: `Resolved.CaretBlink`, zero for `draw.DefaultBlink`. Tests shrink it there; there is no package variable to set.
+- A dialog that reports something is tinted with `WithKind(overlay.Danger)`; `Alert` takes its `Kind` in the constructor. Those colours stay the theme's success, warning and danger, whatever `WithStyles` does.
+- `draw`, `legend` and `overlay.Box` take raw lipgloss styles: `theme` imports them, so they cannot import it.
+- The caret's blink pace travels with the theme (`Resolved.CaretBlink`), so tests shrink it there, not in a package variable.
 
 ## Styles
 
-The theme sets how everything looks; a component's own styles let an app recolour that one component without touching the theme.
+```go
+l := list.New(rows).WithStyles(func(s list.Styles) list.Styles {
+	s.Cursor = s.Cursor.Bold(true)
+	return s
+})
+```
 
-- `Styles` holds one lipgloss style per part the component paints; `XStyles` where a package has several components.
-- `DefaultStyles(th)` derives them from the theme, and is the only place that does.
-- `WithStyles(edit)` stores `edit func(Styles) Styles` and applies it to `DefaultStyles(th)` whenever the component has a theme: when built, on `SetTheme`, or in `View(th, ...)`. The app's change outlives a theme switch. A second `WithStyles` replaces the first edit.
-- A part that no role in `theme.Resolved` fits gets a new role there, derived in `buildDerivedStyles`, never a colour written into the component.
+The theme sets how everything looks; `WithStyles` recolours one component. The edit is applied on top of `DefaultStyles(th)` every time the theme changes, so it survives a light/dark switch. A second `WithStyles` replaces the first.
 
-Not everything can follow the theme. Each package sits in one of three classes, and one that is not themable says so in its doc comment:
+- `Styles` has one lipgloss style per part painted (`XStyles` when a package has several components).
+- `DefaultStyles(th)` is the only place styles are derived from the theme.
+- A colour no role in `theme.Resolved` fits gets a new role in `buildDerivedStyles`, never a literal in the component.
 
-| Class | What the app can do | Packages |
+Each package is in one class, and a non-themable one says so in its doc comment:
+
+| Class | The app can | Packages |
 | --- | --- | --- |
-| Themable | switch the theme, and recolour this one component with `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `input`, `textbox`, `form`, `palette`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, and every `overlay` dialog but `Alert` (one `overlay.Styles` for all of them) |
-| Theme only | switch the theme; a plain function keeps no edit, so it has no `Styles` | `chart`, `progress.Bar` and its siblings, `inline`, `icon.Set.Render` |
-| Non-themable | nothing: the colours report something, or arrive as arguments | `overlay.Alert` and the `Kind` tint of any dialog, `toast`, `animation` and its subpackages, `effect`, `themebrowser` |
+| Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `input`, `textbox`, `form`, `palette`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, every `overlay` dialog but `Alert` |
+| Theme only | switch the theme (a plain function keeps no edit) | `chart`, `progress.Bar` and siblings, `inline`, `icon.Set.Render` |
+| Non-themable | nothing: the colours mean something, or are arguments | `overlay.Alert` and any `Kind` tint, `toast`, `animation` and subpackages, `effect`, `themebrowser` |
 
 ## Three shapes of Update
 
-| Shape | Who | Why |
-| --- | --- | --- |
-| `Update(tea.Msg) (T, bool, tea.Cmd)` | `shell.Shell`, `overlay.Stack` | They route: `handled` false means the message is still the app's. |
-| `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model`, `paginator` | They only move a cursor. The `Action` says what a key did (`list.Chosen`, `tree.Expanded`), the app decides what it means, and they never produce a command. A list with motion keeps that shape: `Tick` and `Animate` carry its frames apart from `Update`. |
-| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`; `form.Form`, `input.Model`, `textbox.Model`, `cursor.Model`, `spinner.Model`, `timer.Model`, `stopwatch.Model`, `viewport.Model`, `accordion.Model`, `toast.Model` and the types of `animation`, its subpackages and `effect` return themselves | The leaves bubbletea drives. The interface `I` lets a stack or a form hold any of them. |
+```go
+// 1. Routers: handled false means the message is still the app's.
+m.sh, handled, cmd = m.sh.Update(msg)
 
-A new component picks the row whose "Why" fits it, not a fourth shape.
+// 2. Cursor movers: say what the key did, never return a command.
+m.list, act = m.list.Update(key)
+if act == list.Chosen { ... }
+
+// 3. Leaves: the usual bubbletea shape.
+m.input, cmd = m.input.Update(msg)
+```
+
+| Shape | Who |
+| --- | --- |
+| `Update(tea.Msg) (T, bool, tea.Cmd)` | `shell.Shell`, `overlay.Stack` |
+| `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model`, `paginator` |
+| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`, `form.Form`, `input`, `textbox`, `cursor`, `spinner`, `timer`, `stopwatch`, `viewport`, `accordion`, `toast`, `animation`, `effect` |
+
+A cursor mover's `Action` (`list.Chosen`, `tree.Expanded`) reports; the app decides what it means. A list with motion keeps its shape: `Tick` and `Animate` carry the frames. A new component picks the row that fits, never a fourth shape.
 
 ## Keys
 
-- Bindings live in a struct: `Keys` where a package has one component (`list`, `tree`, `browser`, `palette`, `form`, `paginator`, `viewport`), `XKeys` where it has several (`overlay.ConfirmKeys`, `overlay.PickKeys`, ...). `DefaultKeys()` or `DefaultXKeys()` builds them and `WithKeys` replaces them. `form.Keys` serves the form and every control in it, and `Form.WithKeys` rebinds them all.
-- `Update` matches with `key.Matches`, never a key string, and `Legend` comes from the same bindings through `legend.FromBindings`, so a component lists exactly what it answers to.
-- Every component with a `Keys` struct has a `Legend()`, which follows its state: a list's esc only while filtering, a form's for the control in focus. A text field lists only the keys worth a hint (paste, complete, copy); its editing keys are the terminal's usual ones and go unlisted.
-- No `DefaultKeys` binds a letter: the arrows, pgup/pgdown, home/end and named keys only. Vim's letters are a `VimKeys()` (`VimXKeys()`) preset beside the defaults, for every component that moves a cursor or scrolls; a field that is typed into has none.
-- A pair that reads as one entry gives its help to the first binding (`Up` as "↑/↓") and none to the second, which `FromBindings` then leaves out.
-- Esc belongs to the stack, which closes the top dialog before the dialog sees the key. A dialog still lists it; its own binding for it only reaches a host that drives the dialog without a stack.
+```go
+type Keys struct{ Up, Down, Enter key.Binding }
+
+func DefaultKeys() Keys { /* arrows and named keys only */ }
+func VimKeys() Keys     { /* the same, plus j/k */ }
+
+// in Update:
+case key.Matches(k, m.keys.Up):
+// for the legend, from the same bindings:
+legend.FromBindings([]key.Binding{m.keys.Up, m.keys.Enter})
+```
+
+- Bindings live in `Keys` (`XKeys` when a package has several components); `WithKeys` replaces them. `form.Keys` serves the form and all its controls.
+- `Update` matches with `key.Matches`, never a key string, and `Legend()` is built from the same bindings, so the legend lists exactly what the component answers to. It follows state: a list's esc shows only while filtering.
+- No `DefaultKeys` binds a letter. Vim's letters are the opt-in `VimKeys()` preset; a field you type into has none.
+- A pair that reads as one entry gives its help to the first binding (`Up` as "↑/↓") and none to the second.
+- Esc belongs to the overlay stack, which closes the top dialog before the dialog sees the key.
 
 ## Clicks
 
-The mouse reaches a component the way a key does: the app hands it on, already moved into the pane's cells by the shell's `ClickMsg`, `Mouse` or `MouseIn`.
+```go
+case shell.ClickMsg: // already moved into the pane's cells
+	if msg.Pane == "items" {
+		m.list, act = m.list.Click(msg.Y) // same return as Update
+	}
+```
 
-- A component that moves a cursor takes a click through **`Click(y int) (T, Action)`** beside its `Update`, with the same return: `list`, `table.Model`, `tree`. `y` is a line of what its `View` drew. The first click moves the cursor to the row; a click on the row already under it does what enter does there.
-- `form.Form` takes **`Click(y int) (Form, tea.Cmd)`**: the width it was given with `SetWidth` sets how tall an open select draws.
-- A leaf that tracks a press, a drag and a release, as `textbox` does, takes the mouse messages in its own `Update`, like its keys.
-- A dialog takes clicks by implementing `overlay.Clicker`, counted from the top left of what it drew.
+The mouse reaches a component the way a key does: the app hands it on. Cursor movers (`list`, `table.Model`, `tree`) take `Click(y) (T, Action)`: the first click moves the cursor, a click on the current row does what enter does. `form.Form.Click` returns a `tea.Cmd`. A leaf that tracks press, drag and release (`textbox`) takes the mouse in its `Update`; a dialog implements `overlay.Clicker`. `Click` is a second way in, not a fourth shape.
 
-`Click` is not a fourth shape of `Update`: it is a second way in, and answers as `Update` does.
+## Time is a message
 
-## Constructor, With and Set
+```go
+func (m model) Init() tea.Cmd { return m.spin.Tick() }
 
-- **`NewX` or a bare name**: a function that builds its own type is `NewX` (`NewTween` gives a `Tween`); one that is a variant of a type shared with others is named for the variant, as a preset is: `spinner.Dot()`, `effect.Wipe(...)`, `scene.Rain(...)`, `animation.Grow(...)`, `theme.Mint`.
-- **`NewX(required..., th)`**: what the component cannot work without, the theme last. A callback may be documented as accepting nil. A constructor returns only the value: a command to start it comes from `Init()`, as `form.Form.Init` does.
-- **Sizes are not required**: the rows and cells a pane has arrive after the first `tea.WindowSizeMsg`, so they come through `SetHeight` and `SetWidth` (`list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`; `browser` has `SetListHeight` and `SetPreviewHeight` for its two panes), never as a constructor parameter nor an argument of `View`. A model not sized yet draws nothing.
-- **`WithX(...) X`**: everything optional, set before the component is used. Each returns a copy and chains with the others. A switch takes its state, `WithX(on bool)`, never a bare `WithX()`, so an app can pass a setting it read: `WithWrap(cfg.Wrap)`, `WithYoyo(true)`.
-- **`SetX(...) X`**: changes a live component after something happened: `SetItems` after a reload, `SetTheme` after `tea.BackgroundColorMsg`, `SetTabs`, `SetStatus`. What can change live has only the `Set`, never a `With` twin doing the same: `input.SetValue`, `SetWidth`, `SetSuggestions`, `textbox.SetValue`.
-- **`Config` struct**: only where an app sets many fields at once, most of them every time, as `shell.Config`.
-- **What went wrong** is an `error`: a check an app hands in is `func(string) error` (`input.WithValidate`, `overlay.Prompt.WithValidate`), and the getter is `Err() error`, nil when all is well (`input`, `filepicker`, `overlay.Prompt`).
-- **What the cursor is on** is `Selected() (T, bool)` in every model with a cursor over items (`list`, `tree`, `table.Model`, `browser`): a copy, and false when nothing is under it. A form control's `Selected() int` is the index of its chosen option, read with `Value()`.
-- **Getters** are the bare noun: `Cursor()`, `Value()`, `Selected()`, never `GetCursor()`. A bool is an adjective or a participle: `Running()`, `Focused()`, `Filtering()`, `Active()`. `Is` or `Has` leads it only where the bare word would read as an action on the same type: `IsOpen(i)` beside `Toggle(i)`, `IsBusy()` beside `Busy(text)`, `HasSelection()` beside `Select`, `HasOverlay()` beside `Push`.
+case animation.FrameMsg:
+	m.spin, cmd = m.spin.Update(msg) // takes only its own frames
 
-An argument most callers would pass as `nil`, `""`, `0` or `false` is a `With`, not a constructor parameter: `form.NewCheckbox(label).WithChecked(on)`, `browser.New(items).WithCurrent(label)`. Two parameters of one type in a row that read the same way are a `With` each, so they cannot be swapped unseen: `text.NewTicker(v, dur).WithUp(c).WithDown(c)`.
+// in a test, no clock:
+m.spin, _ = m.spin.Update(m.spin.FrameAt(start.Add(time.Second)))
+```
+
+Nothing reads the clock. `Tick` asks for frames, each frame is tagged so a model takes only its own, and tests feed `FrameAt(t)`. Everything that moves answers the same five: `Active()`, `Tick()`, `FrameAt(at)`, `Update` (`Animate` for `list`) and `Advance(now) (T, bool)`, true once settled. `accordion` has no `FrameAt`, since each section keeps its own clock.
+
+`BEZEL_NO_MOTION` holds every moving thing still. Only `timer`, `stopwatch` and the blinking caret keep their own tick, because they count real time, not motion.
 
 ## No hidden state
 
-- No package variable is meant to be changed by an app. The environment is read in two places, both when called: `icon.FromEnv()` (ASCII for `BEZEL_ASCII` or `TERM=dumb`), which the controls that draw marks default to and `WithIcons(set)` overrides, and `animation.Still()` with `animation.Speed()` (no motion for `BEZEL_NO_MOTION`, `TERM=dumb` or `BEZEL_MOTION=0`, and the speed of the rest from `BEZEL_MOTION`), which every animation consults when built and as it plays. Everything else that varies per app arrives through a constructor, a `With`, the theme or `shell.Config`.
-- `View` never writes back. An overlay that needs its size in `Update` implements `overlay.Resizer`, and the stack hands it the body when pushed and on every new layout. Whatever scrolls keeps its cursor and offset in a `layout.Window`, and hands a pane's scrollbar its position through `Scroll()`.
-- Time arrives as a message, like keys. No animation reads the clock: the first `FrameMsg` its `Tick` delivers starts it, each one takes only its own frames, and a `Clock` hands one frame's time to several at once. A moving component does the same: `list`'s motion, `accordion`, `toast` and `spinner` turn on frames, so `BEZEL_NO_MOTION` holds them still and a test drives them with `FrameAt`. Three keep a tick of their own because they count real time, not motion: `timer`, `stopwatch` and the blinking caret of `cursor`, `input` and `textbox`.
-- Everything that moves answers the same five: `Active()`, `Tick()`, `FrameAt(at)`, `Update` (`Animate` for `list`, whose `Update` is a cursor mover's) and `Advance(now) (T, bool)`, true once it settled. `accordion` has no `FrameAt`: each section keeps its own clock, and `Advance` drives them all. A component's `FrameAt` returns `tea.Msg`, since components cannot import `animation`; it is an `animation.FrameMsg` all the same.
-- The presets (`theme.Mint`, `theme.Plain`, ...) are values to build on: point a `Theme`'s `Base` at one, or copy it, and never change the preset itself.
+- No package variable is meant to be changed by an app. Per-app settings arrive through a constructor, a `With`, the theme or `shell.Config`.
+- The environment is read in two places only: `icon.FromEnv()` (`BEZEL_ASCII`, `TERM=dumb`) and `animation.Still()`/`Speed()` (`BEZEL_NO_MOTION`, `BEZEL_MOTION`, `TERM=dumb`).
+- `View` never writes back. An overlay that needs its size in `Update` implements `overlay.Resizer`; whatever scrolls keeps its offset in a `layout.Window` and reports it through `Scroll()`.
+- Presets (`theme.Mint`, ...) are bases to build on: point a `Theme`'s `Base` at one, never change the preset.
 
 ## Patterns by name
 
-A new component reaches for one of these before it invents a shape.
+A new component reaches for one of these before inventing a shape.
 
-| Pattern | Where, and what it buys |
+| Pattern | Where |
 | --- | --- |
-| Model-View-Update | Every model: `Update` returns the next value and a command, `View` only reads, effects run as commands. |
-| Composite | `layout.Node`, boxes of boxes and leaves: one tree resolves, prunes absent leaves and collapses as a whole. |
-| Chain of responsibility | `Shell.Update`: the overlays, then the status input, then the actions; `handled` false hands the rest to the app. |
-| Command | `shell.Action`, `palette.Item`: a key, a name and what it runs, held as data the legend, the palette and the dispatch read. |
-| Functional options | `shell.Option` on the prebuilt actions, `With` on every model and on `key.Binding`: optional settings without a growing constructor. |
-| Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `Clicker`, `Themer`, `form.Holder`, `form.Initer`: an overlay or field opts into a behaviour by implementing one small interface. |
-| Strategy | `tree.View`'s row, `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies the answer. |
-| Cascade | `theme.Theme.Base`: each layer overrides the one under it, so a preset is a base to build on. |
+| Model-View-Update | every model: `Update` returns the next value and a command, `View` only reads |
+| Composite | `layout.Node`: boxes of boxes and leaves, resolved as one tree |
+| Chain of responsibility | `Shell.Update`: overlays, then the status input, then actions, then the app |
+| Command | `shell.Action`, `palette.Item`: a key, a name and what it runs, as data |
+| Functional options | `shell.Option`, every `With` |
+| Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `Clicker`, `Themer`, `form.Holder`, `form.Initer` |
+| Strategy | `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies |
+| Cascade | `theme.Theme.Base`: each layer overrides the one below |

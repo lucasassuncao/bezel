@@ -250,6 +250,13 @@ func TestEveryChangeLeavesTheLayoutResolved(t *testing.T) {
 	}
 }
 
+func TestThemeIsTheLatestSet(t *testing.T) {
+	require.Equal(t, theme.Resolve(theme.Plain, true).Colors, newShell().Theme().Colors)
+	mint := theme.Resolve(theme.Mint, true)
+	require.Equal(t, mint.Colors, newShell().SetTheme(mint).Theme().Colors)
+	require.Equal(t, Shell{}.Theme().Colors, New(Config{}).Theme().Colors)
+}
+
 // The Config is shared between copies until one changes it: the change is
 // that copy's alone.
 func TestAConfigChangeIsTheCopysAlone(t *testing.T) {

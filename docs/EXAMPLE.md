@@ -135,7 +135,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 ```
 
-Every message goes to the shell first. It takes the resize, the keys its actions own, and every key while a dialog is open; `handled` true means there is nothing left for the app. Then the app handles what is its own.
+Every message goes to the shell first. It takes the keys its actions own and every key while a dialog is open; `handled` true means there is nothing left for the app. A resize it lays out and hands on, so the app can size its own models from `Rect`. Then the app handles what is its own.
 
 The background colour comes before it all: `Init` asks the terminal for it, and the answer resolves the theme again, light or dark. [THEME.md](THEME.md#light-and-dark) has the details.
 

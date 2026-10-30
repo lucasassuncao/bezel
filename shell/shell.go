@@ -177,6 +177,9 @@ type FocusMsg struct{ From, To string }
 // Size is the terminal's width and height, zero before the first resize.
 func (s Shell) Size() (int, int) { return s.width, s.height }
 
+// Theme is the theme the shell draws in: Config.Theme, or SetTheme's latest.
+func (s Shell) Theme() theme.Resolved { return s.ready().cfg.Theme }
+
 // Rect is where a leaf was placed. The zero Rect means it is not on screen.
 func (s Shell) Rect(name string) layout.Rect { return s.rects[name] }
 

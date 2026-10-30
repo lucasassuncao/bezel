@@ -30,6 +30,8 @@ func toastCmd(cmd tea.Cmd) tea.Cmd {
 // Update handles what is the shell's: resize, status ticks, overlays, the
 // status-row input, help, tabs and focus, and a left click on a dialog, a
 // tab or a pane, which comes back as a ClickMsg. false means the app's turn.
+// A resize is both: the shell takes the size and hands it on, false, so the
+// app sizes its own models from Rect on the same message.
 func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	s = s.ready()
 	next, handled, cmd := s.update(msg)
@@ -37,7 +39,8 @@ func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		return s, false, nil
 	}
 	// The one place a message re-resolves the layout, so no branch can forget to.
-	return next.relayout(), true, cmd
+	_, resize := msg.(tea.WindowSizeMsg)
+	return next.relayout(), !resize, cmd
 }
 
 func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {

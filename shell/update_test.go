@@ -46,6 +46,15 @@ func TestOverlaysAreSizedToTheBody(t *testing.T) {
 	require.Equal(t, first+page(s.Body()), s.TopOverlay().(overlay.Pager).Offset())
 }
 
+// A resize lays the panes out and still reaches the app, which sizes its
+// own models from Rect on the same message.
+func TestResizeIsHandedOnLaidOut(t *testing.T) {
+	s, handled, _ := newShell().Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	require.False(t, handled)
+	require.Equal(t, 100, s.Body().W)
+	require.NotZero(t, s.Rect("list").H)
+}
+
 // Without actions the shell handles no key: not even tab or "?".
 func TestUnknownKeysAreLeftToTheApp(t *testing.T) {
 	s := newShell(stubTab{name: "a"}, stubTab{name: "b"})
