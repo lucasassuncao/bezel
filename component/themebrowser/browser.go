@@ -125,7 +125,7 @@ type browserModel struct {
 
 // newBrowserModel lists the built-in themes in th's colours. dark picks the
 // variant of the adaptive default, for the table and for each palette.
-func newBrowserModel(th theme.Theme, dark bool) *browserModel {
+func newBrowserModel(th theme.Theme, dark bool) browserModel {
 	all := theme.All()
 	var entries []entry
 	for _, cat := range theme.Categories() {
@@ -135,7 +135,7 @@ func newBrowserModel(th theme.Theme, dark bool) *browserModel {
 		}
 	}
 	res := theme.Resolve(th, dark)
-	m := &browserModel{
+	m := browserModel{
 		entries: entries,
 		layout:  -1,
 		keys:    defaultBindings(),
@@ -145,21 +145,20 @@ func newBrowserModel(th theme.Theme, dark bool) *browserModel {
 		h:       defaultHeight,
 	}
 	m.filter = m.newFilter()
-	m.build()
-	return m
+	return m.build()
 }
 
 // newFilter is the empty filter field, drawn on the status line.
-func (m *browserModel) newFilter() input.Model {
+func (m browserModel) newFilter() input.Model {
 	return input.New(m.th).WithPrompt("/ ").WithPlaceholder("theme name")
 }
 
 // inner is the width the table gets inside the panel's edges and padding.
-func (m *browserModel) inner() int { return max(m.boxW-4, 1) }
+func (m browserModel) inner() int { return max(m.boxW-4, 1) }
 
 // build lays the table out for the terminal's size and the filter, keeping
 // the cursor on the theme it was on.
-func (m *browserModel) build() {
+func (m browserModel) build() browserModel {
 	shown := m.shown()
 	at := m.layoutFor()
 	m.boxW = min(m.needs(at)+4+margin, m.w)
@@ -170,7 +169,7 @@ func (m *browserModel) build() {
 	height = max(min(height, m.h-chrome), 2)
 	if at == m.layout {
 		m.tbl = m.tbl.SetItems(m.items(shown, at)).SetHeight(height)
-		return
+		return m
 	}
 	prev := ""
 	if it, ok := m.tbl.Selected(); ok {
@@ -183,6 +182,7 @@ func (m *browserModel) build() {
 			m.tbl = moveTo(m.tbl, i)
 		}
 	}
+	return m
 }
 
 // moveTo puts the cursor of a freshly built table on row i, which is how a
@@ -200,7 +200,7 @@ func moveTo(t table.Model[string], i int) table.Model[string] {
 }
 
 // shown is the themes the filter keeps, best match first, or all of them.
-func (m *browserModel) shown() []entry {
+func (m browserModel) shown() []entry {
 	q := strings.TrimSpace(m.filter.Value())
 	if q == "" {
 		return m.entries
@@ -218,7 +218,7 @@ func (m *browserModel) shown() []entry {
 
 // layoutFor is the widest palette subtable whose columns fit the terminal.
 // It measures every theme, not the filtered ones, so a filter never resizes.
-func (m *browserModel) layoutFor() int {
+func (m browserModel) layoutFor() int {
 	for i := range layouts {
 		if m.needs(i) <= m.w-4 {
 			return i
@@ -228,7 +228,7 @@ func (m *browserModel) layoutFor() int {
 }
 
 // needs is the width the rows of every theme take in layout at.
-func (m *browserModel) needs(at int) int {
+func (m browserModel) needs(at int) int {
 	widths := table.Fit(m.columns(at), rows(m.items(m.entries, at)), 1<<16)
 	total := marker + table.Gap*(len(widths)-1)
 	for _, w := range widths {
@@ -237,7 +237,7 @@ func (m *browserModel) needs(at int) int {
 	return total
 }
 
-func (m *browserModel) columns(at int) []table.Column {
+func (m browserModel) columns(at int) []table.Column {
 	cols := []table.Column{{Title: "ID"}, {Title: "Theme"}, {Title: "Category", Min: 4, Flex: true}}
 	w := colourWidth(at)
 	for _, r := range layouts[at].roles {
@@ -269,7 +269,7 @@ func center(s string, w int) string {
 	return strings.Repeat(" ", pad/2) + s + strings.Repeat(" ", pad-pad/2)
 }
 
-func (m *browserModel) items(shown []entry, at int) []table.Item[string] {
+func (m browserModel) items(shown []entry, at int) []table.Item[string] {
 	items := make([]table.Item[string], len(shown))
 	for i, e := range shown {
 		cells := []string{e.id, e.name, e.category}
@@ -297,19 +297,19 @@ func swatch(hex string) string {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color(hex)).Render("██")
 }
 
-func (m *browserModel) Init() tea.Cmd { return nil }
+func (m browserModel) Init() tea.Cmd { return nil }
 
 // Update sizes the table to the terminal, copies on enter, filters on / and
 // quits on q or ctrl+c; the table takes the keys that move its cursor.
-func (m *browserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m browserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.w, m.h = msg.Width, msg.Height
-		m.build()
+		m = m.build()
 	case copiedMsg:
 		m.status = m.copied(msg)
 	case tea.KeyPressMsg:
-		return m, m.key(msg)
+		return m.key(msg)
 	default:
 		var r bezel.Result
 		m.filter, r = m.filter.Update(msg)
@@ -318,43 +318,43 @@ func (m *browserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m *browserModel) key(k tea.KeyPressMsg) tea.Cmd {
+func (m browserModel) key(k tea.KeyPressMsg) (browserModel, tea.Cmd) {
 	switch {
 	case key.Matches(k, m.keys.Abort), !m.typing && key.Matches(k, m.keys.Quit):
-		return tea.Quit
+		return m, tea.Quit
 	case key.Matches(k, m.keys.Copy):
 		m.typing, m.filter = false, m.filter.Blur()
-		return m.copy()
+		return m, m.copy()
 	case key.Matches(k, m.keys.Clear):
 		if m.typing || m.filter.Value() != "" {
 			m.typing, m.filter = false, m.newFilter()
-			m.build()
+			m = m.build()
 		}
-		return nil
+		return m, nil
 	case !m.typing && key.Matches(k, m.keys.Filter):
 		m.typing, m.status = true, ""
 		var cmd tea.Cmd
 		m.filter, cmd = m.filter.Focus()
-		return cmd
+		return m, cmd
 	}
 	if next, r := m.tbl.Update(k); r.Handled && (r.Event != nil || next.Cursor() != m.tbl.Cursor()) {
 		m.tbl = next
-		return nil
+		return m, nil
 	}
 	if !m.typing {
-		return nil
+		return m, nil
 	}
 	before := m.filter.Value()
 	var r bezel.Result
 	m.filter, r = m.filter.Update(k)
 	if m.filter.Value() != before {
-		m.build()
+		m = m.build()
 	}
-	return r.Cmd
+	return m, r.Cmd
 }
 
 // copy writes the name under the cursor to the clipboard.
-func (m *browserModel) copy() tea.Cmd {
+func (m browserModel) copy() tea.Cmd {
 	it, ok := m.tbl.Selected()
 	if !ok {
 		return nil
@@ -363,7 +363,7 @@ func (m *browserModel) copy() tea.Cmd {
 	return clip.Copy(m.write, name, func(err error) tea.Msg { return copiedMsg{name, err} })
 }
 
-func (m *browserModel) copied(msg copiedMsg) string {
+func (m browserModel) copied(msg copiedMsg) string {
 	if msg.err != nil {
 		return m.icons.Render(icon.Fail, m.th) + " " + m.th.StatusErr.Render(fmt.Sprintf("could not copy %q: %v", msg.name, msg.err))
 	}
@@ -372,7 +372,7 @@ func (m *browserModel) copied(msg copiedMsg) string {
 
 // View renders inline, without AltScreen: the panel as wide as its rows,
 // then the status line and the keys.
-func (m *browserModel) View() tea.View {
+func (m browserModel) View() tea.View {
 	body := m.tbl.SetWidth(m.inner()).View(m.th)
 	h := strings.Count(body, "\n") + 3
 	pos := ""
@@ -389,7 +389,7 @@ func (m *browserModel) View() tea.View {
 	return tea.NewView(strings.Join(lines, "\n"))
 }
 
-func (m *browserModel) statusLine() string {
+func (m browserModel) statusLine() string {
 	switch {
 	case m.typing:
 		return m.filter.View()
@@ -403,7 +403,7 @@ func (m *browserModel) statusLine() string {
 	return ""
 }
 
-func (m *browserModel) legend() []legend.Entry {
+func (m browserModel) legend() []legend.Entry {
 	tk := table.DefaultKeys()
 	out := []legend.Entry{{Binding: tk.Up}, {Binding: tk.PageUp}}
 	if m.typing {

@@ -102,7 +102,7 @@ func (t Ticker) Update(msg tea.Msg) (Ticker, bezel.Result) {
 	r, p, ok, cmd := t.run.Update(msg)
 	if ok {
 		t.run, t.p = r, p
-		t.settle()
+		t = t.settle()
 	}
 	return t, bezel.Result{Handled: ok, Cmd: cmd}
 }
@@ -113,13 +113,14 @@ func (t Ticker) Advance(now time.Time) (Ticker, bool) {
 		return t, true
 	}
 	t.run, t.p = t.run.Advance(now)
-	t.settle()
+	t = t.settle()
 	return t, !t.Active()
 }
 
 // settle lands t on its value once its run is over.
-func (t *Ticker) settle() {
+func (t Ticker) settle() Ticker {
 	if !t.Active() {
 		t.from, t.p = t.to, 1
 	}
+	return t
 }

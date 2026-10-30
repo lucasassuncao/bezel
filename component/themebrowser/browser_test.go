@@ -49,14 +49,14 @@ func TestBrowserModel_RendersAndNavigates(t *testing.T) {
 	// down moves the cursor.
 	before := m.tbl.Cursor()
 	updated, _ := m.Update(tea.KeyPressMsg{Text: "down", Code: tea.KeyDown})
-	m = updated.(*browserModel)
+	m = updated.(browserModel)
 	if m.tbl.Cursor() != before+1 {
 		t.Errorf("cursor = %d, want %d after pressing down", m.tbl.Cursor(), before+1)
 	}
 
 	// up moves it back.
 	updated, _ = m.Update(tea.KeyPressMsg{Text: "up", Code: tea.KeyUp})
-	m = updated.(*browserModel)
+	m = updated.(browserModel)
 	if m.tbl.Cursor() != before {
 		t.Errorf("cursor = %d, want %d after pressing up", m.tbl.Cursor(), before)
 	}
@@ -127,13 +127,13 @@ func TestBrowserModel_IgnoresKeyRelease(t *testing.T) {
 	m := newBrowserModel(theme.Theme{}, true)
 	before := m.tbl.Cursor()
 	updated, _ := m.Update(tea.KeyReleaseMsg{Text: "down", Code: tea.KeyDown})
-	if got := updated.(*browserModel).tbl.Cursor(); got != before {
+	if got := updated.(browserModel).tbl.Cursor(); got != before {
 		t.Errorf("cursor = %d, want %d after a key release", got, before)
 	}
 }
 
 // rowOf is the rendered line of the table row whose name column is name.
-func rowOf(t *testing.T, m *browserModel, name string) string {
+func rowOf(t *testing.T, m browserModel, name string) string {
 	t.Helper()
 	for _, l := range strings.Split(m.View().Content, "\n") {
 		if slices.Contains(strings.Fields(ansi.Strip(l)), name) {
@@ -182,30 +182,30 @@ func TestBrowserModel_PaletteFollowsTheBackground(t *testing.T) {
 }
 
 // sized is a browser after the terminal reported w by h.
-func sized(t *testing.T, w, h int) *browserModel {
+func sized(t *testing.T, w, h int) browserModel {
 	t.Helper()
 	m := newBrowserModel(theme.Theme{}, true)
 	m.th.CaretBlink = time.Millisecond // each key arms a blink the test waits on
 	m.filter = m.newFilter()
 	next, _ := m.Update(tea.WindowSizeMsg{Width: w, Height: h})
-	return next.(*browserModel)
+	return next.(browserModel)
 }
 
 // press sends one key and runs the command it returns, feeding its message
 // back, the way the program would.
-func press(m *browserModel, k tea.KeyPressMsg) *browserModel {
+func press(m browserModel, k tea.KeyPressMsg) browserModel {
 	next, cmd := m.Update(k)
-	m = next.(*browserModel)
+	m = next.(browserModel)
 	if cmd != nil {
 		if msg := cmd(); msg != nil {
 			next, _ = m.Update(msg)
-			m = next.(*browserModel)
+			m = next.(browserModel)
 		}
 	}
 	return m
 }
 
-func typed(m *browserModel, s string) *browserModel {
+func typed(m browserModel, s string) browserModel {
 	for _, r := range s {
 		m = press(m, tea.KeyPressMsg{Code: r, Text: string(r)})
 	}
@@ -316,7 +316,7 @@ func TestBrowserModel_ResizeKeepsTheCursor(t *testing.T) {
 	}
 	want := selValue(m.tbl)
 	next, _ := m.Update(tea.WindowSizeMsg{Width: 80, Height: 30})
-	if got := selValue(next.(*browserModel).tbl); got != want {
+	if got := selValue(next.(browserModel).tbl); got != want {
 		t.Errorf("after the resize the cursor is on %q, want %q", got, want)
 	}
 }
@@ -359,5 +359,17 @@ func TestFilterGetsTheKeysTheTableLeavesAlone(t *testing.T) {
 	m = press(m, tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl})
 	if got := m.filter.Value(); got == "abc" {
 		t.Errorf("ctrl+u did not reach the filter: %q", got)
+	}
+}
+
+func TestUpdateLeavesTheReceiverAlone(t *testing.T) {
+	m := sized(t, 100, 30)
+	before := m.tbl.Cursor()
+	next, _ := m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
+	if got := m.tbl.Cursor(); got != before {
+		t.Errorf("the old model's cursor moved from %d to %d", before, got)
+	}
+	if got := selValue(next.(browserModel).tbl); got == selValue(m.tbl) {
+		t.Errorf("the new model did not move off %q", got)
 	}
 }
