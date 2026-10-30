@@ -11,6 +11,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/table"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -116,10 +117,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
-		var act table.Action
-		if m.tbl, act = m.tbl.Update(msg); act == table.Chosen {
-			it, _ := m.tbl.Selected()
-			m.sh, cmd = m.sh.SetStatus("chose "+it.Value, shell.OK, 2*time.Second)
+		var r bezel.Result
+		m.tbl, r = m.tbl.Update(msg)
+		if e, ok := r.Event.(table.Chosen[string]); ok {
+			m.sh, cmd = m.sh.SetStatus("chose "+e.Item.Value, shell.OK, 2*time.Second)
 			return m, cmd
 		}
 	}

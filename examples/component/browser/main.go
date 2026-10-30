@@ -10,6 +10,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/browser"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -78,19 +79,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if key.String() == "ctrl+c" {
 		return m, tea.Quit
 	}
-	var act browser.Action
+	var r bezel.Result
 	m.browser = m.browser.SetPreviewHeight(draw.InnerRect(m.sh.Rect("preview")).H)
-	m.browser, act = m.browser.Update(key)
+	m.browser, r = m.browser.Update(key)
 	// The shell's focus is only the border; the browser owns which side moves.
 	if m.browser.PreviewFocused() {
 		m.sh = m.sh.SetFocus("preview")
 	} else {
 		m.sh = m.sh.SetFocus("list")
 	}
-	switch act {
+	switch e := r.Event.(type) {
 	case browser.Chosen:
-		it, _ := m.browser.Selected()
-		m.sh, cmd = m.sh.SetStatus("cooking "+it.Label, shell.OK, 3*time.Second)
+		m.sh, cmd = m.sh.SetStatus("cooking "+e.Item.Label, shell.OK, 3*time.Second)
 		return m, cmd
 	case browser.Dismissed:
 		return m, tea.Quit

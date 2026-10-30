@@ -10,6 +10,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/icon"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
@@ -22,14 +23,6 @@ type Kind int
 const (
 	Numbers Kind = iota // "2/5", in the format WithFormat sets
 	Dots                // a mark per page, the current one filled
-)
-
-// Action is what a key did.
-type Action int
-
-const (
-	None  Action = iota
-	Paged        // the page changed
 )
 
 // Keys are the bindings that turn the page. Next has no help of its own:
@@ -64,6 +57,8 @@ type Styles struct {
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{Active: th.Accent, Inactive: th.Muted, Numbers: th.Dim}
 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new paginator.
 type Model struct {
@@ -175,19 +170,25 @@ func (m Model) ItemsOnPage(n int) int {
 	return end - start
 }
 
-// Update turns the page on Prev and Next. Paged says the page changed.
-func (m Model) Update(msg tea.KeyPressMsg) (Model, Action) {
+// Update turns the page on Prev and Next, which are its keys even on the
+// first and last page. A change reports a [Paged]; any other message comes
+// back unhandled and unchanged.
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	k, ok := msg.(tea.KeyPressMsg)
+	if !ok || !key.Matches(k, m.keys.Prev, m.keys.Next) {
+		return m, bezel.Result{}
+	}
 	before := m.page
-	switch {
-	case key.Matches(msg, m.keys.Prev):
+	if key.Matches(k, m.keys.Prev) {
 		m = m.Prev()
-	case key.Matches(msg, m.keys.Next):
+	} else {
 		m = m.Next()
 	}
+	r := bezel.Result{Handled: true}
 	if m.page != before {
-		return m, Paged
+		r.Event = Paged{Page: m.page}
 	}
-	return m, None
+	return m, r
 }
 
 // Legend lists the page keys, for the shell's legend or a help overlay.

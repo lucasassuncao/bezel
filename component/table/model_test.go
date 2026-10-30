@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -74,13 +75,30 @@ func TestModelMovesAndScrollsUnderTheHeader(t *testing.T) {
 	require.Equal(t, 3, m.Cursor())
 }
 
-func TestModelEnterChoosesARow(t *testing.T) {
-	_, act := New(pkgCols, pkgs(3)).SetHeight(5).Update(press(tea.KeyEnter))
-	require.Equal(t, Chosen, act)
-	_, act = New(pkgCols, pkgs(0)).SetHeight(5).Update(press(tea.KeyEnter))
-	require.Equal(t, None, act, "nothing to choose")
-	_, act = New(pkgCols, pkgs(3)).SetHeight(5).Update(press('x'))
-	require.Equal(t, None, act)
+func TestEnterReportsTheChosenItem(t *testing.T) {
+	m := New(pkgCols, pkgs(3)).SetHeight(5)
+	m, _ = m.Update(press(tea.KeyDown))
+	_, r := m.Update(press(tea.KeyEnter))
+	require.True(t, r.Handled)
+	require.Equal(t, Chosen[int]{Item: sel(m)}, r.Event)
+	require.Equal(t, 1, r.Event.(Chosen[int]).Item.Value)
+	_, r = New(pkgCols, pkgs(0)).SetHeight(5).Update(press(tea.KeyEnter))
+	require.True(t, r.Handled, "enter is the table's even with nothing to choose")
+	require.Nil(t, r.Event)
+}
+
+func TestForeignKeyIsNotHandled(t *testing.T) {
+	m := New(pkgCols, pkgs(3)).SetHeight(5)
+	_, r := m.Update(press('x'))
+	require.Equal(t, bezel.Result{}, r)
+	_, r = m.Update(tea.WindowSizeMsg{Width: 1, Height: 1})
+	require.Equal(t, bezel.Result{}, r)
+}
+
+func TestAKeyAtTheEdgeIsStillTheTables(t *testing.T) {
+	_, r := New(pkgCols, pkgs(3)).SetHeight(5).Update(press(tea.KeyUp))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event)
 }
 
 func TestModelSetItemsKeepsTheCursorByTheFirstCell(t *testing.T) {
@@ -174,6 +192,8 @@ func TestABlurredTableDimsItsCursorAndTakesNoKeys(t *testing.T) {
 	require.Equal(t, 0, m.Cursor())
 	require.Contains(t, m.SetWidth(40).View(th), th.Dim.Render(marker))
 	require.NotContains(t, m.SetWidth(40).View(th), th.Cursor.Render("pkg-0"))
+	_, r := m.Update(press(tea.KeyDown))
+	require.Equal(t, bezel.Result{}, r)
 	m, _ = m.Focus().Update(press(tea.KeyDown))
 	require.Equal(t, 1, m.Cursor())
 }
@@ -192,20 +212,32 @@ func TestTheLegendNamesTheKeys(t *testing.T) {
 	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "ctrl+u/d", "home/end", "enter"}, keys)
 }
 
-func TestAClickMovesTheCursorAndASecondChooses(t *testing.T) {
+func click(y int) bezel.ClickMsg {
+	return bezel.ClickMsg{Pane: "p", MouseClickMsg: tea.MouseClickMsg{Y: y, Button: tea.MouseLeft}}
+}
+
+func TestSecondClickOnARowChoosesIt(t *testing.T) {
 	m := New(pkgCols, pkgs(10)).SetHeight(5) // header, three rows, the more row
-	m, act := m.Click(3)
-	require.Equal(t, None, act)
+	m, r := m.Update(click(3))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event)
 	require.Equal(t, 2, m.Cursor())
-	_, act = m.Click(3)
-	require.Equal(t, Chosen, act)
-	for _, y := range []int{0, 4, -1} {
-		got, act := m.Click(y)
-		require.Equal(t, None, act, "line %d", y)
+	_, r = m.Update(click(3))
+	require.True(t, r.Handled)
+	require.Equal(t, Chosen[int]{Item: sel(m)}, r.Event)
+	blurred, r := m.Blur().Update(click(1))
+	require.True(t, r.Handled)
+	require.Equal(t, 0, blurred.Cursor(), "a click reaches a blurred table")
+}
+
+func TestClickPastTheRowsIsNotHandled(t *testing.T) {
+	m := New(pkgCols, pkgs(10)).SetHeight(5)
+	m, _ = m.Update(click(3))
+	for _, y := range []int{0, 4, -1, 99} { // the header, the more row, off the pane
+		got, r := m.Update(click(y))
+		require.Equal(t, bezel.Result{}, r, "line %d", y)
 		require.Equal(t, 2, got.Cursor())
 	}
-	blurred, _ := m.Blur().Click(1)
-	require.Equal(t, 0, blurred.Cursor(), "a click reaches a blurred table")
 }
 
 func TestWithStylesRecoloursTheHeader(t *testing.T) {

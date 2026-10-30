@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -76,24 +77,63 @@ func TestRightExpandsLeftCollapsesOrGoesToParent(t *testing.T) {
 	m, _ = m.Update(press(tea.KeyDown))
 	require.Equal(t, "cache", label(m))
 
-	m, act := m.Update(press(tea.KeyRight))
-	require.Equal(t, Expanded, act)
+	m, r := m.Update(press(tea.KeyRight))
+	require.IsType(t, Expanded[node]{}, r.Event)
 	require.Len(t, m.Visible(), 7)
 	m, _ = m.Update(press(tea.KeyDown))
 	require.Equal(t, "ttl", label(m))
 
-	m, act = m.Update(press(tea.KeyLeft))
-	require.Equal(t, None, act)
+	m, r = m.Update(press(tea.KeyLeft))
+	require.Nil(t, r.Event)
 	require.Equal(t, "cache", label(m), "left on a child goes to its parent")
-	m, act = m.Update(press(tea.KeyLeft))
-	require.Equal(t, Collapsed, act)
+	m, r = m.Update(press(tea.KeyLeft))
+	require.IsType(t, Collapsed[node]{}, r.Event)
 	require.Len(t, m.Visible(), 6)
 
-	_, act = m.Update(press(tea.KeyRight))
-	require.Equal(t, Expanded, act)
+	_, r = m.Update(press(tea.KeyRight))
+	require.IsType(t, Expanded[node]{}, r.Event)
 	m, _ = m.Update(press(tea.KeyUp)) // "port", a leaf
-	_, act = m.Update(press(tea.KeyRight))
-	require.Equal(t, None, act, "a leaf does not expand")
+	_, r = m.Update(press(tea.KeyRight))
+	require.Nil(t, r.Event, "a leaf does not expand")
+	require.True(t, r.Handled, "right is the tree's even on a leaf")
+}
+
+func cacheRow(t *testing.T) Model[node] {
+	t.Helper()
+	m := newTree(10)
+	for range 3 {
+		m, _ = m.Update(press(tea.KeyDown))
+	}
+	require.Equal(t, "cache", label(m))
+	return m
+}
+
+func TestRightReportsExpanded(t *testing.T) {
+	m, r := cacheRow(t).Update(press(tea.KeyRight))
+	require.True(t, r.Handled)
+	e, ok := r.Event.(Expanded[node])
+	require.True(t, ok)
+	require.Equal(t, "cache", e.Node.label)
+	require.True(t, e.Node.expanded, "the node as it is after the update")
+	require.Contains(t, labelsOf(m), "ttl")
+}
+
+func TestLeftReportsCollapsed(t *testing.T) {
+	m, _ := cacheRow(t).Update(press(tea.KeyRight))
+	_, r := m.Update(press(tea.KeyLeft))
+	require.True(t, r.Handled)
+	e, ok := r.Event.(Collapsed[node])
+	require.True(t, ok)
+	require.Equal(t, "cache", e.Node.label)
+	require.False(t, e.Node.expanded)
+}
+
+func TestForeignKeyIsNotHandled(t *testing.T) {
+	m := newTree(10)
+	_, r := m.Update(press('x'))
+	require.Equal(t, bezel.Result{}, r)
+	_, r = m.Update(tea.WindowSizeMsg{Width: 1, Height: 1})
+	require.Equal(t, bezel.Result{}, r)
 }
 
 func TestMutationsAreCopyOnWrite(t *testing.T) {
@@ -330,22 +370,36 @@ func TestTheTreeLegendNamesItsKeys(t *testing.T) {
 	require.Equal(t, []string{"↑/↓", "←/→"}, keys)
 }
 
-func TestAClickMovesTheCursorAndASecondOpensOrCloses(t *testing.T) {
-	m := newTree(10) // ADDED, server (open), host, port, AVAILABLE, cache, ...
-	m, act := m.Click(5)
-	require.Equal(t, None, act)
-	require.Equal(t, "cache", label(m))
-	m, act = m.Click(5)
-	require.Equal(t, Expanded, act)
-	require.Contains(t, labelsOf(m), "ttl")
-	m, act = m.Click(5)
-	require.Equal(t, Collapsed, act)
+func click(y int) bezel.ClickMsg {
+	return bezel.ClickMsg{Pane: "p", MouseClickMsg: tea.MouseClickMsg{Y: y, Button: tea.MouseLeft}}
+}
 
-	m, _ = m.Click(2)
-	_, act = m.Click(2)
-	require.Equal(t, None, act, "a leaf has nothing to open")
-	same, _ := m.Click(0)
-	require.Equal(t, "host", label(same), "a heading is not a row to land on")
+func TestSecondClickOnARowChoosesIt(t *testing.T) {
+	m := newTree(10) // ADDED, server (open), host, port, AVAILABLE, cache, ...
+	m, r := m.Update(click(5))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event)
+	require.Equal(t, "cache", label(m))
+	m, r = m.Update(click(5))
+	require.IsType(t, Expanded[node]{}, r.Event)
+	require.Contains(t, labelsOf(m), "ttl")
+	m, r = m.Update(click(5))
+	require.IsType(t, Collapsed[node]{}, r.Event)
+
+	m, _ = m.Update(click(2))
+	_, r = m.Update(click(2))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event, "a leaf has nothing to open")
+}
+
+func TestClickPastTheRowsIsNotHandled(t *testing.T) {
+	m := newTree(10)
+	m, _ = m.Update(click(2))
+	for _, y := range []int{0, 4, 99, -1} { // two headings, off the pane
+		got, r := m.Update(click(y))
+		require.Equal(t, bezel.Result{}, r, "line %d", y)
+		require.Equal(t, "host", label(got), "a heading is not a row to land on")
+	}
 }
 
 func labelsOf(m Model[node]) []string {

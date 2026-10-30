@@ -8,6 +8,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -21,14 +22,6 @@ type Item[T any] struct {
 	Cells []string
 	Value T
 }
-
-// Action is what a key did.
-type Action int
-
-const (
-	None   Action = iota
-	Chosen        // enter on a row
-)
 
 // Keys are the bindings the table answers to.
 type Keys struct {
@@ -64,6 +57,8 @@ func VimKeys() Keys {
 // marker is what the cursor row starts with. Every row keeps its width, so
 // the columns stay put when the cursor lands.
 const marker = "▶ "
+
+var _ bezel.Model[Model[int]] = Model[int]{}
 
 // Model is a table with a cursor: the header stays put and the rows under it
 // scroll. A value: every method returns the new table.
@@ -210,13 +205,35 @@ func (m Model[T]) SetHeight(h int) Model[T] {
 	return m.clamp()
 }
 
-// Update handles one key. Keys the table does not know return None and
-// leave it unchanged, so the caller can layer its own on top.
-func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action) {
-	n := len(m.items)
-	if m.blur {
-		return m, None
+// Update takes the table's keys, unless it is blurred, and a bezel.ClickMsg
+// on a row. Choosing a row reports a [Chosen]; any other message comes back
+// unhandled and unchanged.
+func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
+	var chosen, handled bool
+	switch msg := msg.(type) {
+	case tea.KeyPressMsg:
+		if m.blur || !key.Matches(msg, m.keys.HalfPageUp, m.keys.HalfPageDown, m.keys.Up, m.keys.Down,
+			m.keys.PageUp, m.keys.PageDown, m.keys.Top, m.keys.Bottom, m.keys.Enter) {
+			return m, bezel.Result{}
+		}
+		m, chosen = m.press(msg)
+		handled = true
+	case bezel.ClickMsg:
+		m, chosen, handled = m.click(msg.Y)
 	}
+	if !handled {
+		return m, bezel.Result{}
+	}
+	r := bezel.Result{Handled: true}
+	if it, ok := m.Selected(); chosen && ok {
+		r.Event = Chosen[T]{Item: it}
+	}
+	return m, r
+}
+
+// press is one of the table's keys: the table after it and whether it chose.
+func (m Model[T]) press(msg tea.KeyPressMsg) (Model[T], bool) {
+	n := len(m.items)
 	switch {
 	case key.Matches(msg, m.keys.HalfPageUp):
 		m.win = m.win.Move(-max(m.page()/2, 1), n, nil)
@@ -235,28 +252,27 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action) {
 	case key.Matches(msg, m.keys.Bottom):
 		m.win = m.win.Move(n, n, nil)
 	case key.Matches(msg, m.keys.Enter):
-		if n > 0 {
-			return m, Chosen
-		}
+		return m, n > 0
 	}
-	return m, None
+	return m, false
 }
 
-// Click is a left click on line y of View: on a row it moves the cursor
-// there, and on the row already under the cursor it chooses it. The header
-// and the "more" row do nothing. A blurred table takes it too.
-func (m Model[T]) Click(y int) (Model[T], Action) {
+// click is a left click on line y of View: on a row it moves the cursor
+// there, and on the row already under the cursor it chooses it. It reports
+// whether it chose and whether y fell on a row; the header and the "more"
+// row are not. A blurred table takes it too.
+func (m Model[T]) click(y int) (Model[T], bool, bool) {
 	w := m.win.Clamp(len(m.items))
 	start, end, _ := w.Bounds(len(m.items))
 	i := start + y - 1 // the header takes line 0
 	switch {
 	case y < 1 || i >= end:
-		return m, None
+		return m, false, false
 	case i == w.Cursor:
-		return m, Chosen
+		return m, true, true
 	}
 	m.win.Cursor = i
-	return m.clamp(), None
+	return m.clamp(), false, true
 }
 
 // page is how far pgup and pgdown move: the rows shown, less the "more" row.

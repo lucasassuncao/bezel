@@ -3,10 +3,12 @@ package paginator
 import (
 	"testing"
 
+	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/component/icon"
 	"github.com/lucasassuncao/bezel/key"
@@ -56,18 +58,29 @@ func TestPrevAndNextStopAtTheEnds(t *testing.T) {
 }
 
 func TestTheKeysTurnThePage(t *testing.T) {
-	p, a := New(10).SetItems(30).Update(bezeltest.Key("right"))
+	p, r := New(10).SetItems(30).Update(bezeltest.Key("right"))
 	require.Equal(t, 1, p.Page())
-	require.Equal(t, Paged, a)
+	require.Equal(t, Paged{Page: 1}, r.Event)
 	p, _ = p.Update(bezeltest.Key("pgdown"))
-	p, a = p.Update(bezeltest.Key("pgdown"))
+	p, r = p.Update(bezeltest.Key("pgdown"))
 	require.Equal(t, 2, p.Page())
-	require.Equal(t, None, a, "already on the last page")
-	p, a = p.Update(bezeltest.Key("left"))
+	require.True(t, r.Handled, "the key is the paginator's even on the last page")
+	require.Nil(t, r.Event, "already on the last page")
+	p, r = p.Update(bezeltest.Key("left"))
 	require.Equal(t, 1, p.Page())
-	require.Equal(t, Paged, a)
-	_, a = p.Update(bezeltest.Key("x"))
-	require.Equal(t, None, a)
+	require.Equal(t, Paged{Page: 1}, r.Event)
+}
+
+func TestNextReportsPaged(t *testing.T) {
+	_, r := New(10).SetItems(30).Update(bezeltest.Key("pgdown"))
+	require.Equal(t, bezel.Result{Handled: true, Event: Paged{Page: 1}}, r)
+}
+
+func TestForeignKeyIsNotHandled(t *testing.T) {
+	_, r := New(10).SetItems(30).Update(bezeltest.Key("x"))
+	require.Equal(t, bezel.Result{}, r)
+	_, r = New(10).SetItems(30).Update(tea.WindowSizeMsg{Width: 1, Height: 1})
+	require.Equal(t, bezel.Result{}, r)
 }
 
 func TestNumbersReadPageOfPages(t *testing.T) {

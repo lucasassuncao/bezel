@@ -10,6 +10,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -22,15 +23,6 @@ type Item struct {
 	Label  string
 	Detail func() string
 }
-
-// Action is what a key did.
-type Action int
-
-const (
-	None      Action = iota
-	Dismissed        // esc on the list: close without choosing
-	Chosen           // enter on the list: the caller reads Selected
-)
 
 // Keys are the bindings the browser answers to.
 type Keys struct {
@@ -56,6 +48,8 @@ func VimKeys() Keys {
 	k.Up, k.Down = key.New("up", "k").WithHelp("↑/↓ k/j", "move"), key.New("down", "j")
 	return k
 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: Update returns the new one.
 type Model struct {
@@ -178,32 +172,38 @@ func (m Model) Legend() []legend.Entry {
 	return legend.FromBindings(append(bs, m.keys.Esc))
 }
 
-// Update handles one key. Keys the browser does not know return None and
-// leave it unchanged, so the caller can layer its own on top.
-func (m Model) Update(msg tea.KeyPressMsg) (Model, Action) {
+// Update takes the browser's keys. Enter on the list reports a [Chosen] and
+// esc on the list a [Dismissed]; any other message comes back unhandled and
+// unchanged.
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	k, ok := msg.(tea.KeyPressMsg)
+	if !ok || !key.Matches(k, m.keys.Esc, m.keys.Tab, m.keys.Enter, m.keys.Up, m.keys.Down, m.keys.PageUp, m.keys.PageDown) {
+		return m, bezel.Result{}
+	}
+	r := bezel.Result{Handled: true}
 	switch {
-	case key.Matches(msg, m.keys.Esc):
+	case key.Matches(k, m.keys.Esc):
 		if m.previewFocus {
 			m.previewFocus = false
-			return m, None
+		} else {
+			r.Event = Dismissed{}
 		}
-		return m, Dismissed
-	case key.Matches(msg, m.keys.Tab):
+	case key.Matches(k, m.keys.Tab):
 		m.previewFocus = !m.previewFocus
-	case key.Matches(msg, m.keys.Enter):
-		if !m.previewFocus && len(m.items) > 0 {
-			return m, Chosen
+	case key.Matches(k, m.keys.Enter):
+		if it, ok := m.Selected(); ok && !m.previewFocus {
+			r.Event = Chosen{Item: it}
 		}
-	case key.Matches(msg, m.keys.Up):
-		return m.step(-1, 1), None
-	case key.Matches(msg, m.keys.Down):
-		return m.step(1, 1), None
-	case key.Matches(msg, m.keys.PageUp):
-		return m.step(-1, max(1, m.previewHeight/2)), None
-	case key.Matches(msg, m.keys.PageDown):
-		return m.step(1, max(1, m.previewHeight/2)), None
+	case key.Matches(k, m.keys.Up):
+		m = m.step(-1, 1)
+	case key.Matches(k, m.keys.Down):
+		m = m.step(1, 1)
+	case key.Matches(k, m.keys.PageUp):
+		m = m.step(-1, max(1, m.previewHeight/2))
+	case key.Matches(k, m.keys.PageDown):
+		m = m.step(1, max(1, m.previewHeight/2))
 	}
-	return m, None
+	return m, r
 }
 
 // step moves the cursor by dir when the list has focus, or scrolls the

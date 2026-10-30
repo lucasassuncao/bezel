@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -39,30 +40,51 @@ func TestWithCurrentPutsTheCursorOnTheLabel(t *testing.T) {
 
 func TestArrowsMoveTheCursorAndClamp(t *testing.T) {
 	b := New(items("a", "b", "c"))
-	b, act := b.Update(press(tea.KeyDown))
-	require.Equal(t, None, act)
+	b, r := b.Update(press(tea.KeyDown))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event)
 	require.Equal(t, 1, b.Cursor())
 	b, _ = b.Update(press(tea.KeyUp))
 	b, _ = b.Update(press(tea.KeyUp)) // clamped at the top
 	require.Equal(t, 0, b.Cursor())
 }
 
-func TestEnterChoosesEscDismissesTabMovesFocus(t *testing.T) {
+func TestEnterReportsTheChosenItem(t *testing.T) {
+	b := New(items("a", "b")).WithCurrent("b")
+	_, r := b.Update(press(tea.KeyEnter))
+	require.True(t, r.Handled)
+	e, ok := r.Event.(Chosen)
+	require.True(t, ok)
+	require.Equal(t, "b", e.Item.Label)
+}
+
+func TestEscReportsDismissed(t *testing.T) {
+	_, r := New(items("a")).Update(press(tea.KeyEscape))
+	require.Equal(t, bezel.Result{Handled: true, Event: Dismissed{}}, r)
+}
+
+func TestTabMovesFocusAndThePreviewKeepsEnterAndEsc(t *testing.T) {
 	b := New(items("a", "b"))
-	_, act := b.Update(press(tea.KeyEnter))
-	require.Equal(t, Chosen, act)
-
-	b, act = b.Update(press(tea.KeyTab))
-	require.Equal(t, None, act)
+	b, r := b.Update(press(tea.KeyTab))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event)
 	require.True(t, b.PreviewFocused())
-	_, act = b.Update(press(tea.KeyEnter))
-	require.Equal(t, None, act, "enter on the preview does nothing")
+	_, r = b.Update(press(tea.KeyEnter))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event, "enter on the preview chooses nothing")
 
-	b, act = b.Update(press(tea.KeyEscape))
-	require.Equal(t, None, act, "esc on the preview only returns to the list")
+	b, r = b.Update(press(tea.KeyEscape))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event, "esc on the preview only returns to the list")
 	require.False(t, b.PreviewFocused())
-	_, act = b.Update(press(tea.KeyEscape))
-	require.Equal(t, Dismissed, act)
+}
+
+func TestForeignKeyIsNotHandled(t *testing.T) {
+	b := New(items("a"))
+	_, r := b.Update(press('x'))
+	require.Equal(t, bezel.Result{}, r)
+	_, r = b.Update(tea.WindowSizeMsg{Width: 1, Height: 1})
+	require.Equal(t, bezel.Result{}, r)
 }
 
 func TestPreviewScrollsWhenFocused(t *testing.T) {

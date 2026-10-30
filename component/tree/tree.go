@@ -10,6 +10,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -32,15 +33,6 @@ type Info struct {
 	Section  bool // a heading or spacer: skipped by the cursor
 	Hidden   bool // left out, and everything under it with it
 }
-
-// Action is what a key did.
-type Action int
-
-const (
-	None      Action = iota
-	Expanded         // → on a collapsed parent
-	Collapsed        // ← on an expanded parent
-)
 
 // Keys are the bindings the tree answers to.
 type Keys struct {
@@ -75,6 +67,8 @@ type Connectors struct{ Mid, Last, Pipe, Space string }
 func DefaultConnectors() Connectors {
 	return Connectors{Mid: "├─ ", Last: "└─ ", Pipe: "│  ", Space: "   "}
 }
+
+func _[N Noder[N]]() { var _ bezel.Model[Model[N]] = Model[N]{} }
 
 // Model is a value: every method returns the new tree. The zero value is
 // usable and answers to DefaultKeys.
@@ -306,25 +300,45 @@ func (m Model[N]) WithNodeMutated(idx int, mut func(*N)) Model[N] {
 	return m
 }
 
-// Update moves the cursor and expands or collapses. Other keys return None
-// and leave the tree unchanged, so the caller layers its own on top.
-func (m Model[N]) Update(msg tea.KeyPressMsg) (Model[N], Action) {
+// Update takes the tree's keys and a bezel.ClickMsg on a row. Opening or
+// closing a parent reports an [Expanded] or a [Collapsed]; any other message
+// comes back unhandled and unchanged.
+func (m Model[N]) Update(msg tea.Msg) (Model[N], bezel.Result) {
+	var ev any
+	var handled bool
+	switch msg := msg.(type) {
+	case tea.KeyPressMsg:
+		keys := m.bindings()
+		if !key.Matches(msg, keys.Up, keys.Down, keys.Left, keys.Right) {
+			return m, bezel.Result{}
+		}
+		m, ev = m.press(msg, keys)
+		handled = true
+	case bezel.ClickMsg:
+		m, ev, handled = m.click(msg.Y)
+	}
+	if !handled {
+		return m, bezel.Result{}
+	}
+	return m, bezel.Result{Handled: true, Event: ev}
+}
+
+// press is one of the tree's keys: the tree after it and what it opened or
+// closed, nil for neither.
+func (m Model[N]) press(msg tea.KeyPressMsg, keys Keys) (Model[N], any) {
 	vis := m.Visible()
 	if len(vis) == 0 {
-		return m, None
+		return m, nil
 	}
-	keys := m.bindings()
 	switch {
 	case key.Matches(msg, keys.Up):
-		return m.move(-1, vis), None
+		return m.move(-1, vis), nil
 	case key.Matches(msg, keys.Down):
-		return m.move(1, vis), None
+		return m.move(1, vis), nil
 	case key.Matches(msg, keys.Right):
 		return m.expand(vis)
-	case key.Matches(msg, keys.Left):
-		return m.collapse(vis)
 	}
-	return m, None
+	return m.collapse(vis)
 }
 
 // move steps the cursor over section rows, clamped at both ends.
@@ -383,25 +397,28 @@ func (m Model[N]) keepOff(w layout.Window, n int) layout.Window {
 	return w.Clamp(n) // and off the "more" row
 }
 
-// Click is a left click on line y of View: on a row it moves the cursor
-// there, and on the row already under the cursor it opens or closes it,
-// Expanded or Collapsed. A heading or the "more" row does nothing.
-func (m Model[N]) Click(y int) (Model[N], Action) {
+// click is a left click on line y of View: on a row it moves the cursor
+// there, and on the row already under the cursor it opens or closes it. It
+// reports the event and whether y fell on a row; a heading, the "more" row
+// and the lines past the rows are not.
+func (m Model[N]) click(y int) (Model[N], any, bool) {
 	vis := m.Visible()
 	w := m.window().Clamp(len(vis))
 	start, end, _ := w.Bounds(len(vis))
 	vi := start + y
 	switch {
 	case y < 0 || vi >= end || m.nodes[vis[vi]].TreeInfo().Section:
-		return m, None
+		return m, nil, false
 	case vi != w.Cursor:
 		m.cursor = vi
-		return m.clampOffset(len(vis)), None
+		return m.clampOffset(len(vis)), nil, true
 	}
 	if in := m.nodes[vis[vi]].TreeInfo(); !in.Leaf && in.Expanded {
-		return m.WithNodeMutated(vis[vi], func(n *N) { *n = (*n).Expand(false) }), Collapsed
+		m = m.WithNodeMutated(vis[vi], func(n *N) { *n = (*n).Expand(false) })
+		return m, Collapsed[N]{Node: m.nodes[vis[vi]]}, true
 	}
-	return m.expand(vis)
+	m, ev := m.expand(vis)
+	return m, ev, true
 }
 
 // MoveTo jumps to a visible row, snapping backwards over section rows: the
@@ -423,39 +440,45 @@ func (m Model[N]) MoveTo(i int) Model[N] {
 }
 
 // Expand opens the row under the cursor when it is a collapsed parent.
-func (m Model[N]) Expand() (Model[N], Action) { return m.expand(m.Visible()) }
+func (m Model[N]) Expand() Model[N] {
+	m, _ = m.expand(m.Visible())
+	return m
+}
 
-func (m Model[N]) expand(vis []int) (Model[N], Action) {
+// expand is Expand reporting the Expanded event, nil when nothing opened.
+func (m Model[N]) expand(vis []int) (Model[N], any) {
 	idx := At(m.cursor, vis)
 	if idx < 0 {
-		return m, None
+		return m, nil
 	}
 	if in := m.nodes[idx].TreeInfo(); !in.Leaf && !in.Expanded {
-		return m.WithNodeMutated(idx, func(n *N) { *n = (*n).Expand(true) }), Expanded
+		m = m.WithNodeMutated(idx, func(n *N) { *n = (*n).Expand(true) })
+		return m, Expanded[N]{Node: m.nodes[idx]}
 	}
-	return m, None
+	return m, nil
 }
 
 // collapse closes an expanded parent, or moves the cursor to the parent of
-// a nested row.
-func (m Model[N]) collapse(vis []int) (Model[N], Action) {
+// a nested row. It reports the Collapsed event, nil when nothing closed.
+func (m Model[N]) collapse(vis []int) (Model[N], any) {
 	idx := At(m.cursor, vis)
 	if idx < 0 {
-		return m, None
+		return m, nil
 	}
 	in := m.nodes[idx].TreeInfo()
 	if !in.Leaf && in.Expanded {
-		return m.WithNodeMutated(idx, func(n *N) { *n = (*n).Expand(false) }), Collapsed
+		m = m.WithNodeMutated(idx, func(n *N) { *n = (*n).Expand(false) })
+		return m, Collapsed[N]{Node: m.nodes[idx]}
 	}
 	if in.Depth > 0 {
 		for vi := m.cursor - 1; vi >= 0; vi-- {
 			if m.nodes[vis[vi]].TreeInfo().Depth == in.Depth-1 {
 				m.cursor = vi
-				return m.clampOffset(len(vis)), None
+				return m.clampOffset(len(vis)), nil
 			}
 		}
 	}
-	return m, None
+	return m, nil
 }
 
 // clamp puts the cursor back on a visible row and scrolls it into view.
