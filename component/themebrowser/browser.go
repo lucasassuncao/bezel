@@ -337,7 +337,7 @@ func (m *browserModel) key(k tea.KeyPressMsg) tea.Cmd {
 		m.filter, cmd = m.filter.Focus()
 		return cmd
 	}
-	if next, r := m.tbl.Update(k); r.Handled {
+	if next, r := m.tbl.Update(k); r.Handled && (r.Event != nil || next.Cursor() != m.tbl.Cursor()) {
 		m.tbl = next
 		return nil
 	}

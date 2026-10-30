@@ -345,3 +345,19 @@ func selValue(t table.Model[string]) string {
 	it, _ := t.Selected()
 	return it.Value
 }
+
+func TestFilterGetsTheKeysTheTableLeavesAlone(t *testing.T) {
+	m := typed(sized(t, 100, 30), "/abc")
+	if m.tbl.Cursor() != 0 {
+		t.Fatalf("cursor = %d, want the first row", m.tbl.Cursor())
+	}
+	m = press(m, tea.KeyPressMsg{Code: tea.KeyHome})
+	if got := m.filter.Cursor(); got != 0 {
+		t.Errorf("home left the filter caret at %d, want 0", got)
+	}
+	m = press(m, tea.KeyPressMsg{Code: tea.KeyEnd})
+	m = press(m, tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl})
+	if got := m.filter.Value(); got == "abc" {
+		t.Errorf("ctrl+u did not reach the filter: %q", got)
+	}
+}
