@@ -1,12 +1,14 @@
 package filepicker
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
@@ -145,3 +147,95 @@ func TestItsOwnListingAndItsKeysAreHandled(t *testing.T) {
 
 // withCmd keeps the command of an Update, for the tests that run it.
 func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }
+
+// many lays out dir/f00.txt to f19.txt and returns dir.
+func many(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	for i := range 20 {
+		require.NoError(t, os.WriteFile(filepath.Join(dir, fmt.Sprintf("f%02d.txt", i)), nil, 0o600))
+	}
+	return dir
+}
+
+func TestPagesAndEndsMoveTheCursor(t *testing.T) {
+	m := New(many(t)).SetHeight(6)
+	m = load(t, m, m.Init())
+	for _, step := range []struct {
+		key  rune
+		want string
+	}{
+		{tea.KeyEnd, "f19.txt"}, {tea.KeyHome, "f00.txt"}, {tea.KeyPgDown, "f05.txt"},
+		{tea.KeyDown, "f06.txt"}, {tea.KeyPgUp, "f01.txt"}, {tea.KeyUp, "f00.txt"},
+	} {
+		m, _ = press(m, step.key)
+		require.Equal(t, step.want, filepath.Base(m.Highlighted()))
+	}
+}
+
+func TestVimKeysMoveWithLetters(t *testing.T) {
+	dir := tree(t)
+	m := New(filepath.Join(dir, "sub")).WithKeys(VimKeys())
+	m = load(t, m, m.Init())
+	m, cmd := withCmd(m.Update(tea.KeyPressMsg{Code: 'h', Text: "h"}))
+	m = load(t, m, cmd)
+	require.Equal(t, dir, m.Dir(), "h goes up")
+	require.Equal(t, "sub", filepath.Base(m.Highlighted()), "onto the directory it came from")
+	m, _ = withCmd(m.Update(tea.KeyPressMsg{Code: 'j', Text: "j"}))
+	require.NotEqual(t, "sub", filepath.Base(m.Highlighted()), "j moves down")
+}
+
+func TestHiddenEntriesShowOnlyWhenAsked(t *testing.T) {
+	dir := tree(t)
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".secret"), nil, 0o600))
+	shut := New(dir)
+	shut = load(t, shut, shut.Init())
+	require.NotContains(t, strings.Join(rows(shut), "\n"), ".secret")
+	open := New(dir).WithHidden(true)
+	open = load(t, open, open.Init())
+	require.Contains(t, strings.Join(rows(open), "\n"), ".secret")
+}
+
+func TestWithDirsLetsEnterPickADirectory(t *testing.T) {
+	dir := tree(t)
+	m := New(dir).WithDirs(true)
+	m = load(t, m, m.Init())
+	require.Equal(t, "sub", filepath.Base(m.Highlighted()), "directories come first")
+	m, _ = press(m, tea.KeyEnter)
+	got, ok := m.Picked()
+	require.True(t, ok)
+	require.Equal(t, filepath.Join(dir, "sub"), got)
+}
+
+func TestTheDrivesMoveAndOpen(t *testing.T) {
+	root := filepath.VolumeName(t.TempDir()) + string(filepath.Separator)
+	other := "Z:" + string(filepath.Separator)
+	m := New(root).WithVolumes(func() []string { return []string{root, other} })
+	m, cmd := press(m, tea.KeyLeft)
+	m = load(t, m, cmd)
+	m, _ = press(m, tea.KeyDown)
+	require.Equal(t, other, m.Highlighted())
+	m, _ = press(m, tea.KeyUp)
+	require.Equal(t, root, m.Highlighted())
+	m, cmd = press(m, tea.KeyEnter)
+	m = load(t, m, cmd)
+	require.True(t, m.Browsing())
+	require.Equal(t, root, m.Dir())
+}
+
+func TestTheLegendNamesTheKeys(t *testing.T) {
+	var got []string
+	for _, e := range New(".").Legend() {
+		got = append(got, e.Help.Desc)
+	}
+	require.Equal(t, []string{"move", "up", "open", "pick"}, got)
+}
+
+// A file of a type that cannot be picked draws in the Disabled style, and an
+// edit to the styles reaches it.
+func TestWithStylesPaintsTheRefusedFiles(t *testing.T) {
+	marked := lipgloss.NewStyle().Strikethrough(true)
+	m := New(tree(t)).WithAllowedTypes(".md").WithStyles(func(s Styles) Styles { s.Disabled = marked; return s })
+	m = load(t, m, m.Init())
+	require.Contains(t, m.View(th), marked.Render("notes.txt"))
+}
