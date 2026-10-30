@@ -128,7 +128,7 @@ func (c confirm) hint() string {
 	km := c.keys
 	var parts []string
 	for _, e := range legend.FromBindings([]key.Binding{km.Toggle, km.Yes, km.No, km.Accept, km.Abort}) {
-		parts = append(parts, e.Help().Key+" "+e.Help().Desc)
+		parts = append(parts, e.Help.Key+" "+e.Help.Desc)
 	}
 	return strings.Join(parts, " · ")
 }

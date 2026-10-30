@@ -31,7 +31,7 @@ func (s Shell) chromeRows() (top, bottom int, legendLines []string) {
 	helpKey := ""
 	acts := s.active()
 	if help := helpAction(acts); help != nil && !s.typing {
-		helpKey = help.Entry().Help().Key
+		helpKey = help.Entry().Help.Key
 	}
 	keys := legend.Filter(actionEntries(acts, !s.typing), s.cfg.Can) // a modal draws its own keys in its box
 	legendLines = legend.Pack(keys, s.width, s.cfg.LegendLines, helpKey, s.cfg.Theme.Legend)

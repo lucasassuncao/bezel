@@ -405,15 +405,15 @@ func (m browserModel) statusLine() string {
 
 func (m browserModel) legend() []legend.Entry {
 	tk := table.DefaultKeys()
-	out := []legend.Entry{{Binding: tk.Up}, {Binding: tk.PageUp}}
+	keys := []key.Binding{tk.Up, tk.PageUp}
 	if m.typing {
-		return append(out, legend.Entry{Binding: m.keys.Copy}, legend.Entry{Binding: m.keys.Clear})
+		return legend.FromBindings(append(keys, m.keys.Copy, m.keys.Clear))
 	}
-	out = append(out, legend.Entry{Binding: m.keys.Filter}, legend.Entry{Binding: m.keys.Copy})
+	keys = append(keys, m.keys.Filter, m.keys.Copy)
 	if m.filter.Value() != "" {
-		out = append(out, legend.Entry{Binding: m.keys.Clear})
+		keys = append(keys, m.keys.Clear)
 	}
-	return append(out, legend.Entry{Binding: m.keys.Quit})
+	return legend.FromBindings(append(keys, m.keys.Quit))
 }
 
 // List writes the built-in themes, one line per category: what --list-themes

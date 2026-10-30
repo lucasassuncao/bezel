@@ -55,7 +55,7 @@ func (s Shell) active() []Action {
 func actionEntries(acts []Action, withHelp bool) []legend.Entry {
 	var out []legend.Entry
 	for _, a := range acts {
-		if e := a.Entry(); len(e.Keys()) > 0 && (withHelp || kindOf(a) != kindHelp) {
+		if e := a.Entry(); len(a.binding().Keys()) > 0 && (withHelp || kindOf(a) != kindHelp) {
 			out = append(out, e)
 		}
 	}

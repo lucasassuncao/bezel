@@ -95,7 +95,7 @@ func (c Choice) Legend() []legend.Entry {
 	out := make([]legend.Entry, 0, len(c.options)+1)
 	hasEsc := false
 	for _, o := range c.options {
-		out = append(out, legend.Entry{Binding: o.Key})
+		out = append(out, legend.Entry{Help: o.Key.Help(), Disabled: o.Key.Disabled})
 		for _, k := range o.Key.Keys() {
 			hasEsc = hasEsc || k == "esc"
 		}

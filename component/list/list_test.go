@@ -360,7 +360,7 @@ func TestLegendListsTheKeysOfTheMode(t *testing.T) {
 	keys := func(m Model[int]) []string {
 		var out []string
 		for _, e := range m.Legend() {
-			out = append(out, e.Help().Key)
+			out = append(out, e.Help.Key)
 		}
 		return out
 	}

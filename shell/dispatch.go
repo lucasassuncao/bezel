@@ -13,7 +13,7 @@ func (s Shell) runKey(k tea.KeyPressMsg) (Shell, tea.Cmd, bool) {
 		if ac, ok := a.(*action); ok && ac.displayOnly() {
 			continue
 		}
-		if key.Matches(k, a.Entry().Binding) {
+		if key.Matches(k, a.binding()) {
 			next, cmd := s.run(a, "", k.String())
 			return next, cmd, true
 		}

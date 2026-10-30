@@ -16,6 +16,7 @@ import (
 type Action interface {
 	Entry() legend.Entry
 	Run(ctx ActionContext) tea.Cmd
+	binding() key.Binding // sealed: Custom, Command and the prebuilts make every one
 }
 
 // ActionContext is what an action runs with. Arg is the text after the name
@@ -60,9 +61,11 @@ type action struct {
 type Option func(*action)
 
 func (a *action) Entry() legend.Entry {
-	b := key.New(a.keys...).WithHelp(a.label, a.desc)
-	return legend.Entry{Binding: b, Needs: a.needs, Group: a.group}
+	return legend.Entry{Help: key.Help{Key: a.label, Desc: a.desc}, Needs: a.needs, Group: a.group}
 }
+
+// binding is the keys that fire a.
+func (a *action) binding() key.Binding { return key.New(a.keys...) }
 
 func (a *action) Run(ctx ActionContext) tea.Cmd {
 	if a.run == nil {
@@ -197,12 +200,12 @@ func Check(actions ...Action) error {
 			continue
 		}
 		e := a.Entry()
-		for _, k := range e.Keys() {
+		for _, k := range a.binding().Keys() {
 			if prev, taken := owner[k]; taken {
-				errs = append(errs, fmt.Errorf("key %q: %q and %q", k, prev, e.Help().Desc))
+				errs = append(errs, fmt.Errorf("key %q: %q and %q", k, prev, e.Help.Desc))
 				continue
 			}
-			owner[k] = e.Help().Desc
+			owner[k] = e.Help.Desc
 		}
 	}
 	return errors.Join(errs...)

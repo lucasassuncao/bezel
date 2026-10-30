@@ -207,7 +207,7 @@ func TestFromValuesSplitsLinesIntoCells(t *testing.T) {
 func TestTheLegendNamesTheKeys(t *testing.T) {
 	var keys []string
 	for _, e := range New(pkgCols, pkgs(3)).SetHeight(5).Legend() {
-		keys = append(keys, e.Help().Key)
+		keys = append(keys, e.Help.Key)
 	}
 	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "ctrl+u/d", "home/end", "enter"}, keys)
 }

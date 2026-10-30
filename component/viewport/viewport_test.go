@@ -154,7 +154,7 @@ func TestScrollIsWhereTheWindowSits(t *testing.T) {
 func TestLegendLeavesPanOutWhileWrapping(t *testing.T) {
 	keys := func(m Model) (out []string) {
 		for _, e := range m.Legend() {
-			out = append(out, e.Help().Key)
+			out = append(out, e.Help.Key)
 		}
 		return out
 	}

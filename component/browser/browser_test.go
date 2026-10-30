@@ -158,7 +158,7 @@ func TestWithStylesRecoloursTheCursorLabel(t *testing.T) {
 func TestLegendDropsEnterWhileThePreviewHasTheKeys(t *testing.T) {
 	keys := func(es []legend.Entry) (out []string) {
 		for _, e := range es {
-			out = append(out, e.Help().Key)
+			out = append(out, e.Help.Key)
 		}
 		return out
 	}

@@ -15,7 +15,7 @@ func TestFilterAlwaysReturnsACopy(t *testing.T) {
 	in := []Entry{New("a", "alpha")}
 	out := Filter(in, nil)
 	out[0] = New("b", "beta")
-	require.Equal(t, "alpha", in[0].Help().Desc)
+	require.Equal(t, "alpha", in[0].Help.Desc)
 }
 
 func entries(n int) []Entry {
@@ -59,7 +59,7 @@ func TestFilterDropsWhatCannotRun(t *testing.T) {
 	es[1].Needs, es[2].Needs = "write", "write"
 	kept := Filter(es, func(c Capability) bool { return c != "write" })
 	require.Len(t, kept, 1)
-	require.Equal(t, "r", kept[0].Help().Key)
+	require.Equal(t, "r", kept[0].Help.Key)
 	require.Len(t, Filter(es, nil), 3)
 }
 
@@ -77,7 +77,7 @@ func TestDisabledEntriesStayOutOfEveryView(t *testing.T) {
 	for name, can := range map[string]func(Capability) bool{"nil can": nil, "some can": func(Capability) bool { return true }} {
 		kept := Filter(es, can)
 		require.Len(t, kept, 1, name)
-		require.Equal(t, "y", kept[0].Help().Key, name)
+		require.Equal(t, "y", kept[0].Help.Key, name)
 	}
 	require.NotContains(t, ansi.Strip(Pack(es, 80, 2, "", Style{})[0]), "off")
 	require.NotContains(t, ansi.Strip(HintLine(es, Style{})), "off")
@@ -89,7 +89,7 @@ func TestFromBindingsSkipsDisabled(t *testing.T) {
 	on := key.New("y").WithHelp("y", "on")
 	es := FromBindings([]key.Binding{off, on})
 	require.Len(t, es, 1)
-	require.Equal(t, "y", es[0].Help().Key)
+	require.Equal(t, "y", es[0].Help.Key)
 }
 
 // The second of a pair carries no help: the first one's "↑/↓" names both.
@@ -98,7 +98,7 @@ func TestFromBindingsSkipsBindingsWithoutHelp(t *testing.T) {
 	down := key.New("down")
 	es := FromBindings([]key.Binding{up, down})
 	require.Len(t, es, 1)
-	require.Equal(t, "↑/↓", es[0].Help().Key)
+	require.Equal(t, "↑/↓", es[0].Help.Key)
 }
 
 func TestPackNamesTheHelpKeyOnlyWhenThereIsOne(t *testing.T) {
@@ -205,10 +205,9 @@ func TestSeparatorsAndTheMarkAreTheStyles(t *testing.T) {
 	require.Equal(t, "[a] one · [b] two", ansi.Strip(HintLine(es[:2], Style{})), "the defaults stay")
 }
 
-// New only labels: "↑/↓" is printed, never a key that fires.
-func TestNewHasNoKeysToMatch(t *testing.T) {
+// New only labels: "↑/↓" is printed as it is.
+func TestNewPrintsItsLabel(t *testing.T) {
 	e := New("↑/↓", "move")
-	require.Empty(t, e.Keys())
-	require.Equal(t, "↑/↓", e.Help().Key)
+	require.Equal(t, "↑/↓", e.Help.Key)
 	require.Equal(t, "[↑/↓] move", ansi.Strip(HintLine([]Entry{e}, Style{})))
 }

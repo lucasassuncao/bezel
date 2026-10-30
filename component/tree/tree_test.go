@@ -365,7 +365,7 @@ func TestScrollOffKeepsRowsAroundTheCursor(t *testing.T) {
 func TestTheTreeLegendNamesItsKeys(t *testing.T) {
 	var keys []string
 	for _, e := range newTree(5).Legend() {
-		keys = append(keys, e.Help().Key)
+		keys = append(keys, e.Help.Key)
 	}
 	require.Equal(t, []string{"↑/↓", "←/→"}, keys)
 }

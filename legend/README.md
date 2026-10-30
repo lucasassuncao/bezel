@@ -50,15 +50,16 @@ type Capability string
 ```
 
 <a name="Entry"></a>
-## type [Entry](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L25-L29>)
+## type [Entry](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L25-L30>)
 
-Entry is one key and what it does, plus the capability it needs. Group sorts it into a row: each group starts a new one while the rows last.
+Entry is what the legend shows for one key: its help, whether it is switched off, the capability it needs and the Group that sorts it into a row.
 
 ```go
 type Entry struct {
-    key.Binding
-    Needs Capability
-    Group int
+    Help     key.Help
+    Disabled bool
+    Needs    Capability
+    Group    int
 }
 ```
 
@@ -81,13 +82,13 @@ func FromBindings(bs []key.Binding) []Entry
 FromBindings turns bindings into entries, skipping disabled ones and those without help, such as the second of a pair the first names \("↑/↓"\). For apps that already keep their keys as key.Binding.
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L33>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L34>)
 
 ```go
 func New(keys, desc string) Entry
 ```
 
-New is an entry that only shows: keys is what the legend prints, "↑/↓", not keys it fires on. Set Needs for the capability it needs.
+New is an entry printing keys, such as "↑/↓", and desc. Set Needs for the capability it needs.
 
 <a name="Style"></a>
 ## type [Style](<https://github.com/lucasassuncao/bezel/blob/main/legend/legend.go#L58-L69>)

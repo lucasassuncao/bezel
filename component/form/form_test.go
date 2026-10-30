@@ -267,7 +267,7 @@ func TestWithStylesRecoloursEveryControl(t *testing.T) {
 func TestLegendFollowsTheFocusedControl(t *testing.T) {
 	descs := func(f Form) (out []string) {
 		for _, e := range f.Legend() {
-			out = append(out, e.Help().Desc)
+			out = append(out, e.Help.Desc)
 		}
 		return out
 	}

@@ -109,7 +109,7 @@ func TestWithStylesHoldsUnderAnotherTheme(t *testing.T) {
 func TestLegendNamesThePageKeysOnce(t *testing.T) {
 	es := New(1).Legend()
 	require.Len(t, es, 1)
-	require.Equal(t, key.Help{Key: "←/→", Desc: "page"}, es[0].Help())
+	require.Equal(t, key.Help{Key: "←/→", Desc: "page"}, es[0].Help)
 }
 
 func TestAZeroPaginatorIsOnePageOfOne(t *testing.T) {

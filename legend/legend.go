@@ -20,20 +20,20 @@ import (
 // The zero value is always allowed.
 type Capability string
 
-// Entry is one key and what it does, plus the capability it needs. Group
-// sorts it into a row: each group starts a new one while the rows last.
+// Entry is what the legend shows for one key: its help, whether it is
+// switched off, the capability it needs and the Group that sorts it into a row.
 type Entry struct {
-	key.Binding
-	Needs Capability
-	Group int
+	Help     key.Help
+	Disabled bool
+	Needs    Capability
+	Group    int
 }
 
-// New is an entry that only shows: keys is what the legend prints, "↑/↓",
-// not keys it fires on. Set Needs for the capability it needs.
-func New(keys, desc string) Entry { return Entry{Binding: key.New().WithHelp(keys, desc)} }
+// New is an entry printing keys, such as "↑/↓", and desc. Set Needs for the
+// capability it needs.
+func New(keys, desc string) Entry { return Entry{Help: key.Help{Key: keys, Desc: desc}} }
 
-// switchedOff reports an entry whose Disabled is set: Enabled() is false too
-// for one New made, which has no keys and still shows.
+// switchedOff reports an entry whose Disabled is set.
 func (e Entry) switchedOff() bool { return e.Disabled }
 
 // shown drops the switched-off entries, in a new slice.
@@ -77,7 +77,7 @@ func (s Style) groupSep(fallback string) string {
 }
 
 func (s Style) pair(e Entry) string {
-	return s.Key.Render(s.key(e.Help().Key)) + " " + s.Text.Render(e.Help().Desc)
+	return s.Key.Render(s.key(e.Help.Key)) + " " + s.Text.Render(e.Help.Desc)
 }
 
 func (s Style) key(k string) string {
@@ -107,7 +107,7 @@ func Pack(entries []Entry, width, maxLines int, helpKey string, st Style) []stri
 	parts := make([]string, 0, len(entries)+1)
 	// starts marks where each group begins in parts; help belongs to the first.
 	starts := []int{0}
-	listed := slices.ContainsFunc(entries, func(e Entry) bool { return e.Help().Key == helpKey })
+	listed := slices.ContainsFunc(entries, func(e Entry) bool { return e.Help.Key == helpKey })
 	if helpKey != "" && !listed {
 		parts = append(parts, st.pair(New(helpKey, "help")))
 	}
@@ -234,7 +234,7 @@ func FromBindings(bs []key.Binding) []Entry {
 	out := make([]Entry, 0, len(bs))
 	for _, b := range bs {
 		if b.Enabled() && b.Help().Key != "" {
-			out = append(out, Entry{Binding: b})
+			out = append(out, Entry{Help: b.Help()})
 		}
 	}
 	return out

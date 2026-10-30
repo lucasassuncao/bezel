@@ -75,7 +75,7 @@ func (h Help) View(body layout.Rect) string {
 		}
 		lines = append(lines, accent(h.style()).Bold(true).Render(s.Name), "")
 		for _, e := range s.Entries {
-			lines = append(lines, "  "+draw.Pad(e.Help().Key+" ", 16)+" "+e.Help().Desc)
+			lines = append(lines, "  "+draw.Pad(e.Help.Key+" ", 16)+" "+e.Help.Desc)
 		}
 	}
 	lines = append(lines, "", h.hint().Text.Render(h.keys.Close.Help().Key+" closes"))
