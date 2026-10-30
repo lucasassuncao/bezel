@@ -1,6 +1,6 @@
 // Package animation moves values on frames that arrive as messages: tweens,
-// springs, fades and physics, alone or on a shared Clock. Its subpackages
-// animate text and scenes. BEZEL_MOTION sets the speed.
+// springs, fades and physics, alone or on a shared Clock; BEZEL_MOTION sets
+// the speed. Experimental: its API may change in a minor release.
 package animation
 
 import (

@@ -75,6 +75,7 @@ type Config struct {
 	Spinner spinner.Spinner
 	// Transition, when set, is the effect played over the panes as the user
 	// changes tab, given the tab left and the tab shown. SlideTabs is one.
+	// Experimental, as the effect package is.
 	Transition func(from, to int) effect.Effect
 	// FocusFade, when set, carries the focused border's colour from the pane
 	// ChangePane leaves to the one it focuses over that long.

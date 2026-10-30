@@ -26,6 +26,7 @@ m.list = m.list.SetRows(reloaded) // SetX: a live change, after something happen
 - **`SetX`** changes a live model: `SetRows`, `SetTheme`, `SetStatus`. What can change live has only the `Set`, never a `With` doing the same.
 - **A variant is named, not built**: a preset of a shared type is a bare name, `spinner.Dot()`, `effect.Wipe(...)`, `theme.Mint`.
 - **`Config` struct** only where an app sets many fields at once, as `shell.Config`.
+- **A declared tree is not a model**: `layout`'s builders read as the screen they describe, `layout.Fixed("help").Info()` and `Columns(...).Collapse(72, "detail")`, so they keep their short names instead of `WithX`.
 
 ### Sizes
 
@@ -186,7 +187,7 @@ Nothing reads the clock. `Tick` asks for frames, each frame is tagged so a model
 ## No hidden state
 
 - No package variable is meant to be changed by an app. Per-app settings arrive through a constructor, a `With`, the theme or `shell.Config`.
-- The environment is read in two places only: `icon.FromEnv()` (`BEZEL_ASCII`, `TERM=dumb`) and `animation.Still()`/`Speed()` (`BEZEL_NO_MOTION`, `BEZEL_MOTION`, `TERM=dumb`).
+- The environment is read in two places only: `icon.FromEnv()` (`BEZEL_ASCII`, `TERM=dumb`) and `animation.Still()`/`Speed()` (`BEZEL_NO_MOTION`, `BEZEL_MOTION`, `TERM=dumb`). The terminal is asked in one: `theme.DarkTerminal()`, for a program that resolves a theme without a running bubbletea program to send `tea.BackgroundColorMsg`.
 - `View` never writes back. An overlay that needs its size in `Update` implements `overlay.Resizer`; whatever scrolls keeps its offset in a `layout.Window` and reports it through `Scroll()`.
 - Presets (`theme.Mint`, ...) are bases to build on: point a `Theme`'s `Base` at one, never change the preset.
 
@@ -204,3 +205,24 @@ A new component reaches for one of these before inventing a shape.
 | Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `Clicker`, `Themer`, `form.Holder`, `form.Initer` |
 | Strategy | `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies |
 | Cascade | `theme.Theme.Base`: each layer overrides the one below |
+
+## Compatibility
+
+What a v1 release promises, so a change knows whether it needs a v2.
+
+Fine in a minor release:
+
+- a new package, function, method, `WithX`, `SetX`, preset or event: a type switch on `Result.Event` passes over an event it does not know;
+- a new field in a `Config`, `Styles` or `Keys` struct, as long as its zero value keeps the behaviour from before;
+- a new role interface, the way `overlay.Resizer` came: behaviour an app opts into by implementing it.
+
+Only in a new major version (`/v2`):
+
+- removing or renaming anything exported, or changing a signature;
+- adding a method to an interface an app implements (`shell.Tab`, the overlay roles, `form.Holder`): it breaks every implementation, so new behaviour comes as a new role interface instead.
+
+Not promised:
+
+- what `View` draws, cell for cell: spacing, glyphs, the colours a preset derives, `DefaultStyles` and `DefaultKeys`. A test that compares a whole frame may need its expected text again after an upgrade;
+- the experimental packages, `animation`, `animation/text`, `animation/scene` and `effect`, and the shell's `Config.Transition`, `SlideTabs` and `Transition()` built on them: they may change in a minor release, said so in its notes;
+- the bubbletea and lipgloss types in bezel's signatures: bezel follows their v2, and a break there is a break here.

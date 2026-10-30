@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/animation"
 ```
 
-Package animation moves values on frames that arrive as messages: tweens, springs, fades and physics, alone or on a shared Clock. Its subpackages animate text and scenes. BEZEL\_MOTION sets the speed.
+Package animation moves values on frames that arrive as messages: tweens, springs, fades and physics, alone or on a shared Clock; BEZEL\_MOTION sets the speed. Experimental: its API may change in a minor release.
 
 ## Index
 

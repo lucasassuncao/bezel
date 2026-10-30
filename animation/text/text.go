@@ -1,6 +1,6 @@
-// Package text animates a line of text: typed, scrolled, shimmered, rolled
-// like an odometer or a departures board, waved, struck and highlighted.
-// Non-themable: colours come as arguments, never from the theme.
+// Package text animates a line of text: typed, scrolled, shimmered, rolled,
+// waved, struck and highlighted. Non-themable: colours are arguments.
+// Experimental: its API may change in a minor release.
 package text
 
 import (
