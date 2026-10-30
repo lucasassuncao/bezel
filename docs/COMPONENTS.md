@@ -279,7 +279,7 @@ No recording: this one is a test. A counter, and the test that drives it with th
 
 ## Changing the keys
 
-Every component that answers to keys keeps them in a struct of [`key.Binding`](../key)s. Packages with one component call it `Keys`: `list`, `tree`, `table`, `browser`, `viewport`, `input`, `textbox`, `form`, `accordion`, `paginator`, `filepicker`, `palette`. In `overlay`, each dialog has its own: `ConfirmKeys`, `PickKeys`, `PromptKeys`, `PagerKeys`, `HelpKeys`, `FilePickerKeys`. `DefaultKeys()` (or `DefaultConfirmKeys()` and so on) builds the defaults, and `WithKeys` hands the component a new set. Start from the defaults and change only what you need:
+Every component that answers to keys keeps them in a struct of [`key.Binding`](../key)s. Packages with one component call it `Keys`: `list`, `tree`, `table`, `browser`, `viewport`, `input`, `textbox`, `form`, `accordion`, `paginator`, `filepicker`. In `overlay`, each dialog has its own: `ConfirmKeys`, `PickKeys`, `PromptKeys`, `PagerKeys`, `HelpKeys`, `FilePickerKeys`. `DefaultKeys()` (or `DefaultConfirmKeys()` and so on) builds the defaults, and `WithKeys` hands the component a new set. Start from the defaults and change only what you need:
 
 ```go
 k := list.DefaultKeys()
@@ -300,7 +300,7 @@ l := list.New(rows).SetHeight(10).WithKeys(k)
   p := overlay.NewPick(title, rows, onPick, th).WithKeys(overlay.VimPickKeys())
   ```
 
-  `VimKeys()` is in `list`, `tree`, `table`, `browser`, `accordion`, `viewport`, `paginator`, `filepicker` and `form`; `overlay` has `VimPickKeys`, `VimFilePickerKeys` and `VimPagerKeys`. A preset is a starting point like the defaults: change one binding of it as above. Where a field is typed into (`input`, `textbox`, `palette`, a list's filter prompt) letters stay text.
+  `VimKeys()` is in `list`, `tree`, `table`, `browser`, `accordion`, `viewport`, `paginator`, `filepicker` and `form`; `overlay` has `VimPickKeys`, `VimFilePickerKeys` and `VimPagerKeys`. A preset is a starting point like the defaults: change one binding of it as above. Where a field is typed into (`input`, `textbox`, the `:` palette, a list's filter prompt) letters stay text.
 
 - **A form takes one set.** `form.Keys` covers the form and every control in it, and `Form.WithKeys` rebinds all of them at once.
 - **Esc belongs to the overlay stack.** The stack closes the top dialog before the dialog sees esc, so rebinding a dialog's esc only matters when you drive the dialog without a stack.

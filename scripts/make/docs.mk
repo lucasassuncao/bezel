@@ -13,8 +13,7 @@ DOC_PACKAGES := \
 	./layout/... \
 	./legend/... \
 	./overlay/... \
-	./palette/... \
-	./shell/... \
+	./shell \
 	./theme/...
 
 ## Generate documentation with gomarkdoc

@@ -65,7 +65,7 @@ Where the theme goes depends on who calls `View`. If bezel does, the component k
 
 | Who calls `View` | Where the theme goes | Packages |
 | --- | --- | --- |
-| bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `overlay`, `palette`, `textbox`, `input`, `cursor`, `logger` |
+| bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `overlay`, `textbox`, `input`, `cursor`, `logger` |
 | bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic | `form` |
 | the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport`, `accordion` |
 | nobody: a plain function | after the data | `progress`, `chart`, `inline`, `icon.Set.Render` |
@@ -94,7 +94,7 @@ Each package is in one class, and a non-themable one says so in its doc comment:
 
 | Class | The app can | Packages |
 | --- | --- | --- |
-| Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `input`, `textbox`, `form`, `palette`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, every `overlay` dialog but `Alert` |
+| Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `input`, `textbox`, `form`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, every `overlay` dialog but `Alert` |
 | Theme only | switch the theme (a plain function keeps no edit) | `chart`, `progress.Bar` and siblings, `inline`, `icon.Set.Render` |
 | Non-themable | nothing: the colours mean something, or are arguments | `overlay.Alert` and any `Kind` tint, `toast` (its `draw.Kind` colours are fixed), `animation` and subpackages, `effect`, `themebrowser` |
 
@@ -200,7 +200,7 @@ A new component reaches for one of these before inventing a shape.
 | Model-View-Update | every model: `Update` returns the next value and a `Result`, `View` only reads |
 | Composite | `layout.Node`: boxes of boxes and leaves, resolved as one tree |
 | Chain of responsibility | `Shell.Update`: overlays, then the status input, then actions, then the app |
-| Command | `shell.Action`, `palette.Item`: a key, a name and what it runs, as data |
+| Command | `shell.Action`: a key, a name and what it runs, as data |
 | Functional options | `shell.Option`, every `With` |
 | Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `Clicker`, `Themer`, `form.Holder`, `form.Initer` |
 | Strategy | `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies |

@@ -25,8 +25,6 @@
 //     capability and packed into a few rows.
 //   - [github.com/lucasassuncao/bezel/key]: key bindings, with the help the
 //     legend prints and a switch to turn them off.
-//   - [github.com/lucasassuncao/bezel/palette]: the ":" command line, with
-//     prefix matching, completion and arguments.
 //   - [github.com/lucasassuncao/bezel/bezeltest]: builds the key presses a
 //     terminal sends, for tests that drive a model.
 //

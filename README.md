@@ -109,7 +109,6 @@ go run ./examples/app
 - [`draw`](draw): ANSI-safe text fitting, panels (text and a scrollbar in their edges), cards, header, tabs, dividers and buttons.
 - [`legend`](legend): key hints, filtered by what the session allows and packed into a few rows.
 - [`key`](key): key bindings, with the help the legend prints; a `Binding` is a value, switched off by its `Disabled` field.
-- [`palette`](palette): the `:` command line, with completion and arguments.
 - [`bezeltest`](bezeltest): key presses for tests that drive a model.
 
 **Components**, in [`component`](component): what goes inside the panes.

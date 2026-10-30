@@ -5,7 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/lucasassuncao/bezel/palette"
+	"github.com/lucasassuncao/bezel/shell/internal/palette"
 )
 
 // defaultStatusTTL is Config.StatusTTL when the app sets none.

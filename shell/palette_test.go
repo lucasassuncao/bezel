@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/overlay"
-	"github.com/lucasassuncao/bezel/palette"
+	"github.com/lucasassuncao/bezel/shell/internal/palette"
 )
 
 var colon = tea.KeyPressMsg{Code: ':', Text: ":"}

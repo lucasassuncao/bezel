@@ -4,7 +4,7 @@ How the repository is laid out, what each folder holds, and why it sits where it
 
 ```
 bezel/
-├── shell, overlay, palette     the frame: what an app embeds and what it opens over the panes
+├── shell, overlay              the frame: what an app embeds and what it opens over the panes
 ├── theme, draw, legend,        the foundation: colours, drawing, key hints, bindings and rects,
 │   key, layout                 under everything else
 ├── bezeltest                   key presses for tests
@@ -22,7 +22,7 @@ bezel/
 The packages at the root are the ones every app touches: `shell` to embed, `theme` to resolve, `layout` to declare the screen. They stay at the root so their imports are the shortest, `bezel/shell` rather than a longer path, and so the module's root reads as its main API, as Go modules usually do. They are two layers, not one:
 
 - **The foundation**: `layout`, `key`, `draw`, `legend` and `theme`. They import nothing from the rest of bezel but each other, and everything else is built on them. `layout` and `key` stand alone; `draw` sits on `layout`, `legend` on `draw` and `key`, and `theme` on `draw` and `legend`, whose styles it fills in.
-- **The frame**: `overlay`, `palette` and `shell`. They are the top of the stack: they compose components (the prompt's `input`, the pager's `viewport`, the busy `spinner`), and nothing in the module imports them except one another and the examples. `legend`, `palette` and `overlay` are not components, though they draw: the shell owns them, builds them from its `Action`s and draws them around the panes, and an app never places one in a pane of its own.
+- **The frame**: `overlay` and `shell`. They are the top of the stack: they compose components (the prompt's `input`, the pager's `viewport`, the busy `spinner`), and nothing in the module imports them except one another and the examples. `legend`, `overlay` and the `:` palette are not components, though they draw: the shell owns them, builds them from its `Action`s and draws them around the panes, and an app never places one in a pane of its own.
 
 `bezeltest` is apart from both: it builds the key presses a terminal sends, for tests, and imports nothing from bezel.
 
@@ -73,7 +73,7 @@ From the bottom up, each layer imports only the ones below it:
 2. the foundation: `layout`, `key`, `draw`, `legend`, `theme`
 3. `component/` and `animation/`, side by side; neither imports the other
 4. `effect/`, on `animation`
-5. the frame: `overlay`, `palette`, `shell`
+5. the frame: `overlay`, `shell` (with its `:` palette in `shell/internal/palette`)
 
 A change that needs an arrow pointing up, a component that imports `overlay` or an animation that imports `effect`, is a sign the code belongs a layer higher.
 

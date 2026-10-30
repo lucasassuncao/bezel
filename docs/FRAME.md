@@ -7,7 +7,6 @@ The frame is what bezel draws around an app: the header and its tabs, the panes'
 | [`shell`](../shell) | the struct an app embeds: resize, tabs, focus, status, the overlay stack, the legend and the keys |
 | [`layout`](../layout) | the screen as a tree of named panes, resolved to rects every frame |
 | [`overlay`](../overlay) | the stack of dialogs, and the ready-made ones |
-| [`palette`](../palette) | the `:` command line |
 | [`legend`](../legend), [`key`](../key) | the key hints at the foot of the screen, and the bindings they are made from |
 
 Each package's example and recording is in [COMPONENTS.md](COMPONENTS.md#the-frame); this page is how they fit together.

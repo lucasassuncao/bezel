@@ -10,7 +10,7 @@ import (
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/overlay"
-	"github.com/lucasassuncao/bezel/palette"
+	"github.com/lucasassuncao/bezel/shell/internal/palette"
 )
 
 // statusExpiredMsg clears the status whose sequence it carries. A stale one,
