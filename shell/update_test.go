@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/component/input"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
@@ -16,7 +17,7 @@ import (
 
 func TestOverlayConsumesKeysBeforeTheApp(t *testing.T) {
 	s := newShell()
-	s = s.Push(overlay.NewAlert(overlay.Info, "hi", "there", theme.Resolved{}))
+	s = s.Push(overlay.NewAlert(draw.Info, "hi", "there", theme.Resolved{}))
 	s, r := s.Update(press("x"))
 	require.True(t, r.Handled)
 	require.NotNil(t, r.Cmd)

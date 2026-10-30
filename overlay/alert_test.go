@@ -6,12 +6,13 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
 func TestAlertClosesOnAnyKey(t *testing.T) {
-	a := NewAlert(Info, "Saved", "written to disk", theme.Resolved{})
+	a := NewAlert(draw.Info, "Saved", "written to disk", theme.Resolved{})
 	_, r := a.Update(press("x"))
 	cmd := r.Cmd
 	require.NotNil(t, cmd)

@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -242,7 +243,7 @@ func isClose(cmd tea.Cmd) bool {
 }
 
 func TestAClickReachesTheTopDialogInItsOwnCells(t *testing.T) {
-	s := Stack{}.Push(NewAlert(Info, "Saved", "all done", theme.Resolved{}))
+	s := Stack{}.Push(NewAlert(draw.Info, "Saved", "all done", theme.Resolved{}))
 	x, y := cellOf(t, s, "OK")
 	_, r := s.Click(x, y, clickBody)
 	cmd := r.Cmd

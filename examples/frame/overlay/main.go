@@ -13,6 +13,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
@@ -64,11 +65,11 @@ func done(text string) tea.Cmd { return func() tea.Msg { return doneMsg{text} } 
 func (m model) modal() overlay.Overlay {
 	switch kinds[m.cursor] {
 	case "Alert":
-		return overlay.NewAlert(overlay.Warning, "Disk almost full",
+		return overlay.NewAlert(draw.Warning, "Disk almost full",
 			"91% of /var is in use.", m.th)
 	case "Confirm":
 		return overlay.NewConfirm("Delete notes.txt?", "It cannot be restored.",
-			done("deleted notes.txt"), m.th).WithKind(overlay.Danger)
+			done("deleted notes.txt"), m.th).WithKind(draw.Danger)
 	case "Prompt":
 		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return done("created " + v) }, m.th).
 			WithLabel("name").

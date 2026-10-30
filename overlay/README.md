@@ -20,9 +20,9 @@ Package overlay is the stack of modals floating over the panes. The top one gets
 - [func Open\(o Overlay\) tea.Cmd](<#Open>)
 - [func ToTop\(cmd tea.Cmd\) tea.Cmd](<#ToTop>)
 - [type Alert](<#Alert>)
-  - [func NewAlert\(kind Kind, title, message string, th theme.Resolved\) Alert](<#NewAlert>)
+  - [func NewAlert\(kind draw.Kind, title, message string, th theme.Resolved\) Alert](<#NewAlert>)
   - [func \(a Alert\) Click\(x, y int, body layout.Rect\) \(Overlay, bezel.Result\)](<#Alert.Click>)
-  - [func \(a Alert\) Kind\(\) Kind](<#Alert.Kind>)
+  - [func \(a Alert\) Kind\(\) draw.Kind](<#Alert.Kind>)
   - [func \(a Alert\) Legend\(\) \[\]legend.Entry](<#Alert.Legend>)
   - [func \(a Alert\) SetTheme\(th theme.Resolved\) Overlay](<#Alert.SetTheme>)
   - [func \(a Alert\) Update\(msg tea.Msg\) \(Overlay, bezel.Result\)](<#Alert.Update>)
@@ -35,7 +35,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(c Choice\) SetTheme\(th theme.Resolved\) Overlay](<#Choice.SetTheme>)
   - [func \(c Choice\) Update\(msg tea.Msg\) \(Overlay, bezel.Result\)](<#Choice.Update>)
   - [func \(c Choice\) View\(body layout.Rect\) string](<#Choice.View>)
-  - [func \(c Choice\) WithKind\(k Kind\) Choice](<#Choice.WithKind>)
+  - [func \(c Choice\) WithKind\(k draw.Kind\) Choice](<#Choice.WithKind>)
   - [func \(c Choice\) WithStyles\(edit func\(Styles\) Styles\) Choice](<#Choice.WithStyles>)
 - [type Clicker](<#Clicker>)
 - [type CloseMsg](<#CloseMsg>)
@@ -47,7 +47,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(c Confirm\) Update\(msg tea.Msg\) \(Overlay, bezel.Result\)](<#Confirm.Update>)
   - [func \(c Confirm\) View\(body layout.Rect\) string](<#Confirm.View>)
   - [func \(c Confirm\) WithKeys\(k ConfirmKeys\) Confirm](<#Confirm.WithKeys>)
-  - [func \(c Confirm\) WithKind\(k Kind\) Confirm](<#Confirm.WithKind>)
+  - [func \(c Confirm\) WithKind\(k draw.Kind\) Confirm](<#Confirm.WithKind>)
   - [func \(c Confirm\) WithStyles\(edit func\(Styles\) Styles\) Confirm](<#Confirm.WithStyles>)
 - [type ConfirmKeys](<#ConfirmKeys>)
   - [func DefaultConfirmKeys\(\) ConfirmKeys](<#DefaultConfirmKeys>)
@@ -67,7 +67,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p FilePicker\) WithDirs\(on bool\) FilePicker](<#FilePicker.WithDirs>)
   - [func \(p FilePicker\) WithHidden\(on bool\) FilePicker](<#FilePicker.WithHidden>)
   - [func \(p FilePicker\) WithKeys\(k FilePickerKeys\) FilePicker](<#FilePicker.WithKeys>)
-  - [func \(p FilePicker\) WithKind\(k Kind\) FilePicker](<#FilePicker.WithKind>)
+  - [func \(p FilePicker\) WithKind\(k draw.Kind\) FilePicker](<#FilePicker.WithKind>)
   - [func \(p FilePicker\) WithStyles\(edit func\(Styles\) Styles\) FilePicker](<#FilePicker.WithStyles>)
 - [type FilePickerKeys](<#FilePickerKeys>)
   - [func DefaultFilePickerKeys\(\) FilePickerKeys](<#DefaultFilePickerKeys>)
@@ -79,13 +79,12 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(h Help\) Update\(msg tea.Msg\) \(Overlay, bezel.Result\)](<#Help.Update>)
   - [func \(h Help\) View\(body layout.Rect\) string](<#Help.View>)
   - [func \(h Help\) WithKeys\(k HelpKeys\) Help](<#Help.WithKeys>)
-  - [func \(h Help\) WithKind\(k Kind\) Help](<#Help.WithKind>)
+  - [func \(h Help\) WithKind\(k draw.Kind\) Help](<#Help.WithKind>)
   - [func \(h Help\) WithStyles\(edit func\(Styles\) Styles\) Help](<#Help.WithStyles>)
   - [func \(h Help\) WithTitle\(title string\) Help](<#Help.WithTitle>)
 - [type HelpKeys](<#HelpKeys>)
   - [func DefaultHelpKeys\(\) HelpKeys](<#DefaultHelpKeys>)
 - [type HelpSection](<#HelpSection>)
-- [type Kind](<#Kind>)
 - [type Option](<#Option>)
   - [func Opt\(keys, label string, do tea.Cmd\) Option](<#Opt>)
 - [type Overlay](<#Overlay>)
@@ -98,7 +97,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p Pager\) Update\(msg tea.Msg\) \(Overlay, bezel.Result\)](<#Pager.Update>)
   - [func \(p Pager\) View\(body layout.Rect\) string](<#Pager.View>)
   - [func \(p Pager\) WithKeys\(k PagerKeys\) Pager](<#Pager.WithKeys>)
-  - [func \(p Pager\) WithKind\(k Kind\) Pager](<#Pager.WithKind>)
+  - [func \(p Pager\) WithKind\(k draw.Kind\) Pager](<#Pager.WithKind>)
   - [func \(p Pager\) WithStyles\(edit func\(Styles\) Styles\) Pager](<#Pager.WithStyles>)
 - [type PagerKeys](<#PagerKeys>)
   - [func DefaultPagerKeys\(\) PagerKeys](<#DefaultPagerKeys>)
@@ -113,7 +112,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p Pick\) View\(body layout.Rect\) string](<#Pick.View>)
   - [func \(p Pick\) WithCursor\(i int\) Pick](<#Pick.WithCursor>)
   - [func \(p Pick\) WithKeys\(k PickKeys\) Pick](<#Pick.WithKeys>)
-  - [func \(p Pick\) WithKind\(k Kind\) Pick](<#Pick.WithKind>)
+  - [func \(p Pick\) WithKind\(k draw.Kind\) Pick](<#Pick.WithKind>)
   - [func \(p Pick\) WithNotes\(notes ...string\) Pick](<#Pick.WithNotes>)
   - [func \(p Pick\) WithStyles\(edit func\(Styles\) Styles\) Pick](<#Pick.WithStyles>)
 - [type PickKeys](<#PickKeys>)
@@ -131,7 +130,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(p Prompt\) WithAcceptHint\(desc string\) Prompt](<#Prompt.WithAcceptHint>)
   - [func \(p Prompt\) WithInput\(in input.Model\) Prompt](<#Prompt.WithInput>)
   - [func \(p Prompt\) WithKeys\(k PromptKeys\) Prompt](<#Prompt.WithKeys>)
-  - [func \(p Prompt\) WithKind\(k Kind\) Prompt](<#Prompt.WithKind>)
+  - [func \(p Prompt\) WithKind\(k draw.Kind\) Prompt](<#Prompt.WithKind>)
   - [func \(p Prompt\) WithLabel\(label string\) Prompt](<#Prompt.WithLabel>)
   - [func \(p Prompt\) WithLines\(lines ...string\) Prompt](<#Prompt.WithLines>)
   - [func \(p Prompt\) WithPreview\(label string, preview func\(typed string\) string\) Prompt](<#Prompt.WithPreview>)
@@ -161,7 +160,7 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(t Text\) SetTheme\(th theme.Resolved\) Overlay](<#Text.SetTheme>)
   - [func \(t Text\) Update\(msg tea.Msg\) \(Overlay, bezel.Result\)](<#Text.Update>)
   - [func \(t Text\) View\(body layout.Rect\) string](<#Text.View>)
-  - [func \(t Text\) WithKind\(k Kind\) Text](<#Text.WithKind>)
+  - [func \(t Text\) WithKind\(k draw.Kind\) Text](<#Text.WithKind>)
   - [func \(t Text\) WithStyles\(edit func\(Styles\) Styles\) Text](<#Text.WithStyles>)
 - [type Themer](<#Themer>)
 - [type TopMsg](<#TopMsg>)
@@ -244,13 +243,13 @@ type Alert struct {
 ### func [NewAlert](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L25>)
 
 ```go
-func NewAlert(kind Kind, title, message string, th theme.Resolved) Alert
+func NewAlert(kind draw.Kind, title, message string, th theme.Resolved) Alert
 ```
 
-NewAlert is an alert of kind, its border in that kind's colour.
+NewAlert is an alert of kind, its border in that Kind's fixed colour.
 
 <a name="Alert.Click"></a>
-### func \(Alert\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L49>)
+### func \(Alert\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L48>)
 
 ```go
 func (a Alert) Click(x, y int, body layout.Rect) (Overlay, bezel.Result)
@@ -259,16 +258,16 @@ func (a Alert) Click(x, y int, body layout.Rect) (Overlay, bezel.Result)
 Click closes the alert on a click on OK.
 
 <a name="Alert.Kind"></a>
-### func \(Alert\) [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L32>)
+### func \(Alert\) [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L31>)
 
 ```go
-func (a Alert) Kind() Kind
+func (a Alert) Kind() draw.Kind
 ```
 
 Kind is what the alert reports.
 
 <a name="Alert.Legend"></a>
-### func \(Alert\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L41>)
+### func \(Alert\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L40>)
 
 ```go
 func (a Alert) Legend() []legend.Entry
@@ -277,7 +276,7 @@ func (a Alert) Legend() []legend.Entry
 
 
 <a name="Alert.SetTheme"></a>
-### func \(Alert\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L140>)
+### func \(Alert\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L130>)
 
 ```go
 func (a Alert) SetTheme(th theme.Resolved) Overlay
@@ -286,7 +285,7 @@ func (a Alert) SetTheme(th theme.Resolved) Overlay
 SetTheme repaints the alert under th; its Kind keeps its colour.
 
 <a name="Alert.Update"></a>
-### func \(Alert\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L34>)
+### func \(Alert\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L33>)
 
 ```go
 func (a Alert) Update(msg tea.Msg) (Overlay, bezel.Result)
@@ -295,7 +294,7 @@ func (a Alert) Update(msg tea.Msg) (Overlay, bezel.Result)
 
 
 <a name="Alert.View"></a>
-### func \(Alert\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L43>)
+### func \(Alert\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/alert.go#L42>)
 
 ```go
 func (a Alert) View(body layout.Rect) string
@@ -351,7 +350,7 @@ func (c Choice) Legend() []legend.Entry
 Legend is the options, plus esc unless an option already names it: esc always closes, the stack sees to that.
 
 <a name="Choice.SetTheme"></a>
-### func \(Choice\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L149>)
+### func \(Choice\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L139>)
 
 ```go
 func (c Choice) SetTheme(th theme.Resolved) Overlay
@@ -378,16 +377,16 @@ func (c Choice) View(body layout.Rect) string
 View draws each option as a button naming its keys. The one enter picks is filled in the dialog's colour, since that is what enter will do.
 
 <a name="Choice.WithKind"></a>
-### func \(Choice\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L176>)
+### func \(Choice\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L166>)
 
 ```go
-func (c Choice) WithKind(k Kind) Choice
+func (c Choice) WithKind(k draw.Kind) Choice
 ```
 
 WithKind tints the choice for what it decides.
 
 <a name="Choice.WithStyles"></a>
-### func \(Choice\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L119>)
+### func \(Choice\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L109>)
 
 ```go
 func (c Choice) WithStyles(edit func(Styles) Styles) Choice
@@ -454,7 +453,7 @@ func (c Confirm) Legend() []legend.Entry
 
 
 <a name="Confirm.SetTheme"></a>
-### func \(Confirm\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L143>)
+### func \(Confirm\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L133>)
 
 ```go
 func (c Confirm) SetTheme(th theme.Resolved) Overlay
@@ -490,16 +489,16 @@ func (c Confirm) WithKeys(k ConfirmKeys) Confirm
 WithKeys rebinds the confirm; its legend follows the bindings' help.
 
 <a name="Confirm.WithKind"></a>
-### func \(Confirm\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L170>)
+### func \(Confirm\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L160>)
 
 ```go
-func (c Confirm) WithKind(k Kind) Confirm
+func (c Confirm) WithKind(k draw.Kind) Confirm
 ```
 
 WithKind tints the confirm, such as Danger for one that deletes.
 
 <a name="Confirm.WithStyles"></a>
-### func \(Confirm\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L113>)
+### func \(Confirm\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L103>)
 
 ```go
 func (c Confirm) WithStyles(edit func(Styles) Styles) Confirm
@@ -611,7 +610,7 @@ func (p FilePicker) Resize(body layout.Rect) Overlay
 Resize shows as many entries as fit in body.
 
 <a name="FilePicker.SetTheme"></a>
-### func \(FilePicker\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L161>)
+### func \(FilePicker\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L151>)
 
 ```go
 func (p FilePicker) SetTheme(th theme.Resolved) Overlay
@@ -674,16 +673,16 @@ func (p FilePicker) WithKeys(k FilePickerKeys) FilePicker
 WithKeys rebinds the picker.
 
 <a name="FilePicker.WithKind"></a>
-### func \(FilePicker\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L191>)
+### func \(FilePicker\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L181>)
 
 ```go
-func (p FilePicker) WithKind(k Kind) FilePicker
+func (p FilePicker) WithKind(k draw.Kind) FilePicker
 ```
 
 WithKind tints the picker, its entries in the new colour.
 
 <a name="FilePicker.WithStyles"></a>
-### func \(FilePicker\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L134>)
+### func \(FilePicker\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L124>)
 
 ```go
 func (p FilePicker) WithStyles(edit func(Styles) Styles) FilePicker
@@ -751,7 +750,7 @@ func (h Help) Legend() []legend.Entry
 
 
 <a name="Help.SetTheme"></a>
-### func \(Help\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L155>)
+### func \(Help\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L145>)
 
 ```go
 func (h Help) SetTheme(th theme.Resolved) Overlay
@@ -787,16 +786,16 @@ func (h Help) WithKeys(k HelpKeys) Help
 WithKeys rebinds the help; the line under the keys follows Close's help.
 
 <a name="Help.WithKind"></a>
-### func \(Help\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L182>)
+### func \(Help\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L172>)
 
 ```go
-func (h Help) WithKind(k Kind) Help
+func (h Help) WithKind(k draw.Kind) Help
 ```
 
 WithKind tints the help.
 
 <a name="Help.WithStyles"></a>
-### func \(Help\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L125>)
+### func \(Help\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L115>)
 
 ```go
 func (h Help) WithStyles(edit func(Styles) Styles) Help
@@ -843,26 +842,6 @@ type HelpSection struct {
     Name    string
     Entries []legend.Entry
 }
-```
-
-<a name="Kind"></a>
-## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L12>)
-
-Kind is what a dialog reports; it picks the colour of its border and title.
-
-```go
-type Kind int
-```
-
-<a name="Info"></a>
-
-```go
-const (
-    Info Kind = iota
-    Success
-    Warning
-    Danger
-)
 ```
 
 <a name="Option"></a>
@@ -948,7 +927,7 @@ func (p Pager) Resize(body layout.Rect) Overlay
 Resize sizes the viewport to what fits in body.
 
 <a name="Pager.SetTheme"></a>
-### func \(Pager\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L158>)
+### func \(Pager\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L148>)
 
 ```go
 func (p Pager) SetTheme(th theme.Resolved) Overlay
@@ -984,16 +963,16 @@ func (p Pager) WithKeys(k PagerKeys) Pager
 WithKeys rebinds the pager; its legend and position line follow the bindings' help.
 
 <a name="Pager.WithKind"></a>
-### func \(Pager\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L185>)
+### func \(Pager\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L175>)
 
 ```go
-func (p Pager) WithKind(k Kind) Pager
+func (p Pager) WithKind(k draw.Kind) Pager
 ```
 
 WithKind tints the pager for what its text reports, such as a failed run.
 
 <a name="Pager.WithStyles"></a>
-### func \(Pager\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L128>)
+### func \(Pager\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L118>)
 
 ```go
 func (p Pager) WithStyles(edit func(Styles) Styles) Pager
@@ -1079,7 +1058,7 @@ func (p Pick) Resize(body layout.Rect) Overlay
 Resize shows as many rows as fit in body, scrolled to keep the cursor's.
 
 <a name="Pick.SetTheme"></a>
-### func \(Pick\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L152>)
+### func \(Pick\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L142>)
 
 ```go
 func (p Pick) SetTheme(th theme.Resolved) Overlay
@@ -1124,10 +1103,10 @@ func (p Pick) WithKeys(k PickKeys) Pick
 WithKeys rebinds the pick; the keys drawn in its box follow the bindings' help.
 
 <a name="Pick.WithKind"></a>
-### func \(Pick\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L179>)
+### func \(Pick\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L169>)
 
 ```go
-func (p Pick) WithKind(k Kind) Pick
+func (p Pick) WithKind(k draw.Kind) Pick
 ```
 
 WithKind tints the pick for what it decides.
@@ -1142,7 +1121,7 @@ func (p Pick) WithNotes(notes ...string) Pick
 WithNotes are lines drawn under the rows, such as what the picked one does.
 
 <a name="Pick.WithStyles"></a>
-### func \(Pick\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L122>)
+### func \(Pick\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L112>)
 
 ```go
 func (p Pick) WithStyles(edit func(Styles) Styles) Pick
@@ -1227,7 +1206,7 @@ func (p Prompt) Legend() []legend.Entry
 Legend offers enter only when it would do something.
 
 <a name="Prompt.SetTheme"></a>
-### func \(Prompt\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L164>)
+### func \(Prompt\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L154>)
 
 ```go
 func (p Prompt) SetTheme(th theme.Resolved) Overlay
@@ -1290,10 +1269,10 @@ func (p Prompt) WithKeys(k PromptKeys) Prompt
 WithKeys rebinds the prompt.
 
 <a name="Prompt.WithKind"></a>
-### func \(Prompt\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L188>)
+### func \(Prompt\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L178>)
 
 ```go
-func (p Prompt) WithKind(k Kind) Prompt
+func (p Prompt) WithKind(k draw.Kind) Prompt
 ```
 
 WithKind tints the prompt, such as Danger for a typed confirmation.
@@ -1335,7 +1314,7 @@ func (p Prompt) WithRequire(want string) Prompt
 WithRequire accepts only want, typed exactly: the friction for an action that cannot be undone.
 
 <a name="Prompt.WithStyles"></a>
-### func \(Prompt\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L131>)
+### func \(Prompt\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L121>)
 
 ```go
 func (p Prompt) WithStyles(edit func(Styles) Styles) Prompt
@@ -1494,9 +1473,9 @@ type StatusLiner interface{ StatusLine(width int) string }
 ```
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L24-L28>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L14-L18>)
 
-Styles are what every dialog but Alert paints with. A Kind other than Info still recolours the border, the title and the focused button: those colours report something and stay the theme's.
+Styles are what every dialog but Alert paints with. A dialog given a Kind still draws its border, title and focused button in that Kind's fixed colour, whatever the theme or WithStyles says.
 
 ```go
 type Styles struct {
@@ -1507,7 +1486,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L31>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L21>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles
@@ -1545,7 +1524,7 @@ func (t Text) Legend() []legend.Entry
 
 
 <a name="Text.SetTheme"></a>
-### func \(Text\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L146>)
+### func \(Text\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L136>)
 
 ```go
 func (t Text) SetTheme(th theme.Resolved) Overlay
@@ -1572,16 +1551,16 @@ func (t Text) View(body layout.Rect) string
 
 
 <a name="Text.WithKind"></a>
-### func \(Text\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L173>)
+### func \(Text\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L163>)
 
 ```go
-func (t Text) WithKind(k Kind) Text
+func (t Text) WithKind(k draw.Kind) Text
 ```
 
 WithKind tints the text for what it reports.
 
 <a name="Text.WithStyles"></a>
-### func \(Text\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L116>)
+### func \(Text\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/overlay/look.go#L106>)
 
 ```go
 func (t Text) WithStyles(edit func(Styles) Styles) Text

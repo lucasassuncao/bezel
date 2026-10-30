@@ -168,7 +168,7 @@ Deleting asks first, the same way, with a confirm drawn in the danger colour:
 case askDropMsg:
 	if i, ok := m.current(); ok {
 		yes := func() tea.Msg { return dropMsg{} }
-		ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.th).WithKind(overlay.Danger)
+		ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.th).WithKind(draw.Danger)
 		return m, overlay.Open(ask)
 	}
 ```

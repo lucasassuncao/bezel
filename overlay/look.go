@@ -8,19 +8,9 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-// Kind is what a dialog reports; it picks the colour of its border and title.
-type Kind int
-
-const (
-	Info Kind = iota
-	Success
-	Warning
-	Danger
-)
-
-// Styles are what every dialog but Alert paints with. A Kind other than Info
-// still recolours the border, the title and the focused button: those
-// colours report something and stay the theme's.
+// Styles are what every dialog but Alert paints with. A dialog given a Kind
+// still draws its border, title and focused button in that Kind's fixed
+// colour, whatever the theme or WithStyles says.
 type Styles struct {
 	Box    lipgloss.Style   // the modal box
 	Hint   legend.Style     // the keys a dialog lists inside its box
@@ -39,7 +29,10 @@ type look struct {
 	th   *theme.Resolved
 	st   *Styles
 	edit func(Styles) Styles
-	kind Kind
+	kind draw.Kind
+	// tinted is a dialog given a Kind: Info's zero value alone would paint
+	// every plain dialog blue.
+	tinted bool
 }
 
 // lookOf is a look at th, untinted.
@@ -87,22 +80,19 @@ func (l look) styles() *theme.Resolved {
 	return l.th
 }
 
-// style is the theme's modal box, its border in the kind's colour: the accent
-// for information, the palette's success, warning or danger otherwise.
+// style is the theme's modal box, its border in the Kind's fixed colour when
+// the dialog was given one.
 func (l look) style() lipgloss.Style {
-	c := l.styles().Colors
-	var border string
-	switch l.kind {
-	case Success:
-		border = c.Success
-	case Warning:
-		border = c.Warning
-	case Danger:
-		border = c.Danger
-	default:
+	if !l.tinted {
 		return l.own().Box
 	}
-	return l.own().Box.BorderForeground(lipgloss.Color(border))
+	return l.own().Box.BorderForeground(l.kind.Color())
+}
+
+// withKind is l tinted with k.
+func (l look) withKind(k draw.Kind) look {
+	l.kind, l.tinted = k, true
+	return l
 }
 
 // hint is how a dialog draws the keys it lists inside its box.
@@ -167,25 +157,25 @@ func (p Prompt) SetTheme(th theme.Resolved) Overlay {
 }
 
 // WithKind tints the confirm, such as Danger for one that deletes.
-func (c Confirm) WithKind(k Kind) Confirm { c.kind = k; return c }
+func (c Confirm) WithKind(k draw.Kind) Confirm { c.look = c.withKind(k); return c }
 
 // WithKind tints the text for what it reports.
-func (t Text) WithKind(k Kind) Text { t.kind = k; return t }
+func (t Text) WithKind(k draw.Kind) Text { t.look = t.withKind(k); return t }
 
 // WithKind tints the choice for what it decides.
-func (c Choice) WithKind(k Kind) Choice { c.kind = k; return c }
+func (c Choice) WithKind(k draw.Kind) Choice { c.look = c.withKind(k); return c }
 
 // WithKind tints the pick for what it decides.
-func (p Pick) WithKind(k Kind) Pick { p.kind = k; return p }
+func (p Pick) WithKind(k draw.Kind) Pick { p.look = p.withKind(k); return p }
 
 // WithKind tints the help.
-func (h Help) WithKind(k Kind) Help { h.kind = k; return h }
+func (h Help) WithKind(k draw.Kind) Help { h.look = h.withKind(k); return h }
 
 // WithKind tints the pager for what its text reports, such as a failed run.
-func (p Pager) WithKind(k Kind) Pager { p.kind = k; return p }
+func (p Pager) WithKind(k draw.Kind) Pager { p.look = p.withKind(k); return p }
 
 // WithKind tints the prompt, such as Danger for a typed confirmation.
-func (p Prompt) WithKind(k Kind) Prompt { p.kind = k; return p }
+func (p Prompt) WithKind(k draw.Kind) Prompt { p.look = p.withKind(k); return p }
 
 // WithKind tints the picker, its entries in the new colour.
-func (p FilePicker) WithKind(k Kind) FilePicker { p.kind = k; return p }
+func (p FilePicker) WithKind(k draw.Kind) FilePicker { p.look = p.withKind(k); return p }

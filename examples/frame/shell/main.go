@@ -108,7 +108,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case askMsg:
 		item := m.selected()
 		yes := func() tea.Msg { return deletedMsg{item} }
-		return m, overlay.Open(overlay.NewConfirm("Delete", item, yes, m.th).WithKind(overlay.Danger))
+		return m, overlay.Open(overlay.NewConfirm("Delete", item, yes, m.th).WithKind(draw.Danger))
 	case deletedMsg:
 		m.sh, cmd = m.sh.SetStatus("deleted "+msg.item, shell.OK, 2*time.Second)
 		return m, cmd

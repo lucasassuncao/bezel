@@ -7,6 +7,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -42,9 +43,9 @@ func TestConfirmIgnoresVimKeys(t *testing.T) {
 // The button enter would press is filled in the colour the dialog's kind gives its border.
 func TestConfirmFillsItsFocusedButtonInItsKindsColour(t *testing.T) {
 	th := theme.Resolve(theme.Mint(), true)
-	c := NewConfirm("Delete?", "gone for good", nil, th).WithKind(Danger)
+	c := NewConfirm("Delete?", "gone for good", nil, th).WithKind(draw.Danger)
 	view := c.View(layout.Rect{W: 80, H: 20})
-	require.Contains(t, view, th.Button.Focused.Background(lipgloss.Color(th.Colors.Danger)).Render("  Yes  "))
+	require.Contains(t, view, th.Button.Focused.Background(draw.Danger.Color()).Foreground(lipgloss.Color("#111111")).Render("  Yes  "))
 	require.Contains(t, view, th.Button.Blurred.Render("  No  "))
 }
 

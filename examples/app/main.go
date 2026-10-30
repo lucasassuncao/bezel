@@ -137,7 +137,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case askDropMsg:
 		if i, ok := m.current(); ok {
 			yes := func() tea.Msg { return dropMsg{} }
-			ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.th).WithKind(overlay.Danger)
+			ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.th).WithKind(draw.Danger)
 			return m, overlay.Open(ask)
 		}
 	case dropMsg:

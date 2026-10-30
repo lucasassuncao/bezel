@@ -98,7 +98,7 @@ func TestAMissingPaneVanishesAndItsSpaceIsReused(t *testing.T) {
 func TestOverlayFloatsOverThePanes(t *testing.T) {
 	s := newShell()
 	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
-	s = s.Push(overlay.NewAlert(overlay.Info, "Saved", "written", theme.Resolved{Modal: lipgloss.NewStyle().Border(lipgloss.NormalBorder())}))
+	s = s.Push(overlay.NewAlert(draw.Info, "Saved", "written", theme.Resolved{Modal: lipgloss.NewStyle().Border(lipgloss.NormalBorder())}))
 	out := ansi.Strip(s.View(demoPanes()))
 	require.Contains(t, out, "written")
 	require.Contains(t, out, "item one") // background still there
@@ -160,7 +160,7 @@ func TestLegendPinsTheShellHelpKey(t *testing.T) {
 func TestNoOverlayChangesTheLegend(t *testing.T) {
 	st := lipgloss.NewStyle()
 	for name, o := range map[string]overlay.Overlay{
-		"alert":   overlay.NewAlert(overlay.Info, "t", "m", theme.Resolved{Modal: st}),
+		"alert":   overlay.NewAlert(draw.Info, "t", "m", theme.Resolved{Modal: st}),
 		"text":    overlay.NewText("t", "body", theme.Resolved{Modal: st}),
 		"confirm": overlay.NewConfirm("t", "m", nil, theme.Resolved{Modal: st}),
 		"pick":    overlay.NewPick("t", []string{"a", "b"}, nil, theme.Resolved{Modal: st}),

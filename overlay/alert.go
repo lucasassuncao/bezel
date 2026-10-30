@@ -21,15 +21,14 @@ type Alert struct {
 	message string
 }
 
-// NewAlert is an alert of kind, its border in that kind's colour.
-func NewAlert(kind Kind, title, message string, th theme.Resolved) Alert {
-	l := lookOf(th)
-	l.kind = kind
+// NewAlert is an alert of kind, its border in that Kind's fixed colour.
+func NewAlert(kind draw.Kind, title, message string, th theme.Resolved) Alert {
+	l := lookOf(th).withKind(kind)
 	return Alert{look: l, title: title, message: message}
 }
 
 // Kind is what the alert reports.
-func (a Alert) Kind() Kind { return a.kind }
+func (a Alert) Kind() draw.Kind { return a.kind }
 
 func (a Alert) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	if _, ok := msg.(tea.KeyPressMsg); ok {
@@ -60,10 +59,14 @@ func accent(style lipgloss.Style) lipgloss.Style {
 }
 
 // button is the theme's button with the focused one filled in the dialog's
-// colour: its border's, which the dialog's kind tints.
+// colour: its border's. On a Kind's fixed colour the label is near black,
+// which reads on all four.
 func (l look) button(label string, focused bool) string {
 	st := l.own().Button
 	st.Focused = st.Focused.Background(l.style().GetBorderTopForeground())
+	if l.tinted {
+		st.Focused = st.Focused.Foreground(lipgloss.Color("#111111"))
+	}
 	return draw.Button(label, st, focused)
 }
 

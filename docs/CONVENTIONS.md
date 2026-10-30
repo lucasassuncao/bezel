@@ -71,7 +71,7 @@ Where the theme goes depends on who calls `View`. If bezel does, the component k
 | nobody: a plain function | after the data | `progress`, `chart`, `inline`, `icon.Set.Render` |
 | the shell | `Config.Theme`; `SetTheme` also repaints open dialogs | `shell` |
 
-- A dialog that reports something is tinted with `WithKind(overlay.Danger)`; `Alert` takes its `Kind` in the constructor. Those colours stay the theme's success, warning and danger, whatever `WithStyles` does.
+- A dialog that reports something is tinted with `WithKind(draw.Danger)`; `Alert` takes its `draw.Kind` in the constructor. A Kind's colour is fixed (blue, green, yellow, red), the same under every theme and whatever `WithStyles` does; a dialog with no Kind keeps the theme's look.
 - `draw`, `legend` and `overlay.Box` take raw lipgloss styles: `theme` imports them, so they cannot import it.
 - The caret's blink pace travels with the theme (`Resolved.CaretBlink`), so tests shrink it there, not in a package variable.
 

@@ -48,7 +48,7 @@ func TestMouseMovesTheMessageIntoThePanesBody(t *testing.T) {
 }
 
 func TestADialogCoversThePanes(t *testing.T) {
-	s := sizedShell().Push(overlay.NewAlert(overlay.Info, "x", "y", theme.Resolve(theme.Plain(), true)))
+	s := sizedShell().Push(overlay.NewAlert(draw.Info, "x", "y", theme.Resolve(theme.Plain(), true)))
 	r := s.Rect("list")
 	_, ok := s.PaneAt(r.X+1, r.Y+1)
 	require.False(t, ok)
@@ -119,7 +119,7 @@ func TestScreenTurnsTheMouseOnWhenAsked(t *testing.T) {
 }
 
 func TestAClickWithADialogOpenIsTheDialogs(t *testing.T) {
-	s := sizedShell().Push(overlay.NewAlert(overlay.Info, "Saved", "done", theme.Resolve(theme.Plain(), true)))
+	s := sizedShell().Push(overlay.NewAlert(draw.Info, "Saved", "done", theme.Resolve(theme.Plain(), true)))
 	_, r := s.Update(click(0, 0))
 	require.True(t, r.Handled)
 	require.Nil(t, r.Cmd, "off its buttons it does nothing")

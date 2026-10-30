@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/component/input"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -20,26 +21,26 @@ func border(l look) any { return l.style().GetBorderTopForeground() }
 
 func TestKindPicksTheBorderColour(t *testing.T) {
 	th := theme.Resolve(theme.Mint(), true)
-	require.Equal(t, th.Modal, lookOf(th).style(), "Info is the theme's own modal")
-	require.Equal(t, lipgloss.Color(th.Colors.Danger), border(look{th: &th, kind: Danger}))
-	require.Equal(t, lipgloss.Color(th.Colors.Success), border(look{th: &th, kind: Success}))
-	require.Equal(t, lipgloss.Color(th.Colors.Warning), border(look{th: &th, kind: Warning}))
+	require.Equal(t, th.Modal, lookOf(th).style(), "a dialog with no Kind is the theme's own modal")
+	for _, k := range []draw.Kind{draw.Info, draw.Success, draw.Warning, draw.Danger} {
+		require.Equal(t, k.Color(), border(lookOf(th).withKind(k)), "the Kind's fixed colour, not the theme's")
+	}
 }
 
 func TestWithKindTintsEveryDialog(t *testing.T) {
 	th := theme.Resolve(theme.Mint(), true)
 	for name, l := range map[string]look{
-		"alert":   NewAlert(Danger, "t", "m", th).look,
-		"confirm": NewConfirm("t", "m", nil, th).WithKind(Danger).look,
-		"text":    NewText("t", "", th).WithKind(Danger).look,
-		"choice":  NewChoice("t", "", nil, th).WithKind(Danger).look,
-		"pick":    NewPick("t", nil, nil, th).WithKind(Danger).look,
-		"help":    NewHelp(nil, th).WithKind(Danger).look,
-		"pager":   NewPager("t", "x", th).WithKind(Danger).look,
-		"prompt":  NewPrompt("t", nil, th).WithKind(Danger).look,
-		"picker":  NewFilePicker("t", t.TempDir(), nil, th).WithKind(Danger).look,
+		"alert":   NewAlert(draw.Danger, "t", "m", th).look,
+		"confirm": NewConfirm("t", "m", nil, th).WithKind(draw.Danger).look,
+		"text":    NewText("t", "", th).WithKind(draw.Danger).look,
+		"choice":  NewChoice("t", "", nil, th).WithKind(draw.Danger).look,
+		"pick":    NewPick("t", nil, nil, th).WithKind(draw.Danger).look,
+		"help":    NewHelp(nil, th).WithKind(draw.Danger).look,
+		"pager":   NewPager("t", "x", th).WithKind(draw.Danger).look,
+		"prompt":  NewPrompt("t", nil, th).WithKind(draw.Danger).look,
+		"picker":  NewFilePicker("t", t.TempDir(), nil, th).WithKind(draw.Danger).look,
 	} {
-		require.Equal(t, lipgloss.Color(th.Colors.Danger), border(l), name)
+		require.Equal(t, draw.Danger.Color(), border(l), name)
 	}
 }
 
@@ -48,9 +49,9 @@ func TestFilePickerWithKindRepaintsEntries(t *testing.T) {
 	th := theme.Resolve(theme.Mint(), true)
 	dir := t.TempDir()
 	require.NoError(t, os.Mkdir(filepath.Join(dir, "sub"), 0o750))
-	p := NewFilePicker("t", dir, nil, th).WithKind(Danger)
+	p := NewFilePicker("t", dir, nil, th).WithKind(draw.Danger)
 	o, _ := p.Update(p.Init()())
-	danger := lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Danger))
+	danger := lipgloss.NewStyle().Foreground(draw.Danger.Color())
 	require.Contains(t, o.View(layout.Rect{W: 80, H: 30}), danger.Render(">"))
 }
 
@@ -83,8 +84,8 @@ func TestWithStylesReachesEveryNeutralDialog(t *testing.T) {
 	}
 	for name, l := range looks {
 		require.Equal(t, lipgloss.NormalBorder(), l.style().GetBorderStyle(), name)
-		l.kind = Danger
-		require.Equal(t, lipgloss.Color(th.Colors.Danger), l.style().GetBorderTopForeground(), name+": the kind keeps its colour")
+		l = l.withKind(draw.Danger)
+		require.Equal(t, draw.Danger.Color(), l.style().GetBorderTopForeground(), name+": the kind keeps its colour")
 	}
 }
 
@@ -104,7 +105,7 @@ func TestEveryDialogDrawsTheModalBorder(t *testing.T) {
 	th := theme.Resolve(theme.Mint(), true)
 	body := layout.Rect{W: 60, H: 20}
 	for name, o := range map[string]Overlay{
-		"alert":   NewAlert(Success, "t", "m", th),
+		"alert":   NewAlert(draw.Success, "t", "m", th),
 		"confirm": NewConfirm("t", "m", nil, th),
 		"text":    NewText("t", "m", th),
 		"choice":  NewChoice("t", "m", nil, th),
