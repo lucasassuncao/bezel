@@ -209,22 +209,4 @@ A new component reaches for one of these before inventing a shape.
 
 ## Compatibility
 
-What a v1 release promises, so a change knows whether it needs a v2.
-
-Fine in a minor release:
-
-- a new package, function, method, `WithX`, `SetX`, preset or event: a type switch on `Result.Event` passes over an event it does not know;
-- a new field in a `Config`, `Styles` or `Keys` struct, as long as its zero value keeps the behaviour from before;
-- a new role interface, the way `overlay.Resizer` came: behaviour an app opts into by implementing it.
-
-Only in a new major version (`/v2`):
-
-- removing or renaming anything exported, or changing a signature;
-- adding a method to an interface an app implements (`shell.Tab`, the overlay roles, `form.Holder`): it breaks every implementation, so new behaviour comes as a new role interface instead.
-- showing an `animation` or `effect` type in a stable package's API: a component may move with them inside, but what it exports stays its own, or that part is experimental too.
-
-Not promised:
-
-- what `View` draws, cell for cell: spacing, glyphs, the colours a preset derives, `DefaultStyles` and `DefaultKeys`. A test that compares a whole frame may need its expected text again after an upgrade;
-- the experimental packages, `animation`, `animation/text`, `animation/scene` and `effect`: they may change in a minor release, said so in its notes;
-- the bubbletea and lipgloss types in bezel's signatures: bezel follows their v2, and a break there is a break here.
+What v1 promises, and so what a change may do without a `/v2`, is on its own page: [STABILITY.md](STABILITY.md). A change that breaks it is a bug in the change.

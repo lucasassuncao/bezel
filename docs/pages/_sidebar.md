@@ -11,6 +11,7 @@
 - **Inside bezel**
   - [Architecture](ARCHITECTURE.md)
   - [Conventions](CONVENTIONS.md)
+  - [Stability](STABILITY.md)
 
 - **Elsewhere**
   - [API on pkg.go.dev](https://pkg.go.dev/github.com/lucasassuncao/bezel)

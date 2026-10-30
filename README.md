@@ -55,6 +55,7 @@ A pane missing from the map gives its space back that frame.
 | [Animations](docs/ANIMATIONS.md) | tweens, springs, physics, text and scenes, and the clock that drives them |
 | [Architecture](docs/ARCHITECTURE.md) | what each folder holds, and what may import what |
 | [Conventions](docs/CONVENTIONS.md) | the rules every package follows: where the theme goes, the one `Update` |
+| [Stability](docs/STABILITY.md) | what v1 promises: the stable and the experimental packages, and what a minor release may change |
 
 Each package also has its own `README.md`, generated from its doc comments.
 
