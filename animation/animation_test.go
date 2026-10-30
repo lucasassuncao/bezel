@@ -213,7 +213,7 @@ var frame0 = time.Unix(0, 0)
 
 func TestOwnFrameIsHandledAndAsksForTheNext(t *testing.T) {
 	tw := NewTween(0, 1, time.Second)
-	tw, r := tw.Update(tw.FrameAt(frame0))
+	_, r := tw.Update(tw.FrameAt(frame0))
 	require.True(t, r.Handled)
 	require.NotNil(t, r.Cmd)
 }
