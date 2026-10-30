@@ -511,8 +511,7 @@ func FuzzListStaysInItsHeight(f *testing.F) {
 	f.Add("全角の名前", "", 30, 1, 29)
 	f.Add("a\x1b[31mred", "x\ny", 0, 4, 0)
 	f.Add("", "", 5, 0, 1)
-	f.Add("
-", "0", 30, 16, 0) // a section label with a break took two rows
+	f.Add("\n", "0", 30, 16, 0) // a section label with a break took two rows
 	f.Fuzz(func(t *testing.T, label, desc string, n, h, down int) {
 		if !appText(label, desc) {
 			t.Skip()
