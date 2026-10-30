@@ -16,23 +16,23 @@ func TestKeyframesPassThroughEveryStop(t *testing.T) {
 	)
 	start := time.Unix(10, 0)
 	k, _ = k.Advance(start)
-	assert.Equal(t, 0.0, k.Cur)
+	assert.Equal(t, 0.0, k.cur)
 	mid, _ := k.Advance(start.Add(25 * ms))
-	assert.InDelta(t, 5, mid.Cur, 1e-9, "halfway up")
+	assert.InDelta(t, 5, mid.cur, 1e-9, "halfway up")
 	top, _ := k.Advance(start.Add(50 * ms))
-	assert.InDelta(t, 10, top.Cur, 1e-9)
+	assert.InDelta(t, 10, top.cur, 1e-9)
 	down, _ := k.Advance(start.Add(75 * ms))
-	assert.InDelta(t, 5, down.Cur, 1e-9, "on the way back")
+	assert.InDelta(t, 5, down.cur, 1e-9, "on the way back")
 	end, done := k.Advance(start.Add(time.Second))
 	assert.True(t, done)
-	assert.Equal(t, 0.0, end.Cur)
+	assert.Equal(t, 0.0, end.cur)
 }
 
 func TestKeyframesWithTooFewKeysStayPut(t *testing.T) {
 	moving(t)
 	one := NewKeyframes(100*ms, Key{Value: 7})
 	assert.False(t, one.Active())
-	assert.Equal(t, 7.0, one.Cur)
+	assert.Equal(t, 7.0, one.cur)
 	assert.False(t, NewKeyframes(100*ms).Active())
 }
 
@@ -40,7 +40,7 @@ func TestStillKeyframesAreBornAtTheirLastKey(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	k := NewKeyframes(100*ms, Key{At: 0, Value: 1}, Key{At: 1, Value: 9})
 	assert.False(t, k.Active())
-	assert.Equal(t, 9.0, k.Cur)
+	assert.Equal(t, 9.0, k.cur)
 }
 
 func TestKeyframesTakeOnlyTheirOwnFrames(t *testing.T) {

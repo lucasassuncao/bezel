@@ -51,12 +51,12 @@ func (r Rubber) Pull(v float64) Rubber {
 // Release lets go: a value past a limit springs back onto it.
 func (r Rubber) Release() (Rubber, tea.Cmd) {
 	var cmd tea.Cmd
-	r.s, cmd = r.s.To(min(max(r.s.Pos, r.lo), r.hi))
+	r.s, cmd = r.s.To(min(max(r.s.pos, r.lo), r.hi))
 	return r, cmd
 }
 
-// Pos is the value now.
-func (r Rubber) Pos() float64 { return r.s.Pos }
+// Value is the value now.
+func (r Rubber) Value() float64 { return r.s.pos }
 
 // Active reports whether the value is still springing back.
 func (r Rubber) Active() bool { return r.s.Active() }

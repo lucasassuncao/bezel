@@ -116,14 +116,14 @@ func (p physics) rows(th theme.Resolved, label func(kind, variant string) string
 
 // dropped is the track with the ball where it is and the floor at the end.
 func (p physics) dropped(th theme.Resolved) string {
-	at := min(max(int(math.Round(p.drop.Cur)), 0), track-1)
+	at := min(max(int(math.Round(p.drop.Value())), 0), track-1)
 	return th.Muted.Render(strings.Repeat("·", at)) + th.Accent.Render("●") +
 		th.Muted.Render(strings.Repeat("·", track-1-at)) + th.Bold.Render("▐")
 }
 
 // swung is a rod with the bob where the pendulum has it.
 func (p physics) swung(th theme.Resolved) string {
-	at := min(max(swing+int(math.Round(p.pend.Cur)), 0), 2*swing)
+	at := min(max(swing+int(math.Round(p.pend.Value())), 0), 2*swing)
 	cells := []rune(strings.Repeat("─", 2*swing+1))
 	cells[swing] = '┼'
 	cells[at] = '●'
@@ -133,7 +133,7 @@ func (p physics) swung(th theme.Resolved) string {
 // orbiting is the sky with a sun in the middle and the point going round it,
 // drawn behind the sun on the far half.
 func (p physics) orbiting(th theme.Resolved) []string {
-	px, py := p.orbit.Pos().Round()
+	px, py := p.orbit.Value().Round()
 	cx, cy := flight/2, sky/2
 	lines := make([]string, sky)
 	for y := range sky {
@@ -187,7 +187,7 @@ func (p physics) flocking(th theme.Resolved) []string {
 // stretched is the rubber's track up to its top, the give beyond it, and the
 // value where it is.
 func (p physics) stretched(th theme.Resolved) string {
-	at := min(max(int(math.Round(p.rubber.Pos())), 0), track-1)
+	at := min(max(int(math.Round(p.rubber.Value())), 0), track-1)
 	var b strings.Builder
 	for x := range track {
 		switch {

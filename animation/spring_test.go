@@ -15,12 +15,12 @@ import (
 func settle(t *testing.T, s Spring, cmd tea.Cmd) (Spring, float64) {
 	t.Helper()
 	res := bezel.Result{Cmd: cmd}
-	at, peak := time.Unix(1000, 0), s.Pos
+	at, peak := time.Unix(1000, 0), s.pos
 	for i := 0; res.Cmd != nil; i++ {
 		require.Less(t, i, 1000, "the spring never came to rest")
 		s, res = s.Update(s.FrameAt(at))
 		at = at.Add(Frame)
-		peak = max(peak, s.Pos)
+		peak = max(peak, s.pos)
 	}
 	return s, peak
 }
@@ -29,8 +29,8 @@ func TestSpringComesToRestOnItsTarget(t *testing.T) {
 	s, cmd := NewSpring(0).To(10)
 	assert.True(t, s.Active())
 	s, peak := settle(t, s, cmd)
-	assert.Equal(t, 10.0, s.Pos)
-	assert.Equal(t, 0.0, s.Vel)
+	assert.Equal(t, 10.0, s.pos)
+	assert.Equal(t, 0.0, s.vel)
 	assert.False(t, s.Active())
 	assert.LessOrEqual(t, peak, 10.0, "a critically damped spring does not overshoot")
 	assert.Equal(t, 10, s.Int())
@@ -40,7 +40,7 @@ func TestALooseSpringOvershoots(t *testing.T) {
 	s, cmd := NewSpring(0).WithDamping(0.3).To(10)
 	s, peak := settle(t, s, cmd)
 	assert.Greater(t, peak, 10.5)
-	assert.Equal(t, 10.0, s.Pos)
+	assert.Equal(t, 10.0, s.pos)
 }
 
 // Retargeting mid-flight keeps the motion: no second clock, no lost speed.
@@ -51,13 +51,13 @@ func TestRetargetingKeepsTheSpringMoving(t *testing.T) {
 		s, _ = s.Update(s.FrameAt(at))
 		at = at.Add(Frame)
 	}
-	vel := s.Vel
+	vel := s.vel
 	require.Positive(t, vel)
 	s, cmd := s.To(20)
 	assert.Nil(t, cmd, "its frames are already coming")
-	assert.Equal(t, vel, s.Vel)
+	assert.Equal(t, vel, s.vel)
 	s, _ = settle(t, s, s.Tick())
-	assert.Equal(t, 20.0, s.Pos)
+	assert.Equal(t, 20.0, s.pos)
 }
 
 func TestASpringAtRestAsksForNothing(t *testing.T) {

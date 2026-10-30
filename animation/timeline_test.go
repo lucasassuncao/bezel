@@ -105,7 +105,7 @@ func TestCascadeDelaysEachMore(t *testing.T) {
 		fs[i], _ = fs[i].Advance(start)
 		fs[i], _ = fs[i].Advance(start.Add(150 * ms))
 	}
-	assert.Equal(t, 1.0, fs[0].Cur)
-	assert.Greater(t, fs[1].Cur, 0.0)
-	assert.Equal(t, 0.0, fs[2].Cur, "the third has not started")
+	assert.Equal(t, 1.0, fs[0].cur)
+	assert.Greater(t, fs[1].cur, 0.0)
+	assert.Equal(t, 0.0, fs[2].cur, "the third has not started")
 }

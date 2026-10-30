@@ -212,7 +212,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if msg.String() == "left" {
 				by = -nudge
 			}
-			target := min(max(m.steady.Target+float64(by), 0), track-1)
+			target := min(max(m.steady.Target()+float64(by), 0), track-1)
 			m.steady, _ = m.steady.To(target)
 			m.bouncy, _ = m.bouncy.To(target)
 			return m.run(nil)
@@ -292,8 +292,8 @@ func (m model) run(cmd tea.Cmd) (tea.Model, tea.Cmd) {
 func (m model) frame(msg animation.FrameMsg) (tea.Model, tea.Cmd) {
 	var phCmd, clockCmd tea.Cmd
 	var slide bezel.Result
-	if m.tween, slide = m.tween.Update(msg); m.tween.Cur != m.height {
-		m.height = m.tween.Cur
+	if m.tween, slide = m.tween.Update(msg); m.tween.Value() != m.height {
+		m.height = m.tween.Value()
 		m.sh = m.sh.SetLayout(shape(m.height))
 	}
 	m.ph, phCmd = m.ph.update(msg)
@@ -381,7 +381,7 @@ func (m model) gallery() string {
 		}
 		cur := 0
 		if i < len(m.bars) {
-			cur = m.bars[i].Cur
+			cur = m.bars[i].Value()
 		}
 		rows = append(rows, label(kind, e.name)+m.bar(cur))
 	}
@@ -389,11 +389,11 @@ func (m model) gallery() string {
 		label("spring", "steady")+m.spring(m.steady),
 		label("", "bouncy")+m.spring(m.bouncy),
 		"",
-		label("float", "sub-cell")+progress.Smooth(int(m.smooth.Cur*1000), 1000, track, m.th),
-		label("count-up", "ease out")+m.th.Bold.Render(thousands(m.count.Cur)+" files"),
-		label("fade", "accent→muted")+lipgloss.NewStyle().Foreground(m.fade.Color()).Render(saved),
+		label("float", "sub-cell")+progress.Smooth(int(m.smooth.Value()*1000), 1000, track, m.th),
+		label("count-up", "ease out")+m.th.Bold.Render(thousands(m.count.Value())+" files"),
+		label("fade", "accent→muted")+lipgloss.NewStyle().Foreground(m.fade.Value()).Render(saved),
 		"",
-		label("pulse", "yoyo forever")+lipgloss.NewStyle().Foreground(m.pulse.Color()).Render("● waiting for the server"),
+		label("pulse", "yoyo forever")+lipgloss.NewStyle().Foreground(m.pulse.Value()).Render("● waiting for the server"),
 		label("cascade", "120ms apart")+m.blocks(),
 	)
 	return strings.Join(rows, "\n")
@@ -434,7 +434,7 @@ func (m model) blocks() string {
 	for i := range parts {
 		cur := 0
 		if i < len(m.cascade) {
-			cur = m.cascade[i].Cur
+			cur = m.cascade[i].Value()
 		}
 		parts[i] = m.th.Accent.Render(strings.Repeat("▮", cur)) + strings.Repeat(" ", block-cur)
 	}

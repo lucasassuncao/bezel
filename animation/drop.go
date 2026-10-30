@@ -17,7 +17,7 @@ const settleHop = 0.05
 // settles: a notice that drops into place, a card that lands. Unlike
 // Out(Bounce) it follows real motion: each hop lower and quicker than the last.
 type Drop struct {
-	Cur      float64
+	cur      float64
 	from, to float64
 	gravity  float64    // cells a second squared
 	bounce   float64    // the share of its speed the floor gives back
@@ -29,10 +29,10 @@ var _ bezel.Model[Drop] = Drop{}
 
 // NewDrop falls from from to the floor at to, either way up the screen.
 func NewDrop(from, to float64) Drop {
-	d := Drop{Cur: from, from: from, to: to, gravity: 60, bounce: 0.45, run: frames.NewRun(time.Second)}
+	d := Drop{cur: from, from: from, to: to, gravity: 60, bounce: 0.45, run: frames.NewRun(time.Second)}
 	d.run.Repeat = Forever
 	if !d.Active() {
-		d.Cur = to
+		d.cur = to
 	}
 	return d
 }
@@ -104,9 +104,12 @@ func (d Drop) Advance(now time.Time) (Drop, bool) {
 	d.run, _ = d.run.Advance(now)
 	d.t = frames.Paced(now.Sub(d.run.Start)).Seconds()
 	pos, settled := d.at(d.t)
-	d.Cur = pos
+	d.cur = pos
 	if settled {
 		d.run = frames.Run{}
 	}
 	return d, settled
 }
+
+// Value is where the last frame put the drop.
+func (d Drop) Value() float64 { return d.cur }

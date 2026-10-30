@@ -18,7 +18,7 @@ func (d Drop) Shape() (w, h float64) {
 	speed := math.Abs(after-before) / (2 * dt)
 	top := math.Sqrt(2 * d.gravity * math.Abs(d.to-d.from)) // speed at the first hit
 	share := min(speed/top, 1)
-	if math.Abs(d.Cur-d.to) < contact && share > 0.2 {
+	if math.Abs(d.cur-d.to) < contact && share > 0.2 {
 		h = 1 - 0.45*share
 		return 1 / h, h
 	}

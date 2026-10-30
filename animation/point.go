@@ -19,8 +19,8 @@ func (p Point) Round() (x, y int) { return int(math.Round(p.X)), int(math.Round(
 // Move eases a point from one place to another over a duration: an overlay
 // that drops in, a marker that travels.
 type Move struct {
-	From, To Point
-	Cur      Point // where the last frame put it
+	from, to Point
+	cur      Point // where the last frame put it
 	run      frames.Run
 }
 
@@ -30,9 +30,9 @@ var _ bezel.Model[Move] = Move{}
 // is Still it is inactive and already at to.
 func NewMove(from, to Point, dur time.Duration) Move {
 	if dur <= 0 || from == to || Still() {
-		return Move{From: to, To: to, Cur: to}
+		return Move{from: to, to: to, cur: to}
 	}
-	return Move{From: from, To: to, Cur: from, run: frames.NewRun(dur)}
+	return Move{from: from, to: to, cur: from, run: frames.NewRun(dur)}
 }
 
 // WithEase is m following e instead of InOut(Quad).
@@ -93,11 +93,11 @@ func (m Move) Advance(now time.Time) (Move, bool) {
 	switch {
 	case m.Active():
 		e := ease(p)
-		m.Cur = Point{m.From.X + (m.To.X-m.From.X)*e, m.From.Y + (m.To.Y-m.From.Y)*e}
+		m.cur = Point{m.from.X + (m.to.X-m.from.X)*e, m.from.Y + (m.to.Y-m.from.Y)*e}
 	case p == 1:
-		m.Cur = m.To
+		m.cur = m.to
 	default:
-		m.Cur = m.From
+		m.cur = m.from
 	}
 	return m, !m.Active()
 }
@@ -143,8 +143,8 @@ func (f Follow) To(p Point) (Follow, tea.Cmd) {
 	return f, f.Tick()
 }
 
-// Pos is where the point is now.
-func (f Follow) Pos() Point { return Point{f.x.Pos, f.y.Pos} }
+// Value is where the point is now.
+func (f Follow) Value() Point { return Point{f.x.pos, f.y.pos} }
 
 // Active reports whether either axis is still moving.
 func (f Follow) Active() bool { return f.x.Active() || f.y.Active() }
@@ -179,3 +179,6 @@ func (f Follow) Advance(now time.Time) (Follow, bool) {
 	f.y, _ = f.y.Advance(now)
 	return f, !f.Active()
 }
+
+// Value is where the last frame put the move.
+func (m Move) Value() Point { return m.cur }

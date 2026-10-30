@@ -34,17 +34,17 @@ func TestStillAnimationsAreBornAtTheirEnd(t *testing.T) {
 
 	tw := NewTween(0, 10, time.Second)
 	assert.False(t, tw.Active())
-	assert.Equal(t, 10, tw.Cur)
+	assert.Equal(t, 10, tw.cur)
 	assert.Nil(t, tw.Tick())
 
 	f := NewFloat(0, 1, time.Second)
 	assert.False(t, f.Active())
-	assert.Equal(t, 1.0, f.Cur)
+	assert.Equal(t, 1.0, f.cur)
 
-	assert.Equal(t, white, NewFade(black, white, time.Second).Color())
+	assert.Equal(t, white, NewFade(black, white, time.Second).Value())
 	s, cmd := NewSpring(0).To(10)
 	assert.Nil(t, cmd)
-	assert.Equal(t, 10.0, s.Pos, "a still spring jumps")
+	assert.Equal(t, 10.0, s.pos, "a still spring jumps")
 }
 
 // TestMain clears both switches, so a CI with TERM=dumb still tests motion.
@@ -75,7 +75,7 @@ func TestSpeedScalesEveryClock(t *testing.T) {
 	tw, _ = tw.Advance(start)
 	tw, done := tw.Advance(start.Add(500 * time.Millisecond))
 	assert.True(t, done)
-	assert.Equal(t, 10, tw.Cur)
+	assert.Equal(t, 10, tw.cur)
 
 	assert.Equal(t, time.Second, frames.Paced(500*time.Millisecond))
 }

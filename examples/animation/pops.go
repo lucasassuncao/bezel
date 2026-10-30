@@ -68,7 +68,7 @@ func (p pops) rank() pops {
 }
 
 func (p pops) sweep() pops {
-	from := p.donut.Cur
+	from := p.donut.Value()
 	p.share = (p.share + 1) % len(shares)
 	p.donut = animation.NewFloat(from, shares[p.share], 900*time.Millisecond).WithEase(animation.Out(animation.Cubic))
 	return p
@@ -94,7 +94,7 @@ func (p pops) moving() bool {
 // rows is the tab's body: the burst beside the donut, the race, the ball.
 func (p pops) rows(th theme.Resolved, label func(kind, variant string) string) string {
 	field := p.field(th)
-	donut := chart.Donut(p.donut.Cur, 1, ring, th)
+	donut := chart.Donut(p.donut.Value(), 1, ring, th)
 	top := lipgloss.JoinHorizontal(lipgloss.Top, field, "   ", donut)
 	var rows []string
 	for i, line := range strings.Split(top, "\n") {
@@ -157,7 +157,7 @@ func (p pops) field(th theme.Resolved) string {
 // squashed is the drop's track with the ball drawn as its shape has it: tall
 // while fast, wide and flat against the wall, round at rest.
 func (p pops) squashed(th theme.Resolved) string {
-	at := min(max(int(math.Round(p.ball.Cur)), 0), track-1)
+	at := min(max(int(math.Round(p.ball.Value())), 0), track-1)
 	w, h := p.ball.Shape()
 	glyph := "●"
 	switch {

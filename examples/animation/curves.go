@@ -88,7 +88,7 @@ func (c curves) rows(th theme.Resolved, label func(kind, variant string) string)
 		}
 		v := 1.0
 		if i < len(c.dots) {
-			v = c.dots[i].Cur
+			v = c.dots[i].Value()
 		}
 		rows[i] = label(kind, f.name) + dotOn(th, v)
 	}

@@ -15,7 +15,7 @@ import (
 type Path struct {
 	pts  []Point
 	lens []float64 // distance from the first point to each one
-	Cur  Point     // where the last frame put it
+	cur  Point     // where the last frame put it
 	run  frames.Run
 }
 
@@ -32,12 +32,12 @@ func NewPath(dur time.Duration, points ...Point) Path {
 	for i := 1; i < len(p.pts); i++ {
 		p.lens[i] = p.lens[i-1] + math.Hypot(p.pts[i].X-p.pts[i-1].X, p.pts[i].Y-p.pts[i-1].Y)
 	}
-	p.Cur = p.pts[len(p.pts)-1]
+	p.cur = p.pts[len(p.pts)-1]
 	if p.lens[len(p.lens)-1] == 0 {
 		return p
 	}
 	if p.run = frames.NewRun(dur); p.run.Active() {
-		p.Cur = p.pts[0]
+		p.cur = p.pts[0]
 	}
 	return p
 }
@@ -133,6 +133,9 @@ func (p Path) Advance(now time.Time) (Path, bool) {
 	ease := frames.Or(p.run.Ease)
 	var q float64
 	p.run, q = p.run.Advance(now)
-	p.Cur = p.at(ease(q))
+	p.cur = p.at(ease(q))
 	return p, !p.Active()
 }
+
+// Value is where the last frame put the path.
+func (p Path) Value() Point { return p.cur }

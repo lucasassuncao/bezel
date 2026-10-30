@@ -18,5 +18,5 @@ func TestTheFlowTabPlaysToItsEnd(t *testing.T) {
 	require.True(t, m.(model).fl.moving())
 	m, out = clockFor(t, m, time.Unix(10000, 0))
 	require.Equal(t, 5, strings.Count(out, strings.Repeat("█", track)), "every staggered bar is full")
-	require.InDelta(t, 20, m.(model).fl.keys.Cur, 1e-9, "the dial rests on its last stop")
+	require.InDelta(t, 20, m.(model).fl.keys.Value(), 1e-9, "the dial rests on its last stop")
 }

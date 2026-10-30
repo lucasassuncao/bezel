@@ -25,7 +25,7 @@ func TestThePointsAndTheMarkerLandOnTheClock(t *testing.T) {
 	require.True(t, mv.move.Active() && mv.follow.Active() && mv.path.Active())
 	m, _ = clockFor(t, m, time.Unix(3000, 0))
 	mv = m.(model).mv
-	require.Equal(t, corners[0], mv.move.Cur)
-	require.Equal(t, corners[0], mv.follow.Pos())
-	require.Equal(t, animation.Point{X: routeW - 1, Y: 0}, mv.path.Cur, "the marker reached the end of its route")
+	require.Equal(t, corners[0], mv.move.Value())
+	require.Equal(t, corners[0], mv.follow.Value())
+	require.Equal(t, animation.Point{X: routeW - 1, Y: 0}, mv.path.Value(), "the marker reached the end of its route")
 }

@@ -17,10 +17,10 @@ func TestPhysicsSettleOnTheClock(t *testing.T) {
 	for _, k := range []string{"d", "f", "b"} {
 		m = press(t, m, k)
 	}
-	require.Greater(t, m.(model).ph.rubber.Pos(), float64(limit), "pulled past its top")
+	require.Greater(t, m.(model).ph.rubber.Value(), float64(limit), "pulled past its top")
 	m = press(t, m, "b")
 	m, out = clockFor(t, m, time.Unix(6000, 0))
 	require.Contains(t, out, "●▐", "the ball lies against the floor")
-	require.InDelta(t, limit, m.(model).ph.rubber.Pos(), 0.01, "let go, it sprang back to its top")
+	require.InDelta(t, limit, m.(model).ph.rubber.Value(), 0.01, "let go, it sprang back to its top")
 	require.True(t, strings.Contains(out, "●"))
 }

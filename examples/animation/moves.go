@@ -42,7 +42,7 @@ func newMoves() moves {
 func (v moves) travel() moves {
 	to := corners[v.corner%len(corners)]
 	v.corner++
-	v.move = animation.NewMove(v.move.Cur, to, 700*time.Millisecond)
+	v.move = animation.NewMove(v.move.Value(), to, 700*time.Millisecond)
 	v.follow, _ = v.follow.To(to)
 	return v
 }
@@ -80,7 +80,7 @@ func (v moves) rows(th theme.Resolved, label func(kind, variant string) string) 
 		rows = append(rows, label(kind, variant)+line)
 	}
 	rows = append(rows, "")
-	px, py := v.path.Cur.Round()
+	px, py := v.path.Value().Round()
 	for y := range routeH {
 		var b strings.Builder
 		for x := range routeW {
@@ -109,8 +109,8 @@ func (v moves) points(th theme.Resolved) []string {
 		x, y := p.Round()
 		return min(max(x, 0), track-1), min(max(y, 0), field-1)
 	}
-	mx, my := clamp(v.move.Cur)
-	fx, fy := clamp(v.follow.Pos())
+	mx, my := clamp(v.move.Value())
+	fx, fy := clamp(v.follow.Value())
 	lines := make([]string, field)
 	for y := range lines {
 		var b strings.Builder

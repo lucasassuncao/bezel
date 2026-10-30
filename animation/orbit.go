@@ -38,8 +38,8 @@ func (o Orbit) WithRepeat(n int) Orbit {
 // angle is how far round the point is, in radians, from the right going down.
 func (o Orbit) angle() float64 { return 2 * math.Pi * o.p }
 
-// Pos is where the point is now.
-func (o Orbit) Pos() Point {
+// Value is where the point is now.
+func (o Orbit) Value() Point {
 	a := o.angle()
 	return Point{X: o.centre.X + o.rx*math.Cos(a), Y: o.centre.Y + o.ry*math.Sin(a)}
 }

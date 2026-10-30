@@ -58,6 +58,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(d Drop\) Shape\(\) \(w, h float64\)](<#Drop.Shape>)
   - [func \(d Drop\) Tick\(\) tea.Cmd](<#Drop.Tick>)
   - [func \(d Drop\) Update\(msg tea.Msg\) \(Drop, bezel.Result\)](<#Drop.Update>)
+  - [func \(d Drop\) Value\(\) float64](<#Drop.Value>)
   - [func \(d Drop\) WithBounce\(e float64\) Drop](<#Drop.WithBounce>)
   - [func \(d Drop\) WithGravity\(g float64\) Drop](<#Drop.WithGravity>)
 - [type Ease](<#Ease>)
@@ -68,10 +69,10 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func NewFade\(from, to color.Color, dur time.Duration\) Fade](<#NewFade>)
   - [func \(f Fade\) Active\(\) bool](<#Fade.Active>)
   - [func \(f Fade\) Advance\(now time.Time\) \(Fade, bool\)](<#Fade.Advance>)
-  - [func \(f Fade\) Color\(\) color.Color](<#Fade.Color>)
   - [func \(f Fade\) FrameAt\(at time.Time\) FrameMsg](<#Fade.FrameAt>)
   - [func \(f Fade\) Tick\(\) tea.Cmd](<#Fade.Tick>)
   - [func \(f Fade\) Update\(msg tea.Msg\) \(Fade, bezel.Result\)](<#Fade.Update>)
+  - [func \(f Fade\) Value\(\) color.Color](<#Fade.Value>)
   - [func \(f Fade\) WithDelay\(d time.Duration\) Fade](<#Fade.WithDelay>)
   - [func \(f Fade\) WithEase\(e Ease\) Fade](<#Fade.WithEase>)
   - [func \(f Fade\) WithRepeat\(n int\) Fade](<#Fade.WithRepeat>)
@@ -84,6 +85,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(f Float\) Int\(\) int](<#Float.Int>)
   - [func \(f Float\) Tick\(\) tea.Cmd](<#Float.Tick>)
   - [func \(f Float\) Update\(msg tea.Msg\) \(Float, bezel.Result\)](<#Float.Update>)
+  - [func \(f Float\) Value\(\) float64](<#Float.Value>)
   - [func \(f Float\) WithDelay\(d time.Duration\) Float](<#Float.WithDelay>)
   - [func \(f Float\) WithEase\(e Ease\) Float](<#Float.WithEase>)
   - [func \(f Float\) WithRepeat\(n int\) Float](<#Float.WithRepeat>)
@@ -104,10 +106,10 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(f Follow\) Active\(\) bool](<#Follow.Active>)
   - [func \(f Follow\) Advance\(now time.Time\) \(Follow, bool\)](<#Follow.Advance>)
   - [func \(f Follow\) FrameAt\(at time.Time\) FrameMsg](<#Follow.FrameAt>)
-  - [func \(f Follow\) Pos\(\) Point](<#Follow.Pos>)
   - [func \(f Follow\) Tick\(\) tea.Cmd](<#Follow.Tick>)
   - [func \(f Follow\) To\(p Point\) \(Follow, tea.Cmd\)](<#Follow.To>)
   - [func \(f Follow\) Update\(msg tea.Msg\) \(Follow, bezel.Result\)](<#Follow.Update>)
+  - [func \(f Follow\) Value\(\) Point](<#Follow.Value>)
   - [func \(f Follow\) WithDamping\(d float64\) Follow](<#Follow.WithDamping>)
   - [func \(f Follow\) WithFreq\(w float64\) Follow](<#Follow.WithFreq>)
 - [type FrameMsg](<#FrameMsg>)
@@ -128,6 +130,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(k Keyframes\) FrameAt\(at time.Time\) FrameMsg](<#Keyframes.FrameAt>)
   - [func \(k Keyframes\) Tick\(\) tea.Cmd](<#Keyframes.Tick>)
   - [func \(k Keyframes\) Update\(msg tea.Msg\) \(Keyframes, bezel.Result\)](<#Keyframes.Update>)
+  - [func \(k Keyframes\) Value\(\) float64](<#Keyframes.Value>)
   - [func \(k Keyframes\) WithDelay\(d time.Duration\) Keyframes](<#Keyframes.WithDelay>)
   - [func \(k Keyframes\) WithRepeat\(n int\) Keyframes](<#Keyframes.WithRepeat>)
   - [func \(k Keyframes\) WithYoyo\(on bool\) Keyframes](<#Keyframes.WithYoyo>)
@@ -138,6 +141,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(m Move\) FrameAt\(at time.Time\) FrameMsg](<#Move.FrameAt>)
   - [func \(m Move\) Tick\(\) tea.Cmd](<#Move.Tick>)
   - [func \(m Move\) Update\(msg tea.Msg\) \(Move, bezel.Result\)](<#Move.Update>)
+  - [func \(m Move\) Value\(\) Point](<#Move.Value>)
   - [func \(m Move\) WithDelay\(d time.Duration\) Move](<#Move.WithDelay>)
   - [func \(m Move\) WithEase\(e Ease\) Move](<#Move.WithEase>)
   - [func \(m Move\) WithRepeat\(n int\) Move](<#Move.WithRepeat>)
@@ -148,9 +152,9 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(o Orbit\) Advance\(now time.Time\) \(Orbit, bool\)](<#Orbit.Advance>)
   - [func \(o Orbit\) FrameAt\(at time.Time\) FrameMsg](<#Orbit.FrameAt>)
   - [func \(o Orbit\) Near\(\) bool](<#Orbit.Near>)
-  - [func \(o Orbit\) Pos\(\) Point](<#Orbit.Pos>)
   - [func \(o Orbit\) Tick\(\) tea.Cmd](<#Orbit.Tick>)
   - [func \(o Orbit\) Update\(msg tea.Msg\) \(Orbit, bezel.Result\)](<#Orbit.Update>)
+  - [func \(o Orbit\) Value\(\) Point](<#Orbit.Value>)
   - [func \(o Orbit\) WithRepeat\(n int\) Orbit](<#Orbit.WithRepeat>)
 - [type Path](<#Path>)
   - [func NewPath\(dur time.Duration, points ...Point\) Path](<#NewPath>)
@@ -159,6 +163,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(p Path\) FrameAt\(at time.Time\) FrameMsg](<#Path.FrameAt>)
   - [func \(p Path\) Tick\(\) tea.Cmd](<#Path.Tick>)
   - [func \(p Path\) Update\(msg tea.Msg\) \(Path, bezel.Result\)](<#Path.Update>)
+  - [func \(p Path\) Value\(\) Point](<#Path.Value>)
   - [func \(p Path\) WithDelay\(d time.Duration\) Path](<#Path.WithDelay>)
   - [func \(p Path\) WithEase\(e Ease\) Path](<#Path.WithEase>)
   - [func \(p Path\) WithRepeat\(n int\) Path](<#Path.WithRepeat>)
@@ -170,6 +175,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(p Pendulum\) FrameAt\(at time.Time\) FrameMsg](<#Pendulum.FrameAt>)
   - [func \(p Pendulum\) Tick\(\) tea.Cmd](<#Pendulum.Tick>)
   - [func \(p Pendulum\) Update\(msg tea.Msg\) \(Pendulum, bezel.Result\)](<#Pendulum.Update>)
+  - [func \(p Pendulum\) Value\(\) float64](<#Pendulum.Value>)
   - [func \(p Pendulum\) WithDecay\(d time.Duration\) Pendulum](<#Pendulum.WithDecay>)
 - [type Point](<#Point>)
   - [func Bezier\(a, b, c, d Point, n int\) \[\]Point](<#Bezier>)
@@ -190,11 +196,11 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(r Rubber\) Active\(\) bool](<#Rubber.Active>)
   - [func \(r Rubber\) Advance\(now time.Time\) \(Rubber, bool\)](<#Rubber.Advance>)
   - [func \(r Rubber\) FrameAt\(at time.Time\) FrameMsg](<#Rubber.FrameAt>)
-  - [func \(r Rubber\) Pos\(\) float64](<#Rubber.Pos>)
   - [func \(r Rubber\) Pull\(v float64\) Rubber](<#Rubber.Pull>)
   - [func \(r Rubber\) Release\(\) \(Rubber, tea.Cmd\)](<#Rubber.Release>)
   - [func \(r Rubber\) Tick\(\) tea.Cmd](<#Rubber.Tick>)
   - [func \(r Rubber\) Update\(msg tea.Msg\) \(Rubber, bezel.Result\)](<#Rubber.Update>)
+  - [func \(r Rubber\) Value\(\) float64](<#Rubber.Value>)
   - [func \(r Rubber\) WithGive\(g float64\) Rubber](<#Rubber.WithGive>)
 - [type Series](<#Series>)
   - [func Draw\(values \[\]float64, dur time.Duration\) Series](<#Draw>)
@@ -222,9 +228,11 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(s Spring\) Advance\(now time.Time\) \(Spring, bool\)](<#Spring.Advance>)
   - [func \(s Spring\) FrameAt\(at time.Time\) FrameMsg](<#Spring.FrameAt>)
   - [func \(s Spring\) Int\(\) int](<#Spring.Int>)
+  - [func \(s Spring\) Target\(\) float64](<#Spring.Target>)
   - [func \(s Spring\) Tick\(\) tea.Cmd](<#Spring.Tick>)
   - [func \(s Spring\) To\(target float64\) \(Spring, tea.Cmd\)](<#Spring.To>)
   - [func \(s Spring\) Update\(msg tea.Msg\) \(Spring, bezel.Result\)](<#Spring.Update>)
+  - [func \(s Spring\) Value\(\) float64](<#Spring.Value>)
   - [func \(s Spring\) WithDamping\(d float64\) Spring](<#Spring.WithDamping>)
   - [func \(s Spring\) WithFreq\(f float64\) Spring](<#Spring.WithFreq>)
 - [type Timeline](<#Timeline>)
@@ -247,6 +255,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(t Tween\) FrameAt\(at time.Time\) FrameMsg](<#Tween.FrameAt>)
   - [func \(t Tween\) Tick\(\) tea.Cmd](<#Tween.Tick>)
   - [func \(t Tween\) Update\(msg tea.Msg\) \(Tween, bezel.Result\)](<#Tween.Update>)
+  - [func \(t Tween\) Value\(\) int](<#Tween.Value>)
   - [func \(t Tween\) WithDelay\(d time.Duration\) Tween](<#Tween.WithDelay>)
   - [func \(t Tween\) WithEase\(e Ease\) Tween](<#Tween.WithEase>)
   - [func \(t Tween\) WithRepeat\(n int\) Tween](<#Tween.WithRepeat>)
@@ -611,7 +620,6 @@ Drop lets a value fall onto a floor under gravity and bounce until it settles: a
 
 ```go
 type Drop struct {
-    Cur float64
     // contains filtered or unexported fields
 }
 ```
@@ -678,6 +686,15 @@ func (d Drop) Update(msg tea.Msg) (Drop, bezel.Result)
 ```
 
 Update falls on its own frames and asks for the next until it settles.
+
+<a name="Drop.Value"></a>
+### func \(Drop\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L115>)
+
+```go
+func (d Drop) Value() float64
+```
+
+Value is where the last frame put the drop.
 
 <a name="Drop.WithBounce"></a>
 ### func \(Drop\) [WithBounce](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L49>)
@@ -771,15 +788,6 @@ func (f Fade) Advance(now time.Time) (Fade, bool)
 
 Advance is f sampled at now, and whether it landed.
 
-<a name="Fade.Color"></a>
-### func \(Fade\) [Color](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L35>)
-
-```go
-func (f Fade) Color() color.Color
-```
-
-Color is the colour this frame draws with.
-
 <a name="Fade.FrameAt"></a>
 ### func \(Fade\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L44>)
 
@@ -806,6 +814,15 @@ func (f Fade) Update(msg tea.Msg) (Fade, bezel.Result)
 ```
 
 Update samples f on its own frames and asks for the next until it lands.
+
+<a name="Fade.Value"></a>
+### func \(Fade\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L35>)
+
+```go
+func (f Fade) Value() color.Color
+```
+
+Value is the colour this frame draws with.
 
 <a name="Fade.WithDelay"></a>
 ### func \(Fade\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L79>)
@@ -850,8 +867,6 @@ Float is Tween over a float64, for what moves by less than a cell: a progress ba
 
 ```go
 type Float struct {
-    From, To float64
-    Cur      float64 // the value the last frame sampled
     // contains filtered or unexported fields
 }
 ```
@@ -899,7 +914,7 @@ FrameAt is f's frame for at, for a test or a host that delivers frames itself.
 func (f Float) Int() int
 ```
 
-Int is Cur rounded to the nearest whole number.
+Int is Value rounded to the nearest whole number.
 
 <a name="Float.Tick"></a>
 ### func \(Float\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L45>)
@@ -918,6 +933,15 @@ func (f Float) Update(msg tea.Msg) (Float, bezel.Result)
 ```
 
 Update samples f on its own frames and asks for the next until it lands.
+
+<a name="Float.Value"></a>
+### func \(Float\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L103>)
+
+```go
+func (f Float) Value() float64
+```
+
+Value is where the last frame put the float.
 
 <a name="Float.WithDelay"></a>
 ### func \(Float\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L85>)
@@ -1103,15 +1127,6 @@ func (f Follow) FrameAt(at time.Time) FrameMsg
 
 FrameAt is f's frame for at, for a test or a host that delivers frames itself.
 
-<a name="Follow.Pos"></a>
-### func \(Follow\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L147>)
-
-```go
-func (f Follow) Pos() Point
-```
-
-Pos is where the point is now.
-
 <a name="Follow.Tick"></a>
 ### func \(Follow\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L153>)
 
@@ -1138,6 +1153,15 @@ func (f Follow) Update(msg tea.Msg) (Follow, bezel.Result)
 ```
 
 Update moves f on its own frames and asks for the next until it rests.
+
+<a name="Follow.Value"></a>
+### func \(Follow\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L147>)
+
+```go
+func (f Follow) Value() Point
+```
+
+Value is where the point is now.
 
 <a name="Follow.WithDamping"></a>
 ### func \(Follow\) [WithDamping](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L125>)
@@ -1269,7 +1293,6 @@ Keyframes moves a value through several stops instead of one: a bounce that land
 
 ```go
 type Keyframes struct {
-    Cur float64 // the value the last frame sampled
     // contains filtered or unexported fields
 }
 ```
@@ -1328,6 +1351,15 @@ func (k Keyframes) Update(msg tea.Msg) (Keyframes, bezel.Result)
 
 Update moves on its own frames and asks for the next until it ends.
 
+<a name="Keyframes.Value"></a>
+### func \(Keyframes\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L122>)
+
+```go
+func (k Keyframes) Value() float64
+```
+
+Value is where the last frame put the keyframes.
+
 <a name="Keyframes.WithDelay"></a>
 ### func \(Keyframes\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L70>)
 
@@ -1362,8 +1394,6 @@ Move eases a point from one place to another over a duration: an overlay that dr
 
 ```go
 type Move struct {
-    From, To Point
-    Cur      Point // where the last frame put it
     // contains filtered or unexported fields
 }
 ```
@@ -1421,6 +1451,15 @@ func (m Move) Update(msg tea.Msg) (Move, bezel.Result)
 ```
 
 Update moves on its own frames and asks for the next until it lands.
+
+<a name="Move.Value"></a>
+### func \(Move\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L184>)
+
+```go
+func (m Move) Value() Point
+```
+
+Value is where the last frame put the move.
 
 <a name="Move.WithDelay"></a>
 ### func \(Move\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L45>)
@@ -1514,15 +1553,6 @@ func (o Orbit) Near() bool
 
 Near reports whether the point is on the near half of its ellipse, the one below the centre: draw it over what it circles there, behind it on the far half.
 
-<a name="Orbit.Pos"></a>
-### func \(Orbit\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L42>)
-
-```go
-func (o Orbit) Pos() Point
-```
-
-Pos is where the point is now.
-
 <a name="Orbit.Tick"></a>
 ### func \(Orbit\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L55>)
 
@@ -1541,6 +1571,15 @@ func (o Orbit) Update(msg tea.Msg) (Orbit, bezel.Result)
 
 Update goes round on its own frames and asks for the next while it runs.
 
+<a name="Orbit.Value"></a>
+### func \(Orbit\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L42>)
+
+```go
+func (o Orbit) Value() Point
+```
+
+Value is where the point is now.
+
 <a name="Orbit.WithRepeat"></a>
 ### func \(Orbit\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L33>)
 
@@ -1557,7 +1596,6 @@ Path carries a point along a line of points at an even speed, however far apart 
 
 ```go
 type Path struct {
-    Cur Point // where the last frame put it
     // contains filtered or unexported fields
 }
 ```
@@ -1616,6 +1654,15 @@ func (p Path) Update(msg tea.Msg) (Path, bezel.Result)
 
 Update travels on its own frames and asks for the next until it arrives.
 
+<a name="Path.Value"></a>
+### func \(Path\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L141>)
+
+```go
+func (p Path) Value() Point
+```
+
+Value is where the last frame put the path.
+
 <a name="Path.WithDelay"></a>
 ### func \(Path\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L88>)
 
@@ -1655,11 +1702,10 @@ WithYoyo travels every other pass of p back.
 <a name="Pendulum"></a>
 ## type [Pendulum](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L15-L21>)
 
-Pendulum swings a value either side of 0, Cur cells from the middle: a "waiting" sign that sways, a needle settling, a notice that swings in.
+Pendulum swings a value either side of 0, Value cells from the middle: a "waiting" sign that sways, a needle settling, a notice that swings in.
 
 ```go
 type Pendulum struct {
-    Cur float64
     // contains filtered or unexported fields
 }
 ```
@@ -1717,6 +1763,15 @@ func (p Pendulum) Update(msg tea.Msg) (Pendulum, bezel.Result)
 ```
 
 Update swings on its own frames and asks for the next until it rests.
+
+<a name="Pendulum.Value"></a>
+### func \(Pendulum\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L93>)
+
+```go
+func (p Pendulum) Value() float64
+```
+
+Value is where the last frame put the pendulum.
 
 <a name="Pendulum.WithDecay"></a>
 ### func \(Pendulum\) [WithDecay](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L38>)
@@ -1906,15 +1961,6 @@ func (r Rubber) FrameAt(at time.Time) FrameMsg
 
 FrameAt is r's frame for at, for a test or a host that delivers frames itself.
 
-<a name="Rubber.Pos"></a>
-### func \(Rubber\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L59>)
-
-```go
-func (r Rubber) Pos() float64
-```
-
-Pos is the value now.
-
 <a name="Rubber.Pull"></a>
 ### func \(Rubber\) [Pull](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L37>)
 
@@ -1950,6 +1996,15 @@ func (r Rubber) Update(msg tea.Msg) (Rubber, bezel.Result)
 ```
 
 Update springs back on its own frames and asks for the next until it rests.
+
+<a name="Rubber.Value"></a>
+### func \(Rubber\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L59>)
+
+```go
+func (r Rubber) Value() float64
+```
+
+Value is the value now.
 
 <a name="Rubber.WithGive"></a>
 ### func \(Rubber\) [WithGive](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L28>)
@@ -2154,11 +2209,6 @@ Spring follows a target with speed and inertia. Unlike a Tween it has no duratio
 
 ```go
 type Spring struct {
-    Pos, Vel, Target float64
-    // Freq is how stiff it is, in radians a second: 12 when zero or less.
-    Freq float64
-    // Damping 1 arrives without overshoot; below 1 it bounces. 1 when zero or less.
-    Damping float64
     // contains filtered or unexported fields
 }
 ```
@@ -2206,7 +2256,16 @@ FrameAt is s's frame for at, for a test or a host that delivers frames itself.
 func (s Spring) Int() int
 ```
 
-Int is Pos rounded to the nearest whole number: the cell it is drawn on.
+Int is Value rounded to the nearest whole number: the cell it is drawn on.
+
+<a name="Spring.Target"></a>
+### func \(Spring\) [Target](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L161>)
+
+```go
+func (s Spring) Target() float64
+```
+
+Target is where the spring is headed.
 
 <a name="Spring.Tick"></a>
 ### func \(Spring\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L76>)
@@ -2234,6 +2293,15 @@ func (s Spring) Update(msg tea.Msg) (Spring, bezel.Result)
 ```
 
 Update moves s on its own frames and asks for the next until it rests.
+
+<a name="Spring.Value"></a>
+### func \(Spring\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L158>)
+
+```go
+func (s Spring) Value() float64
+```
+
+Value is where the spring is now.
 
 <a name="Spring.WithDamping"></a>
 ### func \(Spring\) [WithDamping](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L45>)
@@ -2370,10 +2438,6 @@ Tween eases an int between two values over a duration. Adapted from the minimize
 
 ```go
 type Tween struct {
-    From, To int
-    Cur      int       // value sampled by the last advance; the height the frame draws
-    Start    time.Time // zero until the first frame, which starts the clock
-    Dur      time.Duration
     // contains filtered or unexported fields
 }
 ```
@@ -2403,7 +2467,7 @@ Active reports whether t is currently in flight.
 func (t Tween) Advance(now time.Time) (Tween, bool)
 ```
 
-Advance is t sampled at now into Cur, and whether it finished, coming back inactive where it landed. The renderer reads Cur, not At, so one frame never mixes two samples and lays the hint panel out a row off from the space the preview left.
+Advance is t sampled at now into Value, and whether it finished, coming back inactive where it landed. The renderer reads Value, not At, so one frame never mixes two samples and lays the hint panel out a row off from the space the preview left.
 
 <a name="Tween.At"></a>
 ### func \(Tween\) [At](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L89>)
@@ -2440,6 +2504,15 @@ func (t Tween) Update(msg tea.Msg) (Tween, bezel.Result)
 ```
 
 Update samples t on one of its own frames and asks for the next until it lands. Other messages, frames meant for another tween and a twin frame from a second Tick leave it alone.
+
+<a name="Tween.Value"></a>
+### func \(Tween\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L141>)
+
+```go
+func (t Tween) Value() int
+```
+
+Value is where the last frame put the tween.
 
 <a name="Tween.WithDelay"></a>
 ### func \(Tween\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L123>)

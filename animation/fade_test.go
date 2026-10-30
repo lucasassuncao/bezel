@@ -28,14 +28,14 @@ func TestBlendWithANilEndSwitchesHalfWay(t *testing.T) {
 func TestFadeEndsOnTo(t *testing.T) {
 	start := time.Unix(1000, 0)
 	f := NewFade(black, white, 100*time.Millisecond).WithEase(Linear)
-	assert.Equal(t, black, f.Color(), "before its first frame it is From")
+	assert.Equal(t, black, f.Value(), "before its first frame it is From")
 
 	f, res := f.Update(f.FrameAt(start))
 	assert.NotNil(t, res.Cmd)
 	f, _ = f.Update(f.FrameAt(start.Add(50 * time.Millisecond)))
-	assert.Equal(t, color.RGBA{128, 128, 128, 255}, f.Color())
+	assert.Equal(t, color.RGBA{128, 128, 128, 255}, f.Value())
 	f, res = f.Update(f.FrameAt(start.Add(time.Second)))
 	assert.Nil(t, res.Cmd)
-	assert.Equal(t, white, f.Color())
+	assert.Equal(t, white, f.Value())
 	assert.False(t, f.Active())
 }

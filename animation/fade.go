@@ -31,8 +31,8 @@ func (f Fade) WithEase(e Ease) Fade {
 	return f
 }
 
-// Color is the colour this frame draws with.
-func (f Fade) Color() color.Color { return Blend(f.from, f.to, f.mix.Cur) }
+// Value is the colour this frame draws with.
+func (f Fade) Value() color.Color { return Blend(f.from, f.to, f.mix.cur) }
 
 // Active reports whether f is still changing.
 func (f Fade) Active() bool { return f.mix.Active() }

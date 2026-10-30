@@ -30,7 +30,7 @@ case toggleMsg:
 case animation.FrameMsg:
 	var r bezel.Result
 	m.slide, r = m.slide.Update(msg)
-	m.height = m.slide.Cur
+	m.height = m.slide.Value()
 	return m, r.Cmd
 ```
 

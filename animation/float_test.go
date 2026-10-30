@@ -15,10 +15,10 @@ func TestFloatEasesBetweenItsEnds(t *testing.T) {
 	f, res := f.Update(f.FrameAt(start))
 	assert.NotNil(t, res.Cmd)
 	f, _ = f.Update(f.FrameAt(start.Add(50 * time.Millisecond)))
-	assert.InDelta(t, 0.5, f.Cur, 1e-9)
+	assert.InDelta(t, 0.5, f.cur, 1e-9)
 	f, res = f.Update(f.FrameAt(start.Add(time.Second)))
 	assert.Nil(t, res.Cmd)
-	assert.Equal(t, 1.0, f.Cur)
+	assert.Equal(t, 1.0, f.cur)
 	assert.False(t, f.Active())
 }
 

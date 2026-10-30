@@ -26,11 +26,11 @@ func TestTheCurvesTabRacesEveryCurve(t *testing.T) {
 	m, _ = frame(t, m, m.(model).clock.FrameAt(time.Unix(1000, 0)))
 	m, _ = frame(t, m, m.(model).clock.FrameAt(time.Unix(1000, 0).Add(300*time.Millisecond)))
 	dots := m.(model).cv.dots
-	require.Greater(t, dots[6].Cur, dots[0].Cur, "expo out has run further than linear by now")
+	require.Greater(t, dots[6].Value(), dots[0].Value(), "expo out has run further than linear by now")
 
 	m, _ = clockFor(t, m, time.Unix(1001, 0))
 	for _, d := range m.(model).cv.dots {
-		require.Equal(t, 1.0, d.Cur, "every curve ends on its end mark")
+		require.Equal(t, 1.0, d.Value(), "every curve ends on its end mark")
 	}
 }
 

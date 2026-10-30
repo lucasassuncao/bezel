@@ -33,7 +33,7 @@ var _ bezel.Model[Model] = Model{}
 // Model is a bar that moves to the share it is set to on a spring instead of
 // jumping there. A value: every method returns the new bar.
 type Model struct {
-	spring      animation.Spring // Pos and Target are shares in [0, 1]
+	spring      animation.Spring // its Value and Target are shares in [0, 1]
 	width       int
 	full, empty string
 	gradient    []color.Color
@@ -107,10 +107,10 @@ func (m Model) SetPercent(p float64) (Model, tea.Cmd) {
 }
 
 // Percent is the share the bar is aimed at.
-func (m Model) Percent() float64 { return m.spring.Target }
+func (m Model) Percent() float64 { return m.spring.Target() }
 
 // Shown is the share the bar draws now, on its way to Percent.
-func (m Model) Shown() float64 { return m.spring.Pos }
+func (m Model) Shown() float64 { return m.spring.Value() }
 
 // Active reports whether the bar is still moving.
 func (m Model) Active() bool { return m.spring.Active() }
@@ -123,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 }
 
 // View is the bar where it is now, then the percentage it is aimed at.
-func (m Model) View(th theme.Resolved) string { return m.ViewAs(m.spring.Pos, th) }
+func (m Model) View(th theme.Resolved) string { return m.ViewAs(m.spring.Value(), th) }
 
 // ViewAs is the bar at share p with no motion, for a host that drives the
 // share itself.

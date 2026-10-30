@@ -14,7 +14,7 @@ func TestTweenAtEndpointsAndMidpoint(t *testing.T) {
 	is := assert.New(t)
 
 	start := time.Now()
-	tw := Tween{From: 0, To: 12, Start: start, Dur: 100 * time.Millisecond}
+	tw := Tween{from: 0, to: 12, start: start, dur: 100 * time.Millisecond}
 
 	v, done := tw.At(start)
 	is.Equal(0, v, "at t=0 the tween sits on its start value")
@@ -40,7 +40,7 @@ func TestTweenAtEndpointsAndMidpoint(t *testing.T) {
 func TestTweenEasesRatherThanInterpolatesLinearly(t *testing.T) {
 	is := assert.New(t)
 	start := time.Now()
-	tw := Tween{From: 0, To: 100, Start: start, Dur: 100 * time.Millisecond}
+	tw := Tween{from: 0, to: 100, start: start, dur: 100 * time.Millisecond}
 
 	v, _ := tw.At(start.Add(25 * time.Millisecond))
 	is.Less(v, 25, "ease-in must lag a linear interpolation early on")
@@ -62,9 +62,9 @@ func TestNewDeclinesWhenPointless(t *testing.T) {
 	is.False(NewTween(0, 10, 0).Active(), "duration 0 means no animation")
 	is.False(NewTween(7, 7, time.Second).Active(), "no distance means no animation")
 	is.True(NewTween(0, 10, time.Second).Active(), "a real move animates")
-	// An app that draws Cur after every Update must not see a declined tween at 0.
-	is.Equal(10, NewTween(0, 10, 0).Cur, "a declined tween rests at its target")
-	is.Equal(7, NewTween(7, 7, time.Second).Cur)
+	// An app that draws Value after every Update must not see a declined tween at 0.
+	is.Equal(10, NewTween(0, 10, 0).cur, "a declined tween rests at its target")
+	is.Equal(7, NewTween(7, 7, time.Second).cur)
 }
 
 // TestCurveDoesNotStallOrLurch is the smoothness contract: heights are whole
@@ -86,7 +86,7 @@ func TestCurveDoesNotStallOrLurch(t *testing.T) {
 		{"tall panel, opening", 0, 17, 4},
 	} {
 		start := time.Now()
-		tw := Tween{From: span.from, To: span.to, Start: start, Dur: dur}
+		tw := Tween{from: span.from, to: span.to, start: start, dur: dur}
 
 		// Fewer rows than frames must repeat heights: quantisation, not stutter.
 		// The bound is an even distribution - no worse than the arithmetic forces.
@@ -124,24 +124,24 @@ func abs(n int) int {
 // receiver alone, like every other method on it.
 func TestAdvanceReturnsTheSampledTween(t *testing.T) {
 	start := time.Now()
-	tw := Tween{From: 0, To: 10, Cur: 0, Start: start, Dur: 100 * time.Millisecond}
+	tw := Tween{from: 0, to: 10, cur: 0, start: start, dur: 100 * time.Millisecond}
 
 	next, done := tw.Advance(start.Add(time.Second))
 	assert.True(t, done)
-	assert.Equal(t, 10, next.Cur)
-	assert.Equal(t, 0, tw.Cur, "the receiver changed")
+	assert.Equal(t, 10, next.cur)
+	assert.Equal(t, 0, tw.cur, "the receiver changed")
 }
 
 // New reads no clock: time reaches a tween only through the frames it gets.
 func TestNewLeavesTheClockToTheFirstFrame(t *testing.T) {
 	tw := NewTween(0, 10, 100*time.Millisecond)
-	assert.True(t, tw.Start.IsZero())
+	assert.True(t, tw.start.IsZero())
 
 	at := time.Unix(1000, 0)
 	tw, done := tw.Advance(at)
 	assert.False(t, done)
-	assert.Equal(t, 0, tw.Cur, "the first frame shows the start value")
-	assert.Equal(t, at, tw.Start)
+	assert.Equal(t, 0, tw.cur, "the first frame shows the start value")
+	assert.Equal(t, at, tw.start)
 }
 
 func TestUpdateFollowsItsOwnFramesUntilItLands(t *testing.T) {
@@ -151,10 +151,10 @@ func TestUpdateFollowsItsOwnFramesUntilItLands(t *testing.T) {
 	tw, res := tw.Update(tw.FrameAt(start))
 	assert.NotNil(t, res.Cmd, "an unfinished tween asks for the next frame")
 	tw, res = tw.Update(tw.FrameAt(start.Add(50 * time.Millisecond)))
-	assert.Equal(t, 5, tw.Cur)
+	assert.Equal(t, 5, tw.cur)
 	assert.NotNil(t, res.Cmd)
 	tw, res = tw.Update(tw.FrameAt(start.Add(100 * time.Millisecond)))
-	assert.Equal(t, 10, tw.Cur)
+	assert.Equal(t, 10, tw.cur)
 	assert.Nil(t, res.Cmd, "a tween that landed stops its clock")
 }
 
@@ -177,7 +177,7 @@ func TestUpdateIgnoresAnotherTweensFrames(t *testing.T) {
 func TestTickDeliversAFrameForThisTween(t *testing.T) {
 	tw := NewTween(0, 10, time.Second)
 	next, res := tw.Update(tw.Tick()())
-	assert.False(t, next.Start.IsZero(), "the tick's frame started the clock")
+	assert.False(t, next.start.IsZero(), "the tick's frame started the clock")
 	assert.NotNil(t, res.Cmd)
 }
 
@@ -189,7 +189,7 @@ func TestALandedTweenIsInactiveAtItsEnd(t *testing.T) {
 	tw, _ = tw.Update(tw.FrameAt(start.Add(time.Second)))
 	assert.False(t, tw.Active())
 	assert.Nil(t, tw.Tick())
-	assert.Equal(t, 10, tw.Cur)
+	assert.Equal(t, 10, tw.cur)
 
 	next, _ := NewTween(0, 10, 100*time.Millisecond).Advance(start)
 	next, done := next.Advance(start.Add(time.Second))

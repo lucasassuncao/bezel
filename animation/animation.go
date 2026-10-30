@@ -22,10 +22,10 @@ const Frame = frames.Frame
 // minimize animation in github.com/Gaurav-Gosain/tuios (MIT), reduced to one
 // axis. The zero value is inactive: At reports it finished, at To.
 type Tween struct {
-	From, To int
-	Cur      int       // value sampled by the last advance; the height the frame draws
-	Start    time.Time // zero until the first frame, which starts the clock
-	Dur      time.Duration
+	from, to int
+	cur      int       // value sampled by the last advance; the height the frame draws
+	start    time.Time // zero until the first frame, which starts the clock
+	dur      time.Duration
 	loop     frames.Loop
 	ease     Ease  // nil is InOut(Quad)
 	id       int64 // which FrameMsg values are this tween's
@@ -66,19 +66,19 @@ func (t Tween) Update(msg tea.Msg) (Tween, bezel.Result) {
 }
 
 // Active reports whether t is currently in flight.
-func (t Tween) Active() bool { return t.Dur > 0 }
+func (t Tween) Active() bool { return t.dur > 0 }
 
-// Advance is t sampled at now into Cur, and whether it finished, coming back
-// inactive where it landed. The renderer reads Cur, not At, so one frame never mixes two
+// Advance is t sampled at now into Value, and whether it finished, coming back
+// inactive where it landed. The renderer reads Value, not At, so one frame never mixes two
 // samples and lays the hint panel out a row off from the space the preview left.
 func (t Tween) Advance(now time.Time) (Tween, bool) {
-	if t.Start.IsZero() {
-		t.Start = now
+	if t.start.IsZero() {
+		t.start = now
 	}
 	var done bool
-	t.Cur, done = t.At(now)
+	t.cur, done = t.At(now)
 	if done {
-		return Tween{From: t.Cur, To: t.Cur, Cur: t.Cur}, true
+		return Tween{from: t.cur, to: t.cur, cur: t.cur}, true
 	}
 	return t, false
 }
@@ -87,20 +87,20 @@ func (t Tween) Advance(now time.Time) (Tween, bool) {
 // A finished tween reports its end exactly, To or a yoyo's From, so a panel
 // lands on the height the static layout would choose. Unstarted, it is at From.
 func (t Tween) At(now time.Time) (int, bool) {
-	if t.Dur <= 0 {
-		return t.To, true
+	if t.dur <= 0 {
+		return t.to, true
 	}
-	if t.Start.IsZero() {
-		return t.From, false
+	if t.start.IsZero() {
+		return t.from, false
 	}
-	p, done := t.loop.Phase(frames.Paced(now.Sub(t.Start)), t.Dur)
+	p, done := t.loop.Phase(frames.Paced(now.Sub(t.start)), t.dur)
 	switch {
 	case done && p == 1:
-		return t.To, true
+		return t.to, true
 	case done:
-		return t.From, true
+		return t.from, true
 	}
-	return t.From + int(math.Round(float64(t.To-t.From)*frames.Or(t.ease)(p))), false
+	return t.from + int(math.Round(float64(t.to-t.from)*frames.Or(t.ease)(p))), false
 }
 
 // NewTween builds the tween taking a panel from its on-screen height to target
@@ -108,9 +108,9 @@ func (t Tween) At(now time.Time) (int, bool) {
 // or from == target, or motion is Still, it is inactive and already at target.
 func NewTween(from, target int, dur time.Duration) Tween {
 	if dur <= 0 || from == target || Still() {
-		return Tween{From: target, To: target, Cur: target}
+		return Tween{from: target, to: target, cur: target}
 	}
-	return Tween{From: from, To: target, Cur: from, Dur: dur, id: frames.NextID()}
+	return Tween{from: from, to: target, cur: from, dur: dur, id: frames.NextID()}
 }
 
 // WithEase is t following e instead of InOut(Quad).
@@ -136,3 +136,6 @@ func (t Tween) WithYoyo(on bool) Tween {
 	t.loop.Yoyo = on
 	return t
 }
+
+// Value is where the last frame put the tween.
+func (t Tween) Value() int { return t.cur }

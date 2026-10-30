@@ -13,8 +13,8 @@ import (
 // Float is Tween over a float64, for what moves by less than a cell: a
 // progress bar drawn in eighths, a scrollbar's thumb, a colour's mix.
 type Float struct {
-	From, To float64
-	Cur      float64 // the value the last frame sampled
+	from, to float64
+	cur      float64 // the value the last frame sampled
 	run      frames.Run
 }
 
@@ -24,9 +24,9 @@ var _ bezel.Model[Float] = Float{}
 // frame. When dur <= 0, from == to or motion is Still it is inactive at to.
 func NewFloat(from, to float64, dur time.Duration) Float {
 	if dur <= 0 || from == to || Still() {
-		return Float{From: to, To: to, Cur: to}
+		return Float{from: to, to: to, cur: to}
 	}
-	return Float{From: from, To: to, Cur: from, run: frames.NewRun(dur)}
+	return Float{from: from, to: to, cur: from, run: frames.NewRun(dur)}
 }
 
 // WithEase is f following e instead of InOut(Quad).
@@ -38,8 +38,8 @@ func (f Float) WithEase(e Ease) Float {
 // Active reports whether f is still moving.
 func (f Float) Active() bool { return f.run.Active() }
 
-// Int is Cur rounded to the nearest whole number.
-func (f Float) Int() int { return int(math.Round(f.Cur)) }
+// Int is Value rounded to the nearest whole number.
+func (f Float) Int() int { return int(math.Round(f.cur)) }
 
 // Tick is the command for f's next frame, nil once it landed.
 func (f Float) Tick() tea.Cmd { return f.run.Tick() }
@@ -72,11 +72,11 @@ func (f Float) Advance(now time.Time) (Float, bool) {
 	f.run, p = f.run.Advance(now)
 	switch {
 	case f.Active():
-		f.Cur = f.From + (f.To-f.From)*ease(p)
+		f.cur = f.from + (f.to-f.from)*ease(p)
 	case p == 1:
-		f.Cur = f.To
+		f.cur = f.to
 	default:
-		f.Cur = f.From
+		f.cur = f.from
 	}
 	return f, !f.Active()
 }
@@ -98,3 +98,6 @@ func (f Float) WithYoyo(on bool) Float {
 	f.run.Yoyo = on
 	return f
 }
+
+// Value is where the last frame put the float.
+func (f Float) Value() float64 { return f.cur }

@@ -23,7 +23,7 @@ type Key struct {
 // that lands, rises and lands again, or a dial that overshoots twice.
 type Keyframes struct {
 	keys []Key
-	Cur  float64 // the value the last frame sampled
+	cur  float64 // the value the last frame sampled
 	run  frames.Run
 }
 
@@ -37,12 +37,12 @@ func NewKeyframes(dur time.Duration, keys ...Key) Keyframes {
 	if len(k.keys) == 0 {
 		return k
 	}
-	k.Cur = k.keys[len(k.keys)-1].Value
+	k.cur = k.keys[len(k.keys)-1].Value
 	if len(k.keys) < 2 {
 		return k
 	}
 	if k.run = frames.NewRun(dur); k.run.Active() {
-		k.Cur = k.keys[0].Value
+		k.cur = k.keys[0].Value
 	}
 	return k
 }
@@ -114,6 +114,9 @@ func (k Keyframes) Advance(now time.Time) (Keyframes, bool) {
 	}
 	var p float64
 	k.run, p = k.run.Advance(now)
-	k.Cur = k.at(p)
+	k.cur = k.at(p)
 	return k, !k.Active()
 }
+
+// Value is where the last frame put the keyframes.
+func (k Keyframes) Value() float64 { return k.cur }

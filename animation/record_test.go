@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func showFloat(f Float) string { return fmt.Sprintf("%.1f", f.Cur) }
+func showFloat(f Float) string { return fmt.Sprintf("%.1f", f.cur) }
 
 func TestRecordKeepsEveryFrameToTheEnd(t *testing.T) {
 	frames := Record(NewFloat(0, 1, 50*time.Millisecond).WithEase(Linear), showFloat, time.Second)

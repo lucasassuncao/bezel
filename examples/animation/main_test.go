@@ -146,13 +146,13 @@ func TestTheRaceRunsOnTheSharedClock(t *testing.T) {
 	m, out := frame(t, m, m.(model).clock.FrameAt(at.Add(race/2)))
 	t.Log("\n" + out)
 	bars := m.(model).bars
-	require.Equal(t, track/2, bars[0].Cur, "linear is half way at half time")
-	require.Less(t, bars[1].Cur, bars[0].Cur, "ease in starts slower")
-	require.Greater(t, bars[2].Cur, bars[0].Cur, "ease out starts faster")
+	require.Equal(t, track/2, bars[0].Value(), "linear is half way at half time")
+	require.Less(t, bars[1].Value(), bars[0].Value(), "ease in starts slower")
+	require.Greater(t, bars[2].Value(), bars[0].Value(), "ease out starts faster")
 
 	m, out = clockFor(t, m, at.Add(race))
 	for _, b := range m.(model).bars {
-		require.Equal(t, track, b.Cur)
+		require.Equal(t, track, b.Value())
 	}
 	require.Contains(t, out, "12,345 files")
 	require.False(t, m.(model).clock.Running(), "nothing moves, so the clock stops")
@@ -213,12 +213,12 @@ func TestTheCascadeStartsOneBlockAtATime(t *testing.T) {
 	m, _ = frame(t, m, m.(model).clock.FrameAt(at))
 	m, _ = frame(t, m, m.(model).clock.FrameAt(at.Add(stagger+stagger/2)))
 	c := m.(model).cascade
-	require.Positive(t, c[0].Cur)
-	require.Positive(t, c[1].Cur)
-	require.Zero(t, c[2].Cur, "the third has not started yet")
+	require.Positive(t, c[0].Value())
+	require.Positive(t, c[1].Value())
+	require.Zero(t, c[2].Value(), "the third has not started yet")
 	m, _ = clockFor(t, m, at.Add(stagger*2))
 	for _, b := range m.(model).cascade {
-		require.Equal(t, block, b.Cur)
+		require.Equal(t, block, b.Value())
 	}
 }
 

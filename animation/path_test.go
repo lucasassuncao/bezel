@@ -12,15 +12,15 @@ func TestAPathTravelsAtAnEvenSpeed(t *testing.T) {
 	p := NewPath(100*ms, Point{0, 0}, Point{10, 0}, Point{10, 30}).WithEase(Linear)
 	start := time.Unix(10, 0)
 	p, _ = p.Advance(start)
-	assert.Equal(t, Point{0, 0}, p.Cur)
+	assert.Equal(t, Point{0, 0}, p.cur)
 	quarter, _ := p.Advance(start.Add(25 * ms))
-	assert.InDelta(t, 10, quarter.Cur.X, 1e-9, "a quarter of 40 cells is the first leg")
-	assert.InDelta(t, 0, quarter.Cur.Y, 1e-9)
+	assert.InDelta(t, 10, quarter.cur.X, 1e-9, "a quarter of 40 cells is the first leg")
+	assert.InDelta(t, 0, quarter.cur.Y, 1e-9)
 	half, _ := p.Advance(start.Add(50 * ms))
-	assert.InDelta(t, 10, half.Cur.Y, 1e-9)
+	assert.InDelta(t, 10, half.cur.Y, 1e-9)
 	end, done := p.Advance(start.Add(time.Second))
 	assert.True(t, done)
-	assert.Equal(t, Point{10, 30}, end.Cur)
+	assert.Equal(t, Point{10, 30}, end.cur)
 }
 
 func TestAPathWithNowhereToGoStays(t *testing.T) {
@@ -31,7 +31,7 @@ func TestAPathWithNowhereToGoStays(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	still := NewPath(100*ms, Point{0, 0}, Point{5, 5})
 	assert.False(t, still.Active())
-	assert.Equal(t, Point{5, 5}, still.Cur)
+	assert.Equal(t, Point{5, 5}, still.cur)
 }
 
 func TestBezierRunsFromItsFirstToItsLastPoint(t *testing.T) {

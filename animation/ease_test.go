@@ -24,7 +24,7 @@ func TestEasesRunFromZeroToOneWithoutTurningBack(t *testing.T) {
 
 func TestATweenFollowsItsEase(t *testing.T) {
 	start := time.Unix(1000, 0)
-	tw := Tween{From: 0, To: 100, Start: start, Dur: 100 * time.Millisecond}
+	tw := Tween{from: 0, to: 100, start: start, dur: 100 * time.Millisecond}
 	v, _ := tw.At(start.Add(25 * time.Millisecond))
 	assert.Equal(t, 13, v, "the default is InOut(Quad)")
 	v, _ = tw.WithEase(Linear).At(start.Add(25 * time.Millisecond))

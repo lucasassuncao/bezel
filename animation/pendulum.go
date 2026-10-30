@@ -10,10 +10,10 @@ import (
 	"github.com/lucasassuncao/bezel/internal/frames"
 )
 
-// Pendulum swings a value either side of 0, Cur cells from the middle: a
+// Pendulum swings a value either side of 0, Value cells from the middle: a
 // "waiting" sign that sways, a needle settling, a notice that swings in.
 type Pendulum struct {
-	Cur    float64
+	cur    float64
 	amp    float64
 	period time.Duration
 	decay  time.Duration // how long a swing takes to shrink to a third; 0 never
@@ -82,9 +82,12 @@ func (p Pendulum) Advance(now time.Time) (Pendulum, bool) {
 	}
 	p.run, _ = p.run.Advance(now)
 	pos, rested := p.at(frames.Paced(now.Sub(p.run.Start)).Seconds())
-	p.Cur = pos
+	p.cur = pos
 	if rested {
 		p.run = frames.Run{}
 	}
 	return p, rested
 }
+
+// Value is where the last frame put the pendulum.
+func (p Pendulum) Value() float64 { return p.cur }

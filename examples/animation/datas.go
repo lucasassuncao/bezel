@@ -127,7 +127,7 @@ func (d datas) rows(th theme.Resolved, label func(kind, variant string) string) 
 	add("bars", "g grow", chart.Bars(bars, 100, chartWidth, th))
 	add("spark", "p pushes", chart.Spark(d.spark.Values(), 100, chartWidth, th))
 	add("area", "g draws", chart.Area(d.area.Values(), 100, chartWidth, 3, th))
-	add("gauge", "n springs", progress.Gauge(d.gauge.Pos, 100, chartWidth, th))
+	add("gauge", "n springs", progress.Gauge(d.gauge.Value(), 100, chartWidth, th))
 	add("heat", "w warms", chart.Heat(d.heat.Values(), 10, th))
 	return strings.Join(rows, "\n")
 }
