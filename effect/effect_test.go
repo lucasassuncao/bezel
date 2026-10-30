@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/cells"
 )
@@ -148,4 +149,17 @@ func TestMain(m *testing.M) {
 	_ = os.Setenv("BEZEL_MOTION", "")
 	_ = os.Setenv("TERM", "xterm-256color")
 	os.Exit(m.Run())
+}
+
+func TestOwnFrameIsHandledAndAsksForTheNext(t *testing.T) {
+	x := FadeIn(black, 100*ms)
+	_, r := x.Update(x.FrameAt(time.Unix(1000, 0)))
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd)
+}
+
+func TestForeignFrameIsNotHandled(t *testing.T) {
+	a, b := FadeIn(black, 100*ms), FadeIn(black, 100*ms)
+	_, r := a.Update(b.FrameAt(time.Unix(1000, 0)))
+	require.Equal(t, bezel.Result{}, r)
 }

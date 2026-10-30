@@ -7,7 +7,9 @@ import (
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/internal/cells"
 )
@@ -82,4 +84,17 @@ func TestTransitionTicksOnItsOwnFrames(t *testing.T) {
 	tr, res := tr.Update(tr.FrameAt(time.Unix(1, 0)))
 	assert.NotNil(t, res.Cmd)
 	assert.False(t, tr.Owns(animation.FrameMsg{}))
+}
+
+func TestOwnFrameIsHandledAndAsksForTheNextTransition(t *testing.T) {
+	x := CrossFade(100 * ms)
+	_, r := x.Update(x.FrameAt(time.Unix(1000, 0)))
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd)
+}
+
+func TestForeignFrameIsNotHandledTransition(t *testing.T) {
+	a, b := CrossFade(100*ms), CrossFade(100*ms)
+	_, r := a.Update(b.FrameAt(time.Unix(1000, 0)))
+	require.Equal(t, bezel.Result{}, r)
 }

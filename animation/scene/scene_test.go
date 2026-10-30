@@ -10,6 +10,8 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel"
 )
 
 // playedFor is a advanced to secs seconds after its first frame.
@@ -88,4 +90,17 @@ func TestMain(m *testing.M) {
 	_ = os.Setenv("BEZEL_MOTION", "")
 	_ = os.Setenv("TERM", "xterm-256color")
 	os.Exit(m.Run())
+}
+
+func TestOwnFrameIsHandledAndAsksForTheNext(t *testing.T) {
+	x := Snow(white)
+	_, r := x.Update(x.FrameAt(time.Unix(1000, 0)))
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd)
+}
+
+func TestForeignFrameIsNotHandled(t *testing.T) {
+	a, b := Snow(white), Snow(white)
+	_, r := a.Update(b.FrameAt(time.Unix(1000, 0)))
+	require.Equal(t, bezel.Result{}, r)
 }
