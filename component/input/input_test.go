@@ -290,7 +290,7 @@ func TestAHiddenFieldDrawsNoneOfItsText(t *testing.T) {
 }
 
 func TestASteadyCaretNeverBlinksAndAHiddenOneNeverShows(t *testing.T) {
-	m, cmd := New(th).WithCursorMode(cursor.Steady).Focus()
+	m, cmd := moded(New(th), cursor.Steady).Focus()
 	require.Nil(t, cmd, "nothing to blink")
 	require.Nil(t, m.Blink())
 	require.Contains(t, m.View(), th.Caret.Render(" "))
@@ -320,7 +320,7 @@ func TestTheTerminalCursorStandsInForTheCaret(t *testing.T) {
 	m = run(m, press(tea.KeyHome, 0))
 	require.Equal(t, 2, m.TerminalCursor().X)
 	require.Nil(t, m.Blur().TerminalCursor())
-	require.Nil(t, m.WithCursorMode(cursor.Hidden).TerminalCursor())
+	require.Nil(t, moded(m, cursor.Hidden).TerminalCursor())
 	require.Nil(t, focused().TerminalCursor(), "a field painting its own caret has none")
 }
 
@@ -378,3 +378,9 @@ func TestOwnBlinkIsHandledAndAnotherIsNot(t *testing.T) {
 
 // withCmd keeps the command of an Update, for the tests that run it.
 func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }
+
+// moded is m with its caret set to mode.
+func moded(m Model, mode cursor.Mode) Model {
+	m, _ = m.SetCursorMode(mode)
+	return m
+}

@@ -30,9 +30,9 @@ func TestAModelSpringsToItsPercent(t *testing.T) {
 func TestAModelKeepsWithinItsEnds(t *testing.T) {
 	m, _ := New(10).SetPercent(1.5)
 	require.Equal(t, 1.0, m.Percent())
-	m, _ = m.DecrPercent(2)
+	m, _ = m.SetPercent(-1)
 	require.Zero(t, m.Percent())
-	m, _ = m.IncrPercent(0.25)
+	m, _ = m.SetPercent(0.25)
 	require.Equal(t, 0.25, m.Percent())
 }
 

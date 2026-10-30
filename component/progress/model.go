@@ -106,12 +106,6 @@ func (m Model) SetPercent(p float64) (Model, tea.Cmd) {
 	return m, cmd
 }
 
-// IncrPercent aims the bar d further along.
-func (m Model) IncrPercent(d float64) (Model, tea.Cmd) { return m.SetPercent(m.Percent() + d) }
-
-// DecrPercent aims the bar d further back.
-func (m Model) DecrPercent(d float64) (Model, tea.Cmd) { return m.SetPercent(m.Percent() - d) }
-
 // Percent is the share the bar is aimed at.
 func (m Model) Percent() float64 { return m.spring.Target }
 

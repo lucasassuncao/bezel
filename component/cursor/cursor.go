@@ -100,12 +100,6 @@ func (m Model) restyle() Model {
 	return m
 }
 
-// WithMode sets how the cursor shows before it is used.
-func (m Model) WithMode(mode Mode) Model {
-	m.mode = mode
-	return m
-}
-
 // WithStyles changes the styles derived from the theme through edit, now and
 // after every SetTheme. It replaces an earlier edit.
 func (m Model) WithStyles(edit func(Styles) Styles) Model {

@@ -46,16 +46,16 @@ func TestARefocusLeavesTheOldTickSpent(t *testing.T) {
 }
 
 func TestSteadyAndHiddenNeverTick(t *testing.T) {
-	steady, cmd := New(th).WithMode(Steady).Focus()
+	steady, cmd := moded(New(th), Steady).Focus()
 	require.Nil(t, cmd)
 	require.True(t, steady.Visible())
-	hidden, cmd := New(th).WithMode(Hidden).Focus()
+	hidden, cmd := moded(New(th), Hidden).Focus()
 	require.Nil(t, cmd)
 	require.False(t, hidden.Visible())
 }
 
 func TestSetModeToBlinkingStartsTheBlink(t *testing.T) {
-	m, _ := New(th).WithMode(Steady).Focus()
+	m, _ := moded(New(th), Steady).Focus()
 	m, cmd := m.SetMode(Blinking)
 	require.NotNil(t, cmd)
 	m, _ = m.Update(cmd())
@@ -106,3 +106,9 @@ func TestOwnBlinkIsHandledAndAnotherIsNot(t *testing.T) {
 
 // withCmd keeps the command of an Update, for the tests that run it.
 func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }
+
+// moded is m set to mode before it is focused.
+func moded(m Model, mode Mode) Model {
+	m, _ = m.SetMode(mode)
+	return m
+}

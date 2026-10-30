@@ -458,8 +458,8 @@ func TestWordKeysChangeCaseAndCtrlTTransposes(t *testing.T) {
 	require.Equal(t, "ba", run(focused("ab"), press('t', tea.ModCtrl)).Value())
 }
 
-func TestInsertStringAndRuneTypeAtTheCaret(t *testing.T) {
-	m := focused("ad").MoveTo(0, 1).InsertString("b\nc").InsertRune('!')
+func TestInsertStringTypesAtTheCaret(t *testing.T) {
+	m := focused("ad").MoveTo(0, 1).InsertString("b\nc!")
 	require.Equal(t, "ab\nc!d", m.Value())
 	require.Equal(t, 1, m.Line())
 	m = m.Select(Position{0, 0}, Position{1, 0}).InsertString("x")
@@ -469,7 +469,7 @@ func TestInsertStringAndRuneTypeAtTheCaret(t *testing.T) {
 }
 
 func TestCursorModesAndTheTerminalCursor(t *testing.T) {
-	m, cmd := New(th()).WithCursorMode(cursor.Steady).Focus()
+	m, cmd := moded(New(th()), cursor.Steady).Focus()
 	require.Nil(t, cmd)
 	require.Nil(t, m.Blink())
 	m, cmd = m.SetCursorMode(cursor.Blinking)
@@ -569,3 +569,9 @@ func TestClickMsgMovesTheCaret(t *testing.T) {
 
 // withCmd keeps the command of an Update, for the tests that run it.
 func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }
+
+// moded is m with its caret set to mode.
+func moded(m Model, mode cursor.Mode) Model {
+	m, _ = m.SetCursorMode(mode)
+	return m
+}

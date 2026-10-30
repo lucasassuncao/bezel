@@ -542,15 +542,8 @@ func (m *Model) blinks() bool { return m.focused && m.mode == cursor.Blinking &&
 // shows reports whether the caret is painted now.
 func (m *Model) shows() bool { return m.focused && m.caretOn && m.mode != cursor.Hidden && !m.term }
 
-// WithCursorMode sets how the caret shows while focused: blinking at the
-// theme's pace, steady, or hidden.
-func (m Model) WithCursorMode(mode cursor.Mode) Model {
-	m = m.ready()
-	m.mode = mode
-	return m
-}
-
-// SetCursorMode changes how a live caret shows, lit at once; a focused field
+// SetCursorMode sets how the caret shows while focused: blinking at the
+// theme's pace, steady, or hidden. A focused field is lit at once, and one
 // turned to Blinking starts its blink with the command returned.
 func (m Model) SetCursorMode(mode cursor.Mode) (Model, tea.Cmd) {
 	m = m.ready()
@@ -957,9 +950,6 @@ func (m Model) InsertString(s string) Model {
 	m.selecting, m.goal = false, -1
 	return m.insert(s).scroll().repaint(false)
 }
-
-// InsertRune is InsertString for one character.
-func (m Model) InsertRune(r rune) Model { return m.InsertString(string(r)) }
 
 // Word is the word the caret is in or touches, "" between spaces.
 func (m Model) Word() string {

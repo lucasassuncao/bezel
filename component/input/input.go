@@ -188,14 +188,8 @@ func (m Model) WithHidden(on bool) Model {
 	return m.scroll()
 }
 
-// WithCursorMode sets how the caret shows while focused: blinking at the
-// theme's pace, steady, or hidden.
-func (m Model) WithCursorMode(mode cursor.Mode) Model {
-	m.mode = mode
-	return m
-}
-
-// SetCursorMode changes how a live caret shows, lit at once; a focused field
+// SetCursorMode sets how the caret shows while focused: blinking at the
+// theme's pace, steady, or hidden. A focused field is lit at once, and one
 // turned to Blinking starts its blink with the command returned.
 func (m Model) SetCursorMode(mode cursor.Mode) (Model, tea.Cmd) {
 	m.mode = mode

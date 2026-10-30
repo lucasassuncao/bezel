@@ -44,7 +44,7 @@ func newModel() model {
 	})
 	m := model{sh: sh, th: th}
 	for i, mode := range []cursor.Mode{cursor.Blinking, cursor.Steady, cursor.Hidden} {
-		m.cursors[i] = cursor.New(th).WithMode(mode).SetChar("h")
+		m.cursors[i], _ = cursor.New(th).SetChar("h").SetMode(mode)
 	}
 	m.cursors[0], _ = m.cursors[0].Focus()
 	return m
