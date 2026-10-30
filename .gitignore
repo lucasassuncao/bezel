@@ -39,6 +39,7 @@ Desktop.ini
 .claude
 .superpowers/
 /docs/superpowers
+/bkp
 tmp/
 tmp/*
 CLAUDE.md
