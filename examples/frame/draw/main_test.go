@@ -50,7 +50,7 @@ func TestDrawShowsBothDividers(t *testing.T) {
 func TestDrawShowsACardAndButtons(t *testing.T) {
 	var m tea.Model = newModel()
 	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
-	for range 14 {
+	for range 11 {
 		m, _ = m.Update(bezeltest.Key("down"))
 	}
 	_, out := frame(t, m, nil)

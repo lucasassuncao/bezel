@@ -68,16 +68,11 @@ func (m model) sections(w int) []string {
 	}
 	add("Header", draw.Header(w, "my app", "kv/app/prod", "v1.2.0", m.th.Chrome))
 	add("Tabs", draw.Tabs(w, []string{"secrets", "policies", "auth"}, 1, m.th.Chrome))
-	add("Breadcrumb", draw.Breadcrumb([]string{"kv", "app", "prod", "db"}))
 	add("Divider", draw.Divider(w, "", draw.DividerStyle{Line: m.th.Muted}), draw.Divider(w, "Packages", draw.DividerStyle{Line: m.th.Muted, Label: m.th.Accent}))
 	card := draw.Card(layout.Rect{W: min(w, 40), H: 7}, "git", "version  2.47.0\nsource   winget\nscope    machine",
 		m.th.Key.Render("[u]")+" upgrade  "+m.th.Key.Render("[r]")+" remove", m.th.Panel)
 	add("Card", strings.Split(card, "\n")...)
 	add("Button", draw.Button("Save", m.th.Button, true)+"  "+draw.Button("Cancel", m.th.Button, false))
-	// KV ends its row with a newline, so rows stack by concatenation.
-	kv := draw.KV("address", "http://127.0.0.1:8200", m.th.Dim, w) +
-		draw.KV("version", "4 (2 deleted)", m.th.Dim, w)
-	add("KV", strings.TrimSuffix(kv, "\n"))
 	add("Wrap", draw.Wrap(paragraph, min(w, 40))...)
 	add("Truncate", draw.Truncate("a line much longer than the room it has to fit in", 24))
 	add("NumberLines", draw.NumberLines(source, m.th.Muted))

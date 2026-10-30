@@ -12,15 +12,6 @@ import (
 	"github.com/lucasassuncao/bezel/layout"
 )
 
-// Tail must not pin the whole log's backing array, nor write through to it.
-func TestTailIsACopy(t *testing.T) {
-	log := []string{"a", "b", "c", "d"}
-	tail := Tail(log, 2)
-	require.Equal(t, []string{"c", "d"}, tail)
-	tail[0] = "x"
-	require.Equal(t, "c", log[2])
-}
-
 func TestTruncateMeasuresCellsNotBytes(t *testing.T) {
 	styled := lipgloss.NewStyle().Foreground(lipgloss.Color("63")).Render("hello world")
 	got := Truncate(styled, 5)
@@ -60,16 +51,7 @@ func TestInnerRectRemovesBorderAndPadding(t *testing.T) {
 	require.Equal(t, layout.Rect{X: 2, Y: 1, W: 1, H: 1}, InnerRect(layout.Rect{X: 0, Y: 0, W: 2, H: 1}))
 }
 
-func TestBreadcrumbScrollToAndNumberLines(t *testing.T) {
-	require.Equal(t, "a › b › c", Breadcrumb([]string{"a", "b", "c"}))
-
-	ten := "1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
-	require.Equal(t, "1\n2\n3", ScrollTo(ten, 3, 0))
-	require.Equal(t, "5\n6\n7", ScrollTo(ten, 3, 6))   // centred on the target
-	require.Equal(t, "8\n9\n10", ScrollTo(ten, 3, 10)) // clamped at the end
-	require.Equal(t, ten, ScrollTo(ten, 20, 5))
-	require.Equal(t, "", ScrollTo(ten, 0, 5))
-
+func TestNumberLinesCountsFromOne(t *testing.T) {
 	got := NumberLines("a\nb", lipgloss.NewStyle())
 	require.Equal(t, "   1 │ a\n   2 │ b", got)
 	require.Equal(t, GutterWidth, ansi.StringWidth(Gutter(1, lipgloss.NewStyle())))

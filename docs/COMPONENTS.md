@@ -46,7 +46,7 @@ The ready-made modals, one per row: an alert, a confirm that answers the app, a 
 
 Source: [`examples/frame/draw/main.go`](../examples/frame/draw/main.go)
 
-One scrolling pane with a section per helper: header, tabs, breadcrumb, dividers, a card with its actions in the footer, buttons, key-value rows, wrapped and truncated text, numbered lines and the empty state.
+One scrolling pane with a section per helper: header, tabs, dividers, a card with its actions in the footer, buttons, wrapped and truncated text, numbered lines and the empty state.
 
 ![draw](recordings/frame/draw.gif)
 

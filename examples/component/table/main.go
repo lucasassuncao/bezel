@@ -134,7 +134,7 @@ func (m model) detail(r layout.Rect) string {
 		return ""
 	}
 	c := it.Cells
-	out := draw.KV("version", c[1], m.th.Dim, r.W) + draw.KV("licence", c[2], m.th.Dim, r.W) + "\n"
+	out := m.field("version", c[1], r.W) + m.field("licence", c[2], r.W) + "\n"
 	return out + "  " + strings.Join(draw.Wrap(c[3], r.W-2), "\n  ")
 }
 
@@ -159,4 +159,9 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+// field is one labelled row of the detail, cut to width.
+func (m model) field(name, value string, width int) string {
+	return draw.Cut("  "+m.th.Dim.Render(fmt.Sprintf("%-8s ", name))+value, width) + "\n"
 }
