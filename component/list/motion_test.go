@@ -157,3 +157,24 @@ func TestAClickLooksPastAGhost(t *testing.T) {
 	m, _ = m.Update(click(2))
 	assert.Equal(t, "new", sel(m).Label)
 }
+
+func TestForeignKeyMidGlideReturnsZeroResult(t *testing.T) {
+	moving(t)
+	m := New(plainRows("a", "b", "c")).SetHeight(3).WithMotion(100 * ms)
+	m, _ = m.Update(bezeltest.Key("down"))
+	require.True(t, m.Active())
+	_, r := m.Update(bezeltest.Key("x"))
+	assert.Equal(t, bezel.Result{}, r)
+}
+
+func TestNoOpKeyMidGlideDoesNotRetick(t *testing.T) {
+	moving(t)
+	m := New(plainRows("a", "b", "c")).SetHeight(3).WithMotion(100 * ms)
+	m, _ = m.Update(bezeltest.Key("down"))
+	m, _ = m.Update(bezeltest.Key("end"))
+	_, r := m.Update(bezeltest.Key("end"))
+	assert.True(t, r.Handled)
+	assert.Nil(t, r.Cmd, "nothing moved, so no second frame chain")
+	_, r = m.Update(click(2))
+	assert.Nil(t, r.Cmd, "a click on the cursor row chooses, it does not move")
+}

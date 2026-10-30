@@ -118,7 +118,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		var r bezel.Result
 		click := bezel.ClickMsg{Pane: msg.Pane, MouseClickMsg: msg.MouseClickMsg}
-		if m.lists[at], r = m.lists[at].Update(click); r.Event != nil {
+		if m.lists[at], r = m.lists[at].Update(click); isChosen(r.Event) {
 			m.sh, cmd = m.sh.SetStatus("opened "+m.selected(), shell.OK, 2*time.Second)
 			return m, cmd
 		}
@@ -147,4 +147,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+// isChosen reports whether e is a list's choice of a row.
+func isChosen(e any) bool {
+	_, ok := e.(list.Chosen[int])
+	return ok
 }

@@ -387,7 +387,7 @@ func TestAClickMovesTheCursorAndASecondChooses(t *testing.T) {
 	require.IsType(t, Chosen[int]{}, r.Event, "the row under the cursor is chosen")
 	same, r := m.Update(click(0))
 	require.Nil(t, r.Event, "a heading is not a row to land on")
-	require.True(t, r.Handled, "but it is drawn by the list")
+	require.False(t, r.Handled)
 	require.Equal(t, "cache", sel(same).Label)
 	_, r = m.Update(click(40))
 	require.Equal(t, bezel.Result{}, r)
@@ -493,5 +493,11 @@ func TestClickPastTheRowsIsNotHandled(t *testing.T) {
 
 func TestAMessageForAnotherModelIsNotHandled(t *testing.T) {
 	_, r := New(labelled("a")).SetHeight(5).Update(tea.WindowSizeMsg{Width: 1, Height: 1})
+	require.Equal(t, bezel.Result{}, r)
+}
+
+func TestClickOnAHeadingIsNotHandled(t *testing.T) {
+	l := New([]Row[int]{{Section: true, Label: "H"}, {Label: "a"}}).SetHeight(5)
+	_, r := l.Update(click(0))
 	require.Equal(t, bezel.Result{}, r)
 }

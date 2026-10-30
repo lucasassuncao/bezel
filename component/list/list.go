@@ -364,6 +364,7 @@ func (m Model[T]) picked() bool {
 // list's Tick. Anything else comes back unhandled and unchanged.
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	var chosen, handled bool
+	before := m.mo.run.ID
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		handled = m.handles(msg)
@@ -381,7 +382,13 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 		}
 		return m, bezel.Result{Handled: true, Cmd: cmd}
 	}
-	r := bezel.Result{Handled: handled, Cmd: m.Tick()}
+	if !handled {
+		return m, bezel.Result{}
+	}
+	r := bezel.Result{Handled: true}
+	if m.mo.run.ID != before {
+		r.Cmd = m.Tick() // a new motion began; the old frames are foreign now
+	}
 	if row, ok := m.Selected(); chosen && ok {
 		r.Event = Chosen[T]{Row: row}
 	}
@@ -454,8 +461,8 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], bool) {
 
 // click is a left click on line y of View: on a row it moves the cursor
 // there, and on the row already under the cursor it chooses it, as enter
-// would. It reports whether it chose and whether y fell on a row drawn; a
-// heading is drawn but never chosen; the title and the lines past the rows are not.
+// would. It reports whether it chose and whether y fell on a row it can act on;
+// a heading, the title and the lines past the rows are not.
 func (m Model[T]) click(y int) (Model[T], bool, bool) {
 	if m.title != "" {
 		y--
@@ -486,10 +493,8 @@ func (m Model[T]) click(y int) (Model[T], bool, bool) {
 		}
 	}
 	switch {
-	case i < 0:
+	case i < 0 || m.rows[i].Section:
 		return m, false, false
-	case m.rows[i].Section:
-		return m, false, true
 	case i == m.win.Cursor:
 		return m, true, true
 	}
