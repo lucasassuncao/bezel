@@ -433,3 +433,29 @@ func TestNodeLenAndSetOffsetRestoreAView(t *testing.T) {
 	require.Equal(t, m.Nodes()[3], r.Node(3))
 	require.Equal(t, node{}, r.Node(99), "out of range is the zero node")
 }
+
+// Any shape of tree, scrolled anywhere, draws within its height.
+func FuzzTreeStaysInItsHeight(f *testing.F) {
+	f.Add([]byte{0, 1, 1, 2, 0, 1}, 4, 3)
+	f.Add([]byte{}, 3, 0)
+	f.Add([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 1, 9)
+	f.Fuzz(func(t *testing.T, shape []byte, h, down int) {
+		h, down = h%30, (down%50+50)%50
+		ns := make([]node, len(shape)%80)
+		for i := range ns {
+			d := int(shape[i] % 4)
+			ns[i] = node{label: fmt.Sprint("n", i), depth: d, leaf: shape[i]%3 == 0, expanded: shape[i]%2 == 0, section: shape[i] == 7}
+		}
+		m := New(ns).SetHeight(h)
+		for range down {
+			m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
+		}
+		row := func(n node, _ int, _ bool) string { return n.label }
+		view := m.View(theme.Resolve(theme.Plain(), true), row)
+		if h <= 0 {
+			require.Empty(t, view)
+			return
+		}
+		require.LessOrEqual(t, len(strings.Split(view, "\n")), h, "%q", view)
+	})
+}

@@ -3,6 +3,8 @@ package legend
 import (
 	"strings"
 	"testing"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
@@ -210,4 +212,42 @@ func TestNewPrintsItsLabel(t *testing.T) {
 	e := New("↑/↓", "move")
 	require.Equal(t, "↑/↓", e.Help.Key)
 	require.Equal(t, "[↑/↓] move", ansi.Strip(HintLine([]Entry{e}, Style{})))
+}
+
+// Pack never draws more rows than it may, nor a row wider than the width.
+func FuzzPackStaysInItsRows(f *testing.F) {
+	f.Add("ctrl+s", "save the file", 12, 40, 2, "?")
+	f.Add("全角", "説明文", 3, 5, 1, "")
+	f.Add("", "", 0, 1, 3, "?")
+	f.Fuzz(func(t *testing.T, k, desc string, n, width, lines int, help string) {
+		if !appText(k, desc, help) {
+			t.Skip()
+		}
+		n, width, lines = (n%30+30)%30, (width%120+120)%120, (lines%5+5)%5
+		es := make([]Entry, n)
+		for i := range es {
+			es[i] = New(k, desc)
+			es[i].Group = i % 3
+		}
+		out := Pack(es, width, lines, help, Style{})
+		if width <= 0 || lines < 1 {
+			return // unbounded on purpose: one row, as wide as it needs
+		}
+		require.LessOrEqual(t, len(out), lines)
+		for i, l := range out {
+			require.LessOrEqual(t, ansi.StringWidth(l), width, "row %d: %q", i, l)
+		}
+	})
+}
+
+// appText reports text an app hands a component as it is: valid UTF-8 with
+// no control characters but line breaks. Anything else goes through
+// draw.Sanitize first, the app's job.
+func appText(ss ...string) bool {
+	for _, s := range ss {
+		if !utf8.ValidString(s) || strings.ContainsFunc(s, func(r rune) bool { return unicode.IsControl(r) && r != '\n' }) {
+			return false
+		}
+	}
+	return true
 }

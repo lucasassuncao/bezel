@@ -53,3 +53,26 @@ func TestChartsOfNothing(t *testing.T) {
 func TestANilOptionIsSkipped(t *testing.T) {
 	require.Equal(t, ansi.Strip(Spark([]float64{1, 2}, 2, 2, th())), ansi.Strip(Spark([]float64{1, 2}, 2, 2, th(), nil)))
 }
+
+// Whatever the values, a chart keeps to the cells it was given.
+func FuzzChartsStayInTheirBox(f *testing.F) {
+	f.Add(3.0, -2.0, 1e9, 10.0, 12, 4)
+	f.Add(0.0, 0.0, 0.0, 0.0, 1, 1)
+	f.Add(-5.0, 7.5, 2.0, 0.0, 0, 3)
+	f.Fuzz(func(t *testing.T, a, b, c, top float64, w, h int) {
+		w, h = w%100, h%20
+		vs := []float64{a, b, c, a + b, c - a}
+		within := func(name, out string, rows int) {
+			lines := strings.Split(out, "\n")
+			if rows > 0 {
+				require.LessOrEqual(t, len(lines), rows, name)
+			}
+			for i, l := range lines {
+				require.LessOrEqual(t, ansi.StringWidth(l), max(w, 0), "%s row %d", name, i)
+			}
+		}
+		within("area", Area(vs, top, w, h, th()), max(h, 1))
+		within("spark", Spark(vs, top, w, th()), 1)
+		within("bars", Bars([]Bar{{Label: "a", Value: a}, {Label: "bb", Value: b}}, top, w, th()), 0)
+	})
+}

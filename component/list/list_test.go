@@ -5,6 +5,8 @@ import (
 	"github.com/lucasassuncao/bezel/key"
 	"strings"
 	"testing"
+	"unicode"
+	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -500,4 +502,47 @@ func TestClickOnAHeadingIsNotHandled(t *testing.T) {
 	l := New([]Row[int]{{Section: true, Label: "H"}, {Label: "a"}}).SetHeight(5)
 	_, r := l.Update(click(0))
 	require.Equal(t, bezel.Result{}, r)
+}
+
+// However many rows, whatever their text and the cursor, the list draws
+// within the height it was given, and nothing before it was given one.
+func FuzzListStaysInItsHeight(f *testing.F) {
+	f.Add("server", "the main one", 7, 3, 2)
+	f.Add("全角の名前", "", 30, 1, 29)
+	f.Add("a\x1b[31mred", "x\ny", 0, 4, 0)
+	f.Add("", "", 5, 0, 1)
+	f.Add("
+", "0", 30, 16, 0) // a section label with a break took two rows
+	f.Fuzz(func(t *testing.T, label, desc string, n, h, down int) {
+		if !appText(label, desc) {
+			t.Skip()
+		}
+		n, h, down = (n%60+60)%60, h%30, (down%80+80)%80
+		rs := make([]Row[int], n)
+		for i := range rs {
+			rs[i] = Row[int]{Label: fmt.Sprint(label, i), Description: desc, Section: i%7 == 3, Value: i}
+		}
+		m := New(rs).SetHeight(h)
+		for range down {
+			m, _ = m.Update(bezeltest.Key("down"))
+		}
+		view := m.View(th)
+		if h <= 0 {
+			require.Empty(t, view)
+			return
+		}
+		require.LessOrEqual(t, len(strings.Split(view, "\n")), h, "%q", view)
+	})
+}
+
+// appText reports text an app hands a component as it is: valid UTF-8 with
+// no control characters but line breaks. Anything else goes through
+// draw.Sanitize first, the app's job.
+func appText(ss ...string) bool {
+	for _, s := range ss {
+		if !utf8.ValidString(s) || strings.ContainsFunc(s, func(r rune) bool { return unicode.IsControl(r) && r != '\n' }) {
+			return false
+		}
+	}
+	return true
 }

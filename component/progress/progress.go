@@ -18,7 +18,9 @@ import (
 // Bar is a done/total bar width cells wide: filled in the accent colour, the
 // rest muted. A zero total reads as nothing done.
 func Bar(done, total, width int, th theme.Resolved) string {
-	width = max(width, 1)
+	if width <= 0 {
+		return ""
+	}
 	filled := 0
 	if total > 0 {
 		filled = min(max(done, 0)*width/total, width)
@@ -75,7 +77,9 @@ func Stepper(steps []string, current, width int, th theme.Resolved, set icon.Set
 // Meter is done/total as width squares: the filled ones coloured along the
 // theme's ramp from the left, the rest hollow, so it reads without colour.
 func Meter(done, total, width int, th theme.Resolved) string {
-	width = max(width, 1)
+	if width <= 0 {
+		return ""
+	}
 	filled := 0
 	if total > 0 {
 		filled = min(max(done, 0)*width/total, width)
@@ -100,7 +104,9 @@ var eighths = []rune("▏▎▍▌▋▊▉")
 // eighth of a cell, over a muted track as Bar's.
 func Smooth(done, total, width int, th theme.Resolved, opts ...chart.Option) string {
 	fill := chart.Fill(th, opts...)
-	width = max(width, 1)
+	if width <= 0 {
+		return ""
+	}
 	n := 0
 	if total > 0 {
 		n = min(max(done, 0)*width*8/total, width*8)

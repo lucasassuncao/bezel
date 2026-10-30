@@ -58,7 +58,7 @@ func Gauge(value, total float64, width int, th theme.Resolved) string
 Gauge is value out of total as a needle under a ruled track width cells wide, two rows: the track with a tick every quarter, then the needle. The value is a float, so a Spring can carry the needle smoothly.
 
 <a name="Line"></a>
-## func [Line](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L35>)
+## func [Line](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L37>)
 
 ```go
 func Line(label string, done, total, width int, th theme.Resolved) string
@@ -67,7 +67,7 @@ func Line(label string, done, total, width int, th theme.Resolved) string
 Line is label, a bar and "done/total" in one row width cells wide. The bar takes what the label and the count leave; when space runs out the bar goes first, then the label is cut, and the count stays.
 
 <a name="Meter"></a>
-## func [Meter](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L77>)
+## func [Meter](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L79>)
 
 ```go
 func Meter(done, total, width int, th theme.Resolved) string
@@ -76,7 +76,7 @@ func Meter(done, total, width int, th theme.Resolved) string
 Meter is done/total as width squares: the filled ones coloured along the theme's ramp from the left, the rest hollow, so it reads without colour.
 
 <a name="Smooth"></a>
-## func [Smooth](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L101>)
+## func [Smooth](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L105>)
 
 ```go
 func Smooth(done, total, width int, th theme.Resolved, opts ...chart.Option) string
@@ -85,7 +85,7 @@ func Smooth(done, total, width int, th theme.Resolved, opts ...chart.Option) str
 Smooth is done/total as a bar width cells wide whose edge is cut to an eighth of a cell, over a muted track as Bar's.
 
 <a name="Stepper"></a>
-## func [Stepper](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L48>)
+## func [Stepper](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/progress.go#L50>)
 
 ```go
 func Stepper(steps []string, current, width int, th theme.Resolved, set icon.Set) string

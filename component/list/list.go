@@ -717,7 +717,7 @@ func (m Model[T]) rowLines(st *Styles) (lines []string, of []int) {
 		r, arriving := m.rows[i], m.arriving(m.rows[i], st)
 		switch {
 		case r.Section:
-			heading := st.Section.Render(r.Label)
+			heading := st.Section.Render(oneLine(r.Label))
 			if two {
 				heading += "\n"
 			}
@@ -790,10 +790,10 @@ func renderRow[T any](r Row[T], selected bool, st *Styles, hits []int, two bool)
 	if r.Mark != "" {
 		lead += r.Mark + "  "
 	}
-	row := style.Render(lead) + underlined(r.Label, hits, style)
+	row := style.Render(lead) + underlined(oneLine(r.Label), hits, style)
 	if two {
 		indent := strings.Repeat(" ", utf8.RuneCountInString(lead))
-		row += "\n" + st.Description.Render(indent+r.Description)
+		row += "\n" + st.Description.Render(indent+oneLine(r.Description))
 	}
 	return row
 }
@@ -822,4 +822,15 @@ func underlined(label string, hits []int, style lipgloss.Style) string {
 		}
 	}
 	return b.String()
+}
+
+// oneLine is s with its line breaks as spaces, rune for rune, so a row
+// keeps the lines the list counted for it and its filter hits.
+func oneLine(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r == '\n' || r == '\r' {
+			return ' '
+		}
+		return r
+	}, s)
 }

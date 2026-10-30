@@ -2,7 +2,10 @@ package progress
 
 import (
 	"github.com/lucasassuncao/bezel/component/chart"
+	"strings"
 	"testing"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
@@ -81,4 +84,38 @@ func TestSmoothInASeriesColour(t *testing.T) {
 
 func TestANilOptionIsSkipped(t *testing.T) {
 	require.Equal(t, ansi.Strip(Smooth(1, 2, 8, th())), ansi.Strip(Smooth(1, 2, 8, th(), nil)))
+}
+
+// Every bar keeps to its width, whatever done and total say.
+func FuzzBarsStayInTheirWidth(f *testing.F) {
+	f.Add("installing", 3, 8, 20)
+	f.Add("全角のラベル", -4, 0, 5)
+	f.Add("", 9, 3, 0)
+	f.Fuzz(func(t *testing.T, label string, done, total, w int) {
+		if !appText(label) {
+			t.Skip()
+		}
+		w %= 120
+		for name, out := range map[string]string{
+			"bar":    Bar(done, total, w, th()),
+			"line":   Line(label, done, total, w, th()),
+			"meter":  Meter(done, total, w, th()),
+			"smooth": Smooth(done, total, w, th()),
+			"model":  New().SetWidth(w).ViewAs(float64(done)/float64(max(total, 1)), th()),
+		} {
+			require.LessOrEqual(t, ansi.StringWidth(out), max(w, 0), "%s: %q", name, out)
+		}
+	})
+}
+
+// appText reports text an app hands a component as it is: valid UTF-8 with
+// no control characters but line breaks. Anything else goes through
+// draw.Sanitize first, the app's job.
+func appText(ss ...string) bool {
+	for _, s := range ss {
+		if !utf8.ValidString(s) || strings.ContainsFunc(s, func(r rune) bool { return unicode.IsControl(r) && r != '\n' }) {
+			return false
+		}
+	}
+	return true
 }

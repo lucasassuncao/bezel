@@ -230,7 +230,7 @@ func (m Model) View(th theme.Resolved) string {
 		body := draw.Wrap(s.Body, max(width-2, 1))
 		shown := int(math.Round(share * float64(len(body))))
 		for _, l := range body[:shown] {
-			out = append(out, "  "+st.Body.Render(l))
+			out = append(out, draw.Cut("  "+st.Body.Render(l), width))
 		}
 	}
 	return strings.Join(out, "\n")

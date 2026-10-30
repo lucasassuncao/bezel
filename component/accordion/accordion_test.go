@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
@@ -130,3 +132,37 @@ func TestOwnFrameIsHandledAndAnotherIsNot(t *testing.T) {
 
 // withCmd keeps the command of an Update, for the tests that run it.
 func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }
+
+// Open or shut, every row of the accordion fits the width it was given.
+func FuzzAccordionStaysInItsWidth(f *testing.F) {
+	f.Add("Question", "An answer that runs on past the width.", 20, true)
+	f.Add("全角の題", "本文\n二行目", 6, true)
+	f.Add("", "", 1, false)
+	f.Add("", "0", 1, true) // the body's indent alone outgrew one cell
+	f.Fuzz(func(t *testing.T, title, body string, w int, open bool) {
+		if !appText(title, body) {
+			t.Skip()
+		}
+		w %= 80
+		m := New([]Section{{Title: title, Body: body}, {Title: "second", Body: body}}).SetWidth(w)
+		if open {
+			m, _ = m.Toggle(0)
+			m = opened(m, time.Hour)
+		}
+		for i, l := range strings.Split(m.View(th), "\n") {
+			require.LessOrEqual(t, ansi.StringWidth(l), max(w, 0), "row %d", i)
+		}
+	})
+}
+
+// appText reports text an app hands a component as it is: valid UTF-8 with
+// no control characters but line breaks. Anything else goes through
+// draw.Sanitize first, the app's job.
+func appText(ss ...string) bool {
+	for _, s := range ss {
+		if !utf8.ValidString(s) || strings.ContainsFunc(s, func(r rune) bool { return unicode.IsControl(r) && r != '\n' }) {
+			return false
+		}
+	}
+	return true
+}
