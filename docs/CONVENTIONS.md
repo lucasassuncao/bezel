@@ -224,5 +224,5 @@ Only in a new major version (`/v2`):
 Not promised:
 
 - what `View` draws, cell for cell: spacing, glyphs, the colours a preset derives, `DefaultStyles` and `DefaultKeys`. A test that compares a whole frame may need its expected text again after an upgrade;
-- the experimental packages, `animation`, `animation/text`, `animation/scene` and `effect`, and the shell's `Config.Transition`, `SlideTabs` and `Transition()` built on them: they may change in a minor release, said so in its notes;
+- the experimental packages, `animation`, `animation/text`, `animation/scene` and `effect`: they may change in a minor release, said so in its notes;
 - the bubbletea and lipgloss types in bezel's signatures: bezel follows their v2, and a break there is a break here.

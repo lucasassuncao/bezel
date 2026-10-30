@@ -86,8 +86,7 @@ func (s Shell) click(c tea.MouseClickMsg) (Shell, bool, tea.Cmd) {
 	}
 	if len(s.cfg.Tabs) > 0 && c.Y == s.headerRows() {
 		if i := draw.TabAt(s.width, s.tabNames(), s.tab, s.cfg.Theme.Chrome, c.X); i >= 0 {
-			next, cmd := s.showTab(i)
-			return next, true, cmd
+			return s.SetTab(i), true, nil
 		}
 		return s, true, nil
 	}

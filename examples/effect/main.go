@@ -43,10 +43,9 @@ type model struct {
 func newModel() model {
 	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
-		Layout:     layout.Rows(layout.Fill("main")),
-		Theme:      th,
-		Title:      "effect",
-		Transition: shell.SlideTabs(300 * time.Millisecond),
+		Layout: layout.Rows(layout.Fill("main")),
+		Theme:  th,
+		Title:  "effect",
 		Tabs: []shell.Tab{
 			page{"draw", []shell.Action{
 				shell.Custom("e", "effect", shell.Send(effectMsg{})),

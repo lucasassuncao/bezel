@@ -22,7 +22,7 @@ bezel/
 The packages at the root are the ones every app touches: `shell` to embed, `theme` to resolve, `layout` to declare the screen. They stay at the root so their imports are the shortest, `bezel/shell` rather than a longer path, and so the module's root reads as its main API, as Go modules usually do. They are two layers, not one:
 
 - **The foundation**: `layout`, `key`, `draw`, `legend` and `theme`. They import nothing from the rest of bezel but each other, and everything else is built on them. `layout` and `key` stand alone; `draw` sits on `layout`, `legend` on `draw` and `key`, and `theme` on `draw` and `legend`, whose styles it fills in.
-- **The frame**: `overlay`, `palette` and `shell`. They are the top of the stack: they compose components (the prompt's `input`, the pager's `viewport`, the busy `spinner`) and play effects, and nothing in the module imports them except one another and the examples. `legend`, `palette` and `overlay` are not components, though they draw: the shell owns them, builds them from its `Action`s and draws them around the panes, and an app never places one in a pane of its own.
+- **The frame**: `overlay`, `palette` and `shell`. They are the top of the stack: they compose components (the prompt's `input`, the pager's `viewport`, the busy `spinner`), and nothing in the module imports them except one another and the examples. `legend`, `palette` and `overlay` are not components, though they draw: the shell owns them, builds them from its `Action`s and draws them around the panes, and an app never places one in a pane of its own.
 
 `bezeltest` is apart from both: it builds the key presses a terminal sends, for tests, and imports nothing from bezel.
 
@@ -36,7 +36,7 @@ A component imports the foundation and, where it is made of others, other compon
 
 Changes to a block that is already drawn: fades, dissolves, slides, lights, the transitions from one block to the next, and the presets that name an intent. An effect reads the block's escape codes back into cells and draws them again, so it works over anything a `View` returns.
 
-It is a folder of its own, not part of `animation`, because it is a different kind of thing: an animation moves a value the app draws, an effect changes what was drawn. The shell plays one between tabs. It runs on the animation clock, so `effect` imports `animation`, never the other way.
+It is a folder of its own, not part of `animation`, because it is a different kind of thing: an animation moves a value the app draws, an effect changes what was drawn. It runs on the animation clock, so `effect` imports `animation`, never the other way.
 
 ## animation/
 
@@ -55,7 +55,7 @@ Plumbing more than one folder needs and no app should depend on. Go lets only th
 
 | Package | What it holds | Who uses it |
 |---|---|---|
-| `frames` | the frame message, the run a timed motion keeps, the motion switches read from the environment | `animation`, `effect`, `shell`, and the components that move: `list`, `accordion`, `toast` |
+| `frames` | the frame message, the run a timed motion keeps, the motion switches read from the environment | `animation`, `effect`, and the components that move: `list`, `accordion`, `toast` |
 | `cells` | a drawn block read back into styled cells, and the canvas they are put into | `effect`, `animation/scene` |
 | `noise` | the hash randomness is drawn from, the same for the same frame | `effect`, `animation/text`, `animation/scene` |
 | `hue` | colours turned round the HSL wheel | `effect`, `animation/text` |

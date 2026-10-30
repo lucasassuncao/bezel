@@ -132,9 +132,6 @@ func (s Shell) View(panes map[string]Pane) string {
 	rows = append(rows, draw.Fit("", s.width))
 
 	canvas := s.paneCanvas(panes, body)
-	if s.trans.Active() {
-		canvas = s.trans.Apply(canvas) // the tab strip above stays put
-	}
 	rows = append(rows, strings.Split(canvas, "\n")...)
 	if s.statusShown() {
 		rows = append(rows, s.statusRow())
@@ -188,9 +185,6 @@ func (s Shell) paneCanvas(panes map[string]Pane, body layout.Rect) string {
 		st := s.cfg.Theme.Panel
 		if name == s.Focused() {
 			st = s.cfg.Theme.PanelFocused
-		}
-		if c := s.glowColor(name); c != nil {
-			st.Border = st.Border.Foreground(c)
 		}
 		if p.Accent != nil {
 			st.Border = st.Border.Foreground(p.Accent)

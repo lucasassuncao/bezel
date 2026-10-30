@@ -95,7 +95,7 @@ func (t filesTab) Actions(shell.Context) []shell.Action {
 
 `Status` is the text on the status row while the tab shows; `Actions` are its keys, added to `Config.Actions`. Both run several times a frame, so they stay cheap and change nothing. A tab is read as given: when it changes, the app hands it back with `SetTabs`.
 
-`ChangeTab` moves between tabs on `tab` and `shift+tab`; `SetTab(i)` moves from code, and `ActiveTab()` says where the user is. When the tabs are wider than the screen the strip scrolls to keep the active one in sight, with `‹` and `›` where more are hidden. `Config.Transition` plays an [effect](EFFECTS.md#between-tabs) over the panes as the tab changes.
+`ChangeTab` moves between tabs on `tab` and `shift+tab`; `SetTab(i)` moves from code, and `ActiveTab()` says where the user is. When the tabs are wider than the screen the strip scrolls to keep the active one in sight, with `‹` and `›` where more are hidden.
 
 ## Actions
 
@@ -155,7 +155,7 @@ case tea.KeyPressMsg: // keys no action took go to the focused pane
 	}
 ```
 
-The shell knows which pane has focus and draws its border in the accent. `Focused()` names it, `SetFocus(name)` moves it, and `ChangePane` steps through the layout's leaves, skipping the `Info` ones. Each move sends a `shell.FocusMsg{From, To}`, so the app can run what entering and leaving a pane means for it. With `Config.FocusFade` set, the accent colour travels from the pane left to the pane gained over that long instead of jumping. Keys the actions leave alone fall through to the app, which hands them to the component in the focused pane.
+The shell knows which pane has focus and draws its border in the accent. `Focused()` names it, `SetFocus(name)` moves it, and `ChangePane` steps through the layout's leaves, skipping the `Info` ones. Each move sends a `shell.FocusMsg{From, To}`, so the app can run what entering and leaving a pane means for it. Keys the actions leave alone fall through to the app, which hands them to the component in the focused pane.
 
 ## The mouse
 
@@ -171,7 +171,7 @@ func (m model) View() tea.View {
 
 From then on the shell answers a left click by itself, in `Update`, like a key an action takes:
 
-- on a **tab**, it shows that tab, with `Config.Transition` if there is one;
+- on a **tab**, it shows that tab;
 - on a **dialog**, the dialog takes it: `Confirm`, `Alert` and `Choice` press the button clicked, and a click off the dialog does nothing;
 - on a **pane**, it focuses the pane, with the `FocusMsg` and the fade a key gives (an `Info` pane keeps the focus where it was), and sends the app a `shell.ClickMsg`.
 

@@ -101,10 +101,9 @@ func shape(h int) layout.Node {
 func newModel() model {
 	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
-		Layout:     shape(0),
-		Theme:      th,
-		Title:      "animation",
-		Transition: shell.SlideTabs(300 * time.Millisecond),
+		Layout: shape(0),
+		Theme:  th,
+		Title:  "animation",
 		Tabs: []shell.Tab{
 			page{"basics", []shell.Action{
 				shell.Custom("r", "replay", shell.Send(replayMsg{})),

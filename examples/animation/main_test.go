@@ -14,13 +14,10 @@ import (
 	"github.com/lucasassuncao/bezel/bezeltest"
 )
 
-// turnTab presses tab and plays the slide to the new tab out, as its frames would.
+// turnTab presses tab and renders the new tab.
 func turnTab(t *testing.T, m tea.Model) (tea.Model, string) {
 	t.Helper()
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyTab})
-	at := time.Unix(500, 0)
-	m, _ = m.Update(m.(model).sh.Transition().FrameAt(at))
-	m, _ = m.Update(m.(model).sh.Transition().FrameAt(at.Add(time.Hour)))
 	return frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
 }
 

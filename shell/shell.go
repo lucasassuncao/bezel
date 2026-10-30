@@ -10,7 +10,6 @@ import (
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/component/toast"
-	"github.com/lucasassuncao/bezel/effect"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
@@ -73,13 +72,6 @@ type Config struct {
 	// Spinner is what Busy shows; without frames it turns spinner.Dot's at its
 	// own Every. A test sets an Every of a nanosecond, never to wait on a tick.
 	Spinner spinner.Spinner
-	// Transition, when set, is the effect played over the panes as the user
-	// changes tab, given the tab left and the tab shown. SlideTabs is one.
-	// Experimental, as the effect package is.
-	Transition func(from, to int) effect.Effect
-	// FocusFade, when set, carries the focused border's colour from the pane
-	// ChangePane leaves to the one it focuses over that long.
-	FocusFade time.Duration
 	// Clipboard is what Copy writes to; nil means the system clipboard.
 	Clipboard func(string) error
 	// Mouse turns the terminal's mouse reporting on in Screen. Clicks on
@@ -128,8 +120,6 @@ type Shell struct {
 	overlays overlay.Stack
 	present  map[string]bool // leaves the last View was given
 	actions  []Action        // what the app set with SetActions
-	trans    effect.Effect   // the Transition playing over the panes, if any
-	glow     focusGlow       // the focus colour on its way between panes, if any
 }
 
 // New is a shell over cfg, focused on the first leaf of the focus ring. It

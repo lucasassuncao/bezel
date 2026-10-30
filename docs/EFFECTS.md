@@ -92,16 +92,3 @@ A `Transition` carries the screen from one block to another: `Apply(from, to)` e
 | `Iris` | the old block closes down to a point and the new one opens out of it |
 | `Blinds` | the screen turns over in slats, every row of a slat flipping at once |
 | `Stack` | the new block slides over the old, which sinks into the dark beneath it |
-
-## Between tabs
-
-The shell plays an effect over the panes when the user changes tab, the tab strip and the legend left still. `SlideTabs` slides the new tab in from its side, and any other effect will do:
-
-```go
-shell.Config{
-	// ...
-	Transition: shell.SlideTabs(300 * time.Millisecond),
-}
-```
-
-The shell takes the transition's frames itself and hands every other one to the app.

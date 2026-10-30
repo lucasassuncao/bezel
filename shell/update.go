@@ -54,19 +54,10 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		}
 
 	case animation.FrameMsg:
-		if s.trans.Owns(m) {
-			var r bezel.Result
-			s.trans, r = s.trans.Update(m)
-			return s, true, r.Cmd
-		}
 		if s.spin.Owns(m) {
 			var r bezel.Result
 			s.spin, r = s.spin.Update(m)
 			return s, true, r.Cmd
-		}
-		if run, p, ok, cmd := s.glow.run.Update(m); ok {
-			s.glow.run, s.glow.p = run, p
-			return s, true, cmd
 		}
 
 	case tea.WindowSizeMsg:
