@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/icon"
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/draw"
@@ -81,9 +82,9 @@ func (i Input) retheme(th *theme.Resolved, st *Styles) Field {
 }
 
 func (i Input) Update(msg tea.Msg) (Field, tea.Cmd) {
-	var cmd tea.Cmd
-	i.in, cmd = i.in.Update(msg)
-	return i, cmd
+	var r bezel.Result
+	i.in, r = i.in.Update(msg)
+	return i, r.Cmd
 }
 
 func (i Input) Focus() (Field, tea.Cmd) {

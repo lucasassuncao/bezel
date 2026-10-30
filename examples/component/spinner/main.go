@@ -9,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/draw"
@@ -67,8 +68,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case animation.FrameMsg:
 		for i := range m.spinners {
 			if m.spinners[i].Owns(msg) {
-				m.spinners[i], cmd = m.spinners[i].Update(msg)
-				return m, cmd
+				var r bezel.Result
+				m.spinners[i], r = m.spinners[i].Update(msg)
+				return m, r.Cmd
 			}
 		}
 	case toggleMsg:

@@ -9,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/textbox"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -67,15 +68,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case shell.ClickMsg: // the press, already in the pane's cells
-		m.ta, cmd = m.ta.Update(msg.MouseClickMsg)
-		return m, cmd
+		var r bezel.Result
+		m.ta, r = m.ta.Update(msg.MouseClickMsg)
+		return m, r.Cmd
 	case tea.MouseMotionMsg, tea.MouseReleaseMsg:
 		// The drag: moved into the pane even when the pointer left it.
-		m.ta, cmd = m.ta.Update(m.sh.MouseIn("text", msg.(tea.MouseMsg)))
-		return m, cmd
+		var r bezel.Result
+		m.ta, r = m.ta.Update(m.sh.MouseIn("text", msg.(tea.MouseMsg)))
+		return m, r.Cmd
 	}
-	m.ta, cmd = m.ta.Update(msg)
-	return m, cmd
+	var r bezel.Result
+	m.ta, r = m.ta.Update(msg)
+	return m, r.Cmd
 }
 
 func (m model) View() tea.View {

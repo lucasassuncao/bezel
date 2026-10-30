@@ -4,9 +4,12 @@ import (
 	"testing"
 	"time"
 
+	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -20,7 +23,7 @@ var th = func() theme.Resolved {
 func TestABlinkingCursorFlipsOnItsOwnTicks(t *testing.T) {
 	m, cmd := New(th).Focus()
 	require.True(t, m.Visible())
-	m, cmd = m.Update(cmd())
+	m, cmd = withCmd(m.Update(cmd()))
 	require.False(t, m.Visible(), "the first tick darkens it")
 	m, _ = m.Update(cmd())
 	require.True(t, m.Visible())
@@ -29,7 +32,7 @@ func TestABlinkingCursorFlipsOnItsOwnTicks(t *testing.T) {
 func TestACursorTakesNoOtherCursorsTicks(t *testing.T) {
 	_, other := New(th).Focus()
 	m, _ := New(th).Focus()
-	m, cmd := m.Update(other())
+	m, cmd := withCmd(m.Update(other()))
 	require.True(t, m.Visible())
 	require.Nil(t, cmd)
 }
@@ -37,7 +40,7 @@ func TestACursorTakesNoOtherCursorsTicks(t *testing.T) {
 func TestARefocusLeavesTheOldTickSpent(t *testing.T) {
 	m, old := New(th).Focus()
 	m, _ = m.Blur().Focus()
-	m, cmd := m.Update(old())
+	m, cmd := withCmd(m.Update(old()))
 	require.True(t, m.Visible())
 	require.Nil(t, cmd, "a second loop would blink twice as fast")
 }
@@ -89,3 +92,17 @@ func TestModeNames(t *testing.T) {
 func TestAZeroCursorDrawsWithoutPanicking(t *testing.T) {
 	require.NotPanics(t, func() { _ = Model{}.View() })
 }
+
+func TestOwnBlinkIsHandledAndAnotherIsNot(t *testing.T) {
+	m, cmd := New(th).Focus()
+	_, r := m.Update(cmd())
+	require.True(t, r.Handled)
+	_, other := New(th).Focus()
+	_, r = m.Update(other())
+	require.False(t, r.Handled)
+	_, r = m.Update(bezeltest.Key("a"))
+	require.False(t, r.Handled)
+}
+
+// withCmd keeps the command of an Update, for the tests that run it.
+func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }

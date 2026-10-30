@@ -15,6 +15,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/term"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/icon"
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/component/table"
@@ -310,9 +311,9 @@ func (m *browserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 		return m, m.key(msg)
 	default:
-		var cmd tea.Cmd
-		m.filter, cmd = m.filter.Update(msg)
-		return m, cmd
+		var r bezel.Result
+		m.filter, r = m.filter.Update(msg)
+		return m, r.Cmd
 	}
 	return m, nil
 }
@@ -344,12 +345,12 @@ func (m *browserModel) key(k tea.KeyPressMsg) tea.Cmd {
 		return nil
 	}
 	before := m.filter.Value()
-	var cmd tea.Cmd
-	m.filter, cmd = m.filter.Update(k)
+	var r bezel.Result
+	m.filter, r = m.filter.Update(k)
 	if m.filter.Value() != before {
 		m.build()
 	}
-	return cmd
+	return r.Cmd
 }
 
 // copy writes the name under the cursor to the clipboard.

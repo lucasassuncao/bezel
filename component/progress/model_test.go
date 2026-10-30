@@ -58,3 +58,13 @@ func TestAStillModelJumps(t *testing.T) {
 	require.Nil(t, cmd)
 	require.Equal(t, 1.0, m.Shown())
 }
+
+func TestItsOwnFrameIsHandledAndAForeignOneIsNot(t *testing.T) {
+	m, cmd := New(10).SetPercent(1)
+	require.NotNil(t, cmd)
+	_, r := m.Update(m.spring.FrameAt(time.Unix(1, 0)))
+	require.True(t, r.Handled)
+	other, _ := New(10).SetPercent(1)
+	_, r = m.Update(other.spring.FrameAt(time.Unix(1, 0)))
+	require.False(t, r.Handled)
+}

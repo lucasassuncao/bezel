@@ -28,6 +28,8 @@ func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{Full: th.Accent, Empty: th.Muted, Percent: th.Dim}
 }
 
+var _ bezel.Model[Model] = Model{}
+
 // Model is a bar that moves to the share it is set to on a spring instead of
 // jumping there. A value: every method returns the new bar.
 type Model struct {
@@ -120,10 +122,10 @@ func (m Model) Shown() float64 { return m.spring.Pos }
 func (m Model) Active() bool { return m.spring.Active() }
 
 // Update moves the bar on its own frames until it settles.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	var r bezel.Result
 	m.spring, r = m.spring.Update(msg)
-	return m, r.Cmd
+	return m, r
 }
 
 // View is the bar where it is now, then the percentage it is aimed at.

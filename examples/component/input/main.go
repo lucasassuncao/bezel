@@ -12,6 +12,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
@@ -104,7 +105,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// A blink is only the focused field's, but each checks its own id.
 	cmds := make([]tea.Cmd, len(m.fields))
 	for i := range m.fields {
-		m.fields[i], cmds[i] = m.fields[i].Update(msg)
+		var r bezel.Result
+		m.fields[i], r = m.fields[i].Update(msg)
+		cmds[i] = r.Cmd
 	}
 	return m, tea.Batch(cmds...)
 }

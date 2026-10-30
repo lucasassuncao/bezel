@@ -5,6 +5,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/filepicker"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
@@ -106,8 +107,9 @@ func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 	if m, ok := msg.(TopMsg); ok {
 		msg = m.Msg
 	}
-	var cmd tea.Cmd
-	p.m, cmd = p.m.WithVolumes(volumes).Update(msg)
+	var r bezel.Result
+	p.m, r = p.m.WithVolumes(volumes).Update(msg)
+	cmd := r.Cmd
 	path, picked := p.m.Picked()
 	switch {
 	case !picked:

@@ -11,6 +11,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
@@ -39,6 +40,8 @@ type item struct {
 
 // expireMsg ends the toast key when motion is Still and no frames run.
 type expireMsg struct{ id, key int64 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is the stack of toasts, newest at the top. It is a value: every
 // method returns the new stack.
@@ -93,22 +96,25 @@ func (m Model) Push(text string, kind Kind) (Model, tea.Cmd) {
 
 // Update slides the toasts on the stack's own frames and drops the ones whose
 // time is up, asking for frames while any is showing.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	if e, ok := msg.(expireMsg); ok && e.id == m.id {
 		m.items = drop(m.items, func(it item) bool { return it.key == e.key })
-		return m, nil
+		return m, bezel.Result{Handled: true}
+	}
+	if !frames.Of(msg, m.id) {
+		return m, bezel.Result{}
 	}
 	f, ok := frames.Is(msg, m.id, m.tag)
 	if !ok || !m.running {
-		return m, nil
+		return m, bezel.Result{Handled: true}
 	}
 	m, _ = m.Advance(f.At)
 	if len(m.items) == 0 {
 		m.running = false
-		return m, nil
+		return m, bezel.Result{Handled: true}
 	}
 	m.tag++
-	return m, frames.Tick(frames.Frame, m.id, m.tag)
+	return m, bezel.Result{Handled: true, Cmd: frames.Tick(frames.Frame, m.id, m.tag)}
 }
 
 // Active reports whether a toast is showing.

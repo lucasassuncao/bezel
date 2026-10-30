@@ -5,10 +5,13 @@ import (
 	"testing"
 	"time"
 
+	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -32,7 +35,7 @@ func TestEachTickTakesOneStep(t *testing.T) {
 
 func TestTheLastTickTimesOut(t *testing.T) {
 	m, cmd := fast(time.Nanosecond).Start()
-	m, cmd = m.Update(cmd())
+	m, cmd = withCmd(m.Update(cmd()))
 	require.True(t, m.TimedOut())
 	require.False(t, m.Running())
 	require.Equal(t, TimeoutMsg{ID: m.ID()}, cmd())
@@ -47,7 +50,7 @@ func TestTimeLeftNeverGoesBelowZero(t *testing.T) {
 func TestARestartLeavesTheOldTickSpent(t *testing.T) {
 	m, old := fast(5 * time.Nanosecond).Start()
 	m, _ = m.Stop().Start()
-	m, cmd := m.Update(old())
+	m, cmd := withCmd(m.Update(old()))
 	require.Equal(t, 5*time.Nanosecond, m.Left())
 	require.Nil(t, cmd)
 }
@@ -55,7 +58,7 @@ func TestARestartLeavesTheOldTickSpent(t *testing.T) {
 func TestATimerTakesNoOtherTimersTicks(t *testing.T) {
 	_, other := fast(5 * time.Nanosecond).Start()
 	m, _ := fast(5 * time.Nanosecond).Start()
-	m, cmd := m.Update(other())
+	m, cmd := withCmd(m.Update(other()))
 	require.Equal(t, 5*time.Nanosecond, m.Left())
 	require.Nil(t, cmd)
 }
@@ -112,7 +115,26 @@ func TestAZeroTimerStepsASecond(t *testing.T) {
 func TestTwoZeroTimersTakeOnlyTheirOwnTicks(t *testing.T) {
 	_, other := Model{}.Reset(5 * time.Nanosecond).WithEvery(time.Nanosecond).Start()
 	m, _ := Model{}.Reset(5 * time.Nanosecond).WithEvery(time.Nanosecond).Start()
-	m, cmd := m.Update(other())
+	m, cmd := withCmd(m.Update(other()))
 	require.Equal(t, 5*time.Nanosecond, m.Left())
 	require.Nil(t, cmd)
 }
+
+func TestOwnTickIsHandled(t *testing.T) {
+	m, cmd := fast(3 * time.Nanosecond).Start()
+	_, r := m.Update(cmd())
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd)
+}
+
+func TestForeignFrameIsNotHandled(t *testing.T) {
+	_, other := fast(5 * time.Nanosecond).Start()
+	m, _ := fast(5 * time.Nanosecond).Start()
+	_, r := m.Update(other())
+	require.False(t, r.Handled)
+	_, r = m.Update(bezeltest.Key("a"))
+	require.False(t, r.Handled)
+}
+
+// withCmd keeps the command of an Update, for the tests that run it.
+func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }

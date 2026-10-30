@@ -11,6 +11,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -95,6 +96,8 @@ type Styles struct {
 // DefaultStyles paints the frame in the theme's accent.
 func DefaultStyles(th theme.Resolved) Styles { return Styles{Frame: th.Accent} }
 
+var _ bezel.Model[Model] = Model{}
+
 // Model is a value: every method returns the new spinner.
 type Model struct {
 	spinner Spinner
@@ -164,12 +167,15 @@ func (m Model) Owns(msg tea.Msg) bool { return frames.Of(msg, m.id) }
 
 // Update turns to the next frame on its own frame and arms the one after.
 // Any other message leaves it as it was, with no command.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	if !m.Owns(msg) {
+		return m, bezel.Result{}
+	}
 	if _, ok := frames.Is(msg, m.id, m.tag); !ok || !m.running || len(m.spinner.Frames) == 0 {
-		return m, nil
+		return m, bezel.Result{Handled: true}
 	}
 	m.frame = (m.frame + 1) % len(m.spinner.Frames)
-	return m, m.Tick()
+	return m, bezel.Result{Handled: true, Cmd: m.Tick()}
 }
 
 // Frame is the frame showing, unstyled and unpadded; "" without frames.

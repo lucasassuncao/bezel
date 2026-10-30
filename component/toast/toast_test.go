@@ -6,10 +6,12 @@ import (
 	"testing"
 	"time"
 
+	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -71,11 +73,11 @@ func TestOverDrawsOnTheTopRightCorner(t *testing.T) {
 func TestTheStackTakesOnlyItsOwnFrames(t *testing.T) {
 	m, _ := New().Push("a", Info)
 	other, _ := New().Push("b", Info)
-	_, cmd := m.Update(other.FrameAt(time.Unix(1, 0)))
+	_, cmd := withCmd(m.Update(other.FrameAt(time.Unix(1, 0))))
 	assert.Nil(t, cmd)
-	m, cmd = m.Update(m.FrameAt(time.Unix(1, 0)))
+	m, cmd = withCmd(m.Update(m.FrameAt(time.Unix(1, 0))))
 	assert.NotNil(t, cmd)
-	m, cmd = m.Update(m.FrameAt(time.Unix(30, 0)))
+	m, cmd = withCmd(m.Update(m.FrameAt(time.Unix(30, 0))))
 	assert.Nil(t, cmd, "every toast is gone: no more frames")
 	assert.Zero(t, m.Len())
 }
@@ -103,3 +105,16 @@ func TestAZeroToastWorks(t *testing.T) {
 	assert.NotNil(t, cmd)
 	assert.Equal(t, 1, m.Len())
 }
+
+func TestOwnFrameIsHandledAndAnotherIsNot(t *testing.T) {
+	m, _ := New().Push("a", Info)
+	other, _ := New().Push("b", Info)
+	_, r := m.Update(m.FrameAt(time.Unix(1, 0)))
+	assert.True(t, r.Handled)
+	assert.NotNil(t, r.Cmd)
+	_, r = m.Update(other.FrameAt(time.Unix(1, 0)))
+	assert.False(t, r.Handled)
+}
+
+// withCmd keeps the command of an Update, for the tests that run it.
+func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }

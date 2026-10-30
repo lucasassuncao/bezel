@@ -8,6 +8,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/accordion"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
@@ -51,8 +52,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if k, ok := msg.(tea.KeyPressMsg); ok && k.String() == "ctrl+c" {
 		return m, tea.Quit
 	}
-	m.acc, cmd = m.acc.Update(msg)
-	return m, cmd
+	var r bezel.Result
+	m.acc, r = m.acc.Update(msg)
+	return m, r.Cmd
 }
 
 func (m model) View() tea.View {

@@ -12,6 +12,8 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/component/cursor"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/theme"
@@ -146,7 +148,7 @@ func TestTheCaretShowsOnlyWhileFocused(t *testing.T) {
 }
 
 func TestAnUnfocusedFieldTakesNothing(t *testing.T) {
-	m, cmd := New(th()).Update(typed("a"))
+	m, cmd := withCmd(New(th()).Update(typed("a")))
 	require.Empty(t, m.Value())
 	require.Nil(t, cmd)
 }
@@ -155,7 +157,7 @@ func TestTheCaretBlinksAtTheThemesPace(t *testing.T) {
 	short := th()
 	short.CaretBlink = time.Nanosecond
 	m, cmd := New(short).Focus()
-	m, next := m.Update(cmd())
+	m, next := withCmd(m.Update(cmd()))
 	require.NotNil(t, next)
 	require.NotContains(t, m.View(), short.Caret.Render(" "), "the dark half")
 	require.Nil(t, m.Blur().Blink(), "a blurred field does not blink")
@@ -263,7 +265,7 @@ func BenchmarkMovingDownALongText(b *testing.B) {
 // lines kept.
 func TestCtrlVPastesTheClipboard(t *testing.T) {
 	m := focused("").WithClipboard(func() (string, error) { return "a\r\nb", nil })
-	m, cmd := m.Update(press('v', tea.ModCtrl))
+	m, cmd := withCmd(m.Update(press('v', tea.ModCtrl)))
 	require.Empty(t, m.Value(), "nothing until the read answers")
 	m = run(m, cmd())
 	require.Equal(t, "a\nb", m.Value())
@@ -370,16 +372,16 @@ func TestSelectAndClearSelectionFromTheApp(t *testing.T) {
 func TestAltWCopiesTheSelectionAndAltXCutsIt(t *testing.T) {
 	var board string
 	m := focused("copy me").WithClipboardWrite(func(s string) error { board = s; return nil })
-	_, cmd := m.Update(press('w', tea.ModAlt))
+	_, cmd := withCmd(m.Update(press('w', tea.ModAlt)))
 	require.Nil(t, cmd, "nothing selected, nothing copied")
 
 	m = run(m, press(tea.KeyLeft, tea.ModCtrl|tea.ModShift))
-	_, cmd = m.Update(press('w', tea.ModAlt))
+	_, cmd = withCmd(m.Update(press('w', tea.ModAlt)))
 	require.Equal(t, CopiedMsg{Text: "me"}, cmd())
 	require.Equal(t, "me", board)
 
 	board = ""
-	m, cmd = m.Update(press('x', tea.ModAlt))
+	m, cmd = withCmd(m.Update(press('x', tea.ModAlt)))
 	require.Equal(t, "copy ", m.Value())
 	for _, c := range cmd().(tea.BatchMsg) {
 		if c, ok := c().(CopiedMsg); ok {
@@ -521,3 +523,49 @@ func TestLegendOffersCopyOnlyWithASelection(t *testing.T) {
 	m = m.Select(Position{0, 0}, Position{0, 2})
 	require.Len(t, m.Legend(), 5, "copy and cut join them")
 }
+
+func TestTypedTextIsHandledWhenFocused(t *testing.T) {
+	_, r := focused("").Update(bezeltest.Key("a"))
+	require.True(t, r.Handled)
+	_, r = focused("").Update(tea.PasteMsg{Content: "x"})
+	require.True(t, r.Handled)
+}
+
+func TestABindingIsHandledEvenWhenNothingMoves(t *testing.T) {
+	_, r := focused("").Update(bezeltest.Key("left"))
+	require.True(t, r.Handled)
+	_, r = focused("").Update(bezeltest.Key("alt+w"))
+	require.True(t, r.Handled, "copy with nothing selected is still the box's key")
+}
+
+func TestForeignKeyIsNotHandled(t *testing.T) {
+	_, r := New(th()).Update(bezeltest.Key("a"))
+	require.False(t, r.Handled, "an unfocused box gets nothing")
+	_, r = New(th()).Update(tea.PasteMsg{Content: "x"})
+	require.False(t, r.Handled)
+	for _, k := range []string{"f5", "ctrl+x", "tab"} {
+		_, r = focused("").Update(bezeltest.Key(k))
+		require.False(t, r.Handled, k)
+	}
+}
+
+func TestOwnBlinkIsHandledAndAnotherIsNot(t *testing.T) {
+	m, cmd := New(th()).Focus()
+	_, r := m.Update(cmd())
+	require.True(t, r.Handled)
+	_, other := New(th()).Focus()
+	_, r = m.Update(other())
+	require.False(t, r.Handled)
+}
+
+func TestClickMsgMovesTheCaret(t *testing.T) {
+	m := focused("abcdef").SetWidth(40)
+	m, r := m.Update(bezel.ClickMsg{Pane: "notes", MouseClickMsg: tea.MouseClickMsg{X: draw.GutterWidth + 2, Y: 0, Button: tea.MouseLeft}})
+	require.True(t, r.Handled)
+	require.Equal(t, 2, m.Column())
+	_, r = New(th()).Update(bezel.ClickMsg{MouseClickMsg: tea.MouseClickMsg{Button: tea.MouseLeft}})
+	require.False(t, r.Handled, "a blurred box takes no click")
+}
+
+// withCmd keeps the command of an Update, for the tests that run it.
+func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }

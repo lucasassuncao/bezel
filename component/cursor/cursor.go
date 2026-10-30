@@ -8,6 +8,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
@@ -48,6 +49,8 @@ type Styles struct {
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{Cursor: th.Caret, Text: lipgloss.NewStyle()}
 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new cursor.
 type Model struct {
@@ -184,14 +187,17 @@ func (m Model) tick() tea.Cmd {
 
 // Update flips the cursor on its own BlinkMsg and arms the next one. Any
 // other message leaves it as it was, with no command.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	b, ok := msg.(BlinkMsg)
-	if !ok || !m.blinks() || b.ID != m.id || b.tag != m.tag {
-		return m, nil
+	if !ok || b.ID != m.id {
+		return m, bezel.Result{}
+	}
+	if !m.blinks() || b.tag != m.tag {
+		return m, bezel.Result{Handled: true}
 	}
 	m.on = !m.on
 	m.tag++
-	return m, m.tick()
+	return m, bezel.Result{Handled: true, Cmd: m.tick()}
 }
 
 // View is the character, painted as the cursor while Visible.

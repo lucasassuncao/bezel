@@ -58,9 +58,9 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 			return s, true, r.Cmd
 		}
 		if s.spin.Owns(m) {
-			var cmd tea.Cmd
-			s.spin, cmd = s.spin.Update(m)
-			return s, true, cmd
+			var r bezel.Result
+			s.spin, r = s.spin.Update(m)
+			return s, true, r.Cmd
 		}
 		if run, p, ok, cmd := s.glow.run.Update(m); ok {
 			s.glow.run, s.glow.p = run, p
@@ -78,9 +78,9 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		return s, true, nil
 
 	case toastMsg:
-		var cmd tea.Cmd
-		s.toasts, cmd = s.toasts.Update(m.Msg)
-		return s, true, toastCmd(cmd)
+		var r bezel.Result
+		s.toasts, r = s.toasts.Update(m.Msg)
+		return s, true, toastCmd(r.Cmd)
 
 	case copiedMsg:
 		next, cmd := s.copied(m)
@@ -132,9 +132,9 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	if s.typing {
 		switch msg.(type) {
 		case tea.KeyPressMsg, tea.PasteMsg:
-			var cmd tea.Cmd
-			s.input, cmd = s.input.Update(msg)
-			return s, true, cmd
+			var r bezel.Result
+			s.input, r = s.input.Update(msg)
+			return s, true, r.Cmd
 		}
 	}
 
@@ -237,9 +237,9 @@ func (s Shell) blink(msg input.BlinkMsg) (Shell, bool, tea.Cmd) {
 		}
 	}
 	if s.typing {
-		if in, cmd := s.input.Update(msg); cmd != nil {
+		if in, r := s.input.Update(msg); r.Cmd != nil {
 			s.input = in
-			return s, true, cmd
+			return s, true, r.Cmd
 		}
 	}
 	return s, false, nil

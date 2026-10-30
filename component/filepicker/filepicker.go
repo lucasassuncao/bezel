@@ -13,6 +13,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/key"
@@ -109,6 +110,8 @@ type volumesMsg struct {
 
 // sizeWidth is the column file sizes are right-aligned in, as "999.9MB".
 const sizeWidth = 7
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new picker.
 type Model struct {
@@ -300,7 +303,30 @@ func (m Model) allows(name string) bool {
 
 // Update takes the picker's own listings and its keys; Picked then says
 // whether enter picked something.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	next, cmd := m.update(msg)
+	return next, bezel.Result{Handled: m.handles(msg), Cmd: cmd}
+}
+
+// handles reports whether msg is the picker's: its own listing, or a key
+// bound in the view it shows, the file list or the drives.
+func (m Model) handles(msg tea.Msg) bool {
+	switch msg := msg.(type) {
+	case listedMsg:
+		return msg.id == m.id
+	case volumesMsg:
+		return msg.id == m.id
+	case tea.KeyPressMsg:
+		km := m.keys
+		if m.drives.open() {
+			return key.Matches(msg, km.Up, km.Down, km.Open, km.Pick)
+		}
+		return key.Matches(msg, km.Up, km.Down, km.PageUp, km.PageDown, km.Top, km.Bottom, km.Back, km.Open, km.Pick)
+	}
+	return false
+}
+
+func (m Model) update(msg tea.Msg) (Model, tea.Cmd) {
 	m.picked = ""
 	switch msg := msg.(type) {
 	case listedMsg:

@@ -11,6 +11,8 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/component/cursor"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -43,7 +45,7 @@ func TestTypingInsertsAtTheCaret(t *testing.T) {
 }
 
 func TestAnUnfocusedFieldTakesNothing(t *testing.T) {
-	m, cmd := New(th).Update(typed("a"))
+	m, cmd := withCmd(New(th).Update(typed("a")))
 	require.Empty(t, m.Value())
 	require.Nil(t, cmd)
 	require.Empty(t, run(focused().Blur(), typed("a")).Value())
@@ -64,7 +66,7 @@ func TestTheReadlineKeysEdit(t *testing.T) {
 func TestAKeyItDoesNotKnowIsLeftToTheHost(t *testing.T) {
 	m := focused().SetValue("x")
 	for _, k := range []tea.KeyPressMsg{press(tea.KeyEnter, 0), press(tea.KeyUp, 0), {Code: 'x', Text: "x", Mod: tea.ModCtrl}} {
-		got, cmd := m.Update(k)
+		got, cmd := withCmd(m.Update(k))
 		require.Equal(t, "x", got.Value(), "%v", k)
 		require.Nil(t, cmd, "%v", k)
 	}
@@ -128,7 +130,7 @@ func TestTheCaretBlinksOnItsOwnTicksOnly(t *testing.T) {
 	tick := cmd()
 	require.IsType(t, BlinkMsg{}, tick)
 
-	m, next := m.Update(tick)
+	m, next := withCmd(m.Update(tick))
 	require.NotNil(t, next, "the blink runs on")
 	require.NotContains(t, m.View(), short.Caret.Render(" "), "the dark half")
 
@@ -179,7 +181,7 @@ func TestBlinkRestartsAFocusedCaretOnly(t *testing.T) {
 	short := th
 	short.CaretBlink = time.Nanosecond
 	m, _ := New(short).Focus()
-	m, next := m.Update(m.Blink()())
+	m, next := withCmd(m.Update(m.Blink()()))
 	require.NotNil(t, next, "the tick is the field's own")
 	require.NotContains(t, m.View(), short.Caret.Render(" "))
 }
@@ -188,13 +190,13 @@ func TestBlinkRestartsAFocusedCaretOnly(t *testing.T) {
 // the field then takes as one line.
 func TestCtrlVPastesTheClipboard(t *testing.T) {
 	m := focused().WithClipboard(func() (string, error) { return "from\nthe clipboard", nil })
-	m, cmd := m.Update(press('v', tea.ModCtrl))
+	m, cmd := withCmd(m.Update(press('v', tea.ModCtrl)))
 	require.Empty(t, m.Value(), "nothing until the read answers")
 	paste := cmd()
 	require.Equal(t, tea.PasteMsg{Content: "from\nthe clipboard"}, paste)
 	require.Equal(t, "from the clipboard", run(m, paste).Value())
 
-	_, cmd = focused().Blur().WithClipboard(func() (string, error) { return "x", nil }).Update(press('v', tea.ModCtrl))
+	_, cmd = withCmd(focused().Blur().WithClipboard(func() (string, error) { return "x", nil }).Update(press('v', tea.ModCtrl)))
 	require.Nil(t, cmd, "a blurred field reads nothing")
 }
 
@@ -229,7 +231,7 @@ func TestASuggestionShowsTheRestAndTabTakesIt(t *testing.T) {
 
 func TestWithoutAMatchTabIsLeftToTheHost(t *testing.T) {
 	m := focused().SetSuggestions([]string{"commit"}).SetValue("x")
-	got, cmd := m.Update(press(tea.KeyTab, 0))
+	got, cmd := withCmd(m.Update(press(tea.KeyTab, 0)))
 	require.Equal(t, "x", got.Value())
 	require.Nil(t, cmd)
 	require.Empty(t, focused().SetSuggestions([]string{"a"}).CurrentSuggestion(), "an empty field suggests nothing")
@@ -245,7 +247,7 @@ func TestASuggestionKeepsToTheWidth(t *testing.T) {
 func TestTheCharLimitStopsTypingAndCutsAPaste(t *testing.T) {
 	m := focused().WithCharLimit(4).SetValue("abcdef")
 	require.Equal(t, "abcd", m.Value(), "a value is cut too")
-	got, cmd := m.Update(typed("x"))
+	got, cmd := withCmd(m.Update(typed("x")))
 	require.Equal(t, "abcd", got.Value())
 	require.Nil(t, cmd, "a key that types nothing is left to the host")
 
@@ -292,7 +294,7 @@ func TestASteadyCaretNeverBlinksAndAHiddenOneNeverShows(t *testing.T) {
 	require.Nil(t, cmd, "nothing to blink")
 	require.Nil(t, m.Blink())
 	require.Contains(t, m.View(), th.Caret.Render(" "))
-	m, cmd = m.Update(typed("a"))
+	m, cmd = withCmd(m.Update(typed("a")))
 	require.Nil(t, cmd, "an edit arms no blink either")
 
 	m, cmd = m.SetCursorMode(cursor.Hidden)
@@ -336,3 +338,43 @@ func TestLegendOffersCompletionOnlyWithASuggestion(t *testing.T) {
 	m = m.SetValue("dep")
 	require.Len(t, m.Legend(), 3, "complete, the next suggestion, paste")
 }
+
+func TestTypedTextIsHandledWhenFocused(t *testing.T) {
+	_, r := focused().Update(bezeltest.Key("a"))
+	require.True(t, r.Handled)
+	_, r = focused().Update(tea.PasteMsg{Content: "x"})
+	require.True(t, r.Handled)
+}
+
+func TestABindingIsHandledEvenWhenNothingMoves(t *testing.T) {
+	_, r := focused().Update(bezeltest.Key("left"))
+	require.True(t, r.Handled)
+}
+
+func TestForeignKeyIsNotHandled(t *testing.T) {
+	_, r := New(th).Update(bezeltest.Key("a"))
+	require.False(t, r.Handled, "an unfocused field gets nothing")
+	_, r = New(th).Update(tea.PasteMsg{Content: "x"})
+	require.False(t, r.Handled)
+	for _, k := range []string{"f5", "ctrl+x", "enter", "up"} {
+		_, r = focused().Update(bezeltest.Key(k))
+		require.False(t, r.Handled, k)
+	}
+}
+
+func TestSuggestionKeysAreHandledOnlyWithSuggestions(t *testing.T) {
+	_, r := focused().Update(bezeltest.Key("tab"))
+	require.False(t, r.Handled, "tab belongs to the host when nothing completes")
+}
+
+func TestOwnBlinkIsHandledAndAnotherIsNot(t *testing.T) {
+	m, cmd := New(th).Focus()
+	_, r := m.Update(cmd())
+	require.True(t, r.Handled)
+	_, other := New(th).Focus()
+	_, r = m.Update(other())
+	require.False(t, r.Handled)
+}
+
+// withCmd keeps the command of an Update, for the tests that run it.
+func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }

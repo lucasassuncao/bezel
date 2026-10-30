@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
@@ -136,9 +137,9 @@ func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 		}
 		return p, tea.Batch(p.onAccept(p.Value()), Close())
 	}
-	var cmd tea.Cmd
-	p.input, cmd = p.input.Update(msg)
-	return p, cmd
+	var r bezel.Result
+	p.input, r = p.input.Update(msg)
+	return p, r.Cmd
 }
 
 // Legend offers enter only when it would do something.

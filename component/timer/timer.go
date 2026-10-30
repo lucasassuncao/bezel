@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -37,6 +38,8 @@ type Styles struct {
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{Running: lipgloss.NewStyle(), Stopped: th.Dim, TimedOut: th.Danger}
 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new timer.
 type Model struct {
@@ -119,18 +122,21 @@ func (m Model) tick() tea.Cmd {
 
 // Update takes a step off on its own tick and arms the next; at zero it
 // stops, and the command says it timed out.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	t, ok := msg.(TickMsg)
-	if !ok || !m.running || t.ID != m.id || t.tag != m.tag {
-		return m, nil
+	if !ok || t.ID != m.id {
+		return m, bezel.Result{}
+	}
+	if !m.running || t.tag != m.tag {
+		return m, bezel.Result{Handled: true}
 	}
 	m.left = max(m.left-m.Every(), 0)
 	if !m.TimedOut() {
-		return m, m.tick()
+		return m, bezel.Result{Handled: true, Cmd: m.tick()}
 	}
 	m.running = false
 	out := TimeoutMsg{ID: m.id}
-	return m, func() tea.Msg { return out }
+	return m, bezel.Result{Handled: true, Cmd: func() tea.Msg { return out }}
 }
 
 // Left is the time left.

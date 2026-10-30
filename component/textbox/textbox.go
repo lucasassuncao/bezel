@@ -14,6 +14,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/cursor"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/clip"
@@ -117,6 +118,8 @@ type line struct {
 	edit.Line
 	starts []int
 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new field.
 type Model struct {
@@ -587,8 +590,45 @@ func (m Model) TerminalCursor() *tea.Cursor {
 
 // Update edits on a key or a paste while focused, and flips the caret on its
 // own BlinkMsg. A key it has no use for leaves it as it was, with no command.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	m = m.ready()
+	if c, ok := msg.(bezel.ClickMsg); ok {
+		msg = c.MouseClickMsg
+	}
+	next, cmd := m.update(msg)
+	return next, bezel.Result{Handled: m.handles(msg), Cmd: cmd}
+}
+
+// handles reports whether msg is the box's: its own blink, or while focused a
+// paste, a binding, typed text, or the left button's click and drag.
+func (m Model) handles(msg tea.Msg) bool {
+	switch msg := msg.(type) {
+	case BlinkMsg:
+		return msg.id == m.id
+	case tea.PasteMsg:
+		return m.focused
+	case tea.KeyPressMsg:
+		return m.focused && (m.bound(msg) || typingKey(msg, m.keys))
+	case tea.MouseClickMsg:
+		return m.focused && msg.Button == tea.MouseLeft
+	case tea.MouseMotionMsg, tea.MouseReleaseMsg:
+		return m.focused && m.dragging
+	}
+	return false
+}
+
+// bound reports whether k fires one of the box's bindings.
+func (m Model) bound(k tea.KeyPressMsg) bool {
+	km := m.keys
+	return key.Matches(k, km.Left, km.Right, km.WordLeft, km.WordRight, km.Up, km.Down, km.PageUp,
+		km.PageDown, km.LineStart, km.LineEnd, km.Top, km.Bottom, km.Newline, km.DeleteBack,
+		km.DeleteForward, km.DeleteWordBack, km.DeleteWordForward, km.KillToStart, km.KillToEnd,
+		km.UpperWord, km.LowerWord, km.CapitalizeWord, km.Transpose, km.Paste, km.SelectLeft,
+		km.SelectRight, km.SelectWordLeft, km.SelectWordRight, km.SelectUp, km.SelectDown,
+		km.SelectLineStart, km.SelectLineEnd, km.SelectAll, km.Copy, km.Cut)
+}
+
+func (m Model) update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case BlinkMsg:
 		if !m.blinks() || msg.id != m.id || msg.tag != m.tag {

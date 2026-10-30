@@ -9,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/toast"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -65,8 +66,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	m.toasts, cmd = m.toasts.Update(msg)
-	return m, cmd
+	var r bezel.Result
+	m.toasts, r = m.toasts.Update(msg)
+	return m, r.Cmd
 }
 
 func (m model) body(r layout.Rect) string {

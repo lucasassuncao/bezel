@@ -12,6 +12,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
@@ -155,9 +156,9 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd) {
 	k, ok := msg.(tea.KeyPressMsg)
 	if !ok {
 		// A paste: the input's own business.
-		var cmd tea.Cmd
-		m.input, cmd = m.input.Update(msg)
-		return m, cmd
+		var r bezel.Result
+		m.input, r = m.input.Update(msg)
+		return m, r.Cmd
 	}
 	switch {
 	case key.Matches(k, m.keys.Run):
@@ -169,11 +170,11 @@ func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd) {
 	case key.Matches(k, m.keys.Complete):
 		return m.complete(), nil
 	}
-	var cmd tea.Cmd
-	m.input, cmd = m.input.Update(k)
+	var r bezel.Result
+	m.input, r = m.input.Update(k)
 	// The list under a pick changed, and the last error was about the old line.
 	m.cursor, m.err = -1, ""
-	return m, cmd
+	return m, r.Cmd
 }
 
 func (m Model) Legend() []legend.Entry {

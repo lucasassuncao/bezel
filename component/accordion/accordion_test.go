@@ -1,6 +1,7 @@
 package accordion
 
 import (
+	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"os"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -43,7 +45,7 @@ func opened(m Model, d time.Duration) Model {
 func TestASectionOpensALineAtATime(t *testing.T) {
 	m := New(sections())
 	assert.Equal(t, "▸ Install\n▸ Usage", ansi.Strip(m.SetWidth(20).View(th)))
-	m, cmd := m.Update(bezeltest.Key("enter"))
+	m, cmd := withCmd(m.Update(bezeltest.Key("enter")))
 	require.NotNil(t, cmd)
 	assert.True(t, m.IsOpen(0))
 	half := ansi.Strip(opened(m, 100*time.Millisecond).SetWidth(20).View(th))
@@ -85,9 +87,9 @@ func TestAStillAccordionSnaps(t *testing.T) {
 func TestTheSectionsTakeOnlyTheirOwnFrames(t *testing.T) {
 	m, own := New(sections()).WithKeys(DefaultKeys()).Toggle(0)
 	_, other := New(sections()).Toggle(0)
-	_, cmd := m.Update(other())
+	_, cmd := withCmd(m.Update(other()))
 	assert.Nil(t, cmd)
-	_, cmd = m.Update(own())
+	_, cmd = withCmd(m.Update(own()))
 	assert.NotNil(t, cmd)
 }
 
@@ -106,3 +108,25 @@ func TestWithStylesRecoloursTheHeadings(t *testing.T) {
 	m := New([]Section{{Title: "a"}, {Title: "b"}}).WithStyles(func(s Styles) Styles { s.Heading = red; return s })
 	require.Equal(t, red.Render("▸ b"), strings.Split(m.SetWidth(20).View(th), "\n")[1])
 }
+
+func TestToggleAndMovesAreHandled(t *testing.T) {
+	m := New(sections())
+	for _, k := range []string{"enter", "down", "up"} {
+		_, r := m.Update(bezeltest.Key(k))
+		assert.True(t, r.Handled, k)
+	}
+	_, r := m.Update(bezeltest.Key("x"))
+	assert.False(t, r.Handled)
+}
+
+func TestOwnFrameIsHandledAndAnotherIsNot(t *testing.T) {
+	m, own := New(sections()).Toggle(0)
+	_, other := New(sections()).Toggle(0)
+	_, r := m.Update(own())
+	assert.True(t, r.Handled)
+	_, r = m.Update(other())
+	assert.False(t, r.Handled)
+}
+
+// withCmd keeps the command of an Update, for the tests that run it.
+func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }

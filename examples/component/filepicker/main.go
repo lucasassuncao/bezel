@@ -11,6 +11,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/filepicker"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
@@ -66,7 +67,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	m.fp, cmd = m.fp.Update(msg)
+	var r bezel.Result
+	m.fp, r = m.fp.Update(msg)
+	cmd = r.Cmd
 	if path, ok := m.fp.Picked(); ok {
 		if rel, err := filepath.Rel(m.root, path); err == nil {
 			path = rel

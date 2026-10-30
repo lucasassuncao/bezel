@@ -12,6 +12,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/cursor"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/clip"
@@ -59,6 +60,8 @@ func DefaultKeys() Keys {
 // BlinkMsg flips the caret of the input that armed it. A host hands it on
 // the way it hands on keys; an input ignores every other input's.
 type BlinkMsg struct{ id, tag int64 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new field.
 type Model struct {
@@ -411,7 +414,37 @@ func (m Model) tick() tea.Cmd {
 
 // Update edits on a key or a paste while focused, and flips the caret on its
 // own BlinkMsg. A key it has no use for leaves it as it was, with no command.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	next, cmd := m.update(msg)
+	return next, bezel.Result{Handled: m.handles(msg), Cmd: cmd}
+}
+
+// handles reports whether msg is the field's: its own blink, or while focused
+// a paste, a binding or typed text.
+func (m Model) handles(msg tea.Msg) bool {
+	switch msg := msg.(type) {
+	case BlinkMsg:
+		return msg.id == m.id
+	case tea.PasteMsg:
+		return m.focused
+	case tea.KeyPressMsg:
+		return m.focused && (m.bound(msg) || (oneLine(msg.Key().Text) != "" && msg.Mod&typingMods == 0))
+	}
+	return false
+}
+
+// bound reports whether k fires a binding; the suggestion keys count only
+// while there are suggestions, so tab stays the host's otherwise.
+func (m Model) bound(k tea.KeyPressMsg) bool {
+	km := m.keys
+	if key.Matches(k, km.Left, km.Right, km.WordLeft, km.WordRight, km.Home, km.End, km.DeleteBack,
+		km.DeleteForward, km.DeleteWordBack, km.DeleteWordForward, km.KillToStart, km.KillToEnd, km.Paste) {
+		return true
+	}
+	return len(m.matches) > 0 && key.Matches(k, km.Accept, km.NextSuggestion, km.PrevSuggestion)
+}
+
+func (m Model) update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case BlinkMsg:
 		if !m.blinks() || msg.id != m.id || msg.tag != m.tag {

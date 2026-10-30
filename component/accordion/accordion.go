@@ -11,6 +11,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/key"
@@ -58,6 +59,8 @@ func (f fold) share() float64 {
 	}
 	return f.from + (f.to-f.from)*frames.Or(f.run.Ease)(f.p)
 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new accordion.
 type Model struct {
@@ -161,7 +164,7 @@ func (m Model) Advance(now time.Time) (Model, bool) {
 
 // Update moves the cursor and toggles on keys, and slides the sections on
 // their own frames.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	if k, ok := msg.(tea.KeyPressMsg); ok {
 		switch {
 		case key.Matches(k, m.keys.Up):
@@ -169,9 +172,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(k, m.keys.Down):
 			m.cursor = min(m.cursor+1, max(len(m.sections)-1, 0))
 		case key.Matches(k, m.keys.Toggle):
-			return m.Toggle(m.cursor)
+			next, cmd := m.Toggle(m.cursor)
+			return next, bezel.Result{Handled: true, Cmd: cmd}
+		default:
+			return m, bezel.Result{}
 		}
-		return m, nil
+		return m, bezel.Result{Handled: true}
 	}
 	for i, f := range m.folds {
 		run, p, ok, cmd := f.run.Update(msg)
@@ -181,9 +187,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.folds = slices.Clone(m.folds)
 		f.run, f.p = run, p
 		m.folds[i] = f
-		return m, cmd
+		return m, bezel.Result{Handled: true, Cmd: cmd}
 	}
-	return m, nil
+	return m, bezel.Result{}
 }
 
 // Legend is the keys the accordion answers to.

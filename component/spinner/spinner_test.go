@@ -5,10 +5,13 @@ import (
 	"testing"
 	"time"
 
+	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -56,7 +59,7 @@ func TestAPresetIsAFreshValue(t *testing.T) {
 func TestStartAdvancesOnItsOwnTicks(t *testing.T) {
 	m, cmd := New(fast(Line())).Start()
 	require.Equal(t, "|", m.Frame())
-	m, cmd = m.Update(cmd())
+	m, cmd = withCmd(m.Update(cmd()))
 	require.Equal(t, "/", m.Frame())
 	require.NotNil(t, cmd)
 }
@@ -70,10 +73,10 @@ func TestStartWhileRunningStartsNothing(t *testing.T) {
 func TestARestartLeavesTheOldTickSpent(t *testing.T) {
 	m, old := New(fast(Line())).Start()
 	m, cur := m.Stop().Start()
-	m, cmd := m.Update(old())
+	m, cmd := withCmd(m.Update(old()))
 	require.Equal(t, "|", m.Frame())
 	require.Nil(t, cmd, "a second loop would spin twice as fast")
-	m, cmd = m.Update(cur())
+	m, cmd = withCmd(m.Update(cur()))
 	require.Equal(t, "/", m.Frame())
 	require.NotNil(t, cmd)
 }
@@ -81,7 +84,7 @@ func TestARestartLeavesTheOldTickSpent(t *testing.T) {
 func TestASpinnerTakesNoOtherSpinnersTicks(t *testing.T) {
 	_, other := New(fast(Line())).Start()
 	m, _ := New(fast(Line())).Start()
-	m, cmd := m.Update(other())
+	m, cmd := withCmd(m.Update(other()))
 	require.Equal(t, "|", m.Frame())
 	require.Nil(t, cmd)
 }
@@ -127,7 +130,26 @@ func TestFrameAtTurnsItAndOwnsTellsItsFrames(t *testing.T) {
 	f := m.FrameAt(time.Now())
 	require.True(t, m.Owns(f))
 	require.False(t, other.Owns(f))
-	m, cmd := m.Update(f)
+	m, cmd := withCmd(m.Update(f))
 	require.Equal(t, "/", m.Frame())
 	require.NotNil(t, cmd)
 }
+
+func TestOwnTickIsHandled(t *testing.T) {
+	m, cmd := New(fast(Line())).Start()
+	_, r := m.Update(cmd())
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd)
+}
+
+func TestForeignFrameIsNotHandled(t *testing.T) {
+	m, _ := New(fast(Line())).Start()
+	_, other := New(fast(Line())).Start()
+	_, r := m.Update(other())
+	require.False(t, r.Handled)
+	_, r = m.Update(bezeltest.Key("a"))
+	require.False(t, r.Handled)
+}
+
+// withCmd keeps the command of an Update, for the tests that run it.
+func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }

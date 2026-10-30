@@ -10,6 +10,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/stopwatch"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -58,8 +59,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	switch msg := msg.(type) {
 	case stopwatch.TickMsg:
-		m.sw, cmd = m.sw.Update(msg)
-		return m, cmd
+		var r bezel.Result
+		m.sw, r = m.sw.Update(msg)
+		return m, r.Cmd
 	case toggleMsg:
 		m.sw, cmd = m.sw.Toggle()
 		return m, cmd

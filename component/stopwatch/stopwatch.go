@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -30,6 +31,8 @@ type Styles struct {
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{Running: lipgloss.NewStyle(), Stopped: th.Dim}
 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new stopwatch.
 type Model struct {
@@ -108,13 +111,16 @@ func (m Model) tick() tea.Cmd {
 
 // Update adds a step on its own tick and arms the next. Any other message
 // leaves it as it was, with no command.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	t, ok := msg.(TickMsg)
-	if !ok || !m.running || t.ID != m.id || t.tag != m.tag {
-		return m, nil
+	if !ok || t.ID != m.id {
+		return m, bezel.Result{}
+	}
+	if !m.running || t.tag != m.tag {
+		return m, bezel.Result{Handled: true}
 	}
 	m.elapsed += m.Every()
-	return m, m.tick()
+	return m, bezel.Result{Handled: true, Cmd: m.tick()}
 }
 
 // Elapsed is the time counted so far.

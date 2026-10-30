@@ -12,6 +12,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -69,6 +70,8 @@ type Styles struct {
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{Match: th.Match, Current: th.MatchCurrent}
 }
+
+var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new viewport.
 type Model struct {
@@ -419,19 +422,23 @@ func (m Model) Scroll() layout.Scroll {
 }
 
 // Update scrolls and pans on its keys and the mouse wheel; the command is
-// always nil.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+// always nil. A scroll key is Handled even at the end of the text.
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	var r bezel.Result
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
+		km := m.keys
+		r.Handled = key.Matches(msg, km.Up, km.Down, km.Left, km.Right, km.PageUp, km.PageDown,
+			km.HalfPageUp, km.HalfPageDown, km.Top, km.Bottom)
 		if len(m.lines) > 0 {
 			m = m.key(msg)
 		}
 	case tea.MouseWheelMsg:
 		if m.wheel > 0 {
-			m = m.wheelMoved(msg)
+			m, r.Handled = m.wheelMoved(msg), true
 		}
 	}
-	return m, nil
+	return m, r
 }
 
 func (m Model) key(k tea.KeyPressMsg) Model {

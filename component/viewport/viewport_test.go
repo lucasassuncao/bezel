@@ -322,3 +322,23 @@ func TestVimKeysAddTheLetters(t *testing.T) {
 		require.Equal(t, want, got.YOffset(), k)
 	}
 }
+
+func TestAScrollKeyIsHandledAndAForeignOneIsNot(t *testing.T) {
+	m := sized(numbered(40), 20, 10)
+	_, r := m.Update(bezeltest.Key("down"))
+	require.True(t, r.Handled)
+	_, r = m.Update(bezeltest.Key("up"))
+	require.True(t, r.Handled, "a key that moves nothing is still the viewport's")
+	_, r = m.Update(bezeltest.Key("x"))
+	require.False(t, r.Handled)
+	_, r = m.Update(bezeltest.Key("f5"))
+	require.False(t, r.Handled)
+}
+
+func TestTheWheelIsHandledOnlyWhenEnabled(t *testing.T) {
+	m := sized(numbered(40), 20, 10)
+	_, r := m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.True(t, r.Handled)
+	_, r = m.WithWheel(0).Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.False(t, r.Handled)
+}

@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -34,7 +35,9 @@ func load(t *testing.T, m Model, cmd tea.Cmd) Model {
 	return m
 }
 
-func press(m Model, code rune) (Model, tea.Cmd) { return m.Update(tea.KeyPressMsg{Code: code}) }
+func press(m Model, code rune) (Model, tea.Cmd) {
+	return withCmd(m.Update(tea.KeyPressMsg{Code: code}))
+}
 
 func rows(m Model) []string {
 	var out []string
@@ -126,3 +129,19 @@ func TestHumanBytesReadsLikeAListing(t *testing.T) {
 		require.Equal(t, want, humanBytes(n), "%d", n)
 	}
 }
+
+func TestItsOwnListingAndItsKeysAreHandled(t *testing.T) {
+	m := New(tree(t))
+	m, r := m.Update(m.Init()())
+	require.True(t, r.Handled, "its own listing")
+	_, r = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
+	require.True(t, r.Handled)
+	_, r = m.Update(tea.KeyPressMsg{Code: tea.KeyF5})
+	require.False(t, r.Handled)
+	other := New(tree(t))
+	_, r = m.Update(other.Init()())
+	require.False(t, r.Handled, "another picker's listing")
+}
+
+// withCmd keeps the command of an Update, for the tests that run it.
+func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }

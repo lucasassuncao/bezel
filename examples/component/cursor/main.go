@@ -10,6 +10,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/cursor"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -62,8 +63,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case cursor.BlinkMsg:
 		var cmds []tea.Cmd
 		for i := range m.cursors {
-			m.cursors[i], cmd = m.cursors[i].Update(msg)
-			cmds = append(cmds, cmd)
+			var r bezel.Result
+			m.cursors[i], r = m.cursors[i].Update(msg)
+			cmds = append(cmds, r.Cmd)
 		}
 		return m, tea.Batch(cmds...)
 	case nextMsg:

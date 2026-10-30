@@ -10,6 +10,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/timer"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -61,8 +62,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	switch msg := msg.(type) {
 	case timer.TickMsg:
-		m.tm, cmd = m.tm.Update(msg)
-		return m, cmd
+		var r bezel.Result
+		m.tm, r = m.tm.Update(msg)
+		return m, r.Cmd
 	case timer.TimeoutMsg:
 		if msg.ID == m.tm.ID() {
 			m.sh, cmd = m.sh.SetStatus("time's up", shell.OK, 3*time.Second)
