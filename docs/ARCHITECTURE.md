@@ -2,7 +2,7 @@
 
 How the repository is laid out, what each folder holds, and why it sits where it does. The rules every package follows inside its own code are in [CONVENTIONS.md](CONVENTIONS.md); this page is about where the code lives and what may import what.
 
-```
+```plaintext
 bezel/
 ├── shell, overlay              the frame: what an app embeds and what it opens over the panes
 ├── theme, draw, legend,        the foundation: colours, drawing, key hints, bindings and rects,
@@ -54,7 +54,7 @@ Every animation, effect and scene takes the same `animation.FrameMsg`, so one sc
 Plumbing more than one folder needs and no app should depend on. Go lets only the packages under `internal/`'s parent import it, so it sits at the root to reach every folder:
 
 | Package | What it holds | Who uses it |
-|---|---|---|
+| --- | --- | --- |
 | `frames` | the frame message, the run a timed motion keeps, the motion switches read from the environment | `animation`, `effect`, and the components that move: `list`, `accordion`, `toast` |
 | `cells` | a drawn block read back into styled cells, and the canvas they are put into | `effect`, `animation/scene` |
 | `noise` | the hash randomness is drawn from, the same for the same frame | `effect`, `animation/text`, `animation/scene` |
