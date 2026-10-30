@@ -61,6 +61,8 @@ help:
 ## Run every check: deps, fmt, docs, lint, security, tests and vulnerability scans
 all: deps fmt docs lint security test-coverage govulncheck sbom vuln
 
+all-basic: deps fmt docs lint test-coverage
+
 ## Remove coverage artifacts, installed tools and cache
 clean: clean-tools
 	@$(call script,remove) $(COVERAGE_DIR) $(SBOM_FILE) $(SITE_DIR)
