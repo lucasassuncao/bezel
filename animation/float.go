@@ -29,7 +29,7 @@ func NewFloat(from, to float64, dur time.Duration) Float {
 	return Float{From: from, To: to, Cur: from, run: frames.NewRun(dur)}
 }
 
-// WithEase is f following e instead of EaseInOut.
+// WithEase is f following e instead of InOut(Quad).
 func (f Float) WithEase(e Ease) Float {
 	f.run.Ease = e
 	return f

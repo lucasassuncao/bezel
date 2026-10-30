@@ -138,7 +138,7 @@ func (e Effect) WithPattern(p Pattern) Effect {
 	return e
 }
 
-// WithEase is e following ease instead of EaseInOut.
+// WithEase is e following ease instead of InOut(Quad).
 func (e Effect) WithEase(ease animation.Ease) Effect {
 	e.run.Ease = ease
 	return e

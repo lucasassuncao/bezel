@@ -61,9 +61,9 @@ var eases = []struct {
 	ease animation.Ease
 }{
 	{"linear", animation.Linear},
-	{"ease in", animation.EaseIn},
-	{"ease out", animation.EaseOut},
-	{"ease in-out", animation.EaseInOut},
+	{"ease in", animation.Quad},
+	{"ease out", animation.Out(animation.Quad)},
+	{"ease in-out", animation.InOut(animation.Quad)},
 }
 
 type model struct {
@@ -272,10 +272,10 @@ func (m model) replay() model {
 		m.bars[i] = animation.NewTween(0, track, race).WithEase(e.ease)
 	}
 	m.smooth = animation.NewFloat(0, 1, race).WithEase(animation.Linear)
-	m.count = animation.NewTween(0, counts, race).WithEase(animation.EaseOut)
+	m.count = animation.NewTween(0, counts, race).WithEase(animation.Out(animation.Quad))
 	m.cascade = make([]animation.Tween, blocks)
 	for i := range m.cascade {
-		m.cascade[i] = animation.NewTween(0, block, 300*time.Millisecond).WithEase(animation.EaseOut).WithDelay(time.Duration(i) * stagger)
+		m.cascade[i] = animation.NewTween(0, block, 300*time.Millisecond).WithEase(animation.Out(animation.Quad)).WithDelay(time.Duration(i) * stagger)
 	}
 	return m
 }

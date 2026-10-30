@@ -116,9 +116,16 @@ type Marquee struct {
 
 var _ bezel.Model[Marquee] = Marquee{}
 
-// NewMarquee is text in width cells, still until Start, stepping every 120ms.
-func NewMarquee(text string, width int) Marquee {
-	return Marquee{text: text, width: max(width, 0), every: 120 * time.Millisecond, id: frames.NextID()}
+// NewMarquee is text, still until Start, stepping every 120ms. It draws
+// nothing until SetWidth gives it room.
+func NewMarquee(text string) Marquee {
+	return Marquee{text: text, every: 120 * time.Millisecond, id: frames.NextID()}
+}
+
+// SetWidth is the room the text scrolls through, in cells.
+func (m Marquee) SetWidth(w int) Marquee {
+	m.width = max(w, 0)
+	return m
 }
 
 // WithEvery steps the text once every d instead of every 120ms.

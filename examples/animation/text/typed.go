@@ -33,7 +33,7 @@ type typed struct {
 func newTyped() typed {
 	return typed{
 		typewriter: text.NewTypewriter(headline, 0),
-		marquee:    text.NewMarquee(longPath, 30),
+		marquee:    text.NewMarquee(longPath).SetWidth(30),
 		shake:      text.NewShake(3, 0),
 	}
 }

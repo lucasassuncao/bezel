@@ -34,7 +34,7 @@ func NewHighlight(text string, marker color.Color, dur time.Duration) Highlight 
 	return h
 }
 
-// WithEase is h following e instead of EaseInOut.
+// WithEase is h following e instead of InOut(Quad).
 func (h Highlight) WithEase(e animation.Ease) Highlight {
 	h.run.Ease = e
 	return h

@@ -31,7 +31,7 @@ var _ bezel.Model[Rise] = Rise{}
 // WithFade.
 func NewRise(text string, rows int, dur time.Duration) Rise {
 	r := Rise{text: text, rows: max(rows, 1), run: frames.NewRun(dur)}
-	r.run.Ease = animation.EaseOut
+	r.run.Ease = animation.Out(animation.Quad)
 	if !r.Active() {
 		r.p = 1
 	}

@@ -12,12 +12,12 @@ import (
 
 // Enter brings a block in, gathering it out of bg from the middle outward.
 func Enter(bg color.Color) Effect {
-	return FadeIn(bg, 300*time.Millisecond).WithPattern(Radial()).WithEase(animation.EaseOut)
+	return FadeIn(bg, 300*time.Millisecond).WithPattern(Radial()).WithEase(animation.Out(animation.Quad))
 }
 
 // Exit takes a block away, sinking it into bg from the edges inward.
 func Exit(bg color.Color) Effect {
-	return FadeOut(bg, 250*time.Millisecond).WithPattern(Inverted(Radial())).WithEase(animation.EaseIn)
+	return FadeOut(bg, 250*time.Millisecond).WithPattern(Inverted(Radial())).WithEase(animation.Quad)
 }
 
 // Attention draws the eye to a block with two pulses of c.

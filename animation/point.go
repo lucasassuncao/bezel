@@ -35,7 +35,7 @@ func NewMove(from, to Point, dur time.Duration) Move {
 	return Move{From: from, To: to, Cur: from, run: frames.NewRun(dur)}
 }
 
-// WithEase is m following e instead of EaseInOut.
+// WithEase is m following e instead of InOut(Quad).
 func (m Move) WithEase(e Ease) Move {
 	m.run.Ease = e
 	return m

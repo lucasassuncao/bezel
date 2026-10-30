@@ -21,7 +21,7 @@ var family = []struct {
 	name string
 	ease animation.Ease
 }{
-	{"linear", animation.Linear}, {"sine", animation.Sine}, {"quad", animation.EaseIn},
+	{"linear", animation.Linear}, {"sine", animation.Sine}, {"quad", animation.Quad},
 	{"cubic", animation.Cubic}, {"quart", animation.Quart}, {"quint", animation.Quint},
 	{"expo", animation.Expo}, {"circ", animation.Circ}, {"back", animation.Back},
 	{"elastic", animation.Elastic}, {"bounce", animation.Bounce}, {"steps 6", animation.Steps(6)},

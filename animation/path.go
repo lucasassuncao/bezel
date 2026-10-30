@@ -78,7 +78,7 @@ func (p Path) at(q float64) Point {
 	return p.pts[len(p.pts)-1]
 }
 
-// WithEase is p following e along its length instead of EaseInOut.
+// WithEase is p following e along its length instead of InOut(Quad).
 func (p Path) WithEase(e Ease) Path {
 	p.run.Ease = e
 	return p

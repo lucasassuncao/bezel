@@ -19,12 +19,10 @@ Package animation moves values on frames that arrive as messages: tweens, spring
 - [func Cascade\[T delayer\[T\]\]\(gap time.Duration, items ...T\) \[\]T](<#Cascade>)
 - [func Circ\(p float64\) float64](<#Circ>)
 - [func Cubic\(p float64\) float64](<#Cubic>)
-- [func EaseIn\(p float64\) float64](<#EaseIn>)
-- [func EaseInOut\(p float64\) float64](<#EaseInOut>)
-- [func EaseOut\(p float64\) float64](<#EaseOut>)
 - [func Elastic\(p float64\) float64](<#Elastic>)
 - [func Expo\(p float64\) float64](<#Expo>)
 - [func Linear\(p float64\) float64](<#Linear>)
+- [func Quad\(p float64\) float64](<#Quad>)
 - [func Quart\(p float64\) float64](<#Quart>)
 - [func Quint\(p float64\) float64](<#Quint>)
 - [func Record\[T advancer\[T\]\]\(a T, view func\(T\) string, limit time.Duration\) \[\]string](<#Record>)
@@ -270,7 +268,7 @@ const Frame = frames.Frame
 ```
 
 <a name="Back"></a>
-## func [Back](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L59>)
+## func [Back](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L53>)
 
 ```go
 func Back(p float64) float64
@@ -288,7 +286,7 @@ func Blend(a, b color.Color, p float64) color.Color
 Blend is the colour p of the way from a to b, channel by channel. With either one nil there is nothing to mix, so it is a until half way, then b.
 
 <a name="Bounce"></a>
-## func [Bounce](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L72>)
+## func [Bounce](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L66>)
 
 ```go
 func Bounce(p float64) float64
@@ -306,7 +304,7 @@ func Cascade[T delayer[T]](gap time.Duration, items ...T) []T
 Cascade delays each of items gap more than the one before, so animations built apart start one after another: the rows of a list sliding in.
 
 <a name="Circ"></a>
-## func [Circ](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L53>)
+## func [Circ](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L47>)
 
 ```go
 func Circ(p float64) float64
@@ -315,43 +313,16 @@ func Circ(p float64) float64
 Circ eases along a quarter circle.
 
 <a name="Cubic"></a>
-## func [Cubic](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L36>)
+## func [Cubic](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L30>)
 
 ```go
 func Cubic(p float64) float64
 ```
 
-Cubic is p³, slower to start than EaseIn's p².
-
-<a name="EaseIn"></a>
-## func [EaseIn](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L17>)
-
-```go
-func EaseIn(p float64) float64
-```
-
-EaseIn starts slow and ends fast, for something leaving.
-
-<a name="EaseInOut"></a>
-## func [EaseInOut](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L25>)
-
-```go
-func EaseInOut(p float64) float64
-```
-
-EaseInOut is quadratic, gentler than a cubic on purpose: on whole cells a cubic freezes, then skips rows, while this never repeats a height more than once over 180ms. Every tween follows it unless told otherwise.
-
-<a name="EaseOut"></a>
-## func [EaseOut](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L20>)
-
-```go
-func EaseOut(p float64) float64
-```
-
-EaseOut starts fast and settles, for something arriving.
+Cubic is p³, slower to start than Quad's p².
 
 <a name="Elastic"></a>
-## func [Elastic](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L63>)
+## func [Elastic](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L57>)
 
 ```go
 func Elastic(p float64) float64
@@ -360,7 +331,7 @@ func Elastic(p float64) float64
 Elastic winds up like a spring before it lets go; Out\(Elastic\) rings past its end and settles.
 
 <a name="Expo"></a>
-## func [Expo](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L45>)
+## func [Expo](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L39>)
 
 ```go
 func Expo(p float64) float64
@@ -377,8 +348,17 @@ func Linear(p float64) float64
 
 Linear moves at one speed throughout: a counter, a typewriter.
 
+<a name="Quad"></a>
+## func [Quad](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L19>)
+
+```go
+func Quad(p float64) float64
+```
+
+Quad is p², starting slow; Out\(Quad\) settles, for something arriving. Every tween follows InOut\(Quad\) unless told otherwise: on whole cells it never repeats a height more than once over 180ms, where a cubic freezes.
+
 <a name="Quart"></a>
-## func [Quart](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L39>)
+## func [Quart](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L33>)
 
 ```go
 func Quart(p float64) float64
@@ -387,7 +367,7 @@ func Quart(p float64) float64
 Quart is p⁴.
 
 <a name="Quint"></a>
-## func [Quint](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L42>)
+## func [Quint](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L36>)
 
 ```go
 func Quint(p float64) float64
@@ -405,7 +385,7 @@ func Record[T advancer[T]](a T, view func(T) string, limit time.Duration) []stri
 Record plays a from its first frame to its end, or for limit at most, one frame every Frame, and keeps what view draws of each: an animation as text, for a test that checks it frame by frame or a recording built from it.
 
 <a name="Sine"></a>
-## func [Sine](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L33>)
+## func [Sine](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L27>)
 
 ```go
 func Sine(p float64) float64
@@ -727,7 +707,7 @@ type Ease = frames.Ease
 ```
 
 <a name="InOut"></a>
-### func [InOut](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L96>)
+### func [InOut](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L90>)
 
 ```go
 func InOut(e Ease) Ease
@@ -736,7 +716,7 @@ func InOut(e Ease) Ease
 InOut is e easing in over the first half and out over the second.
 
 <a name="Out"></a>
-### func [Out](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L93>)
+### func [Out](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L87>)
 
 ```go
 func Out(e Ease) Ease
@@ -745,7 +725,7 @@ func Out(e Ease) Ease
 Out is e played backwards from the end: fast first, then settling.
 
 <a name="Steps"></a>
-### func [Steps](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L106>)
+### func [Steps](<https://github.com/lucasassuncao/bezel/blob/main/animation/ease.go#L100>)
 
 ```go
 func Steps(n int) Ease
@@ -843,7 +823,7 @@ WithDelay holds f at its first colour for d after its first frame.
 func (f Fade) WithEase(e Ease) Fade
 ```
 
-WithEase is f following e instead of EaseInOut.
+WithEase is f following e instead of InOut\(Quad\).
 
 <a name="Fade.WithRepeat"></a>
 ### func \(Fade\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L85>)
@@ -955,7 +935,7 @@ WithDelay holds f at From for d after its first frame.
 func (f Float) WithEase(e Ease) Float
 ```
 
-WithEase is f following e instead of EaseInOut.
+WithEase is f following e instead of InOut\(Quad\).
 
 <a name="Float.WithRepeat"></a>
 ### func \(Float\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L91>)
@@ -1278,7 +1258,7 @@ Key is one stop of Keyframes: the value at a share of the duration, and the curv
 type Key struct {
     At    float64 // in [0,1]
     Value float64
-    Ease  Ease // nil is EaseInOut
+    Ease  Ease // nil is InOut(Quad)
 }
 ```
 
@@ -1458,7 +1438,7 @@ WithDelay holds m at From for d after its first frame.
 func (m Move) WithEase(e Ease) Move
 ```
 
-WithEase is m following e instead of EaseInOut.
+WithEase is m following e instead of InOut\(Quad\).
 
 <a name="Move.WithRepeat"></a>
 ### func \(Move\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L51>)
@@ -1652,7 +1632,7 @@ WithDelay holds p at its start for d after its first frame.
 func (p Path) WithEase(e Ease) Path
 ```
 
-WithEase is p following e along its length instead of EaseInOut.
+WithEase is p following e along its length instead of InOut\(Quad\).
 
 <a name="Path.WithRepeat"></a>
 ### func \(Path\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L94>)
@@ -1864,7 +1844,7 @@ Update moves on its own frames and asks for the next until the bars settle.
 func (r Race) WithEase(e Ease) Race
 ```
 
-WithEase is r following e instead of EaseInOut, for every later Set.
+WithEase is r following e instead of InOut\(Quad\), for every later Set.
 
 <a name="Racer"></a>
 ## type [Racer](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L16-L20>)
@@ -2088,7 +2068,7 @@ WithDuration is how long each later Push takes to rise.
 func (s Series) WithEase(e Ease) Series
 ```
 
-WithEase is s following e instead of EaseInOut.
+WithEase is s following e instead of InOut\(Quad\).
 
 <a name="Span"></a>
 ## type [Span](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L24-L27>)
@@ -2477,7 +2457,7 @@ WithDelay holds t at From for d after its first frame.
 func (t Tween) WithEase(e Ease) Tween
 ```
 
-WithEase is t following e instead of EaseInOut.
+WithEase is t following e instead of InOut\(Quad\).
 
 <a name="Tween.WithRepeat"></a>
 ### func \(Tween\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L129>)

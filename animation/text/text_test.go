@@ -33,7 +33,7 @@ func TestTypewriterRevealsAGraphemeAtATime(t *testing.T) {
 
 func TestMarqueeScrollsTextWiderThanItsWidth(t *testing.T) {
 	start := time.Unix(1000, 0)
-	m := NewMarquee("abcdefghij", 4).WithEvery(100 * time.Millisecond)
+	m := NewMarquee("abcdefghij").SetWidth(4).WithEvery(100 * time.Millisecond)
 	assert.Equal(t, "abcd", m.View())
 
 	m, cmd := m.Start()
@@ -51,14 +51,14 @@ func TestMarqueeScrollsTextWiderThanItsWidth(t *testing.T) {
 }
 
 func TestMarqueeLeavesTextThatFitsAlone(t *testing.T) {
-	m, cmd := NewMarquee("ab", 4).Start()
+	m, cmd := NewMarquee("ab").SetWidth(4).Start()
 	assert.Nil(t, cmd)
 	assert.False(t, m.Active())
 	assert.Equal(t, "ab  ", m.View())
 }
 
 func TestMarqueeTakesItsOwnTicks(t *testing.T) {
-	m, _ := NewMarquee("abcdefghij", 4).WithEvery(100 * time.Millisecond).Start()
+	m, _ := NewMarquee("abcdefghij").SetWidth(4).WithEvery(100 * time.Millisecond).Start()
 	start := time.Unix(1000, 0)
 	m, res := m.Update(m.FrameAt(start))
 	assert.NotNil(t, res.Cmd)
@@ -82,7 +82,7 @@ func TestStillTextIsBornWhole(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	assert.False(t, NewShake(3, time.Second).Active())
 	assert.Equal(t, "hello", NewTypewriter("hello", time.Second).View())
-	m, cmd := NewMarquee("abcdefghij", 4).Start()
+	m, cmd := NewMarquee("abcdefghij").SetWidth(4).Start()
 	assert.Nil(t, cmd)
 	assert.False(t, m.Active())
 	assert.Equal(t, "abcd", m.View())
@@ -129,4 +129,9 @@ func TestForeignFrameIsNotHandled(t *testing.T) {
 	a, b := NewTypewriter("abc", time.Second), NewTypewriter("abc", time.Second)
 	_, r := a.Update(b.FrameAt(time.Unix(0, 0)))
 	require.Equal(t, bezel.Result{}, r)
+}
+
+// A marquee no one sized draws nothing.
+func TestAnUnsizedMarqueeDrawsNothing(t *testing.T) {
+	require.Empty(t, NewMarquee("abcdefghij").View())
 }

@@ -126,7 +126,7 @@ func (r Race) Advance(now time.Time) (Race, bool) {
 	return r, !r.Active()
 }
 
-// WithEase is r following e instead of EaseInOut, for every later Set.
+// WithEase is r following e instead of InOut(Quad), for every later Set.
 func (r Race) WithEase(e Ease) Race {
 	r.run.Ease = e
 	return r

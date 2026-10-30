@@ -89,7 +89,7 @@ Every timed one takes `WithDelay` and `WithRepeat`, `animation.Forever` for no e
 
 ![curves](recordings/animation/curves.gif)
 
-`Linear`, `EaseIn`, `EaseOut` and `EaseInOut`, the default, and nine more, each easing in: `Sine`, `Cubic`, `Quart`, `Quint`, `Expo`, `Circ`, `Back`, `Elastic` and `Bounce`. `Out` and `InOut` turn any of them round, and `Steps(n)` moves in whole jumps:
+`Linear`, and ten curves that ease in: `Quad`, `Sine`, `Cubic`, `Quart`, `Quint`, `Expo`, `Circ`, `Back`, `Elastic` and `Bounce`. `Out` and `InOut` turn any of them round (`InOut(Quad)` is the default), and `Steps(n)` moves in whole jumps:
 
 ```go
 animation.NewTween(0, 40, time.Second).WithEase(animation.Out(animation.Back))

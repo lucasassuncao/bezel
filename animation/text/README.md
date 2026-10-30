@@ -87,10 +87,11 @@ Package text animates a line of text: typed, scrolled, shimmered, rolled, waved,
   - [func \(h Highlight\) WithDelay\(d time.Duration\) Highlight](<#Highlight.WithDelay>)
   - [func \(h Highlight\) WithEase\(e animation.Ease\) Highlight](<#Highlight.WithEase>)
 - [type Marquee](<#Marquee>)
-  - [func NewMarquee\(text string, width int\) Marquee](<#NewMarquee>)
+  - [func NewMarquee\(text string\) Marquee](<#NewMarquee>)
   - [func \(m Marquee\) Active\(\) bool](<#Marquee.Active>)
   - [func \(m Marquee\) Advance\(now time.Time\) \(Marquee, bool\)](<#Marquee.Advance>)
   - [func \(m Marquee\) FrameAt\(at time.Time\) animation.FrameMsg](<#Marquee.FrameAt>)
+  - [func \(m Marquee\) SetWidth\(w int\) Marquee](<#Marquee.SetWidth>)
   - [func \(m Marquee\) Start\(\) \(Marquee, tea.Cmd\)](<#Marquee.Start>)
   - [func \(m Marquee\) Stop\(\) Marquee](<#Marquee.Stop>)
   - [func \(m Marquee\) Tick\(\) tea.Cmd](<#Marquee.Tick>)
@@ -927,7 +928,7 @@ WithDelay holds the marker off for d after the first frame.
 func (h Highlight) WithEase(e animation.Ease) Highlight
 ```
 
-WithEase is h following e instead of EaseInOut.
+WithEase is h following e instead of InOut\(Quad\).
 
 <a name="Marquee"></a>
 ## type [Marquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L107-L115>)
@@ -941,16 +942,16 @@ type Marquee struct {
 ```
 
 <a name="NewMarquee"></a>
-### func [NewMarquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L120>)
+### func [NewMarquee](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L121>)
 
 ```go
-func NewMarquee(text string, width int) Marquee
+func NewMarquee(text string) Marquee
 ```
 
-NewMarquee is text in width cells, still until Start, stepping every 120ms.
+NewMarquee is text, still until Start, stepping every 120ms. It draws nothing until SetWidth gives it room.
 
 <a name="Marquee.Active"></a>
-### func \(Marquee\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L154>)
+### func \(Marquee\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L161>)
 
 ```go
 func (m Marquee) Active() bool
@@ -959,7 +960,7 @@ func (m Marquee) Active() bool
 Active reports whether the text is moving.
 
 <a name="Marquee.Advance"></a>
-### func \(Marquee\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L188>)
+### func \(Marquee\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L195>)
 
 ```go
 func (m Marquee) Advance(now time.Time) (Marquee, bool)
@@ -968,7 +969,7 @@ func (m Marquee) Advance(now time.Time) (Marquee, bool)
 Advance is m at now; it never finishes, so done is only true when stopped.
 
 <a name="Marquee.FrameAt"></a>
-### func \(Marquee\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L174>)
+### func \(Marquee\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L181>)
 
 ```go
 func (m Marquee) FrameAt(at time.Time) animation.FrameMsg
@@ -976,8 +977,17 @@ func (m Marquee) FrameAt(at time.Time) animation.FrameMsg
 
 FrameAt is m's frame for at, for a test or a host that delivers frames itself.
 
+<a name="Marquee.SetWidth"></a>
+### func \(Marquee\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L126>)
+
+```go
+func (m Marquee) SetWidth(w int) Marquee
+```
+
+SetWidth is the room the text scrolls through, in cells.
+
 <a name="Marquee.Start"></a>
-### func \(Marquee\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L134>)
+### func \(Marquee\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L141>)
 
 ```go
 func (m Marquee) Start() (Marquee, tea.Cmd)
@@ -986,7 +996,7 @@ func (m Marquee) Start() (Marquee, tea.Cmd)
 Start sets the text moving; text that fits, or motion that is Still, is left alone and asks nothing.
 
 <a name="Marquee.Stop"></a>
-### func \(Marquee\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L147>)
+### func \(Marquee\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L154>)
 
 ```go
 func (m Marquee) Stop() Marquee
@@ -995,7 +1005,7 @@ func (m Marquee) Stop() Marquee
 Stop halts the text back at its start; ticks already sent are dropped.
 
 <a name="Marquee.Tick"></a>
-### func \(Marquee\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L166>)
+### func \(Marquee\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L173>)
 
 ```go
 func (m Marquee) Tick() tea.Cmd
@@ -1004,7 +1014,7 @@ func (m Marquee) Tick() tea.Cmd
 Tick is the command for m's next step, nil while it is still.
 
 <a name="Marquee.Update"></a>
-### func \(Marquee\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L177>)
+### func \(Marquee\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L184>)
 
 ```go
 func (m Marquee) Update(msg tea.Msg) (Marquee, bezel.Result)
@@ -1013,7 +1023,7 @@ func (m Marquee) Update(msg tea.Msg) (Marquee, bezel.Result)
 Update steps on its own ticks and asks for the next while it runs.
 
 <a name="Marquee.View"></a>
-### func \(Marquee\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L157>)
+### func \(Marquee\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L164>)
 
 ```go
 func (m Marquee) View() string
@@ -1022,7 +1032,7 @@ func (m Marquee) View() string
 View is exactly width cells of the text, from where it has scrolled to.
 
 <a name="Marquee.WithEvery"></a>
-### func \(Marquee\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L125>)
+### func \(Marquee\) [WithEvery](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/text.go#L132>)
 
 ```go
 func (m Marquee) WithEvery(d time.Duration) Marquee
@@ -1304,7 +1314,7 @@ View is the number as the columns show it now, zero\-padded to the width.
 func (o Odometer) WithEase(e animation.Ease) Odometer
 ```
 
-WithEase is o following e instead of EaseOut.
+WithEase is o following e instead of Out\(Quad\).
 
 <a name="Rainbow"></a>
 ## type [Rainbow](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/rainbow.go#L22-L28>)

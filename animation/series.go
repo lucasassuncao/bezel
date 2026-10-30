@@ -40,7 +40,7 @@ func Draw(values []float64, dur time.Duration) Series {
 	return s
 }
 
-// WithEase is s following e instead of EaseInOut.
+// WithEase is s following e instead of InOut(Quad).
 func (s Series) WithEase(e Ease) Series {
 	s.run.Ease = e
 	return s

@@ -54,7 +54,7 @@ func (t Ticker) WithDown(c color.Color) Ticker {
 func (t Ticker) To(v int) (Ticker, tea.Cmd) {
 	t.from, t.to = t.Value(), v
 	t.run = frames.NewRun(t.dur)
-	t.run.Ease = animation.EaseOut
+	t.run.Ease = animation.Out(animation.Quad)
 	t.p = 0
 	if !t.Active() {
 		t.p = 1

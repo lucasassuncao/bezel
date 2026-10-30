@@ -16,7 +16,7 @@ import (
 type Key struct {
 	At    float64 // in [0,1]
 	Value float64
-	Ease  Ease // nil is EaseInOut
+	Ease  Ease // nil is InOut(Quad)
 }
 
 // Keyframes moves a value through several stops instead of one: a bounce

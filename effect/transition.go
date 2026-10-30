@@ -91,7 +91,7 @@ func Zoom(dur time.Duration) Transition { return newTransition(zoom, dur) }
 // the scatter.
 func Shuffle(dur time.Duration) Transition { return newTransition(shuffle, dur) }
 
-// WithEase is t following e instead of EaseInOut.
+// WithEase is t following e instead of InOut(Quad).
 func (t Transition) WithEase(e animation.Ease) Transition {
 	t.run.Ease = e
 	return t

@@ -13,16 +13,10 @@ type Ease = frames.Ease
 // Linear moves at one speed throughout: a counter, a typewriter.
 func Linear(p float64) float64 { return p }
 
-// EaseIn starts slow and ends fast, for something leaving.
-func EaseIn(p float64) float64 { return p * p }
-
-// EaseOut starts fast and settles, for something arriving.
-func EaseOut(p float64) float64 { return 1 - (1-p)*(1-p) }
-
-// EaseInOut is quadratic, gentler than a cubic on purpose: on whole cells a
-// cubic freezes, then skips rows, while this never repeats a height more
-// than once over 180ms. Every tween follows it unless told otherwise.
-func EaseInOut(p float64) float64 { return frames.InOut(p) }
+// Quad is p², starting slow; Out(Quad) settles, for something arriving. Every
+// tween follows InOut(Quad) unless told otherwise: on whole cells it never
+// repeats a height more than once over 180ms, where a cubic freezes.
+func Quad(p float64) float64 { return p * p }
 
 // Forever is the repeat count of a motion that runs until it is replaced.
 const Forever = frames.Forever
@@ -32,7 +26,7 @@ const Forever = frames.Forever
 // Sine eases in along a quarter of a sine wave, the gentlest of them.
 func Sine(p float64) float64 { return 1 - math.Cos(p*math.Pi/2) }
 
-// Cubic is p³, slower to start than EaseIn's p².
+// Cubic is p³, slower to start than Quad's p².
 func Cubic(p float64) float64 { return p * p * p }
 
 // Quart is p⁴.

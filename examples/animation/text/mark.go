@@ -81,7 +81,7 @@ func (x texts) move() texts {
 }
 
 func (x texts) remark() texts {
-	x.mark = text.NewHighlight(searched, x.th.Accent.GetForeground(), 900*time.Millisecond).WithEase(animation.EaseOut)
+	x.mark = text.NewHighlight(searched, x.th.Accent.GetForeground(), 900*time.Millisecond).WithEase(animation.Out(animation.Quad))
 	return x
 }
 

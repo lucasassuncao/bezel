@@ -8,7 +8,7 @@ import (
 )
 
 func TestEasesRunFromZeroToOneWithoutTurningBack(t *testing.T) {
-	for name, e := range map[string]Ease{"linear": Linear, "in": EaseIn, "out": EaseOut, "inout": EaseInOut} {
+	for name, e := range map[string]Ease{"linear": Linear, "in": Quad, "out": Out(Quad), "inout": InOut(Quad)} {
 		assert.InDelta(t, 0, e(0), 1e-9, name)
 		assert.InDelta(t, 1, e(1), 1e-9, name)
 		prev := 0.0
@@ -18,22 +18,22 @@ func TestEasesRunFromZeroToOneWithoutTurningBack(t *testing.T) {
 			prev = v
 		}
 	}
-	assert.Less(t, EaseIn(0.25), 0.25, "in starts slow")
-	assert.Greater(t, EaseOut(0.25), 0.25, "out starts fast")
+	assert.Less(t, Quad(0.25), 0.25, "in starts slow")
+	assert.Greater(t, Out(Quad)(0.25), 0.25, "out starts fast")
 }
 
 func TestATweenFollowsItsEase(t *testing.T) {
 	start := time.Unix(1000, 0)
 	tw := Tween{From: 0, To: 100, Start: start, Dur: 100 * time.Millisecond}
 	v, _ := tw.At(start.Add(25 * time.Millisecond))
-	assert.Equal(t, 13, v, "the default is EaseInOut")
+	assert.Equal(t, 13, v, "the default is InOut(Quad)")
 	v, _ = tw.WithEase(Linear).At(start.Add(25 * time.Millisecond))
 	assert.Equal(t, 25, v)
 }
 
 // curves are every in-curve, by name, for the tests that sweep them all.
 var curves = map[string]Ease{
-	"sine": Sine, "quad": EaseIn, "cubic": Cubic, "quart": Quart, "quint": Quint,
+	"sine": Sine, "quad": Quad, "cubic": Cubic, "quart": Quart, "quint": Quint,
 	"expo": Expo, "circ": Circ, "back": Back, "elastic": Elastic, "bounce": Bounce,
 }
 
@@ -60,7 +60,7 @@ func TestTheSmoothCurvesNeverTurnBack(t *testing.T) {
 			}
 		}
 	}
-	assert.Less(t, Cubic(0.5), EaseIn(0.5), "a higher power starts slower")
+	assert.Less(t, Cubic(0.5), Quad(0.5), "a higher power starts slower")
 	assert.Less(t, Quint(0.5), Quart(0.5))
 }
 

@@ -32,7 +32,7 @@ func NewOdometer(from, to int, dur time.Duration) Odometer {
 	o := Odometer{from: from, to: to, dur: dur, width: max(len(strconv.Itoa(from)), len(strconv.Itoa(to)))}
 	if from != to {
 		o.run = frames.NewRun(dur)
-		o.run.Ease = animation.EaseOut
+		o.run.Ease = animation.Out(animation.Quad)
 	}
 	return o
 }
@@ -102,7 +102,7 @@ func (o Odometer) Advance(now time.Time) (Odometer, bool) {
 	return o, !o.Active()
 }
 
-// WithEase is o following e instead of EaseOut.
+// WithEase is o following e instead of Out(Quad).
 func (o Odometer) WithEase(e animation.Ease) Odometer {
 	o.run.Ease = e
 	return o

@@ -27,7 +27,7 @@ type Tween struct {
 	Start    time.Time // zero until the first frame, which starts the clock
 	Dur      time.Duration
 	loop     frames.Loop
-	ease     Ease  // nil is EaseInOut
+	ease     Ease  // nil is InOut(Quad)
 	id       int64 // which FrameMsg values are this tween's
 	tag      int64 // which step: a twin frame from a second Tick is dropped
 }
@@ -113,7 +113,7 @@ func NewTween(from, target int, dur time.Duration) Tween {
 	return Tween{From: from, To: target, Cur: from, Dur: dur, id: frames.NextID()}
 }
 
-// WithEase is t following e instead of EaseInOut.
+// WithEase is t following e instead of InOut(Quad).
 func (t Tween) WithEase(e Ease) Tween {
 	t.ease = e
 	return t

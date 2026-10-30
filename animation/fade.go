@@ -25,7 +25,7 @@ func NewFade(from, to color.Color, dur time.Duration) Fade {
 	return Fade{from: from, to: to, mix: NewFloat(0, 1, dur)}
 }
 
-// WithEase is f following e instead of EaseInOut.
+// WithEase is f following e instead of InOut(Quad).
 func (f Fade) WithEase(e Ease) Fade {
 	f.mix = f.mix.WithEase(e)
 	return f
