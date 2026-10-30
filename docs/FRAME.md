@@ -25,7 +25,7 @@ func newModel() model {
 			layout.Fixed("list", layout.Ratio(1, 3), layout.Min(24)),
 			layout.Fill("detail"),
 		),
-		Theme:   theme.Resolve(theme.Mint, true),
+		Theme:   theme.Resolve(theme.Mint(), true),
 		Title:   "my app",
 		Actions: []shell.Action{shell.Help(), shell.ChangePane(), shell.Move(), shell.Quit()},
 	})}

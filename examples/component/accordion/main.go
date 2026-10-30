@@ -20,7 +20,7 @@ var faq = []accordion.Section{
 	{Title: "What is bezel?", Body: "The frame around a Bubble Tea app: tabs, panes, dialogs, the status row and the key legend. The app draws what goes inside."},
 	{Title: "Does it need a mouse?", Body: "No. Every action has a key, listed at the foot of the screen and in the help."},
 	{Title: "Can I turn the motion off?", Body: "Set BEZEL_NO_MOTION, or TERM=dumb, and everything lands where it would end. BEZEL_MOTION sets the speed instead."},
-	{Title: "Which themes are there?", Body: "Ninety-two presets, from mint to dracula, and any theme of your own built on one."},
+	{Title: "Which themes are there?", Body: "Four presets, from the adaptive default to mint, and any theme of your own built on one."},
 }
 
 type model struct {
@@ -30,7 +30,7 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	acc := accordion.New(faq)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fill("faq")),

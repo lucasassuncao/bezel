@@ -12,7 +12,7 @@ import (
 )
 
 func actionConfig(tabs ...Tab) Config {
-	return Config{Layout: twoPane(), Tabs: tabs, Theme: theme.Resolve(theme.Plain, true), Title: "demo"}
+	return Config{Layout: twoPane(), Tabs: tabs, Theme: theme.Resolve(theme.Plain(), true), Title: "demo"}
 }
 
 func sized(s Shell) Shell {

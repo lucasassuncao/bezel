@@ -24,7 +24,7 @@ m.list = m.list.SetRows(reloaded) // SetX: a live change, after something happen
 - **`NewX(required..., th)`** takes only what the component cannot work without, the theme last when it takes one. It returns only the value; a command to start it comes from `Init()`.
 - **`WithX`** is everything optional. A switch takes its state, `WithWrap(on bool)`, so an app can pass a setting it read. An argument most callers would pass as `nil`, `""`, `0` or `false` is a `With`, and so is each of two same-typed parameters in a row: `text.NewTicker(v, dur).WithUp(c).WithDown(c)` cannot be swapped by mistake.
 - **`SetX`** changes a live model: `SetRows`, `SetTheme`, `SetStatus`. What can change live has only the `Set`, never a `With` doing the same.
-- **A variant is named, not built**: a preset of a shared type is a bare name, `spinner.Dot()`, `effect.Wipe(...)`, `theme.Mint`.
+- **A variant is named, not built**: a preset of a shared type is a bare name, `spinner.Dot()`, `effect.Wipe(...)`, `theme.Mint()`.
 - **`Config` struct** only where an app sets many fields at once, as `shell.Config`.
 - **A declared tree is not a model**: `layout`'s builders read as the screen they describe, `layout.Fixed("help").Info()` and `Columns(...).Collapse(72, "detail")`, so they keep their short names instead of `WithX`.
 
@@ -189,7 +189,7 @@ Nothing reads the clock. `Tick` asks for frames, each frame is tagged so a model
 - No package variable is meant to be changed by an app. Per-app settings arrive through a constructor, a `With`, the theme or `shell.Config`.
 - The environment is read in two places only: `icon.FromEnv()` (`BEZEL_ASCII`, `TERM=dumb`) and `animation.Still()`/`Speed()` (`BEZEL_NO_MOTION`, `BEZEL_MOTION`, `TERM=dumb`). The terminal is asked in one: `theme.DarkTerminal()`, for a program that resolves a theme without a running bubbletea program to send `tea.BackgroundColorMsg`.
 - `View` never writes back. An overlay that needs its size in `Update` implements `overlay.Resizer`; whatever scrolls keeps its offset in a `layout.Window` and reports it through `Scroll()`.
-- Presets (`theme.Mint`, ...) are bases to build on: point a `Theme`'s `Base` at one, never change the preset.
+- Presets (`theme.Mint()`, ...) are functions that build a fresh value each call, so no app can change one for another; point a `Theme`'s `Base` at one to build on it.
 
 ## Patterns by name
 

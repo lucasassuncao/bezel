@@ -103,7 +103,7 @@ func TestPreviewScrollsWhenFocused(t *testing.T) {
 
 func TestListViewMarksTheCursorAndScrollsToIt(t *testing.T) {
 	b := New(items("a", "b", "c", "d")).WithCurrent("d")
-	got := ansi.Strip(b.SetListHeight(2).ListView(theme.Resolve(theme.Plain, true)))
+	got := ansi.Strip(b.SetListHeight(2).ListView(theme.Resolve(theme.Plain(), true)))
 	require.Contains(t, got, "▶  d")
 	require.NotContains(t, got, "a")
 }
@@ -129,7 +129,7 @@ func TestPreviewScrollStopsAtTheEnd(t *testing.T) {
 
 // Stepping back up from the bottom moves the cursor, not the whole window.
 func TestListViewDoesNotPinTheCursorToTheBottom(t *testing.T) {
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	b := New(items("a", "b", "c", "d", "e", "f", "g", "h")).WithCurrent("h")
 	b, _ = b.Update(press(tea.KeyUp))
 	lines := strings.Split(ansi.Strip(b.SetListHeight(4).ListView(th)), "\n")
@@ -152,7 +152,7 @@ func TestNewAndSetItemsCopyTheSlice(t *testing.T) {
 func TestWithStylesRecoloursTheCursorLabel(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	b := New(items("a", "b")).WithStyles(func(s Styles) Styles { s.Cursor = red; return s })
-	require.Equal(t, red.Render("▶  a"), strings.Split(b.SetListHeight(2).ListView(theme.Resolve(theme.Mint, true)), "\n")[0])
+	require.Equal(t, red.Render("▶  a"), strings.Split(b.SetListHeight(2).ListView(theme.Resolve(theme.Mint(), true)), "\n")[0])
 }
 
 func TestLegendDropsEnterWhileThePreviewHasTheKeys(t *testing.T) {

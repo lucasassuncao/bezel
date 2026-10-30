@@ -17,7 +17,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Mint, true)
+var th = theme.Resolve(theme.Mint(), true)
 
 func typed(s string) tea.KeyPressMsg { return tea.KeyPressMsg{Code: []rune(s)[0], Text: s} }
 
@@ -171,7 +171,7 @@ func TestSetWidthAndSetThemeChangeALiveField(t *testing.T) {
 	m := focused().SetValue("abcdefgh").SetWidth(4)
 	require.Equal(t, "fgh ", ansi.Strip(m.View()), "narrowed, the caret stays in view")
 
-	plain := theme.Resolve(theme.Plain, true)
+	plain := theme.Resolve(theme.Plain(), true)
 	m = New(theme.Resolved{}).WithPlaceholder("x").SetTheme(plain)
 	require.Equal(t, plain.Muted.Render("x"), m.View(), "drawn in the theme learned late")
 }
@@ -327,8 +327,8 @@ func TestTheTerminalCursorStandsInForTheCaret(t *testing.T) {
 // The edit survives a theme switch: SetTheme rebuilds the styles under it.
 func TestWithStylesHoldsAcrossSetTheme(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
-	m := New(theme.Resolve(theme.Plain, true)).WithPrompt("> ").WithStyles(func(s Styles) Styles { s.Prompt = red; return s })
-	m = m.SetTheme(theme.Resolve(theme.Mint, true))
+	m := New(theme.Resolve(theme.Plain(), true)).WithPrompt("> ").WithStyles(func(s Styles) Styles { s.Prompt = red; return s })
+	m = m.SetTheme(theme.Resolve(theme.Mint(), true))
 	require.True(t, strings.HasPrefix(m.View(), red.Render("> ")))
 }
 

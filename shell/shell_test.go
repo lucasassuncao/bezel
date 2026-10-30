@@ -30,7 +30,7 @@ func twoPane() layout.Node {
 }
 
 func newShell(tabs ...Tab) Shell {
-	return New(Config{Layout: twoPane(), Tabs: tabs, Theme: theme.Resolve(theme.Plain, true), Title: "demo"})
+	return New(Config{Layout: twoPane(), Tabs: tabs, Theme: theme.Resolve(theme.Plain(), true), Title: "demo"})
 }
 
 func press(k string) tea.KeyPressMsg { return tea.KeyPressMsg{Code: rune(k[0]), Text: k} }
@@ -82,7 +82,7 @@ func TestFocusMovesAlongTheLayoutOrderAndWraps(t *testing.T) {
 func TestTabSkipsInfoPanes(t *testing.T) {
 	s := New(Config{
 		Layout: layout.Columns(layout.Fixed("hint", layout.Ratio(1, 4)).Info(), layout.Fill("list"), layout.Fill("detail")),
-		Theme:  theme.Resolve(theme.Plain, true),
+		Theme:  theme.Resolve(theme.Plain(), true),
 	})
 	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	require.Equal(t, "list", s.Focused())
@@ -151,7 +151,7 @@ func TestLegendLinesIsConfigurable(t *testing.T) {
 	for i := range keys {
 		keys[i] = Custom(string(rune('a'+i)), "a long action description", nil)
 	}
-	one := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true), LegendLines: 1})
+	one := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain(), true), LegendLines: 1})
 	one, _ = one.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	one = one.SetActions(keys...)
 	require.Equal(t, 24-2-1-1, one.Body().H) // header and blank row, status, legend
@@ -221,7 +221,7 @@ func TestEveryChangeLeavesTheLayoutResolved(t *testing.T) {
 		{"SetTab", func(s Shell) Shell { return s.SetTab(1) }},
 		{"SetTabs", func(s Shell) Shell { return s.SetTabs(stubTab{name: "a"}) }},
 		{"SetLayout", func(s Shell) Shell { return s.SetLayout(layout.Rows(layout.Fill("detail"), layout.Fill("list"))) }},
-		{"SetTheme", func(s Shell) Shell { return s.SetTheme(theme.Resolve(theme.Mint, false)) }},
+		{"SetTheme", func(s Shell) Shell { return s.SetTheme(theme.Resolve(theme.Mint(), false)) }},
 		{"SetSubtitle", func(s Shell) Shell { return s.SetSubtitle("sub") }},
 		{"SetActions", func(s Shell) Shell { return s.SetActions(Custom("x", "x", nil)) }},
 		{"SetLegendLines", func(s Shell) Shell { return s.SetLegendLines(3) }},
@@ -251,8 +251,8 @@ func TestEveryChangeLeavesTheLayoutResolved(t *testing.T) {
 }
 
 func TestThemeIsTheLatestSet(t *testing.T) {
-	require.Equal(t, theme.Resolve(theme.Plain, true).Colors, newShell().Theme().Colors)
-	mint := theme.Resolve(theme.Mint, true)
+	require.Equal(t, theme.Resolve(theme.Plain(), true).Colors, newShell().Theme().Colors)
+	mint := theme.Resolve(theme.Mint(), true)
 	require.Equal(t, mint.Colors, newShell().SetTheme(mint).Theme().Colors)
 	require.Equal(t, Shell{}.Theme().Colors, New(Config{}).Theme().Colors)
 }
@@ -261,11 +261,11 @@ func TestThemeIsTheLatestSet(t *testing.T) {
 // that copy's alone.
 func TestAConfigChangeIsTheCopysAlone(t *testing.T) {
 	before, _ := newShell().Update(tea.WindowSizeMsg{Width: 100, Height: 30})
-	after := before.SetSubtitle("reloaded").SetLegendLines(1).SetTheme(theme.Resolve(theme.Mint, true))
+	after := before.SetSubtitle("reloaded").SetLegendLines(1).SetTheme(theme.Resolve(theme.Mint(), true))
 	require.Contains(t, ansi.Strip(after.View(demoPanes())), "reloaded")
 	require.NotContains(t, ansi.Strip(before.View(demoPanes())), "reloaded")
 	require.Equal(t, 2, before.cfg.LegendLines)
-	require.Equal(t, theme.Resolve(theme.Plain, true).Colors, before.cfg.Theme.Colors)
+	require.Equal(t, theme.Resolve(theme.Plain(), true).Colors, before.cfg.Theme.Colors)
 }
 
 // A Shell never built with New behaves as New(Config{}): a host that keeps
@@ -290,7 +290,7 @@ func TestTheZeroShellIsAnEmptyOne(t *testing.T) {
 
 // A dialog open when the terminal's background is learned repaints with it.
 func TestSetThemeReachesAnOpenDialog(t *testing.T) {
-	plain, mint := theme.Resolve(theme.Plain, true), theme.Resolve(theme.Mint, true)
+	plain, mint := theme.Resolve(theme.Plain(), true), theme.Resolve(theme.Mint(), true)
 	s := New(Config{Layout: layout.Columns(layout.Fill("a")), Theme: plain})
 	s = s.Push(overlay.NewText("t", "body", plain)).SetTheme(mint)
 	body := layout.Rect{W: 60, H: 20}

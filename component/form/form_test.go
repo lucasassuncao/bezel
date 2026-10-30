@@ -18,7 +18,7 @@ import (
 
 type submitted struct{}
 
-func th() theme.Resolved { return theme.Resolve(theme.Plain, true) }
+func th() theme.Resolved { return theme.Resolve(theme.Plain(), true) }
 
 // sample is one of each control, in the order the tests index them.
 func sample(t *testing.T) Form {
@@ -247,7 +247,7 @@ func TestTheFormPaintsItsControlsInItsTheme(t *testing.T) {
 	f := New(th(), NewCheckbox("a").WithChecked(true))
 	require.NotEqual(t, bare, f.SetWidth(20).View(), "the form's theme reached the box")
 
-	other := theme.Resolve(theme.Mint, true)
+	other := theme.Resolve(theme.Mint(), true)
 	require.Equal(t, New(other, NewCheckbox("a").WithChecked(true)).SetWidth(20).View(), f.SetTheme(other).SetWidth(20).View())
 }
 
@@ -260,7 +260,7 @@ func TestInitIsNilWithoutAnIniterInFocus(t *testing.T) {
 func TestWithStylesRecoloursEveryControl(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	f := New(th(), NewCheckbox("a").WithChecked(true)).WithStyles(func(s Styles) Styles { s.Chosen = red; return s })
-	f = f.SetTheme(theme.Resolve(theme.Mint, true))
+	f = f.SetTheme(theme.Resolve(theme.Mint(), true))
 	require.Contains(t, f.SetWidth(20).View(), red.Render("[x]"))
 }
 

@@ -50,7 +50,7 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	tabs := []tab{
 		{name: "files", items: []string{"main.go", "go.mod", "README.md", "Makefile"}},
 		{name: "notes", items: []string{"ideas", "todo", "meeting"}},

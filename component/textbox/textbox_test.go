@@ -19,7 +19,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-func th() theme.Resolved { return theme.Resolve(theme.Plain, true) }
+func th() theme.Resolved { return theme.Resolve(theme.Plain(), true) }
 
 func typed(s string) tea.KeyPressMsg { return tea.KeyPressMsg{Code: []rune(s)[0], Text: s} }
 
@@ -511,9 +511,9 @@ func TestABlurredFieldIgnoresTheMouse(t *testing.T) {
 // The edit survives a theme switch: SetTheme rebuilds the styles under it.
 func TestWithStylesHoldsAcrossSetTheme(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
-	m := New(theme.Resolve(theme.Plain, true)).WithPlaceholder("say").SetWidth(20).SetHeight(1).
+	m := New(theme.Resolve(theme.Plain(), true)).WithPlaceholder("say").SetWidth(20).SetHeight(1).
 		WithStyles(func(s Styles) Styles { s.Placeholder = red; return s })
-	m = m.SetTheme(theme.Resolve(theme.Mint, true))
+	m = m.SetTheme(theme.Resolve(theme.Mint(), true))
 	require.Contains(t, m.View(), red.Render("say"))
 }
 

@@ -19,7 +19,7 @@ import (
 func border(l look) any { return l.style().GetBorderTopForeground() }
 
 func TestKindPicksTheBorderColour(t *testing.T) {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	require.Equal(t, th.Modal, lookOf(th).style(), "Info is the theme's own modal")
 	require.Equal(t, lipgloss.Color(th.Colors.Danger), border(look{th: &th, kind: Danger}))
 	require.Equal(t, lipgloss.Color(th.Colors.Success), border(look{th: &th, kind: Success}))
@@ -27,7 +27,7 @@ func TestKindPicksTheBorderColour(t *testing.T) {
 }
 
 func TestWithKindTintsEveryDialog(t *testing.T) {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	for name, l := range map[string]look{
 		"alert":   NewAlert(Danger, "t", "m", th).look,
 		"confirm": NewConfirm("t", "m", nil, th).WithKind(Danger).look,
@@ -45,7 +45,7 @@ func TestWithKindTintsEveryDialog(t *testing.T) {
 
 // The picker draws its entries in the dialog's colour, so a new kind repaints them.
 func TestFilePickerWithKindRepaintsEntries(t *testing.T) {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	dir := t.TempDir()
 	require.NoError(t, os.Mkdir(filepath.Join(dir, "sub"), 0o750))
 	p := NewFilePicker("t", dir, nil, th).WithKind(Danger)
@@ -68,7 +68,7 @@ func TestPromptCaretBlinksAtTheThemesPace(t *testing.T) {
 
 // Every dialog but Alert takes the edit, and a Kind still tints the border.
 func TestWithStylesReachesEveryNeutralDialog(t *testing.T) {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	box := lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Padding(0, 1)
 	edit := func(s Styles) Styles { s.Box = box; return s }
 	looks := map[string]look{
@@ -92,7 +92,7 @@ func TestWithStylesReachesEveryNeutralDialog(t *testing.T) {
 var _ = []Themer{Alert{}, Confirm{}, Text{}, Choice{}, Pick{}, Help{}, Pager{}, Prompt{}, FilePicker{}}
 
 func TestStackSetThemeRepaintsTheDialogs(t *testing.T) {
-	plain, mint := theme.Resolve(theme.Plain, true), theme.Resolve(theme.Mint, true)
+	plain, mint := theme.Resolve(theme.Plain(), true), theme.Resolve(theme.Mint(), true)
 	body := layout.Rect{W: 60, H: 20}
 	s := Stack{}.Push(NewText("t", "body", plain)).SetTheme(mint)
 	require.Equal(t, NewText("t", "body", mint).View(body), s.Top().View(body))
@@ -101,7 +101,7 @@ func TestStackSetThemeRepaintsTheDialogs(t *testing.T) {
 // Every dialog draws the theme's modal box, Alert included: one built
 // without lookOf had no styles and so no border.
 func TestEveryDialogDrawsTheModalBorder(t *testing.T) {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	body := layout.Rect{W: 60, H: 20}
 	for name, o := range map[string]Overlay{
 		"alert":   NewAlert(Success, "t", "m", th),

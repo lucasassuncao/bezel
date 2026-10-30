@@ -16,7 +16,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var presets = []string{"mint", "banana", "strawberry", "blueberry", "grape", "plain"}
+var presets = []string{"mint", "terminal", "plain", "default"}
 
 type stepMsg struct{ by int }
 

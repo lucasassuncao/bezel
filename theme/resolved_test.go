@@ -18,13 +18,13 @@ func TestResolveThemeZeroValueIsAdaptive(t *testing.T) {
 }
 
 func TestResolveThemeBaseOverride(t *testing.T) {
-	require.Equal(t, "#9B59B6", Resolve(Theme{Base: &Grape}, true).Colors.Accent)
+	require.Equal(t, "#3EB489", Resolve(Theme{Base: ptr(Mint())}, true).Colors.Accent)
 }
 
 func TestResolveThemeColorOverride(t *testing.T) {
-	rt := Resolve(Theme{Base: &Grape, Colors: Colors{Accent: "#FF0000"}}, true)
+	rt := Resolve(Theme{Base: ptr(Mint()), Colors: Colors{Accent: "#FF0000"}}, true)
 	assert.Equal(t, "#FF0000", rt.Colors.Accent, "Colors.Accent should override Base")
-	assert.Equal(t, "#5DBB63", rt.Colors.Success, "Success should inherit from Grape")
+	assert.Equal(t, "#2ECC71", rt.Colors.Success, "Success should inherit from Mint")
 }
 
 func TestResolveAccentFillsSelectionAndInfo(t *testing.T) {
@@ -62,7 +62,7 @@ func TestPresetsKeepTheirColours(t *testing.T) {
 }
 
 func TestResolveFillsTheChromeSlots(t *testing.T) {
-	r := Resolve(Mint, true)
+	r := Resolve(Mint(), true)
 	require.Equal(t, "#3EB489", r.Colors.Accent)
 	require.NotEqual(t, r.Panel.Border, r.PanelFocused.Border)
 	require.NotEqual(t, r.PanelFocused.Border.GetForeground(), r.PanelFocused.Thumb.GetForeground(), "focused, the thumb stands out from its track")
@@ -102,37 +102,31 @@ func TestSeriesDefaultsToSixDistinctColours(t *testing.T) {
 }
 
 func TestAThemeOverridesPartOfItsSeries(t *testing.T) {
-	c := resolveColors(Theme{Base: &Gruvbox, Colors: Colors{Series: [6]string{2: "#FF0000"}}}, true)
+	c := resolveColors(Theme{Base: ptr(series), Colors: Colors{Series: [6]string{2: "#FF0000"}}}, true)
 	assert.Equal(t, "#FF0000", c.Series[2])
-	assert.Equal(t, Gruvbox.Colors.Series[0], c.Series[0], "the rest is the base's")
+	assert.Equal(t, series.Colors.Series[0], c.Series[0], "the rest is the base's")
 }
 
 // A theme that names no ramp climbs through its own success, warning and danger.
 func TestRampFollowsTheThemesStates(t *testing.T) {
-	c := resolveColors(Mint, true)
+	c := resolveColors(Mint(), true)
 	assert.Equal(t, [3]string{c.Success, c.Warning, c.Danger}, c.Ramp)
 }
 
 func TestResolveStylesTheSeriesAndTheRamp(t *testing.T) {
-	r := Resolve(Gruvbox, true)
-	assert.Equal(t, lipgloss.Color(Gruvbox.Colors.Series[3]), r.Series[3].GetForeground())
-	assert.Equal(t, lipgloss.Color(Gruvbox.Colors.Ramp[2]), r.Ramp[2].GetForeground())
+	r := Resolve(series, true)
+	assert.Equal(t, lipgloss.Color(series.Colors.Series[3]), r.Series[3].GetForeground())
+	assert.Equal(t, lipgloss.Color(series.Colors.Ramp[2]), r.Ramp[2].GetForeground())
 }
 
 func TestPlainKeepsItsSeriesInTheTerminalsColours(t *testing.T) {
-	for _, s := range resolveColors(Plain, true).Series {
+	for _, s := range resolveColors(Plain(), true).Series {
 		assert.NotContains(t, s, "#", "Plain uses ANSI codes only")
 	}
 }
 
-func TestLookupFindsGruvbox(t *testing.T) {
-	got, err := Lookup("Gruvbox")
-	require.NoError(t, err)
-	assert.Equal(t, Gruvbox.Colors, got.Colors)
-}
-
 func TestResolveDerivesTheMatchAndSelectionStyles(t *testing.T) {
-	r := Resolve(Mint, true)
+	r := Resolve(Mint(), true)
 	c := r.Colors
 	require.Equal(t, lipgloss.NewStyle().Foreground(lipgloss.Color(c.OnAccent)).Background(lipgloss.Color(c.Info)), r.Match)
 	require.Equal(t, lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color(c.OnAccent)).Background(lipgloss.Color(c.Warning)), r.MatchCurrent)
@@ -169,3 +163,11 @@ func TestPresetsBringTheirOwnBackground(t *testing.T) {
 		assert.Equal(t, c, resolveColors(th, true), name)
 	}
 }
+
+// series is a theme that names its whole series and ramp.
+var series = Theme{Colors: Colors{
+	Series: [6]string{"#110000", "#220000", "#330000", "#440000", "#550000", "#660000"},
+	Ramp:   [3]string{"#001100", "#002200", "#003300"},
+}}
+
+func ptr(t Theme) *Theme { return &t }

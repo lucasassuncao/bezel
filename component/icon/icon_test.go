@@ -46,7 +46,7 @@ func TestDefaultFallsBackToASCII(t *testing.T) {
 }
 
 func TestRenderKeepsTheMark(t *testing.T) {
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	require.Equal(t, "✓", ansi.Strip(Unicode().Render(OK, th)))
 	require.Equal(t, "x", ansi.Strip(ASCII().Render(Fail, th)))
 }

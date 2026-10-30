@@ -11,7 +11,7 @@ import (
 )
 
 func TestDonutIsARingTwiceAsWideAsItIsTall(t *testing.T) {
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	rows := strings.Split(ansi.Strip(Donut(1, 4, 8, th)), "\n")
 	assert.Len(t, rows, 8)
 	for _, r := range rows {
@@ -22,7 +22,7 @@ func TestDonutIsARingTwiceAsWideAsItIsTall(t *testing.T) {
 }
 
 func TestDonutFillsClockwiseFromTheTop(t *testing.T) {
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	quarter := Donut(1, 4, 10, th)
 	full := Donut(4, 4, 10, th)
 	empty := Donut(0, 4, 10, th)
@@ -33,7 +33,7 @@ func TestDonutFillsClockwiseFromTheTop(t *testing.T) {
 }
 
 func TestATinyDonutStillDrawsARing(t *testing.T) {
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	rows := strings.Split(ansi.Strip(Donut(1, 2, 1, th)), "\n")
 	assert.Len(t, rows, 3, "three rows at least")
 }

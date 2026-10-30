@@ -55,7 +55,7 @@ Everything is a value: each method that changes the shell or the list returns a 
 
 ```go
 func newModel(readOnly bool) model {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(
 			layout.Fixed("tasks", layout.Ratio(1, 2), layout.Min(30)),
@@ -119,7 +119,7 @@ func (m model) current() (int, bool) {
 ```go
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if bg, ok := msg.(tea.BackgroundColorMsg); ok {
-		m.th = theme.Resolve(theme.Mint, bg.IsDark())
+		m.th = theme.Resolve(theme.Mint(), bg.IsDark())
 		m.sh = m.sh.SetTheme(m.th)
 		return m, nil
 	}

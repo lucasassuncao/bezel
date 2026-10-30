@@ -17,7 +17,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Plain, true)
+var th = theme.Resolve(theme.Plain(), true)
 
 // TestMain clears the motion switches, so a CI with TERM=dumb still tests motion.
 func TestMain(m *testing.M) {

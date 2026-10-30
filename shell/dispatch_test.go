@@ -17,7 +17,7 @@ type ping struct{}
 // ChangePane tells the app where focus went, so it can run enter and leave
 // effects; nothing is sent when focus stays put.
 func TestChangePaneSendsFocusMsg(t *testing.T) {
-	s := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true), Actions: []Action{ChangePane()}})
+	s := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain(), true), Actions: []Action{ChangePane()}})
 	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	s, r := s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 	require.True(t, r.Handled)
@@ -25,7 +25,7 @@ func TestChangePaneSendsFocusMsg(t *testing.T) {
 	require.NotNil(t, r.Cmd)
 	require.Equal(t, FocusMsg{From: "list", To: "detail"}, r.Cmd())
 
-	solo := New(Config{Layout: layout.Fill("only"), Theme: theme.Resolve(theme.Plain, true), Actions: []Action{ChangePane()}})
+	solo := New(Config{Layout: layout.Fill("only"), Theme: theme.Resolve(theme.Plain(), true), Actions: []Action{ChangePane()}})
 	solo, _ = solo.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	_, r = solo.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 	require.Nil(t, r.Cmd)

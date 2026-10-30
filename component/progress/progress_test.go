@@ -11,7 +11,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-func th() theme.Resolved { return theme.Resolve(theme.Plain, true) }
+func th() theme.Resolved { return theme.Resolve(theme.Plain(), true) }
 
 func TestBarFillsInProportion(t *testing.T) {
 	require.Equal(t, "█████░░░░░", ansi.Strip(Bar(5, 10, 10, th())))
@@ -49,13 +49,21 @@ func TestStepperCompactsWhenItDoesNotFit(t *testing.T) {
 	require.Empty(t, Stepper(nil, 0, 30, th(), icon.Unicode()))
 }
 
-func gruvbox() theme.Resolved { return theme.Resolve(theme.Gruvbox, true) }
+// rich is a theme with a whole series and ramp of distinct colours.
+var rich = theme.Theme{Colors: theme.Colors{
+	Accent: "#FE8019", Selection: "#FABD2F", Border: "#7C6F64", Dim: "#A89984", Text: "#EBDBB2", Background: "#282828",
+	Success: "#B8BB26", Warning: "#FABD2F", Danger: "#FB4934", Info: "#83A598", OnAccent: "#282828",
+	Series: [6]string{"#B8BB26", "#8EC07C", "#FE8019", "#83A598", "#FABD2F", "#D3869B"},
+	Ramp:   [3]string{"#B8BB26", "#FABD2F", "#FE8019"},
+}}
+
+func richTheme() theme.Resolved { return theme.Resolve(rich, true) }
 
 func TestMeterIsSquaresFilledAlongTheRamp(t *testing.T) {
 	require.Equal(t, "■■■■■□□□□□", ansi.Strip(Meter(5, 10, 10, th())))
 	require.Equal(t, "□□□□", ansi.Strip(Meter(1, 0, 4, th())), "zero total is nothing done")
-	full := Meter(9, 9, 9, gruvbox())
-	for _, st := range gruvbox().Ramp {
+	full := Meter(9, 9, 9, richTheme())
+	for _, st := range richTheme().Ramp {
 		require.Contains(t, full, st.Render("■■■"))
 	}
 }
@@ -68,7 +76,7 @@ func TestSmoothSplitsACellInEighths(t *testing.T) {
 }
 
 func TestSmoothInASeriesColour(t *testing.T) {
-	require.Contains(t, Smooth(8, 8, 2, gruvbox(), chart.InSeries(4)), gruvbox().Series[4].Render("██"))
+	require.Contains(t, Smooth(8, 8, 2, richTheme(), chart.InSeries(4)), richTheme().Series[4].Render("██"))
 }
 
 func TestANilOptionIsSkipped(t *testing.T) {

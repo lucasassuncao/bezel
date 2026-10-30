@@ -17,7 +17,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Plain, true)
+var th = theme.Resolve(theme.Plain(), true)
 
 func rows() []Row[int] {
 	return []Row[int]{
@@ -227,7 +227,7 @@ func BenchmarkUpdateDown(b *testing.B) {
 
 // The filter re-matches every row on each keystroke and each frame.
 func BenchmarkFilter(b *testing.B) {
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	m := bigList(100_000)
 	m, _ = m.Update(tea.KeyPressMsg{Code: '/', Text: "/"})
 	m, _ = m.Update(tea.KeyPressMsg{Code: '7', Text: "7"})
@@ -410,7 +410,7 @@ func TestAClickPicksAMatchWhileFiltering(t *testing.T) {
 func TestWithStylesRecoloursOneList(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	m := New(rows()).SetHeight(10).WithTitle("Plugins").WithStyles(func(s Styles) Styles { s.Title = red; return s })
-	for _, under := range []theme.Resolved{th, theme.Resolve(theme.Mint, true)} {
+	for _, under := range []theme.Resolved{th, theme.Resolve(theme.Mint(), true)} {
 		require.Equal(t, red.Render("Plugins"), strings.Split(m.View(under), "\n")[0], "the edit holds under any theme")
 	}
 }

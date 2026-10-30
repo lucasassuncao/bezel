@@ -3,7 +3,7 @@
 Every colour bezel draws comes from one place, the [`theme`](../theme) package. An app picks a theme, resolves it for the terminal it runs in, and hands the result to the shell and to every component. Nothing else holds a colour of its own.
 
 ```go
-th := theme.Resolve(theme.Mint, true) // a preset, for a dark terminal
+th := theme.Resolve(theme.Mint(), true) // a preset, for a dark terminal
 sh := shell.New(shell.Config{Theme: th /* ... */})
 body := items.View(th)                  // a component draws under the theme it is handed
 ```
@@ -29,24 +29,14 @@ Each value is a lipgloss colour string: a hex value (`"#7C3AED"`) or an ANSI cod
 
 ## Presets
 
-bezel ships 92 presets, in categories:
+bezel ships four presets, each a function that builds a fresh `Theme`, so no app can change one for another:
 
-| Category | Presets |
-|---|---|
-| Miscellaneous | `Default`, `Plain`, `Terminal` |
-| Classic | the terminal schemes: `Gruvbox`, `Dracula`, `Nord`, `SolarizedDark`, `SolarizedLight`, `OneDark`, `Monokai`, `TokyoNight`, `CatppuccinMocha`, `CatppuccinLatte`, `RosePine`, `Everforest`, `Kanagawa`, `Ubuntu`, `Ayu`, `Cobalt2`, `GitHub`, `Iceberg`, `NightOwl`, `Nightfox`, `OneHalf`, `ShadesOfPurple`, `Sonokai`, `Tomorrow` |
-| Apps | the colours of well-known terminal tools: `ClaudeCode`, `Codex`, `GeminiCLI`, `Lazygit`, `K9s`, `Btop` |
-| Styles | a mood each: `Cyberpunk`, `Ocean`, `Retro`, `Minimal` |
-| Fruit | `Mint`, `Banana`, `Strawberry`, `Blueberry`, … 28 in all |
-| Horizon, Super Mario, Sonic | one per character |
+- **`Default()`** leaves every role empty, so each follows the terminal's light or dark background.
+- **`Plain()`** uses only the 16 ANSI colours, for a terminal with few.
+- **`Terminal()`** takes every colour from the terminal's own palette, so the app matches the scheme the user already runs.
+- **`Mint()`** is a green accent on a dark background of its own.
 
-Three are for when colour itself is the question:
-
-- **`Default`** leaves every role empty, so each follows the terminal's light or dark background.
-- **`Plain`** uses only the 16 ANSI colours, for a terminal with few.
-- **`Terminal`** takes every colour from the terminal's own palette, so the app matches the scheme the user already runs.
-
-Those three keep the terminal's background. Every other preset brings one of its own: the classics and the apps their own, light for `SolarizedLight` and `CatppuccinLatte`, a step off white; most fruits plain black; the rest a dark tint of their accent, as `Mario` a red near black.
+The first three keep the terminal's background; `Mint` brings its own, so what the terminal answers changes nothing.
 
 For a `--theme` flag, `theme.Lookup(name)` finds a preset by name in any case, empty being `Default`, and `theme.All()` and `theme.Categories()` list them. For `--list-themes`, [`themebrowser`](../component/themebrowser) draws every preset with its palette:
 
@@ -59,11 +49,12 @@ t, err := theme.Lookup(flagTheme)
 
 ## A theme of your own
 
-A `Theme` layers: `Base` points at the theme under it, and every role it sets overrides that one. A preset is a base to build on, never something to change:
+A `Theme` layers: `Base` points at the theme under it, and every role it sets overrides that one. A preset is a base to build on:
 
 ```go
+mint := theme.Mint()
 brand := theme.Theme{
-	Base:   &theme.Mint,
+	Base:   &mint,
 	Colors: theme.Colors{Accent: "#FF5F87", Danger: "#D7005F"},
 }
 ```

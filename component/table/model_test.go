@@ -15,7 +15,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Plain, true)
+var th = theme.Resolve(theme.Plain(), true)
 
 var pkgCols = []Column{{Title: "NAME"}, {Title: "VERSION"}}
 
@@ -132,7 +132,7 @@ func TestModelSizesColumnsOverEveryRow(t *testing.T) {
 
 func TestModelCursorRowPaintsThePlainCells(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000"))
-	mint := theme.Resolve(theme.Mint, true)
+	mint := theme.Resolve(theme.Mint(), true)
 	items := []Item[int]{
 		{Cells: []string{"api", red.Render("Failed")}},
 		{Cells: []string{"web", red.Render("Failed")}},
@@ -243,6 +243,6 @@ func TestClickPastTheRowsIsNotHandled(t *testing.T) {
 func TestWithStylesRecoloursTheHeader(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	m := New(pkgCols, pkgs(2)).SetHeight(5).WithStyles(func(s Styles) Styles { s.Header = red; return s })
-	head := strings.Split(m.SetWidth(40).View(theme.Resolve(theme.Mint, true)), "\n")[0]
+	head := strings.Split(m.SetWidth(40).View(theme.Resolve(theme.Mint(), true)), "\n")[0]
 	require.Equal(t, red.Render(ansi.Strip(head)), head, "the edit holds under another theme")
 }

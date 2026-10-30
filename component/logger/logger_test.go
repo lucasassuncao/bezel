@@ -21,7 +21,7 @@ var at = time.Date(2026, 10, 28, 13, 11, 21, 0, time.UTC)
 
 func newTest() (Handler, *bytes.Buffer) {
 	var buf bytes.Buffer
-	return New(&buf, theme.Resolve(theme.Mint, true)).WithIcons(icon.Unicode()), &buf
+	return New(&buf, theme.Resolve(theme.Mint(), true)).WithIcons(icon.Unicode()), &buf
 }
 
 func handle(t *testing.T, h slog.Handler, buf *bytes.Buffer, l slog.Level, msg string, args ...any) string {
@@ -177,7 +177,7 @@ func TestLoggerDrawsInASCII(t *testing.T) {
 
 func TestLoggerNamesTheCaller(t *testing.T) {
 	var buf bytes.Buffer
-	h := New(&buf, theme.Resolve(theme.Mint, true)).WithTimeFormat("").WithCaller(true)
+	h := New(&buf, theme.Resolve(theme.Mint(), true)).WithTimeFormat("").WithCaller(true)
 	slog.New(h).Info("hi")
 	require.Regexp(t, `^INFO  hi logger_test\.go:\d+\n$`, buf.String())
 }

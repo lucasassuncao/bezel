@@ -28,14 +28,14 @@ func TestThemeRegistryHasNoDuplicateNames(t *testing.T) {
 // A name typed on a command line: case does not matter, empty is the default,
 // and a misspelling is refused by name.
 func TestLookupFindsAThemeByName(t *testing.T) {
-	grape, err := Lookup("grape")
-	if err != nil || !reflect.DeepEqual(grape, All()["grape"]) {
-		t.Fatalf("Lookup(grape) = %v, %v", grape, err)
+	mint, err := Lookup("mint")
+	if err != nil || !reflect.DeepEqual(mint, Mint()) {
+		t.Fatalf("Lookup(mint) = %v, %v", mint, err)
 	}
-	if upper, err := Lookup("GRAPE"); err != nil || !reflect.DeepEqual(upper, grape) {
+	if upper, err := Lookup("MINT"); err != nil || !reflect.DeepEqual(upper, mint) {
 		t.Errorf("Lookup is case-sensitive: %v", err)
 	}
-	if def, err := Lookup(""); err != nil || !reflect.DeepEqual(def, Default) {
+	if def, err := Lookup(""); err != nil || !reflect.DeepEqual(def, Default()) {
 		t.Errorf("an empty name is not the default: %v", err)
 	}
 	if _, err := Lookup("chartreuse"); err == nil || err.Error() != `unknown theme "chartreuse"` {
@@ -43,16 +43,15 @@ func TestLookupFindsAThemeByName(t *testing.T) {
 	}
 }
 
-// The presets are variables, so the registry must read them, not a copy.
-func TestLookupSeesAPresetChangedAtRuntime(t *testing.T) {
-	old := Banana
-	t.Cleanup(func() { Banana = old })
-	Banana.Colors.Accent = "#ABCDEF"
-
-	got, err := Lookup("banana")
+// A preset is built fresh each time: changing one copy reaches no other.
+func TestAPresetCannotBeChangedForEveryone(t *testing.T) {
+	m := Mint()
+	m.Colors.Accent = "#ABCDEF"
+	got, err := Lookup("mint")
 	require.NoError(t, err)
-	require.Equal(t, "#ABCDEF", got.Colors.Accent)
-	require.Equal(t, "#ABCDEF", All()["banana"].Colors.Accent)
+	require.NotEqual(t, "#ABCDEF", got.Colors.Accent)
+	require.NotEqual(t, "#ABCDEF", Mint().Colors.Accent)
+	require.NotEqual(t, "#ABCDEF", All()["mint"].Colors.Accent)
 }
 
 // A redirected end must not reach lipgloss's query: on Windows it reads the

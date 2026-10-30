@@ -20,7 +20,7 @@ sh := shell.New(shell.Config{
         layout.Fill("detail"),
     ).Collapse(72, "detail"),
     Tabs:    tabs, // each implements shell.Tab: Name(), Status(ctx) and Actions(ctx)
-    Theme:   theme.Resolve(theme.Mint, true), // re-resolve on tea.BackgroundColorMsg
+    Theme:   theme.Resolve(theme.Mint(), true), // re-resolve on tea.BackgroundColorMsg
     Title:   "my app",
     Actions: []shell.Action{shell.Help(), shell.ChangeTab(), shell.Move(), shell.Quit()},
 })
@@ -104,7 +104,7 @@ go run ./examples/app
 
 - [`shell`](shell): the struct you embed. Tabs, focus, status, a busy spinner, overlays and the legend; keys are `Action`s that drive the key, the legend and the palette at once.
 - [`layout`](layout): the screen as a tree of `Columns`, `Rows`, `Fixed` and `Fill`, resolved to rects. `Collapse` drops a pane below a width.
-- [`theme`](theme): semantic colours, 92 presets, and the styles every package draws with.
+- [`theme`](theme): semantic colours, four presets, and the styles every package draws with.
 - [`overlay`](overlay): a stack of modals: `Alert`, `Confirm`, `Prompt`, `Pick`, `Choice`, `Help`, `Pager`, `FilePicker`.
 - [`draw`](draw): ANSI-safe text fitting, panels (text and a scrollbar in their edges), cards, header, tabs, dividers and buttons.
 - [`legend`](legend): key hints, filtered by what the session allows and packed into a few rows.

@@ -31,13 +31,13 @@ func TestThemeStepsThroughPresets(t *testing.T) {
 
 	m, cmd := m.Update(bezeltest.Key("n"))
 	m, out = frame(t, m, cmd())
-	require.Contains(t, out, "banana")
+	require.Contains(t, out, "terminal")
 
 	m, cmd = m.Update(bezeltest.Key("p"))
 	m, _ = m.Update(cmd())
 	m, cmd = m.Update(bezeltest.Key("p"))
 	_, out = frame(t, m, cmd())
-	require.Contains(t, out, "plain", "p wraps from the first preset to the last")
+	require.Contains(t, out, "default", "p wraps from the first preset to the last")
 }
 
 func TestEveryPresetResolves(t *testing.T) {

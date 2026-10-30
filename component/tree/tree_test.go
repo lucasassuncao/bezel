@@ -173,7 +173,7 @@ func TestNodesIsACopy(t *testing.T) {
 }
 
 func TestViewPadsShortTreesAndMarksOverflow(t *testing.T) {
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	row := func(n node, _ int, selected bool) string {
 		prefix := "  "
 		if selected {
@@ -294,7 +294,7 @@ func BenchmarkUpdateDown(b *testing.B) {
 }
 
 func BenchmarkView(b *testing.B) {
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	row := func(n node, _ int, _ bool) string { return n.label }
 	for _, n := range benchSizes {
 		b.Run(fmt.Sprint(n*10, "nodes"), func(b *testing.B) {
@@ -413,7 +413,7 @@ func labelsOf(m Model[node]) []string {
 func TestWithStylesRecoloursTheEmptyMessage(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	m := New([]node{}).SetHeight(3).WithStyles(func(s Styles) Styles { s.Empty = red; return s })
-	require.Equal(t, red.Render("  (empty)"), m.View(theme.Resolve(theme.Mint, true), nil))
+	require.Equal(t, red.Render("  (empty)"), m.View(theme.Resolve(theme.Mint(), true), nil))
 }
 
 func TestSelectedIsTheNodeUnderTheCursor(t *testing.T) {

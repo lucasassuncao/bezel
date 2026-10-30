@@ -33,7 +33,7 @@ func push(text string, kind toast.Kind) func(shell.ActionContext) tea.Cmd {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("doc")),
 		Theme:  th,

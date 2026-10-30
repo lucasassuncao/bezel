@@ -17,7 +17,7 @@ import (
 
 const ms = time.Millisecond
 
-var th = theme.Resolve(theme.Plain, true)
+var th = theme.Resolve(theme.Plain(), true)
 
 // TestMain clears the motion switches, so a CI with TERM=dumb still tests motion.
 func TestMain(m *testing.M) {
@@ -96,7 +96,7 @@ func TestStillToastsDoNotSlideAndStillExpire(t *testing.T) {
 func TestAStillToastShowsWithoutAFrame(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	m, _ := New().Push("saved", Success)
-	assert.Contains(t, ansi.Strip(m.View(theme.Resolve(theme.Plain, true))), "saved")
+	assert.Contains(t, ansi.Strip(m.View(theme.Resolve(theme.Plain(), true))), "saved")
 }
 
 func TestAZeroToastWorks(t *testing.T) {

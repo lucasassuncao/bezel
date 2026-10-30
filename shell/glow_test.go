@@ -21,7 +21,7 @@ func glowing(t *testing.T, fade time.Duration) Shell {
 	t.Setenv("TERM", "xterm-256color")
 	s := New(Config{
 		Layout:    layout.Columns(layout.Fill("left"), layout.Fill("right")),
-		Theme:     theme.Resolve(theme.Mint, true),
+		Theme:     theme.Resolve(theme.Mint(), true),
 		Actions:   []Action{ChangePane()},
 		FocusFade: fade,
 	})

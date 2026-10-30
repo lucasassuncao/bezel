@@ -15,7 +15,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Mint, true)
+var th = theme.Resolve(theme.Mint(), true)
 
 // fast steps a nanosecond a tick, so a test that runs a tick never waits.
 func fast(d time.Duration) Model { return New(d).WithEvery(time.Nanosecond) }
@@ -105,7 +105,7 @@ func TestTheViewIsStyledByState(t *testing.T) {
 func TestWithStylesHoldsUnderAnotherTheme(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	m := New(time.Minute).WithStyles(func(s Styles) Styles { s.Stopped = red; return s })
-	require.Equal(t, red.Render("1m0s"), m.View(theme.Resolve(theme.Plain, true)))
+	require.Equal(t, red.Render("1m0s"), m.View(theme.Resolve(theme.Plain(), true)))
 }
 
 func TestAZeroTimerStepsASecond(t *testing.T) {

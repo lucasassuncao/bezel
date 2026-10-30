@@ -134,7 +134,7 @@ func TestInfoStatusUsesTheNeutralStyleAndHelpHasNoEmptySection(t *testing.T) {
 	s, _ = s.SetStatus("just saying", Info, 0)
 	require.Contains(t, ansi.Strip(s.View(demoPanes())), "just saying")
 
-	s = New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true)})
+	s = New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain(), true)})
 	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	s = s.ShowHelp()
 	require.NotContains(t, ansi.Strip(s.View(demoPanes())), "Keys")
@@ -259,7 +259,7 @@ func (quietTab) Status(Context) string { return "" }
 // there, Busy runs or the tab has a status, and shows a banner as a toast.
 func TestTheToastStyleShowsTheRowOnlyWhenItHasALine(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1") // a toast shows at once, without frames
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	size := tea.WindowSizeMsg{Width: 120, Height: 30}
 	s, _ := New(Config{Layout: twoPane(), Tabs: []Tab{quietTab{stubTab{name: "a"}}}, Theme: th, StatusStyle: Toast}).Update(size)
 	bar, _ := New(Config{Layout: twoPane(), Tabs: []Tab{quietTab{stubTab{name: "a"}}}, Theme: th}).Update(size)
@@ -285,7 +285,7 @@ func TestTheToastStyleShowsTheRowOnlyWhenItHasALine(t *testing.T) {
 // A toast's frames and expiry are the shell's, and a harness drops them like
 // the status timer.
 func TestAToastsMessagesAreTheShells(t *testing.T) {
-	s, _ := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true), StatusStyle: Toast}).
+	s, _ := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain(), true), StatusStyle: Toast}).
 		Update(tea.WindowSizeMsg{Width: 120, Height: 30})
 	s, _ = s.SetStatus("x", Info, time.Minute)
 	frame := toastMsg{s.toasts.FrameAt(time.Now())}

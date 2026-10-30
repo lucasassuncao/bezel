@@ -32,7 +32,7 @@ func items() []Item {
 	}
 }
 
-func open() Model { return New(items(), theme.Resolve(theme.Plain, true)) }
+func open() Model { return New(items(), theme.Resolve(theme.Plain(), true)) }
 
 func typed(m Model, s string) Model {
 	for _, r := range s {
@@ -133,7 +133,7 @@ func TestARefusedExactNameDoesNotRunItsPrefixSibling(t *testing.T) {
 		{Name: "copy", Available: false, Run: echo("copy")},
 		{Name: "copy-path", Available: true, Run: echo("copy-path")},
 	}
-	m := typed(New(its, theme.Resolve(theme.Plain, true)), "copy")
+	m := typed(New(its, theme.Resolve(theme.Plain(), true)), "copy")
 	m, cmd := press(m, tea.KeyEnter)
 	// Refused, but its siblings are one keystroke away: stay open, run nothing.
 	require.Nil(t, cmd)

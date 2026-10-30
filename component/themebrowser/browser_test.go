@@ -31,7 +31,7 @@ func TestListGroupsTheNamesByCategory(t *testing.T) {
 			t.Errorf("category %q is missing:\n%s", c.Name, out)
 		}
 	}
-	if !strings.Contains(out, "grape") {
+	if !strings.Contains(out, "mint") {
 		t.Errorf("a theme name is missing:\n%s", out)
 	}
 }
@@ -157,15 +157,15 @@ func sgr(hex string) string {
 // from another: accent, selection, border, dim, success, danger.
 func TestBrowserModel_ShowsEachThemesPalette(t *testing.T) {
 	m := newBrowserModel(theme.Theme{}, true)
-	row := rowOf(t, m, "gruvbox")
+	row := rowOf(t, m, "mint")
 	if n := strings.Count(ansi.Strip(row), "██"); n != 6 {
-		t.Fatalf("want six blocks in the gruvbox row, got %d: %q", n, ansi.Strip(row))
+		t.Fatalf("want six blocks in the mint row, got %d: %q", n, ansi.Strip(row))
 	}
 	at := 0
-	for _, hex := range []string{"#FE8019", "#FABD2F", "#7C6F64", "#A89984", "#B8BB26", "#FB4934"} {
+	for _, hex := range []string{"#3EB489", "#98DFAF", "#4A7B6F", "#2E4F46", "#2ECC71", "#E74C3C"} {
 		i := strings.Index(row[at:], sgr(hex))
 		if i < 0 {
-			t.Fatalf("gruvbox's %s is missing or out of order: %q", hex, row)
+			t.Fatalf("mint's %s is missing or out of order: %q", hex, row)
 		}
 		at += i
 	}
@@ -220,16 +220,16 @@ func TestBrowserModel_FitsItsRows(t *testing.T) {
 	if got, want := ansi.StringWidth(top), m.needs(m.layout)+4+margin; got >= 200 || got != want {
 		t.Errorf("the panel is %d wide, want %d: its widest row and a margin", got, want)
 	}
-	if n := m.tbl.Scroll().Visible; n != maxRows {
-		t.Errorf("%d themes show, want %d", n, maxRows)
+	if n := m.tbl.Scroll().Visible; n != min(maxRows, len(theme.All())) {
+		t.Errorf("%d themes show, want %d", n, min(maxRows, len(theme.All())))
 	}
 }
 
 // A short terminal shows fewer rows, leaving a line for the prompt.
 func TestBrowserModel_FitsAShortTerminal(t *testing.T) {
-	lines := strings.Split(sized(t, 120, 20).View().Content, "\n")
-	if len(lines) != 19 {
-		t.Errorf("the view is %d lines, want 19 on a 20-line terminal", len(lines))
+	lines := strings.Split(sized(t, 120, 8).View().Content, "\n")
+	if len(lines) != 7 {
+		t.Errorf("the view is %d lines, want 7 on an 8-line terminal", len(lines))
 	}
 }
 
@@ -241,7 +241,7 @@ func TestBrowserModel_NamesEachColour(t *testing.T) {
 			t.Errorf("a wide terminal does not name %q:\n%s", name, wide)
 		}
 	}
-	if n := strings.Count(ansi.Strip(rowOf(t, sized(t, 140, 30), "gruvbox")), "██"); n != 10 {
+	if n := strings.Count(ansi.Strip(rowOf(t, sized(t, 140, 30), "mint")), "██"); n != 10 {
 		t.Errorf("want ten blocks on a wide terminal, got %d", n)
 	}
 	narrow := ansi.Strip(sized(t, 80, 30).View().Content)
@@ -291,12 +291,12 @@ func TestBrowserModel_FiltersByName(t *testing.T) {
 	m := sized(t, 100, 30)
 	var got string
 	m.write = func(s string) error { got = s; return nil }
-	m = typed(press(m, tea.KeyPressMsg{Code: '/', Text: "/"}), "grap")
+	m = typed(press(m, tea.KeyPressMsg{Code: '/', Text: "/"}), "min")
 	if m.tbl.Len() == 0 || m.tbl.Len() == len(theme.All()) {
 		t.Fatalf("the filter kept %d of %d themes", m.tbl.Len(), len(theme.All()))
 	}
-	if !strings.Contains(selValue(m.tbl), "grap") {
-		t.Errorf("best match = %q, want a name with grap", selValue(m.tbl))
+	if !strings.Contains(selValue(m.tbl), "min") {
+		t.Errorf("best match = %q, want a name with min", selValue(m.tbl))
 	}
 	m = press(m, tea.KeyPressMsg{Code: tea.KeyEnter})
 	if got != selValue(m.tbl) {
@@ -324,7 +324,7 @@ func TestBrowserModel_ResizeKeepsTheCursor(t *testing.T) {
 // The colour columns share one width, so the blocks sit evenly spaced.
 func TestBrowserModel_SpacesTheColoursEvenly(t *testing.T) {
 	for _, w := range []int{80, 200} {
-		row := []rune(ansi.Strip(rowOf(t, sized(t, w, 30), "gruvbox")))
+		row := []rune(ansi.Strip(rowOf(t, sized(t, w, 30), "mint")))
 		var starts []int
 		for i, r := range row {
 			if r == '█' && (i == 0 || row[i-1] != '█') && i < len(row)-1 && row[i+1] == '█' {
@@ -363,7 +363,7 @@ func TestFilterGetsTheKeysTheTableLeavesAlone(t *testing.T) {
 }
 
 func TestFilterGetsHomeAndCtrlUWithRowsShown(t *testing.T) {
-	m := typed(sized(t, 100, 30), "/gr")
+	m := typed(sized(t, 100, 30), "/in")
 	if m.tbl.Len() < 2 {
 		t.Fatalf("the filter kept %d themes, want at least 2", m.tbl.Len())
 	}
@@ -374,7 +374,7 @@ func TestFilterGetsHomeAndCtrlUWithRowsShown(t *testing.T) {
 	if got := m.filter.Cursor(); got != 0 {
 		t.Errorf("home left the filter caret at %d, want 0", got)
 	}
-	m = typed(sized(t, 100, 30), "/gr")
+	m = typed(sized(t, 100, 30), "/in")
 	m = press(m, tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl})
 	if got := m.filter.Value(); got == "gr" {
 		t.Errorf("ctrl+u did not reach the filter: %q", got)

@@ -21,7 +21,7 @@ func sliding(t *testing.T) Shell {
 	t.Setenv("BEZEL_NO_MOTION", "")
 	t.Setenv("TERM", "xterm-256color")
 	s := New(Config{
-		Layout: layout.Rows(layout.Fill("main")), Theme: theme.Resolve(theme.Plain, true),
+		Layout: layout.Rows(layout.Fill("main")), Theme: theme.Resolve(theme.Plain(), true),
 		Tabs:       []Tab{stubTab{name: "one"}, stubTab{name: "two"}},
 		Actions:    []Action{ChangeTab()},
 		Transition: SlideTabs(100 * time.Millisecond),

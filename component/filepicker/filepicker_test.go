@@ -14,7 +14,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Plain, true)
+var th = theme.Resolve(theme.Plain(), true)
 
 // tree lays out dir/{notes.txt, main.go, sub/inner.md} and returns dir.
 func tree(t *testing.T) string {

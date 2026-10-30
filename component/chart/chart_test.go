@@ -10,7 +10,15 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-func th() theme.Resolved { return theme.Resolve(theme.Gruvbox, true) }
+// rich is a theme with a whole series and ramp of distinct colours.
+var rich = theme.Theme{Colors: theme.Colors{
+	Accent: "#FE8019", Selection: "#FABD2F", Border: "#7C6F64", Dim: "#A89984", Text: "#EBDBB2", Background: "#282828",
+	Success: "#B8BB26", Warning: "#FABD2F", Danger: "#FB4934", Info: "#83A598", OnAccent: "#282828",
+	Series: [6]string{"#B8BB26", "#8EC07C", "#FE8019", "#83A598", "#FABD2F", "#D3869B"},
+	Ramp:   [3]string{"#B8BB26", "#FABD2F", "#FE8019"},
+}}
+
+func th() theme.Resolved { return theme.Resolve(rich, true) }
 
 func TestAreaStacksEighthsFromTheBottom(t *testing.T) {
 	require.Equal(t, "  █▄\n ███", ansi.Strip(Area([]float64{0, 8, 16, 12}, 16, 4, 2, th())))

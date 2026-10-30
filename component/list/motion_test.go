@@ -53,7 +53,7 @@ func marked(out string) string {
 
 func TestTheCursorGlidesThroughTheRowsBetween(t *testing.T) {
 	moving(t)
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	m := New(plainRows("a", "b", "c", "d", "e")).SetHeight(5).WithMotion(100 * ms)
 	for range 4 {
 		m, _ = m.Update(bezeltest.Key("down"))
@@ -78,7 +78,7 @@ func TestAListWithoutMotionJumps(t *testing.T) {
 
 func TestANewRowLightsUpAndALeavingRowFades(t *testing.T) {
 	moving(t)
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	m := New(plainRows("keep", "old")).SetHeight(4).WithMotion(100 * ms)
 	m = m.SetRows(plainRows("keep", "new"))
 	require.NotNil(t, m.Tick())
@@ -93,7 +93,7 @@ func TestANewRowLightsUpAndALeavingRowFades(t *testing.T) {
 
 func TestAGhostNeverMakesTheListTaller(t *testing.T) {
 	moving(t)
-	th := theme.Resolve(theme.Plain, true)
+	th := theme.Resolve(theme.Plain(), true)
 	m := New(plainRows("a", "b", "c")).SetHeight(3).WithMotion(100 * ms)
 	m = m.SetRows(plainRows("a", "c", "d"))
 	out := playTo(m, 20*ms).View(th)
@@ -135,7 +135,7 @@ func TestStillListsDoNotMove(t *testing.T) {
 	m, _ = m.Update(bezeltest.Key("down"))
 	assert.False(t, m.Active())
 	assert.Nil(t, m.Tick())
-	assert.Contains(t, marked(m.View(theme.Resolve(theme.Plain, true))), "b")
+	assert.Contains(t, marked(m.View(theme.Resolve(theme.Plain(), true))), "b")
 }
 
 func TestMixBlendsAndGivesWayToAMissingColour(t *testing.T) {

@@ -72,7 +72,7 @@ func actions() []shell.Action {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fixed("tree", layout.Ratio(1, 2)), layout.Fill("detail")),
 		Theme:   th,

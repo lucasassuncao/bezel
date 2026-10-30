@@ -15,7 +15,7 @@ import (
 
 // th blinks every nanosecond, so a test that runs a tick never waits on one.
 var th = func() theme.Resolved {
-	t := theme.Resolve(theme.Mint, true)
+	t := theme.Resolve(theme.Mint(), true)
 	t.CaretBlink = time.Nanosecond
 	return t
 }()
@@ -80,7 +80,7 @@ func TestTheCharIsPaintedOnlyWhileVisible(t *testing.T) {
 func TestWithStylesSurvivesSetTheme(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	m, _ := New(th).WithStyles(func(s Styles) Styles { s.Cursor = red; return s }).SetChar("x").Focus()
-	m = m.SetTheme(theme.Resolve(theme.Plain, true))
+	m = m.SetTheme(theme.Resolve(theme.Plain(), true))
 	require.Equal(t, red.Render("x"), m.View())
 }
 

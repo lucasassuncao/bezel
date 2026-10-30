@@ -30,7 +30,7 @@ func newLogger(w io.Writer, asJSON bool) *slog.Logger {
 	if asJSON {
 		return slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{Level: logger.LevelTrace, ReplaceAttr: logger.ReplaceAttr}))
 	}
-	return slog.New(logger.New(w, theme.Resolve(theme.Mint, true)).WithLevel(logger.LevelTrace))
+	return slog.New(logger.New(w, theme.Resolve(theme.Mint(), true)).WithLevel(logger.LevelTrace))
 }
 
 func run(log *slog.Logger, pause time.Duration) {

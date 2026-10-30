@@ -47,7 +47,7 @@ func actions() []shell.Action {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fill("items")),
 		Theme:   th,

@@ -70,7 +70,7 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fixed("table", layout.Ratio(3, 5)), layout.Fill("detail").Info()),
 		Theme:  th,

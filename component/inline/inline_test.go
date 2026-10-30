@@ -14,7 +14,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Plain, true)
+var th = theme.Resolve(theme.Plain(), true)
 
 func press(c confirm, keys ...string) confirm {
 	for _, k := range keys {

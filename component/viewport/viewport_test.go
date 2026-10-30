@@ -16,7 +16,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Mint, true)
+var th = theme.Resolve(theme.Mint(), true)
 
 func numbered(n int) string {
 	lines := make([]string, n)
@@ -185,7 +185,7 @@ func TestEmptyAndTinyViewportsNeverPanic(t *testing.T) {
 func TestWithStylesHoldsUnderAnotherTheme(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	m := New().WithStyles(func(s Styles) Styles { s.Match = red; return s })
-	require.Equal(t, red, m.styles(theme.Resolve(theme.Plain, true)).Match)
+	require.Equal(t, red, m.styles(theme.Resolve(theme.Plain(), true)).Match)
 }
 
 func FuzzViewportStaysInItsBox(f *testing.F) {

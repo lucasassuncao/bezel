@@ -17,7 +17,7 @@ func answer(ok bool, err error) func(string) (bool, error) {
 
 func TestInlineYesDrawsTheBarToTheEnd(t *testing.T) {
 	var buf bytes.Buffer
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	require.NoError(t, run(&buf, th, answer(true, nil), 0))
 	out := ansi.Strip(buf.String())
 	t.Log("\n" + out)
@@ -26,7 +26,7 @@ func TestInlineYesDrawsTheBarToTheEnd(t *testing.T) {
 }
 
 func TestInlineNoAndEscSkip(t *testing.T) {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	for _, a := range []func(string) (bool, error){answer(false, nil), answer(false, inline.ErrAborted)} {
 		var buf bytes.Buffer
 		require.NoError(t, run(&buf, th, a, 0))

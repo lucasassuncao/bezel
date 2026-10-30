@@ -15,7 +15,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Mint, true)
+var th = theme.Resolve(theme.Mint(), true)
 
 func TestMain(m *testing.M) {
 	_ = os.Setenv("BEZEL_NO_MOTION", "")
@@ -101,7 +101,7 @@ func TestTheFrameIsPaintedInTheAccent(t *testing.T) {
 func TestWithStylesHoldsUnderAnotherTheme(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	m := New(Line()).WithStyles(func(s Styles) Styles { s.Frame = red; return s })
-	require.Equal(t, red.Render("|"), m.View(theme.Resolve(theme.Plain, true)))
+	require.Equal(t, red.Render("|"), m.View(theme.Resolve(theme.Plain(), true)))
 }
 
 func TestASpinnerWithoutFramesDrawsNothingAndNeverTicks(t *testing.T) {

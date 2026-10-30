@@ -99,7 +99,7 @@ func shape(h int) layout.Node {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint, true)
+	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout:     shape(0),
 		Theme:      th,

@@ -15,7 +15,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var th = theme.Resolve(theme.Mint, true)
+var th = theme.Resolve(theme.Mint(), true)
 
 func TestNewHasOnePageUntilItKnowsTheItems(t *testing.T) {
 	p := New(10)
@@ -103,7 +103,7 @@ func TestDotsAreStyledFromTheTheme(t *testing.T) {
 func TestWithStylesHoldsUnderAnotherTheme(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	p := New(10).WithStyles(func(s Styles) Styles { s.Numbers = red; return s })
-	require.Equal(t, red.Render("1/1"), p.View(theme.Resolve(theme.Plain, true)))
+	require.Equal(t, red.Render("1/1"), p.View(theme.Resolve(theme.Plain(), true)))
 }
 
 func TestLegendNamesThePageKeysOnce(t *testing.T) {

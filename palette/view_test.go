@@ -47,7 +47,7 @@ func TestThePanelFitsAShortBody(t *testing.T) {
 	for _, n := range []string{"a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9"} {
 		its = append(its, Item{Name: n, Available: true})
 	}
-	m := New(its, theme.Resolve(theme.Plain, true))
+	m := New(its, theme.Resolve(theme.Plain(), true))
 	out := ansi.Strip(m.View(layout.Rect{W: 60, H: 5}))
 	require.LessOrEqual(t, len(strings.Split(out, "\n")), 5)
 	require.Contains(t, out, "more")
@@ -60,13 +60,13 @@ func TestTheColumnsDoNotShiftAsTheListScrolls(t *testing.T) {
 	for _, n := range []string{"b", "c", "d", "e", "f", "g", "z-much-longer-name"} {
 		its = append(its, Item{Name: n, Desc: "x", Available: true})
 	}
-	out := ansi.Strip(New(its, theme.Resolve(theme.Plain, true)).View(layout.Rect{W: 80, H: 5}))
+	out := ansi.Strip(New(its, theme.Resolve(theme.Plain(), true)).View(layout.Rect{W: 80, H: 5}))
 	require.NotContains(t, out, "z-much-longer-name")
 	require.Contains(t, out, ":a"+strings.Repeat(" ", len(":z-much-longer-name")-len(":a")+2))
 }
 
 func TestWithStylesRecoloursTheNote(t *testing.T) {
 	red := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
-	m := New(nil, theme.Resolve(theme.Mint, true)).WithStyles(func(s Styles) Styles { s.Note = red; return s })
+	m := New(nil, theme.Resolve(theme.Mint(), true)).WithStyles(func(s Styles) Styles { s.Note = red; return s })
 	require.Contains(t, m.View(layout.Rect{W: 40, H: 5}), red.Render("  no command matches"))
 }
