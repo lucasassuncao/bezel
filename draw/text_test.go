@@ -131,3 +131,8 @@ func BenchmarkFit(b *testing.B) {
 		_ = Fit(s, 80)
 	}
 }
+
+func TestOneLineTurnsBreaksIntoSpaces(t *testing.T) {
+	require.Equal(t, "a b  c", OneLine("a\nb\r\nc"))
+	require.Equal(t, "plain", OneLine("plain"))
+}

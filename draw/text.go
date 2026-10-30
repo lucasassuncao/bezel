@@ -122,3 +122,14 @@ func Cut(s string, width int) string {
 func Heading(name string, style lipgloss.Style, width int) string {
 	return style.Render(Cut(strings.ToUpper(name), width))
 }
+
+// OneLine is s with its line breaks as spaces, rune for rune, for text that
+// must keep to one row: a label, a status, a title.
+func OneLine(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r == '\n' || r == '\r' {
+			return ' '
+		}
+		return r
+	}, s)
+}

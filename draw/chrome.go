@@ -139,7 +139,7 @@ func Divider(width int, label string, st DividerStyle) string {
 
 // StatusLine is one row of text in a style, exactly width cells.
 func StatusLine(width int, text string, style lipgloss.Style) string {
-	return Fit(style.Render(text), width)
+	return Fit(style.Render(OneLine(text)), width)
 }
 
 // EmptyState centres a message, and a hint under it, inside r.

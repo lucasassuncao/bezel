@@ -166,7 +166,9 @@ func (s Shell) render(panes map[string]Pane) string {
 		// Narrower than the screen, so a toast never hangs off its left edge.
 		out = s.toasts.WithWidth(min(toastWidth, s.width-2)).Over(out)
 	}
-	return out
+	// A dialog pads the screen to the body's foot, past a terminal too short
+	// for the chrome; the terminal is all there is.
+	return draw.FitBlock(out, s.width, s.height)
 }
 
 func (s Shell) headerLines() []string {

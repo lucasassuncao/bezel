@@ -29,6 +29,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func InnerRect\(r layout.Rect\) layout.Rect](<#InnerRect>)
 - [func More\(n, indent int, st lipgloss.Style\) string](<#More>)
 - [func NumberLines\(s string, style lipgloss.Style\) string](<#NumberLines>)
+- [func OneLine\(s string\) string](<#OneLine>)
 - [func Pad\(s string, width int\) string](<#Pad>)
 - [func PadHeight\(s string, height int\) string](<#PadHeight>)
 - [func Panel\(r layout.Rect, edges Edges, body string, st PanelStyle\) string](<#Panel>)
@@ -200,6 +201,15 @@ func NumberLines(s string, style lipgloss.Style) string
 ```
 
 NumberLines prefixes every line of s with its 1\-based Gutter, before any scrolling, so the numbers stay absolute.
+
+<a name="OneLine"></a>
+## func [OneLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L128>)
+
+```go
+func OneLine(s string) string
+```
+
+OneLine is s with its line breaks as spaces, rune for rune, for text that must keep to one row: a label, a status, a title.
 
 <a name="Pad"></a>
 ## func [Pad](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L27>)

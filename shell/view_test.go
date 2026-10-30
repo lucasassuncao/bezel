@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -300,4 +302,38 @@ func TestViewCarriesTheThemesColours(t *testing.T) {
 	v := New(Config{Layout: twoPane(), Theme: th}).View(demoPanes())
 	require.Equal(t, th.Background, v.BackgroundColor)
 	require.Equal(t, th.Foreground, v.ForegroundColor)
+}
+
+// Whatever the terminal's size and the panes' text, the screen is exactly
+// the terminal: every row as wide as it, and as many rows as it has.
+func FuzzScreenFillsTheTerminal(f *testing.F) {
+	f.Add("item one\nitem two", "a status", 120, 30, true)
+	f.Add("全角の行\n二行目", "", 40, 10, false)
+	f.Add("", "", 1, 1, true)       // a dialog padded a 2-row terminal to its body
+	f.Add("", "\n", 107, 29, false) // a status with a break took two rows
+	f.Fuzz(func(t *testing.T, body, status string, w, h int, open bool) {
+		if !utf8.ValidString(body+status) || strings.ContainsFunc(body+status, func(r rune) bool { return unicode.IsControl(r) && r != '\n' }) {
+			t.Skip()
+		}
+		if strings.ContainsFunc(body+status, func(r rune) bool { return unicode.Is(unicode.M, r) }) {
+			t.Skip() // a mark may sit on no letter, and terminals disagree on its width
+		}
+		w, h = 1+(w%200+200)%200, 1+(h%60+60)%60
+		s, _ := newShell().Update(tea.WindowSizeMsg{Width: w, Height: h})
+		if status != "" {
+			s, _ = s.SetStatus(status, Info, 0)
+		}
+		if open {
+			s = s.ShowHelp()
+		}
+		panes := map[string]Pane{
+			"list":   {Title: body, Body: func(layout.Rect) string { return body }},
+			"detail": {Title: "detail", Bottom: body, Body: func(layout.Rect) string { return body }},
+		}
+		rows := strings.Split(s.render(panes), "\n")
+		require.Len(t, rows, h)
+		for i, r := range rows {
+			require.Equal(t, w, ansi.StringWidth(r), "row %d: %q", i, r)
+		}
+	})
 }
