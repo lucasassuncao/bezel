@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
@@ -36,9 +37,16 @@ func sample(t *testing.T) Form {
 func press(f Form, keys ...string) (Form, tea.Cmd) {
 	var cmd tea.Cmd
 	for _, k := range keys {
-		f, cmd = f.Update(bezeltest.Key(k))
+		var r bezel.Result
+		f, r = f.Update(bezeltest.Key(k))
+		cmd = r.Cmd
 	}
 	return f, cmd
+}
+
+// click is a left click on row y of the form's body.
+func click(f Form, y int) (Form, bezel.Result) {
+	return f.Update(bezel.ClickMsg{Pane: "form", MouseClickMsg: tea.MouseClickMsg{Button: tea.MouseLeft, Y: y}})
 }
 
 // Get reads a field by its type; a wrong index or type is false, not a panic.
@@ -133,32 +141,103 @@ func TestNilFieldsAreLeftOutAndFieldIsBounded(t *testing.T) {
 	require.Nil(t, f.Field(-1))
 }
 
-func TestAClickFocusesAFieldAndPressesAButton(t *testing.T) {
-	f := sample(t)
-	f, cmd := f.SetWidth(60).Click(5)
+func TestClickFocusesTheFieldUnderIt(t *testing.T) {
+	f := sample(t).SetWidth(60)
+	f, r := click(f, 5)
+	require.True(t, r.Handled)
 	require.Equal(t, 5, f.Focused())
-	require.NotNil(t, cmd)
-	require.Equal(t, submitted{}, cmd())
+	require.NotNil(t, r.Cmd)
+	require.Equal(t, submitted{}, r.Cmd())
 
-	f, _ = f.SetWidth(60).Click(3)
+	f, r = click(f, 3)
+	require.True(t, r.Handled)
 	toggle, _ := Get[Toggle](f, 3)
 	require.True(t, toggle.On(), "a toggle flips")
-	f, _ = f.SetWidth(60).Click(4)
+	f, _ = click(f, 4)
 	box, _ := Get[Checkbox](f, 4)
 	require.True(t, box.Checked())
 
-	f, _ = f.SetWidth(60).Click(0)
+	f, _ = click(f, 0)
 	require.Equal(t, 0, f.Focused(), "an input only takes the focus")
-	same, cmd := f.SetWidth(60).Click(99)
-	require.Equal(t, 0, same.Focused())
-	require.Nil(t, cmd)
+}
+
+func TestClickPastTheFieldsIsNotHandled(t *testing.T) {
+	f, r := click(sample(t).SetWidth(60), 99)
+	require.Equal(t, bezel.Result{}, r)
+	require.Equal(t, 0, f.Focused())
+}
+
+func TestTabIsHandled(t *testing.T) {
+	f, r := sample(t).Update(bezeltest.Key("tab"))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event)
+	require.Equal(t, 1, f.Focused())
+	_, r = f.Update(bezeltest.Key("shift+tab"))
+	require.True(t, r.Handled)
+}
+
+func TestForeignKeyIsNotHandled(t *testing.T) {
+	f := New(th(), NewCheckbox("a"))
+	_, r := f.Update(bezeltest.Key("f5"))
+	require.Equal(t, bezel.Result{}, r)
+	_, r = New(th()).Update(bezeltest.Key("tab"))
+	require.Equal(t, bezel.Result{}, r, "no fields")
+}
+
+func TestAFocusedInputHandlesTextButNotF5(t *testing.T) {
+	f := sample(t)
+	_, r := f.Update(bezeltest.Key("a"))
+	require.True(t, r.Handled)
+	_, r = f.Update(bezeltest.Key("f5"))
+	require.False(t, r.Handled)
+}
+
+func TestControlsHandleOnlyTheirKeys(t *testing.T) {
+	cases := []struct {
+		name  string
+		field Field
+		yes   []string
+		no    []string
+	}{
+		{"checkbox", NewCheckbox("a"), []string{"space", "enter"}, []string{"left", "x", "f5"}},
+		{"radio", NewRadio("r", []string{"a", "b"}), []string{"left", "right"}, []string{"space", "x", "f5"}},
+		{"toggle", NewToggle("t"), []string{"space", "enter", "left", "right"}, []string{"up", "x", "f5"}},
+		{"select closed", NewSelect("s", []string{"a"}), []string{"enter", "space"}, []string{"up", "down", "esc", "f5"}},
+		{"button", NewButton("b", nil), []string{"space", "enter"}, []string{"left", "x", "f5"}},
+	}
+	for _, c := range cases {
+		for _, k := range c.yes {
+			_, r := c.field.Update(bezeltest.Key(k))
+			require.True(t, r.Handled, "%s %s", c.name, k)
+			require.Nil(t, r.Event)
+		}
+		for _, k := range c.no {
+			_, r := c.field.Update(bezeltest.Key(k))
+			require.Equal(t, bezel.Result{}, r, "%s %s", c.name, k)
+		}
+	}
+	open, _ := NewSelect("s", []string{"a", "b"}).Update(bezeltest.Key("enter"))
+	for _, k := range []string{"up", "down", "enter", "esc"} {
+		_, r := open.Update(bezeltest.Key(k))
+		require.True(t, r.Handled, "open select %s", k)
+	}
+	_, r := open.Update(bezeltest.Key("f5"))
+	require.False(t, r.Handled)
+}
+
+func TestInputPassesItsResultThrough(t *testing.T) {
+	f, _ := NewInput("n").Focus()
+	_, r := f.Update(bezeltest.Key("a"))
+	require.True(t, r.Handled)
+	_, r = NewInput("n").Update(bezeltest.Key("a"))
+	require.False(t, r.Handled, "an unfocused input takes no text")
 }
 
 func TestAClickCountsTheRowsOfAnOpenSelect(t *testing.T) {
 	f, _ := press(sample(t), "tab", "enter") // the select, open under its row
 	_, h := draw.BlockSize(f.Field(1).View(true, 20, 60))
 	require.Greater(t, h, 1)
-	f, _ = f.SetWidth(60).Click(1 + h)
+	f, _ = click(f.SetWidth(60), 1+h)
 	require.Equal(t, 2, f.Focused(), "the radio sits under the open list")
 }
 
@@ -200,4 +279,8 @@ func TestLegendFollowsTheFocusedControl(t *testing.T) {
 	f, _ = press(f, "esc", "tab")
 	require.Equal(t, []string{"next", "previous", "choose"}, descs(f), "a radio")
 	require.Empty(t, New(th()).Legend())
+}
+
+func TestFormIsAModel(t *testing.T) {
+	var _ bezel.Model[Form] = Form{}
 }

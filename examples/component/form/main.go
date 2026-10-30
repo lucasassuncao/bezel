@@ -9,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/form"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
@@ -85,14 +86,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 		// Keys belong to the form: the shell would read "q" or "?" typed into a field.
-		var cmd tea.Cmd
-		m.form, cmd = m.form.Update(msg)
-		return m, cmd
+		var r bezel.Result
+		m.form, r = m.form.Update(msg)
+		return m, r.Cmd
 	}
 	var cmd tea.Cmd
 	m.sh, _, cmd = m.sh.Update(msg)
 	if cmd == nil {
-		m.form, cmd = m.form.Update(msg)
+		var r bezel.Result
+		m.form, r = m.form.Update(msg)
+		cmd = r.Cmd
 	}
 	return m, cmd
 }

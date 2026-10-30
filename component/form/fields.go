@@ -81,10 +81,11 @@ func (i Input) retheme(th *theme.Resolved, st *Styles) Field {
 	return i
 }
 
-func (i Input) Update(msg tea.Msg) (Field, tea.Cmd) {
+// Update hands msg to the input and reports what it reported.
+func (i Input) Update(msg tea.Msg) (Field, bezel.Result) {
 	var r bezel.Result
 	i.in, r = i.in.Update(msg)
-	return i, r.Cmd
+	return i, r
 }
 
 func (i Input) Focus() (Field, tea.Cmd) {
@@ -152,11 +153,12 @@ func (c Checkbox) flip() Field {
 	return c
 }
 
-func (c Checkbox) Update(msg tea.Msg) (Field, tea.Cmd) {
+// Update flips the box on Press, which is the only key it takes.
+func (c Checkbox) Update(msg tea.Msg) (Field, bezel.Result) {
 	if is(msg, c.keys.Press) {
-		return c.flip(), nil
+		return c.flip(), bezel.Result{Handled: true}
 	}
-	return c, nil
+	return c, bezel.Result{}
 }
 
 // View draws the box before the label, the way a list of options reads; the
@@ -222,14 +224,17 @@ func (r Radio) Label() string           { return r.label }
 func (r Radio) Focus() (Field, tea.Cmd) { return r, nil }
 func (r Radio) Blur() Field             { return r }
 
-func (r Radio) Update(msg tea.Msg) (Field, tea.Cmd) {
+// Update moves the choice on Left and Right, at the ends too.
+func (r Radio) Update(msg tea.Msg) (Field, bezel.Result) {
 	switch {
 	case is(msg, r.keys.Left):
 		r.selected = max(0, r.selected-1)
 	case is(msg, r.keys.Right):
 		r.selected = max(0, min(len(r.options)-1, r.selected+1))
+	default:
+		return r, bezel.Result{}
 	}
-	return r, nil
+	return r, bezel.Result{Handled: true}
 }
 
 func (r Radio) View(focused bool, labelW, width int) string {
@@ -294,11 +299,12 @@ func (t Toggle) flip() Field {
 	return t
 }
 
-func (t Toggle) Update(msg tea.Msg) (Field, tea.Cmd) {
+// Update flips the switch on Press, Left and Right.
+func (t Toggle) Update(msg tea.Msg) (Field, bezel.Result) {
 	if is(msg, t.keys.Press, t.keys.Left, t.keys.Right) {
-		return t.flip(), nil
+		return t.flip(), bezel.Result{Handled: true}
 	}
-	return t, nil
+	return t, bezel.Result{}
 }
 
 func (t Toggle) View(focused bool, labelW, width int) string {
@@ -369,12 +375,14 @@ func (s Select) Blur() Field {
 	return s
 }
 
-func (s Select) Update(msg tea.Msg) (Field, tea.Cmd) {
+// Update opens on Press; while open it takes Up, Down, Press and Close.
+func (s Select) Update(msg tea.Msg) (Field, bezel.Result) {
 	if !s.open {
 		if is(msg, s.keys.Press) {
 			s.open, s.cursor = true, s.selected
+			return s, bezel.Result{Handled: true}
 		}
-		return s, nil
+		return s, bezel.Result{}
 	}
 	switch {
 	case is(msg, s.keys.Up):
@@ -388,8 +396,10 @@ func (s Select) Update(msg tea.Msg) (Field, tea.Cmd) {
 		}
 	case is(msg, s.keys.Close):
 		s.open = false
+	default:
+		return s, bezel.Result{}
 	}
-	return s, nil
+	return s, bezel.Result{Handled: true}
 }
 
 func (s Select) View(focused bool, labelW, width int) string {
@@ -448,11 +458,12 @@ func (b Button) Blur() Field             { return b }
 
 func (b Button) press() tea.Cmd { return b.onPress }
 
-func (b Button) Update(msg tea.Msg) (Field, tea.Cmd) {
+// Update runs the button's command on Press.
+func (b Button) Update(msg tea.Msg) (Field, bezel.Result) {
 	if is(msg, b.keys.Press) {
-		return b, b.press()
+		return b, bezel.Result{Handled: true, Cmd: b.press()}
 	}
-	return b, nil
+	return b, bezel.Result{}
 }
 
 func (b Button) View(focused bool, labelW, width int) string {

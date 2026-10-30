@@ -11,6 +11,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
@@ -20,7 +21,7 @@ import (
 // Field is one control. It gets keys only while focused, and draws its label
 // padded to labelW so a form's values start in one column.
 type Field interface {
-	Update(msg tea.Msg) (Field, tea.Cmd)
+	Update(msg tea.Msg) (Field, bezel.Result)
 	View(focused bool, labelW, width int) string
 	Focus() (Field, tea.Cmd)
 	Blur() Field
@@ -226,11 +227,18 @@ func (f Form) Legend() []legend.Entry {
 // Focused is the index of the field in focus.
 func (f Form) Focused() int { return f.focus }
 
+var _ bezel.Model[Form] = Form{}
+
 // Update moves the focus on tab and shift+tab, unless the focused field holds
-// them, and hands every other message to the focused field.
-func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
+// them, focuses and presses the field a bezel.ClickMsg lands on, and hands
+// every other message to the focused field. A click past the fields, and a
+// message the field does not take, come back unhandled.
+func (f Form) Update(msg tea.Msg) (Form, bezel.Result) {
 	if len(f.fields) == 0 {
-		return f, nil
+		return f, bezel.Result{}
+	}
+	if c, ok := msg.(bezel.ClickMsg); ok {
+		return f.click(c.Y)
 	}
 	held := false
 	if h, ok := f.fields[f.focus].(Holder); ok {
@@ -239,18 +247,23 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 	if k, ok := msg.(tea.KeyPressMsg); ok && !held {
 		switch {
 		case key.Matches(k, f.keys.Next):
-			return f.move(1)
+			return f.moved(1)
 		case key.Matches(k, f.keys.Prev):
-			return f.move(-1)
+			return f.moved(-1)
 		}
 	}
 	f.fields = slices.Clone(f.fields)
-	var cmd tea.Cmd
-	f.fields[f.focus], cmd = f.fields[f.focus].Update(msg)
-	return f, cmd
+	var r bezel.Result
+	f.fields[f.focus], r = f.fields[f.focus].Update(msg)
+	return f, r
 }
 
-// move hands the focus by steps, wrapping at either end.
+// moved is move reported as handled.
+func (f Form) moved(by int) (Form, bezel.Result) {
+	f, cmd := f.move(by)
+	return f, bezel.Result{Handled: true, Cmd: cmd}
+}
+
 // pressable is a field a click runs, as space would: a button.
 type pressable interface{ press() tea.Cmd }
 
@@ -263,12 +276,12 @@ func (f Form) SetWidth(w int) Form {
 	return f
 }
 
-// Click focuses the field drawn on row y of View and presses it when it is a
-// button, a checkbox or a toggle. A row past the fields does nothing.
-func (f Form) Click(y int) (Form, tea.Cmd) {
+// click focuses the field drawn on row y of View and presses it when it is a
+// button, a checkbox or a toggle. A row past the fields is not handled.
+func (f Form) click(y int) (Form, bezel.Result) {
 	i := f.fieldAt(y)
 	if i < 0 {
-		return f, nil
+		return f, bezel.Result{}
 	}
 	var focus tea.Cmd
 	if i != f.focus {
@@ -276,12 +289,12 @@ func (f Form) Click(y int) (Form, tea.Cmd) {
 	}
 	switch fl := f.fields[i].(type) {
 	case pressable:
-		return f, tea.Batch(focus, fl.press())
+		return f, bezel.Result{Handled: true, Cmd: tea.Batch(focus, fl.press())}
 	case flippable:
 		f.fields = slices.Clone(f.fields)
 		f.fields[i] = fl.flip()
 	}
-	return f, focus
+	return f, bezel.Result{Handled: true, Cmd: focus}
 }
 
 // fieldAt is the field drawn on row y, counting the rows an open select
@@ -302,6 +315,7 @@ func (f Form) fieldAt(y int) int {
 	return -1
 }
 
+// move hands the focus by steps, wrapping at either end.
 func (f Form) move(by int) (Form, tea.Cmd) {
 	f.fields = slices.Clone(f.fields)
 	f.fields[f.focus] = f.fields[f.focus].Blur()
