@@ -90,13 +90,13 @@ func TestNumbersReadPageOfPages(t *testing.T) {
 }
 
 func TestDotsMarkTheCurrentPage(t *testing.T) {
-	p := New(10).SetItems(30).SetPage(1).WithKind(Dots)
+	p := New(10).SetItems(30).SetPage(1).WithDisplay(Dots)
 	require.Equal(t, "○●○", ansi.Strip(p.WithIcons(icon.Unicode()).View(th)))
 	require.Equal(t, "o*o", ansi.Strip(p.WithIcons(icon.ASCII()).View(th)))
 }
 
 func TestDotsAreStyledFromTheTheme(t *testing.T) {
-	p := New(10).SetItems(20).WithKind(Dots).WithIcons(icon.Unicode())
+	p := New(10).SetItems(20).WithDisplay(Dots).WithIcons(icon.Unicode())
 	require.Equal(t, th.Accent.Render("●")+th.Muted.Render("○"), p.View(th))
 }
 
@@ -130,5 +130,5 @@ func TestSetPerPageKeepsTheFirstItemInView(t *testing.T) {
 
 func TestTheDefaultDotsFollowTheEnvironment(t *testing.T) {
 	t.Setenv("BEZEL_ASCII", "1")
-	require.Equal(t, "*oo", ansi.Strip(New(10).SetItems(30).WithKind(Dots).View(th)))
+	require.Equal(t, "*oo", ansi.Strip(New(10).SetItems(30).WithDisplay(Dots).View(th)))
 }

@@ -17,12 +17,12 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-// Kind is how View draws the page.
-type Kind int
+// Display is how View draws the page.
+type Display int
 
 const (
-	Numbers Kind = iota // "2/5", in the format WithFormat sets
-	Dots                // a mark per page, the current one filled
+	Numbers Display = iota // "2/5", in the format WithFormat sets
+	Dots                   // a mark per page, the current one filled
 )
 
 // Keys are the bindings that turn the page. Next has no help of its own:
@@ -62,7 +62,7 @@ var _ bezel.Model[Model] = Model{}
 
 // Model is a value: every method returns the new paginator.
 type Model struct {
-	kind    Kind
+	display Display
 	page    int
 	perPage int // 0 in a Model never built with New, read as 1
 	items   int
@@ -78,9 +78,9 @@ func New(perPage int) Model {
 	return Model{perPage: max(perPage, 1), format: "%d/%d", icons: icon.FromEnv(), keys: DefaultKeys()}
 }
 
-// WithKind sets how the page is drawn.
-func (m Model) WithKind(k Kind) Model {
-	m.kind = k
+// WithDisplay sets how the page is drawn.
+func (m Model) WithDisplay(d Display) Model {
+	m.display = d
 	return m
 }
 
@@ -203,7 +203,7 @@ func (m Model) View(th theme.Resolved) string {
 		st = m.edit(st)
 	}
 	pages := m.Pages()
-	if m.kind != Dots {
+	if m.display != Dots {
 		return st.Numbers.Render(fmt.Sprintf(cmp.Or(m.format, "%d/%d"), m.page+1, pages))
 	}
 	var b strings.Builder

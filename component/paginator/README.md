@@ -12,10 +12,10 @@ Package paginator is pages over a run of items: which page shows, the slice of i
 
 ## Index
 
+- [type Display](<#Display>)
 - [type Keys](<#Keys>)
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
   - [func VimKeys\(\) Keys](<#VimKeys>)
-- [type Kind](<#Kind>)
 - [type Model](<#Model>)
   - [func New\(perPage int\) Model](<#New>)
   - [func \(m Model\) Bounds\(n int\) \(start, end int\)](<#Model.Bounds>)
@@ -33,15 +33,33 @@ Package paginator is pages over a run of items: which page shows, the slice of i
   - [func \(m Model\) SetPerPage\(n int\) Model](<#Model.SetPerPage>)
   - [func \(m Model\) Update\(msg tea.Msg\) \(Model, bezel.Result\)](<#Model.Update>)
   - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
+  - [func \(m Model\) WithDisplay\(d Display\) Model](<#Model.WithDisplay>)
   - [func \(m Model\) WithFormat\(f string\) Model](<#Model.WithFormat>)
   - [func \(m Model\) WithIcons\(set icon.Set\) Model](<#Model.WithIcons>)
   - [func \(m Model\) WithKeys\(k Keys\) Model](<#Model.WithKeys>)
-  - [func \(m Model\) WithKind\(k Kind\) Model](<#Model.WithKind>)
   - [func \(m Model\) WithStyles\(edit func\(Styles\) Styles\) Model](<#Model.WithStyles>)
 - [type Paged](<#Paged>)
 - [type Styles](<#Styles>)
   - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
 
+
+<a name="Display"></a>
+## type [Display](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L21>)
+
+Display is how View draws the page.
+
+```go
+type Display int
+```
+
+<a name="Numbers"></a>
+
+```go
+const (
+    Numbers Display = iota // "2/5", in the format WithFormat sets
+    Dots                   // a mark per page, the current one filled
+)
+```
 
 <a name="Keys"></a>
 ## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L30-L32>)
@@ -71,24 +89,6 @@ func VimKeys() Keys
 ```
 
 VimKeys are DefaultKeys with h/l added to turn the page.
-
-<a name="Kind"></a>
-## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L21>)
-
-Kind is how View draws the page.
-
-```go
-type Kind int
-```
-
-<a name="Numbers"></a>
-
-```go
-const (
-    Numbers Kind = iota // "2/5", in the format WithFormat sets
-    Dots                // a mark per page, the current one filled
-)
-```
 
 <a name="Model"></a>
 ## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L64-L73>)
@@ -245,6 +245,15 @@ func (m Model) View(th theme.Resolved) string
 
 View is the page as dots or numbers, in the theme's styles.
 
+<a name="Model.WithDisplay"></a>
+### func \(Model\) [WithDisplay](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L82>)
+
+```go
+func (m Model) WithDisplay(d Display) Model
+```
+
+WithDisplay sets how the page is drawn.
+
 <a name="Model.WithFormat"></a>
 ### func \(Model\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L89>)
 
@@ -271,15 +280,6 @@ func (m Model) WithKeys(k Keys) Model
 ```
 
 WithKeys rebinds the page keys.
-
-<a name="Model.WithKind"></a>
-### func \(Model\) [WithKind](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L82>)
-
-```go
-func (m Model) WithKind(k Kind) Model
-```
-
-WithKind sets how the page is drawn.
 
 <a name="Model.WithStyles"></a>
 ### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L109>)

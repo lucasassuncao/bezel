@@ -42,10 +42,10 @@ type Model struct {
 	edit        func(Styles) Styles
 }
 
-// New is an empty bar width cells wide, the percentage included, with
-// █ over ░ and the percentage shown.
-func New(width int) Model {
-	return Model{spring: animation.NewSpring(0), width: max(width, 1), full: "█", empty: "░", percent: true, format: " %3.0f%%"}
+// New is an empty bar, █ over ░ with the percentage shown. It draws nothing
+// until SetWidth sizes it.
+func New() Model {
+	return Model{spring: animation.NewSpring(0), full: "█", empty: "░", percent: true, format: " %3.0f%%"}
 }
 
 // WithChars draws the filled cells with full and the track with empty.
@@ -92,7 +92,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model {
 
 // SetWidth changes the bar's width, the percentage included.
 func (m Model) SetWidth(w int) Model {
-	m.width = max(w, 1)
+	m.width = max(w, 0)
 	return m
 }
 
@@ -128,6 +128,9 @@ func (m Model) View(th theme.Resolved) string { return m.ViewAs(m.spring.Pos, th
 // ViewAs is the bar at share p with no motion, for a host that drives the
 // share itself.
 func (m Model) ViewAs(p float64, th theme.Resolved) string {
+	if m.width <= 0 {
+		return ""
+	}
 	st := DefaultStyles(th)
 	if m.edit != nil {
 		st = m.edit(st)

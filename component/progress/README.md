@@ -19,7 +19,7 @@ Package progress draws how far along something is: bars, a meter and a stepper o
 - [func Smooth\(done, total, width int, th theme.Resolved, opts ...chart.Option\) string](<#Smooth>)
 - [func Stepper\(steps \[\]string, current, width int, th theme.Resolved, set icon.Set\) string](<#Stepper>)
 - [type Model](<#Model>)
-  - [func New\(width int\) Model](<#New>)
+  - [func New\(\) Model](<#New>)
   - [func \(m Model\) Active\(\) bool](<#Model.Active>)
   - [func \(m Model\) Percent\(\) float64](<#Model.Percent>)
   - [func \(m Model\) SetPercent\(p float64\) \(Model, tea.Cmd\)](<#Model.SetPercent>)
@@ -108,10 +108,10 @@ type Model struct {
 ### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L47>)
 
 ```go
-func New(width int) Model
+func New() Model
 ```
 
-New is an empty bar width cells wide, the percentage included, with █ over ░ and the percentage shown.
+New is an empty bar, █ over ░ with the percentage shown. It draws nothing until SetWidth sizes it.
 
 <a name="Model.Active"></a>
 ### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L116>)

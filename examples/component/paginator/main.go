@@ -19,8 +19,8 @@ import (
 
 const total = 42
 
-// kindMsg switches the paginator between numbers and dots.
-type kindMsg struct{}
+// displayMsg switches the paginator between numbers and dots.
+type displayMsg struct{}
 
 type model struct {
 	sh   shell.Shell
@@ -37,7 +37,7 @@ func newModel() model {
 		Title:  "paginator",
 		Actions: []shell.Action{
 			shell.Custom("←/→", "page", nil, shell.DisplayOnly()),
-			shell.Custom("t", "dots/numbers", shell.Send(kindMsg{})),
+			shell.Custom("t", "dots/numbers", shell.Send(displayMsg{})),
 			shell.Quit(),
 		},
 	})
@@ -52,13 +52,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, r.Cmd
 	}
 	switch msg := msg.(type) {
-	case kindMsg:
+	case displayMsg:
 		m.dots = !m.dots
-		kind := paginator.Numbers
+		show := paginator.Numbers
 		if m.dots {
-			kind = paginator.Dots
+			show = paginator.Dots
 		}
-		m.pg = m.pg.WithKind(kind)
+		m.pg = m.pg.WithDisplay(show)
 	case tea.KeyPressMsg:
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
