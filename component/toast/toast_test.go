@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
@@ -121,4 +123,29 @@ func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }
 func TestTheEdgeIsTheKindsFixedColour(t *testing.T) {
 	m, _ := New().WithWidth(20).Push("failed", draw.Danger)
 	require.Contains(t, m.View(), "38;2;239;68;68", "Danger's #EF4444")
+}
+
+// Toasts drawn over a screen leave it the size it was, at any point of
+// their slide.
+func FuzzOverKeepsTheScreenSize(f *testing.F) {
+	f.Add("Saved notes.md", 80, 24, 100)
+	f.Add("全角の通知", 10, 3, 0)
+	f.Add("", 1, 1, 999)
+	f.Add("x", 10, 3, 300) // a screen narrower than the toast
+	f.Fuzz(func(t *testing.T, text string, w, h, ms int) {
+		if !utf8.ValidString(text) || strings.ContainsFunc(text, unicode.IsControl) {
+			t.Skip()
+		}
+		w, h, ms = 1+(w%120+120)%120, 1+(h%40+40)%40, (ms%3000+3000)%3000
+		row := strings.Repeat(".", w)
+		screen := strings.TrimSuffix(strings.Repeat(row+"\n", h), "\n")
+		m, _ := New().WithWidth(30).Push(text, draw.Info)
+		m, _ = m.Advance(time.Unix(0, 0))
+		m, _ = m.Advance(time.Unix(0, 0).Add(time.Duration(ms) * time.Millisecond))
+		lines := strings.Split(m.Over(screen), "\n")
+		require.Len(t, lines, h)
+		for i, l := range lines {
+			require.Equal(t, w, ansi.StringWidth(l), "row %d: %q", i, l)
+		}
+	})
 }

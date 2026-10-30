@@ -192,7 +192,11 @@ func (m Model) Over(screen string) string {
 		x := w - 1 - m.width + off
 		for _, l := range m.box(it) {
 			if visible := m.width - off; visible > 0 && x < w {
-				screen = draw.Composite(ansi.Truncate(l, visible, ""), screen, x, y)
+				line, at := ansi.Truncate(l, visible, ""), x
+				if at < 0 { // a screen narrower than the toast keeps its right end
+					line, at = ansi.TruncateLeft(line, -at, ""), 0
+				}
+				screen = draw.Composite(line, screen, at, y)
 			}
 			y++
 		}

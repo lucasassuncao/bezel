@@ -4,6 +4,8 @@ import (
 	"charm.land/lipgloss/v2"
 	"strings"
 	"testing"
+	"unicode"
+	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
@@ -283,4 +285,21 @@ func TestLegendFollowsTheFocusedControl(t *testing.T) {
 
 func TestFormIsAModel(t *testing.T) {
 	var _ bezel.Model[Form] = Form{}
+}
+
+// Whatever the labels and the width, no row of the form outgrows it.
+func FuzzFormStaysInItsWidth(f *testing.F) {
+	f.Add("Name", "Create", 40)
+	f.Add("全角のラベル", "作成", 10)
+	f.Add("", "", 1)
+	f.Fuzz(func(t *testing.T, label, button string, w int) {
+		if !utf8.ValidString(label) || !utf8.ValidString(button) || strings.ContainsFunc(label+button, unicode.IsControl) {
+			t.Skip()
+		}
+		w = (w%100 + 100) % 100
+		fm := New(th(), NewInput(label), NewSelect(label, []string{"a", label}), NewCheckbox(label), NewToggle(label), NewButton(button, nil)).SetWidth(w)
+		for i, l := range strings.Split(fm.View(), "\n") {
+			require.LessOrEqual(t, ansi.StringWidth(l), w, "row %d: %q", i, l)
+		}
+	})
 }

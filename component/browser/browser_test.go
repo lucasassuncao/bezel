@@ -2,6 +2,7 @@ package browser
 
 import (
 	"charm.land/lipgloss/v2"
+	"fmt"
 	"github.com/lucasassuncao/bezel/legend"
 	"strings"
 	"testing"
@@ -166,4 +167,28 @@ func TestLegendDropsEnterWhileThePreviewHasTheKeys(t *testing.T) {
 	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "tab", "enter", "esc"}, keys(b.Legend()))
 	b = b.SetPreviewFocus(true)
 	require.NotContains(t, keys(b.Legend()), "enter")
+}
+
+// The list half keeps to the height it was given, scrolled anywhere.
+func FuzzListViewStaysInItsHeight(f *testing.F) {
+	f.Add("recipe", 12, 4, 7)
+	f.Add("", 1, 1, 0)
+	f.Add("全角", 40, 3, 39)
+	f.Add("\n", 17, 4, 0) // a label with a break took two rows
+	f.Fuzz(func(t *testing.T, label string, n, h, down int) {
+		n, h, down = (n%60+60)%60, h%20, (down%80+80)%80
+		items := make([]Item, n)
+		for i := range items {
+			items[i] = Item{Label: fmt.Sprint(label, i)}
+		}
+		b := New(items).SetListHeight(h)
+		for range down {
+			b, _ = b.Update(tea.KeyPressMsg{Code: tea.KeyDown})
+		}
+		view := b.ListView(theme.Resolve(theme.Plain(), true))
+		if h <= 0 {
+			return // 0 shows every label, on purpose
+		}
+		require.LessOrEqual(t, len(strings.Split(view, "\n")), h)
+	})
 }

@@ -9,6 +9,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
@@ -209,4 +211,24 @@ func TestReplaceAttrNamesTrace(t *testing.T) {
 	require.Equal(t, "v", got["k"])
 
 	require.Equal(t, slog.Any(slog.LevelKey, slog.LevelInfo), ReplaceAttr(nil, slog.Any(slog.LevelKey, slog.LevelInfo)))
+}
+
+// No line the handler writes is wider than the width it was given, however
+// long the message and the values, while a value has its minRoom.
+func FuzzLinesStayInTheWidth(f *testing.F) {
+	f.Add("moved files", "path", `C:\Users\someone\Downloads\a-rather-long-name.zip`, 40)
+	f.Add("全角のメッセージ", "キー", "値の文字列がとても長いのでよく折り返される", 24)
+	f.Add("", "", "", 30)
+	f.Fuzz(func(t *testing.T, msg, k, v string, w int) {
+		if !utf8.ValidString(msg+k+v) || strings.ContainsFunc(msg+k+v, unicode.IsControl) {
+			t.Skip()
+		}
+		w = 30 + ansi.StringWidth(k) + (w%120+120)%120 // minRoom: a value always gets 12 cells
+		var buf bytes.Buffer
+		h := New(&buf, theme.Resolve(theme.Plain(), true)).WithWidth(w).WithTimeFormat("").WithColor(false)
+		slog.New(h).Info(msg, k, v, "group", slog.GroupValue(slog.String(k, v)))
+		for i, l := range strings.Split(strings.TrimRight(buf.String(), "\n"), "\n") {
+			require.LessOrEqual(t, ansi.StringWidth(l), w, "line %d: %q", i, l)
+		}
+	})
 }

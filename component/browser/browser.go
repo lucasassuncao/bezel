@@ -247,9 +247,9 @@ func (m Model) ListView(th theme.Resolved) string {
 			sb.WriteByte('\n')
 		}
 		if i == m.cursor {
-			sb.WriteString(st.Cursor.Render("▶  " + m.items[i].Label))
+			sb.WriteString(st.Cursor.Render("▶  " + oneLine(m.items[i].Label)))
 		} else {
-			sb.WriteString(st.Label.Render("   " + m.items[i].Label))
+			sb.WriteString(st.Label.Render("   " + oneLine(m.items[i].Label)))
 		}
 	}
 	return sb.String()
@@ -271,4 +271,14 @@ func (m Model) PreviewView() string {
 	height = max(height, 1)
 	scroll := min(m.previewScroll, max(len(lines)-height, 0))
 	return strings.Join(lines[scroll:min(scroll+height, len(lines))], "\n")
+}
+
+// oneLine is s with its line breaks as spaces, so a label keeps one row.
+func oneLine(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r == '\n' || r == '\r' {
+			return ' '
+		}
+		return r
+	}, s)
 }
