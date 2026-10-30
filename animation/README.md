@@ -38,7 +38,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(b Burst\) FrameAt\(at time.Time\) FrameMsg](<#Burst.FrameAt>)
   - [func \(b Burst\) Sparks\(\) \[\]Spark](<#Burst.Sparks>)
   - [func \(b Burst\) Tick\(\) tea.Cmd](<#Burst.Tick>)
-  - [func \(b Burst\) Update\(msg tea.Msg\) \(Burst, tea.Cmd\)](<#Burst.Update>)
+  - [func \(b Burst\) Update\(msg tea.Msg\) \(Burst, bezel.Result\)](<#Burst.Update>)
   - [func \(b Burst\) WithDelay\(d time.Duration\) Burst](<#Burst.WithDelay>)
   - [func \(b Burst\) WithGravity\(g float64\) Burst](<#Burst.WithGravity>)
   - [func \(b Burst\) WithSeed\(seed uint64\) Burst](<#Burst.WithSeed>)
@@ -59,7 +59,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(d Drop\) FrameAt\(at time.Time\) FrameMsg](<#Drop.FrameAt>)
   - [func \(d Drop\) Shape\(\) \(w, h float64\)](<#Drop.Shape>)
   - [func \(d Drop\) Tick\(\) tea.Cmd](<#Drop.Tick>)
-  - [func \(d Drop\) Update\(msg tea.Msg\) \(Drop, tea.Cmd\)](<#Drop.Update>)
+  - [func \(d Drop\) Update\(msg tea.Msg\) \(Drop, bezel.Result\)](<#Drop.Update>)
   - [func \(d Drop\) WithBounce\(e float64\) Drop](<#Drop.WithBounce>)
   - [func \(d Drop\) WithGravity\(g float64\) Drop](<#Drop.WithGravity>)
 - [type Ease](<#Ease>)
@@ -73,7 +73,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(f Fade\) Color\(\) color.Color](<#Fade.Color>)
   - [func \(f Fade\) FrameAt\(at time.Time\) FrameMsg](<#Fade.FrameAt>)
   - [func \(f Fade\) Tick\(\) tea.Cmd](<#Fade.Tick>)
-  - [func \(f Fade\) Update\(msg tea.Msg\) \(Fade, tea.Cmd\)](<#Fade.Update>)
+  - [func \(f Fade\) Update\(msg tea.Msg\) \(Fade, bezel.Result\)](<#Fade.Update>)
   - [func \(f Fade\) WithDelay\(d time.Duration\) Fade](<#Fade.WithDelay>)
   - [func \(f Fade\) WithEase\(e Ease\) Fade](<#Fade.WithEase>)
   - [func \(f Fade\) WithRepeat\(n int\) Fade](<#Fade.WithRepeat>)
@@ -85,7 +85,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(f Float\) FrameAt\(at time.Time\) FrameMsg](<#Float.FrameAt>)
   - [func \(f Float\) Int\(\) int](<#Float.Int>)
   - [func \(f Float\) Tick\(\) tea.Cmd](<#Float.Tick>)
-  - [func \(f Float\) Update\(msg tea.Msg\) \(Float, tea.Cmd\)](<#Float.Update>)
+  - [func \(f Float\) Update\(msg tea.Msg\) \(Float, bezel.Result\)](<#Float.Update>)
   - [func \(f Float\) WithDelay\(d time.Duration\) Float](<#Float.WithDelay>)
   - [func \(f Float\) WithEase\(e Ease\) Float](<#Float.WithEase>)
   - [func \(f Float\) WithRepeat\(n int\) Float](<#Float.WithRepeat>)
@@ -98,7 +98,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(f Flock\) Points\(\) \[\]Point](<#Flock.Points>)
   - [func \(f Flock\) Tick\(\) tea.Cmd](<#Flock.Tick>)
   - [func \(f Flock\) To\(p Point\) \(Flock, tea.Cmd\)](<#Flock.To>)
-  - [func \(f Flock\) Update\(msg tea.Msg\) \(Flock, tea.Cmd\)](<#Flock.Update>)
+  - [func \(f Flock\) Update\(msg tea.Msg\) \(Flock, bezel.Result\)](<#Flock.Update>)
   - [func \(f Flock\) WithDamping\(d float64\) Flock](<#Flock.WithDamping>)
   - [func \(f Flock\) WithFreq\(w float64\) Flock](<#Flock.WithFreq>)
 - [type Follow](<#Follow>)
@@ -109,7 +109,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(f Follow\) Pos\(\) Point](<#Follow.Pos>)
   - [func \(f Follow\) Tick\(\) tea.Cmd](<#Follow.Tick>)
   - [func \(f Follow\) To\(p Point\) \(Follow, tea.Cmd\)](<#Follow.To>)
-  - [func \(f Follow\) Update\(msg tea.Msg\) \(Follow, tea.Cmd\)](<#Follow.Update>)
+  - [func \(f Follow\) Update\(msg tea.Msg\) \(Follow, bezel.Result\)](<#Follow.Update>)
   - [func \(f Follow\) WithDamping\(d float64\) Follow](<#Follow.WithDamping>)
   - [func \(f Follow\) WithFreq\(w float64\) Follow](<#Follow.WithFreq>)
 - [type FrameMsg](<#FrameMsg>)
@@ -120,7 +120,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(h Heat\) FrameAt\(at time.Time\) FrameMsg](<#Heat.FrameAt>)
   - [func \(h Heat\) Set\(values \[\]\[\]float64\) \(Heat, tea.Cmd\)](<#Heat.Set>)
   - [func \(h Heat\) Tick\(\) tea.Cmd](<#Heat.Tick>)
-  - [func \(h Heat\) Update\(msg tea.Msg\) \(Heat, tea.Cmd\)](<#Heat.Update>)
+  - [func \(h Heat\) Update\(msg tea.Msg\) \(Heat, bezel.Result\)](<#Heat.Update>)
   - [func \(h Heat\) Values\(\) \[\]\[\]float64](<#Heat.Values>)
 - [type Key](<#Key>)
 - [type Keyframes](<#Keyframes>)
@@ -129,7 +129,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(k Keyframes\) Advance\(now time.Time\) \(Keyframes, bool\)](<#Keyframes.Advance>)
   - [func \(k Keyframes\) FrameAt\(at time.Time\) FrameMsg](<#Keyframes.FrameAt>)
   - [func \(k Keyframes\) Tick\(\) tea.Cmd](<#Keyframes.Tick>)
-  - [func \(k Keyframes\) Update\(msg tea.Msg\) \(Keyframes, tea.Cmd\)](<#Keyframes.Update>)
+  - [func \(k Keyframes\) Update\(msg tea.Msg\) \(Keyframes, bezel.Result\)](<#Keyframes.Update>)
   - [func \(k Keyframes\) WithDelay\(d time.Duration\) Keyframes](<#Keyframes.WithDelay>)
   - [func \(k Keyframes\) WithRepeat\(n int\) Keyframes](<#Keyframes.WithRepeat>)
   - [func \(k Keyframes\) WithYoyo\(on bool\) Keyframes](<#Keyframes.WithYoyo>)
@@ -139,7 +139,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(m Move\) Advance\(now time.Time\) \(Move, bool\)](<#Move.Advance>)
   - [func \(m Move\) FrameAt\(at time.Time\) FrameMsg](<#Move.FrameAt>)
   - [func \(m Move\) Tick\(\) tea.Cmd](<#Move.Tick>)
-  - [func \(m Move\) Update\(msg tea.Msg\) \(Move, tea.Cmd\)](<#Move.Update>)
+  - [func \(m Move\) Update\(msg tea.Msg\) \(Move, bezel.Result\)](<#Move.Update>)
   - [func \(m Move\) WithDelay\(d time.Duration\) Move](<#Move.WithDelay>)
   - [func \(m Move\) WithEase\(e Ease\) Move](<#Move.WithEase>)
   - [func \(m Move\) WithRepeat\(n int\) Move](<#Move.WithRepeat>)
@@ -152,7 +152,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(o Orbit\) Near\(\) bool](<#Orbit.Near>)
   - [func \(o Orbit\) Pos\(\) Point](<#Orbit.Pos>)
   - [func \(o Orbit\) Tick\(\) tea.Cmd](<#Orbit.Tick>)
-  - [func \(o Orbit\) Update\(msg tea.Msg\) \(Orbit, tea.Cmd\)](<#Orbit.Update>)
+  - [func \(o Orbit\) Update\(msg tea.Msg\) \(Orbit, bezel.Result\)](<#Orbit.Update>)
   - [func \(o Orbit\) WithRepeat\(n int\) Orbit](<#Orbit.WithRepeat>)
 - [type Path](<#Path>)
   - [func NewPath\(dur time.Duration, points ...Point\) Path](<#NewPath>)
@@ -160,7 +160,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(p Path\) Advance\(now time.Time\) \(Path, bool\)](<#Path.Advance>)
   - [func \(p Path\) FrameAt\(at time.Time\) FrameMsg](<#Path.FrameAt>)
   - [func \(p Path\) Tick\(\) tea.Cmd](<#Path.Tick>)
-  - [func \(p Path\) Update\(msg tea.Msg\) \(Path, tea.Cmd\)](<#Path.Update>)
+  - [func \(p Path\) Update\(msg tea.Msg\) \(Path, bezel.Result\)](<#Path.Update>)
   - [func \(p Path\) WithDelay\(d time.Duration\) Path](<#Path.WithDelay>)
   - [func \(p Path\) WithEase\(e Ease\) Path](<#Path.WithEase>)
   - [func \(p Path\) WithRepeat\(n int\) Path](<#Path.WithRepeat>)
@@ -171,7 +171,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(p Pendulum\) Advance\(now time.Time\) \(Pendulum, bool\)](<#Pendulum.Advance>)
   - [func \(p Pendulum\) FrameAt\(at time.Time\) FrameMsg](<#Pendulum.FrameAt>)
   - [func \(p Pendulum\) Tick\(\) tea.Cmd](<#Pendulum.Tick>)
-  - [func \(p Pendulum\) Update\(msg tea.Msg\) \(Pendulum, tea.Cmd\)](<#Pendulum.Update>)
+  - [func \(p Pendulum\) Update\(msg tea.Msg\) \(Pendulum, bezel.Result\)](<#Pendulum.Update>)
   - [func \(p Pendulum\) WithDecay\(d time.Duration\) Pendulum](<#Pendulum.WithDecay>)
 - [type Point](<#Point>)
   - [func Bezier\(a, b, c, d Point, n int\) \[\]Point](<#Bezier>)
@@ -184,7 +184,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(r Race\) Racers\(\) \[\]Racer](<#Race.Racers>)
   - [func \(r Race\) Set\(values \[\]float64\) \(Race, tea.Cmd\)](<#Race.Set>)
   - [func \(r Race\) Tick\(\) tea.Cmd](<#Race.Tick>)
-  - [func \(r Race\) Update\(msg tea.Msg\) \(Race, tea.Cmd\)](<#Race.Update>)
+  - [func \(r Race\) Update\(msg tea.Msg\) \(Race, bezel.Result\)](<#Race.Update>)
   - [func \(r Race\) WithEase\(e Ease\) Race](<#Race.WithEase>)
 - [type Racer](<#Racer>)
 - [type Rubber](<#Rubber>)
@@ -196,7 +196,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(r Rubber\) Pull\(v float64\) Rubber](<#Rubber.Pull>)
   - [func \(r Rubber\) Release\(\) \(Rubber, tea.Cmd\)](<#Rubber.Release>)
   - [func \(r Rubber\) Tick\(\) tea.Cmd](<#Rubber.Tick>)
-  - [func \(r Rubber\) Update\(msg tea.Msg\) \(Rubber, tea.Cmd\)](<#Rubber.Update>)
+  - [func \(r Rubber\) Update\(msg tea.Msg\) \(Rubber, bezel.Result\)](<#Rubber.Update>)
   - [func \(r Rubber\) WithGive\(g float64\) Rubber](<#Rubber.WithGive>)
 - [type Series](<#Series>)
   - [func Draw\(values \[\]float64, dur time.Duration\) Series](<#Draw>)
@@ -206,7 +206,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(s Series\) FrameAt\(at time.Time\) FrameMsg](<#Series.FrameAt>)
   - [func \(s Series\) Push\(v float64, keep int\) \(Series, tea.Cmd\)](<#Series.Push>)
   - [func \(s Series\) Tick\(\) tea.Cmd](<#Series.Tick>)
-  - [func \(s Series\) Update\(msg tea.Msg\) \(Series, tea.Cmd\)](<#Series.Update>)
+  - [func \(s Series\) Update\(msg tea.Msg\) \(Series, bezel.Result\)](<#Series.Update>)
   - [func \(s Series\) Values\(\) \[\]float64](<#Series.Values>)
   - [func \(s Series\) WithDuration\(d time.Duration\) Series](<#Series.WithDuration>)
   - [func \(s Series\) WithEase\(e Ease\) Series](<#Series.WithEase>)
@@ -226,7 +226,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(s Spring\) Int\(\) int](<#Spring.Int>)
   - [func \(s Spring\) Tick\(\) tea.Cmd](<#Spring.Tick>)
   - [func \(s Spring\) To\(target float64\) \(Spring, tea.Cmd\)](<#Spring.To>)
-  - [func \(s Spring\) Update\(msg tea.Msg\) \(Spring, tea.Cmd\)](<#Spring.Update>)
+  - [func \(s Spring\) Update\(msg tea.Msg\) \(Spring, bezel.Result\)](<#Spring.Update>)
   - [func \(s Spring\) WithDamping\(d float64\) Spring](<#Spring.WithDamping>)
   - [func \(s Spring\) WithFreq\(f float64\) Spring](<#Spring.WithFreq>)
 - [type Timeline](<#Timeline>)
@@ -237,7 +237,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(t Timeline\) FrameAt\(at time.Time\) FrameMsg](<#Timeline.FrameAt>)
   - [func \(t Timeline\) Progress\(name string\) float64](<#Timeline.Progress>)
   - [func \(t Timeline\) Tick\(\) tea.Cmd](<#Timeline.Tick>)
-  - [func \(t Timeline\) Update\(msg tea.Msg\) \(Timeline, tea.Cmd\)](<#Timeline.Update>)
+  - [func \(t Timeline\) Update\(msg tea.Msg\) \(Timeline, bezel.Result\)](<#Timeline.Update>)
   - [func \(t Timeline\) Value\(name string\) float64](<#Timeline.Value>)
   - [func \(t Timeline\) WithRepeat\(n int\) Timeline](<#Timeline.WithRepeat>)
   - [func \(t Timeline\) WithYoyo\(on bool\) Timeline](<#Timeline.WithYoyo>)
@@ -248,7 +248,7 @@ Package animation moves values on frames that arrive as messages: tweens, spring
   - [func \(t Tween\) At\(now time.Time\) \(int, bool\)](<#Tween.At>)
   - [func \(t Tween\) FrameAt\(at time.Time\) FrameMsg](<#Tween.FrameAt>)
   - [func \(t Tween\) Tick\(\) tea.Cmd](<#Tween.Tick>)
-  - [func \(t Tween\) Update\(msg tea.Msg\) \(Tween, tea.Cmd\)](<#Tween.Update>)
+  - [func \(t Tween\) Update\(msg tea.Msg\) \(Tween, bezel.Result\)](<#Tween.Update>)
   - [func \(t Tween\) WithDelay\(d time.Duration\) Tween](<#Tween.WithDelay>)
   - [func \(t Tween\) WithEase\(e Ease\) Tween](<#Tween.WithEase>)
   - [func \(t Tween\) WithRepeat\(n int\) Tween](<#Tween.WithRepeat>)
@@ -279,7 +279,7 @@ func Back(p float64) float64
 Back pulls back a little before it goes; Out\(Back\) overshoots and settles.
 
 <a name="Blend"></a>
-## func [Blend](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L58>)
+## func [Blend](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L62>)
 
 ```go
 func Blend(a, b color.Color, p float64) color.Color
@@ -297,7 +297,7 @@ func Bounce(p float64) float64
 Bounce hops off the start a few times before it goes; Out\(Bounce\) drops onto its end like a ball, and never leaves \[0,1\].
 
 <a name="Cascade"></a>
-## func [Cascade](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L195>)
+## func [Cascade](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L198>)
 
 ```go
 func Cascade[T delayer[T]](gap time.Duration, items ...T) []T
@@ -432,7 +432,7 @@ func Still() bool
 Still reports whether motion is switched off: BEZEL\_NO\_MOTION set to anything, TERM=dumb, or BEZEL\_MOTION at 0. Then every animation is born where it would end, for a user who finds motion hard to follow, a slow link or a CI log.
 
 <a name="Burst"></a>
-## type [Burst](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L23-L32>)
+## type [Burst](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L24-L33>)
 
 Burst throws sparks out of a point in every direction and lets gravity pull them down as they fade: a task ticked off, a level up, a "\+1" that pops. Draw each of Sparks; Still, it is born spent.
 
@@ -443,7 +443,7 @@ type Burst struct {
 ```
 
 <a name="NewBurst"></a>
-### func [NewBurst](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L35>)
+### func [NewBurst](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L38>)
 
 ```go
 func NewBurst(at Point, n int, dur time.Duration) Burst
@@ -452,7 +452,7 @@ func NewBurst(at Point, n int, dur time.Duration) Burst
 NewBurst throws n sparks out of at over dur.
 
 <a name="Burst.Active"></a>
-### func \(Burst\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L83>)
+### func \(Burst\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L86>)
 
 ```go
 func (b Burst) Active() bool
@@ -461,7 +461,7 @@ func (b Burst) Active() bool
 Active reports whether any spark is still flying.
 
 <a name="Burst.Advance"></a>
-### func \(Burst\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L106>)
+### func \(Burst\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L109>)
 
 ```go
 func (b Burst) Advance(now time.Time) (Burst, bool)
@@ -470,7 +470,7 @@ func (b Burst) Advance(now time.Time) (Burst, bool)
 Advance is b at now, and whether it is spent.
 
 <a name="Burst.FrameAt"></a>
-### func \(Burst\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L89>)
+### func \(Burst\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L92>)
 
 ```go
 func (b Burst) FrameAt(at time.Time) FrameMsg
@@ -479,7 +479,7 @@ func (b Burst) FrameAt(at time.Time) FrameMsg
 FrameAt is b's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Burst.Sparks"></a>
-### func \(Burst\) [Sparks](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L66>)
+### func \(Burst\) [Sparks](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L69>)
 
 ```go
 func (b Burst) Sparks() []Spark
@@ -488,7 +488,7 @@ func (b Burst) Sparks() []Spark
 Sparks is every spark still alive, where it has flown. Rows count double, as a terminal cell is twice as tall as it is wide.
 
 <a name="Burst.Tick"></a>
-### func \(Burst\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L86>)
+### func \(Burst\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L89>)
 
 ```go
 func (b Burst) Tick() tea.Cmd
@@ -497,16 +497,16 @@ func (b Burst) Tick() tea.Cmd
 Tick is the command for b's next frame, nil once it is spent.
 
 <a name="Burst.Update"></a>
-### func \(Burst\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L92>)
+### func \(Burst\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L95>)
 
 ```go
-func (b Burst) Update(msg tea.Msg) (Burst, tea.Cmd)
+func (b Burst) Update(msg tea.Msg) (Burst, bezel.Result)
 ```
 
 Update flies on its own frames and asks for the next until it is spent.
 
 <a name="Burst.WithDelay"></a>
-### func \(Burst\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L119>)
+### func \(Burst\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L122>)
 
 ```go
 func (b Burst) WithDelay(d time.Duration) Burst
@@ -515,7 +515,7 @@ func (b Burst) WithDelay(d time.Duration) Burst
 WithDelay holds the sparks in for d after the first frame.
 
 <a name="Burst.WithGravity"></a>
-### func \(Burst\) [WithGravity](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L53>)
+### func \(Burst\) [WithGravity](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L56>)
 
 ```go
 func (b Burst) WithGravity(g float64) Burst
@@ -524,7 +524,7 @@ func (b Burst) WithGravity(g float64) Burst
 WithGravity pulls the sparks down at g cells a second squared: 30 when unset, 0 for none.
 
 <a name="Burst.WithSeed"></a>
-### func \(Burst\) [WithSeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L59>)
+### func \(Burst\) [WithSeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L62>)
 
 ```go
 func (b Burst) WithSeed(seed uint64) Burst
@@ -533,7 +533,7 @@ func (b Burst) WithSeed(seed uint64) Burst
 WithSeed throws the sparks another way.
 
 <a name="Burst.WithSpeed"></a>
-### func \(Burst\) [WithSpeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L44>)
+### func \(Burst\) [WithSpeed](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L47>)
 
 ```go
 func (b Burst) WithSpeed(v float64) Burst
@@ -625,7 +625,7 @@ func (c Clock) Take(msg tea.Msg) (Clock, time.Time, bool)
 Take is Frame for a host that lets c pace itself: frames that arrive twice as far apart as asked mean the screen cannot keep up, so c asks half as often, down to a quarter of the usual rate, and faster again once they keep up.
 
 <a name="Drop"></a>
-## type [Drop](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L18-L25>)
+## type [Drop](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L19-L26>)
 
 Drop lets a value fall onto a floor under gravity and bounce until it settles: a notice that drops into place, a card that lands. Unlike Out\(Bounce\) it follows real motion: each hop lower and quicker than the last.
 
@@ -637,7 +637,7 @@ type Drop struct {
 ```
 
 <a name="NewDrop"></a>
-### func [NewDrop](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L28>)
+### func [NewDrop](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L31>)
 
 ```go
 func NewDrop(from, to float64) Drop
@@ -646,7 +646,7 @@ func NewDrop(from, to float64) Drop
 NewDrop falls from from to the floor at to, either way up the screen.
 
 <a name="Drop.Active"></a>
-### func \(Drop\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L74>)
+### func \(Drop\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L77>)
 
 ```go
 func (d Drop) Active() bool
@@ -655,7 +655,7 @@ func (d Drop) Active() bool
 Active reports whether d is still falling or bouncing.
 
 <a name="Drop.Advance"></a>
-### func \(Drop\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L97>)
+### func \(Drop\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L100>)
 
 ```go
 func (d Drop) Advance(now time.Time) (Drop, bool)
@@ -664,7 +664,7 @@ func (d Drop) Advance(now time.Time) (Drop, bool)
 Advance is d at now, and whether it settled.
 
 <a name="Drop.FrameAt"></a>
-### func \(Drop\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L80>)
+### func \(Drop\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L83>)
 
 ```go
 func (d Drop) FrameAt(at time.Time) FrameMsg
@@ -682,7 +682,7 @@ func (d Drop) Shape() (w, h float64)
 Shape is how d should be drawn now, squash and stretch, as factors of its resting width and height: taller and narrower as it falls fast, wide and flat as it hits the floor, round at rest. Their product stays near 1.
 
 <a name="Drop.Tick"></a>
-### func \(Drop\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L77>)
+### func \(Drop\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L80>)
 
 ```go
 func (d Drop) Tick() tea.Cmd
@@ -691,16 +691,16 @@ func (d Drop) Tick() tea.Cmd
 Tick is the command for d's next frame, nil once it settled.
 
 <a name="Drop.Update"></a>
-### func \(Drop\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L83>)
+### func \(Drop\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L86>)
 
 ```go
-func (d Drop) Update(msg tea.Msg) (Drop, tea.Cmd)
+func (d Drop) Update(msg tea.Msg) (Drop, bezel.Result)
 ```
 
 Update falls on its own frames and asks for the next until it settles.
 
 <a name="Drop.WithBounce"></a>
-### func \(Drop\) [WithBounce](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L46>)
+### func \(Drop\) [WithBounce](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L49>)
 
 ```go
 func (d Drop) WithBounce(e float64) Drop
@@ -709,7 +709,7 @@ func (d Drop) WithBounce(e float64) Drop
 WithBounce is d keeping e of its speed at each hit, in \[0,1\): 0 lands dead.
 
 <a name="Drop.WithGravity"></a>
-### func \(Drop\) [WithGravity](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L38>)
+### func \(Drop\) [WithGravity](<https://github.com/lucasassuncao/bezel/blob/main/animation/drop.go#L41>)
 
 ```go
 func (d Drop) WithGravity(g float64) Drop
@@ -754,7 +754,7 @@ func Steps(n int) Ease
 Steps moves in n equal jumps, like a clock's hand; none is one jump to the end.
 
 <a name="Fade"></a>
-## type [Fade](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L13-L16>)
+## type [Fade](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L15-L18>)
 
 Fade moves a colour from one to another: a status that dims once read, a border that warms when focused, a match whose highlight cools.
 
@@ -765,7 +765,7 @@ type Fade struct {
 ```
 
 <a name="NewFade"></a>
-### func [NewFade](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L20>)
+### func [NewFade](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L24>)
 
 ```go
 func NewFade(from, to color.Color, dur time.Duration) Fade
@@ -774,7 +774,7 @@ func NewFade(from, to color.Color, dur time.Duration) Fade
 NewFade goes from from to to over dur. A nil colour is the terminal's own, which cannot be mixed: Blend switches to the other half way.
 
 <a name="Fade.Active"></a>
-### func \(Fade\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L34>)
+### func \(Fade\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L38>)
 
 ```go
 func (f Fade) Active() bool
@@ -783,7 +783,7 @@ func (f Fade) Active() bool
 Active reports whether f is still changing.
 
 <a name="Fade.Advance"></a>
-### func \(Fade\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L50>)
+### func \(Fade\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L54>)
 
 ```go
 func (f Fade) Advance(now time.Time) (Fade, bool)
@@ -792,7 +792,7 @@ func (f Fade) Advance(now time.Time) (Fade, bool)
 Advance is f sampled at now, and whether it landed.
 
 <a name="Fade.Color"></a>
-### func \(Fade\) [Color](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L31>)
+### func \(Fade\) [Color](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L35>)
 
 ```go
 func (f Fade) Color() color.Color
@@ -801,7 +801,7 @@ func (f Fade) Color() color.Color
 Color is the colour this frame draws with.
 
 <a name="Fade.FrameAt"></a>
-### func \(Fade\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L40>)
+### func \(Fade\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L44>)
 
 ```go
 func (f Fade) FrameAt(at time.Time) FrameMsg
@@ -810,7 +810,7 @@ func (f Fade) FrameAt(at time.Time) FrameMsg
 FrameAt is f's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Fade.Tick"></a>
-### func \(Fade\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L37>)
+### func \(Fade\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L41>)
 
 ```go
 func (f Fade) Tick() tea.Cmd
@@ -819,16 +819,16 @@ func (f Fade) Tick() tea.Cmd
 Tick is the command for f's next frame, nil once it landed.
 
 <a name="Fade.Update"></a>
-### func \(Fade\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L43>)
+### func \(Fade\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L47>)
 
 ```go
-func (f Fade) Update(msg tea.Msg) (Fade, tea.Cmd)
+func (f Fade) Update(msg tea.Msg) (Fade, bezel.Result)
 ```
 
 Update samples f on its own frames and asks for the next until it lands.
 
 <a name="Fade.WithDelay"></a>
-### func \(Fade\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L75>)
+### func \(Fade\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L79>)
 
 ```go
 func (f Fade) WithDelay(d time.Duration) Fade
@@ -837,7 +837,7 @@ func (f Fade) WithDelay(d time.Duration) Fade
 WithDelay holds f at its first colour for d after its first frame.
 
 <a name="Fade.WithEase"></a>
-### func \(Fade\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L25>)
+### func \(Fade\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L29>)
 
 ```go
 func (f Fade) WithEase(e Ease) Fade
@@ -846,7 +846,7 @@ func (f Fade) WithEase(e Ease) Fade
 WithEase is f following e instead of EaseInOut.
 
 <a name="Fade.WithRepeat"></a>
-### func \(Fade\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L81>)
+### func \(Fade\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L85>)
 
 ```go
 func (f Fade) WithRepeat(n int) Fade
@@ -855,7 +855,7 @@ func (f Fade) WithRepeat(n int) Fade
 WithRepeat runs f n more times after the first, or without end for Forever.
 
 <a name="Fade.WithYoyo"></a>
-### func \(Fade\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L87>)
+### func \(Fade\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/fade.go#L91>)
 
 ```go
 func (f Fade) WithYoyo(on bool) Fade
@@ -864,7 +864,7 @@ func (f Fade) WithYoyo(on bool) Fade
 WithYoyo sends every other run of f back: with Forever, a pulse.
 
 <a name="Float"></a>
-## type [Float](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L14-L18>)
+## type [Float](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L15-L19>)
 
 Float is Tween over a float64, for what moves by less than a cell: a progress bar drawn in eighths, a scrollbar's thumb, a colour's mix.
 
@@ -877,7 +877,7 @@ type Float struct {
 ```
 
 <a name="NewFloat"></a>
-### func [NewFloat](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L22>)
+### func [NewFloat](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L25>)
 
 ```go
 func NewFloat(from, to float64, dur time.Duration) Float
@@ -886,7 +886,7 @@ func NewFloat(from, to float64, dur time.Duration) Float
 NewFloat eases from from to to over dur, its clock started by its first frame. When dur \<= 0, from == to or motion is Still it is inactive at to.
 
 <a name="Float.Active"></a>
-### func \(Float\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L36>)
+### func \(Float\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L39>)
 
 ```go
 func (f Float) Active() bool
@@ -895,7 +895,7 @@ func (f Float) Active() bool
 Active reports whether f is still moving.
 
 <a name="Float.Advance"></a>
-### func \(Float\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L63>)
+### func \(Float\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L66>)
 
 ```go
 func (f Float) Advance(now time.Time) (Float, bool)
@@ -904,7 +904,7 @@ func (f Float) Advance(now time.Time) (Float, bool)
 Advance is f sampled at now, and whether it landed: for a host driving several animations from one Clock.
 
 <a name="Float.FrameAt"></a>
-### func \(Float\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L45>)
+### func \(Float\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L48>)
 
 ```go
 func (f Float) FrameAt(at time.Time) FrameMsg
@@ -913,7 +913,7 @@ func (f Float) FrameAt(at time.Time) FrameMsg
 FrameAt is f's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Float.Int"></a>
-### func \(Float\) [Int](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L39>)
+### func \(Float\) [Int](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L42>)
 
 ```go
 func (f Float) Int() int
@@ -922,7 +922,7 @@ func (f Float) Int() int
 Int is Cur rounded to the nearest whole number.
 
 <a name="Float.Tick"></a>
-### func \(Float\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L42>)
+### func \(Float\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L45>)
 
 ```go
 func (f Float) Tick() tea.Cmd
@@ -931,16 +931,16 @@ func (f Float) Tick() tea.Cmd
 Tick is the command for f's next frame, nil once it landed.
 
 <a name="Float.Update"></a>
-### func \(Float\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L48>)
+### func \(Float\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L51>)
 
 ```go
-func (f Float) Update(msg tea.Msg) (Float, tea.Cmd)
+func (f Float) Update(msg tea.Msg) (Float, bezel.Result)
 ```
 
 Update samples f on its own frames and asks for the next until it lands.
 
 <a name="Float.WithDelay"></a>
-### func \(Float\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L82>)
+### func \(Float\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L85>)
 
 ```go
 func (f Float) WithDelay(d time.Duration) Float
@@ -949,7 +949,7 @@ func (f Float) WithDelay(d time.Duration) Float
 WithDelay holds f at From for d after its first frame.
 
 <a name="Float.WithEase"></a>
-### func \(Float\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L30>)
+### func \(Float\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L33>)
 
 ```go
 func (f Float) WithEase(e Ease) Float
@@ -958,7 +958,7 @@ func (f Float) WithEase(e Ease) Float
 WithEase is f following e instead of EaseInOut.
 
 <a name="Float.WithRepeat"></a>
-### func \(Float\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L88>)
+### func \(Float\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L91>)
 
 ```go
 func (f Float) WithRepeat(n int) Float
@@ -967,7 +967,7 @@ func (f Float) WithRepeat(n int) Float
 WithRepeat runs f n more times after the first, or without end for Forever.
 
 <a name="Float.WithYoyo"></a>
-### func \(Float\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L94>)
+### func \(Float\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/float.go#L97>)
 
 ```go
 func (f Float) WithYoyo(on bool) Float
@@ -976,7 +976,7 @@ func (f Float) WithYoyo(on bool) Float
 WithYoyo sends every other run of f back the way it came.
 
 <a name="Flock"></a>
-## type [Flock](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L16-L23>)
+## type [Flock](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L17-L24>)
 
 Flock is a line of points that follow one another: the first springs after the target, each other one after the point ahead of it, so they trail like a tail behind a cursor.
 
@@ -987,7 +987,7 @@ type Flock struct {
 ```
 
 <a name="NewFlock"></a>
-### func [NewFlock](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L26>)
+### func [NewFlock](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L29>)
 
 ```go
 func NewFlock(n int, at Point) Flock
@@ -996,7 +996,7 @@ func NewFlock(n int, at Point) Flock
 NewFlock is n points at rest at at, springs of stiffness 14 and damping 0.8.
 
 <a name="Flock.Active"></a>
-### func \(Flock\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L73>)
+### func \(Flock\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L76>)
 
 ```go
 func (f Flock) Active() bool
@@ -1005,7 +1005,7 @@ func (f Flock) Active() bool
 Active reports whether any point is still moving.
 
 <a name="Flock.Advance"></a>
-### func \(Flock\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L101>)
+### func \(Flock\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L104>)
 
 ```go
 func (f Flock) Advance(now time.Time) (Flock, bool)
@@ -1014,7 +1014,7 @@ func (f Flock) Advance(now time.Time) (Flock, bool)
 Advance is f moved to now, and whether every point came to rest. Each point springs after where the one ahead of it has just been moved to.
 
 <a name="Flock.FrameAt"></a>
-### func \(Flock\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L84>)
+### func \(Flock\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L87>)
 
 ```go
 func (f Flock) FrameAt(at time.Time) FrameMsg
@@ -1023,7 +1023,7 @@ func (f Flock) FrameAt(at time.Time) FrameMsg
 FrameAt is f's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Flock.Points"></a>
-### func \(Flock\) [Points](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L70>)
+### func \(Flock\) [Points](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L73>)
 
 ```go
 func (f Flock) Points() []Point
@@ -1032,7 +1032,7 @@ func (f Flock) Points() []Point
 Points is where every point is now, the leader first.
 
 <a name="Flock.Tick"></a>
-### func \(Flock\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L76>)
+### func \(Flock\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L79>)
 
 ```go
 func (f Flock) Tick() tea.Cmd
@@ -1041,7 +1041,7 @@ func (f Flock) Tick() tea.Cmd
 Tick is the command for f's next frame, nil at rest.
 
 <a name="Flock.To"></a>
-### func \(Flock\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L51>)
+### func \(Flock\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L54>)
 
 ```go
 func (f Flock) To(p Point) (Flock, tea.Cmd)
@@ -1050,16 +1050,16 @@ func (f Flock) To(p Point) (Flock, tea.Cmd)
 To aims the first point at p. When motion is Still every point jumps there.
 
 <a name="Flock.Update"></a>
-### func \(Flock\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L87>)
+### func \(Flock\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L90>)
 
 ```go
-func (f Flock) Update(msg tea.Msg) (Flock, tea.Cmd)
+func (f Flock) Update(msg tea.Msg) (Flock, bezel.Result)
 ```
 
 Update moves f on its own frames and asks for the next until it rests.
 
 <a name="Flock.WithDamping"></a>
-### func \(Flock\) [WithDamping](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L43>)
+### func \(Flock\) [WithDamping](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L46>)
 
 ```go
 func (f Flock) WithDamping(d float64) Flock
@@ -1068,7 +1068,7 @@ func (f Flock) WithDamping(d float64) Flock
 WithDamping is f's springs at damping d: 1 settles, below it bounces.
 
 <a name="Flock.WithFreq"></a>
-### func \(Flock\) [WithFreq](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L35>)
+### func \(Flock\) [WithFreq](<https://github.com/lucasassuncao/bezel/blob/main/animation/flock.go#L38>)
 
 ```go
 func (f Flock) WithFreq(w float64) Flock
@@ -1077,7 +1077,7 @@ func (f Flock) WithFreq(w float64) Flock
 WithFreq is f's springs at stiffness w, in radians a second.
 
 <a name="Follow"></a>
-## type [Follow](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L103-L106>)
+## type [Follow](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L106-L109>)
 
 Follow springs a point after a target on both axes, on one chain of frames.
 
@@ -1088,7 +1088,7 @@ type Follow struct {
 ```
 
 <a name="NewFollow"></a>
-### func [NewFollow](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L109>)
+### func [NewFollow](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L114>)
 
 ```go
 func NewFollow(at Point) Follow
@@ -1097,7 +1097,7 @@ func NewFollow(at Point) Follow
 NewFollow is a point at rest at at, each axis a NewSpring.
 
 <a name="Follow.Active"></a>
-### func \(Follow\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L145>)
+### func \(Follow\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L150>)
 
 ```go
 func (f Follow) Active() bool
@@ -1106,7 +1106,7 @@ func (f Follow) Active() bool
 Active reports whether either axis is still moving.
 
 <a name="Follow.Advance"></a>
-### func \(Follow\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L172>)
+### func \(Follow\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L177>)
 
 ```go
 func (f Follow) Advance(now time.Time) (Follow, bool)
@@ -1115,7 +1115,7 @@ func (f Follow) Advance(now time.Time) (Follow, bool)
 Advance is f moved to now, and whether it came to rest.
 
 <a name="Follow.FrameAt"></a>
-### func \(Follow\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L156>)
+### func \(Follow\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L161>)
 
 ```go
 func (f Follow) FrameAt(at time.Time) FrameMsg
@@ -1124,7 +1124,7 @@ func (f Follow) FrameAt(at time.Time) FrameMsg
 FrameAt is f's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Follow.Pos"></a>
-### func \(Follow\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L142>)
+### func \(Follow\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L147>)
 
 ```go
 func (f Follow) Pos() Point
@@ -1133,7 +1133,7 @@ func (f Follow) Pos() Point
 Pos is where the point is now.
 
 <a name="Follow.Tick"></a>
-### func \(Follow\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L148>)
+### func \(Follow\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L153>)
 
 ```go
 func (f Follow) Tick() tea.Cmd
@@ -1142,7 +1142,7 @@ func (f Follow) Tick() tea.Cmd
 Tick is the command for f's next frame, nil at rest.
 
 <a name="Follow.To"></a>
-### func \(Follow\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L127>)
+### func \(Follow\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L132>)
 
 ```go
 func (f Follow) To(p Point) (Follow, tea.Cmd)
@@ -1151,16 +1151,16 @@ func (f Follow) To(p Point) (Follow, tea.Cmd)
 To aims f at p. A point at rest starts its frames; a moving one keeps them, and its speed. When motion is Still it jumps there.
 
 <a name="Follow.Update"></a>
-### func \(Follow\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L159>)
+### func \(Follow\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L164>)
 
 ```go
-func (f Follow) Update(msg tea.Msg) (Follow, tea.Cmd)
+func (f Follow) Update(msg tea.Msg) (Follow, bezel.Result)
 ```
 
 Update moves f on its own frames and asks for the next until it rests.
 
 <a name="Follow.WithDamping"></a>
-### func \(Follow\) [WithDamping](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L120>)
+### func \(Follow\) [WithDamping](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L125>)
 
 ```go
 func (f Follow) WithDamping(d float64) Follow
@@ -1169,7 +1169,7 @@ func (f Follow) WithDamping(d float64) Follow
 WithDamping is f with damping d on both axes: 1 settles, below it bounces.
 
 <a name="Follow.WithFreq"></a>
-### func \(Follow\) [WithFreq](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L114>)
+### func \(Follow\) [WithFreq](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L119>)
 
 ```go
 func (f Follow) WithFreq(w float64) Follow
@@ -1178,7 +1178,7 @@ func (f Follow) WithFreq(w float64) Follow
 WithFreq is f with stiffness w on both axes, in radians a second.
 
 <a name="FrameMsg"></a>
-## type [FrameMsg](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L36>)
+## type [FrameMsg](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L39>)
 
 FrameMsg is one tick of an animation's clock, at the time it fired. Hand it to every running animation's Update: each one takes only its own.
 
@@ -1187,7 +1187,7 @@ type FrameMsg = frames.Msg
 ```
 
 <a name="Heat"></a>
-## type [Heat](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L13-L18>)
+## type [Heat](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L14-L19>)
 
 Heat moves a grid of values to new ones over dur, cell by cell: a heatmap whose cells warm and cool instead of jumping. Hand Values to a chart.
 
@@ -1198,7 +1198,7 @@ type Heat struct {
 ```
 
 <a name="NewHeat"></a>
-### func [NewHeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L21>)
+### func [NewHeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L24>)
 
 ```go
 func NewHeat(values [][]float64, dur time.Duration) Heat
@@ -1207,7 +1207,7 @@ func NewHeat(values [][]float64, dur time.Duration) Heat
 NewHeat is values at rest; each Set moves them over dur.
 
 <a name="Heat.Active"></a>
-### func \(Heat\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L71>)
+### func \(Heat\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L74>)
 
 ```go
 func (h Heat) Active() bool
@@ -1216,7 +1216,7 @@ func (h Heat) Active() bool
 Active reports whether any cell is still changing.
 
 <a name="Heat.Advance"></a>
-### func \(Heat\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L89>)
+### func \(Heat\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L92>)
 
 ```go
 func (h Heat) Advance(now time.Time) (Heat, bool)
@@ -1225,7 +1225,7 @@ func (h Heat) Advance(now time.Time) (Heat, bool)
 Advance is h at now, and whether it settled.
 
 <a name="Heat.FrameAt"></a>
-### func \(Heat\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L77>)
+### func \(Heat\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L80>)
 
 ```go
 func (h Heat) FrameAt(at time.Time) FrameMsg
@@ -1234,7 +1234,7 @@ func (h Heat) FrameAt(at time.Time) FrameMsg
 FrameAt is h's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Heat.Set"></a>
-### func \(Heat\) [Set](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L27>)
+### func \(Heat\) [Set](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L30>)
 
 ```go
 func (h Heat) Set(values [][]float64) (Heat, tea.Cmd)
@@ -1243,7 +1243,7 @@ func (h Heat) Set(values [][]float64) (Heat, tea.Cmd)
 Set moves every cell from where it is now to values. A cell the grid did not have before rises from zero.
 
 <a name="Heat.Tick"></a>
-### func \(Heat\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L74>)
+### func \(Heat\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L77>)
 
 ```go
 func (h Heat) Tick() tea.Cmd
@@ -1252,16 +1252,16 @@ func (h Heat) Tick() tea.Cmd
 Tick is the command for h's next frame, nil at rest.
 
 <a name="Heat.Update"></a>
-### func \(Heat\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L80>)
+### func \(Heat\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L83>)
 
 ```go
-func (h Heat) Update(msg tea.Msg) (Heat, tea.Cmd)
+func (h Heat) Update(msg tea.Msg) (Heat, bezel.Result)
 ```
 
 Update moves on its own frames and asks for the next until it settles.
 
 <a name="Heat.Values"></a>
-### func \(Heat\) [Values](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L47>)
+### func \(Heat\) [Values](<https://github.com/lucasassuncao/bezel/blob/main/animation/heat.go#L50>)
 
 ```go
 func (h Heat) Values() [][]float64
@@ -1270,7 +1270,7 @@ func (h Heat) Values() [][]float64
 Values are the numbers to draw now.
 
 <a name="Key"></a>
-## type [Key](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L15-L19>)
+## type [Key](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L16-L20>)
 
 Key is one stop of Keyframes: the value at a share of the duration, and the curve that leads into it from the stop before.
 
@@ -1283,7 +1283,7 @@ type Key struct {
 ```
 
 <a name="Keyframes"></a>
-## type [Keyframes](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L23-L27>)
+## type [Keyframes](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L24-L28>)
 
 Keyframes moves a value through several stops instead of one: a bounce that lands, rises and lands again, or a dial that overshoots twice.
 
@@ -1295,7 +1295,7 @@ type Keyframes struct {
 ```
 
 <a name="NewKeyframes"></a>
-### func [NewKeyframes](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L31>)
+### func [NewKeyframes](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L34>)
 
 ```go
 func NewKeyframes(dur time.Duration, keys ...Key) Keyframes
@@ -1304,7 +1304,7 @@ func NewKeyframes(dur time.Duration, keys ...Key) Keyframes
 NewKeyframes plays keys over dur, sorted by At. With motion Still, no time or fewer than two keys it is inactive at the last key's value.
 
 <a name="Keyframes.Active"></a>
-### func \(Keyframes\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L85>)
+### func \(Keyframes\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L88>)
 
 ```go
 func (k Keyframes) Active() bool
@@ -1313,7 +1313,7 @@ func (k Keyframes) Active() bool
 Active reports whether k is still moving.
 
 <a name="Keyframes.Advance"></a>
-### func \(Keyframes\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L108>)
+### func \(Keyframes\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L111>)
 
 ```go
 func (k Keyframes) Advance(now time.Time) (Keyframes, bool)
@@ -1322,7 +1322,7 @@ func (k Keyframes) Advance(now time.Time) (Keyframes, bool)
 Advance is k at now, and whether it ended.
 
 <a name="Keyframes.FrameAt"></a>
-### func \(Keyframes\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L91>)
+### func \(Keyframes\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L94>)
 
 ```go
 func (k Keyframes) FrameAt(at time.Time) FrameMsg
@@ -1331,7 +1331,7 @@ func (k Keyframes) FrameAt(at time.Time) FrameMsg
 FrameAt is k's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Keyframes.Tick"></a>
-### func \(Keyframes\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L88>)
+### func \(Keyframes\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L91>)
 
 ```go
 func (k Keyframes) Tick() tea.Cmd
@@ -1340,16 +1340,16 @@ func (k Keyframes) Tick() tea.Cmd
 Tick is the command for k's next frame, nil once it ended.
 
 <a name="Keyframes.Update"></a>
-### func \(Keyframes\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L94>)
+### func \(Keyframes\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L97>)
 
 ```go
-func (k Keyframes) Update(msg tea.Msg) (Keyframes, tea.Cmd)
+func (k Keyframes) Update(msg tea.Msg) (Keyframes, bezel.Result)
 ```
 
 Update moves on its own frames and asks for the next until it ends.
 
 <a name="Keyframes.WithDelay"></a>
-### func \(Keyframes\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L67>)
+### func \(Keyframes\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L70>)
 
 ```go
 func (k Keyframes) WithDelay(d time.Duration) Keyframes
@@ -1358,7 +1358,7 @@ func (k Keyframes) WithDelay(d time.Duration) Keyframes
 WithDelay holds k at its first key for d after its first frame.
 
 <a name="Keyframes.WithRepeat"></a>
-### func \(Keyframes\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L73>)
+### func \(Keyframes\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L76>)
 
 ```go
 func (k Keyframes) WithRepeat(n int) Keyframes
@@ -1367,7 +1367,7 @@ func (k Keyframes) WithRepeat(n int) Keyframes
 WithRepeat plays k n more times after the first, or without end for Forever.
 
 <a name="Keyframes.WithYoyo"></a>
-### func \(Keyframes\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L79>)
+### func \(Keyframes\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/keyframes.go#L82>)
 
 ```go
 func (k Keyframes) WithYoyo(on bool) Keyframes
@@ -1376,7 +1376,7 @@ func (k Keyframes) WithYoyo(on bool) Keyframes
 WithYoyo plays every other pass of k backwards.
 
 <a name="Move"></a>
-## type [Move](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L20-L24>)
+## type [Move](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L21-L25>)
 
 Move eases a point from one place to another over a duration: an overlay that drops in, a marker that travels.
 
@@ -1389,7 +1389,7 @@ type Move struct {
 ```
 
 <a name="NewMove"></a>
-### func [NewMove](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L28>)
+### func [NewMove](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L31>)
 
 ```go
 func NewMove(from, to Point, dur time.Duration) Move
@@ -1398,7 +1398,7 @@ func NewMove(from, to Point, dur time.Duration) Move
 NewMove goes from from to to over dur. When dur \<= 0, from == to or motion is Still it is inactive and already at to.
 
 <a name="Move.Active"></a>
-### func \(Move\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L60>)
+### func \(Move\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L63>)
 
 ```go
 func (m Move) Active() bool
@@ -1407,7 +1407,7 @@ func (m Move) Active() bool
 Active reports whether m is still moving.
 
 <a name="Move.Advance"></a>
-### func \(Move\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L83>)
+### func \(Move\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L86>)
 
 ```go
 func (m Move) Advance(now time.Time) (Move, bool)
@@ -1416,7 +1416,7 @@ func (m Move) Advance(now time.Time) (Move, bool)
 Advance is m at now, and whether it landed.
 
 <a name="Move.FrameAt"></a>
-### func \(Move\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L66>)
+### func \(Move\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L69>)
 
 ```go
 func (m Move) FrameAt(at time.Time) FrameMsg
@@ -1425,7 +1425,7 @@ func (m Move) FrameAt(at time.Time) FrameMsg
 FrameAt is m's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Move.Tick"></a>
-### func \(Move\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L63>)
+### func \(Move\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L66>)
 
 ```go
 func (m Move) Tick() tea.Cmd
@@ -1434,16 +1434,16 @@ func (m Move) Tick() tea.Cmd
 Tick is the command for m's next frame, nil once it landed.
 
 <a name="Move.Update"></a>
-### func \(Move\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L69>)
+### func \(Move\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L72>)
 
 ```go
-func (m Move) Update(msg tea.Msg) (Move, tea.Cmd)
+func (m Move) Update(msg tea.Msg) (Move, bezel.Result)
 ```
 
 Update moves on its own frames and asks for the next until it lands.
 
 <a name="Move.WithDelay"></a>
-### func \(Move\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L42>)
+### func \(Move\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L45>)
 
 ```go
 func (m Move) WithDelay(d time.Duration) Move
@@ -1452,7 +1452,7 @@ func (m Move) WithDelay(d time.Duration) Move
 WithDelay holds m at From for d after its first frame.
 
 <a name="Move.WithEase"></a>
-### func \(Move\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L36>)
+### func \(Move\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L39>)
 
 ```go
 func (m Move) WithEase(e Ease) Move
@@ -1461,7 +1461,7 @@ func (m Move) WithEase(e Ease) Move
 WithEase is m following e instead of EaseInOut.
 
 <a name="Move.WithRepeat"></a>
-### func \(Move\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L48>)
+### func \(Move\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L51>)
 
 ```go
 func (m Move) WithRepeat(n int) Move
@@ -1470,7 +1470,7 @@ func (m Move) WithRepeat(n int) Move
 WithRepeat runs m n more times after the first, or without end for Forever.
 
 <a name="Move.WithYoyo"></a>
-### func \(Move\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L54>)
+### func \(Move\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L57>)
 
 ```go
 func (m Move) WithYoyo(on bool) Move
@@ -1479,7 +1479,7 @@ func (m Move) WithYoyo(on bool) Move
 WithYoyo sends every other run of m back the way it came.
 
 <a name="Orbit"></a>
-## type [Orbit](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L14-L19>)
+## type [Orbit](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L15-L20>)
 
 Orbit carries a point round a centre on an ellipse, once every period, for as long as it lives: a spinner with depth, a satellite round a title.
 
@@ -1490,7 +1490,7 @@ type Orbit struct {
 ```
 
 <a name="NewOrbit"></a>
-### func [NewOrbit](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L23>)
+### func [NewOrbit](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L26>)
 
 ```go
 func NewOrbit(centre Point, rx, ry float64, period time.Duration) Orbit
@@ -1499,7 +1499,7 @@ func NewOrbit(centre Point, rx, ry float64, period time.Duration) Orbit
 NewOrbit circles centre at rx columns and ry rows; a terminal cell is about twice as tall as wide, so ry near rx/2 looks round.
 
 <a name="Orbit.Active"></a>
-### func \(Orbit\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L49>)
+### func \(Orbit\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L52>)
 
 ```go
 func (o Orbit) Active() bool
@@ -1508,7 +1508,7 @@ func (o Orbit) Active() bool
 Active reports whether the point is still going round.
 
 <a name="Orbit.Advance"></a>
-### func \(Orbit\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L67>)
+### func \(Orbit\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L70>)
 
 ```go
 func (o Orbit) Advance(now time.Time) (Orbit, bool)
@@ -1517,7 +1517,7 @@ func (o Orbit) Advance(now time.Time) (Orbit, bool)
 Advance is o at now, and whether it stopped.
 
 <a name="Orbit.FrameAt"></a>
-### func \(Orbit\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L55>)
+### func \(Orbit\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L58>)
 
 ```go
 func (o Orbit) FrameAt(at time.Time) FrameMsg
@@ -1526,7 +1526,7 @@ func (o Orbit) FrameAt(at time.Time) FrameMsg
 FrameAt is o's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Orbit.Near"></a>
-### func \(Orbit\) [Near](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L46>)
+### func \(Orbit\) [Near](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L49>)
 
 ```go
 func (o Orbit) Near() bool
@@ -1535,7 +1535,7 @@ func (o Orbit) Near() bool
 Near reports whether the point is on the near half of its ellipse, the one below the centre: draw it over what it circles there, behind it on the far half.
 
 <a name="Orbit.Pos"></a>
-### func \(Orbit\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L39>)
+### func \(Orbit\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L42>)
 
 ```go
 func (o Orbit) Pos() Point
@@ -1544,7 +1544,7 @@ func (o Orbit) Pos() Point
 Pos is where the point is now.
 
 <a name="Orbit.Tick"></a>
-### func \(Orbit\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L52>)
+### func \(Orbit\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L55>)
 
 ```go
 func (o Orbit) Tick() tea.Cmd
@@ -1553,16 +1553,16 @@ func (o Orbit) Tick() tea.Cmd
 Tick is the command for o's next frame, nil once it stopped.
 
 <a name="Orbit.Update"></a>
-### func \(Orbit\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L58>)
+### func \(Orbit\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L61>)
 
 ```go
-func (o Orbit) Update(msg tea.Msg) (Orbit, tea.Cmd)
+func (o Orbit) Update(msg tea.Msg) (Orbit, bezel.Result)
 ```
 
 Update goes round on its own frames and asks for the next while it runs.
 
 <a name="Orbit.WithRepeat"></a>
-### func \(Orbit\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L30>)
+### func \(Orbit\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/orbit.go#L33>)
 
 ```go
 func (o Orbit) WithRepeat(n int) Orbit
@@ -1571,7 +1571,7 @@ func (o Orbit) WithRepeat(n int) Orbit
 WithRepeat goes round n more times after the first instead of forever.
 
 <a name="Path"></a>
-## type [Path](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L14-L19>)
+## type [Path](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L15-L20>)
 
 Path carries a point along a line of points at an even speed, however far apart they sit: a marker that follows a route, a cursor that curves.
 
@@ -1583,7 +1583,7 @@ type Path struct {
 ```
 
 <a name="NewPath"></a>
-### func [NewPath](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L23>)
+### func [NewPath](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L26>)
 
 ```go
 func NewPath(dur time.Duration, points ...Point) Path
@@ -1592,7 +1592,7 @@ func NewPath(dur time.Duration, points ...Point) Path
 NewPath travels points over dur. With fewer than two points, a path of no length, or motion Still, it is inactive at the last point.
 
 <a name="Path.Active"></a>
-### func \(Path\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L103>)
+### func \(Path\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L106>)
 
 ```go
 func (p Path) Active() bool
@@ -1601,7 +1601,7 @@ func (p Path) Active() bool
 Active reports whether p is still travelling.
 
 <a name="Path.Advance"></a>
-### func \(Path\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L126>)
+### func \(Path\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L129>)
 
 ```go
 func (p Path) Advance(now time.Time) (Path, bool)
@@ -1610,7 +1610,7 @@ func (p Path) Advance(now time.Time) (Path, bool)
 Advance is p at now, and whether it arrived.
 
 <a name="Path.FrameAt"></a>
-### func \(Path\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L109>)
+### func \(Path\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L112>)
 
 ```go
 func (p Path) FrameAt(at time.Time) FrameMsg
@@ -1619,7 +1619,7 @@ func (p Path) FrameAt(at time.Time) FrameMsg
 FrameAt is p's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Path.Tick"></a>
-### func \(Path\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L106>)
+### func \(Path\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L109>)
 
 ```go
 func (p Path) Tick() tea.Cmd
@@ -1628,16 +1628,16 @@ func (p Path) Tick() tea.Cmd
 Tick is the command for p's next frame, nil once it arrived.
 
 <a name="Path.Update"></a>
-### func \(Path\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L112>)
+### func \(Path\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L115>)
 
 ```go
-func (p Path) Update(msg tea.Msg) (Path, tea.Cmd)
+func (p Path) Update(msg tea.Msg) (Path, bezel.Result)
 ```
 
 Update travels on its own frames and asks for the next until it arrives.
 
 <a name="Path.WithDelay"></a>
-### func \(Path\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L85>)
+### func \(Path\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L88>)
 
 ```go
 func (p Path) WithDelay(d time.Duration) Path
@@ -1646,7 +1646,7 @@ func (p Path) WithDelay(d time.Duration) Path
 WithDelay holds p at its start for d after its first frame.
 
 <a name="Path.WithEase"></a>
-### func \(Path\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L79>)
+### func \(Path\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L82>)
 
 ```go
 func (p Path) WithEase(e Ease) Path
@@ -1655,7 +1655,7 @@ func (p Path) WithEase(e Ease) Path
 WithEase is p following e along its length instead of EaseInOut.
 
 <a name="Path.WithRepeat"></a>
-### func \(Path\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L91>)
+### func \(Path\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L94>)
 
 ```go
 func (p Path) WithRepeat(n int) Path
@@ -1664,7 +1664,7 @@ func (p Path) WithRepeat(n int) Path
 WithRepeat travels p n more times after the first, or without end for Forever.
 
 <a name="Path.WithYoyo"></a>
-### func \(Path\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L97>)
+### func \(Path\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L100>)
 
 ```go
 func (p Path) WithYoyo(on bool) Path
@@ -1673,7 +1673,7 @@ func (p Path) WithYoyo(on bool) Path
 WithYoyo travels every other pass of p back.
 
 <a name="Pendulum"></a>
-## type [Pendulum](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L14-L20>)
+## type [Pendulum](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L15-L21>)
 
 Pendulum swings a value either side of 0, Cur cells from the middle: a "waiting" sign that sways, a needle settling, a notice that swings in.
 
@@ -1685,7 +1685,7 @@ type Pendulum struct {
 ```
 
 <a name="NewPendulum"></a>
-### func [NewPendulum](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L24>)
+### func [NewPendulum](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L27>)
 
 ```go
 func NewPendulum(amp float64, period time.Duration) Pendulum
@@ -1694,7 +1694,7 @@ func NewPendulum(amp float64, period time.Duration) Pendulum
 NewPendulum swings amp cells either way, once every period, for as long as it lives. WithDecay lets it come to rest.
 
 <a name="Pendulum.Active"></a>
-### func \(Pendulum\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L53>)
+### func \(Pendulum\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L56>)
 
 ```go
 func (p Pendulum) Active() bool
@@ -1703,7 +1703,7 @@ func (p Pendulum) Active() bool
 Active reports whether p is still swinging.
 
 <a name="Pendulum.Advance"></a>
-### func \(Pendulum\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L76>)
+### func \(Pendulum\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L79>)
 
 ```go
 func (p Pendulum) Advance(now time.Time) (Pendulum, bool)
@@ -1712,7 +1712,7 @@ func (p Pendulum) Advance(now time.Time) (Pendulum, bool)
 Advance is p at now, and whether it came to rest.
 
 <a name="Pendulum.FrameAt"></a>
-### func \(Pendulum\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L59>)
+### func \(Pendulum\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L62>)
 
 ```go
 func (p Pendulum) FrameAt(at time.Time) FrameMsg
@@ -1721,7 +1721,7 @@ func (p Pendulum) FrameAt(at time.Time) FrameMsg
 FrameAt is p's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Pendulum.Tick"></a>
-### func \(Pendulum\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L56>)
+### func \(Pendulum\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L59>)
 
 ```go
 func (p Pendulum) Tick() tea.Cmd
@@ -1730,16 +1730,16 @@ func (p Pendulum) Tick() tea.Cmd
 Tick is the command for p's next frame, nil at rest.
 
 <a name="Pendulum.Update"></a>
-### func \(Pendulum\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L62>)
+### func \(Pendulum\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L65>)
 
 ```go
-func (p Pendulum) Update(msg tea.Msg) (Pendulum, tea.Cmd)
+func (p Pendulum) Update(msg tea.Msg) (Pendulum, bezel.Result)
 ```
 
 Update swings on its own frames and asks for the next until it rests.
 
 <a name="Pendulum.WithDecay"></a>
-### func \(Pendulum\) [WithDecay](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L35>)
+### func \(Pendulum\) [WithDecay](<https://github.com/lucasassuncao/bezel/blob/main/animation/pendulum.go#L38>)
 
 ```go
 func (p Pendulum) WithDecay(d time.Duration) Pendulum
@@ -1748,7 +1748,7 @@ func (p Pendulum) WithDecay(d time.Duration) Pendulum
 WithDecay shrinks every swing, to about a third of its size each d, until it is too small to see and the pendulum rests in the middle.
 
 <a name="Point"></a>
-## type [Point](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L13>)
+## type [Point](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L14>)
 
 Point is a place on the screen in cells, fractional while it moves.
 
@@ -1757,7 +1757,7 @@ type Point struct{ X, Y float64 }
 ```
 
 <a name="Bezier"></a>
-### func [Bezier](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L44>)
+### func [Bezier](<https://github.com/lucasassuncao/bezel/blob/main/animation/path.go#L47>)
 
 ```go
 func Bezier(a, b, c, d Point, n int) []Point
@@ -1766,7 +1766,7 @@ func Bezier(a, b, c, d Point, n int) []Point
 Bezier is the cubic curve from a to d pulled towards b and c, as n\+1 points for NewPath.
 
 <a name="Point.Round"></a>
-### func \(Point\) [Round](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L16>)
+### func \(Point\) [Round](<https://github.com/lucasassuncao/bezel/blob/main/animation/point.go#L17>)
 
 ```go
 func (p Point) Round() (x, y int)
@@ -1775,7 +1775,7 @@ func (p Point) Round() (x, y int)
 Round is the cell p is drawn in.
 
 <a name="Race"></a>
-## type [Race](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L23-L30>)
+## type [Race](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L24-L31>)
 
 Race moves a set of bars to new values and new places together, a bar that overtakes another sliding past it: a leaderboard, the busiest services.
 
@@ -1786,7 +1786,7 @@ type Race struct {
 ```
 
 <a name="NewRace"></a>
-### func [NewRace](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L33>)
+### func [NewRace](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L36>)
 
 ```go
 func NewRace(labels []string, values []float64, dur time.Duration) Race
@@ -1795,7 +1795,7 @@ func NewRace(labels []string, values []float64, dur time.Duration) Race
 NewRace is labels at values, placed largest first, still until Set.
 
 <a name="Race.Active"></a>
-### func \(Race\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L100>)
+### func \(Race\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L103>)
 
 ```go
 func (r Race) Active() bool
@@ -1804,7 +1804,7 @@ func (r Race) Active() bool
 Active reports whether the bars are still moving.
 
 <a name="Race.Advance"></a>
-### func \(Race\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L118>)
+### func \(Race\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L121>)
 
 ```go
 func (r Race) Advance(now time.Time) (Race, bool)
@@ -1813,7 +1813,7 @@ func (r Race) Advance(now time.Time) (Race, bool)
 Advance is r at now, and whether the bars settled.
 
 <a name="Race.FrameAt"></a>
-### func \(Race\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L106>)
+### func \(Race\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L109>)
 
 ```go
 func (r Race) FrameAt(at time.Time) FrameMsg
@@ -1822,7 +1822,7 @@ func (r Race) FrameAt(at time.Time) FrameMsg
 FrameAt is r's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Race.Racers"></a>
-### func \(Race\) [Racers](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L83>)
+### func \(Race\) [Racers](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L86>)
 
 ```go
 func (r Race) Racers() []Racer
@@ -1831,7 +1831,7 @@ func (r Race) Racers() []Racer
 Racers is every bar as it stands now, in the order the labels were given; sort by Place to draw them top to bottom.
 
 <a name="Race.Set"></a>
-### func \(Race\) [Set](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L64>)
+### func \(Race\) [Set](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L67>)
 
 ```go
 func (r Race) Set(values []float64) (Race, tea.Cmd)
@@ -1840,7 +1840,7 @@ func (r Race) Set(values []float64) (Race, tea.Cmd)
 Set moves every bar from where it is now to values, and to its new place.
 
 <a name="Race.Tick"></a>
-### func \(Race\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L103>)
+### func \(Race\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L106>)
 
 ```go
 func (r Race) Tick() tea.Cmd
@@ -1849,16 +1849,16 @@ func (r Race) Tick() tea.Cmd
 Tick is the command for r's next frame, nil once the bars settled.
 
 <a name="Race.Update"></a>
-### func \(Race\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L109>)
+### func \(Race\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L112>)
 
 ```go
-func (r Race) Update(msg tea.Msg) (Race, tea.Cmd)
+func (r Race) Update(msg tea.Msg) (Race, bezel.Result)
 ```
 
 Update moves on its own frames and asks for the next until the bars settle.
 
 <a name="Race.WithEase"></a>
-### func \(Race\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L127>)
+### func \(Race\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L130>)
 
 ```go
 func (r Race) WithEase(e Ease) Race
@@ -1867,7 +1867,7 @@ func (r Race) WithEase(e Ease) Race
 WithEase is r following e instead of EaseInOut, for every later Set.
 
 <a name="Racer"></a>
-## type [Racer](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L15-L19>)
+## type [Racer](<https://github.com/lucasassuncao/bezel/blob/main/animation/race.go#L16-L20>)
 
 Racer is one bar of a Race: its label, the value it has grown to, and its place in the order, 0 the top, fractional while it moves to a new one.
 
@@ -1880,7 +1880,7 @@ type Racer struct {
 ```
 
 <a name="Rubber"></a>
-## type [Rubber](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L12-L16>)
+## type [Rubber](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L14-L18>)
 
 Rubber is a value kept between two limits that gives past them, harder the farther it is pulled, and springs back when let go: a list scrolled past its end, a slider dragged off its track.
 
@@ -1891,7 +1891,7 @@ type Rubber struct {
 ```
 
 <a name="NewRubber"></a>
-### func [NewRubber](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L19>)
+### func [NewRubber](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L23>)
 
 ```go
 func NewRubber(lo, hi float64) Rubber
@@ -1900,7 +1900,7 @@ func NewRubber(lo, hi float64) Rubber
 NewRubber holds a value in \[lo, hi\], at lo to begin with.
 
 <a name="Rubber.Active"></a>
-### func \(Rubber\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L58>)
+### func \(Rubber\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L62>)
 
 ```go
 func (r Rubber) Active() bool
@@ -1909,7 +1909,7 @@ func (r Rubber) Active() bool
 Active reports whether the value is still springing back.
 
 <a name="Rubber.Advance"></a>
-### func \(Rubber\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L74>)
+### func \(Rubber\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L78>)
 
 ```go
 func (r Rubber) Advance(now time.Time) (Rubber, bool)
@@ -1918,7 +1918,7 @@ func (r Rubber) Advance(now time.Time) (Rubber, bool)
 Advance is r at now, and whether it rests.
 
 <a name="Rubber.FrameAt"></a>
-### func \(Rubber\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L64>)
+### func \(Rubber\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L68>)
 
 ```go
 func (r Rubber) FrameAt(at time.Time) FrameMsg
@@ -1927,7 +1927,7 @@ func (r Rubber) FrameAt(at time.Time) FrameMsg
 FrameAt is r's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Rubber.Pos"></a>
-### func \(Rubber\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L55>)
+### func \(Rubber\) [Pos](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L59>)
 
 ```go
 func (r Rubber) Pos() float64
@@ -1936,7 +1936,7 @@ func (r Rubber) Pos() float64
 Pos is the value now.
 
 <a name="Rubber.Pull"></a>
-### func \(Rubber\) [Pull](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L33>)
+### func \(Rubber\) [Pull](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L37>)
 
 ```go
 func (r Rubber) Pull(v float64) Rubber
@@ -1945,7 +1945,7 @@ func (r Rubber) Pull(v float64) Rubber
 Pull puts the value where v asks, resisted past the limits: it never gets further than give beyond one.
 
 <a name="Rubber.Release"></a>
-### func \(Rubber\) [Release](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L48>)
+### func \(Rubber\) [Release](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L52>)
 
 ```go
 func (r Rubber) Release() (Rubber, tea.Cmd)
@@ -1954,7 +1954,7 @@ func (r Rubber) Release() (Rubber, tea.Cmd)
 Release lets go: a value past a limit springs back onto it.
 
 <a name="Rubber.Tick"></a>
-### func \(Rubber\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L61>)
+### func \(Rubber\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L65>)
 
 ```go
 func (r Rubber) Tick() tea.Cmd
@@ -1963,16 +1963,16 @@ func (r Rubber) Tick() tea.Cmd
 Tick is the command for r's next frame, nil at rest.
 
 <a name="Rubber.Update"></a>
-### func \(Rubber\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L67>)
+### func \(Rubber\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L71>)
 
 ```go
-func (r Rubber) Update(msg tea.Msg) (Rubber, tea.Cmd)
+func (r Rubber) Update(msg tea.Msg) (Rubber, bezel.Result)
 ```
 
 Update springs back on its own frames and asks for the next until it rests.
 
 <a name="Rubber.WithGive"></a>
-### func \(Rubber\) [WithGive](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L24>)
+### func \(Rubber\) [WithGive](<https://github.com/lucasassuncao/bezel/blob/main/animation/rubber.go#L28>)
 
 ```go
 func (r Rubber) WithGive(g float64) Rubber
@@ -1981,7 +1981,7 @@ func (r Rubber) WithGive(g float64) Rubber
 WithGive lets the value go at most g past either limit, however hard it is pulled.
 
 <a name="Series"></a>
-## type [Series](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L15-L21>)
+## type [Series](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L16-L22>)
 
 Series animates a run of chart values: grown from nothing all at once, drawn in from the left, or fed live with each new value rising at the right. Hand Values to a chart every frame.
 
@@ -1992,7 +1992,7 @@ type Series struct {
 ```
 
 <a name="Draw"></a>
-### func [Draw](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L34>)
+### func [Draw](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L37>)
 
 ```go
 func Draw(values []float64, dur time.Duration) Series
@@ -2001,7 +2001,7 @@ func Draw(values []float64, dur time.Duration) Series
 Draw reveals values from the left over dur, each rising as the front reaches it: a line drawn across a chart. Values not reached yet are zero.
 
 <a name="Grow"></a>
-### func [Grow](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L24>)
+### func [Grow](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L27>)
 
 ```go
 func Grow(values []float64, dur time.Duration) Series
@@ -2010,7 +2010,7 @@ func Grow(values []float64, dur time.Duration) Series
 Grow raises every one of values from zero over dur: bars that grow in.
 
 <a name="Series.Active"></a>
-### func \(Series\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L90>)
+### func \(Series\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L93>)
 
 ```go
 func (s Series) Active() bool
@@ -2019,7 +2019,7 @@ func (s Series) Active() bool
 Active reports whether any value is still moving.
 
 <a name="Series.Advance"></a>
-### func \(Series\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L108>)
+### func \(Series\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L111>)
 
 ```go
 func (s Series) Advance(now time.Time) (Series, bool)
@@ -2028,7 +2028,7 @@ func (s Series) Advance(now time.Time) (Series, bool)
 Advance is s at now, and whether it settled.
 
 <a name="Series.FrameAt"></a>
-### func \(Series\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L96>)
+### func \(Series\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L99>)
 
 ```go
 func (s Series) FrameAt(at time.Time) FrameMsg
@@ -2037,7 +2037,7 @@ func (s Series) FrameAt(at time.Time) FrameMsg
 FrameAt is s's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Series.Push"></a>
-### func \(Series\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L54>)
+### func \(Series\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L57>)
 
 ```go
 func (s Series) Push(v float64, keep int) (Series, tea.Cmd)
@@ -2046,7 +2046,7 @@ func (s Series) Push(v float64, keep int) (Series, tea.Cmd)
 Push adds v at the right, dropping the oldest past keep values; the others hold and v rises from zero over the series' duration: a live sparkline.
 
 <a name="Series.Tick"></a>
-### func \(Series\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L93>)
+### func \(Series\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L96>)
 
 ```go
 func (s Series) Tick() tea.Cmd
@@ -2055,16 +2055,16 @@ func (s Series) Tick() tea.Cmd
 Tick is the command for s's next frame, nil at rest.
 
 <a name="Series.Update"></a>
-### func \(Series\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L99>)
+### func \(Series\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L102>)
 
 ```go
-func (s Series) Update(msg tea.Msg) (Series, tea.Cmd)
+func (s Series) Update(msg tea.Msg) (Series, bezel.Result)
 ```
 
 Update moves on its own frames and asks for the next until it settles.
 
 <a name="Series.Values"></a>
-### func \(Series\) [Values](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L73>)
+### func \(Series\) [Values](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L76>)
 
 ```go
 func (s Series) Values() []float64
@@ -2073,7 +2073,7 @@ func (s Series) Values() []float64
 Values are the numbers to draw now.
 
 <a name="Series.WithDuration"></a>
-### func \(Series\) [WithDuration](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L47>)
+### func \(Series\) [WithDuration](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L50>)
 
 ```go
 func (s Series) WithDuration(d time.Duration) Series
@@ -2082,7 +2082,7 @@ func (s Series) WithDuration(d time.Duration) Series
 WithDuration is how long each later Push takes to rise.
 
 <a name="Series.WithEase"></a>
-### func \(Series\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L41>)
+### func \(Series\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/series.go#L44>)
 
 ```go
 func (s Series) WithEase(e Ease) Series
@@ -2091,7 +2091,7 @@ func (s Series) WithEase(e Ease) Series
 WithEase is s following e instead of EaseInOut.
 
 <a name="Span"></a>
-## type [Span](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L23-L26>)
+## type [Span](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L24-L27>)
 
 Span is a piece of a timeline: steps, and how long the piece lasts. Seq, Par and Stagger build bigger spans out of smaller ones.
 
@@ -2102,7 +2102,7 @@ type Span struct {
 ```
 
 <a name="Gap"></a>
-### func [Gap](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L35>)
+### func [Gap](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L36>)
 
 ```go
 func Gap(d time.Duration) Span
@@ -2111,7 +2111,7 @@ func Gap(d time.Duration) Span
 Gap is a pause of d, for a Seq that waits between two steps.
 
 <a name="Par"></a>
-### func [Par](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L66>)
+### func [Par](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L67>)
 
 ```go
 func Par(spans ...Span) Span
@@ -2120,7 +2120,7 @@ func Par(spans ...Span) Span
 Par plays spans together, lasting as long as the longest.
 
 <a name="Seq"></a>
-### func [Seq](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L56>)
+### func [Seq](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L57>)
 
 ```go
 func Seq(spans ...Span) Span
@@ -2129,7 +2129,7 @@ func Seq(spans ...Span) Span
 Seq plays spans one after another.
 
 <a name="Stagger"></a>
-### func [Stagger](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L70>)
+### func [Stagger](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L71>)
 
 ```go
 func Stagger(gap time.Duration, spans ...Span) Span
@@ -2138,7 +2138,7 @@ func Stagger(gap time.Duration, spans ...Span) Span
 Stagger plays spans together, each starting gap after the one before: a list whose rows come in one by one.
 
 <a name="Step"></a>
-### func [Step](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L29>)
+### func [Step](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L30>)
 
 ```go
 func Step(name string, from, to float64, dur time.Duration) Span
@@ -2147,7 +2147,7 @@ func Step(name string, from, to float64, dur time.Duration) Span
 Step moves the value called name from from to to over dur.
 
 <a name="Span.WithEase"></a>
-### func \(Span\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L38>)
+### func \(Span\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L39>)
 
 ```go
 func (s Span) WithEase(e Ease) Span
@@ -2156,7 +2156,7 @@ func (s Span) WithEase(e Ease) Span
 WithEase is s with every step in it following e.
 
 <a name="Spark"></a>
-## type [Spark](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L15-L18>)
+## type [Spark](<https://github.com/lucasassuncao/bezel/blob/main/animation/burst.go#L16-L19>)
 
 Spark is one particle of a Burst: where it is, and how much of its life is left, 1 when it flies out and 0 when it is gone.
 
@@ -2168,7 +2168,7 @@ type Spark struct {
 ```
 
 <a name="Spring"></a>
-## type [Spring](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L19-L28>)
+## type [Spring](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L20-L29>)
 
 Spring follows a target with speed and inertia. Unlike a Tween it has no duration, so a new target mid\-flight bends the motion instead of starting it over: a progress bar fed often, a cursor sliding to the row picked.
 
@@ -2184,7 +2184,7 @@ type Spring struct {
 ```
 
 <a name="NewSpring"></a>
-### func [NewSpring](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L31>)
+### func [NewSpring](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L34>)
 
 ```go
 func NewSpring(pos float64) Spring
@@ -2193,7 +2193,7 @@ func NewSpring(pos float64) Spring
 NewSpring is a spring at rest at pos, stiffness 12 and damping 1.
 
 <a name="Spring.Active"></a>
-### func \(Spring\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L67>)
+### func \(Spring\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L70>)
 
 ```go
 func (s Spring) Active() bool
@@ -2202,7 +2202,7 @@ func (s Spring) Active() bool
 Active reports whether s is still moving.
 
 <a name="Spring.Advance"></a>
-### func \(Spring\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L99>)
+### func \(Spring\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L102>)
 
 ```go
 func (s Spring) Advance(now time.Time) (Spring, bool)
@@ -2211,7 +2211,7 @@ func (s Spring) Advance(now time.Time) (Spring, bool)
 Advance is s moved to now, and whether it came to rest. The first frame only starts the clock; each later one solves the motion exactly over the time since the last, so a slow frame never throws it off.
 
 <a name="Spring.FrameAt"></a>
-### func \(Spring\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L81>)
+### func \(Spring\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L84>)
 
 ```go
 func (s Spring) FrameAt(at time.Time) FrameMsg
@@ -2220,7 +2220,7 @@ func (s Spring) FrameAt(at time.Time) FrameMsg
 FrameAt is s's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Spring.Int"></a>
-### func \(Spring\) [Int](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L70>)
+### func \(Spring\) [Int](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L73>)
 
 ```go
 func (s Spring) Int() int
@@ -2229,7 +2229,7 @@ func (s Spring) Int() int
 Int is Pos rounded to the nearest whole number: the cell it is drawn on.
 
 <a name="Spring.Tick"></a>
-### func \(Spring\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L73>)
+### func \(Spring\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L76>)
 
 ```go
 func (s Spring) Tick() tea.Cmd
@@ -2238,7 +2238,7 @@ func (s Spring) Tick() tea.Cmd
 Tick is the command for s's next frame, nil at rest.
 
 <a name="Spring.To"></a>
-### func \(Spring\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L49>)
+### func \(Spring\) [To](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L52>)
 
 ```go
 func (s Spring) To(target float64) (Spring, tea.Cmd)
@@ -2247,16 +2247,16 @@ func (s Spring) To(target float64) (Spring, tea.Cmd)
 To aims s at target. A spring at rest starts its frames; a moving one keeps the ones it has, and its speed. When motion is Still it jumps there.
 
 <a name="Spring.Update"></a>
-### func \(Spring\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L84>)
+### func \(Spring\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L87>)
 
 ```go
-func (s Spring) Update(msg tea.Msg) (Spring, tea.Cmd)
+func (s Spring) Update(msg tea.Msg) (Spring, bezel.Result)
 ```
 
 Update moves s on its own frames and asks for the next until it rests.
 
 <a name="Spring.WithDamping"></a>
-### func \(Spring\) [WithDamping](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L42>)
+### func \(Spring\) [WithDamping](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L45>)
 
 ```go
 func (s Spring) WithDamping(d float64) Spring
@@ -2265,7 +2265,7 @@ func (s Spring) WithDamping(d float64) Spring
 WithDamping is s with damping d: 1 settles, below it bounces, above it creeps.
 
 <a name="Spring.WithFreq"></a>
-### func \(Spring\) [WithFreq](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L36>)
+### func \(Spring\) [WithFreq](<https://github.com/lucasassuncao/bezel/blob/main/animation/spring.go#L39>)
 
 ```go
 func (s Spring) WithFreq(f float64) Spring
@@ -2274,7 +2274,7 @@ func (s Spring) WithFreq(f float64) Spring
 WithFreq is s with stiffness f, in radians a second.
 
 <a name="Timeline"></a>
-## type [Timeline](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L82-L86>)
+## type [Timeline](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L83-L87>)
 
 Timeline plays a Span on one clock and reports where each named value is: a choreography of several values without a delay worked out by hand.
 
@@ -2285,7 +2285,7 @@ type Timeline struct {
 ```
 
 <a name="NewTimeline"></a>
-### func [NewTimeline](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L90>)
+### func [NewTimeline](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L93>)
 
 ```go
 func NewTimeline(s Span) Timeline
@@ -2294,7 +2294,7 @@ func NewTimeline(s Span) Timeline
 NewTimeline plays s once, its clock started by its first frame. Empty, or with motion Still, it is inactive with every value at its end.
 
 <a name="Timeline.Active"></a>
-### func \(Timeline\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L155>)
+### func \(Timeline\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L158>)
 
 ```go
 func (t Timeline) Active() bool
@@ -2303,7 +2303,7 @@ func (t Timeline) Active() bool
 Active reports whether t is still playing.
 
 <a name="Timeline.Advance"></a>
-### func \(Timeline\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L178>)
+### func \(Timeline\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L181>)
 
 ```go
 func (t Timeline) Advance(now time.Time) (Timeline, bool)
@@ -2312,7 +2312,7 @@ func (t Timeline) Advance(now time.Time) (Timeline, bool)
 Advance is t at now, and whether it ended.
 
 <a name="Timeline.Elapsed"></a>
-### func \(Timeline\) [Elapsed](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L152>)
+### func \(Timeline\) [Elapsed](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L155>)
 
 ```go
 func (t Timeline) Elapsed() time.Duration
@@ -2321,7 +2321,7 @@ func (t Timeline) Elapsed() time.Duration
 Elapsed is how far into the span t is.
 
 <a name="Timeline.FrameAt"></a>
-### func \(Timeline\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L161>)
+### func \(Timeline\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L164>)
 
 ```go
 func (t Timeline) FrameAt(at time.Time) FrameMsg
@@ -2330,7 +2330,7 @@ func (t Timeline) FrameAt(at time.Time) FrameMsg
 FrameAt is t's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Timeline.Progress"></a>
-### func \(Timeline\) [Progress](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L121>)
+### func \(Timeline\) [Progress](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L124>)
 
 ```go
 func (t Timeline) Progress(name string) float64
@@ -2339,7 +2339,7 @@ func (t Timeline) Progress(name string) float64
 Progress is how far the current step of name is, in \[0,1\] before its ease.
 
 <a name="Timeline.Tick"></a>
-### func \(Timeline\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L158>)
+### func \(Timeline\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L161>)
 
 ```go
 func (t Timeline) Tick() tea.Cmd
@@ -2348,16 +2348,16 @@ func (t Timeline) Tick() tea.Cmd
 Tick is the command for t's next frame, nil once it ended.
 
 <a name="Timeline.Update"></a>
-### func \(Timeline\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L164>)
+### func \(Timeline\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L167>)
 
 ```go
-func (t Timeline) Update(msg tea.Msg) (Timeline, tea.Cmd)
+func (t Timeline) Update(msg tea.Msg) (Timeline, bezel.Result)
 ```
 
 Update plays on its own frames and asks for the next until it ends.
 
 <a name="Timeline.Value"></a>
-### func \(Timeline\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L115>)
+### func \(Timeline\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L118>)
 
 ```go
 func (t Timeline) Value(name string) float64
@@ -2366,7 +2366,7 @@ func (t Timeline) Value(name string) float64
 Value is where the value called name is now: the last step of that name to have started, or the first step's start before any has.
 
 <a name="Timeline.WithRepeat"></a>
-### func \(Timeline\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L102>)
+### func \(Timeline\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L105>)
 
 ```go
 func (t Timeline) WithRepeat(n int) Timeline
@@ -2375,7 +2375,7 @@ func (t Timeline) WithRepeat(n int) Timeline
 WithRepeat plays t n more times after the first, or without end for Forever.
 
 <a name="Timeline.WithYoyo"></a>
-### func \(Timeline\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L108>)
+### func \(Timeline\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/timeline.go#L111>)
 
 ```go
 func (t Timeline) WithYoyo(on bool) Timeline
@@ -2384,7 +2384,7 @@ func (t Timeline) WithYoyo(on bool) Timeline
 WithYoyo plays every other pass of t backwards.
 
 <a name="Tween"></a>
-## type [Tween](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L23-L32>)
+## type [Tween](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L24-L33>)
 
 Tween eases an int between two values over a duration. Adapted from the minimize animation in github.com/Gaurav\-Gosain/tuios \(MIT\), reduced to one axis. The zero value is inactive: At reports it finished, at To.
 
@@ -2399,7 +2399,7 @@ type Tween struct {
 ```
 
 <a name="NewTween"></a>
-### func [NewTween](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L106>)
+### func [NewTween](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L109>)
 
 ```go
 func NewTween(from, target int, dur time.Duration) Tween
@@ -2408,7 +2408,7 @@ func NewTween(from, target int, dur time.Duration) Tween
 NewTween builds the tween taking a panel from its on\-screen height to target over dur, its clock started by the first frame Tick delivers. When dur \<= 0 or from == target, or motion is Still, it is inactive and already at target.
 
 <a name="Tween.Active"></a>
-### func \(Tween\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L66>)
+### func \(Tween\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L69>)
 
 ```go
 func (t Tween) Active() bool
@@ -2417,7 +2417,7 @@ func (t Tween) Active() bool
 Active reports whether t is currently in flight.
 
 <a name="Tween.Advance"></a>
-### func \(Tween\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L71>)
+### func \(Tween\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L74>)
 
 ```go
 func (t Tween) Advance(now time.Time) (Tween, bool)
@@ -2426,7 +2426,7 @@ func (t Tween) Advance(now time.Time) (Tween, bool)
 Advance is t sampled at now into Cur, and whether it finished, coming back inactive where it landed. The renderer reads Cur, not At, so one frame never mixes two samples and lays the hint panel out a row off from the space the preview left.
 
 <a name="Tween.At"></a>
-### func \(Tween\) [At](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L86>)
+### func \(Tween\) [At](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L89>)
 
 ```go
 func (t Tween) At(now time.Time) (int, bool)
@@ -2435,7 +2435,7 @@ func (t Tween) At(now time.Time) (int, bool)
 At returns the interpolated value at now, and whether the tween has finished. A finished tween reports its end exactly, To or a yoyo's From, so a panel lands on the height the static layout would choose. Unstarted, it is at From.
 
 <a name="Tween.FrameAt"></a>
-### func \(Tween\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L47>)
+### func \(Tween\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L50>)
 
 ```go
 func (t Tween) FrameAt(at time.Time) FrameMsg
@@ -2444,7 +2444,7 @@ func (t Tween) FrameAt(at time.Time) FrameMsg
 FrameAt is t's frame for at, for a test harness that delivers frames itself.
 
 <a name="Tween.Tick"></a>
-### func \(Tween\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L39>)
+### func \(Tween\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L42>)
 
 ```go
 func (t Tween) Tick() tea.Cmd
@@ -2453,16 +2453,16 @@ func (t Tween) Tick() tea.Cmd
 Tick is the command for t's next frame, nil for a tween with nothing to do.
 
 <a name="Tween.Update"></a>
-### func \(Tween\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L52>)
+### func \(Tween\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L55>)
 
 ```go
-func (t Tween) Update(msg tea.Msg) (Tween, tea.Cmd)
+func (t Tween) Update(msg tea.Msg) (Tween, bezel.Result)
 ```
 
 Update samples t on one of its own frames and asks for the next until it lands. Other messages, frames meant for another tween and a twin frame from a second Tick leave it alone.
 
 <a name="Tween.WithDelay"></a>
-### func \(Tween\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L120>)
+### func \(Tween\) [WithDelay](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L123>)
 
 ```go
 func (t Tween) WithDelay(d time.Duration) Tween
@@ -2471,7 +2471,7 @@ func (t Tween) WithDelay(d time.Duration) Tween
 WithDelay holds t at From for d after its first frame.
 
 <a name="Tween.WithEase"></a>
-### func \(Tween\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L114>)
+### func \(Tween\) [WithEase](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L117>)
 
 ```go
 func (t Tween) WithEase(e Ease) Tween
@@ -2480,7 +2480,7 @@ func (t Tween) WithEase(e Ease) Tween
 WithEase is t following e instead of EaseInOut.
 
 <a name="Tween.WithRepeat"></a>
-### func \(Tween\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L126>)
+### func \(Tween\) [WithRepeat](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L129>)
 
 ```go
 func (t Tween) WithRepeat(n int) Tween
@@ -2489,7 +2489,7 @@ func (t Tween) WithRepeat(n int) Tween
 WithRepeat runs t n more times after the first, or without end for Forever.
 
 <a name="Tween.WithYoyo"></a>
-### func \(Tween\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L132>)
+### func \(Tween\) [WithYoyo](<https://github.com/lucasassuncao/bezel/blob/main/animation/animation.go#L135>)
 
 ```go
 func (t Tween) WithYoyo(on bool) Tween

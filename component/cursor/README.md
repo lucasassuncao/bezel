@@ -27,7 +27,7 @@ Package cursor is a text field's caret on its own: it blinks, stays lit or hides
   - [func \(m Model\) SetChar\(s string\) Model](<#Model.SetChar>)
   - [func \(m Model\) SetMode\(mode Mode\) \(Model, tea.Cmd\)](<#Model.SetMode>)
   - [func \(m Model\) SetTheme\(th theme.Resolved\) Model](<#Model.SetTheme>)
-  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
+  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, bezel.Result\)](<#Model.Update>)
   - [func \(m Model\) View\(\) string](<#Model.View>)
   - [func \(m Model\) Visible\(\) bool](<#Model.Visible>)
   - [func \(m Model\) WithMode\(mode Mode\) Model](<#Model.WithMode>)
@@ -37,7 +37,7 @@ Package cursor is a text field's caret on its own: it blinks, stays lit or hides
 
 
 <a name="BlinkMsg"></a>
-## type [BlinkMsg](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L36-L39>)
+## type [BlinkMsg](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L37-L40>)
 
 BlinkMsg flips the cursor whose ID it carries. A host hands it on the way it hands on keys; a cursor ignores every other cursor's.
 
@@ -49,7 +49,7 @@ type BlinkMsg struct {
 ```
 
 <a name="Mode"></a>
-## type [Mode](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L17>)
+## type [Mode](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L18>)
 
 Mode is how a focused cursor shows.
 
@@ -68,7 +68,7 @@ const (
 ```
 
 <a name="Mode.String"></a>
-### func \(Mode\) [String](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L27>)
+### func \(Mode\) [String](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L28>)
 
 ```go
 func (m Mode) String() string
@@ -77,7 +77,7 @@ func (m Mode) String() string
 
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L53-L62>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L56-L65>)
 
 Model is a value: every method returns the new cursor.
 
@@ -88,7 +88,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L65>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L68>)
 
 ```go
 func New(th theme.Resolved) Model
@@ -97,7 +97,7 @@ func New(th theme.Resolved) Model
 New is a blinking cursor over a space, not focused.
 
 <a name="Model.Blink"></a>
-### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L171>)
+### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L174>)
 
 ```go
 func (m Model) Blink() tea.Cmd
@@ -106,7 +106,7 @@ func (m Model) Blink() tea.Cmd
 Blink is the command that keeps a focused cursor blinking, for a host that focused it before it could hand on a command; nil unless it blinks.
 
 <a name="Model.Blur"></a>
-### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L152>)
+### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L155>)
 
 ```go
 func (m Model) Blur() Model
@@ -115,7 +115,7 @@ func (m Model) Blur() Model
 Blur hides the cursor; a blink already on its way lands spent.
 
 <a name="Model.Focus"></a>
-### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L146>)
+### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L149>)
 
 ```go
 func (m Model) Focus() (Model, tea.Cmd)
@@ -124,7 +124,7 @@ func (m Model) Focus() (Model, tea.Cmd)
 Focus shows the cursor and, when Blinking, starts its blink.
 
 <a name="Model.Focused"></a>
-### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L136>)
+### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L139>)
 
 ```go
 func (m Model) Focused() bool
@@ -133,7 +133,7 @@ func (m Model) Focused() bool
 Focused reports whether the cursor shows at all.
 
 <a name="Model.ID"></a>
-### func \(Model\) [ID](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L143>)
+### func \(Model\) [ID](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L146>)
 
 ```go
 func (m Model) ID() int64
@@ -142,7 +142,7 @@ func (m Model) ID() int64
 ID tells this cursor's BlinkMsg from another's.
 
 <a name="Model.Mode"></a>
-### func \(Model\) [Mode](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L133>)
+### func \(Model\) [Mode](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L136>)
 
 ```go
 func (m Model) Mode() Mode
@@ -151,7 +151,7 @@ func (m Model) Mode() Mode
 Mode is how the cursor shows when focused.
 
 <a name="Model.Reset"></a>
-### func \(Model\) [Reset](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L160>)
+### func \(Model\) [Reset](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L163>)
 
 ```go
 func (m Model) Reset() (Model, tea.Cmd)
@@ -160,7 +160,7 @@ func (m Model) Reset() (Model, tea.Cmd)
 Reset lights the cursor for a full blink, as after an edit: a caret that went dark while typing would seem to lag.
 
 <a name="Model.SetChar"></a>
-### func \(Model\) [SetChar](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L120>)
+### func \(Model\) [SetChar](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L123>)
 
 ```go
 func (m Model) SetChar(s string) Model
@@ -169,7 +169,7 @@ func (m Model) SetChar(s string) Model
 SetChar is the character under the cursor, as the caret moves over text.
 
 <a name="Model.SetMode"></a>
-### func \(Model\) [SetMode](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L127>)
+### func \(Model\) [SetMode](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L130>)
 
 ```go
 func (m Model) SetMode(mode Mode) (Model, tea.Cmd)
@@ -178,7 +178,7 @@ func (m Model) SetMode(mode Mode) (Model, tea.Cmd)
 SetMode changes how a live cursor shows, lit at once; turning Blinking on a focused cursor starts the blink.
 
 <a name="Model.SetTheme"></a>
-### func \(Model\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L114>)
+### func \(Model\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L117>)
 
 ```go
 func (m Model) SetTheme(th theme.Resolved) Model
@@ -187,16 +187,16 @@ func (m Model) SetTheme(th theme.Resolved) Model
 SetTheme repaints the cursor and sets its pace after the theme changed.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L187>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L190>)
 
 ```go
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 ```
 
 Update flips the cursor on its own BlinkMsg and arms the next one. Any other message leaves it as it was, with no command.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L198>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L204>)
 
 ```go
 func (m Model) View() string
@@ -205,7 +205,7 @@ func (m Model) View() string
 View is the character, painted as the cursor while Visible.
 
 <a name="Model.Visible"></a>
-### func \(Model\) [Visible](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L140>)
+### func \(Model\) [Visible](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L143>)
 
 ```go
 func (m Model) Visible() bool
@@ -214,7 +214,7 @@ func (m Model) Visible() bool
 Visible reports whether View paints the cursor now: focused, not Hidden, and not in the dark half of a blink.
 
 <a name="Model.WithMode"></a>
-### func \(Model\) [WithMode](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L101>)
+### func \(Model\) [WithMode](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L104>)
 
 ```go
 func (m Model) WithMode(mode Mode) Model
@@ -223,7 +223,7 @@ func (m Model) WithMode(mode Mode) Model
 WithMode sets how the cursor shows before it is used.
 
 <a name="Model.WithStyles"></a>
-### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L108>)
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L111>)
 
 ```go
 func (m Model) WithStyles(edit func(Styles) Styles) Model
@@ -232,7 +232,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit, now and after every SetTheme. It replaces an earlier edit.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L42-L45>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L43-L46>)
 
 Styles are how the character is painted.
 
@@ -244,7 +244,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L48>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/cursor/cursor.go#L49>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles

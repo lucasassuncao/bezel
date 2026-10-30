@@ -91,10 +91,9 @@
 })
 
 <span class="k">func</span> (m model) <span class="f">Update</span>(msg tea.<span class="t">Msg</span>) (tea.<span class="t">Model</span>, tea.<span class="t">Cmd</span>) {
-    <span class="k">var</span> handled <span class="t">bool</span>
-    <span class="k">var</span> cmd tea.<span class="t">Cmd</span>
-    <span class="k">if</span> m.sh, handled, cmd = m.sh.<span class="f">Update</span>(msg); handled {
-        <span class="k">return</span> m, cmd <span class="c">// resize, overlays and every action</span>
+    <span class="k">var</span> r bezel.<span class="t">Result</span>
+    <span class="k">if</span> m.sh, r = m.sh.<span class="f">Update</span>(msg); r.Handled {
+        <span class="k">return</span> m, r.Cmd <span class="c">// resize, overlays and every action</span>
     }
     <span class="c">// the messages your actions send, and the keys no action claims</span>
 }

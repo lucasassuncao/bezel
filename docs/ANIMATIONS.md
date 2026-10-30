@@ -28,10 +28,10 @@ case toggleMsg:
 	m.slide = animation.NewTween(m.height, 8, 300*time.Millisecond)
 	return m, m.slide.Tick()
 case animation.FrameMsg:
-	var cmd tea.Cmd
-	m.slide, cmd = m.slide.Update(msg)
+	var r bezel.Result
+	m.slide, r = m.slide.Update(msg)
 	m.height = m.slide.Cur
-	return m, cmd
+	return m, r.Cmd
 ```
 
 **On one `Clock`.** A screen running several at once gives them a single chain of frames: each frame, it advances every animation to the frame's time and keeps the clock going while any of them still moves.
@@ -213,7 +213,7 @@ m.snow = scene.Snow(lipgloss.Color("#e0e8ff"))
 return m, m.snow.Tick()
 
 // on every animation.FrameMsg
-m.snow, cmd = m.snow.Update(msg)
+m.snow, r = m.snow.Update(msg) // r.Cmd asks for the next frame
 
 // in View
 body := m.snow.Under(m.card.View())

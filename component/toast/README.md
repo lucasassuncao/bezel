@@ -21,14 +21,14 @@ Package toast shows short notices in a corner of the screen, stacked, sliding in
   - [func \(m Model\) Len\(\) int](<#Model.Len>)
   - [func \(m Model\) Over\(screen string, th theme.Resolved\) string](<#Model.Over>)
   - [func \(m Model\) Push\(text string, kind Kind\) \(Model, tea.Cmd\)](<#Model.Push>)
-  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
+  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, bezel.Result\)](<#Model.Update>)
   - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
   - [func \(m Model\) WithTTL\(d time.Duration\) Model](<#Model.WithTTL>)
   - [func \(m Model\) WithWidth\(w int\) Model](<#Model.WithWidth>)
 
 
 <a name="Kind"></a>
-## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L20>)
+## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L21>)
 
 Kind is what a toast reports; it picks the colour of its edge.
 
@@ -48,7 +48,7 @@ const (
 ```
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L45-L53>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L48-L56>)
 
 Model is the stack of toasts, newest at the top. It is a value: every method returns the new stack.
 
@@ -59,7 +59,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L56>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L59>)
 
 ```go
 func New() Model
@@ -68,7 +68,7 @@ func New() Model
 New is an empty stack whose toasts stay three seconds, 36 columns wide.
 
 <a name="Model.Active"></a>
-### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L115>)
+### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L121>)
 
 ```go
 func (m Model) Active() bool
@@ -77,7 +77,7 @@ func (m Model) Active() bool
 Active reports whether a toast is showing.
 
 <a name="Model.Advance"></a>
-### func \(Model\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L119>)
+### func \(Model\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L125>)
 
 ```go
 func (m Model) Advance(now time.Time) (Model, bool)
@@ -86,7 +86,7 @@ func (m Model) Advance(now time.Time) (Model, bool)
 Advance is the stack at now, newcomers stamped and the expired gone, and whether it emptied.
 
 <a name="Model.FrameAt"></a>
-### func \(Model\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L133>)
+### func \(Model\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L139>)
 
 ```go
 func (m Model) FrameAt(at time.Time) tea.Msg
@@ -95,7 +95,7 @@ func (m Model) FrameAt(at time.Time) tea.Msg
 FrameAt is the stack's frame for at, for a test that delivers frames itself.
 
 <a name="Model.Len"></a>
-### func \(Model\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L73>)
+### func \(Model\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L76>)
 
 ```go
 func (m Model) Len() int
@@ -104,7 +104,7 @@ func (m Model) Len() int
 Len is how many toasts are showing.
 
 <a name="Model.Over"></a>
-### func \(Model\) [Over](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L193>)
+### func \(Model\) [Over](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L199>)
 
 ```go
 func (m Model) Over(screen string, th theme.Resolved) string
@@ -113,7 +113,7 @@ func (m Model) Over(screen string, th theme.Resolved) string
 Over draws the stack on screen's top right corner, one row down and one column in, the screen showing wherever a toast is not.
 
 <a name="Model.Push"></a>
-### func \(Model\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L76>)
+### func \(Model\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L79>)
 
 ```go
 func (m Model) Push(text string, kind Kind) (Model, tea.Cmd)
@@ -122,16 +122,16 @@ func (m Model) Push(text string, kind Kind) (Model, tea.Cmd)
 Push shows text as a toast of kind on top of the stack.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L96>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L99>)
 
 ```go
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 ```
 
 Update slides the toasts on the stack's own frames and drops the ones whose time is up, asking for frames while any is showing.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L180>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L186>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
@@ -140,7 +140,7 @@ func (m Model) View(th theme.Resolved) string
 View is the stack, newest first, each toast slid by how far it is from its place; columns it has slid out of are blank.
 
 <a name="Model.WithTTL"></a>
-### func \(Model\) [WithTTL](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L59>)
+### func \(Model\) [WithTTL](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L62>)
 
 ```go
 func (m Model) WithTTL(d time.Duration) Model
@@ -149,7 +149,7 @@ func (m Model) WithTTL(d time.Duration) Model
 WithTTL keeps each toast on screen for d, sliding included.
 
 <a name="Model.WithWidth"></a>
-### func \(Model\) [WithWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L67>)
+### func \(Model\) [WithWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L70>)
 
 ```go
 func (m Model) WithWidth(w int) Model

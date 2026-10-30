@@ -74,7 +74,7 @@ What a pane shows: rows with a cursor, a tree, a table, pages of items, a long t
 
 Source: [`examples/component/list/main.go`](../examples/component/list/main.go)
 
-Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included. `WithMotion` makes the cursor glide from row to row, a row that arrives light up and one that leaves fade where it was; `Update` still returns no command, so the app calls `Tick` after it and hands the frames to `Animate`.
+Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included. `WithMotion` makes the cursor glide from row to row, a row that arrives light up and one that leaves fade where it was; `Update` starts the motion and takes its frames, so the app hands it every message.
 
 ![list](recordings/component/list.gif)
 

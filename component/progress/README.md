@@ -27,7 +27,7 @@ Package progress draws how far along something is: bars, a meter and a stepper o
   - [func \(m Model\) SetPercent\(p float64\) \(Model, tea.Cmd\)](<#Model.SetPercent>)
   - [func \(m Model\) SetWidth\(w int\) Model](<#Model.SetWidth>)
   - [func \(m Model\) Shown\(\) float64](<#Model.Shown>)
-  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
+  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, bezel.Result\)](<#Model.Update>)
   - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
   - [func \(m Model\) ViewAs\(p float64, th theme.Resolved\) string](<#Model.ViewAs>)
   - [func \(m Model\) Width\(\) int](<#Model.Width>)
@@ -96,7 +96,7 @@ func Stepper(steps []string, current, width int, th theme.Resolved, set icon.Set
 Stepper is a row of named stages: those before current marked done, current marked running, the rest pending. current == len\(steps\) marks every stage done. When the row does not fit width it becomes "Step 2 of 4 · Name".
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L32-L40>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L35-L43>)
 
 Model is a bar that moves to the share it is set to on a spring instead of jumping there. A value: every method returns the new bar.
 
@@ -107,7 +107,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L44>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L47>)
 
 ```go
 func New(width int) Model
@@ -116,7 +116,7 @@ func New(width int) Model
 New is an empty bar width cells wide, the percentage included, with █ over ░ and the percentage shown.
 
 <a name="Model.Active"></a>
-### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L119>)
+### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L122>)
 
 ```go
 func (m Model) Active() bool
@@ -125,7 +125,7 @@ func (m Model) Active() bool
 Active reports whether the bar is still moving.
 
 <a name="Model.DecrPercent"></a>
-### func \(Model\) [DecrPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L110>)
+### func \(Model\) [DecrPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L113>)
 
 ```go
 func (m Model) DecrPercent(d float64) (Model, tea.Cmd)
@@ -134,7 +134,7 @@ func (m Model) DecrPercent(d float64) (Model, tea.Cmd)
 DecrPercent aims the bar d further back.
 
 <a name="Model.IncrPercent"></a>
-### func \(Model\) [IncrPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L107>)
+### func \(Model\) [IncrPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L110>)
 
 ```go
 func (m Model) IncrPercent(d float64) (Model, tea.Cmd)
@@ -143,7 +143,7 @@ func (m Model) IncrPercent(d float64) (Model, tea.Cmd)
 IncrPercent aims the bar d further along.
 
 <a name="Model.Percent"></a>
-### func \(Model\) [Percent](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L113>)
+### func \(Model\) [Percent](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L116>)
 
 ```go
 func (m Model) Percent() float64
@@ -152,7 +152,7 @@ func (m Model) Percent() float64
 Percent is the share the bar is aimed at.
 
 <a name="Model.SetPercent"></a>
-### func \(Model\) [SetPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L100>)
+### func \(Model\) [SetPercent](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L103>)
 
 ```go
 func (m Model) SetPercent(p float64) (Model, tea.Cmd)
@@ -161,7 +161,7 @@ func (m Model) SetPercent(p float64) (Model, tea.Cmd)
 SetPercent aims the bar at p, kept within \[0, 1\]; the command moves it.
 
 <a name="Model.SetWidth"></a>
-### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L91>)
+### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L94>)
 
 ```go
 func (m Model) SetWidth(w int) Model
@@ -170,7 +170,7 @@ func (m Model) SetWidth(w int) Model
 SetWidth changes the bar's width, the percentage included.
 
 <a name="Model.Shown"></a>
-### func \(Model\) [Shown](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L116>)
+### func \(Model\) [Shown](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L119>)
 
 ```go
 func (m Model) Shown() float64
@@ -179,16 +179,16 @@ func (m Model) Shown() float64
 Shown is the share the bar draws now, on its way to Percent.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L122>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L125>)
 
 ```go
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 ```
 
 Update moves the bar on its own frames until it settles.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L129>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L132>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
@@ -197,7 +197,7 @@ func (m Model) View(th theme.Resolved) string
 View is the bar where it is now, then the percentage it is aimed at.
 
 <a name="Model.ViewAs"></a>
-### func \(Model\) [ViewAs](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L133>)
+### func \(Model\) [ViewAs](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L136>)
 
 ```go
 func (m Model) ViewAs(p float64, th theme.Resolved) string
@@ -206,7 +206,7 @@ func (m Model) ViewAs(p float64, th theme.Resolved) string
 ViewAs is the bar at share p with no motion, for a host that drives the share itself.
 
 <a name="Model.Width"></a>
-### func \(Model\) [Width](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L97>)
+### func \(Model\) [Width](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L100>)
 
 ```go
 func (m Model) Width() int
@@ -215,7 +215,7 @@ func (m Model) Width() int
 Width is the bar's width, the percentage included.
 
 <a name="Model.WithChars"></a>
-### func \(Model\) [WithChars](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L49>)
+### func \(Model\) [WithChars](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L52>)
 
 ```go
 func (m Model) WithChars(full, empty rune) Model
@@ -224,7 +224,7 @@ func (m Model) WithChars(full, empty rune) Model
 WithChars draws the filled cells with full and the track with empty.
 
 <a name="Model.WithFormat"></a>
-### func \(Model\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L72>)
+### func \(Model\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L75>)
 
 ```go
 func (m Model) WithFormat(format string) Model
@@ -233,7 +233,7 @@ func (m Model) WithFormat(format string) Model
 WithFormat writes the percentage with format, a fmt verb for a float64 from 0 to 100, " %3.0f%%" by default.
 
 <a name="Model.WithGradient"></a>
-### func \(Model\) [WithGradient](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L56>)
+### func \(Model\) [WithGradient](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L59>)
 
 ```go
 func (m Model) WithGradient(colors ...color.Color) Model
@@ -242,7 +242,7 @@ func (m Model) WithGradient(colors ...color.Color) Model
 WithGradient colours the filled cells along colors, blended from the bar's left end to its right; fewer than two is the Full style again.
 
 <a name="Model.WithPercentage"></a>
-### func \(Model\) [WithPercentage](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L65>)
+### func \(Model\) [WithPercentage](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L68>)
 
 ```go
 func (m Model) WithPercentage(on bool) Model
@@ -251,7 +251,7 @@ func (m Model) WithPercentage(on bool) Model
 WithPercentage shows or hides the percentage after the bar.
 
 <a name="Model.WithSpring"></a>
-### func \(Model\) [WithSpring](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L79>)
+### func \(Model\) [WithSpring](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L82>)
 
 ```go
 func (m Model) WithSpring(freq, damping float64) Model
@@ -260,7 +260,7 @@ func (m Model) WithSpring(freq, damping float64) Model
 WithSpring sets how stiff the motion is, in radians a second, and how damped: 1 arrives without overshoot.
 
 <a name="Model.WithStyles"></a>
-### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L85>)
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L88>)
 
 ```go
 func (m Model) WithStyles(edit func(Styles) Styles) Model
@@ -269,7 +269,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L18-L22>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L19-L23>)
 
 Styles are how a Model paints its bar and its percentage.
 
@@ -282,7 +282,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L26>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/progress/model.go#L27>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles

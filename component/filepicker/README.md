@@ -26,7 +26,7 @@ Package filepicker browses directories inside a pane: directories first, sizes a
   - [func \(m Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
   - [func \(m Model\) Picked\(\) \(string, bool\)](<#Model.Picked>)
   - [func \(m Model\) SetHeight\(h int\) Model](<#Model.SetHeight>)
-  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
+  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, bezel.Result\)](<#Model.Update>)
   - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
   - [func \(m Model\) WithAllowedTypes\(exts ...string\) Model](<#Model.WithAllowedTypes>)
   - [func \(m Model\) WithDirs\(on bool\) Model](<#Model.WithDirs>)
@@ -41,7 +41,7 @@ Package filepicker browses directories inside a pane: directories first, sizes a
 
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L26-L29>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L27-L30>)
 
 Keys are the bindings the picker answers to. Pick shares enter with Open: on a directory it opens it, unless WithDirs.
 
@@ -53,7 +53,7 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L33>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L34>)
 
 ```go
 func DefaultKeys() Keys
@@ -62,7 +62,7 @@ func DefaultKeys() Keys
 DefaultKeys are the arrows, pgup/pgdown, home/end, backspace to go up and enter to pick.
 
 <a name="VimKeys"></a>
-### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L49>)
+### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L50>)
 
 ```go
 func VimKeys() Keys
@@ -71,7 +71,7 @@ func VimKeys() Keys
 VimKeys are DefaultKeys with vim's letters added: k/j to move, K/J to page, g/G to the ends, h to go up and l to open.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L114-L131>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L117-L134>)
 
 Model is a value: every method returns the new picker.
 
@@ -82,7 +82,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L135>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L138>)
 
 ```go
 func New(dir string) Model
@@ -91,7 +91,7 @@ func New(dir string) Model
 New browses dir, files only, without hidden entries, ten rows tall. Call Init for the first listing.
 
 <a name="Model.Browsing"></a>
-### func \(Model\) [Browsing](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L213>)
+### func \(Model\) [Browsing](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L216>)
 
 ```go
 func (m Model) Browsing() bool
@@ -100,7 +100,7 @@ func (m Model) Browsing() bool
 Browsing reports whether a directory shows, false while the drive list does.
 
 <a name="Model.Dir"></a>
-### func \(Model\) [Dir](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L210>)
+### func \(Model\) [Dir](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L213>)
 
 ```go
 func (m Model) Dir() string
@@ -109,7 +109,7 @@ func (m Model) Dir() string
 Dir is the directory being browsed.
 
 <a name="Model.Err"></a>
-### func \(Model\) [Err](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L217>)
+### func \(Model\) [Err](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L220>)
 
 ```go
 func (m Model) Err() error
@@ -118,7 +118,7 @@ func (m Model) Err() error
 Err is why the last key did nothing, such as a file of the wrong type; "" when it did.
 
 <a name="Model.Height"></a>
-### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L204>)
+### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L207>)
 
 ```go
 func (m Model) Height() int
@@ -127,7 +127,7 @@ func (m Model) Height() int
 Height is how many entries the picker shows.
 
 <a name="Model.Highlighted"></a>
-### func \(Model\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L223>)
+### func \(Model\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L226>)
 
 ```go
 func (m Model) Highlighted() string
@@ -136,7 +136,7 @@ func (m Model) Highlighted() string
 Highlighted is the path under the cursor, or "" in an empty directory.
 
 <a name="Model.Init"></a>
-### func \(Model\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L207>)
+### func \(Model\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L210>)
 
 ```go
 func (m Model) Init() tea.Cmd
@@ -145,7 +145,7 @@ func (m Model) Init() tea.Cmd
 Init reads the first directory.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L409>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L435>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -154,7 +154,7 @@ func (m Model) Legend() []legend.Entry
 Legend lists the keys the picker answers to now.
 
 <a name="Model.Picked"></a>
-### func \(Model\) [Picked](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L220>)
+### func \(Model\) [Picked](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L223>)
 
 ```go
 func (m Model) Picked() (string, bool)
@@ -163,7 +163,7 @@ func (m Model) Picked() (string, bool)
 Picked is the absolute path the last Update picked, and whether it picked.
 
 <a name="Model.SetHeight"></a>
-### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L195>)
+### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L198>)
 
 ```go
 func (m Model) SetHeight(h int) Model
@@ -172,16 +172,16 @@ func (m Model) SetHeight(h int) Model
 SetHeight shows as many entries as h rows hold, at least one.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L303>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L306>)
 
 ```go
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 ```
 
 Update takes the picker's own listings and its keys; Picked then says whether enter picked something.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L418>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L444>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
@@ -190,7 +190,7 @@ func (m Model) View(th theme.Resolved) string
 View is the entries, or the drives, in a window that keeps the cursor in view and counts the rest below it; nothing until the first listing.
 
 <a name="Model.WithAllowedTypes"></a>
-### func \(Model\) [WithAllowedTypes](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L156>)
+### func \(Model\) [WithAllowedTypes](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L159>)
 
 ```go
 func (m Model) WithAllowedTypes(exts ...string) Model
@@ -199,7 +199,7 @@ func (m Model) WithAllowedTypes(exts ...string) Model
 WithAllowedTypes limits the pick to names ending in one of exts, such as ".go"; other files stay listed but enter refuses them and says why.
 
 <a name="Model.WithDirs"></a>
-### func \(Model\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L162>)
+### func \(Model\) [WithDirs](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L165>)
 
 ```go
 func (m Model) WithDirs(on bool) Model
@@ -208,7 +208,7 @@ func (m Model) WithDirs(on bool) Model
 WithDirs lets enter pick a directory; → still opens one.
 
 <a name="Model.WithHidden"></a>
-### func \(Model\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L169>)
+### func \(Model\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L172>)
 
 ```go
 func (m Model) WithHidden(on bool) Model
@@ -217,7 +217,7 @@ func (m Model) WithHidden(on bool) Model
 WithHidden lists hidden entries too: dotfiles, and on Windows the ones marked hidden. Set it before Init.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L143>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L146>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
@@ -226,7 +226,7 @@ func (m Model) WithKeys(k Keys) Model
 WithKeys rebinds the picker.
 
 <a name="Model.WithPermissions"></a>
-### func \(Model\) [WithPermissions](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L182>)
+### func \(Model\) [WithPermissions](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L185>)
 
 ```go
 func (m Model) WithPermissions(on bool) Model
@@ -235,7 +235,7 @@ func (m Model) WithPermissions(on bool) Model
 WithPermissions shows or hides a column of permissions, as ls \-l writes them; it is hidden by default.
 
 <a name="Model.WithSizes"></a>
-### func \(Model\) [WithSizes](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L175>)
+### func \(Model\) [WithSizes](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L178>)
 
 ```go
 func (m Model) WithSizes(on bool) Model
@@ -244,7 +244,7 @@ func (m Model) WithSizes(on bool) Model
 WithSizes shows or hides the column of file sizes; it shows by default.
 
 <a name="Model.WithStyles"></a>
-### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L149>)
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L152>)
 
 ```go
 func (m Model) WithStyles(edit func(Styles) Styles) Model
@@ -253,7 +253,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit.
 
 <a name="Model.WithVolumes"></a>
-### func \(Model\) [WithVolumes](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L189>)
+### func \(Model\) [WithVolumes](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L192>)
 
 ```go
 func (m Model) WithVolumes(fn func() []string) Model
@@ -262,7 +262,7 @@ func (m Model) WithVolumes(fn func() []string) Model
 WithVolumes lists the drives through fn when ← leaves a root, for a test that must not read the machine's; nil is the system's.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L60-L67>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L61-L68>)
 
 Styles are how the rows are painted.
 
@@ -278,7 +278,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L71>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L72>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles

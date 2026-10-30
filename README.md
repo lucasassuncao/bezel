@@ -26,10 +26,9 @@ sh := shell.New(shell.Config{
 })
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-    var handled bool
-    var cmd tea.Cmd
-    if m.sh, handled, cmd = m.sh.Update(msg); handled {
-        return m, cmd // overlays and every action: the shell's
+    var r bezel.Result
+    if m.sh, r = m.sh.Update(msg); r.Handled {
+        return m, r.Cmd // overlays and every action: the shell's
     }
     // the resize, laid out; the messages your actions Send; the keys no action claims
 }
@@ -55,7 +54,7 @@ A pane missing from the map gives its space back that frame.
 | [Effects](docs/EFFECTS.md) | effects, lights and transitions over a drawn block |
 | [Animations](docs/ANIMATIONS.md) | tweens, springs, physics, text and scenes, and the clock that drives them |
 | [Architecture](docs/ARCHITECTURE.md) | what each folder holds, and what may import what |
-| [Conventions](docs/CONVENTIONS.md) | the rules every package follows: where the theme goes, the shapes of `Update` |
+| [Conventions](docs/CONVENTIONS.md) | the rules every package follows: where the theme goes, the one `Update` |
 
 Each package also has its own `README.md`, generated from its doc comments.
 

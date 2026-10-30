@@ -34,10 +34,9 @@ func newModel() model {
 func (m model) Init() tea.Cmd { return tea.RequestBackgroundColor }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m, cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
 	}
 	// the messages the app's actions send, and the keys no action claims
 	return m, nil
@@ -52,7 +51,7 @@ func (m model) View() tea.View {
 ```
 
 1. **`shell.Config`** says everything up front: the layout, the theme, the title, the tabs and the keys that hold on every screen.
-2. **`Update`** hands every message to the shell first. `handled` true means it was the shell's (a key an action took, a dialog's) and the app returns at once; false means the app's turn. A resize is both: the shell lays the panes out and hands it on, so the app sizes its models from `Rect` on the same message.
+2. **`Update`** hands every message to the shell first. `Handled` true means it was the shell's (a key an action took, a dialog's) and the app returns at once; false means the app's turn. A resize the shell lays out and still hands on as false, so the app sizes its models from `Rect` on the same message.
 3. **`View`** hands the shell a `Pane` per leaf of the layout: a title and a `Body` that draws into the inner rect the shell computed. A leaf missing from the map gives its space back that frame.
 4. **`Init`** asks the terminal for its background, so the theme can be resolved [light or dark](THEME.md#light-and-dark).
 
@@ -150,7 +149,7 @@ case shell.FocusMsg: // sent on every move, by key or click
 	}
 case tea.KeyPressMsg: // keys no action took go to the focused pane
 	if m.sh.Focused() == "list" {
-		m.list, _ = m.list.Update(msg)
+		m.list, _ = m.list.Update(msg) // its Result: Event and Cmd
 	}
 ```
 
@@ -174,21 +173,21 @@ From then on the shell answers a left click by itself, in `Update`, like a key a
 - on a **dialog**, the dialog takes it: `Confirm`, `Alert` and `Choice` press the button clicked, and a click off the dialog does nothing;
 - on a **pane**, it focuses the pane, with the `FocusMsg` and the fade a key gives (an `Info` pane keeps the focus where it was), and sends the app a `shell.ClickMsg`.
 
-`ClickMsg` names the pane and carries the cell inside its body, the rect its `Body` draws in, so the app hands it on the way it hands on a key:
+`ClickMsg` names the pane and carries the cell inside its body, the rect its `Body` draws in, so the app hands it to the component the way it hands on a key, through `Update`:
 
 ```go
 case shell.ClickMsg:
 	switch msg.Pane {
 	case "list":
-		m.list, act = m.list.Click(msg.Y) // act is list.Chosen on a second click
+		m.list, r = m.list.Update(msg) // r.Event is list.Chosen on a second click
 	case "form":
-		m.form, cmd = m.form.Click(msg.Y) // the width SetWidth gave it says how tall an open select is
+		m.form, r = m.form.Update(msg) // the width SetWidth gave it says how tall an open select is
 	case "notes":
-		m.notes, cmd = m.notes.Update(msg.MouseClickMsg) // a textbox takes the press itself
+		m.notes, r = m.notes.Update(msg) // a textbox takes the press itself
 	}
 ```
 
-The components' `Click` moves the cursor to the row clicked, and on the row already under it does what enter would: `list` and `table` return `Chosen`, `tree` opens or closes the node. `form.Click` focuses the field and presses a button, a checkbox or a toggle.
+The components move the cursor to the row clicked, and on the row already under it does what enter would: `list` and `table` report `Chosen`, `tree` reports `Expanded` or `Collapsed`. `form` focuses the field and presses a button, a checkbox or a toggle.
 
 A click is all `ClickMsg` carries. The rest of the mouse reaches the app as it came, and two methods move it into a pane:
 
@@ -276,4 +275,4 @@ next, _ = next.Update(bezeltest.Key("d"))
 - An animation asks for frames with `Tick`; a test hands it its own with `FrameAt(time)`, so no test waits on a clock. `animation.Record` plays one to its end as text. See [ANIMATIONS.md](ANIMATIONS.md).
 - Set `BEZEL_NO_MOTION=1` in a test that only cares where things land, and clear it in `TestMain` when a CI sets `TERM=dumb`.
 - `shell.Check` over each screen's actions catches two keys bound twice.
-- A click on a pane comes back from `Update` as a command: call it for the `shell.ClickMsg`, and feed that to the app.
+- A click on a pane comes back in `Result.Cmd`: call it for the `shell.ClickMsg`, and feed that to the app.

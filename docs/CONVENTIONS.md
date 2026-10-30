@@ -97,27 +97,44 @@ Each package is in one class, and a non-themable one says so in its doc comment:
 | Theme only | switch the theme (a plain function keeps no edit) | `chart`, `progress.Bar` and siblings, `inline`, `icon.Set.Render` |
 | Non-themable | nothing: the colours mean something, or are arguments | `overlay.Alert` and any `Kind` tint, `toast`, `animation` and subpackages, `effect`, `themebrowser` |
 
-## Three shapes of Update
+## One Update
 
 ```go
-// 1. Routers: handled false means the message is still the app's.
-m.sh, handled, cmd = m.sh.Update(msg)
-
-// 2. Cursor movers: say what the key did, never return a command.
-m.list, act = m.list.Update(key)
-if act == list.Chosen { ... }
-
-// 3. Leaves: the usual bubbletea shape.
-m.input, cmd = m.input.Update(msg)
+var r bezel.Result
+if m.sh, r = m.sh.Update(msg); r.Handled { // the frame's first
+	return m, r.Cmd
+}
+m.list, r = m.list.Update(msg)
+switch e := r.Event.(type) {
+case list.Chosen[string]:
+	return m.open(e.Row.Value)
+}
+return m, r.Cmd
 ```
 
-| Shape | Who |
-| --- | --- |
-| `Update(tea.Msg) (T, bool, tea.Cmd)` | `shell.Shell`, `overlay.Stack` |
-| `Update(tea.KeyPressMsg) (T, Action)` | `list`, `tree`, `browser`, `table.Model`, `paginator` |
-| `Update(tea.Msg) (I, tea.Cmd)` | `overlay.Overlay`, `form.Field`, `palette`, `form.Form`, `input`, `textbox`, `cursor`, `spinner`, `timer`, `stopwatch`, `viewport`, `accordion`, `toast`, `animation`, `effect` |
+Every model answers the same signature, `Update(tea.Msg) (T, bezel.Result)`, and `bezel.Model[T]` names it. The `Result` has three fields: `Handled` says the message was this model's, `Event` says what happened (nil when nothing did), `Cmd` is the effect to run. A model that has nothing to report leaves `Event` nil; a model with nothing to run leaves `Cmd` nil.
 
-A cursor mover's `Action` (`list.Chosen`, `tree.Expanded`) reports; the app decides what it means. A list with motion keeps its shape: `Tick` and `Animate` carry the frames. A new component picks the row that fits, never a fourth shape.
+`Handled` is true exactly when:
+
+1. the key matches one of the model's bindings, even if nothing moved (`↑` on the first row is the list's);
+2. the model is focused and takes typed text or a `tea.PasteMsg`, or an open filter takes text;
+3. the message is a frame tagged with the model's id, or the own tick of `timer`, `stopwatch` or a caret;
+4. a `bezel.ClickMsg` lands on a row the model drew;
+5. in `shell.Shell` and `overlay.Stack`, wherever they took the message. A resize stays false.
+
+Anything else is `Result{}`, and the app keeps the message.
+
+The events are structs in the component's package, comparable when they have no type parameter:
+
+| Package | Event |
+| --- | --- |
+| `list` | `Chosen[T]{Row}` |
+| `table` | `Chosen[T]{Item}` |
+| `tree` | `Expanded[N]{Node}`, `Collapsed[N]{Node}` |
+| `browser` | `Chosen{Item}`, `Dismissed{}` |
+| `paginator` | `Paged{Page}` |
+
+An event reports; the app decides what it means. A cursor that starts to move puts its own `Tick()` in `Result.Cmd`, so the app never calls it after `Update`; `Tick()` stays public for after `SetRows`. A new component answers this signature, never a new shape.
 
 ## Keys
 
@@ -144,11 +161,11 @@ legend.FromBindings([]key.Binding{m.keys.Up, m.keys.Enter})
 ```go
 case shell.ClickMsg: // already moved into the pane's cells
 	if msg.Pane == "items" {
-		m.list, act = m.list.Click(msg.Y) // same return as Update
+		m.list, r = m.list.Update(msg) // the same Update as a key
 	}
 ```
 
-The mouse reaches a component the way a key does: the app hands it on. Cursor movers (`list`, `table.Model`, `tree`) take `Click(y) (T, Action)`: the first click moves the cursor, a click on the current row does what enter does. `form.Form.Click` returns a `tea.Cmd`. A leaf that tracks press, drag and release (`textbox`) takes the mouse in its `Update`; a dialog implements `overlay.Clicker`. `Click` is a second way in, not a fourth shape.
+A click enters through `Update`, like a key. `shell.ClickMsg` is `bezel.ClickMsg`: the pane's name, which the app routes by, and the click in the pane's cells. `list`, `table.Model` and `tree` use `Y`: the first click moves the cursor, a click on the current row does what enter does and reports the same event. `form.Form` focuses the field and presses a button, a checkbox or a toggle. A leaf that tracks press, drag and release (`textbox`) takes the click in the same `Update`, and the drag as the `tea.Mouse*Msg` that `shell.MouseIn` hands it. A dialog of the app's own that wants clicks implements `overlay.Clicker`, a role interface and not a second `Update`.
 
 ## Time is a message
 
@@ -156,13 +173,13 @@ The mouse reaches a component the way a key does: the app hands it on. Cursor mo
 func (m model) Init() tea.Cmd { return m.spin.Tick() }
 
 case animation.FrameMsg:
-	m.spin, cmd = m.spin.Update(msg) // takes only its own frames
+	m.spin, r = m.spin.Update(msg) // takes only its own frames
 
 // in a test, no clock:
 m.spin, _ = m.spin.Update(m.spin.FrameAt(start.Add(time.Second)))
 ```
 
-Nothing reads the clock. `Tick` asks for frames, each frame is tagged so a model takes only its own, and tests feed `FrameAt(t)`. Everything that moves answers the same five: `Active()`, `Tick()`, `FrameAt(at)`, `Update` (`Animate` for `list`) and `Advance(now) (T, bool)`, true once settled. `accordion` has no `FrameAt`, since each section keeps its own clock.
+Nothing reads the clock. `Tick` asks for frames, each frame is tagged so a model takes only its own, and tests feed `FrameAt(t)`. Everything that moves answers the same five: `Active()`, `Tick()`, `FrameAt(at)`, `Update` and `Advance(now) (T, bool)`, true once settled. `accordion` has no `FrameAt`, since each section keeps its own clock.
 
 `BEZEL_NO_MOTION` holds every moving thing still. Only `timer`, `stopwatch` and the blinking caret keep their own tick, because they count real time, not motion.
 

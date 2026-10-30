@@ -22,7 +22,7 @@ Package spinner is a run of frames that turns while something works: twelve pres
   - [func \(m Model\) Start\(\) \(Model, tea.Cmd\)](<#Model.Start>)
   - [func \(m Model\) Stop\(\) Model](<#Model.Stop>)
   - [func \(m Model\) Tick\(\) tea.Cmd](<#Model.Tick>)
-  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, tea.Cmd\)](<#Model.Update>)
+  - [func \(m Model\) Update\(msg tea.Msg\) \(Model, bezel.Result\)](<#Model.Update>)
   - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
   - [func \(m Model\) WithStyles\(edit func\(Styles\) Styles\) Model](<#Model.WithStyles>)
 - [type Spinner](<#Spinner>)
@@ -43,7 +43,7 @@ Package spinner is a run of frames that turns while something works: twelve pres
 
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L99-L106>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L102-L109>)
 
 Model is a value: every method returns the new spinner.
 
@@ -54,7 +54,7 @@ type Model struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L110>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L113>)
 
 ```go
 func New(s Spinner) Model
@@ -63,7 +63,7 @@ func New(s Spinner) Model
 New is s, stopped on its first frame. Its frames are copied, and an Every of zero or less is a tenth of a second.
 
 <a name="Model.Frame"></a>
-### func \(Model\) [Frame](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L176>)
+### func \(Model\) [Frame](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L182>)
 
 ```go
 func (m Model) Frame() string
@@ -72,7 +72,7 @@ func (m Model) Frame() string
 Frame is the frame showing, unstyled and unpadded; "" without frames.
 
 <a name="Model.FrameAt"></a>
-### func \(Model\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L159>)
+### func \(Model\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L162>)
 
 ```go
 func (m Model) FrameAt(at time.Time) tea.Msg
@@ -81,7 +81,7 @@ func (m Model) FrameAt(at time.Time) tea.Msg
 FrameAt is the spinner's next frame for at, for a test or a host that delivers frames itself.
 
 <a name="Model.Owns"></a>
-### func \(Model\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L163>)
+### func \(Model\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L166>)
 
 ```go
 func (m Model) Owns(msg tea.Msg) bool
@@ -90,7 +90,7 @@ func (m Model) Owns(msg tea.Msg) bool
 Owns reports whether msg is one of this spinner's frames, a spent one included, so a host routing frames hands it here and nowhere else.
 
 <a name="Model.Running"></a>
-### func \(Model\) [Running](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L191>)
+### func \(Model\) [Running](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L197>)
 
 ```go
 func (m Model) Running() bool
@@ -99,7 +99,7 @@ func (m Model) Running() bool
 Running reports whether the spinner is turning.
 
 <a name="Model.Spinner"></a>
-### func \(Model\) [Spinner](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L184>)
+### func \(Model\) [Spinner](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L190>)
 
 ```go
 func (m Model) Spinner() Spinner
@@ -108,7 +108,7 @@ func (m Model) Spinner() Spinner
 Spinner is the frames and pace the spinner turns with.
 
 <a name="Model.Start"></a>
-### func \(Model\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L132>)
+### func \(Model\) [Start](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L135>)
 
 ```go
 func (m Model) Start() (Model, tea.Cmd)
@@ -117,7 +117,7 @@ func (m Model) Start() (Model, tea.Cmd)
 Start turns the spinner. The command is its first frame; nil when it is already turning, has no frames, or motion is Still, where it holds its first frame while Running.
 
 <a name="Model.Stop"></a>
-### func \(Model\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L142>)
+### func \(Model\) [Stop](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L145>)
 
 ```go
 func (m Model) Stop() Model
@@ -126,7 +126,7 @@ func (m Model) Stop() Model
 Stop holds the spinner on its frame; a tick already on its way lands spent.
 
 <a name="Model.Tick"></a>
-### func \(Model\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L150>)
+### func \(Model\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L153>)
 
 ```go
 func (m Model) Tick() tea.Cmd
@@ -135,16 +135,16 @@ func (m Model) Tick() tea.Cmd
 Tick is the command for the next frame, Every apart at BEZEL\_MOTION's speed; nil while stopped or Still.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L167>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L170>)
 
 ```go
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd)
+func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 ```
 
 Update turns to the next frame on its own frame and arms the one after. Any other message leaves it as it was, with no command.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L194>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L200>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
@@ -153,7 +153,7 @@ func (m Model) View(th theme.Resolved) string
 View is the frame in the theme's style, padded to the widest frame.
 
 <a name="Model.WithStyles"></a>
-### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L124>)
+### func \(Model\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L127>)
 
 ```go
 func (m Model) WithStyles(edit func(Styles) Styles) Model
@@ -162,7 +162,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit, under whatever theme View gets. It replaces an earlier edit.
 
 <a name="Spinner"></a>
-## type [Spinner](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L19-L22>)
+## type [Spinner](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L20-L23>)
 
 Spinner is the frames a spinner turns through and how long each shows.
 
@@ -174,7 +174,7 @@ type Spinner struct {
 ```
 
 <a name="Dot"></a>
-### func [Dot](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L32>)
+### func [Dot](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L33>)
 
 ```go
 func Dot() Spinner
@@ -183,7 +183,7 @@ func Dot() Spinner
 Dot is a braille cell with one dot missing, moving around it; each frame carries a space that sets the text after it apart.
 
 <a name="Ellipsis"></a>
-### func [Ellipsis](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L83>)
+### func [Ellipsis](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L84>)
 
 ```go
 func Ellipsis() Spinner
@@ -192,7 +192,7 @@ func Ellipsis() Spinner
 Ellipsis is three dots appearing one by one.
 
 <a name="Globe"></a>
-### func [Globe](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L57>)
+### func [Globe](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L58>)
 
 ```go
 func Globe() Spinner
@@ -201,7 +201,7 @@ func Globe() Spinner
 Globe is the earth turning.
 
 <a name="Hamburger"></a>
-### func [Hamburger](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L78>)
+### func [Hamburger](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L79>)
 
 ```go
 func Hamburger() Spinner
@@ -210,7 +210,7 @@ func Hamburger() Spinner
 Hamburger is a trigram whose broken bar moves. Unicode counts a trigram two cells wide and many terminals draw it in one, so what follows can shift.
 
 <a name="Jump"></a>
-### func [Jump](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L42>)
+### func [Jump](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L43>)
 
 ```go
 func Jump() Spinner
@@ -219,7 +219,7 @@ func Jump() Spinner
 Jump is a braille dot hopping along the bottom of its cell.
 
 <a name="Line"></a>
-### func [Line](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L28>)
+### func [Line](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L29>)
 
 ```go
 func Line() Spinner
@@ -228,7 +228,7 @@ func Line() Spinner
 Line is a bar turning around its middle.
 
 <a name="Meter"></a>
-### func [Meter](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L72>)
+### func [Meter](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L73>)
 
 ```go
 func Meter() Spinner
@@ -237,7 +237,7 @@ func Meter() Spinner
 Meter is three cells filling and emptying.
 
 <a name="MiniDot"></a>
-### func [MiniDot](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L37>)
+### func [MiniDot](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L38>)
 
 ```go
 func MiniDot() Spinner
@@ -246,7 +246,7 @@ func MiniDot() Spinner
 MiniDot is a small braille dot running in a circle.
 
 <a name="Monkey"></a>
-### func [Monkey](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L67>)
+### func [Monkey](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L68>)
 
 ```go
 func Monkey() Spinner
@@ -255,7 +255,7 @@ func Monkey() Spinner
 Monkey is the three wise monkeys.
 
 <a name="Moon"></a>
-### func [Moon](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L62>)
+### func [Moon](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L63>)
 
 ```go
 func Moon() Spinner
@@ -264,7 +264,7 @@ func Moon() Spinner
 Moon is the moon through its phases.
 
 <a name="Points"></a>
-### func [Points](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L52>)
+### func [Points](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L53>)
 
 ```go
 func Points() Spinner
@@ -273,7 +273,7 @@ func Points() Spinner
 Points is a dot walking along three.
 
 <a name="Pulse"></a>
-### func [Pulse](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L47>)
+### func [Pulse](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L48>)
 
 ```go
 func Pulse() Spinner
@@ -282,7 +282,7 @@ func Pulse() Spinner
 Pulse is a block fading out.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L91-L93>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L92-L94>)
 
 Styles are how the frame is painted.
 
@@ -293,7 +293,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L96>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L97>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles
