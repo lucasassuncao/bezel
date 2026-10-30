@@ -58,17 +58,17 @@ func TestEmptyStateCentresWithinTheRect(t *testing.T) {
 func TestDividerFillsTheWidth(t *testing.T) {
 	plain := lipgloss.NewStyle()
 	for _, width := range []int{1, 8, 40} {
-		require.Equal(t, width, ansi.StringWidth(Divider(width, "", plain, plain)), "bare rule at %d", width)
-		require.Equal(t, width, ansi.StringWidth(Divider(width, "Packages", plain, plain)), "labelled rule at %d", width)
+		require.Equal(t, width, ansi.StringWidth(Divider(width, "", DividerStyle{Line: plain, Label: plain})), "bare rule at %d", width)
+		require.Equal(t, width, ansi.StringWidth(Divider(width, "Packages", DividerStyle{Line: plain, Label: plain})), "labelled rule at %d", width)
 	}
-	require.Equal(t, "── Packages ──────", Divider(18, "Packages", plain, plain))
-	require.Empty(t, Divider(0, "x", plain, plain))
+	require.Equal(t, "── Packages ──────", Divider(18, "Packages", DividerStyle{Line: plain, Label: plain}))
+	require.Empty(t, Divider(0, "x", DividerStyle{Line: plain, Label: plain}))
 }
 
 func TestDividerMeasuresAPaddedLabelStyle(t *testing.T) {
 	padded := lipgloss.NewStyle().Padding(0, 1)
 	for _, width := range []int{8, 18, 40} {
-		require.Equal(t, width, ansi.StringWidth(Divider(width, "Packages", lipgloss.NewStyle(), padded)), "width %d", width)
+		require.Equal(t, width, ansi.StringWidth(Divider(width, "Packages", DividerStyle{Label: padded})), "width %d", width)
 	}
 }
 

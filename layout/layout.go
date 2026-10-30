@@ -42,14 +42,17 @@ func (l Leaf) Info() Leaf {
 	return l
 }
 
-func (*Box) node() {}
+// IsInfo reports whether l was marked with Info.
+func (l Leaf) IsInfo() bool { return l.info }
+
+func (Box) node()  {}
 func (Leaf) node() {}
 
 // Columns lays children out left to right.
-func Columns(children ...Node) *Box { return &Box{dir: horizontal, children: slices.Clone(children)} }
+func Columns(children ...Node) Box { return Box{dir: horizontal, children: slices.Clone(children)} }
 
 // Rows lays children out top to bottom.
-func Rows(children ...Node) *Box { return &Box{dir: vertical, children: slices.Clone(children)} }
+func Rows(children ...Node) Box { return Box{dir: vertical, children: slices.Clone(children)} }
 
 // Fixed is a leaf sized by its constraints. With none it behaves like Fill.
 func Fixed(name string, cs ...Constraint) Leaf { return Leaf{Name: name, cs: slices.Clone(cs)} }
@@ -57,14 +60,11 @@ func Fixed(name string, cs ...Constraint) Leaf { return Leaf{Name: name, cs: sli
 // Fill is a leaf that takes what the fixed siblings leave.
 func Fill(name string) Leaf { return Leaf{Name: name} }
 
-// Collapse is a copy of b that keeps only the child holding leaf keep when
-// its axis is shorter than limit. keep may name a leaf nested deeper in that
-// child. b itself is left as it was, so a box shared by two layouts is safe.
-func (b *Box) Collapse(limit int, keep string) *Box {
-	c := *b
-	c.children = slices.Clone(b.children)
-	c.collapseLimit, c.collapseKeep = limit, keep
-	return &c
+// Collapse is b keeping only the child holding leaf keep when its axis is
+// shorter than limit. keep may name a leaf nested deeper in that child.
+func (b Box) Collapse(limit int, keep string) Box {
+	b.collapseLimit, b.collapseKeep = limit, keep
+	return b
 }
 
 type constraintKind int
@@ -94,26 +94,6 @@ func Max(n int) Constraint { return Constraint{kind: maximum, num: n} }
 // Lines is an exact size: rows in a Rows box, columns in a Columns box.
 func Lines(n int) Constraint { return Constraint{kind: exact, num: n} }
 
-// Order lists leaf names depth-first in declaration order.
-func Order(n Node) []string {
-	var out []string
-	for l := range Leaves(n) {
-		out = append(out, l.Name)
-	}
-	return out
-}
-
-// Ring is the focus ring: Order without the Info leaves.
-func Ring(n Node) []string {
-	var out []string
-	for l := range Leaves(n) {
-		if !l.info {
-			out = append(out, l.Name)
-		}
-	}
-	return out
-}
-
 // Leaves yields every leaf under n, depth-first in declaration order.
 func Leaves(n Node) iter.Seq[Leaf] {
 	return func(yield func(Leaf) bool) { leaves(n, yield) }
@@ -124,7 +104,7 @@ func leaves(n Node, yield func(Leaf) bool) bool {
 	switch v := n.(type) {
 	case Leaf:
 		return yield(v)
-	case *Box:
+	case Box:
 		for _, c := range v.children {
 			if !leaves(c, yield) {
 				return false

@@ -36,7 +36,7 @@ func Button(label string, st ButtonStyle, focused bool) string {
 // a block of facts with what can be done about them underneath.
 func Card(r layout.Rect, title, body, footer string, st PanelStyle) string {
 	if footer == "" {
-		return Panel(r, title, body, st)
+		return Panel(r, Edges{Title: title}, body, st)
 	}
 	inner := InnerRect(r)
 	rows := max(0, inner.H-2) // the rule and the footer take the last two rows
@@ -45,6 +45,6 @@ func Card(r layout.Rect, title, body, footer string, st PanelStyle) string {
 	for len(lines) < rows { // a short body still leaves the footer at the bottom
 		lines = append(lines, "")
 	}
-	lines = append(lines, Divider(inner.W, "", st.Border, st.Title), footer)
-	return Panel(r, title, strings.Join(lines, "\n"), st)
+	lines = append(lines, Divider(inner.W, "", DividerStyle{Line: st.Border, Label: st.Title}), footer)
+	return Panel(r, Edges{Title: title}, strings.Join(lines, "\n"), st)
 }

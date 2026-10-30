@@ -7,7 +7,6 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
-	"github.com/lucasassuncao/bezel/layout"
 )
 
 // ClickMsg is a left click on a pane, sent by the shell once it focused the
@@ -35,7 +34,7 @@ func (s Shell) PaneAt(x, y int) (string, bool) {
 		return "", false
 	}
 	// Last drawn wins, as on screen: paneCanvas draws in declaration order.
-	order := layout.Order(s.cfg.Layout)
+	order := paneOrder(s.cfg.Layout)
 	for i := len(order) - 1; i >= 0; i-- {
 		r, ok := s.rects[order[i]]
 		if ok && x >= r.X && x < r.X+r.W && y >= r.Y && y < r.Y+r.H {
@@ -98,7 +97,7 @@ func (s Shell) click(c tea.MouseClickMsg) (Shell, bool, tea.Cmd) {
 	}
 	clicked := ClickMsg{Pane: pane, MouseClickMsg: s.MouseIn(pane, c).(tea.MouseClickMsg)}
 	send := func() tea.Msg { return clicked }
-	if pane == s.Focused() || !slices.Contains(layout.Ring(s.cfg.Layout), pane) {
+	if pane == s.Focused() || !slices.Contains(focusRing(s.cfg.Layout), pane) {
 		return s, true, send
 	}
 	next, focus := s.focused(s.Focused(), s.focusOn(pane).relayout())

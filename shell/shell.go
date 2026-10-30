@@ -191,7 +191,7 @@ func (s Shell) Focused() string { s = s.ready(); return s.focus[s.tab] }
 // and a leaf the layout dropped hands focus to one on screen.
 func (s Shell) SetFocus(name string) Shell {
 	s = s.ready()
-	if slices.Contains(layout.Order(s.cfg.Layout), name) {
+	if slices.Contains(paneOrder(s.cfg.Layout), name) {
 		return s.focusOn(name).relayout() // a Header may size itself by focus
 	}
 	return s
@@ -200,7 +200,7 @@ func (s Shell) SetFocus(name string) Shell {
 // focusOn moves focus, remembering it as the way back when name is on the ring.
 func (s Shell) focusOn(name string) Shell {
 	s.focus = withAt(s.focus, s.tab, name)
-	if slices.Contains(layout.Ring(s.cfg.Layout), name) {
+	if slices.Contains(focusRing(s.cfg.Layout), name) {
 		s.ringFocus = withAt(s.ringFocus, s.tab, name)
 	}
 	return s
@@ -327,11 +327,27 @@ func (s Shell) nextPane(back bool) Shell {
 	return s.focusOn(order[cycle(cur, len(order), back)])
 }
 
+// paneOrder is every pane of n by name, depth-first in declaration order.
+func paneOrder(n layout.Node) []string { return leafNames(n, true) }
+
+// focusRing is paneOrder without the Info panes.
+func focusRing(n layout.Node) []string { return leafNames(n, false) }
+
+func leafNames(n layout.Node, info bool) []string {
+	var out []string
+	for l := range layout.Leaves(n) {
+		if info || !l.IsInfo() {
+			out = append(out, l.Name)
+		}
+	}
+	return out
+}
+
 // visibleOrder is the focus ring minus the leaves the layout dropped. Before
 // the first resize nothing is placed yet, so every leaf counts.
 func (s Shell) visibleOrder() []string {
 	var out []string
-	for _, n := range layout.Ring(s.cfg.Layout) {
+	for _, n := range focusRing(s.cfg.Layout) {
 		if _, ok := s.rects[n]; ok || len(s.rects) == 0 {
 			out = append(out, n)
 		}
@@ -371,7 +387,7 @@ func (s Shell) relayout() Shell {
 
 // firstLeaf is where focus starts: the first leaf of the focus ring.
 func firstLeaf(n layout.Node) string {
-	if ring := layout.Ring(n); len(ring) > 0 {
+	if ring := focusRing(n); len(ring) > 0 {
 		return ring[0]
 	}
 	return ""

@@ -26,7 +26,7 @@ func prune(n Node, present func(string) bool) Node {
 			return v
 		}
 		return nil
-	case *Box:
+	case Box:
 		kept := make([]Node, 0, len(v.children))
 		for _, c := range v.children {
 			if p := prune(c, present); p != nil {
@@ -36,7 +36,7 @@ func prune(n Node, present func(string) bool) Node {
 		if len(kept) == 0 {
 			return nil
 		}
-		return &Box{dir: v.dir, children: kept, collapseLimit: v.collapseLimit, collapseKeep: v.collapseKeep}
+		return Box{dir: v.dir, children: kept, collapseLimit: v.collapseLimit, collapseKeep: v.collapseKeep}
 	}
 	return nil
 }
@@ -45,7 +45,7 @@ func place(n Node, r Rect, out map[string]Rect, collapsed *bool) {
 	switch v := n.(type) {
 	case Leaf:
 		out[v.Name] = r
-	case *Box:
+	case Box:
 		length := r.W
 		if v.dir == vertical {
 			length = r.H
@@ -72,7 +72,7 @@ func place(n Node, r Rect, out map[string]Rect, collapsed *bool) {
 
 // survivor is the child that stays when the box collapses: the one holding
 // collapseKeep, or the first when no child does.
-func (b *Box) survivor() Node {
+func (b Box) survivor() Node {
 	for _, c := range b.children {
 		if contains(c, b.collapseKeep) {
 			return c
@@ -83,7 +83,7 @@ func (b *Box) survivor() Node {
 
 // sizes splits length among the children. Fixed leaves are sized by their
 // constraints; everything else shares the rest evenly.
-func (b *Box) sizes(length int) []int {
+func (b Box) sizes(length int) []int {
 	n := len(b.children)
 	sizes := make([]int, n)
 	fixed := make([]bool, n)

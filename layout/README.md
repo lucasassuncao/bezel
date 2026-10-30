@@ -14,14 +14,12 @@ Package layout declares a screen as a tree of named leaves and resolves it to re
 
 - [func ClampScroll\(cursor, offset, height int\) int](<#ClampScroll>)
 - [func Leaves\(n Node\) iter.Seq\[Leaf\]](<#Leaves>)
-- [func Order\(n Node\) \[\]string](<#Order>)
 - [func Resolve\(n Node, body Rect, present func\(name string\) bool\) \(map\[string\]Rect, bool\)](<#Resolve>)
-- [func Ring\(n Node\) \[\]string](<#Ring>)
 - [func ScrollStart\(cursor, total, height int\) int](<#ScrollStart>)
 - [type Box](<#Box>)
-  - [func Columns\(children ...Node\) \*Box](<#Columns>)
-  - [func Rows\(children ...Node\) \*Box](<#Rows>)
-  - [func \(b \*Box\) Collapse\(limit int, keep string\) \*Box](<#Box.Collapse>)
+  - [func Columns\(children ...Node\) Box](<#Columns>)
+  - [func Rows\(children ...Node\) Box](<#Rows>)
+  - [func \(b Box\) Collapse\(limit int, keep string\) Box](<#Box.Collapse>)
 - [type Constraint](<#Constraint>)
   - [func Lines\(n int\) Constraint](<#Lines>)
   - [func Max\(n int\) Constraint](<#Max>)
@@ -31,6 +29,7 @@ Package layout declares a screen as a tree of named leaves and resolves it to re
   - [func Fill\(name string\) Leaf](<#Fill>)
   - [func Fixed\(name string, cs ...Constraint\) Leaf](<#Fixed>)
   - [func \(l Leaf\) Info\(\) Leaf](<#Leaf.Info>)
+  - [func \(l Leaf\) IsInfo\(\) bool](<#Leaf.IsInfo>)
 - [type Node](<#Node>)
 - [type Rect](<#Rect>)
 - [type Scroll](<#Scroll>)
@@ -52,22 +51,13 @@ func ClampScroll(cursor, offset, height int) int
 ClampScroll moves offset so that cursor stays inside a window of height rows: up when the cursor is above it, down when below. Never negative; a non\-positive height only applies the floor.
 
 <a name="Leaves"></a>
-## func [Leaves](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L118>)
+## func [Leaves](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L98>)
 
 ```go
 func Leaves(n Node) iter.Seq[Leaf]
 ```
 
 Leaves yields every leaf under n, depth\-first in declaration order.
-
-<a name="Order"></a>
-## func [Order](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L98>)
-
-```go
-func Order(n Node) []string
-```
-
-Order lists leaf names depth\-first in declaration order.
 
 <a name="Resolve"></a>
 ## func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/layout/resolve.go#L6>)
@@ -77,15 +67,6 @@ func Resolve(n Node, body Rect, present func(name string) bool) (map[string]Rect
 ```
 
 Resolve places the tree inside body. Leaves that present rejects are pruned first, so their space goes to their siblings. collapsed reports whether any Collapse fired, which is what a legend needs to change its wording.
-
-<a name="Ring"></a>
-## func [Ring](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L107>)
-
-```go
-func Ring(n Node) []string
-```
-
-Ring is the focus ring: Order without the Info leaves.
 
 <a name="ScrollStart"></a>
 ## func [ScrollStart](<https://github.com/lucasassuncao/bezel/blob/main/layout/scroll.go#L18>)
@@ -108,31 +89,31 @@ type Box struct {
 ```
 
 <a name="Columns"></a>
-### func [Columns](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L49>)
+### func [Columns](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L52>)
 
 ```go
-func Columns(children ...Node) *Box
+func Columns(children ...Node) Box
 ```
 
 Columns lays children out left to right.
 
 <a name="Rows"></a>
-### func [Rows](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L52>)
+### func [Rows](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L55>)
 
 ```go
-func Rows(children ...Node) *Box
+func Rows(children ...Node) Box
 ```
 
 Rows lays children out top to bottom.
 
 <a name="Box.Collapse"></a>
-### func \(\*Box\) [Collapse](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L63>)
+### func \(Box\) [Collapse](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L65>)
 
 ```go
-func (b *Box) Collapse(limit int, keep string) *Box
+func (b Box) Collapse(limit int, keep string) Box
 ```
 
-Collapse is a copy of b that keeps only the child holding leaf keep when its axis is shorter than limit. keep may name a leaf nested deeper in that child. b itself is left as it was, so a box shared by two layouts is safe.
+Collapse is b keeping only the child holding leaf keep when its axis is shorter than limit. keep may name a leaf nested deeper in that child.
 
 <a name="Constraint"></a>
 ## type [Constraint](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L80-L83>)
@@ -194,7 +175,7 @@ type Leaf struct {
 ```
 
 <a name="Fill"></a>
-### func [Fill](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L58>)
+### func [Fill](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L61>)
 
 ```go
 func Fill(name string) Leaf
@@ -203,7 +184,7 @@ func Fill(name string) Leaf
 Fill is a leaf that takes what the fixed siblings leave.
 
 <a name="Fixed"></a>
-### func [Fixed](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L55>)
+### func [Fixed](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L58>)
 
 ```go
 func Fixed(name string, cs ...Constraint) Leaf
@@ -219,6 +200,15 @@ func (l Leaf) Info() Leaf
 ```
 
 Info marks a pane that only informs: tab skips it, though the app can still focus it on purpose \(to scroll a long hint, say\).
+
+<a name="Leaf.IsInfo"></a>
+### func \(Leaf\) [IsInfo](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L46>)
+
+```go
+func (l Leaf) IsInfo() bool
+```
+
+IsInfo reports whether l was marked with Info.
 
 <a name="Node"></a>
 ## type [Node](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L14>)

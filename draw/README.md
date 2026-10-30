@@ -20,11 +20,10 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func Composite\(fg, bg string, x, y int\) string](<#Composite>)
 - [func CompositeCenter\(fg, bg string\) string](<#CompositeCenter>)
 - [func Cut\(s string, width int\) string](<#Cut>)
-- [func Divider\(width int, label string, line, text lipgloss.Style\) string](<#Divider>)
+- [func Divider\(width int, label string, st DividerStyle\) string](<#Divider>)
 - [func EmptyState\(r layout.Rect, message, hint string, st ChromeStyle\) string](<#EmptyState>)
 - [func Fit\(s string, width int\) string](<#Fit>)
 - [func FitBlock\(s string, width, height int\) string](<#FitBlock>)
-- [func FramedPanel\(r layout.Rect, edges Edges, body string, st PanelStyle\) string](<#FramedPanel>)
 - [func Gutter\(n int, style lipgloss.Style\) string](<#Gutter>)
 - [func Header\(width int, title, subtitle, right string, st ChromeStyle\) string](<#Header>)
 - [func Heading\(name string, style lipgloss.Style, width int\) string](<#Heading>)
@@ -36,7 +35,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func OrDash\(s string\) string](<#OrDash>)
 - [func Pad\(s string, width int\) string](<#Pad>)
 - [func PadHeight\(s string, height int\) string](<#PadHeight>)
-- [func Panel\(r layout.Rect, title, body string, st PanelStyle\) string](<#Panel>)
+- [func Panel\(r layout.Rect, edges Edges, body string, st PanelStyle\) string](<#Panel>)
 - [func Sanitize\(s string\) string](<#Sanitize>)
 - [func SanitizeLines\(s string\) \[\]string](<#SanitizeLines>)
 - [func ScrollTo\(s string, height, target int\) string](<#ScrollTo>)
@@ -45,12 +44,12 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func TabAt\(width int, names \[\]string, active int, st ChromeStyle, x int\) int](<#TabAt>)
 - [func Tabs\(width int, names \[\]string, active int, st ChromeStyle\) string](<#Tabs>)
 - [func Tail\(lines \[\]string, height int\) \[\]string](<#Tail>)
-- [func TitledPanel\(r layout.Rect, title, right, body string, st PanelStyle\) string](<#TitledPanel>)
 - [func Truncate\(s string, width int\) string](<#Truncate>)
 - [func Width\(s string\) int](<#Width>)
 - [func Wrap\(s string, width int\) \[\]string](<#Wrap>)
 - [type ButtonStyle](<#ButtonStyle>)
 - [type ChromeStyle](<#ChromeStyle>)
+- [type DividerStyle](<#DividerStyle>)
 - [type Edges](<#Edges>)
 - [type PanelStyle](<#PanelStyle>)
 
@@ -127,16 +126,16 @@ func Cut(s string, width int) string
 Cut is Truncate without the ellipsis: the line ends where the width does.
 
 <a name="Divider"></a>
-## func [Divider](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L118>)
+## func [Divider](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L123>)
 
 ```go
-func Divider(width int, label string, line, text lipgloss.Style) string
+func Divider(width int, label string, st DividerStyle) string
 ```
 
 Divider is a horizontal rule width cells long, with label set into it after a short lead when one is given: "── Label ─────".
 
 <a name="EmptyState"></a>
-## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L141>)
+## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L146>)
 
 ```go
 func EmptyState(r layout.Rect, message, hint string, st ChromeStyle) string
@@ -161,15 +160,6 @@ func FitBlock(s string, width, height int) string
 ```
 
 FitBlock cuts a block to height rows and width cells per row. A too\-wide line would wrap inside lipgloss and push a border down, so cut first.
-
-<a name="FramedPanel"></a>
-## func [FramedPanel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L55>)
-
-```go
-func FramedPanel(r layout.Rect, edges Edges, body string, st PanelStyle) string
-```
-
-FramedPanel is a Panel with edges drawn into its border: a position at the end of the bottom edge, a scrollbar's thumb down the right one.
 
 <a name="Gutter"></a>
 ## func [Gutter](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L117>)
@@ -271,13 +261,13 @@ func PadHeight(s string, height int) string
 PadHeight grows a block to height lines so a Composite has rows to land on.
 
 <a name="Panel"></a>
-## func [Panel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L43>)
+## func [Panel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L42>)
 
 ```go
-func Panel(r layout.Rect, title, body string, st PanelStyle) string
+func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string
 ```
 
-Panel draws a box with the title in its top edge, exactly r.W by r.H. Below three rows only the title edge is drawn; below four columns nothing is.
+Panel draws a box exactly r.W by r.H with edges drawn into its border. Below three rows only the top edge is drawn; below four columns nothing is.
 
 <a name="Sanitize"></a>
 ## func [Sanitize](<https://github.com/lucasassuncao/bezel/blob/main/draw/safe.go#L12>)
@@ -316,7 +306,7 @@ func ShortDuration(d time.Duration) string
 ShortDuration renders a lifetime the way a header has room for: the two largest units that say anything, truncated rather than rounded, so a countdown never shows more time than is left.
 
 <a name="StatusLine"></a>
-## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L136>)
+## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L141>)
 
 ```go
 func StatusLine(width int, text string, style lipgloss.Style) string
@@ -350,15 +340,6 @@ func Tail(lines []string, height int) []string
 ```
 
 Tail is a copy of the last height lines of lines, the way a log scrolls. A copy, so holding it does not keep the whole log alive.
-
-<a name="TitledPanel"></a>
-## func [TitledPanel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L49>)
-
-```go
-func TitledPanel(r layout.Rect, title, right, body string, st PanelStyle) string
-```
-
-TitledPanel is Panel with right at the end of the top edge, as a count or a rate, dropped before the title is cut.
 
 <a name="Truncate"></a>
 ## func [Truncate](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L21>)
@@ -411,6 +392,17 @@ type ChromeStyle struct {
     TabActive lipgloss.Style
     Status    lipgloss.Style
     Dim       lipgloss.Style // empty-state message and hint
+}
+```
+
+<a name="DividerStyle"></a>
+## type [DividerStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L117-L119>)
+
+DividerStyle paints a Divider: Line the rule, Label the text set into it.
+
+```go
+type DividerStyle struct {
+    Line, Label lipgloss.Style
 }
 ```
 

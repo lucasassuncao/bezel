@@ -380,7 +380,7 @@ func (m browserModel) View() tea.View {
 		pos = fmt.Sprintf("%d/%d", m.tbl.Cursor()+1, n)
 	}
 	edges := draw.Edges{Title: "Themes", Right: pos, Scroll: m.tbl.Scroll()}
-	panel := draw.FramedPanel(layout.Rect{W: m.boxW, H: h}, edges, body, m.th.Panel)
+	panel := draw.Panel(layout.Rect{W: m.boxW, H: h}, edges, body, m.th.Panel)
 	lines := []string{panel, " " + draw.Fit(m.statusLine(), m.w-1)}
 	keys := legend.Pack(m.legend(), m.w-1, 1, m.th.Legend)
 	if len(keys) > 0 {

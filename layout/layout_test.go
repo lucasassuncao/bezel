@@ -6,21 +6,25 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOrderWalksLeavesInDeclarationOrder(t *testing.T) {
+func names(n Node) []string {
+	var out []string
+	for l := range Leaves(n) {
+		out = append(out, l.Name)
+	}
+	return out
+}
+
+func TestLeavesWalkInDeclarationOrder(t *testing.T) {
 	tree := Columns(
 		Fixed("list", Ratio(1, 3)),
 		Rows(Fill("detail"), Fixed("copy", Ratio(1, 5))),
 	)
-	require.Equal(t, []string{"list", "detail", "copy"}, Order(tree))
+	require.Equal(t, []string{"list", "detail", "copy"}, names(tree))
 }
 
-func TestRingLeavesOutInfoLeaves(t *testing.T) {
-	tree := Columns(
-		Fixed("list", Ratio(1, 3)),
-		Rows(Fill("detail"), Fixed("hint", Lines(8)).Info()),
-	)
-	require.Equal(t, []string{"list", "detail", "hint"}, Order(tree))
-	require.Equal(t, []string{"list", "detail"}, Ring(tree))
+func TestInfoMarksALeaf(t *testing.T) {
+	require.True(t, Fixed("hint", Lines(8)).Info().IsInfo())
+	require.False(t, Fill("detail").IsInfo())
 }
 
 func TestLeavesYieldsDepthFirstAndStopsWhenAsked(t *testing.T) {
@@ -65,5 +69,5 @@ func TestConstructorsCopyTheirArguments(t *testing.T) {
 
 	rects, _ := Resolve(tree, Rect{W: 10, H: 10}, nil)
 	require.Equal(t, 3, rects["a"].H)
-	require.Equal(t, []string{"a", "b"}, Order(tree))
+	require.Equal(t, []string{"a", "b"}, names(tree))
 }

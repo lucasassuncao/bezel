@@ -40,7 +40,7 @@ func (m Model) View(body layout.Rect) string {
 	if m.err != "" {
 		lines = append(lines, m.styles().Error.Render("  "+m.err))
 	}
-	lines = append([]string{draw.Divider(w, "", m.styles().Divider, m.styles().Divider)}, lines...)
+	lines = append([]string{draw.Divider(w, "", draw.DividerStyle{Line: m.styles().Divider})}, lines...)
 	for i, l := range lines {
 		lines[i] = draw.Pad(draw.Cut(l, w), w)
 	}

@@ -180,7 +180,7 @@ func (s Shell) paneCanvas(panes map[string]Pane, body layout.Rect) string {
 	canvas := strings.Join(lines, "\n")
 
 	// Declaration order, not map order, so any overlap draws the same every frame.
-	for _, name := range layout.Order(s.cfg.Layout) {
+	for _, name := range paneOrder(s.cfg.Layout) {
 		r, placed := s.rects[name]
 		p, ok := panes[name]
 		if !placed || !ok || r.W <= 0 || r.H <= 0 {
@@ -201,7 +201,7 @@ func (s Shell) paneCanvas(panes map[string]Pane, body layout.Rect) string {
 			content = p.Body(draw.InnerRect(r))
 		}
 		edges := draw.Edges{Title: p.Title, Right: p.Right, Bottom: p.Bottom, Scroll: p.Scroll}
-		canvas = draw.Composite(draw.FramedPanel(r, edges, content, st), canvas, r.X, r.Y-body.Y)
+		canvas = draw.Composite(draw.Panel(r, edges, content, st), canvas, r.X, r.Y-body.Y)
 	}
 	return canvas
 }

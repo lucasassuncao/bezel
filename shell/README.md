@@ -243,7 +243,7 @@ type Capability = legend.Capability
 ```
 
 <a name="ClickMsg"></a>
-## type [ClickMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L16>)
+## type [ClickMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L15>)
 
 ClickMsg is a left click on a pane, sent by the shell once it focused the pane: X and Y are cells of the pane's body, and may fall outside it on the border. It is bezel.ClickMsg, which the components take as it comes.
 
@@ -576,7 +576,7 @@ func (s Shell) IsBusy() bool
 IsBusy reports whether Busy is in effect.
 
 <a name="Shell.Mouse"></a>
-### func \(Shell\) [Mouse](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L51>)
+### func \(Shell\) [Mouse](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L50>)
 
 ```go
 func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool)
@@ -585,7 +585,7 @@ func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool)
 Mouse finds the pane under the pointer of msg and hands back msg moved into that pane's body, for the wheel or a drag; a click comes as a ClickMsg instead. false when no pane is under the pointer.
 
 <a name="Shell.MouseIn"></a>
-### func \(Shell\) [MouseIn](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L62>)
+### func \(Shell\) [MouseIn](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L61>)
 
 ```go
 func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg
@@ -612,7 +612,7 @@ func (s Shell) OpenCommands() Shell
 OpenCommands opens the palette over the declared named actions, for an app that decides itself when ":" means commands and when it is text.
 
 <a name="Shell.PaneAt"></a>
-### func \(Shell\) [PaneAt](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L32>)
+### func \(Shell\) [PaneAt](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L31>)
 
 ```go
 func (s Shell) PaneAt(x, y int) (string, bool)
@@ -648,7 +648,7 @@ func (s Shell) Rect(name string) layout.Rect
 Rect is where a leaf was placed. The zero Rect means it is not on screen.
 
 <a name="Shell.Screen"></a>
-### func \(Shell\) [Screen](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L20>)
+### func \(Shell\) [Screen](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L19>)
 
 ```go
 func (s Shell) Screen(panes map[string]Pane) tea.View

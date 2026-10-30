@@ -113,23 +113,28 @@ func tabWindow(parts []string, active, width int) (lo, hi int) {
 	return lo, hi
 }
 
+// DividerStyle paints a Divider: Line the rule, Label the text set into it.
+type DividerStyle struct {
+	Line, Label lipgloss.Style
+}
+
 // Divider is a horizontal rule width cells long, with label set into it after a
 // short lead when one is given: "── Label ─────".
-func Divider(width int, label string, line, text lipgloss.Style) string {
+func Divider(width int, label string, st DividerStyle) string {
 	if width < 1 {
 		return ""
 	}
 	const lead = 2
 	// Too narrow for the lead, the two spaces and a cell of label: the bare rule.
 	if label == "" || width < lead+3 {
-		return line.Render(strings.Repeat("─", width))
+		return st.Line.Render(strings.Repeat("─", width))
 	}
 	// Measured rendered: a style with padding takes cells the raw label does not.
 	room := width - lead - 2
-	pad := ansi.StringWidth(text.Render("x")) - 1
-	styled := text.Render(Truncate(label, max(1, room-pad)))
+	pad := ansi.StringWidth(st.Label.Render("x")) - 1
+	styled := st.Label.Render(Truncate(label, max(1, room-pad)))
 	rest := max(0, room-ansi.StringWidth(styled))
-	return line.Render(strings.Repeat("─", lead)+" ") + styled + line.Render(" "+strings.Repeat("─", rest))
+	return st.Line.Render(strings.Repeat("─", lead)+" ") + styled + st.Line.Render(" "+strings.Repeat("─", rest))
 }
 
 // StatusLine is one row of text in a style, exactly width cells.

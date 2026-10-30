@@ -69,7 +69,7 @@ func (m model) sections(w int) []string {
 	add("Header", draw.Header(w, "my app", "kv/app/prod", "v1.2.0", m.th.Chrome))
 	add("Tabs", draw.Tabs(w, []string{"secrets", "policies", "auth"}, 1, m.th.Chrome))
 	add("Breadcrumb", draw.Breadcrumb([]string{"kv", "app", "prod", "db"}))
-	add("Divider", draw.Divider(w, "", m.th.Muted, m.th.Dim), draw.Divider(w, "Packages", m.th.Muted, m.th.Accent))
+	add("Divider", draw.Divider(w, "", draw.DividerStyle{Line: m.th.Muted}), draw.Divider(w, "Packages", draw.DividerStyle{Line: m.th.Muted, Label: m.th.Accent}))
 	card := draw.Card(layout.Rect{W: min(w, 40), H: 7}, "git", "version  2.47.0\nsource   winget\nscope    machine",
 		m.th.Key.Render("[u]")+" upgrade  "+m.th.Key.Render("[r]")+" remove", m.th.Panel)
 	add("Card", strings.Split(card, "\n")...)

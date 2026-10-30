@@ -37,22 +37,9 @@ func (st PanelStyle) edge() lipgloss.Border {
 	return st.Edge
 }
 
-// Panel draws a box with the title in its top edge, exactly r.W by r.H.
-// Below three rows only the title edge is drawn; below four columns
-// nothing is.
-func Panel(r layout.Rect, title, body string, st PanelStyle) string {
-	return TitledPanel(r, title, "", body, st)
-}
-
-// TitledPanel is Panel with right at the end of the top edge, as a count or
-// a rate, dropped before the title is cut.
-func TitledPanel(r layout.Rect, title, right, body string, st PanelStyle) string {
-	return FramedPanel(r, Edges{Title: title, Right: right}, body, st)
-}
-
-// FramedPanel is a Panel with edges drawn into its border: a position at the
-// end of the bottom edge, a scrollbar's thumb down the right one.
-func FramedPanel(r layout.Rect, edges Edges, body string, st PanelStyle) string {
+// Panel draws a box exactly r.W by r.H with edges drawn into its border.
+// Below three rows only the top edge is drawn; below four columns nothing is.
+func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string {
 	if r.W < 4 || r.H < 1 {
 		return ""
 	}
