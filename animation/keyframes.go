@@ -97,7 +97,7 @@ func (k Keyframes) FrameAt(at time.Time) FrameMsg { return k.run.FrameAt(at) }
 func (k Keyframes) Update(msg tea.Msg) (Keyframes, bezel.Result) {
 	f, ok := k.run.Own(msg)
 	if !ok {
-		return k, bezel.Result{Handled: ok}
+		return k, bezel.Result{}
 	}
 	if k, _ = k.Advance(f.At); !k.Active() {
 		return k, bezel.Result{Handled: true}

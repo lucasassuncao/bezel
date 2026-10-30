@@ -149,7 +149,9 @@ case shell.FocusMsg: // sent on every move, by key or click
 	}
 case tea.KeyPressMsg: // keys no action took go to the focused pane
 	if m.sh.Focused() == "list" {
-		m.list, _ = m.list.Update(msg) // its Result: Event and Cmd
+		var r bezel.Result
+		m.list, r = m.list.Update(msg) // Event, and the Cmd a moving list needs
+		return m, r.Cmd
 	}
 ```
 
@@ -187,7 +189,7 @@ case shell.ClickMsg:
 	}
 ```
 
-The components move the cursor to the row clicked, and on the row already under it does what enter would: `list` and `table` report `Chosen`, `tree` reports `Expanded` or `Collapsed`. `form` focuses the field and presses a button, a checkbox or a toggle.
+The components move the cursor to the row clicked, and on the row already under it do what enter would: `list` and `table` report `Chosen`, `tree` reports `Expanded` or `Collapsed`. `form` focuses the field and presses a button, a checkbox or a toggle.
 
 A click is all `ClickMsg` carries. The rest of the mouse reaches the app as it came, and two methods move it into a pane:
 

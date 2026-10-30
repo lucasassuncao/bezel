@@ -72,7 +72,7 @@ func (m Move) FrameAt(at time.Time) FrameMsg { return m.run.FrameAt(at) }
 func (m Move) Update(msg tea.Msg) (Move, bezel.Result) {
 	f, ok := m.run.Own(msg)
 	if !ok {
-		return m, bezel.Result{Handled: ok}
+		return m, bezel.Result{}
 	}
 	if m, _ = m.Advance(f.At); !m.Active() {
 		return m, bezel.Result{Handled: true}

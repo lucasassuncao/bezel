@@ -83,7 +83,7 @@ func (g Gradient) FrameAt(at time.Time) animation.FrameMsg { return g.run.FrameA
 func (g Gradient) Update(msg tea.Msg) (Gradient, bezel.Result) {
 	f, ok := g.run.Own(msg)
 	if !ok {
-		return g, bezel.Result{Handled: ok}
+		return g, bezel.Result{}
 	}
 	if g, _ = g.Advance(f.At); !g.Active() {
 		return g, bezel.Result{Handled: true}

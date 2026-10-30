@@ -90,7 +90,7 @@ func (s Scramble) FrameAt(at time.Time) animation.FrameMsg { return s.run.FrameA
 func (s Scramble) Update(msg tea.Msg) (Scramble, bezel.Result) {
 	f, ok := s.run.Own(msg)
 	if !ok {
-		return s, bezel.Result{Handled: ok}
+		return s, bezel.Result{}
 	}
 	if s, _ = s.Advance(f.At); !s.Active() {
 		return s, bezel.Result{Handled: true}

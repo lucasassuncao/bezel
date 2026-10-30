@@ -115,7 +115,7 @@ func (p Path) FrameAt(at time.Time) FrameMsg { return p.run.FrameAt(at) }
 func (p Path) Update(msg tea.Msg) (Path, bezel.Result) {
 	f, ok := p.run.Own(msg)
 	if !ok {
-		return p, bezel.Result{Handled: ok}
+		return p, bezel.Result{}
 	}
 	if p, _ = p.Advance(f.At); !p.Active() {
 		return p, bezel.Result{Handled: true}

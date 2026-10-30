@@ -229,10 +229,9 @@ func (f Form) Focused() int { return f.focus }
 
 var _ bezel.Model[Form] = Form{}
 
-// Update moves the focus on tab and shift+tab, unless the focused field holds
-// them, focuses and presses the field a bezel.ClickMsg lands on, and hands
-// every other message to the focused field. A click past the fields, and a
-// message the field does not take, come back unhandled.
+// Update moves the focus on tab and shift+tab (unless the field holds them),
+// presses the field a bezel.ClickMsg lands on, and hands every other message
+// to the focused field. A click past the fields comes back unhandled.
 func (f Form) Update(msg tea.Msg) (Form, bezel.Result) {
 	if len(f.fields) == 0 {
 		return f, bezel.Result{}

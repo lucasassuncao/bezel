@@ -131,7 +131,7 @@ func (a Scene) FrameAt(at time.Time) animation.FrameMsg { return a.run.FrameAt(a
 func (a Scene) Update(msg tea.Msg) (Scene, bezel.Result) {
 	f, ok := a.run.Own(msg)
 	if !ok {
-		return a, bezel.Result{Handled: ok}
+		return a, bezel.Result{}
 	}
 	a, _ = a.Advance(f.At)
 	var cmd tea.Cmd

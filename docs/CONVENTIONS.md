@@ -124,7 +124,7 @@ Every model answers the same signature, `Update(tea.Msg) (T, bezel.Result)`, and
 
 Anything else is `Result{}`, and the app keeps the message.
 
-The events are structs in the component's package, comparable when they have no type parameter:
+The events are structs in the component's package. Read them with a type switch on `Result.Event`, not with `==`: some hold a func and are not comparable. They are:
 
 | Package | Event |
 | --- | --- |
@@ -196,7 +196,7 @@ A new component reaches for one of these before inventing a shape.
 
 | Pattern | Where |
 | --- | --- |
-| Model-View-Update | every model: `Update` returns the next value and a command, `View` only reads |
+| Model-View-Update | every model: `Update` returns the next value and a `Result`, `View` only reads |
 | Composite | `layout.Node`: boxes of boxes and leaves, resolved as one tree |
 | Chain of responsibility | `Shell.Update`: overlays, then the status input, then actions, then the app |
 | Command | `shell.Action`, `palette.Item`: a key, a name and what it runs, as data |

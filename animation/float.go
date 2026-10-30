@@ -51,7 +51,7 @@ func (f Float) FrameAt(at time.Time) FrameMsg { return f.run.FrameAt(at) }
 func (f Float) Update(msg tea.Msg) (Float, bezel.Result) {
 	fm, ok := f.run.Own(msg)
 	if !ok {
-		return f, bezel.Result{Handled: ok}
+		return f, bezel.Result{}
 	}
 	if f, _ = f.Advance(fm.At); !f.Active() {
 		return f, bezel.Result{Handled: true}

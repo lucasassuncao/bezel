@@ -178,3 +178,16 @@ func TestNoOpKeyMidGlideDoesNotRetick(t *testing.T) {
 	_, r = m.Update(click(2))
 	assert.Nil(t, r.Cmd, "a click on the cursor row chooses, it does not move")
 }
+
+func TestAMoveDuringAGlideReplacesItsRun(t *testing.T) {
+	moving(t)
+	m := New(plainRows("a", "b", "c", "d", "e")).SetHeight(5).WithMotion(100 * ms)
+	m, _ = m.Update(bezeltest.Key("down"))
+	require.True(t, m.Active())
+	old := m.FrameAt(time.Unix(10, 0))
+	m, r := m.Update(bezeltest.Key("down"))
+	assert.True(t, r.Handled)
+	assert.NotNil(t, r.Cmd, "the new run asks for its own frames")
+	_, r = m.Update(old)
+	assert.Equal(t, bezel.Result{}, r, "a frame of the replaced run is foreign")
+}

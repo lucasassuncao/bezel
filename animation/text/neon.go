@@ -87,7 +87,7 @@ func (n Neon) FrameAt(at time.Time) animation.FrameMsg { return n.run.FrameAt(at
 func (n Neon) Update(msg tea.Msg) (Neon, bezel.Result) {
 	f, ok := n.run.Own(msg)
 	if !ok {
-		return n, bezel.Result{Handled: ok}
+		return n, bezel.Result{}
 	}
 	n, _ = n.Advance(f.At)
 	var cmd tea.Cmd

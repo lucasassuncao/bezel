@@ -459,10 +459,9 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], bool) {
 	return m, false
 }
 
-// click is a left click on line y of View: on a row it moves the cursor
-// there, and on the row already under the cursor it chooses it, as enter
-// would. It reports whether it chose and whether y fell on a row it can act on;
-// a heading, the title and the lines past the rows are not.
+// click is a left click on line y of View: it moves the cursor to a row, or
+// chooses the row already under it, as enter would. It reports whether it chose
+// and whether y fell on a row; headings, the title and the empty tail are not.
 func (m Model[T]) click(y int) (Model[T], bool, bool) {
 	if m.title != "" {
 		y--

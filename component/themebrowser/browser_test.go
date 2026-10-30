@@ -362,6 +362,25 @@ func TestFilterGetsTheKeysTheTableLeavesAlone(t *testing.T) {
 	}
 }
 
+func TestFilterGetsHomeAndCtrlUWithRowsShown(t *testing.T) {
+	m := typed(sized(t, 100, 30), "/gr")
+	if m.tbl.Len() < 2 {
+		t.Fatalf("the filter kept %d themes, want at least 2", m.tbl.Len())
+	}
+	if m.tbl.Cursor() != 0 {
+		t.Fatalf("cursor = %d, want the first row", m.tbl.Cursor())
+	}
+	m = press(m, tea.KeyPressMsg{Code: tea.KeyHome})
+	if got := m.filter.Cursor(); got != 0 {
+		t.Errorf("home left the filter caret at %d, want 0", got)
+	}
+	m = typed(sized(t, 100, 30), "/gr")
+	m = press(m, tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl})
+	if got := m.filter.Value(); got == "gr" {
+		t.Errorf("ctrl+u did not reach the filter: %q", got)
+	}
+}
+
 func TestUpdateLeavesTheReceiverAlone(t *testing.T) {
 	m := sized(t, 100, 30)
 	before := m.tbl.Cursor()

@@ -257,10 +257,9 @@ func (m Model[T]) press(msg tea.KeyPressMsg) (Model[T], bool) {
 	return m, false
 }
 
-// click is a left click on line y of View: on a row it moves the cursor
-// there, and on the row already under the cursor it chooses it. It reports
-// whether it chose and whether y fell on a row; the header and the "more"
-// row are not. A blurred table takes it too.
+// click is a left click on line y of View: it moves the cursor to a row, or
+// chooses the row already under it. It reports whether it chose and whether y
+// fell on a row (not the header or "more"). A blurred table takes it too.
 func (m Model[T]) click(y int) (Model[T], bool, bool) {
 	w := m.win.Clamp(len(m.items))
 	start, end, _ := w.Bounds(len(m.items))

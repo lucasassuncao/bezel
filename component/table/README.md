@@ -272,7 +272,7 @@ func (m Model[T]) SetItems(items []Item[T]) Model[T]
 SetItems replaces the rows, keeping the cursor on the row with the same first cell when it survives \(at the same index first\), else at the same index: a refresh that drops a row lands on the one that took its place.
 
 <a name="Model[T].SetWidth"></a>
-### func \(Model\[T\]\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L299>)
+### func \(Model\[T\]\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L298>)
 
 ```go
 func (m Model[T]) SetWidth(w int) Model[T]
@@ -290,7 +290,7 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result)
 Update takes the table's keys, unless it is blurred, and a bezel.ClickMsg on a row. Choosing a row reports a [Chosen](<#Chosen>); any other message comes back unhandled and unchanged.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L307>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L306>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved) string

@@ -365,7 +365,7 @@ func (e Effect) FrameAt(at time.Time) animation.FrameMsg { return e.run.FrameAt(
 func (e Effect) Update(msg tea.Msg) (Effect, bezel.Result) {
 	f, ok := e.run.Own(msg)
 	if !ok {
-		return e, bezel.Result{Handled: ok}
+		return e, bezel.Result{}
 	}
 	if e, _ = e.Advance(f.At); !e.Active() {
 		return e, bezel.Result{Handled: true}

@@ -83,7 +83,7 @@ func (o Odometer) FrameAt(at time.Time) animation.FrameMsg { return o.run.FrameA
 func (o Odometer) Update(msg tea.Msg) (Odometer, bezel.Result) {
 	f, ok := o.run.Own(msg)
 	if !ok {
-		return o, bezel.Result{Handled: ok}
+		return o, bezel.Result{}
 	}
 	if o, _ = o.Advance(f.At); !o.Active() {
 		return o, bezel.Result{Handled: true}

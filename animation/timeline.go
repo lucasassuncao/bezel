@@ -167,7 +167,7 @@ func (t Timeline) FrameAt(at time.Time) FrameMsg { return t.run.FrameAt(at) }
 func (t Timeline) Update(msg tea.Msg) (Timeline, bezel.Result) {
 	f, ok := t.run.Own(msg)
 	if !ok {
-		return t, bezel.Result{Handled: ok}
+		return t, bezel.Result{}
 	}
 	if t, _ = t.Advance(f.At); !t.Active() {
 		return t, bezel.Result{Handled: true}

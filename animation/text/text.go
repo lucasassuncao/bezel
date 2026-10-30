@@ -60,7 +60,7 @@ func (w Typewriter) FrameAt(at time.Time) animation.FrameMsg { return w.run.Fram
 func (w Typewriter) Update(msg tea.Msg) (Typewriter, bezel.Result) {
 	f, ok := w.run.Own(msg)
 	if !ok {
-		return w, bezel.Result{Handled: ok}
+		return w, bezel.Result{}
 	}
 	if w, _ = w.Advance(f.At); !w.Active() {
 		return w, bezel.Result{Handled: true}

@@ -95,7 +95,7 @@ func (b Burst) FrameAt(at time.Time) FrameMsg { return b.run.FrameAt(at) }
 func (b Burst) Update(msg tea.Msg) (Burst, bezel.Result) {
 	f, ok := b.run.Own(msg)
 	if !ok {
-		return b, bezel.Result{Handled: ok}
+		return b, bezel.Result{}
 	}
 	if b, _ = b.Advance(f.At); !b.Active() {
 		return b, bezel.Result{Handled: true}

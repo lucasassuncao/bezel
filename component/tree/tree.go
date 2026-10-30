@@ -397,10 +397,9 @@ func (m Model[N]) keepOff(w layout.Window, n int) layout.Window {
 	return w.Clamp(n) // and off the "more" row
 }
 
-// click is a left click on line y of View: on a row it moves the cursor
-// there, and on the row already under the cursor it opens or closes it. It
-// reports the event and whether y fell on a row; a heading, the "more" row
-// and the lines past the rows are not.
+// click is a left click on line y of View: it moves the cursor to a row, or
+// opens or closes the row already under it. It reports the event and whether y
+// fell on a row; headings, the "more" row and the empty tail are not.
 func (m Model[N]) click(y int) (Model[N], any, bool) {
 	vis := m.Visible()
 	w := m.window().Clamp(len(vis))

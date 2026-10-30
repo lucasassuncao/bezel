@@ -63,7 +63,7 @@ func (s Shake) FrameAt(at time.Time) animation.FrameMsg { return s.run.FrameAt(a
 func (s Shake) Update(msg tea.Msg) (Shake, bezel.Result) {
 	f, ok := s.run.Own(msg)
 	if !ok {
-		return s, bezel.Result{Handled: ok}
+		return s, bezel.Result{}
 	}
 	if s, _ = s.Advance(f.At); !s.Active() {
 		return s, bezel.Result{Handled: true}

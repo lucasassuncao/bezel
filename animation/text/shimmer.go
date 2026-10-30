@@ -95,7 +95,7 @@ func (s Shimmer) FrameAt(at time.Time) animation.FrameMsg { return s.run.FrameAt
 func (s Shimmer) Update(msg tea.Msg) (Shimmer, bezel.Result) {
 	f, ok := s.run.Own(msg)
 	if !ok {
-		return s, bezel.Result{Handled: ok}
+		return s, bezel.Result{}
 	}
 	if s, _ = s.Advance(f.At); !s.Active() {
 		return s, bezel.Result{Handled: true}

@@ -86,7 +86,7 @@ func (d Drop) FrameAt(at time.Time) FrameMsg { return d.run.FrameAt(at) }
 func (d Drop) Update(msg tea.Msg) (Drop, bezel.Result) {
 	f, ok := d.run.Own(msg)
 	if !ok {
-		return d, bezel.Result{Handled: ok}
+		return d, bezel.Result{}
 	}
 	if d, _ = d.Advance(f.At); !d.Active() {
 		return d, bezel.Result{Handled: true}
