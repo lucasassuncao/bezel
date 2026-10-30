@@ -14,17 +14,6 @@ import (
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/frames"
-	"github.com/lucasassuncao/bezel/theme"
-)
-
-// Kind is what a toast reports; it picks the colour of its edge.
-type Kind int
-
-const (
-	Info Kind = iota
-	Success
-	Warning
-	Error
 )
 
 // slide is how long a toast takes to come in, and again to go out.
@@ -33,7 +22,7 @@ const slide = 250 * time.Millisecond
 // item is one toast: what it says, and the frame it arrived on.
 type item struct {
 	text string
-	kind Kind
+	kind draw.Kind
 	born time.Time // zero until the first frame after Push
 	key  int64
 }
@@ -76,7 +65,7 @@ func (m Model) WithWidth(w int) Model {
 func (m Model) Len() int { return len(m.items) }
 
 // Push shows text as a toast of kind on top of the stack.
-func (m Model) Push(text string, kind Kind) (Model, tea.Cmd) {
+func (m Model) Push(text string, kind draw.Kind) (Model, tea.Cmd) {
 	if m.id == 0 { // a Model never built with New
 		m = New().WithWidth(max(m.width, 8)).WithTTL(m.ttl)
 	}
@@ -173,21 +162,20 @@ func (m Model) offset(it item) int {
 }
 
 // box is one toast drawn width columns wide, its edge in its kind's colour.
-func (m Model) box(it item, th theme.Resolved) []string {
-	edge := map[Kind]lipgloss.Style{Info: th.Info, Success: th.Success, Warning: th.Warning, Error: th.Danger}[it.kind]
+func (m Model) box(it item) []string {
 	inner := m.width - 4
 	lines := draw.Wrap(it.text, inner)
-	style := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(edge.GetForeground()).Padding(0, 1).Width(m.width)
+	style := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(it.kind.Color()).Padding(0, 1).Width(m.width)
 	return strings.Split(style.Render(strings.Join(lines, "\n")), "\n")
 }
 
 // View is the stack, newest first, each toast slid by how far it is from
 // its place; columns it has slid out of are blank.
-func (m Model) View(th theme.Resolved) string {
+func (m Model) View() string {
 	var out []string
 	for _, it := range m.items {
 		off := m.offset(it)
-		for _, l := range m.box(it, th) {
+		for _, l := range m.box(it) {
 			out = append(out, strings.Repeat(" ", min(off, m.width))+ansi.Truncate(l, max(m.width-off, 0), ""))
 		}
 	}
@@ -196,13 +184,13 @@ func (m Model) View(th theme.Resolved) string {
 
 // Over draws the stack on screen's top right corner, one row down and one
 // column in, the screen showing wherever a toast is not.
-func (m Model) Over(screen string, th theme.Resolved) string {
+func (m Model) Over(screen string) string {
 	w, _ := draw.BlockSize(screen)
 	y := 1
 	for _, it := range m.items {
 		off := m.offset(it)
 		x := w - 1 - m.width + off
-		for _, l := range m.box(it, th) {
+		for _, l := range m.box(it) {
 			if visible := m.width - off; visible > 0 && x < w {
 				screen = draw.Composite(ansi.Truncate(l, visible, ""), screen, x, y)
 			}

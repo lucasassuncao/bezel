@@ -67,7 +67,7 @@ Where the theme goes depends on who calls `View`. If bezel does, the component k
 | --- | --- | --- |
 | bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `overlay`, `palette`, `textbox`, `input`, `cursor`, `logger` |
 | bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic | `form` |
-| the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport`, `accordion`, `toast` |
+| the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `timer`, `stopwatch`, `viewport`, `accordion` |
 | nobody: a plain function | after the data | `progress`, `chart`, `inline`, `icon.Set.Render` |
 | the shell | `Config.Theme`; `SetTheme` also repaints open dialogs | `shell` |
 
@@ -96,7 +96,7 @@ Each package is in one class, and a non-themable one says so in its doc comment:
 | --- | --- | --- |
 | Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `input`, `textbox`, `form`, `palette`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, every `overlay` dialog but `Alert` |
 | Theme only | switch the theme (a plain function keeps no edit) | `chart`, `progress.Bar` and siblings, `inline`, `icon.Set.Render` |
-| Non-themable | nothing: the colours mean something, or are arguments | `overlay.Alert` and any `Kind` tint, `toast`, `animation` and subpackages, `effect`, `themebrowser` |
+| Non-themable | nothing: the colours mean something, or are arguments | `overlay.Alert` and any `Kind` tint, `toast` (its `draw.Kind` colours are fixed), `animation` and subpackages, `effect`, `themebrowser` |
 
 ## One Update
 

@@ -44,6 +44,8 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [type ChromeStyle](<#ChromeStyle>)
 - [type DividerStyle](<#DividerStyle>)
 - [type Edges](<#Edges>)
+- [type Kind](<#Kind>)
+  - [func \(k Kind\) Color\(\) color.Color](<#Kind.Color>)
 - [type PanelStyle](<#PanelStyle>)
 
 
@@ -348,6 +350,35 @@ type Edges struct {
     Scroll       layout.Scroll // a thumb on the right edge; the zero value draws none
 }
 ```
+
+<a name="Kind"></a>
+## type [Kind](<https://github.com/lucasassuncao/bezel/blob/main/draw/kind.go#L11>)
+
+Kind is what a notice reports. Its colour is fixed, the same under every theme, so a warning reads as one whatever the app looks like.
+
+```go
+type Kind int
+```
+
+<a name="Info"></a>
+
+```go
+const (
+    Info Kind = iota
+    Success
+    Warning
+    Danger
+)
+```
+
+<a name="Kind.Color"></a>
+### func \(Kind\) [Color](<https://github.com/lucasassuncao/bezel/blob/main/draw/kind.go#L21>)
+
+```go
+func (k Kind) Color() color.Color
+```
+
+Color is k's fixed colour; a Kind out of range is Info's blue.
 
 <a name="PanelStyle"></a>
 ## type [PanelStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L15-L21>)

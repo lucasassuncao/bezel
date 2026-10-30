@@ -19,7 +19,7 @@ import (
 
 type pushMsg struct {
 	text string
-	kind toast.Kind
+	kind draw.Kind
 }
 
 type model struct {
@@ -28,7 +28,7 @@ type model struct {
 	toasts toast.Model
 }
 
-func push(text string, kind toast.Kind) func(shell.ActionContext) tea.Cmd {
+func push(text string, kind draw.Kind) func(shell.ActionContext) tea.Cmd {
 	return shell.Send(pushMsg{text: text, kind: kind})
 }
 
@@ -39,10 +39,10 @@ func newModel() model {
 		Theme:  th,
 		Title:  "toast",
 		Actions: []shell.Action{
-			shell.Custom("s", "saved", push("Saved notes.md", toast.Success)),
-			shell.Custom("c", "copied", push("Link copied to the clipboard", toast.Info)),
-			shell.Custom("w", "warning", push("Disk is 90% full", toast.Warning)),
-			shell.Custom("e", "error", push("Could not reach the server; retrying in 5s", toast.Error)),
+			shell.Custom("s", "saved", push("Saved notes.md", draw.Success)),
+			shell.Custom("c", "copied", push("Link copied to the clipboard", draw.Info)),
+			shell.Custom("w", "warning", push("Disk is 90% full", draw.Warning)),
+			shell.Custom("e", "error", push("Could not reach the server; retrying in 5s", draw.Danger)),
 			shell.Quit(),
 		},
 	})
@@ -82,7 +82,7 @@ func (m model) body(r layout.Rect) string {
 
 func (m model) View() tea.View {
 	screen := m.sh.View(map[string]shell.Pane{"doc": {Title: "doc", Body: m.body}})
-	v := tea.NewView(m.toasts.Over(screen, m.th))
+	v := tea.NewView(m.toasts.Over(screen))
 	v.AltScreen = true
 	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 	return v

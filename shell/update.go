@@ -8,7 +8,7 @@ import (
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/component/input"
-	"github.com/lucasassuncao/bezel/component/toast"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/palette"
 )
@@ -175,14 +175,14 @@ func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, te
 }
 
 // toastKind is the toast that reports a status at level.
-func toastKind(level Level) toast.Kind {
+func toastKind(level Level) draw.Kind {
 	switch level {
 	case OK:
-		return toast.Success
+		return draw.Success
 	case Error:
-		return toast.Error
+		return draw.Danger
 	}
-	return toast.Info
+	return draw.Info
 }
 
 // StatusLevel is how the current status is drawn.

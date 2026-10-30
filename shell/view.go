@@ -152,7 +152,7 @@ func (s Shell) View(panes map[string]Pane) string {
 	}
 	if s.toasts.Len() > 0 {
 		// Narrower than the screen, so a toast never hangs off its left edge.
-		out = s.toasts.WithWidth(min(toastWidth, s.width-2)).Over(out, *th)
+		out = s.toasts.WithWidth(min(toastWidth, s.width-2)).Over(out)
 	}
 	return out
 }
