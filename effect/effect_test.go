@@ -163,3 +163,32 @@ func TestForeignFrameIsNotHandled(t *testing.T) {
 	_, r := a.Update(b.FrameAt(time.Unix(1000, 0)))
 	require.Equal(t, bezel.Result{}, r)
 }
+
+// fullScreen is a 120x40 terminal of coloured text, what a frame redraws.
+func fullScreen() string {
+	rows := make([]string, 40)
+	for i := range rows {
+		rows[i] = "\x1b[38;2;80;200;120m" + strings.Repeat("panel text ", 6) + "\x1b[m\x1b[38;2;200;120;80m" + strings.Repeat("·", 54) + "\x1b[m"
+	}
+	return strings.Join(rows, "\n")
+}
+
+// BenchmarkEffectFrame is one frame of each effect over a whole screen: the
+// budget is 2ms, an eighth of a 60fps frame, so a host can play several.
+func BenchmarkEffectFrame(b *testing.B) {
+	block := fullScreen()
+	for name, e := range map[string]Effect{
+		"fade": FadeIn(black, 100*ms), "dissolve": Dissolve(100 * ms), "sweep": SweepIn(white, 100*ms),
+		"slide": SlideIn(Left, 100*ms), "evolve": Evolve(100 * ms), "explode": Explode(100 * ms),
+		"melt": Melt(white, 100*ms), "tint": Tint(white, 100*ms), "spotlight": Spotlight(10, 5, 40, 10, black, 100*ms),
+		"glitch": Glitch(100 * ms), "powerOff": PowerOff(white, 100*ms), "iris": IrisIn(100 * ms), "pixelate": Pixelate(100 * ms),
+		"skeleton": Skeleton(black, white, 100*ms), "wave": Dissolve(100 * ms).WithPattern(Wave()),
+	} {
+		mid := halfway(e)
+		b.Run(name, func(b *testing.B) {
+			for b.Loop() {
+				mid.Apply(block)
+			}
+		})
+	}
+}

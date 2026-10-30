@@ -38,7 +38,7 @@ type Grid [][]Cell
 // is dropped.
 func Parse(block string) Grid {
 	p := ansi.NewParser()
-	var g Grid
+	g := make(Grid, 0, strings.Count(block, "\n")+1)
 	row := []Cell{}
 	var cur Cell
 	state := byte(0)
@@ -46,8 +46,8 @@ func Parse(block string) Grid {
 		seq, width, n, next := ansi.DecodeSequence(block, state, p)
 		state, block = next, block[n:]
 		switch {
-		case seq == "\n":
-			g, row = append(g, row), []Cell{}
+		case seq == "\n": // the next row is likely as long as this one
+			g, row = append(g, row), make([]Cell, 0, len(row))
 		case width > 0:
 			c := cur
 			c.Text, c.Width = seq, width
@@ -158,27 +158,49 @@ func open(c Cell) string {
 // String draws g, changing style only where it changes and resetting at the
 // end of every styled line.
 func (g Grid) String() string {
-	var b strings.Builder
+	var p painter
 	for y, row := range g {
 		if y > 0 {
-			b.WriteByte('\n')
+			p.newline()
 		}
-		var cur Cell
 		for _, c := range row {
-			if !sameStyle(c, cur) {
-				if cur.Fg != nil || cur.Bg != nil || cur.Attrs != 0 {
-					b.WriteString(ansi.ResetStyle)
-				}
-				b.WriteString(open(c))
-				cur = c
-			}
-			b.WriteString(c.Text)
-		}
-		if cur.Fg != nil || cur.Bg != nil || cur.Attrs != 0 {
-			b.WriteString(ansi.ResetStyle)
+			p.cell(c)
 		}
 	}
-	return b.String()
+	return p.done()
+}
+
+// painter writes cells as text, opening a style only where it changes and
+// closing it at the end of each row.
+type painter struct {
+	b   strings.Builder
+	cur Cell
+}
+
+func (p *painter) cell(c Cell) {
+	if !sameStyle(c, p.cur) {
+		p.reset()
+		p.b.WriteString(open(c))
+		p.cur = c
+	}
+	p.b.WriteString(c.Text)
+}
+
+func (p *painter) reset() {
+	if p.cur.Fg != nil || p.cur.Bg != nil || p.cur.Attrs != 0 {
+		p.b.WriteString(ansi.ResetStyle)
+	}
+	p.cur = Cell{}
+}
+
+func (p *painter) newline() {
+	p.reset()
+	p.b.WriteByte('\n')
+}
+
+func (p *painter) done() string {
+	p.reset()
+	return p.b.String()
 }
 
 // Width is the widest row, in columns.

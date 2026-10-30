@@ -104,3 +104,35 @@ func TestForeignFrameIsNotHandled(t *testing.T) {
 	_, r := a.Update(b.FrameAt(time.Unix(1000, 0)))
 	require.Equal(t, bezel.Result{}, r)
 }
+
+// BenchmarkSceneFrame is one frame of each scene filling a 120x40 terminal;
+// the budget is 2ms, an eighth of a 60fps frame.
+func BenchmarkSceneFrame(b *testing.B) {
+	for name, a := range map[string]Scene{
+		"rain": Rain(white, grey), "snow": Snow(white), "confetti": Confetti(white, black),
+		"fireworks": Fireworks(white), "stars": Starfield(white), "static": Static(white), "plasma": Plasma(black, white),
+		"fire": Fire(white, grey), "aurora": Aurora(white, grey), "bubbles": Bubbles(white), "sea": Sea(white, grey),
+		"life": Life(white),
+	} {
+		played := playedFor(a, 2)
+		b.Run(name, func(b *testing.B) {
+			for b.Loop() {
+				played.View(120, 40)
+			}
+		})
+	}
+}
+
+// Life steps on from the board it drew last, and lands on the board it would
+// have worked out from the seed: the time alone decides what it draws.
+func TestLifeSteppedOnMatchesLifeFromTheSeed(t *testing.T) {
+	stepped := Life(white)
+	start := time.Unix(1000, 0)
+	stepped, _ = stepped.Advance(start)
+	for d := time.Duration(0); d <= 3*time.Second; d += 125 * time.Millisecond {
+		stepped, _ = stepped.Advance(start.Add(d))
+		stepped.View(30, 10)
+	}
+	require.Equal(t, playedFor(Life(white), 3).View(30, 10), stepped.View(30, 10))
+	require.Equal(t, playedFor(Life(white), 1).View(30, 10), playedFor(stepped, 1).View(30, 10), "and back again")
+}

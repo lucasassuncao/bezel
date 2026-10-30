@@ -24,3 +24,10 @@ func TestACellThatWouldNotFitIsLeftOut(t *testing.T) {
 	cv.Put(1, 0, Cell{Text: "界", Width: 2})
 	assert.Equal(t, "  ", cv.Grid().String())
 }
+
+func TestCanvasStringIsItsGridsString(t *testing.T) {
+	cv := NewCanvas(5, 2)
+	cv.Put(1, 0, Cell{Text: "日", Width: 2, Attrs: Bold})
+	cv.Put(0, 1, Cell{Text: "x", Width: 1})
+	assert.Equal(t, cv.Grid().String(), cv.String())
+}

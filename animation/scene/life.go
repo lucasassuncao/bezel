@@ -16,16 +16,17 @@ const (
 
 // Life is Conway's Game of Life in c, on a board as large as the scene
 // that wraps at its edges, seeded afresh every twenty seconds.
-func Life(c color.Color) Scene { return newScene(life, c) }
+func Life(c color.Color) Scene {
+	a := newScene(life, c)
+	a.board = &lifeBoard{}
+	return a
+}
 
 // life draws the board at the generation the time has reached, worked out
 // from its seed: the same time draws the same board at the same size.
 func (a Scene) life(cv cells.Canvas, w, h int) {
 	gen := int(a.t * lifeRate)
-	board := seedBoard(uint64(gen/lifeSpan), w, h) // #nosec G115 -- a non-negative count
-	for range gen % lifeSpan {
-		board = step(board, w, h)
-	}
+	board := a.board.at(uint64(gen/lifeSpan), gen%lifeSpan, w, h) // #nosec G115 -- a non-negative count
 	c := a.color(0)
 	for y, row := range board {
 		for x, alive := range row {
@@ -67,4 +68,28 @@ func step(b [][]bool, w, h int) [][]bool {
 		}
 	}
 	return next
+}
+
+// lifeBoard remembers the last generation drawn, so the next frame steps on
+// from it instead of from the seed: one generation a frame, not up to 159.
+type lifeBoard struct {
+	seed  uint64
+	gen   int
+	w, h  int
+	board [][]bool
+}
+
+// at is generation gen of the board seeded with seed at w×h, stepped on
+// from the one remembered when it can be, from the seed when it cannot.
+func (lb *lifeBoard) at(seed uint64, gen, w, h int) [][]bool {
+	if lb == nil {
+		lb = &lifeBoard{}
+	}
+	if lb.board == nil || lb.seed != seed || lb.w != w || lb.h != h || lb.gen > gen {
+		*lb = lifeBoard{seed: seed, w: w, h: h, board: seedBoard(seed, w, h)}
+	}
+	for ; lb.gen < gen; lb.gen++ {
+		lb.board = step(lb.board, w, h)
+	}
+	return lb.board
 }

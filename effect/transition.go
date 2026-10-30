@@ -145,7 +145,7 @@ func (t Transition) Apply(from, to string) string {
 	case stack:
 		t.stacked(cv, a, b, w, h, p)
 	}
-	return cv.Grid().String()
+	return cv.String()
 }
 
 // vector is how far a block travels d to leave a w×h box.
@@ -187,15 +187,32 @@ func draw(cv cells.Canvas, g cells.Grid, dx, dy int) {
 	}
 }
 
-// columns maps the column each cell of row starts at to the cell.
-func columns(row []cells.Cell) map[int]cells.Cell {
-	m := make(map[int]cells.Cell, len(row))
+// byColumn is a row's cells by the column each starts at; a column a wide
+// cell covers past its first holds none. A slice, not a map: it is built
+// for every row of every frame.
+type byColumn []cells.Cell
+
+// columns is row by column.
+func columns(row []cells.Cell) byColumn {
+	n := 0
+	for _, c := range row {
+		n += c.Width
+	}
+	out := make(byColumn, n)
 	x := 0
 	for _, c := range row {
-		m[x] = c
+		out[x] = c
 		x += c.Width
 	}
-	return m
+	return out
+}
+
+// at is the cell starting at column x, and whether one does.
+func (b byColumn) at(x int) (cells.Cell, bool) {
+	if x < 0 || x >= len(b) || b[x].Width == 0 {
+		return cells.Cell{}, false
+	}
+	return b[x], true
 }
 
 // crossFaded is b's text past halfway, a's before, every cell's colours
@@ -210,7 +227,7 @@ func crossFaded(a, b cells.Grid, p float64) cells.Grid {
 		row := make([]cells.Cell, len(src))
 		x := 0
 		for i, c := range src {
-			if o, ok := other[x]; ok {
+			if o, ok := other.at(x); ok {
 				from, to := o, c // the colours run from a's cell to b's
 				if p < 0.5 {
 					from, to = c, o
@@ -263,7 +280,7 @@ func zoomed(cv cells.Canvas, a, b cells.Grid, w, h int, p float64) {
 			if math.Abs(float64(x)-cx) > p*float64(w)/2 {
 				continue
 			}
-			if c, ok := src[round(cx+(float64(x)-cx)/p)]; ok {
+			if c, ok := src.at(round(cx + (float64(x)-cx)/p)); ok {
 				cv.Put(x, y, c)
 			}
 		}

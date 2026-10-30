@@ -474,7 +474,7 @@ func Vignette(dim color.Color, dur time.Duration) Effect
 Vignette darkens the block towards dim the farther a cell is from its middle.
 
 <a name="Effect.Active"></a>
-### func \(Effect\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L356>)
+### func \(Effect\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L359>)
 
 ```go
 func (e Effect) Active() bool
@@ -483,7 +483,7 @@ func (e Effect) Active() bool
 Active reports whether e is still changing the block.
 
 <a name="Effect.Advance"></a>
-### func \(Effect\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L379>)
+### func \(Effect\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L382>)
 
 ```go
 func (e Effect) Advance(now time.Time) (Effect, bool)
@@ -501,7 +501,7 @@ func (e Effect) Apply(block string) string
 Apply is block as this frame shows it, its size kept. Within and OnRows keep the change to their parts of it.
 
 <a name="Effect.FrameAt"></a>
-### func \(Effect\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L362>)
+### func \(Effect\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L365>)
 
 ```go
 func (e Effect) FrameAt(at time.Time) animation.FrameMsg
@@ -519,7 +519,7 @@ func (e Effect) OnRows(rows ...int) Effect
 OnRows keeps e to whole rows of the block: the lines a diff added, the ones undo restored. Each row turns on its own, as a one\-line block.
 
 <a name="Effect.Owns"></a>
-### func \(Effect\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L389>)
+### func \(Effect\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L392>)
 
 ```go
 func (e Effect) Owns(msg tea.Msg) bool
@@ -537,7 +537,7 @@ func (e Effect) Reverse() Effect
 Reverse plays e backwards: an effect that brings a block in takes it away, a hover lets go.
 
 <a name="Effect.Tick"></a>
-### func \(Effect\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L359>)
+### func \(Effect\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L362>)
 
 ```go
 func (e Effect) Tick() tea.Cmd
@@ -546,7 +546,7 @@ func (e Effect) Tick() tea.Cmd
 Tick is the command for e's next frame, nil once it ended.
 
 <a name="Effect.Update"></a>
-### func \(Effect\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L365>)
+### func \(Effect\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L368>)
 
 ```go
 func (e Effect) Update(msg tea.Msg) (Effect, bezel.Result)
@@ -809,7 +809,7 @@ func Zoom(dur time.Duration) Transition
 Zoom grows the new block out of the middle of the old one.
 
 <a name="Transition.Active"></a>
-### func \(Transition\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L294>)
+### func \(Transition\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L311>)
 
 ```go
 func (t Transition) Active() bool
@@ -818,7 +818,7 @@ func (t Transition) Active() bool
 Active reports whether t is still moving between the blocks.
 
 <a name="Transition.Advance"></a>
-### func \(Transition\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L318>)
+### func \(Transition\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L335>)
 
 ```go
 func (t Transition) Advance(now time.Time) (Transition, bool)
@@ -836,7 +836,7 @@ func (t Transition) Apply(from, to string) string
 Apply is the frame between from and to: all from before the first frame, all to once t ends.
 
 <a name="Transition.FrameAt"></a>
-### func \(Transition\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L300>)
+### func \(Transition\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L317>)
 
 ```go
 func (t Transition) FrameAt(at time.Time) animation.FrameMsg
@@ -845,7 +845,7 @@ func (t Transition) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is t's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Transition.Owns"></a>
-### func \(Transition\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L303>)
+### func \(Transition\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L320>)
 
 ```go
 func (t Transition) Owns(msg tea.Msg) bool
@@ -854,7 +854,7 @@ func (t Transition) Owns(msg tea.Msg) bool
 Owns reports whether msg is t's current frame.
 
 <a name="Transition.Tick"></a>
-### func \(Transition\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L297>)
+### func \(Transition\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L314>)
 
 ```go
 func (t Transition) Tick() tea.Cmd
@@ -863,7 +863,7 @@ func (t Transition) Tick() tea.Cmd
 Tick is the command for t's next frame, nil once it ended.
 
 <a name="Transition.Update"></a>
-### func \(Transition\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L309>)
+### func \(Transition\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/transition.go#L326>)
 
 ```go
 func (t Transition) Update(msg tea.Msg) (Transition, bezel.Result)

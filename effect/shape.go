@@ -49,7 +49,7 @@ func (e Effect) pixelate(g cells.Grid, w, h int, p float64) cells.Grid {
 		corner := columns(g[y/side*side])
 		x := 0
 		for _, c := range row {
-			src, ok := corner[x/side*side]
+			src, ok := corner.at(x / side * side)
 			if !ok {
 				src = c
 			}

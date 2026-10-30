@@ -13,10 +13,14 @@ type slot struct {
 	covering int  // a wide cell starting this many columns to the left covers it
 }
 
+// blank is what an empty column reads back as.
+var blank = Cell{Text: " ", Width: 1}
+
 func NewCanvas(w, h int) Canvas {
 	cv := Canvas{w: w, h: h, slots: make([][]slot, h)}
+	all := make([]slot, w*h) // one allocation for every row
 	for y := range cv.slots {
-		cv.slots[y] = make([]slot, w)
+		cv.slots[y] = all[y*w : (y+1)*w : (y+1)*w]
 	}
 	return cv
 }
@@ -50,21 +54,39 @@ func (cv Canvas) clear(row []slot, x int) {
 	}
 }
 
+// each calls put for every cell of row y, a blank for every empty column.
+func (cv Canvas) each(y int, put func(Cell)) {
+	row := cv.slots[y]
+	for x := 0; x < cv.w; {
+		if row[x].used {
+			put(row[x].c)
+			x += row[x].c.Width
+			continue
+		}
+		put(blank)
+		x++
+	}
+}
+
 // Grid reads the canvas back, a blank for every column no cell holds.
 func (cv Canvas) Grid() Grid {
 	g := make(Grid, cv.h)
-	for y, row := range cv.slots {
-		cells := []Cell{}
-		for x := 0; x < cv.w; {
-			if row[x].used {
-				cells = append(cells, row[x].c)
-				x += row[x].c.Width
-				continue
-			}
-			cells = append(cells, Cell{Text: " ", Width: 1})
-			x++
-		}
+	for y := range g {
+		cells := make([]Cell, 0, cv.w)
+		cv.each(y, func(c Cell) { cells = append(cells, c) })
 		g[y] = cells
 	}
 	return g
+}
+
+// String is the canvas as text, as Grid().String() is, without the grid.
+func (cv Canvas) String() string {
+	var p painter
+	for y := range cv.h {
+		if y > 0 {
+			p.newline()
+		}
+		cv.each(y, p.cell)
+	}
+	return p.done()
 }

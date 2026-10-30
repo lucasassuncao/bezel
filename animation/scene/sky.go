@@ -74,8 +74,18 @@ func (a Scene) static(cv cells.Canvas, w, h int) {
 
 // plasma colours every cell's background by the classic sum of sines, rows
 // counted double so the ripples are round.
+// plasmaShades is how many steps the gradient takes: blending once per shade
+// a frame, not once per cell, and finer than the eye tells apart.
+const plasmaShades = 64
+
 func (a Scene) plasma(cv cells.Canvas, w, h int) {
 	from, to := a.color(0), a.color(1)
+	var shades [plasmaShades]color.Color
+	if from != nil && to != nil {
+		for i := range shades {
+			shades[i] = animation.Blend(from, to, float64(i)/(plasmaShades-1))
+		}
+	}
 	for y := range h {
 		for x := range w {
 			fx, fy := float64(x), 2*float64(y)
@@ -83,7 +93,7 @@ func (a Scene) plasma(cv cells.Canvas, w, h int) {
 				math.Sin((fx+fy)/12+a.t*0.7) + math.Sin(math.Hypot(fx-float64(w)/2, fy-float64(h))/8-a.t)
 			bg := from
 			if from != nil && to != nil {
-				bg = animation.Blend(from, to, (v+4)/8)
+				bg = shades[min(max(int((v+4)/8*(plasmaShades-1)+0.5), 0), plasmaShades-1)]
 			}
 			cv.Put(x, y, cells.Cell{Text: " ", Width: 1, Bg: bg})
 		}

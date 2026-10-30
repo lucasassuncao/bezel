@@ -35,7 +35,7 @@ Package scene draws whole scenes from the time alone: rain, snow, confetti, fire
 
 
 <a name="Scene"></a>
-## type [Scene](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L39-L44>)
+## type [Scene](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L39-L45>)
 
 Scene plays behind content, or in place of it: rain, snow, stars, fireworks. It is drawn from the time alone, at any size, for as long as it lives; Still, it holds its first frame.
 
@@ -154,7 +154,7 @@ func Static(c color.Color) Scene
 Static is the snow of a television with no signal, in c.
 
 <a name="Scene.Active"></a>
-### func \(Scene\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L122>)
+### func \(Scene\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L123>)
 
 ```go
 func (a Scene) Active() bool
@@ -163,7 +163,7 @@ func (a Scene) Active() bool
 Active reports whether the scene is still playing.
 
 <a name="Scene.Advance"></a>
-### func \(Scene\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L144>)
+### func \(Scene\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L145>)
 
 ```go
 func (a Scene) Advance(now time.Time) (Scene, bool)
@@ -172,7 +172,7 @@ func (a Scene) Advance(now time.Time) (Scene, bool)
 Advance is a at now; a scene never ends on its own, so done is false while it plays.
 
 <a name="Scene.FrameAt"></a>
-### func \(Scene\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L128>)
+### func \(Scene\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L129>)
 
 ```go
 func (a Scene) FrameAt(at time.Time) animation.FrameMsg
@@ -181,7 +181,7 @@ func (a Scene) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is a's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Scene.Tick"></a>
-### func \(Scene\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L125>)
+### func \(Scene\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L126>)
 
 ```go
 func (a Scene) Tick() tea.Cmd
@@ -190,7 +190,7 @@ func (a Scene) Tick() tea.Cmd
 Tick is the command for a's next frame, nil once it stopped.
 
 <a name="Scene.Under"></a>
-### func \(Scene\) [Under](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L66>)
+### func \(Scene\) [Under](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L67>)
 
 ```go
 func (a Scene) Under(block string) string
@@ -199,7 +199,7 @@ func (a Scene) Under(block string) string
 Under is the scene with block on top of it: every cell of block that draws something, a grapheme or a background, hides the scene there.
 
 <a name="Scene.Update"></a>
-### func \(Scene\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L131>)
+### func \(Scene\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L132>)
 
 ```go
 func (a Scene) Update(msg tea.Msg) (Scene, bezel.Result)
@@ -208,7 +208,7 @@ func (a Scene) Update(msg tea.Msg) (Scene, bezel.Result)
 Update plays on its own frames and asks for the next while it runs.
 
 <a name="Scene.View"></a>
-### func \(Scene\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L55>)
+### func \(Scene\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L56>)
 
 ```go
 func (a Scene) View(w, h int) string

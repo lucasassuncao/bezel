@@ -331,7 +331,10 @@ func (e Effect) slide(g cells.Grid, w, h int, p float64) cells.Grid {
 
 // shift is row moved dx columns within w, whole cells only, padded with blanks.
 func shift(row []cells.Cell, dx, w int) []cells.Cell {
-	out := []cells.Cell{}
+	if dx == 0 && rowWidth(row) == w {
+		return row // already in place: most rows of a block that fills its room
+	}
+	out := make([]cells.Cell, 0, w)
 	at := 0 // the column out has reached
 	x := dx
 	for _, c := range row {
@@ -389,4 +392,13 @@ func (e Effect) Advance(now time.Time) (Effect, bool) {
 func (e Effect) Owns(msg tea.Msg) bool {
 	_, ok := e.run.Own(msg)
 	return ok
+}
+
+// rowWidth is the columns row covers.
+func rowWidth(row []cells.Cell) int {
+	n := 0
+	for _, c := range row {
+		n += c.Width
+	}
+	return n
 }

@@ -98,3 +98,21 @@ func TestForeignFrameIsNotHandledTransition(t *testing.T) {
 	_, r := a.Update(b.FrameAt(time.Unix(1000, 0)))
 	require.Equal(t, bezel.Result{}, r)
 }
+
+// BenchmarkTransitionFrame is one frame of each transition between two
+// whole screens, against the same 2ms budget as an effect.
+func BenchmarkTransitionFrame(b *testing.B) {
+	from, to := fullScreen(), strings.ToUpper(fullScreen())
+	for name, tr := range map[string]Transition{
+		"push": Push(Left, 100*ms), "cover": Cover(Up, 100*ms), "crossfade": CrossFade(100 * ms),
+		"wipe": Wipe(Radial(), 100*ms), "zoom": Zoom(100 * ms), "shuffle": Shuffle(100 * ms),
+		"iris": Iris(100 * ms), "blinds": Blinds(6, 100*ms), "stack": Stack(Left, 100*ms),
+	} {
+		mid := tHalf(tr)
+		b.Run(name, func(b *testing.B) {
+			for b.Loop() {
+				mid.Apply(from, to)
+			}
+		})
+	}
+}

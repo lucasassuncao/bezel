@@ -41,6 +41,7 @@ type Scene struct {
 	colors []color.Color
 	t      float64 // seconds since the first frame, at Speed
 	run    frames.Run
+	board  *lifeBoard // Life's last generation, shared by copies: a cache, not state
 }
 
 var _ bezel.Model[Scene] = Scene{}
@@ -58,7 +59,7 @@ func (a Scene) View(w, h int) string {
 	}
 	cv := cells.NewCanvas(w, h)
 	a.paint(cv, w, h)
-	return cv.Grid().String()
+	return cv.String()
 }
 
 // Under is the scene with block on top of it: every cell of block that draws
@@ -77,7 +78,7 @@ func (a Scene) Under(block string) string {
 			x += c.Width
 		}
 	}
-	return cv.Grid().String()
+	return cv.String()
 }
 
 // paint draws the scene at a.t onto cv.
