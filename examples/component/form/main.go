@@ -90,14 +90,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.form, r = m.form.Update(msg)
 		return m, r.Cmd
 	}
-	var cmd tea.Cmd
-	m.sh, _, cmd = m.sh.Update(msg)
-	if cmd == nil {
-		var r bezel.Result
-		m.form, r = m.form.Update(msg)
-		cmd = r.Cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
 	}
-	return m, cmd
+	m.form, r = m.form.Update(msg)
+	return m, r.Cmd
 }
 
 func (m model) View() tea.View {

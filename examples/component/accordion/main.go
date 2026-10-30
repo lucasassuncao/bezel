@@ -44,15 +44,13 @@ func newModel() model {
 func (m model) Init() tea.Cmd { return nil }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m, cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
 	}
 	if k, ok := msg.(tea.KeyPressMsg); ok && k.String() == "ctrl+c" {
 		return m, tea.Quit
 	}
-	var r bezel.Result
 	m.acc, r = m.acc.Update(msg)
 	return m, r.Cmd
 }

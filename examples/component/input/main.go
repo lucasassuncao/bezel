@@ -85,10 +85,9 @@ func (m model) submit() (model, tea.Cmd) {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m, cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
 	}
 	if k, ok := msg.(tea.KeyPressMsg); ok {
 		switch k.String() {

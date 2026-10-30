@@ -52,11 +52,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if size, ok := msg.(tea.WindowSizeMsg); ok {
 		m.fp = m.fp.SetHeight(size.Height - 7) // the pane's rows, less the chrome around it
 	}
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m, cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
 	}
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case permsMsg:
 		m.perms = !m.perms
@@ -67,7 +67,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	var r bezel.Result
 	m.fp, r = m.fp.Update(msg)
 	cmd = r.Cmd
 	if path, ok := m.fp.Picked(); ok {

@@ -29,29 +29,28 @@ func deliver(t *testing.T, s Shell, cmd tea.Cmd) Shell {
 			s = deliver(t, s, c)
 		}
 	default:
-		var next tea.Cmd
-		s, _, next = s.Update(msg)
-		s = deliver(t, s, next)
+		next, r := s.Update(msg)
+		s = deliver(t, next, r.Cmd)
 	}
 	return s
 }
 
 func typeLine(s Shell, line string) Shell {
 	for _, r := range line {
-		s, _, _ = s.Update(tea.KeyPressMsg{Code: r, Text: string(r)})
+		s, _ = s.Update(tea.KeyPressMsg{Code: r, Text: string(r)})
 	}
 	return s
 }
 
 func enter(t *testing.T, s Shell) Shell {
-	s, _, cmd := s.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
-	return deliver(t, s, cmd)
+	s, r := s.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	return deliver(t, s, r.Cmd)
 }
 
 func TestCommandsOpensThePaletteOnTheStatusRow(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Commands(), Custom("r", "reveal", nil, Named("reveal"))))
-	s, handled, _ := s.Update(colon)
-	require.True(t, handled)
+	s, r := s.Update(colon)
+	require.True(t, r.Handled)
 	require.IsType(t, palette.Model{}, s.TopOverlay())
 	screen := ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}}))
 	require.Contains(t, screen, ":reveal")
@@ -62,7 +61,7 @@ func TestCommandsOpensThePaletteOnTheStatusRow(t *testing.T) {
 func TestThePaletteRunsTheNamedAction(t *testing.T) {
 	got := false
 	s := sized(New(actionConfig()).SetActions(Commands(), Custom("x", "reveal", func(ActionContext) tea.Cmd { got = true; return nil }, Named("reveal"))))
-	s, _, _ = s.Update(colon)
+	s, _ = s.Update(colon)
 	s = enter(t, typeLine(s, "rev"))
 	require.True(t, got)
 	require.False(t, s.HasOverlay())
@@ -71,7 +70,7 @@ func TestThePaletteRunsTheNamedAction(t *testing.T) {
 func TestThePalettePassesTheArgument(t *testing.T) {
 	var arg string
 	s := sized(New(actionConfig()).SetActions(Commands(), Command("goto", "jump", func(c ActionContext) tea.Cmd { arg = c.Arg; return nil }, Arg("path"))))
-	s, _, _ = s.Update(colon)
+	s, _ = s.Update(colon)
 	enter(t, typeLine(s, "goto kv/app"))
 	require.Equal(t, "kv/app", arg)
 }
@@ -79,10 +78,10 @@ func TestThePalettePassesTheArgument(t *testing.T) {
 func TestThePaletteSaysNotAvailableForARefusedAction(t *testing.T) {
 	never := func(Context) bool { return false }
 	s := sized(New(actionConfig()).SetActions(Commands(), Custom("e", "edit", nil, Named("edit"), When(never))))
-	s, _, _ = s.Update(colon)
+	s, _ = s.Update(colon)
 	// Only the DoneMsg: delivering everything would also fire the status TTL.
-	s, _, cmd := typeLine(s, "edit").Update(tea.KeyPressMsg{Code: tea.KeyEnter})
-	s, _, _ = s.Update(cmd())
+	s, r := typeLine(s, "edit").Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	s, _ = s.Update(r.Cmd())
 	require.Equal(t, "edit is not available here", s.Status())
 	require.Equal(t, Error, s.StatusLevel())
 	require.False(t, s.HasOverlay())
@@ -91,7 +90,7 @@ func TestThePaletteSaysNotAvailableForARefusedAction(t *testing.T) {
 // Closing the palette and opening the help must not race: the help stays.
 func TestHelpRunFromThePaletteStaysOpen(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Help(), Commands()))
-	s, _, _ = s.Update(colon)
+	s, _ = s.Update(colon)
 	s = enter(t, typeLine(s, "help"))
 	require.IsType(t, overlay.Help{}, s.TopOverlay())
 	require.Equal(t, 1, strings.Count(ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}})), "esc closes"))
@@ -99,7 +98,7 @@ func TestHelpRunFromThePaletteStaysOpen(t *testing.T) {
 
 func TestPaletteOnlyCommandsAreListed(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Commands(), Command("goto", "jump to a path", nil, Arg("path"))))
-	s, _, _ = s.Update(colon)
+	s, _ = s.Update(colon)
 	require.Contains(t, ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}})), ":goto <path>")
 }
 
@@ -107,21 +106,21 @@ func TestPaletteOnlyCommandsAreListed(t *testing.T) {
 func TestADoubleEnterRunsTheActionOnce(t *testing.T) {
 	runs := 0
 	s := sized(New(actionConfig()).SetActions(Commands(), Command("go", "go", func(ActionContext) tea.Cmd { runs++; return nil })))
-	s, _, _ = s.Update(colon)
+	s, _ = s.Update(colon)
 	s = typeLine(s, "go")
-	s, _, first := s.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
-	s, _, second := s.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
-	s = deliver(t, s, first)
-	deliver(t, s, second)
+	s, first := s.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	s, r := s.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	s = deliver(t, s, first.Cmd)
+	deliver(t, s, r.Cmd)
 	require.Equal(t, 1, runs)
 }
 
 // The shell hands a paste to the open palette.
 func TestPasteReachesTheOpenPalette(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Commands(), Command("goto", "jump", nil, Arg("path"))))
-	s, _, _ = s.Update(colon)
+	s, _ = s.Update(colon)
 	s = typeLine(s, "goto ")
-	s, _, _ = s.Update(tea.PasteMsg{Content: "kv/app"})
+	s, _ = s.Update(tea.PasteMsg{Content: "kv/app"})
 	require.True(t, strings.HasPrefix(ansi.Strip(s.TopOverlay().(palette.Model).StatusLine(80)), ":goto kv/app"))
 }
 
@@ -140,8 +139,8 @@ func TestOpenCommandsListsTheDeclaredCommands(t *testing.T) {
 func TestKeyHintShowsInThePaletteOnly(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Command("reveal", "reveal the secret", Send(ping{}), KeyHint("r"))))
 	require.NotContains(t, legendRows(s), "reveal")
-	_, handled, _ := s.Update(tea.KeyPressMsg{Code: 'r', Text: "r"})
-	require.False(t, handled)
+	_, r := s.Update(tea.KeyPressMsg{Code: 'r', Text: "r"})
+	require.False(t, r.Handled)
 	require.Regexp(t, `:reveal\s+r\s+reveal the secret`, screen(s.OpenCommands()))
 }
 
@@ -167,14 +166,14 @@ func TestPaletteErrorsUseTheConfiguredTTL(t *testing.T) {
 	cfg := actionConfig()
 	cfg.StatusTTL = time.Millisecond
 	s := sized(New(cfg).SetActions(Commands()))
-	s, _, _ = s.Update(colon)
+	s, _ = s.Update(colon)
 	s = typeLine(s, "nope")
-	s, _, cmd := s.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
-	_, _, tick := s.Update(cmd())
-	require.NotNil(t, tick)
+	s, r := s.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	_, r = s.Update(r.Cmd())
+	require.NotNil(t, r.Cmd)
 
 	got := make(chan tea.Msg, 1)
-	go func() { got <- tick() }()
+	go func() { got <- r.Cmd() }()
 	select {
 	case msg := <-got:
 		if b, ok := msg.(tea.BatchMsg); ok {

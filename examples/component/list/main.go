@@ -78,10 +78,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if key, ok := msg.(tea.KeyPressMsg); ok && m.list.Filtering() {
 		return m.toList(key)
 	}
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m, cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
 	}
 	if key, ok := msg.(tea.KeyPressMsg); ok && key.String() == "ctrl+c" {
 		return m, tea.Quit

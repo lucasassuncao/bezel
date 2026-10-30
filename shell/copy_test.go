@@ -14,8 +14,8 @@ import (
 func run(t *testing.T, s Shell, cmd func() any) Shell {
 	t.Helper()
 	require.NotNil(t, cmd)
-	s, handled, _ := s.Update(cmd())
-	require.True(t, handled, "the copy's answer is the shell's")
+	s, r := s.Update(cmd())
+	require.True(t, r.Handled, "the copy's answer is the shell's")
 	return s
 }
 

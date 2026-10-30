@@ -12,6 +12,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/viewport"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -104,10 +105,9 @@ func (m model) sized() model {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m.sized(), cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m.sized(), r.Cmd
 	}
 	m = m.sized()
 	switch msg := msg.(type) {

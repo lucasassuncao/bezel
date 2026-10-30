@@ -25,14 +25,14 @@ func glowing(t *testing.T, fade time.Duration) Shell {
 		Actions:   []Action{ChangePane()},
 		FocusFade: fade,
 	})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
 	return s
 }
 
 func TestTheFocusColourTravelsBetweenPanes(t *testing.T) {
 	s := glowing(t, 100*time.Millisecond)
-	s, _, cmd := s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
-	require.NotNil(t, cmd)
+	s, r := s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
+	require.NotNil(t, r.Cmd)
 	require.Equal(t, "right", s.Focused())
 	accent := lipgloss.Color(s.cfg.Theme.Colors.Accent)
 	border := lipgloss.Color(s.cfg.Theme.Colors.Border)
@@ -40,16 +40,16 @@ func TestTheFocusColourTravelsBetweenPanes(t *testing.T) {
 	assert.Equal(t, rgba(accent), rgba(s.glowColor("left")), "the old one starts lit")
 
 	at := time.Unix(10, 0)
-	s, handled, _ := s.Update(frames.NewMsg(at, s.glow.run.ID, s.glow.run.Tag))
-	require.True(t, handled, "the shell takes its own frames")
-	s, _, _ = s.Update(frames.NewMsg(at.Add(time.Second), s.glow.run.ID, s.glow.run.Tag))
+	s, r = s.Update(frames.NewMsg(at, s.glow.run.ID, s.glow.run.Tag))
+	require.True(t, r.Handled, "the shell takes its own frames")
+	s, _ = s.Update(frames.NewMsg(at.Add(time.Second), s.glow.run.ID, s.glow.run.Tag))
 	assert.Nil(t, s.glowColor("right"), "settled, the theme's own styles take over")
 	assert.Nil(t, s.glowColor("left"))
 }
 
 func TestWithoutAFadeFocusJumps(t *testing.T) {
 	s := glowing(t, 0)
-	s, _, _ = s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
+	s, _ = s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 	assert.Equal(t, "right", s.Focused())
 	assert.Nil(t, s.glowColor("right"))
 }

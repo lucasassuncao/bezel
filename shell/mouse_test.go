@@ -8,13 +8,14 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
 func sizedShell() Shell {
-	s, _, _ := newShell().Update(tea.WindowSizeMsg{Width: 120, Height: 30})
+	s, _ := newShell().Update(tea.WindowSizeMsg{Width: 120, Height: 30})
 	return s
 }
 
@@ -56,13 +57,13 @@ func TestADialogCoversThePanes(t *testing.T) {
 func click(x, y int) tea.MouseClickMsg { return tea.MouseClickMsg{X: x, Y: y, Button: tea.MouseLeft} }
 
 func TestAClickOnATabShowsIt(t *testing.T) {
-	s, _, _ := newShell(stubTab{name: "alpha"}, stubTab{name: "beta"}).Update(tea.WindowSizeMsg{Width: 120, Height: 30})
+	s, _ := newShell(stubTab{name: "alpha"}, stubTab{name: "beta"}).Update(tea.WindowSizeMsg{Width: 120, Height: 30})
 	row := strings.Split(ansi.Strip(s.View(demoPanes())), "\n")[s.headerRows()]
-	s, handled, _ := s.Update(click(strings.Index(row, "beta"), s.headerRows()))
-	require.True(t, handled)
+	s, r := s.Update(click(strings.Index(row, "beta"), s.headerRows()))
+	require.True(t, r.Handled)
 	require.Equal(t, 1, s.ActiveTab())
-	s, handled, _ = s.Update(click(119, s.headerRows()))
-	require.True(t, handled, "the tab row is the shell's even off a tab")
+	s, r = s.Update(click(119, s.headerRows()))
+	require.True(t, r.Handled, "the tab row is the shell's even off a tab")
 	require.Equal(t, 1, s.ActiveTab())
 }
 
@@ -88,24 +89,24 @@ func TestAClickOnAPaneFocusesItAndComesAsAClickMsg(t *testing.T) {
 	s := sizedShell()
 	require.Equal(t, "list", s.Focused())
 	inner := draw.InnerRect(s.Rect("detail"))
-	s, handled, cmd := s.Update(click(inner.X+3, inner.Y+2))
-	require.True(t, handled)
+	s, r := s.Update(click(inner.X+3, inner.Y+2))
+	require.True(t, r.Handled)
 	require.Equal(t, "detail", s.Focused())
-	got, ok := clickOf(cmd)
+	got, ok := clickOf(r.Cmd)
 	require.True(t, ok, "the focus and the click, in one go")
 	require.Equal(t, "detail", got.Pane)
 	require.Equal(t, 3, got.X)
 	require.Equal(t, 2, got.Y)
 
-	_, handled, cmd = s.Update(click(inner.X, inner.Y))
-	require.True(t, handled)
-	got, _ = clickOf(cmd)
+	_, r = s.Update(click(inner.X, inner.Y))
+	require.True(t, r.Handled)
+	got, _ = clickOf(r.Cmd)
 	require.Equal(t, ClickMsg{Pane: "detail", MouseClickMsg: tea.MouseClickMsg{Button: tea.MouseLeft}}, got, "on the focused pane, just the click")
 
-	_, handled, _ = s.Update(tea.MouseClickMsg{X: inner.X, Y: inner.Y, Button: tea.MouseRight})
-	require.False(t, handled, "only the left button")
-	_, handled, _ = s.Update(click(0, 0))
-	require.False(t, handled, "the header is no pane: the click is the app's as it came")
+	_, r = s.Update(tea.MouseClickMsg{X: inner.X, Y: inner.Y, Button: tea.MouseRight})
+	require.False(t, r.Handled, "only the left button")
+	_, r = s.Update(click(0, 0))
+	require.False(t, r.Handled, "the header is no pane: the click is the app's as it came")
 }
 
 func TestScreenTurnsTheMouseOnWhenAsked(t *testing.T) {
@@ -119,8 +120,13 @@ func TestScreenTurnsTheMouseOnWhenAsked(t *testing.T) {
 
 func TestAClickWithADialogOpenIsTheDialogs(t *testing.T) {
 	s := sizedShell().Push(overlay.NewAlert(overlay.Info, "Saved", "done", theme.Resolve(theme.Plain, true)))
-	_, handled, cmd := s.Update(click(0, 0))
-	require.True(t, handled)
-	require.Nil(t, cmd, "off its buttons it does nothing")
+	_, r := s.Update(click(0, 0))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Cmd, "off its buttons it does nothing")
 	require.Equal(t, "list", s.Focused())
+}
+
+func TestShellClickMsgIsBezelClickMsg(t *testing.T) {
+	pane := func(c bezel.ClickMsg) string { return c.Pane }
+	require.Equal(t, "list", pane(ClickMsg{Pane: "list"}))
 }

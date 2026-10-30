@@ -11,13 +11,9 @@ import (
 )
 
 // ClickMsg is a left click on a pane, sent by the shell once it focused the
-// pane: X and Y are cells of the pane's body, the rect its Body draws in,
-// and may fall outside it on the border. The embedded message is the click
-// moved there, for a component that takes the mouse itself.
-type ClickMsg struct {
-	Pane string
-	tea.MouseClickMsg
-}
+// pane: X and Y are cells of the pane's body, and may fall outside it on the
+// border. It is bezel.ClickMsg, which the components take as it comes.
+type ClickMsg = bezel.ClickMsg
 
 // Screen is the shell's view as the full-screen tea.View a program returns,
 // with mouse reporting on when Config.Mouse is.

@@ -37,7 +37,7 @@ func statusAt(s Shell) int { return s.Body().Y + s.Body().H }
 
 func TestBodyIsTheTerminalMinusTheChrome(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Help()}})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 
 	body := s.Body()
 	require.Equal(t, 100, body.W)
@@ -52,7 +52,7 @@ func TestBodyIsTheTerminalMinusTheChrome(t *testing.T) {
 
 func TestNoTabsMeansNoTabRow(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	require.Equal(t, 2, s.Body().Y) // the header, then the blank row above the panes
 	plain := strings.Split(ansi.Strip(s.View(demoPanes())), "\n")
 	require.Empty(t, strings.TrimSpace(plain[1]))
@@ -60,7 +60,7 @@ func TestNoTabsMeansNoTabRow(t *testing.T) {
 
 func TestViewIsExactlyTheTerminal(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Help(), Quit()}})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	out := s.View(demoPanes())
 	lines := strings.Split(out, "\n")
 	require.Len(t, lines, 24)
@@ -78,7 +78,7 @@ func TestViewIsExactlyTheTerminal(t *testing.T) {
 
 func TestPaneBodyGetsTheInnerRect(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	out := ansi.Strip(s.View(demoPanes()))
 	inner := draw.InnerRect(s.Rect("detail"))
 	require.Contains(t, out, fmt.Sprintf("%dx%d", inner.W, inner.H))
@@ -86,7 +86,7 @@ func TestPaneBodyGetsTheInnerRect(t *testing.T) {
 
 func TestAMissingPaneVanishesAndItsSpaceIsReused(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	panes := demoPanes()
 	delete(panes, "detail")
 	s2 := s.withPresent(panes)
@@ -97,7 +97,7 @@ func TestAMissingPaneVanishesAndItsSpaceIsReused(t *testing.T) {
 
 func TestOverlayFloatsOverThePanes(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	s = s.Push(overlay.NewAlert(overlay.Info, "Saved", "written", theme.Resolved{Modal: lipgloss.NewStyle().Border(lipgloss.NormalBorder())}))
 	out := ansi.Strip(s.View(demoPanes()))
 	require.Contains(t, out, "written")
@@ -107,7 +107,7 @@ func TestOverlayFloatsOverThePanes(t *testing.T) {
 
 func TestStatusRowShowsInputThenBannerThenTabStatus(t *testing.T) {
 	s := newShell(stubTab{name: "a"})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	require.Contains(t, ansi.Strip(s.View(demoPanes())), "status of a")
 
 	s, _ = s.SetStatus("saved!", OK, 0)
@@ -123,19 +123,19 @@ func TestStatusRowShowsInputThenBannerThenTabStatus(t *testing.T) {
 func TestViewSurvivesATinyTerminal(t *testing.T) {
 	s := newShell(stubTab{name: "a"})
 	for _, size := range [][2]int{{0, 0}, {1, 1}, {5, 3}, {20, 4}, {200, 2}} {
-		s, _, _ = s.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
+		s, _ = s.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
 		require.NotPanics(t, func() { s.View(demoPanes()) }, "%v", size)
 	}
 }
 
 func TestInfoStatusUsesTheNeutralStyleAndHelpHasNoEmptySection(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	s, _ = s.SetStatus("just saying", Info, 0)
 	require.Contains(t, ansi.Strip(s.View(demoPanes())), "just saying")
 
 	s = New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true)})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	s = s.ShowHelp()
 	require.NotContains(t, ansi.Strip(s.View(demoPanes())), "Keys")
 }
@@ -143,7 +143,7 @@ func TestInfoStatusUsesTheNeutralStyleAndHelpHasNoEmptySection(t *testing.T) {
 // "?" lists only what has a key; a keyless command lives in the palette alone.
 func TestHelpListsOnlyActionsWithAKey(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Help(), Custom("r", "reveal", nil), Command("goto", "jump to a path", nil)))
-	s, _, _ = s.Update(tea.KeyPressMsg{Code: '?', Text: "?"})
+	s, _ = s.Update(tea.KeyPressMsg{Code: '?', Text: "?"})
 	screen := ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}}))
 	require.Contains(t, screen, "reveal")
 	require.NotContains(t, screen, "jump to a path")
@@ -151,7 +151,7 @@ func TestHelpListsOnlyActionsWithAKey(t *testing.T) {
 
 func TestLegendPinsTheShellHelpKey(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Custom("x", "do x", nil), Help()}})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	require.Contains(t, legendRow(s), "[?] help")
 }
 
@@ -167,12 +167,12 @@ func TestNoOverlayChangesTheLegend(t *testing.T) {
 		"prompt":  overlay.NewPrompt("t", nil, theme.Resolved{Modal: st}),
 	} {
 		s := newShell(stubTab{name: "a", actions: []Action{Custom("x", "do x", nil), Help()}})
-		s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+		s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 		before := legendRow(s)
 		require.Equal(t, before, legendRow(s.Push(o)), name)
 	}
 	s := newShell(stubTab{name: "a", actions: []Action{Custom("x", "do x", nil), Help()}})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	require.Equal(t, legendRow(s), legendRow(s.ShowHelp()), "help")
 	require.Equal(t, legendRow(s), legendRow(s.OpenCommands()), "command palette")
 }
@@ -180,15 +180,15 @@ func TestNoOverlayChangesTheLegend(t *testing.T) {
 // An app that opens its own help still pins "?" through a display-only Help.
 func TestADisplayOnlyHelpIsPinnedButNotHandled(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Help(DisplayOnly())}})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	require.Contains(t, legendRow(s), "[?] help")
-	_, handled, _ := s.Update(press("?"))
-	require.False(t, handled)
+	_, r := s.Update(press("?"))
+	require.False(t, r.Handled)
 }
 
 func TestLegendDropsHelpWhileAnInputHasTheKeys(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Help()}})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	in := input.New(theme.Resolved{})
 	s = s.SetInput(in)
 	require.NotContains(t, legendRow(s), "[?] help")
@@ -197,7 +197,7 @@ func TestLegendDropsHelpWhileAnInputHasTheKeys(t *testing.T) {
 // A blank row separates the tab strip from the panes below it.
 func TestABlankRowSitsBetweenTheTabsAndThePanes(t *testing.T) {
 	s := newShell(stubTab{name: "a"}, stubTab{name: "b"})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	rows := strings.Split(ansi.Strip(s.View(map[string]Pane{"list": {Title: "L"}, "detail": {Title: "D"}})), "\n")
 	require.Contains(t, rows[1], "a")
 	require.Empty(t, strings.TrimSpace(rows[2]))
@@ -207,7 +207,7 @@ func TestABlankRowSitsBetweenTheTabsAndThePanes(t *testing.T) {
 // The status row starts at the left edge, in line with the legend under it.
 func TestTheStatusRowIsFlushLeft(t *testing.T) {
 	s := newShell(stubTab{name: "a", actions: []Action{Help()}})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	for _, lvl := range []Level{Info, OK, Error} {
 		s, _ = s.SetStatus("copied: kv/app", lvl, 0)
 		rows := strings.Split(ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}})), "\n")
@@ -220,7 +220,7 @@ func openSGR(st lipgloss.Style) string { return strings.Split(st.Render("x"), "x
 
 func TestAPaneCarriesRightTextAndItsOwnBorderColour(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	red := lipgloss.Color("#FF0000")
 
 	plain := strings.Split(s.View(demoPanes()), "\n")[s.Body().Y]
@@ -237,7 +237,7 @@ func TestAPaneCarriesRightTextAndItsOwnBorderColour(t *testing.T) {
 
 func TestAPaneCarriesABottomTextAndAScrollbar(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	r := s.Rect("detail")
 	lines := strings.Split(ansi.Strip(s.View(map[string]Pane{
 		"list":   {Title: "List"},
@@ -261,8 +261,8 @@ func TestTheToastStyleShowsTheRowOnlyWhenItHasALine(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1") // a toast shows at once, without frames
 	th := theme.Resolve(theme.Plain, true)
 	size := tea.WindowSizeMsg{Width: 120, Height: 30}
-	s, _, _ := New(Config{Layout: twoPane(), Tabs: []Tab{quietTab{stubTab{name: "a"}}}, Theme: th, StatusStyle: Toast}).Update(size)
-	bar, _, _ := New(Config{Layout: twoPane(), Tabs: []Tab{quietTab{stubTab{name: "a"}}}, Theme: th}).Update(size)
+	s, _ := New(Config{Layout: twoPane(), Tabs: []Tab{quietTab{stubTab{name: "a"}}}, Theme: th, StatusStyle: Toast}).Update(size)
+	bar, _ := New(Config{Layout: twoPane(), Tabs: []Tab{quietTab{stubTab{name: "a"}}}, Theme: th}).Update(size)
 	require.Equal(t, bar.Body().H+1, s.Body().H, "no row: the panes take it")
 
 	s, cmd := s.SetStatus("saved notes.md", OK, time.Minute)
@@ -278,18 +278,18 @@ func TestTheToastStyleShowsTheRowOnlyWhenItHasALine(t *testing.T) {
 	require.Equal(t, bar.Body().H, typing.Body().H, "typing brings the row back")
 	busy, _ := s.Busy("indexing")
 	require.Equal(t, bar.Body().H, busy.Body().H, "and so does Busy")
-	talking, _, _ := New(Config{Layout: twoPane(), Tabs: []Tab{stubTab{name: "a"}}, Theme: th, StatusStyle: Toast}).Update(size)
+	talking, _ := New(Config{Layout: twoPane(), Tabs: []Tab{stubTab{name: "a"}}, Theme: th, StatusStyle: Toast}).Update(size)
 	require.Equal(t, bar.Body().H, talking.Body().H, "and the tab's status")
 }
 
 // A toast's frames and expiry are the shell's, and a harness drops them like
 // the status timer.
 func TestAToastsMessagesAreTheShells(t *testing.T) {
-	s, _, _ := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true), StatusStyle: Toast}).
+	s, _ := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true), StatusStyle: Toast}).
 		Update(tea.WindowSizeMsg{Width: 120, Height: 30})
 	s, _ = s.SetStatus("x", Info, time.Minute)
 	frame := toastMsg{s.toasts.FrameAt(time.Now())}
 	require.True(t, IsStatusExpiry(frame))
-	_, handled, _ := s.Update(frame)
-	require.True(t, handled)
+	_, r := s.Update(frame)
+	require.True(t, r.Handled)
 }

@@ -30,19 +30,21 @@ func toastCmd(cmd tea.Cmd) tea.Cmd {
 
 // Update handles what is the shell's: resize, status ticks, overlays, the
 // status-row input, help, tabs and focus, and a left click on a dialog, a
-// tab or a pane, which comes back as a ClickMsg. false means the app's turn.
-// A resize is both: the shell takes the size and hands it on, false, so the
-// app sizes its own models from Rect on the same message.
-func (s Shell) Update(msg tea.Msg) (Shell, bool, tea.Cmd) {
+// tab or a pane, which comes back as a ClickMsg. Handled false means the
+// app's turn. A resize takes the size and stays false, so the app sizes
+// its own models from Rect on the same message.
+func (s Shell) Update(msg tea.Msg) (Shell, bezel.Result) {
 	s = s.ready()
 	next, handled, cmd := s.update(msg)
 	if !handled {
-		return s, false, nil
+		return s, bezel.Result{}
 	}
 	// The one place a message re-resolves the layout, so no branch can forget to.
 	_, resize := msg.(tea.WindowSizeMsg)
-	return next.relayout(), !resize, cmd
+	return next.relayout(), bezel.Result{Handled: !resize, Cmd: cmd}
 }
+
+var _ bezel.Model[Shell] = Shell{}
 
 func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	switch m := msg.(type) {
@@ -228,7 +230,7 @@ func (s Shell) Input() (input.Model, bool) { return s.input, s.typing }
 
 // blink hands a caret's blink to the field that armed it: an open dialog's
 // or the status row's, which re-arm it. A blink neither knows is the app's,
-// for a field it drives itself, so handled is false.
+// for a field it drives itself, so it is not handled.
 func (s Shell) blink(msg input.BlinkMsg) (Shell, bool, tea.Cmd) {
 	if s.overlays.Len() > 0 {
 		if next, r := s.overlays.Update(msg); r.Cmd != nil {

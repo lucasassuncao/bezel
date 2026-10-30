@@ -52,7 +52,7 @@ func TestABannerShowsOverBusyAndBusyReturns(t *testing.T) {
 	require.Contains(t, view(s), "could not reach scoop")
 	require.NotContains(t, view(s), "refreshing…")
 
-	s, _, _ = s.Update(s.StatusExpiry())
+	s, _ = s.Update(s.StatusExpiry())
 	require.Contains(t, view(s), "refreshing…")
 }
 
@@ -64,23 +64,24 @@ func TestTheSpinnerTicksOnlyWhileBusy(t *testing.T) {
 	require.IsType(t, animation.FrameMsg{}, tick)
 
 	before := s.SpinnerFrame()
-	s, handled, next := s.Update(tick)
-	require.True(t, handled)
-	require.NotNil(t, next, "still busy: the loop re-arms")
+	s, r := s.Update(tick)
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd, "still busy: the loop re-arms")
 	require.NotEqual(t, before, s.SpinnerFrame(), "a tick advances the frame")
 
+	next := r.Cmd
 	s = s.Idle()
-	_, handled, next = s.Update(next())
-	require.True(t, handled, "the shell's own tick is never the app's")
-	require.Nil(t, next, "idle: the loop stops")
+	_, r = s.Update(next())
+	require.True(t, r.Handled, "the shell's own tick is never the app's")
+	require.Nil(t, r.Cmd, "idle: the loop stops")
 }
 
 func TestAnotherShellsTickIsTheApps(t *testing.T) {
 	s := busyShell()
 	s, _ = s.Busy("refreshing…")
 	_, cmd := busyShell().Busy("elsewhere")
-	_, handled, _ := s.Update(cmd())
-	require.False(t, handled)
+	_, r := s.Update(cmd())
+	require.False(t, r.Handled)
 }
 
 // Idle then Busy again before the old loop's tick lands: that tick ends,
@@ -91,13 +92,13 @@ func TestAStaleLoopsTickDoesNotDoubleTheSpinner(t *testing.T) {
 	s, second := s.Idle().Busy("again")
 	before := s.SpinnerFrame()
 
-	s, handled, next := s.Update(first())
-	require.True(t, handled)
-	require.Nil(t, next, "the old loop stops")
+	s, r := s.Update(first())
+	require.True(t, r.Handled)
+	require.Nil(t, r.Cmd, "the old loop stops")
 	require.Equal(t, before, s.SpinnerFrame())
 
-	_, _, next = s.Update(second())
-	require.NotNil(t, next, "the new loop runs on")
+	_, r = s.Update(second())
+	require.NotNil(t, r.Cmd, "the new loop runs on")
 }
 
 func TestIdleLeavesABannerAlone(t *testing.T) {
@@ -121,17 +122,17 @@ func TestConfigSpinnerPicksTheBusyMark(t *testing.T) {
 func TestAnotherSpinnersTickIsTheApps(t *testing.T) {
 	_, cmd := spinner.New(spinner.Spinner{Frames: []string{"a"}, Every: time.Nanosecond}).Start()
 	s, _ := busyShell(stubTab{name: "a"}).Busy("x")
-	_, handled, _ := s.Update(cmd())
-	require.False(t, handled)
+	_, r := s.Update(cmd())
+	require.False(t, r.Handled)
 }
 
 func TestBusyWithNoTextGoesIdleAndEndsTheLoop(t *testing.T) {
 	s, cmd := busyShell().Busy("refreshing…")
 	s, _ = s.Busy("")
 	require.False(t, s.IsBusy())
-	_, handled, next := s.Update(cmd())
-	require.True(t, handled)
-	require.Nil(t, next, "idle: the loop stops")
+	_, r := s.Update(cmd())
+	require.True(t, r.Handled)
+	require.Nil(t, r.Cmd, "idle: the loop stops")
 }
 
 func TestAConfigSpinnerWithOnlyAPaceKeepsIt(t *testing.T) {

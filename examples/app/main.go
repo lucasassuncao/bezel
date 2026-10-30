@@ -13,6 +13,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/list"
 	"github.com/lucasassuncao/bezel/component/progress"
 	"github.com/lucasassuncao/bezel/draw"
@@ -106,11 +107,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.sh = m.sh.SetTheme(m.th)
 		return m, nil
 	}
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m, cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
 	}
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case askAddMsg:
 		ask := overlay.NewPrompt("New task", func(title string) tea.Cmd {

@@ -11,6 +11,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
@@ -90,10 +91,9 @@ func newModel() model {
 func (m model) Init() tea.Cmd { return func() tea.Msg { return startMsg{} } }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m, cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
 	}
 	if next, cmd, ok := m.key(msg); ok {
 		return next.run(cmd)

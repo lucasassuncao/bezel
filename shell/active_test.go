@@ -16,7 +16,7 @@ func actionConfig(tabs ...Tab) Config {
 }
 
 func sized(s Shell) Shell {
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 120, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 120, Height: 30})
 	return s
 }
 

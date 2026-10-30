@@ -26,7 +26,7 @@ func sliding(t *testing.T) Shell {
 		Actions:    []Action{ChangeTab()},
 		Transition: SlideTabs(100 * time.Millisecond),
 	})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
 	return s
 }
 
@@ -38,18 +38,18 @@ func panes(s Shell) map[string]Pane {
 
 func TestChangingTabPlaysTheTransition(t *testing.T) {
 	s := sliding(t)
-	s, handled, cmd := s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
-	require.True(t, handled)
-	require.NotNil(t, cmd, "the transition asks for its first frame")
+	s, r := s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd, "the transition asks for its first frame")
 	require.True(t, s.Transition().Active())
 	require.NotContains(t, ansi.Strip(s.View(panes(s))), "content of two", "before its first frame the new tab is off screen")
 	require.Contains(t, ansi.Strip(s.View(panes(s))), "two", "the tab strip itself is never moved")
 
 	at := time.Unix(1000, 0)
-	s, handled, _ = s.Update(s.Transition().FrameAt(at))
-	require.True(t, handled, "the shell takes its own frames")
-	s, _, cmd = s.Update(s.Transition().FrameAt(at.Add(time.Second)))
-	require.Nil(t, cmd)
+	s, r = s.Update(s.Transition().FrameAt(at))
+	require.True(t, r.Handled, "the shell takes its own frames")
+	s, r = s.Update(s.Transition().FrameAt(at.Add(time.Second)))
+	require.Nil(t, r.Cmd)
 	require.False(t, s.Transition().Active())
 	require.Contains(t, ansi.Strip(s.View(panes(s))), "content of two")
 }
@@ -57,10 +57,10 @@ func TestChangingTabPlaysTheTransition(t *testing.T) {
 // Half way, the new tab has come in part of the way, its left edge not home yet.
 func TestTheTransitionMovesThePanesHalfWay(t *testing.T) {
 	s := sliding(t)
-	s, _, _ = s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
+	s, _ = s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 	at := time.Unix(1000, 0)
-	s, _, _ = s.Update(s.Transition().FrameAt(at))
-	s, _, _ = s.Update(s.Transition().FrameAt(at.Add(50 * time.Millisecond)))
+	s, _ = s.Update(s.Transition().FrameAt(at))
+	s, _ = s.Update(s.Transition().FrameAt(at.Add(50 * time.Millisecond)))
 	lines := strings.Split(ansi.Strip(s.View(panes(s))), "\n")
 	require.True(t, strings.HasPrefix(lines[3], " "), "the pane has not reached its place: %q", lines[3])
 	require.Contains(t, lines[3], "┏", "but it is on its way in")
@@ -74,18 +74,18 @@ func TestNoTransitionWithoutOneOrFromSetTab(t *testing.T) {
 	require.False(t, s.Transition().Active(), "an app turning the tab itself gets no slide")
 
 	plain := newShell(stubTab{name: "a"}, stubTab{name: "b"})
-	plain, _, _ = plain.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
-	_, _, cmd := plain.Update(tea.KeyPressMsg{Code: tea.KeyTab})
-	require.Nil(t, cmd)
+	plain, _ = plain.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
+	_, r := plain.Update(tea.KeyPressMsg{Code: tea.KeyTab})
+	require.Nil(t, r.Cmd)
 }
 
 // A frame that is not the transition's is left for the app.
 func TestOtherFramesAreNotTheShells(t *testing.T) {
 	s := sliding(t)
-	s, _, _ = s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
+	s, _ = s.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 	other := animation.NewFloat(0, 1, time.Second)
-	_, handled, _ := s.Update(other.FrameAt(time.Unix(1000, 0)))
-	require.False(t, handled)
+	_, r := s.Update(other.FrameAt(time.Unix(1000, 0)))
+	require.False(t, r.Handled)
 }
 
 func TestSlideTabsComesFromTheSideTheTabIsOn(t *testing.T) {

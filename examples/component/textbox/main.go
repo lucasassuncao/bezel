@@ -53,14 +53,14 @@ func (m model) fit() model {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m.fit(), cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m.fit(), r.Cmd
 	}
 	switch msg := msg.(type) {
 	case countMsg:
 		text := fmt.Sprintf("%d lines, %d characters", m.ta.LineCount(), len(m.ta.Value()))
+		var cmd tea.Cmd
 		m.sh, cmd = m.sh.SetStatus(text, shell.Info, 3*time.Second)
 		return m, cmd
 	case tea.KeyPressMsg:
@@ -68,16 +68,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case shell.ClickMsg: // the press, already in the pane's cells
-		var r bezel.Result
-		m.ta, r = m.ta.Update(msg.MouseClickMsg)
+		m.ta, r = m.ta.Update(msg)
 		return m, r.Cmd
 	case tea.MouseMotionMsg, tea.MouseReleaseMsg:
 		// The drag: moved into the pane even when the pointer left it.
-		var r bezel.Result
 		m.ta, r = m.ta.Update(m.sh.MouseIn("text", msg.(tea.MouseMsg)))
 		return m, r.Cmd
 	}
-	var r bezel.Result
 	m.ta, r = m.ta.Update(msg)
 	return m, r.Cmd
 }

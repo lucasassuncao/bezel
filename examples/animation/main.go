@@ -165,11 +165,11 @@ func newModel() model {
 func (m model) Init() tea.Cmd { return func() tea.Msg { return startMsg{} } }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var handled bool
-	var cmd tea.Cmd
-	if m.sh, handled, cmd = m.sh.Update(msg); handled {
-		return m, cmd
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
 	}
+	var cmd tea.Cmd
 	if next, ok := m.familyKey(msg); ok {
 		return next.run(nil)
 	}

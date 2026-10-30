@@ -84,7 +84,7 @@ func TestTabSkipsInfoPanes(t *testing.T) {
 		Layout: layout.Columns(layout.Fixed("hint", layout.Ratio(1, 4)).Info(), layout.Fill("list"), layout.Fill("detail")),
 		Theme:  theme.Resolve(theme.Plain, true),
 	})
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	require.Equal(t, "list", s.Focused())
 	require.Equal(t, "detail", s.nextPane(false).Focused())
 	require.Equal(t, "list", s.nextPane(false).nextPane(false).Focused())
@@ -108,7 +108,7 @@ func TestEachTabRemembersItsFocus(t *testing.T) {
 
 func TestNarrowIsReportedWhenTheLayoutCollapsed(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 60, Height: 20})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 60, Height: 20})
 	require.True(t, s.Narrow())
 	require.Equal(t, layout.Rect{}, s.Rect("list"))
 	require.Equal(t, 60, s.Rect("detail").W)
@@ -117,7 +117,7 @@ func TestNarrowIsReportedWhenTheLayoutCollapsed(t *testing.T) {
 
 func TestSetActionsFeedsATablessShell(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	s = s.SetActions(Custom("x", "do x", nil), Custom("y", "do y", nil))
 	plain := ansi.Strip(s.View(demoPanes()))
 	require.Contains(t, plain, "[x] do x")
@@ -126,7 +126,7 @@ func TestSetActionsFeedsATablessShell(t *testing.T) {
 
 func TestSetLayoutReplacesTheTree(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 90, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 90, Height: 24})
 	s = s.SetLayout(layout.Columns(layout.Fill("a"), layout.Fill("b"), layout.Fill("c")))
 	require.Equal(t, 30, s.Rect("a").W)
 	require.Equal(t, layout.Rect{}, s.Rect("list"))
@@ -135,7 +135,7 @@ func TestSetLayoutReplacesTheTree(t *testing.T) {
 
 func TestSubtitleStatusAndShowHelp(t *testing.T) {
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	s = s.SetSubtitle("config.yaml ● modified")
 	s, _ = s.SetStatus("hello", OK, 0)
 	require.Equal(t, "hello", s.Status())
@@ -152,7 +152,7 @@ func TestLegendLinesIsConfigurable(t *testing.T) {
 		keys[i] = Custom(string(rune('a'+i)), "a long action description", nil)
 	}
 	one := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain, true), LegendLines: 1})
-	one, _, _ = one.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	one, _ = one.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	one = one.SetActions(keys...)
 	require.Equal(t, 24-2-1-1, one.Body().H) // header and blank row, status, legend
 
@@ -169,7 +169,7 @@ func TestTheBodyKeepsItsHeightWhenTheLegendShrinks(t *testing.T) {
 		keys[i] = Custom(string(rune('a'+i)), "a long action description", nil)
 	}
 	s := newShell()
-	s, _, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	long := s.SetActions(keys...)
 	short := s.SetActions(keys[0])
 	require.Equal(t, long.Body(), short.Body())
@@ -195,7 +195,7 @@ func requireLaidOut(t *testing.T, s Shell, op string) {
 
 func send(msg tea.Msg) func(Shell) Shell {
 	return func(s Shell) Shell {
-		s, _, _ = s.Update(msg)
+		s, _ = s.Update(msg)
 		return s
 	}
 }
@@ -260,7 +260,7 @@ func TestThemeIsTheLatestSet(t *testing.T) {
 // The Config is shared between copies until one changes it: the change is
 // that copy's alone.
 func TestAConfigChangeIsTheCopysAlone(t *testing.T) {
-	before, _, _ := newShell().Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	before, _ := newShell().Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	after := before.SetSubtitle("reloaded").SetLegendLines(1).SetTheme(theme.Resolve(theme.Mint, true))
 	require.Contains(t, ansi.Strip(after.View(demoPanes())), "reloaded")
 	require.NotContains(t, ansi.Strip(before.View(demoPanes())), "reloaded")
@@ -277,7 +277,7 @@ func TestTheZeroShellIsAnEmptyOne(t *testing.T) {
 		_ = s.Context()
 		_ = s.Body()
 		_ = s.View(nil)
-		s, _, _ = s.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
+		s, _ = s.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
 		s = Shell{}.SetTab(2).SetFocus("x").SetSubtitle("s").SetLegendLines(3).OpenCommands().Pop()
 		_ = Shell{}.Copy("a", "copied", "failed")
 		_, _ = Shell{}.Busy("working")
