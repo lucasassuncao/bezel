@@ -266,7 +266,7 @@ func (m Model[N]) Visible() []int {
 
 // Selected is the node under the cursor, false when no row is visible.
 func (m Model[N]) Selected() (N, bool) {
-	i := m.CurrentIdx()
+	i := m.Index()
 	if i < 0 {
 		var zero N
 		return zero, false
@@ -274,8 +274,8 @@ func (m Model[N]) Selected() (N, bool) {
 	return m.nodes[i], true
 }
 
-// CurrentIdx is the Nodes index under the cursor, or -1.
-func (m Model[N]) CurrentIdx() int { return At(m.cursor, m.Visible()) }
+// Index is the Nodes index under the cursor, or -1.
+func (m Model[N]) Index() int { return At(m.cursor, m.Visible()) }
 
 // At maps a cursor position into a visible index list, or -1 when out of
 // range. For callers that already hold the Visible() result.
@@ -286,10 +286,10 @@ func At(cursor int, vis []int) int {
 	return -1
 }
 
-// WithNodeMutated returns the tree with a fresh Nodes slice in which
+// SetNode returns the tree with a fresh Nodes slice in which
 // nodes[idx] was changed by mut: copy-on-write, never in place. A nil mut
 // changes nothing.
-func (m Model[N]) WithNodeMutated(idx int, mut func(*N)) Model[N] {
+func (m Model[N]) SetNode(idx int, mut func(*N)) Model[N] {
 	if idx < 0 || idx >= len(m.nodes) || mut == nil {
 		return m
 	}
@@ -413,7 +413,7 @@ func (m Model[N]) click(y int) (Model[N], any, bool) {
 		return m.clampOffset(len(vis)), nil, true
 	}
 	if in := m.nodes[vis[vi]].TreeInfo(); !in.Leaf && in.Expanded {
-		m = m.WithNodeMutated(vis[vi], func(n *N) { *n = (*n).Expand(false) })
+		m = m.SetNode(vis[vi], func(n *N) { *n = (*n).Expand(false) })
 		return m, Collapsed[N]{Node: m.nodes[vis[vi]]}, true
 	}
 	m, ev := m.expand(vis)
@@ -438,20 +438,15 @@ func (m Model[N]) MoveTo(i int) Model[N] {
 	return m.clampOffset(len(vis))
 }
 
-// Expand opens the row under the cursor when it is a collapsed parent.
-func (m Model[N]) Expand() Model[N] {
-	m, _ = m.expand(m.Visible())
-	return m
-}
-
-// expand is Expand reporting the Expanded event, nil when nothing opened.
+// expand opens the row under the cursor when it is a collapsed parent,
+// reporting the Expanded event, nil when nothing opened.
 func (m Model[N]) expand(vis []int) (Model[N], any) {
 	idx := At(m.cursor, vis)
 	if idx < 0 {
 		return m, nil
 	}
 	if in := m.nodes[idx].TreeInfo(); !in.Leaf && !in.Expanded {
-		m = m.WithNodeMutated(idx, func(n *N) { *n = (*n).Expand(true) })
+		m = m.SetNode(idx, func(n *N) { *n = (*n).Expand(true) })
 		return m, Expanded[N]{Node: m.nodes[idx]}
 	}
 	return m, nil
@@ -466,7 +461,7 @@ func (m Model[N]) collapse(vis []int) (Model[N], any) {
 	}
 	in := m.nodes[idx].TreeInfo()
 	if !in.Leaf && in.Expanded {
-		m = m.WithNodeMutated(idx, func(n *N) { *n = (*n).Expand(false) })
+		m = m.SetNode(idx, func(n *N) { *n = (*n).Expand(false) })
 		return m, Collapsed[N]{Node: m.nodes[idx]}
 	}
 	if in.Depth > 0 {

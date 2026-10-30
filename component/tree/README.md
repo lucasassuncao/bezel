@@ -23,12 +23,11 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
   - [func VimKeys\(\) Keys](<#VimKeys>)
 - [type Model](<#Model>)
   - [func New\[N Noder\[N\]\]\(nodes \[\]N\) Model\[N\]](<#New>)
-  - [func \(m Model\[N\]\) CurrentIdx\(\) int](<#Model[N].CurrentIdx>)
   - [func \(m Model\[N\]\) Cursor\(\) int](<#Model[N].Cursor>)
   - [func \(m Model\[N\]\) CursorTo\(match func\(N\) bool\) \(Model\[N\], bool\)](<#Model[N].CursorTo>)
-  - [func \(m Model\[N\]\) Expand\(\) Model\[N\]](<#Model[N].Expand>)
   - [func \(m Model\[N\]\) Guides\(\) \[\]string](<#Model[N].Guides>)
   - [func \(m Model\[N\]\) Height\(\) int](<#Model[N].Height>)
+  - [func \(m Model\[N\]\) Index\(\) int](<#Model[N].Index>)
   - [func \(m Model\[N\]\) Legend\(\) \[\]legend.Entry](<#Model[N].Legend>)
   - [func \(m Model\[N\]\) Len\(\) int](<#Model[N].Len>)
   - [func \(m Model\[N\]\) Move\(delta int\) Model\[N\]](<#Model[N].Move>)
@@ -39,6 +38,7 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
   - [func \(m Model\[N\]\) Scroll\(\) layout.Scroll](<#Model[N].Scroll>)
   - [func \(m Model\[N\]\) Selected\(\) \(N, bool\)](<#Model[N].Selected>)
   - [func \(m Model\[N\]\) SetHeight\(h int\) Model\[N\]](<#Model[N].SetHeight>)
+  - [func \(m Model\[N\]\) SetNode\(idx int, mut func\(\*N\)\) Model\[N\]](<#Model[N].SetNode>)
   - [func \(m Model\[N\]\) SetNodes\(nodes \[\]N\) Model\[N\]](<#Model[N].SetNodes>)
   - [func \(m Model\[N\]\) SetOffset\(n int\) Model\[N\]](<#Model[N].SetOffset>)
   - [func \(m Model\[N\]\) Update\(msg tea.Msg\) \(Model\[N\], bezel.Result\)](<#Model[N].Update>)
@@ -47,7 +47,6 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
   - [func \(m Model\[N\]\) WithConnectors\(c Connectors\) Model\[N\]](<#Model[N].WithConnectors>)
   - [func \(m Model\[N\]\) WithEmptyMessage\(s string\) Model\[N\]](<#Model[N].WithEmptyMessage>)
   - [func \(m Model\[N\]\) WithKeys\(k Keys\) Model\[N\]](<#Model[N].WithKeys>)
-  - [func \(m Model\[N\]\) WithNodeMutated\(idx int, mut func\(\*N\)\) Model\[N\]](<#Model[N].WithNodeMutated>)
   - [func \(m Model\[N\]\) WithScrollOff\(n int\) Model\[N\]](<#Model[N].WithScrollOff>)
   - [func \(m Model\[N\]\) WithStyles\(edit func\(Styles\) Styles\) Model\[N\]](<#Model[N].WithStyles>)
 - [type Noder](<#Noder>)
@@ -164,15 +163,6 @@ func New[N Noder[N]](nodes []N) Model[N]
 
 New builds a tree over nodes with the cursor on the first row that is not a section; SetHeight gives it the rows its pane has.
 
-<a name="Model[N].CurrentIdx"></a>
-### func \(Model\[N\]\) [CurrentIdx](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L278>)
-
-```go
-func (m Model[N]) CurrentIdx() int
-```
-
-CurrentIdx is the Nodes index under the cursor, or \-1.
-
 <a name="Model[N].Cursor"></a>
 ### func \(Model\[N\]\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L150>)
 
@@ -183,22 +173,13 @@ func (m Model[N]) Cursor() int
 Cursor is the cursor's place among the visible rows.
 
 <a name="Model[N].CursorTo"></a>
-### func \(Model\[N\]\) [CursorTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L491>)
+### func \(Model\[N\]\) [CursorTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L486>)
 
 ```go
 func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool)
 ```
 
 CursorTo moves the cursor to the first visible row match accepts, or leaves it when none does, as a nil match. Reports whether it moved.
-
-<a name="Model[N].Expand"></a>
-### func \(Model\[N\]\) [Expand](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L442>)
-
-```go
-func (m Model[N]) Expand() Model[N]
-```
-
-Expand opens the row under the cursor when it is a collapsed parent.
 
 <a name="Model[N].Guides"></a>
 ### func \(Model\[N\]\) [Guides](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L198>)
@@ -217,6 +198,15 @@ func (m Model[N]) Height() int
 ```
 
 Height is the rows the tree takes.
+
+<a name="Model[N].Index"></a>
+### func \(Model\[N\]\) [Index](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L278>)
+
+```go
+func (m Model[N]) Index() int
+```
+
+Index is the Nodes index under the cursor, or \-1.
 
 <a name="Model[N].Legend"></a>
 ### func \(Model\[N\]\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L178>)
@@ -273,7 +263,7 @@ func (m Model[N]) Nodes() []N
 Nodes is a copy of the nodes, every one, folded or not.
 
 <a name="Model[N].Reveal"></a>
-### func \(Model\[N\]\) [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L508>)
+### func \(Model\[N\]\) [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L503>)
 
 ```go
 func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool)
@@ -308,6 +298,15 @@ func (m Model[N]) SetHeight(h int) Model[N]
 
 SetHeight changes the rows the tree takes and keeps the cursor in view.
 
+<a name="Model[N].SetNode"></a>
+### func \(Model\[N\]\) [SetNode](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L292>)
+
+```go
+func (m Model[N]) SetNode(idx int, mut func(*N)) Model[N]
+```
+
+SetNode returns the tree with a fresh Nodes slice in which nodes\[idx\] was changed by mut: copy\-on\-write, never in place. A nil mut changes nothing.
+
 <a name="Model[N].SetNodes"></a>
 ### func \(Model\[N\]\) [SetNodes](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L115>)
 
@@ -336,7 +335,7 @@ func (m Model[N]) Update(msg tea.Msg) (Model[N], bezel.Result)
 Update takes the tree's keys and a bezel.ClickMsg on a row. Opening or closing a parent reports an [Expanded](<#Expanded>) or a [Collapsed](<#Collapsed>); any other message comes back unhandled and unchanged.
 
 <a name="Model[N].View"></a>
-### func \(Model\[N\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L544>)
+### func \(Model\[N\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L539>)
 
 ```go
 func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) string) string
@@ -379,15 +378,6 @@ func (m Model[N]) WithKeys(k Keys) Model[N]
 ```
 
 WithKeys rebinds the tree.
-
-<a name="Model[N].WithNodeMutated"></a>
-### func \(Model\[N\]\) [WithNodeMutated](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L292>)
-
-```go
-func (m Model[N]) WithNodeMutated(idx int, mut func(*N)) Model[N]
-```
-
-WithNodeMutated returns the tree with a fresh Nodes slice in which nodes\[idx\] was changed by mut: copy\-on\-write, never in place. A nil mut changes nothing.
 
 <a name="Model[N].WithScrollOff"></a>
 ### func \(Model\[N\]\) [WithScrollOff](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L191>)

@@ -12,7 +12,7 @@ Package themebrowser provides an inline \(not full\-screen\) terminal table list
 
 ## Index
 
-- [func BrowseInTerminal\(t ...theme.Theme\) error](<#BrowseInTerminal>)
+- [func BrowseInTerminal\(t theme.Theme\) error](<#BrowseInTerminal>)
 - [func List\(w io.Writer\) error](<#List>)
 
 
@@ -20,10 +20,10 @@ Package themebrowser provides an inline \(not full\-screen\) terminal table list
 ## func [BrowseInTerminal](<https://github.com/lucasassuncao/bezel/blob/main/component/themebrowser/browser.go#L434>)
 
 ```go
-func BrowseInTerminal(t ...theme.Theme) error
+func BrowseInTerminal(t theme.Theme) error
 ```
 
-BrowseInTerminal is an inline table of the built\-in themes and their named colours \(enter copies a name, / filters, q quits\), in an optional theme.Theme's colours; without a terminal on stdout it Lists.
+BrowseInTerminal is an inline table of the built\-in themes and their named colours \(enter copies a name, / filters, q quits\), drawn in t; without a terminal on stdout it Lists.
 
 <a name="List"></a>
 ## func [List](<https://github.com/lucasassuncao/bezel/blob/main/component/themebrowser/browser.go#L421>)

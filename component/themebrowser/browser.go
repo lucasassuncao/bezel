@@ -429,17 +429,13 @@ func List(w io.Writer) error {
 }
 
 // BrowseInTerminal is an inline table of the built-in themes
-// and their named colours (enter copies a name, / filters, q quits), in an
-// optional theme.Theme's colours; without a terminal on stdout it Lists.
-func BrowseInTerminal(t ...theme.Theme) error {
+// and their named colours (enter copies a name, / filters, q quits), drawn
+// in t; without a terminal on stdout it Lists.
+func BrowseInTerminal(t theme.Theme) error {
 	if !term.IsTerminal(os.Stdout.Fd()) {
 		return List(os.Stdout)
 	}
-	th := theme.Theme{}
-	if len(t) > 0 {
-		th = t[0]
-	}
-	m := newBrowserModel(th, theme.DarkTerminal())
+	m := newBrowserModel(t, theme.DarkTerminal())
 	p := tea.NewProgram(m)
 	if _, err := p.Run(); err != nil {
 		return fmt.Errorf("failed to run theme browser: %w", err)

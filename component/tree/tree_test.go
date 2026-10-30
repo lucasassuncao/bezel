@@ -50,7 +50,7 @@ func newTree(h int) Model[node] { return New(nodes()).SetHeight(h) }
 
 func press(code rune) tea.KeyPressMsg { return tea.KeyPressMsg{Code: code} }
 
-func label(m Model[node]) string { return m.Nodes()[m.CurrentIdx()].label }
+func label(m Model[node]) string { return m.Nodes()[m.Index()].label }
 
 func TestVisibleHidesCollapsedChildrenAndCursorSkipsSections(t *testing.T) {
 	m := newTree(10)
@@ -139,10 +139,10 @@ func TestForeignKeyIsNotHandled(t *testing.T) {
 func TestMutationsAreCopyOnWrite(t *testing.T) {
 	m := newTree(10)
 	before := m.Nodes()
-	m2 := m.WithNodeMutated(1, func(n *node) { n.expanded = false })
+	m2 := m.SetNode(1, func(n *node) { n.expanded = false })
 	require.True(t, before[1].expanded, "the old slice is untouched")
 	require.False(t, m2.Nodes()[1].expanded)
-	require.Equal(t, m.Nodes(), m.WithNodeMutated(99, func(n *node) { n.label = "x" }).Nodes(), "stale index is a no-op")
+	require.Equal(t, m.Nodes(), m.SetNode(99, func(n *node) { n.label = "x" }).Nodes(), "stale index is a no-op")
 }
 
 func TestRevealExpandsAncestorsAndCursorToMatches(t *testing.T) {
@@ -309,7 +309,7 @@ func BenchmarkView(b *testing.B) {
 // A nil func matches nothing, changes nothing and draws empty rows.
 func TestNilFuncsAreHarmless(t *testing.T) {
 	m := newTree(4)
-	require.Equal(t, m.Nodes(), m.WithNodeMutated(0, nil).Nodes())
+	require.Equal(t, m.Nodes(), m.SetNode(0, nil).Nodes())
 	_, moved := m.CursorTo(nil)
 	require.False(t, moved)
 	_, moved = m.Reveal(nil)

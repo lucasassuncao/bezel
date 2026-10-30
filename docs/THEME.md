@@ -42,7 +42,7 @@ For a `--theme` flag, `theme.Lookup(name)` finds a preset by name in any case, e
 
 ```go
 if listThemes {
-	return themebrowser.BrowseInTerminal() // a scrollable table, or plain lines in a pipe
+	return themebrowser.BrowseInTerminal(theme.Default()) // a scrollable table, or plain lines in a pipe
 }
 t, err := theme.Lookup(flagTheme)
 ```
