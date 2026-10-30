@@ -30,7 +30,7 @@ The packages at the root are the ones every app touches: `shell` to embed, `them
 
 What an app creates and draws inside a pane: `list`, `paginator`, `tree`, `table`, `viewport`, `browser`, `filepicker`, `accordion`, `form`, `input`, `textbox`, `cursor`, `progress`, `spinner`, `timer`, `stopwatch`, `chart`, `icon` and `toast`, and the three that print into a terminal instead of taking it over, `inline`, `logger` and `themebrowser`.
 
-A component imports the foundation and, where it is made of others, other components: `form` holds `input`s, `inline` draws a `progress` bar, `themebrowser` is a `table`. It never imports the frame, so any of them works in a pane, in a dialog or in a program without a shell. That is also why the shell cannot click a list for the app: it finds the pane under the pointer and sends a `ClickMsg`, and the app, which holds the list, hands it on. `overlay.FilePicker` is the one dialog built on a component, `filepicker`. `component/` is a folder, not a package: each component is its own package, `component/list` imported as `list`.
+A component imports the foundation, the motion packages and, where it is made of others, other components: `form` holds `input`s, `inline` draws a `progress` bar, `themebrowser` is a `table`, `progress` moves on an `animation.Spring`. A motion type stays inside: no stable component shows one in its API, since `animation` and `effect` are experimental. A component never imports the frame, so any of them works in a pane, in a dialog or in a program without a shell. That is also why the shell cannot click a list for the app: it finds the pane under the pointer and sends a `ClickMsg`, and the app, which holds the list, hands it on. `overlay.FilePicker` is the one dialog built on a component, `filepicker`. `component/` is a folder, not a package: each component is its own package, `component/list` imported as `list`.
 
 ## effect/
 
@@ -70,12 +70,12 @@ From the bottom up, each layer imports only the ones below it:
 
 0. the root `bezel`: `Result`, `Model` and `ClickMsg`, importing only bubbletea
 1. `internal/`
-2. the foundation: `layout`, `key`, `draw`, `legend`, `theme`
-3. `component/` and `animation/`, side by side; neither imports the other
-4. `effect/`, on `animation`
+2. motion: `animation/` (with `text` and `scene`), then `effect/` on it; they import nothing from bezel but `internal/` and the root
+3. the foundation: `layout`, `key`, `draw`, `legend`, `theme`
+4. `component/`, which may move with `animation` and `effect` inside
 5. the frame: `overlay`, `shell` (with its `:` palette in `shell/internal/palette`)
 
-A change that needs an arrow pointing up, a component that imports `overlay` or an animation that imports `effect`, is a sign the code belongs a layer higher.
+A change that needs an arrow pointing up, an animation that imports `theme` or a component that imports `overlay`, is a sign the code belongs a layer higher.
 
 ## examples/, docs/ and scripts/
 

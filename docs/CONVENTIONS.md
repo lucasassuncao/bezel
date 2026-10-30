@@ -27,6 +27,7 @@ m.list = m.list.SetRows(reloaded) // SetX: a live change, after something happen
 - **A variant is named, not built**: a preset of a shared type is a bare name, `spinner.Dot()`, `effect.Wipe(...)`, `theme.Mint()`.
 - **`Config` struct** only where an app sets many fields at once, as `shell.Config`.
 - **A declared tree is not a model**: `layout`'s builders read as the screen they describe, `layout.Fixed("help").Info()` and `Columns(...).Collapse(72, "detail")`, so they keep their short names instead of `WithX`.
+- **A range stays in order**: a from/to or low/high pair is positional, `animation.NewTween(from, to, dur)`, `NewRubber(lo, hi)`, because the order is the meaning; the same-typed rule above is for settings that could be swapped.
 
 ### Sizes
 
@@ -220,6 +221,7 @@ Only in a new major version (`/v2`):
 
 - removing or renaming anything exported, or changing a signature;
 - adding a method to an interface an app implements (`shell.Tab`, the overlay roles, `form.Holder`): it breaks every implementation, so new behaviour comes as a new role interface instead.
+- showing an `animation` or `effect` type in a stable package's API: a component may move with them inside, but what it exports stays its own, or that part is experimental too.
 
 Not promised:
 
