@@ -22,7 +22,7 @@ func sized(s Shell) Shell {
 
 // legendRows is the last two screen rows: the legend's, filled or not.
 func legendRows(s Shell) string {
-	rows := strings.Split(ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}})), "\n")
+	rows := strings.Split(ansi.Strip(s.render(map[string]Pane{"list": {}, "detail": {}})), "\n")
 	return strings.Join(rows[len(rows)-2:], "\n")
 }
 
@@ -41,7 +41,7 @@ func TestGroupPutsActionsOnTheirOwnRow(t *testing.T) {
 		Custom("ctrl+s", "save", nil, Group(2)), Help(), Move(),
 		Custom("enter", "add", nil, Group(1)), Custom("esc", "back", nil),
 	))
-	rows := strings.Split(ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}})), "\n")
+	rows := strings.Split(ansi.Strip(s.render(map[string]Pane{"list": {}, "detail": {}})), "\n")
 	got := make([]string, 0, 3)
 	for _, r := range rows[len(rows)-3:] {
 		got = append(got, strings.TrimSpace(r))

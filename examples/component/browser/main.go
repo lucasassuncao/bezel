@@ -98,13 +98,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"list":    {Title: "recipes", Body: func(r layout.Rect) string { return m.browser.SetListHeight(r.H).ListView(m.th) }},
 		"preview": {Title: "recipe", Body: func(r layout.Rect) string { return m.browser.SetPreviewHeight(r.H).PreviewView() }},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

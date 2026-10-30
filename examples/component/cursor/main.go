@@ -98,12 +98,9 @@ func (m model) body(r layout.Rect) string {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"cursor": {Title: "cursor", Body: m.body},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

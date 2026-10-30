@@ -135,15 +135,12 @@ func (m model) detail() string {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"tree": {Title: "files", Body: func(r layout.Rect) string {
 			return m.tree.SetHeight(r.H).View(m.th, m.row)
 		}},
 		"detail": {Title: "detail", Body: func(layout.Rect) string { return m.detail() }},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

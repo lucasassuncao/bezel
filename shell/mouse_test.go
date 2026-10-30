@@ -58,7 +58,7 @@ func click(x, y int) tea.MouseClickMsg { return tea.MouseClickMsg{X: x, Y: y, Bu
 
 func TestAClickOnATabShowsIt(t *testing.T) {
 	s, _ := newShell(stubTab{name: "alpha"}, stubTab{name: "beta"}).Update(tea.WindowSizeMsg{Width: 120, Height: 30})
-	row := strings.Split(ansi.Strip(s.View(demoPanes())), "\n")[s.headerRows()]
+	row := strings.Split(ansi.Strip(s.render(demoPanes())), "\n")[s.headerRows()]
 	s, r := s.Update(click(strings.Index(row, "beta"), s.headerRows()))
 	require.True(t, r.Handled)
 	require.Equal(t, 1, s.ActiveTab())
@@ -109,13 +109,13 @@ func TestAClickOnAPaneFocusesItAndComesAsAClickMsg(t *testing.T) {
 	require.False(t, r.Handled, "the header is no pane: the click is the app's as it came")
 }
 
-func TestScreenTurnsTheMouseOnWhenAsked(t *testing.T) {
+func TestViewTurnsTheMouseOnWhenAsked(t *testing.T) {
 	s := sizedShell()
-	v := s.Screen(demoPanes())
+	v := s.View(demoPanes())
 	require.True(t, v.AltScreen)
 	require.Equal(t, tea.MouseModeNone, v.MouseMode)
 	on := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain(), true), Mouse: true})
-	require.Equal(t, tea.MouseModeCellMotion, on.Screen(demoPanes()).MouseMode)
+	require.Equal(t, tea.MouseModeCellMotion, on.View(demoPanes()).MouseMode)
 }
 
 func TestAClickWithADialogOpenIsTheDialogs(t *testing.T) {

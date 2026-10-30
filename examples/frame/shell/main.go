@@ -133,7 +133,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() tea.View {
 	at := m.sh.ActiveTab()
 	l := m.lists[at].SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
-	return m.sh.Screen(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"list": {Title: m.tabs[at].name, Body: func(layout.Rect) string { return l.View(m.th) }},
 		"detail": {Title: "detail", Body: func(r layout.Rect) string {
 			return fmt.Sprintf("selected: %s\nfocus: %s\npane: %dx%d", m.selected(), m.sh.Focused(), r.W, r.H)

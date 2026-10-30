@@ -346,7 +346,7 @@ func (m model) moving() bool {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"main": {Title: "every animation", Right: still(), Body: func(layout.Rect) string {
 			switch m.sh.ActiveTab() {
 			case 1:
@@ -367,10 +367,7 @@ func (m model) View() tea.View {
 		"hints": {Title: "hints", Body: func(layout.Rect) string {
 			return "This pane slides on a Tween of its own.\nThe pendulum and the orbit keep their own\nticks; everything else shares one Clock."
 		}},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 // gallery is one row per animation, its kind and variant on the left.

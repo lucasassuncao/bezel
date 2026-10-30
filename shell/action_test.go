@@ -95,6 +95,6 @@ func TestNilActionsTabsAndOptionsAreSkipped(t *testing.T) {
 	require.NoError(t, Check(nil, Quit(nil), nil))
 	tab := stubTab{name: "a", actions: []Action{nil, Custom("r", "reveal", nil)}}
 	s := New(Config{Tabs: []Tab{nil, tab}, Actions: []Action{nil}}).SetActions(nil).SetTabs(nil, tab)
-	require.NotPanics(t, func() { _ = s.Body(); _ = s.View(nil) })
+	require.NotPanics(t, func() { _ = s.Body(); _ = s.render(nil) })
 	require.Equal(t, 0, s.SetTab(1).ActiveTab(), "the nil tab was left out, so there is no second")
 }

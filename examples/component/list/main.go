@@ -98,15 +98,12 @@ func (m model) detail() string {
 func (m model) View() tea.View {
 	// Sized before the pane is drawn: the scrollbar is the pane's, not the body's.
 	l := m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"list": {Title: "food", Scroll: l.Scroll(), Body: func(layout.Rect) string {
 			return l.View(m.th)
 		}},
 		"detail": {Title: "payload", Body: func(layout.Rect) string { return m.detail() }},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

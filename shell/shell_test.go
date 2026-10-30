@@ -46,7 +46,7 @@ func TestSetTabsReplacesWhatTheShellReads(t *testing.T) {
 	s := sized(newShell(stubTab{name: "a"}, stubTab{name: "b"})).SetTab(1)
 	s = s.SetTabs(stubTab{name: "a"}, stubTab{name: "renamed"})
 	require.Equal(t, 1, s.ActiveTab())
-	require.Contains(t, ansi.Strip(s.View(demoPanes())), "status of renamed")
+	require.Contains(t, ansi.Strip(s.render(demoPanes())), "status of renamed")
 }
 
 func TestSetTabsKeepsEachTabsFocusAndClampsTheActiveOne(t *testing.T) {
@@ -119,7 +119,7 @@ func TestSetActionsFeedsATablessShell(t *testing.T) {
 	s := newShell()
 	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	s = s.SetActions(Custom("x", "do x", nil), Custom("y", "do y", nil))
-	plain := ansi.Strip(s.View(demoPanes()))
+	plain := ansi.Strip(s.render(demoPanes()))
 	require.Contains(t, plain, "[x] do x")
 	require.Equal(t, 24-2-3, s.Body().H) // header and blank row, status, both legend rows
 }
@@ -139,7 +139,7 @@ func TestSubtitleStatusAndShowHelp(t *testing.T) {
 	s = s.SetSubtitle("config.yaml ● modified")
 	s, _ = s.SetStatus("hello", OK, 0)
 	require.Equal(t, "hello", s.Status())
-	plain := ansi.Strip(s.View(demoPanes()))
+	plain := ansi.Strip(s.render(demoPanes()))
 	require.Contains(t, plain, "config.yaml ● modified")
 
 	s = s.ShowHelp()
@@ -175,7 +175,7 @@ func TestTheBodyKeepsItsHeightWhenTheLegendShrinks(t *testing.T) {
 	require.Equal(t, long.Body(), short.Body())
 	require.Equal(t, long.Rect("detail"), short.Rect("detail"))
 
-	rows := strings.Split(ansi.Strip(short.View(demoPanes())), "\n")
+	rows := strings.Split(ansi.Strip(short.render(demoPanes())), "\n")
 	require.Len(t, rows, 24)
 	require.Contains(t, rows[22], "[a] a long action description")
 	require.Empty(t, strings.TrimSpace(rows[23]))
@@ -262,8 +262,8 @@ func TestThemeIsTheLatestSet(t *testing.T) {
 func TestAConfigChangeIsTheCopysAlone(t *testing.T) {
 	before, _ := newShell().Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	after := before.SetSubtitle("reloaded").SetLegendLines(1).SetTheme(theme.Resolve(theme.Mint(), true))
-	require.Contains(t, ansi.Strip(after.View(demoPanes())), "reloaded")
-	require.NotContains(t, ansi.Strip(before.View(demoPanes())), "reloaded")
+	require.Contains(t, ansi.Strip(after.render(demoPanes())), "reloaded")
+	require.NotContains(t, ansi.Strip(before.render(demoPanes())), "reloaded")
 	require.Equal(t, 2, before.cfg.LegendLines)
 	require.Equal(t, theme.Resolve(theme.Plain(), true).Colors, before.cfg.Theme.Colors)
 }
@@ -276,13 +276,13 @@ func TestTheZeroShellIsAnEmptyOne(t *testing.T) {
 		_ = s.Focused()
 		_ = s.Context()
 		_ = s.Body()
-		_ = s.View(nil)
+		_ = s.render(nil)
 		s, _ = s.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
 		s = Shell{}.SetTab(2).SetFocus("x").SetSubtitle("s").SetLegendLines(3).OpenCommands().Pop()
 		_ = Shell{}.Copy("a", "copied", "failed")
 		_, _ = Shell{}.Busy("working")
 		_, _ = Shell{}.SetStatus("hi", Info, time.Second)
-		_ = Shell{}.ShowHelp().View(nil)
+		_ = Shell{}.ShowHelp().render(nil)
 	})
 	w, h := s.Size()
 	require.Equal(t, 0, w+h)

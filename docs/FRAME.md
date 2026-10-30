@@ -43,10 +43,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() tea.View {
-	return tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"list":   {Title: "Items", Body: m.list},
 		"detail": {Title: "Detail", Body: m.detail},
-	}))
+	})
 }
 ```
 
@@ -165,7 +165,7 @@ The mouse is off until the app asks for it. Two lines turn it on:
 shell.New(shell.Config{ /* ... */ Mouse: true})
 
 func (m model) View() tea.View {
-	return m.sh.Screen(panes) // the full-screen view, the mouse reporting on
+	return m.sh.View(panes) // the full-screen view, the mouse reporting on
 }
 ```
 

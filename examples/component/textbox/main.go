@@ -80,7 +80,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() tea.View {
-	return m.sh.Screen(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"text": {Title: "notes.md", Body: func(layout.Rect) string { return m.ta.View() }},
 	})
 }

@@ -20,7 +20,7 @@ func busyShell(tabs ...Tab) Shell {
 }
 
 func view(s Shell) string {
-	return ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}}))
+	return ansi.Strip(s.render(map[string]Pane{"list": {}, "detail": {}}))
 }
 
 func TestBusyShowsTheSpinnerAndTextOnTheStatusRow(t *testing.T) {

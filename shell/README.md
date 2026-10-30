@@ -65,7 +65,6 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) Pop\(\) Shell](<#Shell.Pop>)
   - [func \(s Shell\) Push\(o overlay.Overlay\) Shell](<#Shell.Push>)
   - [func \(s Shell\) Rect\(name string\) layout.Rect](<#Shell.Rect>)
-  - [func \(s Shell\) Screen\(panes map\[string\]Pane\) tea.View](<#Shell.Screen>)
   - [func \(s Shell\) SetActions\(actions ...Action\) Shell](<#Shell.SetActions>)
   - [func \(s Shell\) SetFocus\(name string\) Shell](<#Shell.SetFocus>)
   - [func \(s Shell\) SetInput\(m input.Model\) Shell](<#Shell.SetInput>)
@@ -85,7 +84,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) Theme\(\) theme.Resolved](<#Shell.Theme>)
   - [func \(s Shell\) TopOverlay\(\) overlay.Overlay](<#Shell.TopOverlay>)
   - [func \(s Shell\) Update\(msg tea.Msg\) \(Shell, bezel.Result\)](<#Shell.Update>)
-  - [func \(s Shell\) View\(panes map\[string\]Pane\) string](<#Shell.View>)
+  - [func \(s Shell\) View\(panes map\[string\]Pane\) tea.View](<#Shell.View>)
 - [type StatusStyle](<#StatusStyle>)
 - [type Tab](<#Tab>)
 
@@ -415,7 +414,7 @@ func WithKey(keys ...string) Option
 WithKey rebinds the action. A prebuilt, or a Command that had no key, prints the first key; a custom keeps the label it was given.
 
 <a name="Pane"></a>
-## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L96-L103>)
+## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L97-L104>)
 
 Pane is what the app hands the shell for one leaf: a title for the border and a body drawn into the inner rect the shell computed.
 
@@ -460,7 +459,7 @@ func (s Shell) ActiveTab() int
 ActiveTab is the index of the tab on screen.
 
 <a name="Shell.Body"></a>
-### func \(Shell\) [Body](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L17>)
+### func \(Shell\) [Body](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L18>)
 
 ```go
 func (s Shell) Body() layout.Rect
@@ -559,7 +558,7 @@ func (s Shell) IsBusy() bool
 IsBusy reports whether Busy is in effect.
 
 <a name="Shell.Mouse"></a>
-### func \(Shell\) [Mouse](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L50>)
+### func \(Shell\) [Mouse](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L38>)
 
 ```go
 func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool)
@@ -568,7 +567,7 @@ func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool)
 Mouse finds the pane under the pointer of msg and hands back msg moved into that pane's body, for the wheel or a drag; a click comes as a ClickMsg instead. false when no pane is under the pointer.
 
 <a name="Shell.MouseIn"></a>
-### func \(Shell\) [MouseIn](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L61>)
+### func \(Shell\) [MouseIn](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L49>)
 
 ```go
 func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg
@@ -595,7 +594,7 @@ func (s Shell) OpenCommands() Shell
 OpenCommands opens the palette over the declared named actions, for an app that decides itself when ":" means commands and when it is text.
 
 <a name="Shell.PaneAt"></a>
-### func \(Shell\) [PaneAt](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L31>)
+### func \(Shell\) [PaneAt](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L19>)
 
 ```go
 func (s Shell) PaneAt(x, y int) (string, bool)
@@ -629,15 +628,6 @@ func (s Shell) Rect(name string) layout.Rect
 ```
 
 Rect is where a leaf was placed. The zero Rect means it is not on screen.
-
-<a name="Shell.Screen"></a>
-### func \(Shell\) [Screen](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L19>)
-
-```go
-func (s Shell) Screen(panes map[string]Pane) tea.View
-```
-
-Screen is the shell's view as the full\-screen tea.View a program returns, with mouse reporting on when Config.Mouse is.
 
 <a name="Shell.SetActions"></a>
 ### func \(Shell\) [SetActions](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L258>)
@@ -811,13 +801,13 @@ func (s Shell) Update(msg tea.Msg) (Shell, bezel.Result)
 Update handles what is the shell's: resize, status ticks, overlays, the status\-row input, help, tabs and focus, and a left click on a dialog, a tab or a pane, which comes back as a ClickMsg. Handled false means the app's turn. A resize takes the size and stays false, so the app sizes its own models from Rect on the same message.
 
 <a name="Shell.View"></a>
-### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L117>)
+### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L119>)
 
 ```go
-func (s Shell) View(panes map[string]Pane) string
+func (s Shell) View(panes map[string]Pane) tea.View
 ```
 
-View draws header, tabs, panes, status and legend, then the overlays on top. It is pure: nothing here writes back to the shell the app holds.
+View is the whole screen as the tea.View a program returns: full screen, in the theme's background and text colours, with mouse reporting on when Config.Mouse is. It is pure: nothing here writes back to the shell.
 
 <a name="StatusStyle"></a>
 ## type [StatusStyle](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L87>)

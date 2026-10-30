@@ -192,7 +192,7 @@ func (m model) detail(r layout.Rect) string {
 
 func (m model) View() tea.View {
 	l := m.list.SetHeight(draw.InnerRect(m.sh.Rect("tasks")).H)
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"tasks": {
 			Title:  "tasks",
 			Bottom: fmt.Sprintf("%d/%d done", m.doneCount(), len(m.tasks)),
@@ -200,10 +200,7 @@ func (m model) View() tea.View {
 			Body:   func(layout.Rect) string { return l.View(m.th) },
 		},
 		"detail": {Title: "detail", Body: m.detail},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

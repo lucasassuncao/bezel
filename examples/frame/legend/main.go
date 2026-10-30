@@ -92,12 +92,9 @@ func (m model) View() tea.View {
 	if *m.canWrite {
 		mode = "write mode: every key is shown"
 	}
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"main": {Title: "legend", Body: func(layout.Rect) string { return mode }},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

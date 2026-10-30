@@ -34,10 +34,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() tea.View {
-    return tea.NewView(m.sh.View(map[string]shell.Pane{
+    return m.sh.View(map[string]shell.Pane{
         "list":   {Title: "Items", Body: m.renderList},   // func(inner layout.Rect) string
         "detail": {Title: m.path,  Body: m.renderDetail},
-    }))
+    })
 }
 ```
 

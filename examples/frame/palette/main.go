@@ -98,7 +98,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"items": {Title: "items", Body: func(layout.Rect) string {
 			var b strings.Builder
 			for i, it := range items {
@@ -110,10 +110,7 @@ func (m model) View() tea.View {
 			}
 			return b.String()
 		}},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

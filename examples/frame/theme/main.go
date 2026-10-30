@@ -97,13 +97,10 @@ func (m model) sample() string {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"roles":  {Title: "roles", Body: func(layout.Rect) string { return m.roles() }},
 		"sample": {Title: "sample", Body: func(layout.Rect) string { return m.sample() }},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

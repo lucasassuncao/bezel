@@ -81,11 +81,10 @@ The answer can come after the first frame, so the app starts from a guess, usual
 
 ## The background
 
-A theme with a `Background` paints the whole screen, not just the text: `Resolved.Background` is that colour and `Resolved.Foreground` its `Text`, both nil when the theme has none. The app hands them to the terminal in `View`:
+A theme with a `Background` paints the whole screen, not just the text: `Resolved.Background` is that colour and `Resolved.Foreground` its `Text`, both nil when the theme has none. The shell hands them to the terminal: `Shell.View` returns a `tea.View` with both set. An app that draws without the shell sets them itself:
 
 ```go
-v := tea.NewView(m.sh.View(panes))
-v.AltScreen = true
+v := tea.NewView(content)
 v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 ```
 

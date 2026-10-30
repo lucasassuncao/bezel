@@ -157,13 +157,10 @@ func (m model) servicesPane(r layout.Rect) string {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"load":     {Title: "cpu load", Body: m.loadPane},
 		"services": {Title: "services", Body: m.servicesPane},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

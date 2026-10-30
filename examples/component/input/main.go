@@ -134,7 +134,7 @@ func (m model) body(r layout.Rect) string {
 }
 
 func (m model) View() tea.View {
-	return m.sh.Screen(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"input": {Title: "deploy", Body: m.body},
 	})
 }

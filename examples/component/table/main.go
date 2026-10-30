@@ -140,7 +140,7 @@ func (m model) detail(r layout.Rect) string {
 
 func (m model) View() tea.View {
 	it, _ := m.tbl.Selected()
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"table": {
 			Title:  "dependencies",
 			Bottom: fmt.Sprintf("%d/%d", m.tbl.Cursor()+1, m.tbl.Len()),
@@ -148,10 +148,7 @@ func (m model) View() tea.View {
 			Body:   func(r layout.Rect) string { return m.tbl.SetWidth(r.W).View(m.th) },
 		},
 		"detail": {Title: it.Value, Body: m.detail},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

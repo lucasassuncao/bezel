@@ -130,16 +130,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	vp := m.sized().vp
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	v := m.sh.View(map[string]shell.Pane{
 		"log": {
 			Title:  "access.log",
 			Bottom: fmt.Sprintf("%3.0f%%", vp.ScrollPercent()*100),
 			Scroll: vp.Scroll(),
 			Body:   func(layout.Rect) string { return vp.View(m.th) },
 		},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
+	})
 	v.MouseMode = tea.MouseModeCellMotion
 	return v
 }

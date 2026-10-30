@@ -52,7 +52,7 @@ func TestCommandsOpensThePaletteOnTheStatusRow(t *testing.T) {
 	s, r := s.Update(colon)
 	require.True(t, r.Handled)
 	require.IsType(t, palette.Model{}, s.TopOverlay())
-	screen := ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}}))
+	screen := ansi.Strip(s.render(map[string]Pane{"list": {}, "detail": {}}))
 	require.Contains(t, screen, ":reveal")
 	rows := strings.Split(screen, "\n")
 	require.True(t, strings.HasPrefix(rows[statusAt(s)], ":"), "the typed line takes the status row")
@@ -93,13 +93,13 @@ func TestHelpRunFromThePaletteStaysOpen(t *testing.T) {
 	s, _ = s.Update(colon)
 	s = enter(t, typeLine(s, "help"))
 	require.IsType(t, overlay.Help{}, s.TopOverlay())
-	require.Equal(t, 1, strings.Count(ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}})), "esc closes"))
+	require.Equal(t, 1, strings.Count(ansi.Strip(s.render(map[string]Pane{"list": {}, "detail": {}})), "esc closes"))
 }
 
 func TestPaletteOnlyCommandsAreListed(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Commands(), Command("goto", "jump to a path", nil, Arg("path"))))
 	s, _ = s.Update(colon)
-	require.Contains(t, ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}})), ":goto <path>")
+	require.Contains(t, ansi.Strip(s.render(map[string]Pane{"list": {}, "detail": {}})), ":goto <path>")
 }
 
 // A second enter queued before the first DoneMsg lands must not run twice.
@@ -125,7 +125,7 @@ func TestPasteReachesTheOpenPalette(t *testing.T) {
 }
 
 func screen(s Shell) string {
-	return ansi.Strip(s.View(map[string]Pane{"list": {}, "detail": {}}))
+	return ansi.Strip(s.render(map[string]Pane{"list": {}, "detail": {}}))
 }
 
 func TestOpenCommandsListsTheDeclaredCommands(t *testing.T) {

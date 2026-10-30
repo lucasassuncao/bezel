@@ -86,15 +86,12 @@ func (m model) lines(w int) []string {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"draw": {Title: "draw", Body: func(r layout.Rect) string {
 			lines := m.lines(r.W)
 			return strings.Join(lines[min(m.offset, len(lines)-1):], "\n")
 		}},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {

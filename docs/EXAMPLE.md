@@ -193,7 +193,7 @@ A key no action took reaches the app, which hands it to the list: the arrows, `h
 ```go
 func (m model) View() tea.View {
 	l := m.list.SetHeight(draw.InnerRect(m.sh.Rect("tasks")).H)
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"tasks": {
 			Title:  "tasks",
 			Bottom: fmt.Sprintf("%d/%d done", m.doneCount(), len(m.tasks)),
@@ -201,9 +201,7 @@ func (m model) View() tea.View {
 			Body:   func(layout.Rect) string { return l.View(m.th) },
 		},
 		"detail": {Title: "detail", Body: m.detail},
-	}))
-	v.AltScreen = true
-	return v
+	})
 }
 ```
 

@@ -14,18 +14,6 @@ import (
 // border. It is bezel.ClickMsg, which the components take as it comes.
 type ClickMsg = bezel.ClickMsg
 
-// Screen is the shell's view as the full-screen tea.View a program returns,
-// with mouse reporting on when Config.Mouse is.
-func (s Shell) Screen(panes map[string]Pane) tea.View {
-	s = s.ready()
-	v := tea.NewView(s.View(panes))
-	v.AltScreen = true
-	if s.cfg.Mouse {
-		v.MouseMode = tea.MouseModeCellMotion
-	}
-	return v
-}
-
 // PaneAt is the pane drawn at the screen cell (x, y), border included, and
 // false over the chrome, a gap or an open dialog, which covers the panes.
 func (s Shell) PaneAt(x, y int) (string, bool) {

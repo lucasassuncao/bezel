@@ -192,7 +192,7 @@ func (m model) moving() bool {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"main": {Title: "every text", Right: still(), Body: func(layout.Rect) string {
 			switch m.sh.ActiveTab() {
 			case 1:
@@ -204,10 +204,7 @@ func (m model) View() tea.View {
 			}
 			return m.ty.rows(m.th, m.label)
 		}},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 // still names the switch when motion is off, so a frozen gallery says why.

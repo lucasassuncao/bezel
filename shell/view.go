@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"strings"
 
+	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -112,9 +113,23 @@ func (s Shell) withPresent(panes map[string]Pane) Shell {
 	return s.relayout()
 }
 
-// View draws header, tabs, panes, status and legend, then the overlays on
+// View is the whole screen as the tea.View a program returns: full screen, in
+// the theme's background and text colours, with mouse reporting on when
+// Config.Mouse is. It is pure: nothing here writes back to the shell.
+func (s Shell) View(panes map[string]Pane) tea.View {
+	s = s.ready()
+	v := tea.NewView(s.render(panes))
+	v.AltScreen = true
+	v.BackgroundColor, v.ForegroundColor = s.cfg.Theme.Background, s.cfg.Theme.Foreground
+	if s.cfg.Mouse {
+		v.MouseMode = tea.MouseModeCellMotion
+	}
+	return v
+}
+
+// render draws header, tabs, panes, status and legend, then the overlays on
 // top. It is pure: nothing here writes back to the shell the app holds.
-func (s Shell) View(panes map[string]Pane) string {
+func (s Shell) render(panes map[string]Pane) string {
 	s = s.ready()
 	if s.width <= 0 || s.height <= 0 {
 		return ""

@@ -182,6 +182,6 @@ func BenchmarkKeyAndFrame(b *testing.B) {
 	panes, key := demoPanes(), press("z")
 	for b.Loop() {
 		s, _ = s.Update(key)
-		_ = s.View(panes)
+		_ = s.render(panes)
 	}
 }

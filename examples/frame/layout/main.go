@@ -86,14 +86,11 @@ func rectBody(name string) func(layout.Rect) string {
 }
 
 func (m model) View() tea.View {
-	v := tea.NewView(m.sh.View(map[string]shell.Pane{
+	return m.sh.View(map[string]shell.Pane{
 		"header": {Title: "header", Body: rectBody("header")},
 		"side":   {Title: "side", Body: rectBody("side")},
 		"main":   {Title: "main", Body: rectBody("main")},
-	}))
-	v.AltScreen = true
-	v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
-	return v
+	})
 }
 
 func main() {
