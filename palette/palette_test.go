@@ -43,7 +43,8 @@ func typed(m Model, s string) Model {
 }
 
 func press(m Model, code rune) (Model, tea.Cmd) {
-	o, cmd := m.Update(tea.KeyPressMsg{Code: code})
+	o, r := m.Update(tea.KeyPressMsg{Code: code})
+	cmd := r.Cmd
 	return o.(Model), cmd
 }
 
@@ -161,7 +162,8 @@ func TestSetItemsKeepsTheLineAndClampsThePick(t *testing.T) {
 
 // The caret's blink comes back bare, at the theme's pace; the shell routes it.
 func TestTheCaretBlinksAtTheThemesPace(t *testing.T) {
-	_, cmd := New(items(), theme.Resolved{CaretBlink: time.Nanosecond}).Update(tea.KeyPressMsg{Code: 'c', Text: "c"})
+	_, r := New(items(), theme.Resolved{CaretBlink: time.Nanosecond}).Update(tea.KeyPressMsg{Code: 'c', Text: "c"})
+	cmd := r.Cmd
 	require.IsType(t, input.BlinkMsg{}, cmd())
 }
 
@@ -203,4 +205,11 @@ func FuzzResolveOnlyRunsWhatTheNameLeadsTo(f *testing.F) {
 			t.Fatalf("resolve(%q) = %q (available %v), arg %q", line, it.Name, it.Available, gotArg)
 		}
 	})
+}
+
+func TestPaletteTabCompletesAndIsHandled(t *testing.T) {
+	o, r := typed(open(), "cre").Update(tea.KeyPressMsg{Code: tea.KeyTab})
+	require.True(t, r.Handled)
+	require.Nil(t, r.Cmd)
+	require.Equal(t, "create", o.(Model).Value())
 }

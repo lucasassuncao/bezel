@@ -6,6 +6,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -30,11 +31,11 @@ func NewAlert(kind Kind, title, message string, th theme.Resolved) Alert {
 // Kind is what the alert reports.
 func (a Alert) Kind() Kind { return a.kind }
 
-func (a Alert) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (a Alert) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	if _, ok := msg.(tea.KeyPressMsg); ok {
-		return a, Close()
+		return a, bezel.Result{Handled: true, Cmd: Close()}
 	}
-	return a, nil
+	return a, bezel.Result{}
 }
 
 func (a Alert) Legend() []legend.Entry { return []legend.Entry{legend.New("any key", "close")} }
@@ -45,12 +46,12 @@ func (a Alert) View(body layout.Rect) string {
 }
 
 // Click closes the alert on a click on OK.
-func (a Alert) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
+func (a Alert) Click(x, y int, body layout.Rect) (Overlay, bezel.Result) {
 	row := a.okButton([]string{a.message})
 	if buttonAt(a.View(body), row, dialogFrame(a.style()), []string{a.button("OK", true)}, x, y) == 0 {
-		return a, Close()
+		return a, bezel.Result{Handled: true, Cmd: Close()}
 	}
-	return a, nil
+	return a, bezel.Result{Handled: true}
 }
 
 // accent is the colour a dialog is drawn in: its border's.

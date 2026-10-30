@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 )
@@ -84,9 +85,9 @@ func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg {
 // the chrome is the app's as it came.
 func (s Shell) click(c tea.MouseClickMsg) (Shell, bool, tea.Cmd) {
 	if s.overlays.Len() > 0 {
-		var cmd tea.Cmd
-		s.overlays, cmd = s.overlays.Click(c.X, c.Y, s.Body())
-		return s, true, cmd
+		var r bezel.Result
+		s.overlays, r = s.overlays.Click(c.X, c.Y, s.Body())
+		return s, true, r.Cmd
 	}
 	if len(s.cfg.Tabs) > 0 && c.Y == s.headerRows() {
 		if i := draw.TabAt(s.width, s.tabNames(), s.tab, s.cfg.Theme.Chrome, c.X); i >= 0 {

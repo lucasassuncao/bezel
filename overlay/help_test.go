@@ -23,7 +23,8 @@ func TestHelpListsEverySectionAndCloses(t *testing.T) {
 	require.Contains(t, plain, "list")
 	require.Contains(t, plain, "enter")
 	require.Contains(t, plain, "detail")
-	_, cmd := h.Update(press("?"))
+	_, r := h.Update(press("?"))
+	cmd := r.Cmd
 	require.IsType(t, CloseMsg{}, cmd())
 }
 
@@ -47,9 +48,11 @@ func TestHelpClosesOnTheKeysItWasGiven(t *testing.T) {
 	keys.Close = bind("x", "close")
 	h := NewHelp(nil, theme.Resolved{}).WithKeys(keys)
 
-	_, cmd := h.Update(press("q"))
+	_, r := h.Update(press("q"))
+	cmd := r.Cmd
 	require.Nil(t, cmd)
-	_, cmd = h.Update(press("x"))
+	_, r = h.Update(press("x"))
+	cmd = r.Cmd
 	require.Equal(t, tea.Msg(CloseMsg{}), cmd())
 	require.Contains(t, ansi.Strip(h.View(layout.Rect{W: 60, H: 20})), "x closes")
 }

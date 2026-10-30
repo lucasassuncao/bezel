@@ -16,11 +16,13 @@ func TestConfirmRunsOnYesAndClosesOnNo(t *testing.T) {
 	onYes := func() tea.Msg { fired = true; return nil }
 	c := NewConfirm("Delete?", "this cannot be undone", onYes, theme.Resolved{})
 
-	_, cmd := c.Update(press("n"))
+	_, r := c.Update(press("n"))
+	cmd := r.Cmd
 	require.IsType(t, CloseMsg{}, cmd())
 	require.False(t, fired)
 
-	_, cmd = c.Update(press("y"))
+	_, r = c.Update(press("y"))
+	cmd = r.Cmd
 	// The yes command is a batch of onYes then Close: run it the way tea would.
 	msgs := drain(cmd())
 	require.True(t, fired)
@@ -51,9 +53,11 @@ func TestConfirmAnswersToTheKeysItWasGiven(t *testing.T) {
 	keys.Yes = bind("s", "sim")
 	c := NewConfirm("Apagar?", "", func() tea.Msg { return nil }, theme.Resolved{}).WithKeys(keys)
 
-	_, cmd := c.Update(press("y"))
+	_, r := c.Update(press("y"))
+	cmd := r.Cmd
 	require.Nil(t, cmd, "y is no longer an answer")
-	_, cmd = c.Update(press("s"))
+	_, r = c.Update(press("s"))
+	cmd = r.Cmd
 	require.Contains(t, drain(cmd()), tea.Msg(CloseMsg{}))
 	require.Contains(t, hint(c), "[s] sim")
 }
@@ -63,11 +67,24 @@ func TestConfirmAnswersAClickOnItsButtons(t *testing.T) {
 	c := NewConfirm("Delete?", "for good", func() tea.Msg { fired = true; return nil }, theme.Resolved{})
 	s := Stack{}.Push(c)
 	x, y := cellOf(t, s, "No")
-	_, cmd := s.Click(x, y, clickBody)
+	_, r := s.Click(x, y, clickBody)
+	cmd := r.Cmd
 	require.True(t, isClose(cmd))
 	require.False(t, fired)
 	x, y = cellOf(t, s, "Yes")
-	_, cmd = s.Click(x, y, clickBody)
+	_, r = s.Click(x, y, clickBody)
+	cmd = r.Cmd
 	require.True(t, isClose(cmd))
+	require.True(t, fired)
+}
+
+func TestConfirmClickOnYesSendsItsCommand(t *testing.T) {
+	fired := false
+	c := NewConfirm("Delete?", "for good", func() tea.Msg { fired = true; return nil }, theme.Resolved{})
+	s := Stack{}.Push(c)
+	x, y := cellOf(t, s, "Yes")
+	_, r := s.Click(x, y, clickBody)
+	require.True(t, r.Handled)
+	require.True(t, isClose(r.Cmd))
 	require.True(t, fired)
 }

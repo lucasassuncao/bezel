@@ -105,9 +105,9 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		return s, true, tea.Batch(cmd, m.Cmd)
 
 	case overlay.CloseMsg, overlay.PushMsg, overlay.TopMsg:
-		var cmd tea.Cmd
-		s.overlays, _, cmd = s.overlays.Update(msg)
-		return s, true, cmd
+		var r bezel.Result
+		s.overlays, r = s.overlays.Update(msg)
+		return s, true, r.Cmd
 	}
 
 	if b, ok := msg.(input.BlinkMsg); ok {
@@ -121,9 +121,9 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 			if p, ok := s.overlays.Top().(palette.Model); ok {
 				s.overlays = s.overlays.Pop().Push(p.SetItems(s.paletteItems()))
 			}
-			var cmd tea.Cmd
-			s.overlays, _, cmd = s.overlays.Update(msg)
-			return s, true, cmd
+			var r bezel.Result
+			s.overlays, r = s.overlays.Update(msg)
+			return s, true, r.Cmd
 		}
 		// Anything else is an answer for the app, not the modal.
 		return s, false, nil
@@ -231,9 +231,9 @@ func (s Shell) Input() (input.Model, bool) { return s.input, s.typing }
 // for a field it drives itself, so handled is false.
 func (s Shell) blink(msg input.BlinkMsg) (Shell, bool, tea.Cmd) {
 	if s.overlays.Len() > 0 {
-		if next, _, cmd := s.overlays.Update(msg); cmd != nil {
+		if next, r := s.overlays.Update(msg); r.Cmd != nil {
 			s.overlays = next
-			return s, true, cmd
+			return s, true, r.Cmd
 		}
 	}
 	if s.typing {

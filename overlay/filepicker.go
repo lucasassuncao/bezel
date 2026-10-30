@@ -103,24 +103,26 @@ func (p FilePicker) Dir() string { return p.m.Dir() }
 // Highlighted is the path under the cursor, or "" in an empty directory.
 func (p FilePicker) Highlighted() string { return p.m.Highlighted() }
 
-func (p FilePicker) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (p FilePicker) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	if m, ok := msg.(TopMsg); ok {
 		msg = m.Msg
 	}
 	var r bezel.Result
 	p.m, r = p.m.WithVolumes(volumes).Update(msg)
-	cmd := r.Cmd
+	_, isKey := msg.(tea.KeyPressMsg)
+	handled := isKey || r.Handled
 	path, picked := p.m.Picked()
 	switch {
 	case !picked:
+		cmd := r.Cmd
 		if cmd != nil {
 			cmd = ToTop(cmd)
 		}
-		return p, cmd
+		return p, bezel.Result{Handled: handled, Cmd: cmd}
 	case p.onPick == nil:
-		return p, Close()
+		return p, bezel.Result{Handled: true, Cmd: Close()}
 	}
-	return p, tea.Batch(p.onPick(path), Close())
+	return p, bezel.Result{Handled: true, Cmd: tea.Batch(p.onPick(path), Close())}
 }
 
 func (p FilePicker) Legend() []legend.Entry {

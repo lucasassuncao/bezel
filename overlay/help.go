@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -54,11 +55,12 @@ func (h Help) WithTitle(title string) Help {
 	return h
 }
 
-func (h Help) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (h Help) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	if k, ok := msg.(tea.KeyPressMsg); ok && key.Matches(k, h.keys.Close) {
-		return h, Close()
+		return h, bezel.Result{Handled: true, Cmd: Close()}
 	}
-	return h, nil
+	_, isKey := msg.(tea.KeyPressMsg)
+	return h, bezel.Result{Handled: isKey}
 }
 
 func (h Help) Legend() []legend.Entry { return legend.FromBindings([]key.Binding{h.keys.Close}) }

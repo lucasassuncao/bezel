@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/viewport"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
@@ -79,12 +80,14 @@ func (p Pager) sized(body layout.Rect) viewport.Model {
 // Offset is the index of the first line shown.
 func (p Pager) Offset() int { return p.vp.YOffset() }
 
-func (p Pager) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (p Pager) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	if k, ok := msg.(tea.KeyPressMsg); ok && key.Matches(k, p.keys.Close) {
-		return p, Close()
+		return p, bezel.Result{Handled: true, Cmd: Close()}
 	}
-	p.vp, _ = p.vp.Update(msg)
-	return p, nil
+	var r bezel.Result
+	p.vp, r = p.vp.Update(msg)
+	_, isKey := msg.(tea.KeyPressMsg)
+	return p, bezel.Result{Handled: isKey || r.Handled}
 }
 
 func (p Pager) Legend() []legend.Entry {

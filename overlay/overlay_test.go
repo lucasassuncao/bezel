@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -23,7 +24,7 @@ type fake struct {
 	closeOn string
 }
 
-func (f *fake) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (f *fake) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	k, ok := msg.(tea.KeyPressMsg)
 	if !ok {
 		f.got = append(f.got, msg)
@@ -31,10 +32,10 @@ func (f *fake) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 	if ok {
 		f.seen = append(f.seen, k.String())
 		if k.String() == f.closeOn {
-			return f, Close()
+			return f, bezel.Result{Handled: true, Cmd: Close()}
 		}
 	}
-	return f, nil
+	return f, bezel.Result{Handled: ok}
 }
 func (f *fake) View(layout.Rect) string { return "XX\nXX" }
 func (f *fake) Legend() []legend.Entry  { return []legend.Entry{legend.New("x", "fake")} }
@@ -61,7 +62,8 @@ func drain(m tea.Msg) []tea.Msg {
 func TestOnlyTheTopOverlayGetsKeys(t *testing.T) {
 	a, b := &fake{}, &fake{}
 	s := Stack{}.Push(a).Push(b)
-	_, handled, _ := s.Update(press("q"))
+	_, r := s.Update(press("q"))
+	handled := r.Handled
 	require.True(t, handled)
 	require.Equal(t, []string{"q"}, b.seen)
 	require.Empty(t, a.seen)
@@ -69,35 +71,44 @@ func TestOnlyTheTopOverlayGetsKeys(t *testing.T) {
 
 func TestEscPopsUnlessTheOverlayOwnsIt(t *testing.T) {
 	s := Stack{}.Push(&fake{})
-	s, handled, cmd := s.Update(esc())
+	s, r := s.Update(esc())
+	handled, cmd := r.Handled, r.Cmd
 	require.True(t, handled)
 	require.IsType(t, CloseMsg{}, cmd(), "esc closes through CloseMsg, so the app hears it")
-	s, _, _ = s.Update(cmd())
+	s, _ = s.Update(cmd())
 	require.Equal(t, 0, s.Len())
 
 	owner := &fake{ownsEsc: true}
 	s = Stack{}.Push(owner)
-	s, _, _ = s.Update(esc())
+	s, _ = s.Update(esc())
 	require.Equal(t, 1, s.Len())
 	require.Equal(t, []string{"esc"}, owner.seen)
 }
 
 func TestCloseAndPushMessagesMoveTheStack(t *testing.T) {
 	s := Stack{}.Push(&fake{})
-	s, handled, _ := s.Update(CloseMsg{})
+	s, r := s.Update(CloseMsg{})
+	handled := r.Handled
 	require.True(t, handled)
 	require.Equal(t, 0, s.Len())
 
-	s, _, _ = s.Update(PushMsg{Overlay: &fake{}})
+	s, _ = s.Update(PushMsg{Overlay: &fake{}})
 	require.Equal(t, 1, s.Len())
 }
 
 func TestEmptyStackHandlesNothing(t *testing.T) {
-	s, handled, cmd := Stack{}.Update(press("q"))
-	require.False(t, handled)
-	require.Nil(t, cmd)
+	s, r := Stack{}.Update(press("q"))
+	require.Equal(t, bezel.Result{}, r)
 	require.Equal(t, 0, s.Len())
 	require.Nil(t, s.Top())
+}
+
+func TestStackHandlesEveryKeyWhileOpen(t *testing.T) {
+	s := Stack{}.Push(&fake{})
+	for _, k := range []tea.Msg{press("q"), press("x"), tea.KeyPressMsg{Code: tea.KeyDown}, esc()} {
+		_, r := s.Update(k)
+		require.True(t, r.Handled, "%v", k)
+	}
 }
 
 func TestViewCompositesEveryLayerCentred(t *testing.T) {
@@ -132,7 +143,8 @@ func TestTopMsgReachesTheTopOverlay(t *testing.T) {
 	under, top := &fake{}, &fake{}
 	s := Stack{}.Push(under).Push(top)
 
-	_, handled, _ := s.Update(ToTop(func() tea.Msg { return answerMsg{} })())
+	_, r := s.Update(ToTop(func() tea.Msg { return answerMsg{} })())
+	handled := r.Handled
 	require.True(t, handled)
 	require.Equal(t, []tea.Msg{answerMsg{}}, top.got, "the payload arrives unwrapped")
 	require.Empty(t, under.got)
@@ -140,7 +152,8 @@ func TestTopMsgReachesTheTopOverlay(t *testing.T) {
 
 // A late answer for a modal already closed has nobody to go to.
 func TestTopMsgWithoutAnOverlayIsDropped(t *testing.T) {
-	_, handled, cmd := Stack{}.Update(TopMsg{Msg: answerMsg{}})
+	_, r := Stack{}.Update(TopMsg{Msg: answerMsg{}})
+	handled, cmd := r.Handled, r.Cmd
 	require.True(t, handled)
 	require.Nil(t, cmd)
 }
@@ -152,15 +165,15 @@ func TestStackSizesItsOverlays(t *testing.T) {
 	pager := NewPager("Out", numbered(60), theme.Resolved{})
 
 	s := Stack{}.Resize(layout.Rect{W: 60, H: 18}).Push(pager)
-	s, _, _ = s.Update(pgdown)
+	s, _ = s.Update(pgdown)
 	require.Equal(t, 10, s.Top().(Pager).Offset(), "pushed onto a sized stack")
 
 	s = s.Push(NewText("t", "", theme.Resolved{})).Resize(layout.Rect{W: 60, H: 13}).Pop()
-	s, _, _ = s.Update(pgdown)
+	s, _ = s.Update(pgdown)
 	require.Equal(t, 15, s.Top().(Pager).Offset(), "a layer under the top was resized too")
 
 	s = Stack{}.Push(pager).Resize(layout.Rect{W: 60, H: 18})
-	s, _, _ = s.Update(pgdown)
+	s, _ = s.Update(pgdown)
 	require.Equal(t, 10, s.Top().(Pager).Offset(), "pushed before the stack had a body")
 }
 
@@ -231,11 +244,14 @@ func isClose(cmd tea.Cmd) bool {
 func TestAClickReachesTheTopDialogInItsOwnCells(t *testing.T) {
 	s := Stack{}.Push(NewAlert(Info, "Saved", "all done", theme.Resolved{}))
 	x, y := cellOf(t, s, "OK")
-	_, cmd := s.Click(x, y, clickBody)
+	_, r := s.Click(x, y, clickBody)
+	cmd := r.Cmd
 	require.True(t, isClose(cmd), "a click on OK")
-	_, cmd = s.Click(0, 0, clickBody)
+	_, r = s.Click(0, 0, clickBody)
+	cmd = r.Cmd
 	require.Nil(t, cmd, "a click off the dialog does nothing")
-	_, cmd = Stack{}.Push(&fake{}).Click(x, y, clickBody)
+	_, r = Stack{}.Push(&fake{}).Click(x, y, clickBody)
+	cmd = r.Cmd
 	require.Nil(t, cmd, "a dialog that is no Clicker ignores it")
 }
 

@@ -12,7 +12,8 @@ import (
 
 func TestAlertClosesOnAnyKey(t *testing.T) {
 	a := NewAlert(Info, "Saved", "written to disk", theme.Resolved{})
-	_, cmd := a.Update(press("x"))
+	_, r := a.Update(press("x"))
+	cmd := r.Cmd
 	require.NotNil(t, cmd)
 	require.IsType(t, CloseMsg{}, cmd())
 	require.Contains(t, ansi.Strip(a.View(layout.Rect{W: 60, H: 20})), "written to disk")

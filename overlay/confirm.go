@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -50,26 +51,26 @@ func (c Confirm) WithKeys(k ConfirmKeys) Confirm {
 	return c
 }
 
-func (c Confirm) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (c Confirm) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	k, ok := msg.(tea.KeyPressMsg)
 	if !ok {
-		return c, nil
+		return c, bezel.Result{}
 	}
 	switch {
 	case key.Matches(k, c.keys.Toggle):
 		c.no = !c.no
-		return c, nil
+		return c, bezel.Result{Handled: true}
 	case key.Matches(k, c.keys.Accept):
 		if c.no {
-			return c, Close()
+			return c, bezel.Result{Handled: true, Cmd: Close()}
 		}
-		return c, tea.Batch(c.onYes, Close())
+		return c, bezel.Result{Handled: true, Cmd: tea.Batch(c.onYes, Close())}
 	case key.Matches(k, c.keys.Yes):
-		return c, tea.Batch(c.onYes, Close())
+		return c, bezel.Result{Handled: true, Cmd: tea.Batch(c.onYes, Close())}
 	case key.Matches(k, c.keys.No):
-		return c, Close()
+		return c, bezel.Result{Handled: true, Cmd: Close()}
 	}
-	return c, nil
+	return c, bezel.Result{Handled: true}
 }
 
 func (c Confirm) Legend() []legend.Entry {
@@ -87,12 +88,12 @@ func (c Confirm) buttons() []string {
 }
 
 // Click answers yes or no on a click on its button.
-func (c Confirm) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
+func (c Confirm) Click(x, y int, body layout.Rect) (Overlay, bezel.Result) {
 	switch buttonAt(c.View(body), "", dialogFrame(c.style()), c.buttons(), x, y) {
 	case 0:
-		return c, tea.Batch(c.onYes, Close())
+		return c, bezel.Result{Handled: true, Cmd: tea.Batch(c.onYes, Close())}
 	case 1:
-		return c, Close()
+		return c, bezel.Result{Handled: true, Cmd: Close()}
 	}
-	return c, nil
+	return c, bezel.Result{Handled: true}
 }

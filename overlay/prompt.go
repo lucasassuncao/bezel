@@ -127,19 +127,20 @@ func (p Prompt) Err() error {
 // Accepts reports whether enter would accept the text now.
 func (p Prompt) Accepts() bool { return p.Err() == nil }
 
-func (p Prompt) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (p Prompt) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	if k, ok := msg.(tea.KeyPressMsg); ok && key.Matches(k, p.keys.Accept) {
 		switch {
 		case !p.Accepts():
-			return p, nil
+			return p, bezel.Result{Handled: true}
 		case p.onAccept == nil:
-			return p, Close()
+			return p, bezel.Result{Handled: true, Cmd: Close()}
 		}
-		return p, tea.Batch(p.onAccept(p.Value()), Close())
+		return p, bezel.Result{Handled: true, Cmd: tea.Batch(p.onAccept(p.Value()), Close())}
 	}
 	var r bezel.Result
 	p.input, r = p.input.Update(msg)
-	return p, r.Cmd
+	_, isKey := msg.(tea.KeyPressMsg)
+	return p, bezel.Result{Handled: isKey || r.Handled, Cmd: r.Cmd}
 }
 
 // Legend offers enter only when it would do something.

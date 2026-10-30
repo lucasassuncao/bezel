@@ -152,29 +152,29 @@ func (m Model) SetItems(items []Item) Model {
 	return m
 }
 
-func (m Model) Update(msg tea.Msg) (overlay.Overlay, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (overlay.Overlay, bezel.Result) {
 	k, ok := msg.(tea.KeyPressMsg)
 	if !ok {
 		// A paste: the input's own business.
 		var r bezel.Result
 		m.input, r = m.input.Update(msg)
-		return m, r.Cmd
+		return m, r
 	}
 	switch {
 	case key.Matches(k, m.keys.Run):
 		return m.run()
 	case key.Matches(k, m.keys.Up):
-		return m.pick(true), nil
+		return m.pick(true), bezel.Result{Handled: true}
 	case key.Matches(k, m.keys.Down):
-		return m.pick(false), nil
+		return m.pick(false), bezel.Result{Handled: true}
 	case key.Matches(k, m.keys.Complete):
-		return m.complete(), nil
+		return m.complete(), bezel.Result{Handled: true}
 	}
 	var r bezel.Result
 	m.input, r = m.input.Update(k)
 	// The list under a pick changed, and the last error was about the old line.
 	m.cursor, m.err = -1, ""
-	return m, r.Cmd
+	return m, bezel.Result{Handled: true, Cmd: r.Cmd}
 }
 
 func (m Model) Legend() []legend.Entry {
@@ -254,26 +254,26 @@ func (m Model) complete() Model {
 
 // run finishes on enter. Only an ambiguous line stays open: its answer is
 // already on screen and one keystroke settles it.
-func (m Model) run() (overlay.Overlay, tea.Cmd) {
+func (m Model) run() (overlay.Overlay, bezel.Result) {
 	it, arg, err := m.chosen()
 	var amb ambiguousError
 	var ref refusedError
 	switch {
 	case errors.As(err, &amb), errors.As(err, &ref) && ref.siblings:
 		m.err = err.Error()
-		return m, nil
+		return m, bezel.Result{Handled: true}
 	case errors.Is(err, errEmpty):
-		return m, finish(DoneMsg{})
+		return m, bezel.Result{Handled: true, Cmd: finish(DoneMsg{})}
 	case err != nil:
-		return m, finish(DoneMsg{Err: err.Error()})
+		return m, bezel.Result{Handled: true, Cmd: finish(DoneMsg{Err: err.Error()})}
 	case it.Arg == "" && arg != "":
-		return m, finish(DoneMsg{Err: ":" + it.Name + " takes no argument"})
+		return m, bezel.Result{Handled: true, Cmd: finish(DoneMsg{Err: ":" + it.Name + " takes no argument"})}
 	}
 	var cmd tea.Cmd
 	if it.Run != nil {
 		cmd = it.Run(arg)
 	}
-	return m, finish(DoneMsg{Cmd: cmd})
+	return m, bezel.Result{Handled: true, Cmd: finish(DoneMsg{Cmd: cmd})}
 }
 
 func finish(d DoneMsg) tea.Cmd { return func() tea.Msg { return d } }

@@ -60,7 +60,8 @@ func TestPagerCloses(t *testing.T) {
 		if k == "enter" {
 			key = tea.KeyPressMsg{Code: tea.KeyEnter}
 		}
-		_, cmd := p.Update(key)
+		_, r := p.Update(key)
+		cmd := r.Cmd
 		require.NotNil(t, cmd, "%s should close", k)
 		require.Equal(t, CloseMsg{}, cmd())
 	}

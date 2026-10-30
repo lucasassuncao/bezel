@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -35,11 +36,11 @@ func textLines(text string) []string {
 	return strings.Split(text, "\n")
 }
 
-func (t Text) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (t Text) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	if _, ok := msg.(tea.KeyPressMsg); ok {
-		return t, Close()
+		return t, bezel.Result{Handled: true, Cmd: Close()}
 	}
-	return t, nil
+	return t, bezel.Result{}
 }
 
 func (t Text) Legend() []legend.Entry { return []legend.Entry{legend.New("any key", "close")} }
@@ -75,17 +76,17 @@ func NewChoice(title, text string, options []Option, th theme.Resolved) Choice {
 	return Choice{title: title, lines: textLines(text), options: slices.Clone(options), look: lookOf(th)}
 }
 
-func (c Choice) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (c Choice) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	k, ok := msg.(tea.KeyPressMsg)
 	if !ok {
-		return c, nil
+		return c, bezel.Result{}
 	}
 	for _, o := range c.options {
 		if key.Matches(k, o.Key) {
-			return c, tea.Batch(o.Do, Close()) // Batch drops a nil Do
+			return c, bezel.Result{Handled: true, Cmd: tea.Batch(o.Do, Close())} // Batch drops a nil Do
 		}
 	}
-	return c, nil
+	return c, bezel.Result{Handled: true}
 }
 
 // Legend is the options, plus esc unless an option already names it: esc
@@ -121,12 +122,12 @@ func (c Choice) buttons() []string {
 }
 
 // Click runs the option whose button it lands on, as its key would.
-func (c Choice) Click(x, y int, body layout.Rect) (Overlay, tea.Cmd) {
+func (c Choice) Click(x, y int, body layout.Rect) (Overlay, bezel.Result) {
 	i := buttonAt(c.View(body), "", dialogFrame(c.style()), c.buttons(), x, y)
 	if i < 0 {
-		return c, nil
+		return c, bezel.Result{Handled: true}
 	}
-	return c, tea.Batch(c.options[i].Do, Close())
+	return c, bezel.Result{Handled: true, Cmd: tea.Batch(c.options[i].Do, Close())}
 }
 
 // Pick is a dialog that chooses one row of a list with the arrows: which
@@ -210,10 +211,10 @@ func (p Pick) fit(body layout.Rect) int {
 	return max(1, body.H-dialogFrame(p.style()).GetVerticalFrameSize()-chrome)
 }
 
-func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd) {
+func (p Pick) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	k, ok := msg.(tea.KeyPressMsg)
 	if !ok {
-		return p, nil
+		return p, bezel.Result{}
 	}
 	switch {
 	case key.Matches(k, p.keys.Up):
@@ -222,11 +223,11 @@ func (p Pick) Update(msg tea.Msg) (Overlay, tea.Cmd) {
 		p.win = p.win.Move(1, len(p.rows), nil)
 	case key.Matches(k, p.keys.Enter):
 		if p.onPick == nil || len(p.rows) == 0 {
-			return p, Close()
+			return p, bezel.Result{Handled: true, Cmd: Close()}
 		}
-		return p, tea.Batch(p.onPick(p.win.Cursor), Close())
+		return p, bezel.Result{Handled: true, Cmd: tea.Batch(p.onPick(p.win.Cursor), Close())}
 	}
-	return p, nil
+	return p, bezel.Result{Handled: true}
 }
 
 func (p Pick) Legend() []legend.Entry {

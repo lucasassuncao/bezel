@@ -24,12 +24,14 @@ func TestChoiceRunsTheOptionAndCloses(t *testing.T) {
 	}, theme.Resolved{})
 	require.Contains(t, ansi.Strip(c.View(layout.Rect{W: 60, H: 20})), "dry-run (d)", "each option is a button naming its key")
 
-	_, cmd := c.Update(press("d"))
+	_, r := c.Update(press("d"))
+	cmd := r.Cmd
 	msgs := drain(cmd())
 	require.Equal(t, "dry", ran)
 	require.Contains(t, msgs, tea.Msg(CloseMsg{}))
 
-	_, cmd = c.Update(press("z"))
+	_, r = c.Update(press("z"))
+	cmd = r.Cmd
 	require.Nil(t, cmd, "an unbound key does nothing")
 }
 
@@ -45,7 +47,8 @@ func TestPickMovesAndPicks(t *testing.T) {
 	require.Equal(t, 1, p.Cursor(), "clamped")
 	require.Contains(t, ansi.Strip(p.View(layout.Rect{W: 60, H: 20})), "▸ scoop")
 
-	_, cmd := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	_, r := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	cmd := r.Cmd
 	require.Contains(t, drain(cmd()), tea.Msg(pickedMsg{1}))
 }
 
@@ -130,7 +133,8 @@ func TestPickShowsItsKeysInItsBox(t *testing.T) {
 func TestTextClosesOnAnyKey(t *testing.T) {
 	x := NewText("Help", "a line", theme.Resolved{})
 	require.Contains(t, ansi.Strip(x.View(layout.Rect{W: 40, H: 10})), "a line")
-	_, cmd := x.Update(press("q"))
+	_, r := x.Update(press("q"))
+	cmd := r.Cmd
 	require.IsType(t, CloseMsg{}, cmd())
 }
 
@@ -159,7 +163,8 @@ func TestChoiceRunsTheOptionClicked(t *testing.T) {
 	}
 	s := Stack{}.Push(NewChoice("Save?", "unsaved", []Option{opt("Save", "s"), opt("Discard", "d")}, theme.Resolved{}))
 	x, y := cellOf(t, s, "Discard")
-	_, cmd := s.Click(x, y, clickBody)
+	_, r := s.Click(x, y, clickBody)
+	cmd := r.Cmd
 	require.True(t, isClose(cmd))
 	require.Equal(t, "Discard", ran)
 }

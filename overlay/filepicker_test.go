@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -47,7 +48,8 @@ func load(t *testing.T, p FilePicker, cmd tea.Cmd) FilePicker {
 
 func pressPicker(t *testing.T, p FilePicker, key tea.KeyPressMsg) (FilePicker, tea.Cmd) {
 	t.Helper()
-	o, cmd := p.Update(key)
+	o, r := p.Update(key)
+	cmd := r.Cmd
 	return o.(FilePicker), cmd
 }
 
@@ -131,7 +133,8 @@ func TestFilePickerLeavesEscToTheStack(t *testing.T) {
 	p = load(t, p, p.Init())
 	s := Stack{}.Push(p)
 
-	_, handled, cmd := s.Update(tea.KeyPressMsg{Code: tea.KeyEscape})
+	_, r := s.Update(tea.KeyPressMsg{Code: tea.KeyEscape})
+	handled, cmd := r.Handled, r.Cmd
 	require.True(t, handled)
 	require.Equal(t, tea.Msg(CloseMsg{}), cmd())
 }
@@ -161,9 +164,9 @@ func TestFilePickerOpenPushesThenReads(t *testing.T) {
 	dir := pickerTree(t)
 	s := Stack{}
 	for _, c := range sequence(t, newPicker(dir).Open()()) {
-		var handled bool
-		s, handled, _ = s.Update(c())
-		require.True(t, handled)
+		var r bezel.Result
+		s, r = s.Update(c())
+		require.True(t, r.Handled)
 	}
 	require.Contains(t, ansi.Strip(s.Top().View(layout.Rect{W: 80, H: 30})), "notes.txt")
 }

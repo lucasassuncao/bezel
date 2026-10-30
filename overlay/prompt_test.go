@@ -36,7 +36,8 @@ func TestPromptAcceptsWhatWasTyped(t *testing.T) {
 	p := typeInto(newPrompt(), "db")
 	require.Equal(t, "db", p.Value())
 
-	_, cmd := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	_, r := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	cmd := r.Cmd
 	msgs := drain(cmd())
 	require.Contains(t, msgs, tea.Msg(acceptedMsg{"db"}))
 	require.Contains(t, msgs, tea.Msg(CloseMsg{}), "accepting closes the prompt")
@@ -50,7 +51,8 @@ func TestPromptWithRequireLocksEnterUntilTheTextMatches(t *testing.T) {
 	require.Contains(t, promptView(p), "type the exact text to unlock")
 
 	p = typeInto(p, "pro")
-	_, cmd := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	_, r := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	cmd := r.Cmd
 	require.Nil(t, cmd, "a near miss must not run the action")
 
 	p = typeInto(p, "d")
@@ -69,7 +71,8 @@ func TestPromptWithValidateShowsTheProblemAndBlocks(t *testing.T) {
 	p = typeInto(p, "a b")
 	require.False(t, p.Accepts())
 	require.Contains(t, promptView(p), "no spaces in a name")
-	_, cmd := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	_, r := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	cmd := r.Cmd
 	require.Nil(t, cmd)
 }
 
@@ -96,7 +99,8 @@ func TestPromptTakesAPaste(t *testing.T) {
 // Esc belongs to the stack, which closes the prompt without accepting.
 func TestPromptEscClosesWithoutAccepting(t *testing.T) {
 	s := Stack{}.Push(typeInto(newPrompt(), "db"))
-	_, _, cmd := s.Update(tea.KeyPressMsg{Code: tea.KeyEscape})
+	_, r := s.Update(tea.KeyPressMsg{Code: tea.KeyEscape})
+	cmd := r.Cmd
 	require.Equal(t, tea.Msg(CloseMsg{}), cmd())
 }
 
@@ -112,9 +116,11 @@ func TestPromptAcceptsOnTheKeyItWasGiven(t *testing.T) {
 	keys.Accept = bind("ctrl+s", "save")
 	p := newPrompt().WithKeys(keys)
 
-	_, cmd := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	_, r := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	cmd := r.Cmd
 	require.Nil(t, cmd)
-	_, cmd = p.Update(tea.KeyPressMsg{Code: 's', Mod: tea.ModCtrl})
+	_, r = p.Update(tea.KeyPressMsg{Code: 's', Mod: tea.ModCtrl})
+	cmd = r.Cmd
 	require.Contains(t, drain(cmd()), tea.Msg(CloseMsg{}))
 	require.Contains(t, hint(p), "[ctrl+s] confirm", "the key from the binding, what it does from the hint")
 }

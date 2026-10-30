@@ -58,7 +58,8 @@ func TestFilePickerWithKindRepaintsEntries(t *testing.T) {
 // the prompt hands it on, and the shell routes it to the dialog that armed it.
 func TestPromptCaretBlinksAtTheThemesPace(t *testing.T) {
 	th := theme.Resolved{CaretBlink: time.Nanosecond}
-	p, cmd := NewPrompt("t", nil, th).Update(tea.KeyPressMsg{Code: 'a', Text: "a"})
+	p, r := NewPrompt("t", nil, th).Update(tea.KeyPressMsg{Code: 'a', Text: "a"})
+	cmd := r.Cmd
 	blink := cmd()
 	require.IsType(t, input.BlinkMsg{}, blink)
 	_, next := p.Update(blink)

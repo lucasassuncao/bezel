@@ -10,6 +10,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -19,7 +20,7 @@ import (
 // Overlay is one floating modal. View gets the body rect and picks its own
 // box within it.
 type Overlay interface {
-	Update(msg tea.Msg) (Overlay, tea.Cmd)
+	Update(msg tea.Msg) (Overlay, bezel.Result)
 	View(body layout.Rect) string
 	Legend() []legend.Entry
 }
@@ -35,7 +36,7 @@ type BottomAnchored interface{ AnchorBottom() bool }
 // Clicker is implemented by overlays a left click acts on, such as one with
 // buttons. x and y are counted from the top left of what View drew in body.
 type Clicker interface {
-	Click(x, y int, body layout.Rect) (Overlay, tea.Cmd)
+	Click(x, y int, body layout.Rect) (Overlay, bezel.Result)
 }
 
 // StatusLiner is implemented by overlays that draw the status row while on
@@ -158,19 +159,19 @@ func (s Stack) Top() Overlay {
 // Len is how many overlays are open.
 func (s Stack) Len() int { return len(s.items) }
 
-// Update routes msg to the top overlay. handled is false only when the stack
+// Update routes msg to the top overlay. Handled is false only when the stack
 // is empty and msg is not a stack message.
-func (s Stack) Update(msg tea.Msg) (Stack, bool, tea.Cmd) {
+func (s Stack) Update(msg tea.Msg) (Stack, bezel.Result) {
 	switch m := msg.(type) {
 	case CloseMsg:
-		return s.Pop(), true, nil
+		return s.Pop(), bezel.Result{Handled: true}
 	case PushMsg:
-		return s.Push(m.Overlay), true, nil
+		return s.Push(m.Overlay), bezel.Result{Handled: true}
 	}
 	top := s.Top()
 	if top == nil {
 		_, late := msg.(TopMsg)
-		return s, late, nil
+		return s, bezel.Result{Handled: late}
 	}
 	if m, ok := msg.(TopMsg); ok {
 		msg = m.Msg
@@ -179,12 +180,15 @@ func (s Stack) Update(msg tea.Msg) (Stack, bool, tea.Cmd) {
 	// dialog go whichever key closed it.
 	if k, ok := msg.(tea.KeyPressMsg); ok && k.Code == tea.KeyEscape {
 		if owner, ok := top.(EscOwner); !ok || !owner.OwnsEsc() {
-			return s, true, Close()
+			return s, bezel.Result{Handled: true, Cmd: Close()}
 		}
 	}
-	updated, cmd := top.Update(msg)
-	return s.replaceTop(updated), true, cmd
+	updated, r := top.Update(msg)
+	r.Handled = true
+	return s.replaceTop(updated), r
 }
+
+var _ bezel.Model[Stack] = Stack{}
 
 func (s Stack) replaceTop(o Overlay) Stack {
 	items := make([]Overlay, len(s.items))
@@ -218,15 +222,16 @@ func place(o Overlay, body layout.Rect) (fg string, x, y int) {
 // Click hands a left click at screen cell (x, y) to the top overlay when it
 // is a Clicker, moved into what it drew; the dialog covers the screen, so
 // a click anywhere else does nothing.
-func (s Stack) Click(x, y int, body layout.Rect) (Stack, tea.Cmd) {
+func (s Stack) Click(x, y int, body layout.Rect) (Stack, bezel.Result) {
 	top := s.Top()
 	c, ok := top.(Clicker)
 	if !ok {
-		return s, nil
+		return s, bezel.Result{Handled: top != nil}
 	}
 	_, ox, oy := place(top, body)
-	updated, cmd := c.Click(x-ox, y-oy, body)
-	return s.replaceTop(updated), cmd
+	updated, r := c.Click(x-ox, y-oy, body)
+	r.Handled = true
+	return s.replaceTop(updated), r
 }
 
 // buttonAt is which of buttons covers (x, y) of view: a dialog drawn in
