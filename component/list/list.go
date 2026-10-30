@@ -12,6 +12,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/paginator"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/fuzzy"
@@ -34,14 +35,6 @@ type Row[T any] struct {
 	Style       *lipgloss.Style
 	Value       T
 }
-
-// Action is what a key did.
-type Action int
-
-const (
-	None   Action = iota
-	Chosen        // enter on a selectable row, filtering or not
-)
 
 // Keys are the bindings the list answers to.
 type Keys struct {
@@ -74,6 +67,8 @@ func VimKeys() Keys {
 	k.PageUp, k.PageDown = key.New("pgup", "ctrl+b").WithHelp("^b/^f", "page"), key.New("pgdown", "ctrl+f")
 	return k
 }
+
+var _ bezel.Model[Model[int]] = Model[int]{}
 
 // Model is a value: every method returns the new list.
 type Model[T any] struct {
@@ -364,9 +359,48 @@ func (m Model[T]) picked() bool {
 	return ok
 }
 
-// Update handles one key. Keys the list does not know return None and
-// leave it unchanged, so the caller can layer its own on top.
-func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action) {
+// Update takes the list's keys, a bezel.ClickMsg on a row and its own
+// frames. Choosing a row reports a [Chosen]; a move with motion returns the
+// list's Tick. Anything else comes back unhandled and unchanged.
+func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
+	var chosen, handled bool
+	switch msg := msg.(type) {
+	case tea.KeyPressMsg:
+		handled = m.handles(msg)
+		m, chosen = m.press(msg)
+	case bezel.ClickMsg:
+		m, chosen, handled = m.click(msg.Y)
+	default:
+		run, p, ok, cmd := m.mo.run.Update(msg)
+		if !ok {
+			return m, bezel.Result{}
+		}
+		m.mo.run, m.mo.p = run, p
+		if !m.Active() {
+			m.mo = motion{dur: m.mo.dur, p: 1}
+		}
+		return m, bezel.Result{Handled: true, Cmd: cmd}
+	}
+	r := bezel.Result{Handled: handled, Cmd: m.Tick()}
+	if row, ok := m.Selected(); chosen && ok {
+		r.Event = Chosen[T]{Row: row}
+	}
+	return m, r
+}
+
+// handles reports whether k is one of the list's bindings, or text for an
+// open filter.
+func (m Model[T]) handles(k tea.KeyPressMsg) bool {
+	ks := m.keys
+	if m.find.on {
+		return key.Matches(k, ks.Esc, ks.Enter, ks.Erase, ks.Up, ks.Down) ||
+			utf8.RuneCountInString(k.Key().Text) == 1
+	}
+	return key.Matches(k, ks.Filter, ks.Up, ks.Down, ks.PageUp, ks.PageDown, ks.Top, ks.Bottom, ks.Enter)
+}
+
+// press is one key: the list after it and whether it chose a row.
+func (m Model[T]) press(msg tea.KeyPressMsg) (Model[T], bool) {
 	if m.find.on {
 		return m.updateFilter(msg)
 	}
@@ -374,28 +408,27 @@ func (m Model[T]) Update(msg tea.KeyPressMsg) (Model[T], Action) {
 	case key.Matches(msg, m.keys.Filter):
 		m.find = m.filterFor("")
 	case key.Matches(msg, m.keys.Up):
-		return m.move(-1), None
+		return m.move(-1), false
 	case key.Matches(msg, m.keys.Down):
-		return m.move(1), None
+		return m.move(1), false
 	case key.Matches(msg, m.keys.PageUp):
-		return m.jump(-max(m.win.Height, 1)), None
+		return m.jump(-max(m.win.Height, 1)), false
 	case key.Matches(msg, m.keys.PageDown):
-		return m.jump(max(m.win.Height, 1)), None
+		return m.jump(max(m.win.Height, 1)), false
 	case key.Matches(msg, m.keys.Top):
-		return m.jump(-len(m.rows)), None
+		return m.jump(-len(m.rows)), false
 	case key.Matches(msg, m.keys.Bottom):
-		return m.jump(len(m.rows)), None
+		return m.jump(len(m.rows)), false
 	case key.Matches(msg, m.keys.Enter):
-		if _, ok := m.Selected(); ok {
-			return m, Chosen
-		}
+		_, ok := m.Selected()
+		return m, ok
 	}
-	return m, None
+	return m, false
 }
 
 // updateFilter is the filter prompt: text edits the filter, arrows walk the
 // matches, enter picks one and leaves, esc leaves with nothing.
-func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
+func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], bool) {
 	switch {
 	case key.Matches(msg, m.keys.Esc):
 		m.find = filterMode{}
@@ -416,31 +449,33 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], Action) {
 		}
 		m.find.win = m.find.win.Move(m.wrapped(d, m.find.win.Cursor, n), n, nil)
 	}
-	return m, None
+	return m, false
 }
 
-// Click is a left click on line y of View: on a row it moves the cursor
+// click is a left click on line y of View: on a row it moves the cursor
 // there, and on the row already under the cursor it chooses it, as enter
-// would. A heading, the title or a line past the rows does nothing.
-func (m Model[T]) Click(y int) (Model[T], Action) {
+// would. It reports whether it chose and whether y fell on a row drawn; a
+// heading is drawn but never chosen; the title and the lines past the rows are not.
+func (m Model[T]) click(y int) (Model[T], bool, bool) {
 	if m.title != "" {
 		y--
 	}
 	if m.height <= 0 || y < 0 {
-		return m, None
+		return m, false, false
 	}
 	if m.find.on {
 		at := y / m.itemLines()
 		w := m.find.win.Clamp(len(m.find.idx))
 		start, end, _ := w.Bounds(len(m.find.idx))
 		if at >= end-start {
-			return m, None
+			return m, false, false
 		}
 		if start+at == w.Cursor {
-			return m.pickMatch()
+			m, chosen := m.pickMatch()
+			return m, chosen, true
 		}
 		m.find.win.Cursor = start + at
-		return m, None
+		return m, false, true
 	}
 	i := -1
 	lines, of := m.rowLines(new(Styles)) // what View draws, ghosts included
@@ -451,27 +486,29 @@ func (m Model[T]) Click(y int) (Model[T], Action) {
 		}
 	}
 	switch {
-	case i < 0 || m.rows[i].Section:
-		return m, None
+	case i < 0:
+		return m, false, false
+	case m.rows[i].Section:
+		return m, false, true
 	case i == m.win.Cursor:
-		return m, Chosen
+		return m, true, true
 	}
 	from := m.win.Cursor
 	m.win.Cursor = i
-	return m.start(float64(from)).clampScroll(), None
+	return m.start(float64(from)).clampScroll(), false, true
 }
 
-// pickMatch closes the filter on the match under its cursor, Chosen, or on
+// pickMatch closes the filter on the match under its cursor, chosen, or on
 // nothing when nothing matched.
-func (m Model[T]) pickMatch() (Model[T], Action) {
+func (m Model[T]) pickMatch() (Model[T], bool) {
 	idx, at := m.find.idx, m.find.win.Cursor
 	m.find = filterMode{}
 	if at >= len(idx) {
-		return m, None
+		return m, false
 	}
 	from := m.win.Cursor
 	m.win.Cursor = idx[at]
-	return m.start(float64(from)).clampScroll(), Chosen
+	return m.start(float64(from)).clampScroll(), true
 }
 
 // filterFor is the prompt open on text, its matches found here once.

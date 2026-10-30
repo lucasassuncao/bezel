@@ -6,12 +6,13 @@ import (
 	"testing"
 	"time"
 
-	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/bezeltest"
+	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -35,8 +36,8 @@ func plainRows(labels ...string) []Row[int] {
 // playTo is m's motion played from its first frame to d after it.
 func playTo(m Model[int], d time.Duration) Model[int] {
 	start := time.Unix(10, 0)
-	m, _ = m.Animate(m.FrameAt(start))
-	m, _ = m.Animate(m.FrameAt(start.Add(d)))
+	m, _ = m.Update(m.FrameAt(start))
+	m, _ = m.Update(m.FrameAt(start.Add(d)))
 	return m
 }
 
@@ -105,12 +106,27 @@ func TestTheListTakesOnlyItsOwnFrames(t *testing.T) {
 	m, _ = m.Update(bezeltest.Key("down"))
 	other := New(plainRows("x", "y")).SetHeight(2).WithMotion(100 * ms)
 	other, _ = other.Update(bezeltest.Key("down"))
-	_, cmd := m.Animate(other.FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, cmd)
-	_, cmd = m.Animate(tea.KeyPressMsg{})
-	assert.Nil(t, cmd)
-	_, cmd = m.Animate(m.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, cmd)
+	_, r := m.Update(other.FrameAt(time.Unix(1, 0)))
+	assert.Equal(t, bezel.Result{}, r)
+	_, r = m.Update(m.FrameAt(time.Unix(1, 0)))
+	assert.True(t, r.Handled)
+	assert.NotNil(t, r.Cmd)
+}
+
+func TestForeignFrameIsNotHandled(t *testing.T) {
+	moving(t)
+	m := New(plainRows("a", "b")).SetHeight(2).WithMotion(100 * ms)
+	_, r := m.Update(frames.NewMsg(time.Unix(1, 0), 999999, 0))
+	assert.False(t, r.Handled)
+}
+
+func TestMotionStartsFromUpdate(t *testing.T) {
+	moving(t)
+	m := New(plainRows("a", "b")).SetHeight(2).WithMotion(100 * ms)
+	_, r := m.Update(bezeltest.Key("down"))
+	assert.NotNil(t, r.Cmd)
+	_, r = New(plainRows("a", "b")).SetHeight(2).Update(bezeltest.Key("down"))
+	assert.Nil(t, r.Cmd)
 }
 
 func TestStillListsDoNotMove(t *testing.T) {
@@ -135,9 +151,9 @@ func TestAClickLooksPastAGhost(t *testing.T) {
 	moving(t)
 	m := New(plainRows("keep", "old")).SetHeight(4).WithMotion(100 * ms)
 	m = playTo(m.SetRows(plainRows("keep", "new")), 20*ms) // "keep", the ghost, "new"
-	m, act := m.Click(1)
-	assert.Equal(t, None, act, "the ghost is no row")
+	m, r := m.Update(click(1))
+	assert.False(t, r.Handled, "the ghost is no row")
 	assert.Equal(t, 0, m.win.Cursor)
-	m, _ = m.Click(2)
+	m, _ = m.Update(click(2))
 	assert.Equal(t, "new", sel(m).Label)
 }

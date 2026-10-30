@@ -9,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/list"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -60,17 +61,16 @@ func newModel() model {
 
 func (m model) Init() tea.Cmd { return nil }
 
-// toList hands a key to the list, reads what it did, and starts the cursor
-// gliding to where the key moved it.
-func (m model) toList(key tea.KeyPressMsg) (model, tea.Cmd) {
-	var act list.Action
+// toList hands a message to the list and reads what it did; the Cmd it
+// returns starts the cursor gliding to where the key moved it.
+func (m model) toList(msg tea.Msg) (model, tea.Cmd) {
 	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
-	if m.list, act = m.list.Update(key); act == list.Chosen {
-		if r, ok := m.list.Selected(); ok {
-			m.chosen = &r.Value
-		}
+	var r bezel.Result
+	m.list, r = m.list.Update(msg)
+	if c, ok := r.Event.(list.Chosen[food]); ok {
+		m.chosen = &c.Row.Value
 	}
-	return m, m.list.Tick()
+	return m, r.Cmd
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -83,17 +83,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, handled, cmd = m.sh.Update(msg); handled {
 		return m, cmd
 	}
-	if key, ok := msg.(tea.KeyPressMsg); ok {
-		if key.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
-		return m.toList(key)
+	if key, ok := msg.(tea.KeyPressMsg); ok && key.String() == "ctrl+c" {
+		return m, tea.Quit
 	}
-	var cmd2 tea.Cmd
-	if m.list, cmd2 = m.list.Animate(msg); cmd2 != nil {
-		return m, cmd2
-	}
-	return m, nil
+	return m.toList(msg)
 }
 
 func (m model) detail() string {

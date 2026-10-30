@@ -10,6 +10,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/list"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
@@ -115,8 +116,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Pane != "list" {
 			return m, nil
 		}
-		var act list.Action
-		if m.lists[at], act = m.lists[at].Click(msg.Y); act == list.Chosen {
+		var r bezel.Result
+		click := bezel.ClickMsg{Pane: msg.Pane, MouseClickMsg: msg.MouseClickMsg}
+		if m.lists[at], r = m.lists[at].Update(click); r.Event != nil {
 			m.sh, cmd = m.sh.SetStatus("opened "+m.selected(), shell.OK, 2*time.Second)
 			return m, cmd
 		}

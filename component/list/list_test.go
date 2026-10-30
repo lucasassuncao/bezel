@@ -11,6 +11,8 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -46,8 +48,8 @@ func TestCursorStartsOnAndSkipsOverHeadings(t *testing.T) {
 
 func TestEnterChoosesASelectableRow(t *testing.T) {
 	m := New(rows()).SetHeight(10)
-	_, act := m.Update(press(tea.KeyEnter))
-	require.Equal(t, Chosen, act)
+	_, r := m.Update(press(tea.KeyEnter))
+	require.IsType(t, Chosen[int]{}, r.Event)
 	require.False(t, picked(New([]Row[int]{{Section: true, Label: "x"}}).SetHeight(5)))
 }
 
@@ -61,8 +63,8 @@ func TestFilterNarrowsAndEnterPicksTheMatch(t *testing.T) {
 	require.Equal(t, "metrics", sel(m).Label)
 	require.Contains(t, ansi.Strip(m.View(th)), "/me▋")
 
-	m, act := m.Update(press(tea.KeyEnter))
-	require.Equal(t, Chosen, act)
+	m, r := m.Update(press(tea.KeyEnter))
+	require.IsType(t, Chosen[int]{}, r.Event)
 	require.False(t, m.Filtering())
 	require.Equal(t, "metrics", sel(m).Label, "the pick becomes the cursor")
 
@@ -129,8 +131,8 @@ func TestFilterPicksTheRowItShowsAmongEqualLabels(t *testing.T) {
 	m := New(twins()).SetHeight(5)
 	m, _ = m.Update(typed("/"))
 	m, _ = m.Update(press(tea.KeyDown))
-	m, act := m.Update(press(tea.KeyEnter))
-	require.Equal(t, Chosen, act)
+	m, r := m.Update(press(tea.KeyEnter))
+	require.IsType(t, Chosen[int]{}, r.Event)
 	require.Equal(t, 2, sel(m).Value)
 }
 
@@ -378,28 +380,29 @@ func BenchmarkFuzzyFilter(b *testing.B) {
 
 func TestAClickMovesTheCursorAndASecondChooses(t *testing.T) {
 	m := New(rows()).SetHeight(10) // ADDED, server, logging, spacer, AVAILABLE, cache, metrics
-	m, act := m.Click(5)
-	require.Equal(t, None, act)
+	m, r := m.Update(click(5))
+	require.Nil(t, r.Event)
 	require.Equal(t, "cache", sel(m).Label)
-	_, act = m.Click(5)
-	require.Equal(t, Chosen, act, "the row under the cursor is chosen")
-	same, act := m.Click(0)
-	require.Equal(t, None, act, "a heading is not a row to land on")
+	_, r = m.Update(click(5))
+	require.IsType(t, Chosen[int]{}, r.Event, "the row under the cursor is chosen")
+	same, r := m.Update(click(0))
+	require.Nil(t, r.Event, "a heading is not a row to land on")
+	require.True(t, r.Handled, "but it is drawn by the list")
 	require.Equal(t, "cache", sel(same).Label)
-	_, act = m.Click(40)
-	require.Equal(t, None, act)
+	_, r = m.Update(click(40))
+	require.Equal(t, bezel.Result{}, r)
 
 	titled := New(rows()).SetHeight(10).WithTitle("Plugins")
-	titled, _ = titled.Click(3)
+	titled, _ = titled.Update(click(3))
 	require.Equal(t, "logging", sel(titled).Label, "the title takes the first line")
 }
 
 func TestAClickPicksAMatchWhileFiltering(t *testing.T) {
 	m := filtered(New(numbered(5)).SetHeight(10), "item")
-	m, _ = m.Click(2)
+	m, _ = m.Update(click(2))
 	require.Equal(t, "item-02", sel(m).Label)
-	m, act := m.Click(2)
-	require.Equal(t, Chosen, act)
+	m, r := m.Update(click(2))
+	require.Equal(t, Chosen[int]{Row: Row[int]{Label: "item-02", Value: 2}}, r.Event)
 	require.False(t, m.Filtering())
 	require.Equal(t, "item-02", sel(m).Label)
 }
@@ -432,4 +435,63 @@ func TestEraseIsRebindable(t *testing.T) {
 	require.Equal(t, "it", m.Filter(), "backspace is no longer erase")
 	m, _ = m.Update(tea.KeyPressMsg{Code: 'w', Mod: tea.ModCtrl})
 	require.Equal(t, "i", m.Filter())
+}
+
+func click(y int) bezel.ClickMsg {
+	return bezel.ClickMsg{Pane: "p", MouseClickMsg: tea.MouseClickMsg{Y: y, Button: tea.MouseLeft}}
+}
+
+func labelled(labels ...string) []Row[int] {
+	rows := make([]Row[int], len(labels))
+	for i, l := range labels {
+		rows[i] = Row[int]{Label: l, Value: i}
+	}
+	return rows
+}
+
+func TestEnterReportsTheChosenRow(t *testing.T) {
+	l := New(labelled("a", "b")).SetHeight(5)
+	l, _ = l.Update(bezeltest.Key("down"))
+	_, r := l.Update(bezeltest.Key("enter"))
+	require.True(t, r.Handled)
+	require.Equal(t, Chosen[int]{Row: Row[int]{Label: "b", Value: 1}}, r.Event)
+}
+
+func TestUpAtTheTopIsStillHandled(t *testing.T) {
+	_, r := New(labelled("a")).SetHeight(5).Update(bezeltest.Key("up"))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event)
+}
+
+func TestForeignKeyIsNotHandled(t *testing.T) {
+	_, r := New(labelled("a")).SetHeight(5).Update(bezeltest.Key("x"))
+	require.Equal(t, bezel.Result{}, r)
+}
+
+func TestTypedFilterTextIsHandled(t *testing.T) {
+	l, r := New(labelled("a")).SetHeight(5).Update(bezeltest.Key("/"))
+	require.True(t, r.Handled)
+	l, r = l.Update(bezeltest.Key("x"))
+	require.True(t, r.Handled)
+	_, r = l.Update(bezeltest.Key("ctrl+z"))
+	require.False(t, r.Handled)
+}
+
+func TestSecondClickOnARowChoosesIt(t *testing.T) {
+	l := New(labelled("a", "b")).SetHeight(5)
+	l, r := l.Update(click(1))
+	require.True(t, r.Handled)
+	require.Nil(t, r.Event)
+	_, r = l.Update(click(1))
+	require.IsType(t, Chosen[int]{}, r.Event)
+}
+
+func TestClickPastTheRowsIsNotHandled(t *testing.T) {
+	_, r := New(labelled("a")).SetHeight(5).Update(click(4))
+	require.False(t, r.Handled)
+}
+
+func TestAMessageForAnotherModelIsNotHandled(t *testing.T) {
+	_, r := New(labelled("a")).SetHeight(5).Update(tea.WindowSizeMsg{Width: 1, Height: 1})
+	require.Equal(t, bezel.Result{}, r)
 }

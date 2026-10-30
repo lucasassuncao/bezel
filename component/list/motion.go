@@ -30,7 +30,7 @@ type ghost struct {
 
 // WithMotion makes the list move instead of jump: the cursor glides to its
 // new row, a row that arrives lights up and a row that leaves fades where
-// it was, over dur. Update still returns no command: call Tick after it.
+// it was, over dur. Update returns the Tick that starts it.
 func (m Model[T]) WithMotion(dur time.Duration) Model[T] {
 	m.mo.dur = max(dur, 0)
 	return m
@@ -100,7 +100,7 @@ func (m Model[T]) glide() float64 {
 func (m Model[T]) Active() bool { return m.mo.run.Active() }
 
 // Tick is the command for the list's next frame, nil while it is still: call
-// it after Update or SetRows to start what they set moving.
+// it after SetRows to start what it set moving.
 func (m Model[T]) Tick() tea.Cmd { return m.mo.run.Tick() }
 
 // FrameAt is the list's frame for at, for a test that delivers frames itself.
@@ -117,20 +117,6 @@ func (m Model[T]) Advance(now time.Time) (Model[T], bool) {
 		m.mo = motion{dur: m.mo.dur, p: 1}
 	}
 	return m, !m.Active()
-}
-
-// Animate moves on the list's own frames and asks for the next until it
-// settles; every other message leaves it alone.
-func (m Model[T]) Animate(msg tea.Msg) (Model[T], tea.Cmd) {
-	run, p, ok, cmd := m.mo.run.Update(msg)
-	if !ok {
-		return m, nil
-	}
-	m.mo.run, m.mo.p = run, p
-	if !m.Active() {
-		m.mo = motion{dur: m.mo.dur, p: 1}
-	}
-	return m, cmd
 }
 
 // cursorRow is the row the highlight is drawn on now.
