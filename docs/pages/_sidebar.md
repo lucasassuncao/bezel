@@ -2,6 +2,7 @@
   - [A first app](EXAMPLE.md)
   - [The frame](FRAME.md)
   - [Theme](THEME.md)
+  - [Recipes](RECIPES.md)
 
 - **Packages**
   - [Components](COMPONENTS.md)

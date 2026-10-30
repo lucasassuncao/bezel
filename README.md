@@ -50,6 +50,7 @@ A pane missing from the map gives its space back that frame.
 | [A first app](docs/EXAMPLE.md) | a small task list built step by step, from the model to its tests |
 | [The frame](docs/FRAME.md) | the shell, layout, tabs, actions, focus, status row, dialogs and palette |
 | [Theme](docs/THEME.md) | the presets, a theme of your own, light and dark, recolouring one component |
+| [Recipes](docs/RECIPES.md) | how to test an app, write a dialog, build a CLI, add a read-only mode, take --theme, animate your own drawing |
 | [Components](docs/COMPONENTS.md) | every package's example and recording |
 | [Effects](docs/EFFECTS.md) | effects, lights and transitions over a drawn block |
 | [Animations](docs/ANIMATIONS.md) | tweens, springs, physics, text and scenes, and the clock that drives them |
