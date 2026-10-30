@@ -2,7 +2,8 @@
 // tabs, focus, overlays, the status row and the key legend. The app draws what
 // goes inside the panes, with components, effects and animations in one theme.
 //
-// This package holds no code. The work is in its subpackages.
+// The package itself holds only [Result], [Model] and [ClickMsg], the types
+// every Update shares. The work is in its subpackages.
 //
 // # The frame
 //

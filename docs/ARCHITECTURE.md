@@ -68,6 +68,7 @@ A public type can still come from here: `animation.FrameMsg` and `animation.Ease
 
 From the bottom up, each layer imports only the ones below it:
 
+0. the root `bezel`: `Result`, `Model` and `ClickMsg`, importing only bubbletea
 1. `internal/`
 2. the foundation: `layout`, `key`, `draw`, `legend`, `theme`
 3. `component/` and `animation/`, side by side; neither imports the other
