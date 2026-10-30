@@ -34,21 +34,12 @@ type Colors struct {
 	Ramp   [3]string
 }
 
-// Styles holds optional per-element lipgloss overrides. Nil fields are ignored
-// during theme resolution and the default derived from Colors is used instead.
-type Styles struct {
-	Cursor *lipgloss.Style
-	Muted  *lipgloss.Style
-	Danger *lipgloss.Style
-}
-
 // Theme layers an appearance: Base is an optional preset (nil → adaptive
-// default) that may have a Base of its own; Colors and Styles override every
-// layer under them.
+// default) that may have a Base of its own; Colors override every layer
+// under them.
 type Theme struct {
 	Base   *Theme
 	Colors Colors
-	Styles Styles
 }
 
 // adaptive is a default colour with one value for a light terminal and one
@@ -96,10 +87,10 @@ func defaultColors(dark bool) Colors {
 	return c
 }
 
-// ResolveColors merges t into concrete Colors over the adaptive default for
+// resolveColors merges t into concrete Colors over the adaptive default for
 // a dark or light terminal, or for its own Background when it has one. A theme
 // that sets Accent but not Selection or Info uses its accent for them.
-func ResolveColors(t Theme, dark bool) Colors {
+func resolveColors(t Theme, dark bool) Colors {
 	var c Colors
 	for _, layer := range t.chain() {
 		c = mergeColors(c, layer.Colors)

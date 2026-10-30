@@ -1,4 +1,4 @@
-package draw
+package edit
 
 import (
 	"testing"
@@ -14,7 +14,7 @@ func TestBlinkUsesTheBlinkGiven(t *testing.T) {
 }
 
 func TestBlinkDefaultsAZeroBlink(t *testing.T) {
-	if got := Blink(0); got != DefaultBlink {
-		t.Errorf("caret blinks every %v, want %v", got, DefaultBlink)
+	if got := Blink(0); got != defaultBlink {
+		t.Errorf("caret blinks every %v, want %v", got, defaultBlink)
 	}
 }

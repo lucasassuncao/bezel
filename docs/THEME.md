@@ -70,8 +70,6 @@ brand := theme.Theme{
 
 Everything not set comes from `Mint`, and what `Mint` leaves empty from the adaptive default. A `Base` may have a `Base` of its own, so a company theme and a product's tweak of it are two layers.
 
-`Theme.Styles` goes one step further, for the few elements a colour does not settle: `Cursor`, `Muted` and `Danger` take a whole lipgloss style that replaces the one derived from the colours.
-
 ## Light and dark
 
 `theme.Resolve(t, dark)` turns a theme into the styles everything draws with, for a dark or a light background. The terminal says which: ask in `Init`, and resolve again when it answers.

@@ -98,7 +98,7 @@ func TestBrowserModel_MarksTheCursorRow(t *testing.T) {
 	if !strings.Contains(row, m.th.Cursor.Render(first.Value)) {
 		t.Errorf("the cursor row's name is not in the cursor's style: %q", row)
 	}
-	if !strings.Contains(row, sgr(theme.ResolveColors(theme.All()[first.Value], true).Accent)) {
+	if !strings.Contains(row, sgr(theme.Resolve(theme.All()[first.Value], true).Colors.Accent)) {
 		t.Errorf("the cursor row lost its palette: %q", row)
 	}
 }
@@ -173,8 +173,8 @@ func TestBrowserModel_ShowsEachThemesPalette(t *testing.T) {
 
 // The adaptive default's blocks follow the background the terminal reported.
 func TestBrowserModel_PaletteFollowsTheBackground(t *testing.T) {
-	dark := theme.ResolveColors(theme.Theme{}, true).Accent
-	light := theme.ResolveColors(theme.Theme{}, false).Accent
+	dark := theme.Resolve(theme.Theme{}, true).Colors.Accent
+	light := theme.Resolve(theme.Theme{}, false).Colors.Accent
 	row := rowOf(t, newBrowserModel(theme.Theme{}, false), "default")
 	if !strings.Contains(row, sgr(light)) || strings.Contains(row, sgr(dark)) {
 		t.Errorf("on a light terminal, default should show the light accent %s: %q", light, row)

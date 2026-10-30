@@ -409,7 +409,7 @@ func (m Model) Blink() tea.Cmd {
 // tick is the next flip under the current tag.
 func (m Model) tick() tea.Cmd {
 	msg := BlinkMsg{id: m.id, tag: m.tag}
-	return tea.Tick(draw.Blink(m.resolved().CaretBlink), func(time.Time) tea.Msg { return msg })
+	return tea.Tick(edit.Blink(m.resolved().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
 // Update edits on a key or a paste while focused, and flips the caret on its

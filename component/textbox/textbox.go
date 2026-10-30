@@ -988,7 +988,7 @@ func (m Model) arm() (Model, tea.Cmd) {
 
 func (m Model) tick() tea.Cmd {
 	msg := BlinkMsg{id: m.id, tag: m.tag}
-	return tea.Tick(draw.Blink(m.resolved().CaretBlink), func(time.Time) tea.Msg { return msg })
+	return tea.Tick(edit.Blink(m.resolved().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
 // breaks folds every line break to "\n" and turns tabs into spaces; a

@@ -13,7 +13,6 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 ## Index
 
 - [Constants](<#constants>)
-- [func Blink\(every time.Duration\) time.Duration](<#Blink>)
 - [func BlockSize\(s string\) \(width, height int\)](<#BlockSize>)
 - [func Breadcrumb\(segs \[\]string\) string](<#Breadcrumb>)
 - [func Button\(label string, st ButtonStyle, focused bool\) string](<#Button>)
@@ -58,26 +57,11 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 
 ## Constants
 
-<a name="DefaultBlink"></a>DefaultBlink is how often a caret flips when nothing says otherwise.
-
-```go
-const DefaultBlink = 530 * time.Millisecond
-```
-
 <a name="GutterWidth"></a>GutterWidth is the columns Gutter and NumberLines take: "%4d │ ".
 
 ```go
 const GutterWidth = 7
 ```
-
-<a name="Blink"></a>
-## func [Blink](<https://github.com/lucasassuncao/bezel/blob/main/draw/caret.go#L12>)
-
-```go
-func Blink(every time.Duration) time.Duration
-```
-
-Blink is every, or DefaultBlink when every is zero.
 
 <a name="BlockSize"></a>
 ## func [BlockSize](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L58>)

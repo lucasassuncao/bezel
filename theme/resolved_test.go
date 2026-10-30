@@ -42,12 +42,6 @@ func TestButtonsTakeTheirColoursFromThePalette(t *testing.T) {
 	assert.Equal(t, lipgloss.Color("#778899"), rt.Button.Blurred.GetForeground())
 }
 
-func TestResolveThemeStyleOverride(t *testing.T) {
-	custom := lipgloss.NewStyle().Bold(true)
-	rt := Resolve(Theme{Styles: Styles{Danger: &custom}}, true)
-	require.Equal(t, custom, rt.Danger)
-}
-
 // The rename to the current role names kept every preset's colours: the golden
 // file was dumped from the old API as [Accent, Selection, Border, Dim, Success, Danger].
 func TestPresetsKeepTheirColours(t *testing.T) {
@@ -60,7 +54,7 @@ func TestPresetsKeepTheirColours(t *testing.T) {
 		if name == "default" {
 			continue // new: the adaptive default has no old colours
 		}
-		c := ResolveColors(th, true)
+		c := resolveColors(th, true)
 		want, ok := golden[name]
 		require.True(t, ok, name)
 		assert.Equal(t, want, [6]string{c.Accent, c.Selection, c.Border, c.Dim, c.Success, c.Danger}, name)
@@ -78,15 +72,13 @@ func TestResolveFillsTheChromeSlots(t *testing.T) {
 }
 
 func TestResolveWalksTheWholeBaseChain(t *testing.T) {
-	bold := lipgloss.NewStyle().Bold(true)
-	root := Theme{Colors: Colors{Border: "#111111"}, Styles: Styles{Muted: &bold}}
+	root := Theme{Colors: Colors{Border: "#111111"}}
 	mid := Theme{Base: &root, Colors: Colors{Accent: "#222222"}}
 	rt := Resolve(Theme{Base: &mid, Colors: Colors{Dim: "#333333"}}, true)
 
 	assert.Equal(t, "#111111", rt.Colors.Border, "the base's base was skipped")
 	assert.Equal(t, "#222222", rt.Colors.Accent)
 	assert.Equal(t, "#333333", rt.Colors.Dim)
-	assert.Equal(t, bold, rt.Muted, "a base's Styles were skipped")
 }
 
 func TestResolveSurvivesABaseCycle(t *testing.T) {
@@ -101,7 +93,7 @@ func TestResolveSurvivesABaseCycle(t *testing.T) {
 func TestSeriesDefaultsToSixDistinctColours(t *testing.T) {
 	for _, dark := range []bool{true, false} {
 		seen := map[string]bool{}
-		for _, s := range ResolveColors(Theme{}, dark).Series {
+		for _, s := range resolveColors(Theme{}, dark).Series {
 			require.NotEmpty(t, s)
 			seen[s] = true
 		}
@@ -110,14 +102,14 @@ func TestSeriesDefaultsToSixDistinctColours(t *testing.T) {
 }
 
 func TestAThemeOverridesPartOfItsSeries(t *testing.T) {
-	c := ResolveColors(Theme{Base: &Gruvbox, Colors: Colors{Series: [6]string{2: "#FF0000"}}}, true)
+	c := resolveColors(Theme{Base: &Gruvbox, Colors: Colors{Series: [6]string{2: "#FF0000"}}}, true)
 	assert.Equal(t, "#FF0000", c.Series[2])
 	assert.Equal(t, Gruvbox.Colors.Series[0], c.Series[0], "the rest is the base's")
 }
 
 // A theme that names no ramp climbs through its own success, warning and danger.
 func TestRampFollowsTheThemesStates(t *testing.T) {
-	c := ResolveColors(Mint, true)
+	c := resolveColors(Mint, true)
 	assert.Equal(t, [3]string{c.Success, c.Warning, c.Danger}, c.Ramp)
 }
 
@@ -128,7 +120,7 @@ func TestResolveStylesTheSeriesAndTheRamp(t *testing.T) {
 }
 
 func TestPlainKeepsItsSeriesInTheTerminalsColours(t *testing.T) {
-	for _, s := range ResolveColors(Plain, true).Series {
+	for _, s := range resolveColors(Plain, true).Series {
 		assert.NotContains(t, s, "#", "Plain uses ANSI codes only")
 	}
 }
@@ -168,12 +160,12 @@ func TestNoBackgroundKeepsTheTerminals(t *testing.T) {
 // a background, so what the terminal answers changes nothing.
 func TestPresetsBringTheirOwnBackground(t *testing.T) {
 	for name, th := range All() {
-		c := ResolveColors(th, false)
+		c := resolveColors(th, false)
 		if name == "default" || name == "plain" || name == "terminal" {
 			assert.Empty(t, c.Background, name)
 			continue
 		}
 		require.NotEmpty(t, c.Background, name)
-		assert.Equal(t, c, ResolveColors(th, true), name)
+		assert.Equal(t, c, resolveColors(th, true), name)
 	}
 }

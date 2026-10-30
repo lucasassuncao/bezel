@@ -18,13 +18,12 @@ Package key binds keys to what they do: the keys that fire a binding, the help t
   - [func \(b Binding\) Enabled\(\) bool](<#Binding.Enabled>)
   - [func \(b Binding\) Help\(\) Help](<#Binding.Help>)
   - [func \(b Binding\) Keys\(\) \[\]string](<#Binding.Keys>)
-  - [func \(b Binding\) WithDisabled\(on bool\) Binding](<#Binding.WithDisabled>)
   - [func \(b Binding\) WithHelp\(key, desc string\) Binding](<#Binding.WithHelp>)
 - [type Help](<#Help>)
 
 
 <a name="Matches"></a>
-## func [Matches](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L52>)
+## func [Matches](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L46>)
 
 ```go
 func Matches[Key fmt.Stringer](k Key, b ...Binding) bool
@@ -54,7 +53,7 @@ func New(keys ...string) Binding
 New is a binding fired by keys, as tea.KeyPressMsg.String\(\) spells them: "ctrl\+s", "up", "?". With no keys it matches nothing.
 
 <a name="Binding.Enabled"></a>
-### func \(Binding\) [Enabled](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L49>)
+### func \(Binding\) [Enabled](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L43>)
 
 ```go
 func (b Binding) Enabled() bool
@@ -63,7 +62,7 @@ func (b Binding) Enabled() bool
 Enabled reports whether b can fire: it has keys and is not switched off.
 
 <a name="Binding.Help"></a>
-### func \(Binding\) [Help](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L46>)
+### func \(Binding\) [Help](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L40>)
 
 ```go
 func (b Binding) Help() Help
@@ -72,22 +71,13 @@ func (b Binding) Help() Help
 Help is what the legend prints for b.
 
 <a name="Binding.Keys"></a>
-### func \(Binding\) [Keys](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L43>)
+### func \(Binding\) [Keys](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L37>)
 
 ```go
 func (b Binding) Keys() []string
 ```
 
 Keys are the keys that fire b.
-
-<a name="Binding.WithDisabled"></a>
-### func \(Binding\) [WithDisabled](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L37>)
-
-```go
-func (b Binding) WithDisabled(on bool) Binding
-```
-
-WithDisabled is b switched off, keys and help kept.
 
 <a name="Binding.WithHelp"></a>
 ### func \(Binding\) [WithHelp](<https://github.com/lucasassuncao/bezel/blob/main/key/key.go#L31>)

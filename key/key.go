@@ -33,12 +33,6 @@ func (b Binding) WithHelp(key, desc string) Binding {
 	return b
 }
 
-// WithDisabled is b switched off, keys and help kept.
-func (b Binding) WithDisabled(on bool) Binding {
-	b.Disabled = on
-	return b
-}
-
 // Keys are the keys that fire b.
 func (b Binding) Keys() []string { return b.keys }
 

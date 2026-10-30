@@ -131,7 +131,7 @@ func newBrowserModel(th theme.Theme, dark bool) browserModel {
 	for _, cat := range theme.Categories() {
 		for _, name := range cat.Themes {
 			id := strconv.Itoa(len(entries) + 1)
-			entries = append(entries, entry{id, name, cat.Name, theme.ResolveColors(all[name], dark)})
+			entries = append(entries, entry{id, name, cat.Name, theme.Resolve(all[name], dark).Colors})
 		}
 	}
 	res := theme.Resolve(th, dark)

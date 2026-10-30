@@ -9,7 +9,7 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel"
-	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -182,7 +182,7 @@ func (m Model) blinks() bool { return m.focused && m.mode == Blinking }
 
 func (m Model) tick() tea.Cmd {
 	msg := BlinkMsg{ID: m.id, tag: m.tag}
-	return tea.Tick(draw.Blink(m.resolved().CaretBlink), func(time.Time) tea.Msg { return msg })
+	return tea.Tick(edit.Blink(m.resolved().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
 // Update flips the cursor on its own BlinkMsg and arms the next one. Any

@@ -51,7 +51,7 @@ type Resolved struct {
 	Button       draw.ButtonStyle
 
 	// CaretBlink is how often every text input built with this theme flips its
-	// caret; zero is draw.DefaultBlink. Tests shrink it, as each key arms one.
+	// caret; zero is 530ms. Tests shrink it, as each key arms one.
 	CaretBlink time.Duration
 	// Series and Ramp are Colors' own, as foreground styles.
 	Series [6]lipgloss.Style
@@ -59,28 +59,14 @@ type Resolved struct {
 }
 
 // Resolve turns t into styles for a dark or light terminal. Steps: the
-// colour cascade (ResolveColors), the derived styles, then t.Styles overrides.
+// colour cascade, then the styles derived from it.
 func Resolve(t Theme, dark bool) Resolved {
-	c := ResolveColors(t, dark)
+	c := resolveColors(t, dark)
 
 	rt := buildDerivedStyles(c)
 	rt.Colors = c
 	if c.Background != "" {
 		rt.Background, rt.Foreground = lipgloss.Color(c.Background), lipgloss.Color(c.Text)
-	}
-
-	// Deepest base first, so each layer's Styles override the one under it.
-	for _, layer := range t.chain() {
-		s := layer.Styles
-		if s.Danger != nil {
-			rt.Danger = *s.Danger
-		}
-		if s.Muted != nil {
-			rt.Muted = *s.Muted
-		}
-		if s.Cursor != nil {
-			rt.Cursor = *s.Cursor
-		}
 	}
 	return rt
 }
