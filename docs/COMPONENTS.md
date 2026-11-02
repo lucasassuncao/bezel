@@ -106,7 +106,7 @@ A directory tree over the app's own node type. The arrows expand and collapse; `
 
 Source: [`examples/component/table/main.go`](../examples/component/table/main.go)
 
-Columns sized to their contents, and a cursor over rows that scroll under a fixed header, with the position at the foot of the pane, a scrollbar down its edge and the row's detail below. `pgdown` and `pgup` move a page at a time, `enter` reports the chosen row, and `w` narrows the window: the description gives way first, and the version and licence stay whole.
+Columns sized to their contents, and a cursor over rows that scroll under a fixed header, with the position at the foot of the pane, a scrollbar down its edge and the row's detail below. `pgdown` and `pgup` move a page at a time, `enter` reports the chosen row, `/` filters the rows, and `w` narrows the window: the description gives way first, and the version and licence stay whole.
 
 ![table](recordings/component/table.gif)
 

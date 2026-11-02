@@ -3,6 +3,7 @@ package table
 import (
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -25,11 +26,12 @@ type Item[T any] struct {
 
 // Keys are the bindings the table answers to.
 type Keys struct {
-	Up, Down, PageUp, PageDown, HalfPageUp, HalfPageDown, Top, Bottom, Enter key.Binding
+	Up, Down, PageUp, PageDown, HalfPageUp, HalfPageDown, Top, Bottom, Enter, Filter, Esc key.Binding
+	Erase                                                                                 key.Binding // the filter's last character
 }
 
 // DefaultKeys are the arrows, pgup/pgdown, ctrl+u/ctrl+d for half a page,
-// home/end and enter.
+// home/end, enter, / and esc.
 func DefaultKeys() Keys {
 	return Keys{
 		Up:           key.New("up").WithHelp("↑/↓", "move"),
@@ -41,11 +43,14 @@ func DefaultKeys() Keys {
 		Top:          key.New("home").WithHelp("home/end", "ends"),
 		Bottom:       key.New("end"),
 		Enter:        key.New("enter").WithHelp("enter", "choose"),
+		Filter:       key.New("/").WithHelp("/", "filter"),
+		Esc:          key.New("esc").WithHelp("esc", "stop filtering"),
+		Erase:        key.New("backspace", "ctrl+h"),
 	}
 }
 
 // VimKeys are DefaultKeys with vim's letters added: k/j to move, g/G to the
-// ends and ctrl+b/f to page.
+// ends and ctrl+b/f to page. The filter prompt still takes them as text.
 func VimKeys() Keys {
 	k := DefaultKeys()
 	k.Up, k.Down = key.New("up", "k").WithHelp("↑/↓ k/j", "move"), key.New("down", "j")
@@ -70,6 +75,9 @@ type Model[T any] struct {
 	width  int
 	win    layout.Window // over the rows, one shorter than height for the header
 	keys   Keys
+	find   filterMode
+	match  func(query, text string) bool // nil is Contains
+	fuzzy  bool
 	blur   bool // drawn without the cursor's colour, and deaf to keys
 	edit   func(Styles) Styles
 }
@@ -134,10 +142,13 @@ func (m Model[T]) Blur() Model[T] {
 // Focused reports whether the table takes keys.
 func (m Model[T]) Focused() bool { return !m.blur }
 
-// Legend lists the keys the table answers to.
+// Legend lists the keys the table answers to now: the filter's while it is open.
 func (m Model[T]) Legend() []legend.Entry {
 	k := m.keys
-	return legend.FromBindings([]key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.HalfPageUp, k.HalfPageDown, k.Top, k.Bottom, k.Enter})
+	if m.find.on {
+		return legend.FromBindings([]key.Binding{k.Up, k.Down, k.Enter, k.Esc})
+	}
+	return legend.FromBindings([]key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.HalfPageUp, k.HalfPageDown, k.Top, k.Bottom, k.Enter, k.Filter})
 }
 
 // FromValues is the rows of delimited text, one per line, its cells split
@@ -159,21 +170,34 @@ func (m Model[T]) Items() []Item[T] { return cloneItems(m.items) }
 // Len is how many rows there are.
 func (m Model[T]) Len() int { return len(m.items) }
 
-// Cursor is the index of the row under the cursor.
+// Cursor is the index of the row under the cursor, the filter's aside.
 func (m Model[T]) Cursor() int { return m.win.Cursor }
 
 // Selected is a copy of the row under the cursor, false when there are none.
+// While filtering it is the row under the filter cursor.
 func (m Model[T]) Selected() (Item[T], bool) {
-	if m.win.Cursor >= len(m.items) {
+	at := m.win.Cursor
+	if m.find.on {
+		if m.find.win.Cursor >= len(m.find.idx) {
+			return Item[T]{}, false
+		}
+		at = m.find.idx[m.find.win.Cursor]
+	}
+	if at >= len(m.items) {
 		return Item[T]{}, false
 	}
-	it := m.items[m.win.Cursor]
+	it := m.items[at]
 	it.Cells = slices.Clone(it.Cells)
 	return it, true
 }
 
-// Scroll is where the table shows its rows from, for a pane's scrollbar.
+// Scroll is where the table shows its rows from, for a pane's scrollbar;
+// while filtering, where the matches show from.
 func (m Model[T]) Scroll() layout.Scroll {
+	if m.find.on {
+		n := len(m.find.idx)
+		return m.find.win.Clamp(n).Scroll(n)
+	}
 	return m.win.Clamp(len(m.items)).Scroll(len(m.items))
 }
 
@@ -182,12 +206,12 @@ func (m Model[T]) Scroll() layout.Scroll {
 // index: a refresh that drops a row lands on the one that took its place.
 func (m Model[T]) SetItems(items []Item[T]) Model[T] {
 	prev, at := "", m.win.Cursor
-	if it, ok := m.Selected(); ok {
-		prev = first(it)
+	if at < len(m.items) {
+		prev = first(m.items[at])
 	}
 	m = m.withItems(items)
 	if at < len(m.items) && first(m.items[at]) == prev {
-		return m.clamp()
+		return m.clamp().refilter()
 	}
 	for i, it := range m.items {
 		if first(it) == prev {
@@ -195,28 +219,31 @@ func (m Model[T]) SetItems(items []Item[T]) Model[T] {
 			break
 		}
 	}
-	return m.clamp()
+	return m.clamp().refilter()
 }
 
 // SetHeight updates the rows the table takes, header included.
 func (m Model[T]) SetHeight(h int) Model[T] {
 	m.height = h
 	m.win.Height = max(h-1, 0)
-	return m.clamp()
+	return m.clamp().refilter()
 }
 
 // Update takes the table's keys, unless it is blurred, and a bezel.ClickMsg
-// on a row. Choosing a row reports a [Chosen]; any other message comes back
-// unhandled and unchanged.
+// on a row. Choosing a row, or a match at the / prompt, reports a [Chosen];
+// any other message comes back unhandled and unchanged.
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	var chosen, handled bool
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
-		if m.blur || !key.Matches(msg, m.keys.HalfPageUp, m.keys.HalfPageDown, m.keys.Up, m.keys.Down,
-			m.keys.PageUp, m.keys.PageDown, m.keys.Top, m.keys.Bottom, m.keys.Enter) {
+		if m.blur || !m.handles(msg) {
 			return m, bezel.Result{}
 		}
-		m, chosen = m.press(msg)
+		if m.find.on {
+			m, chosen = m.updateFilter(msg)
+		} else {
+			m, chosen = m.press(msg)
+		}
 		handled = true
 	case bezel.ClickMsg:
 		m, chosen, handled = m.click(msg.Y)
@@ -231,10 +258,24 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	return m, r
 }
 
+// handles reports whether k is one of the table's bindings, or text for an
+// open filter.
+func (m Model[T]) handles(k tea.KeyPressMsg) bool {
+	ks := m.keys
+	if m.find.on {
+		return key.Matches(k, ks.Esc, ks.Enter, ks.Erase, ks.Up, ks.Down) ||
+			utf8.RuneCountInString(k.Key().Text) == 1
+	}
+	return key.Matches(k, ks.Filter, ks.HalfPageUp, ks.HalfPageDown, ks.Up, ks.Down,
+		ks.PageUp, ks.PageDown, ks.Top, ks.Bottom, ks.Enter)
+}
+
 // press is one of the table's keys: the table after it and whether it chose.
 func (m Model[T]) press(msg tea.KeyPressMsg) (Model[T], bool) {
 	n := len(m.items)
 	switch {
+	case key.Matches(msg, m.keys.Filter):
+		m.find = m.filterFor("")
 	case key.Matches(msg, m.keys.HalfPageUp):
 		m.win = m.win.Move(-max(m.page()/2, 1), n, nil)
 	case key.Matches(msg, m.keys.HalfPageDown):
@@ -261,6 +302,20 @@ func (m Model[T]) press(msg tea.KeyPressMsg) (Model[T], bool) {
 // chooses the row already under it. It reports whether it chose and whether y
 // fell on a row (not the header or "more"). A blurred table takes it too.
 func (m Model[T]) click(y int) (Model[T], bool, bool) {
+	if m.find.on {
+		w := m.find.win.Clamp(len(m.find.idx))
+		start, end, _ := w.Bounds(len(m.find.idx))
+		i := start + y - 1
+		switch {
+		case y < 1 || i >= end:
+			return m, false, false
+		case i == w.Cursor:
+			m, chosen := m.pickMatch()
+			return m, chosen, true
+		}
+		m.find.win.Cursor = i
+		return m, false, true
+	}
 	w := m.win.Clamp(len(m.items))
 	start, end, _ := w.Bounds(len(m.items))
 	i := start + y - 1 // the header takes line 0
@@ -313,20 +368,34 @@ func (m Model[T]) View(th theme.Resolved) string {
 	widths := shrink(m.cols, slices.Clone(m.widths), width-len(pad))
 	lines := []string{st.Header.Render(pad + Titles(m.cols, widths))}
 
-	w := m.win.Clamp(len(m.items))
-	start, end, below := w.Bounds(len(m.items))
+	w, rows := m.win, m.items
+	if m.find.on {
+		w, rows = m.find.win, make([]Item[T], len(m.find.idx))
+		for k, i := range m.find.idx {
+			rows[k] = m.items[i]
+		}
+	}
+	w = w.Clamp(len(rows))
+	start, end, below := w.Bounds(len(rows))
 	for i := start; i < end; i++ {
+		cells := rows[i].Cells
 		switch {
 		case i == w.Cursor && m.blur:
-			lines = append(lines, st.Blurred.Render(marker)+Row(widths, m.items[i].Cells))
+			lines = append(lines, st.Blurred.Render(marker)+Row(widths, cells))
 		case i == w.Cursor:
-			lines = append(lines, st.Cursor.Render(marker)+Row(widths, cursorCells(m.items[i].Cells, st.Cursor)))
+			lines = append(lines, st.Cursor.Render(marker)+Row(widths, cursorCells(cells, st.Cursor)))
 		default:
-			lines = append(lines, pad+Row(widths, m.items[i].Cells))
+			lines = append(lines, pad+Row(widths, cells))
 		}
 	}
 	if below > 0 {
 		lines = append(lines, draw.More(below, draw.Width(marker), st.More))
+	}
+	if m.find.on && m.height > 1 {
+		for len(lines) < m.height-1 {
+			lines = append(lines, "")
+		}
+		lines = append(lines, st.Cursor.Render(draw.Truncate("/"+m.find.text+"▋", width)))
 	}
 	return strings.Join(lines, "\n")
 }
