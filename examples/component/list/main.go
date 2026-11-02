@@ -1,5 +1,6 @@
 // List: rows under section headings, a / filter, enter showing the payload
-// the chosen row carries, and a cursor that glides from row to row.
+// the chosen row carries, a cursor that glides from row to row and a spinner
+// on a busy row, which space turns on and off.
 package main
 
 import (
@@ -29,12 +30,17 @@ func rows() []list.Row[food] {
 	}
 	return []list.Row[food]{
 		{Label: "Fruit", Section: true},
-		row("banana", 89), row("mango", 60), row("orange", 47), row("pineapple", 50),
+		row("banana", 89), row("mango", 60), busy(row("orange", 47)), row("pineapple", 50),
 		{Section: true},
 		{Label: "Vegetables", Section: true},
 		row("carrot", 41), row("spinach", 23), row("tomato", 18), row("onion", 40),
 	}
 }
+
+// busy is r with a spinner turning in place of its mark.
+func busy(r list.Row[food]) list.Row[food] { r.Busy = true; return r }
+
+type toggleBusyMsg struct{}
 
 type model struct {
 	sh     shell.Shell
@@ -53,13 +59,15 @@ func newModel() model {
 			shell.Move(),
 			shell.Custom("/", "filter", nil, shell.DisplayOnly()),
 			shell.Custom("enter", "choose", nil, shell.DisplayOnly()),
+			shell.Custom("space", "busy", shell.Send(toggleBusyMsg{})),
 			shell.Quit(),
 		},
 	})
 	return model{sh: sh, th: th, list: list.New(rows()).WithMotion(120 * time.Millisecond)}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+// Init turns the spinner of the row that starts busy.
+func (m model) Init() tea.Cmd { return m.list.Tick() }
 
 // toList hands a message to the list and reads what it did; the Cmd it
 // returns starts the cursor gliding to where the key moved it.
@@ -84,6 +92,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	if key, ok := msg.(tea.KeyPressMsg); ok && key.String() == "ctrl+c" {
 		return m, tea.Quit
+	}
+	if _, ok := msg.(toggleBusyMsg); ok {
+		return m.toggleBusy()
 	}
 	return m.toList(msg)
 }
@@ -111,4 +122,19 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+// toggleBusy starts or stops the spinner on the row under the cursor.
+func (m model) toggleBusy() (model, tea.Cmd) {
+	sel, ok := m.list.Selected()
+	if !ok {
+		return m, nil
+	}
+	for i, r := range m.list.Rows() {
+		if !r.Section && r.Label == sel.Label {
+			r.Busy = !r.Busy
+			m.list = m.list.SetRow(i, r)
+		}
+	}
+	return m, m.list.Tick()
 }

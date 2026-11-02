@@ -1,4 +1,4 @@
-# tree: a directory tree: expand, collapse, and :reveal down to a path.
+# tree: a directory tree: expand, collapse, a spinner on a busy node (space), and :reveal down to a path.
 #
 # Record from the repository root: vhs docs/recordings/component/tree.tape
 
@@ -48,6 +48,11 @@ Up
 Sleep 600ms
 Left
 Sleep 1.2s
+
+Space
+Sleep 2.5s
+Space
+Sleep 1s
 
 Type ":reveal internal/tui/keys/keys.go"
 Sleep 800ms

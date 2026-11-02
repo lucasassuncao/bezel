@@ -74,7 +74,7 @@ What a pane shows: rows with a cursor, a tree, a table, pages of items, a long t
 
 Source: [`examples/component/list/main.go`](../examples/component/list/main.go)
 
-Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included. `WithMotion` makes the cursor glide from row to row, a row that arrives light up and one that leaves fade where it was; `Update` starts the motion and takes its frames, so the app hands it every message.
+Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included. `WithMotion` makes the cursor glide from row to row, a row that arrives light up and one that leaves fade where it was; `Update` starts the motion and takes its frames, so the app hands it every message. A row marked `Busy` turns a spinner in place of its mark; `space` marks the row under the cursor.
 
 ![list](recordings/component/list.gif)
 
@@ -98,7 +98,7 @@ The repository browsed inside a pane, directories first and sizes in a column. `
 
 Source: [`examples/component/tree/main.go`](../examples/component/tree/main.go)
 
-A directory tree over the app's own node type. The arrows expand and collapse; `:reveal` opens every parent on the way down to a path.
+A directory tree over the app's own node type. The arrows expand and collapse; `:reveal` opens every parent on the way down to a path. `go.mod` is `Busy`, so the row func draws `BusyMark` in place of its icon; `space` marks the node under the cursor.
 
 ![tree](recordings/component/tree.gif)
 
@@ -106,7 +106,7 @@ A directory tree over the app's own node type. The arrows expand and collapse; `
 
 Source: [`examples/component/table/main.go`](../examples/component/table/main.go)
 
-Columns sized to their contents, and a cursor over rows that scroll under a fixed header, with the position at the foot of the pane, a scrollbar down its edge and the row's detail below. `pgdown` and `pgup` move a page at a time, `enter` reports the chosen row, `/` filters the rows, and `w` narrows the window: the description gives way first, and the version and licence stay whole.
+Columns sized to their contents, and a cursor over rows that scroll under a fixed header, with the position at the foot of the pane, a scrollbar down its edge and the row's detail below. `pgdown` and `pgup` move a page at a time, `enter` reports the chosen row, `/` filters the rows, `space` turns a spinner on a row the way the two still updating have, and `w` narrows the window: the description gives way first, and the version and licence stay whole.
 
 ![table](recordings/component/table.gif)
 
@@ -117,6 +117,14 @@ Source: [`examples/component/viewport/main.go`](../examples/component/viewport/m
 An access log, numbered in a gutter, with its error lines in red and every `ERROR` highlighted. The arrows, `pgup`/`pgdown` and `home`/`end` scroll, `←` and `→` pan the long lines, `n` and `N` go from error to error, `w` wraps the lines, and the mouse wheel scrolls.
 
 ![viewport](recordings/component/viewport.gif)
+
+### Log pane
+
+Source: [`examples/component/logpane/main.go`](../examples/component/logpane/main.go)
+
+A made-up deploy logging through `log/slog` from another goroutine into `logger.Pane`, levels in their colours and attributes as a tree. The pane follows the end as lines arrive; scrolling up holds it still and counts the lines that arrive meanwhile, and `end` follows again.
+
+![logpane](recordings/component/logpane.gif)
 
 ### Browser
 
@@ -199,7 +207,7 @@ A count that fills on its own, as a `Line` and as a bare `Bar`, and a wizard's s
 
 Source: [`examples/component/chart/main.go`](../examples/component/chart/main.go)
 
-A made-up CPU load fed a sample per tick, drawn as an `Area` and a `Spark` line, beside labelled `Bars` (the busy ones in the danger colour), a week's `Heat` grid and a `Donut`. `space` pauses the feed and `r` starts it over.
+A made-up CPU load fed a sample per tick, drawn as an `Area`, as `Lines` beside a slower memory run and as a `Spark` line, beside labelled `Bars` (the busy ones in the danger colour), a week's `Heat` grid and a `Donut`. `space` pauses the feed and `r` starts it over.
 
 ![chart](recordings/component/chart.gif)
 
@@ -259,7 +267,7 @@ A CLI that prints logs, asks one question below them, then redraws a progress ba
 
 Source: [`examples/component/logger/main.go`](../examples/component/logger/main.go)
 
-A run that sorts downloads, logged through `log/slog`. Each message gets its own line and every attribute hangs under it as a branch of a tree, groups as nested branches; a long path wraps under its own start instead of being cut. `--json` sends the same calls to slog's JSON handler. Inside a TUI, `logger.NewPane` takes the same lines in a panel that follows the end, holds still while you scroll up and counts what arrived meanwhile.
+A run that sorts downloads, logged through `log/slog`. Each message gets its own line and every attribute hangs under it as a branch of a tree, groups as nested branches; a long path wraps under its own start instead of being cut. `--json` sends the same calls to slog's JSON handler. Inside a full screen, the [log pane](#log-pane) shows the same lines.
 
 ![logger](recordings/component/logger.gif)
 

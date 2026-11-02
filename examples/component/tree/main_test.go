@@ -91,3 +91,15 @@ func TestTreeRevealOpensTheWay(t *testing.T) {
 func TestTreeKeysDoNotCollide(t *testing.T) {
 	require.NoError(t, shell.Check(actions()...))
 }
+
+func TestTreeTurnsASpinnerInPlaceOfTheIcon(t *testing.T) {
+	var m tea.Model = newModel()
+	require.NotNil(t, m.Init(), "go.mod starts busy")
+	m, out := frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	require.Contains(t, out, "⠋ go.mod")
+
+	m = typeKeys(m, "space")
+	_, out = frame(t, m, nil)
+	t.Log("\n" + out)
+	require.Contains(t, out, "⠋ cmd", "space marks the node under the cursor")
+}

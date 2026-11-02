@@ -1,4 +1,4 @@
-# chart: a load fed a sample per tick, paused and started over, beside bars, heat and a donut.
+# chart: a CPU load fed a sample per tick as an area, lines and a spark line, beside bars, a heat grid and a donut.
 #
 # Record from the repository root: vhs docs/recordings/component/chart.tape
 

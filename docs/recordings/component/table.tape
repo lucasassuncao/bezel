@@ -1,4 +1,4 @@
-# table: rows scroll under the header with a scrollbar; w narrows and the description gives way first.
+# table: rows scroll under the header with a scrollbar; / filters, space turns a spinner on a row, w narrows the window.
 #
 # Record from the repository root: vhs docs/recordings/component/table.tape
 
@@ -43,6 +43,19 @@ Sleep 1.5s
 Enter
 Sleep 1.5s
 PageUp@600ms 3
+Sleep 1s
+
+Type "/"
+Sleep 600ms
+Type@250ms "x/s"
+Sleep 1.2s
+Down
+Sleep 800ms
+Enter
+Sleep 1.5s
+Space
+Sleep 2.5s
+Space
 Sleep 1s
 
 Type "w"

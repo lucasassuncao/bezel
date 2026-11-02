@@ -130,11 +130,11 @@ go run ./examples/app
 - [`spinner`](component/spinner): twelve spinners and your own frames, each ticking on its own.
 - [`timer`](component/timer): a countdown that says when time is up.
 - [`stopwatch`](component/stopwatch): time counted up, paused and reset.
-- [`chart`](component/chart): `Area` and `Spark` charts of a run of numbers, labelled `Bars` side by side, a `Heat` grid and a `Donut`.
+- [`chart`](component/chart): `Area` and `Spark` charts of a run of numbers, braille `Lines` of several runs over a y axis, labelled `Bars` side by side, a `Heat` grid and a `Donut`.
 - [`icon`](component/icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
 - [`toast`](component/toast): notices that slide into a corner, stack and leave on their own.
 - [`inline`](component/inline): a yes/no question and a progress bar for CLIs that print logs.
-- [`logger`](component/logger): a `slog.Handler` that hangs every attribute under its message as a tree and wraps long values without cutting them.
+- [`logger`](component/logger): a `slog.Handler` that hangs every attribute under its message as a tree and wraps long values without cutting them, and `Pane`, a log panel that follows the end as lines arrive.
 - [`themebrowser`](component/themebrowser): the preset table behind a `--list-themes` flag.
 
 **Effects**

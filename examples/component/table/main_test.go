@@ -57,3 +57,26 @@ func TestTableCursorScrollsAndTheEdgesFollow(t *testing.T) {
 	_, cmd := m.Update(bezeltest.Key("enter"))
 	require.NotNil(t, cmd, "enter sets a status that clears itself")
 }
+
+func TestTableFiltersAndTurnsSpinners(t *testing.T) {
+	var m tea.Model = newModel()
+	require.NotNil(t, m.Init(), "the rows that start busy turn")
+	m, out := frame(t, m, tea.WindowSizeMsg{Width: 100, Height: 24}, 100)
+	require.Contains(t, out, "⠋ lipgloss", "a busy row has the spinner for a marker")
+
+	m, _ = frame(t, m, bezeltest.Key("/"), 100)
+	for _, k := range []string{"x", "/", "s"} {
+		m, _ = frame(t, m, bezeltest.Key(k), 100)
+	}
+	m, out = frame(t, m, bezeltest.Key("down"), 100)
+	t.Log("\n" + out)
+	require.Contains(t, out, "/x/s▋", "w and q are text at the prompt too")
+	require.Contains(t, out, " 2 of 18 ")
+	require.Contains(t, out, "▶ x/sync")
+	require.NotContains(t, out, "bubbletea")
+
+	m, _ = frame(t, m, bezeltest.Key("esc"), 100)
+	m, cmd := m.Update(bezeltest.Key("space"))
+	_, out = frame(t, m, cmd(), 100)
+	require.Contains(t, out, "⠋ bubbletea", "space marks the cursor row")
+}

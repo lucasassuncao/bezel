@@ -1,11 +1,13 @@
 // Tree: a directory tree over the app's own node type; arrows expand and
-// collapse, and :reveal opens the way down to a path.
+// collapse, :reveal opens the way down to a path and space turns a spinner on
+// the node under the cursor, in place of its icon.
 package main
 
 import (
 	"fmt"
 	"os"
 	"path"
+	"slices"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -25,10 +27,11 @@ type entry struct {
 	depth    int
 	dir      bool
 	expanded bool
+	busy     bool
 }
 
 func (e entry) TreeInfo() tree.Info {
-	return tree.Info{Depth: e.depth, Leaf: !e.dir, Expanded: e.expanded}
+	return tree.Info{Depth: e.depth, Leaf: !e.dir, Expanded: e.expanded, Busy: e.busy}
 }
 
 func (e entry) Expand(open bool) entry { e.expanded = open; return e }
@@ -52,7 +55,10 @@ var files = entries(
 	"go.mod", "Makefile",
 )
 
-type revealMsg struct{ path string }
+type (
+	revealMsg     struct{ path string }
+	toggleBusyMsg struct{}
+)
 
 type model struct {
 	sh   shell.Shell
@@ -64,6 +70,7 @@ func actions() []shell.Action {
 	return []shell.Action{
 		shell.Commands(), shell.Move(),
 		shell.Custom("←/→", "collapse/expand", nil, shell.DisplayOnly()),
+		shell.Custom("space", "busy", shell.Send(toggleBusyMsg{})),
 		shell.Command("reveal", "open the way to a path", func(ctx shell.ActionContext) tea.Cmd {
 			return func() tea.Msg { return revealMsg{strings.TrimSpace(ctx.Arg)} }
 		}, shell.Arg("path")),
@@ -79,10 +86,13 @@ func newModel() model {
 		Title:   "tree",
 		Actions: actions(),
 	})
-	return model{sh: sh, th: th, tree: tree.New(files)}
+	nodes := slices.Clone(files)
+	nodes[len(nodes)-2].busy = true // go.mod
+	return model{sh: sh, th: th, tree: tree.New(nodes)}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+// Init turns the spinner of the node that starts busy.
+func (m model) Init() tea.Cmd { return m.tree.Tick() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -98,13 +108,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.sh, cmd = m.sh.SetStatus("no such path: "+msg.path, shell.Error, 0)
 			return m, cmd
 		}
+	case toggleBusyMsg:
+		m.tree = m.tree.SetNode(m.tree.Index(), func(e *entry) { e.busy = !e.busy })
+		return m, m.tree.Tick()
 	case tea.KeyPressMsg:
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
-		m.tree, _ = m.tree.Update(msg)
 	}
-	return m, nil
+	m.tree, r = m.tree.Update(msg) // keys, and the spinner's frames
+	return m, r.Cmd
 }
 
 func (m model) row(e entry, _ int, selected bool) string {
@@ -115,11 +128,14 @@ func (m model) row(e entry, _ int, selected bool) string {
 			icon = "▾ "
 		}
 	}
-	line := strings.Repeat("  ", e.depth) + icon + path.Base(e.path)
+	paint := func(s string) string { return s }
 	if selected {
-		return m.th.Cursor.Render(line)
+		paint = func(s string) string { return m.th.Cursor.Render(s) }
 	}
-	return line
+	if e.busy { // the spinner in its own colour, the rest in the row's
+		return paint(strings.Repeat("  ", e.depth)) + m.tree.BusyMark(m.th) + paint(" "+path.Base(e.path))
+	}
+	return paint(strings.Repeat("  ", e.depth) + icon + path.Base(e.path))
 }
 
 func (m model) detail() string {

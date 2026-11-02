@@ -37,7 +37,7 @@ func TestChartDrawsEveryKind(t *testing.T) {
 	var m tea.Model = newModel()
 	_, out := frame(t, m, tea.WindowSizeMsg{Width: 100, Height: 30})
 	t.Log("\n" + out)
-	for _, want := range []string{"AREA", "SPARK", "BARS", "HEAT", "DONUT", "api", "billing", "40 samples"} {
+	for _, want := range []string{"AREA", "LINES", "● cpu", "● memory", "SPARK", "BARS", "HEAT", "DONUT", "api", "billing", "40 samples"} {
 		require.Contains(t, out, want)
 	}
 }

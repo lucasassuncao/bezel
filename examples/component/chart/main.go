@@ -1,6 +1,6 @@
-// Chart: one run of numbers drawn as an area and a spark line, fed a value per
-// tick, beside labelled bars, a donut and a week's heat grid. space pauses the
-// feed and r starts it over.
+// Chart: a run of numbers drawn as an area, as lines beside a second run and
+// as a spark line, fed a value per tick, beside labelled bars, a donut and a
+// week's heat grid. space pauses the feed and r starts it over.
 package main
 
 import (
@@ -96,6 +96,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// memory is a second, slower run beside the load, for Lines.
+func (m model) memory() []float64 {
+	out := make([]float64, m.n)
+	for i := range out {
+		out[i] = 25 + load(i/3+50)/2
+	}
+	return out
+}
+
 // values is the series up to now, newest last.
 func (m model) values() []float64 {
 	out := make([]float64, m.n)
@@ -108,13 +117,17 @@ func (m model) values() []float64 {
 func (m model) loadPane(r layout.Rect) string {
 	vs := m.values()
 	now := vs[len(vs)-1]
+	h := max((r.H-11)/2, 3) // the area and the lines share what the rest leaves
 	state := "live"
 	if m.paused {
 		state = "paused"
 	}
 	out := []string{
 		draw.Heading("Area", m.th.Section, r.W),
-		chart.Area(vs, top, r.W, max(r.H-8, 3), m.th),
+		chart.Area(vs, top, r.W, h, m.th),
+		"",
+		draw.Heading("Lines", m.th.Section, r.W),
+		chart.Lines([]chart.Line{{Label: "cpu", Values: vs}, {Label: "memory", Values: m.memory()}}, 0, top, r.W, h+1, m.th),
 		"",
 		draw.Heading("Spark", m.th.Section, r.W),
 		chart.Spark(vs, top, r.W-12, m.th, chart.InSeries(1)) + m.th.Dim.Render(fmt.Sprintf("  %3.0f%%", now)),

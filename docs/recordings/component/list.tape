@@ -1,4 +1,4 @@
-# list: rows under headings, a / filter, and enter showing the row's payload.
+# list: rows under headings, a spinner on a busy row (space toggles it), a / filter, and enter showing the row's payload.
 #
 # Record from the repository root: vhs docs/recordings/component/list.tape
 
@@ -43,6 +43,13 @@ Sleep 800ms
 Enter
 Wait+Screen /kcal/
 Sleep 2s
+
+# -- A busy row ---------------------------------------------------------------------
+
+Space
+Sleep 2.5s
+Space
+Sleep 1s
 
 # -- The filter ------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
-// Table: a cursor over rows that scroll under a fixed header, with the position
-// and a scrollbar in the pane's edges and the row's detail below. w narrows the
-// window: the description gives way first, version and licence stay whole.
+// Table: a cursor over rows that scroll under a fixed header, a / filter and a
+// spinner on the rows still updating (space toggles one). w narrows the window:
+// the description gives way first, version and licence stay whole.
 package main
 
 import (
@@ -50,16 +50,22 @@ var rows = [][]string{
 	{"x/sync", "v0.24.0", "BSD-3", "errgroup, semaphore and singleflight"},
 }
 
+// updating are the rows that start with a spinner.
+var updating = map[string]bool{"lipgloss": true, "x/ansi": true}
+
 // items carry each row's name, for the status enter sets.
 func items() []table.Item[string] {
 	out := make([]table.Item[string], len(rows))
 	for i, r := range rows {
-		out[i] = table.Item[string]{Cells: r, Value: r[0]}
+		out[i] = table.Item[string]{Cells: r, Value: r[0], Busy: updating[r[0]]}
 	}
 	return out
 }
 
-type toggleWidthMsg struct{}
+type (
+	toggleWidthMsg struct{}
+	toggleBusyMsg  struct{}
+)
 
 type model struct {
 	sh           shell.Shell
@@ -77,7 +83,9 @@ func newModel() model {
 		Title:  "table",
 		Actions: []shell.Action{
 			shell.Move(),
+			shell.Custom("/", "filter", nil, shell.DisplayOnly()),
 			shell.Custom("enter", "choose", nil, shell.DisplayOnly()),
+			shell.Custom("space", "busy", shell.Send(toggleBusyMsg{})),
 			shell.Custom("w", "narrow/wide", shell.Send(toggleWidthMsg{})),
 			shell.Quit(),
 		},
@@ -85,7 +93,8 @@ func newModel() model {
 	return model{sh: sh, th: th, tbl: table.New(cols, items())}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+// Init turns the spinners of the rows that start busy.
+func (m model) Init() tea.Cmd { return m.tbl.Tick() }
 
 // resize hands the shell the width to draw at: the real one or narrowWidth.
 // VHS cannot resize a terminal mid-recording, so this stands in for it.
@@ -104,27 +113,48 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.realW, m.realH = size.Width, size.Height
 		return m.resize(), nil
 	}
+	// While filtering every key is text for the filter, w and q included.
+	if key, ok := msg.(tea.KeyPressMsg); ok && m.tbl.Filtering() {
+		return m.toTable(key)
+	}
 	var r bezel.Result
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
-	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case toggleWidthMsg:
 		m.narrow = !m.narrow
 		return m.resize(), nil
+	case toggleBusyMsg:
+		return m.toggleBusy()
 	case tea.KeyPressMsg:
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
-		var r bezel.Result
-		m.tbl, r = m.tbl.Update(msg)
-		if e, ok := r.Event.(table.Chosen[string]); ok {
-			m.sh, cmd = m.sh.SetStatus("chose "+e.Item.Value, shell.OK, 2*time.Second)
-			return m, cmd
-		}
 	}
-	return m, nil
+	return m.toTable(msg) // keys, and the spinner's frames
+}
+
+// toTable hands msg to the table and shows a chosen row in the status.
+func (m model) toTable(msg tea.Msg) (model, tea.Cmd) {
+	var r bezel.Result
+	m.tbl, r = m.tbl.Update(msg)
+	if e, ok := r.Event.(table.Chosen[string]); ok {
+		var cmd tea.Cmd
+		m.sh, cmd = m.sh.SetStatus("chose "+e.Item.Value, shell.OK, 2*time.Second)
+		return m, cmd
+	}
+	return m, r.Cmd
+}
+
+// toggleBusy starts or stops the spinner on the row under the cursor.
+func (m model) toggleBusy() (model, tea.Cmd) {
+	items := m.tbl.Items()
+	if i := m.tbl.Cursor(); i < len(items) {
+		items[i].Busy = !items[i].Busy
+	}
+	m.tbl = m.tbl.SetItems(items)
+	return m, m.tbl.Tick()
 }
 
 // detail is the row under the cursor, its description wrapped to the pane.
@@ -140,10 +170,14 @@ func (m model) detail(r layout.Rect) string {
 
 func (m model) View() tea.View {
 	it, _ := m.tbl.Selected()
+	pos := fmt.Sprintf("%d/%d", m.tbl.Cursor()+1, m.tbl.Len())
+	if m.tbl.Filtering() {
+		pos = fmt.Sprintf("%d of %d", m.tbl.Scroll().Total, m.tbl.Len())
+	}
 	return m.sh.View(map[string]shell.Pane{
 		"table": {
 			Title:  "dependencies",
-			Bottom: fmt.Sprintf("%d/%d", m.tbl.Cursor()+1, m.tbl.Len()),
+			Bottom: pos,
 			Scroll: m.tbl.Scroll(),
 			Body:   func(r layout.Rect) string { return m.tbl.SetWidth(r.W).View(m.th) },
 		},
