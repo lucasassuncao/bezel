@@ -10,7 +10,6 @@ import (
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/component/toast"
-	"github.com/lucasassuncao/bezel/internal/frames"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
@@ -119,8 +118,6 @@ type Shell struct {
 	toasts toast.Model // the messages, in the Toast style
 
 	overlays overlay.Stack
-	fade     frames.Run // the backdrop settling behind a modal that opened
-	fadeP    float64
 	present  map[string]bool // leaves the last View was given
 	actions  []Action        // what the app set with SetActions
 }
@@ -289,8 +286,7 @@ func (s Shell) HasOverlay() bool { return s.overlays.Len() > 0 }
 // TopOverlay is the modal that gets the keys, or nil.
 func (s Shell) TopOverlay() overlay.Overlay { return s.overlays.Top() }
 
-// Push opens o above any open modal, the backdrop at once: overlay.Open,
-// through Update, fades it in.
+// Push opens o above any open modal.
 func (s Shell) Push(o overlay.Overlay) Shell {
 	s = s.ready()
 	s.overlays = s.overlays.Push(o)

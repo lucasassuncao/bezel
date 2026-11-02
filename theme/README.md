@@ -94,7 +94,7 @@ type Colors struct {
 ```
 
 <a name="Resolved"></a>
-## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L16-L62>)
+## type [Resolved](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L16-L59>)
 
 Resolved is a Theme after the whole cascade has been applied: ready\-to\-use lipgloss styles plus the colors they were derived from. A consumer builds one per instance and only reads it afterwards.
 
@@ -139,9 +139,6 @@ type Resolved struct {
     // CaretBlink is how often every text input built with this theme flips its
     // caret; zero is 530ms. Tests shrink it, as each key arms one.
     CaretBlink time.Duration
-    // Backdrop is how far the screen behind a modal blends toward Background:
-    // 0.4 dark, 0.3 light, 0 without a Background or to turn it off.
-    Backdrop float64
     // Series and Ramp are Colors' own, as foreground styles.
     Series [6]lipgloss.Style
     Ramp   [3]lipgloss.Style
@@ -149,7 +146,7 @@ type Resolved struct {
 ```
 
 <a name="Resolve"></a>
-### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L66>)
+### func [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/theme/resolved.go#L63>)
 
 ```go
 func Resolve(t Theme, dark bool) Resolved

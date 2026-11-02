@@ -151,7 +151,6 @@ Package overlay is the stack of modals floating over the panes. The top one gets
   - [func \(s Stack\) Top\(\) Overlay](<#Stack.Top>)
   - [func \(s Stack\) Update\(msg tea.Msg\) \(Stack, bezel.Result\)](<#Stack.Update>)
   - [func \(s Stack\) View\(body layout.Rect, background string\) string](<#Stack.View>)
-  - [func \(s Stack\) ViewOver\(body layout.Rect, background string, behind func\(screen string\) string\) string](<#Stack.ViewOver>)
 - [type StatusLiner](<#StatusLiner>)
 - [type Styles](<#Styles>)
   - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
@@ -1384,7 +1383,7 @@ type Stack struct {
 ```
 
 <a name="Stack.Click"></a>
-### func \(Stack\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L234>)
+### func \(Stack\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L225>)
 
 ```go
 func (s Stack) Click(x, y int, body layout.Rect) (Stack, bezel.Result)
@@ -1463,15 +1462,6 @@ func (s Stack) View(body layout.Rect, background string) string
 ```
 
 View composites every layer, bottom first, centred over background.
-
-<a name="Stack.ViewOver"></a>
-### func \(Stack\) [ViewOver](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L207>)
-
-```go
-func (s Stack) ViewOver(body layout.Rect, background string, behind func(screen string) string) string
-```
-
-ViewOver is View with behind applied once to the screen under the top layer, lower layers included: a backdrop. nil is View.
 
 <a name="StatusLiner"></a>
 ## type [StatusLiner](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L44>)
