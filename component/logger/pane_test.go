@@ -90,7 +90,7 @@ func TestPaneAttributesBecomeLinesOfTheirOwn(t *testing.T) {
 	slog.New(p.Handler().WithTimeFormat("")).Info("saved", "file", "a.txt")
 	p, _ = p.Update(p.Init()())
 	require.Equal(t, 2, p.Len())
-	require.Len(t, p.Legend(), 2, "scroll and page: panning is left out while wrapping")
+	require.Len(t, p.Legend(), 3, "scroll, page and filter: panning is left out while wrapping")
 }
 
 func TestPaneViewIsEmptyBeforeSized(t *testing.T) {
@@ -127,4 +127,79 @@ func TestPaneTakesAnyHandlerThroughItsWriter(t *testing.T) {
 	p, _ = p.Update(p.Init()())
 	require.Equal(t, 1, p.Len(), "one JSON record, one line")
 	require.Contains(t, p.Lines()[0], `"msg":"saved","file":"a.txt"}`)
+}
+
+// typed sends each rune of s as a key press.
+func typed(p Pane, s string) Pane {
+	for _, r := range s {
+		p, _ = p.Update(tea.KeyPressMsg{Code: r, Text: string(r)})
+	}
+	return p
+}
+
+// deployed is a pane with three records, one of them two lines long.
+func deployed() Pane {
+	p := sized(NewPane(paneTheme())).SetWidth(40).SetHeight(6)
+	log := slog.New(p.Handler().WithTimeFormat(""))
+	log.Info("pulling image")
+	log.Error("refused", "host", "db-primary")
+	log.Info("replica ready")
+	p, _ = p.Update(p.Init()())
+	return p
+}
+
+func TestPaneFilterShowsTheRecordsHoldingTheText(t *testing.T) {
+	p, r := deployed().Update(tea.KeyPressMsg{Code: '/', Text: "/"})
+	require.True(t, r.Handled)
+	require.True(t, p.Filtering())
+
+	p = typed(p, "DB")
+	require.Equal(t, "DB", p.Filter())
+	require.Equal(t, 2, p.Shown(), "the whole record, its attribute line too")
+	require.Equal(t, 4, p.Len())
+	got := shown(p)
+	require.Contains(t, got[0], "refused", "a match in an attribute keeps the record's head")
+	require.Equal(t, "/DB▋", strings.TrimRight(got[len(got)-1], " "))
+	require.Len(t, p.Legend(), 2, "enter and esc while typing")
+
+	p, _ = p.Update(tea.KeyPressMsg{Code: tea.KeyBackspace})
+	require.Equal(t, "D", p.Filter())
+}
+
+func TestPaneFilterKeptByEnterTakesNewLinesAndEscClearsIt(t *testing.T) {
+	p := typed(deployed(), "/ready")
+	p, _ = p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	require.False(t, p.Filtering())
+	require.Equal(t, "ready", p.Filter())
+	require.Equal(t, "/ready", strings.TrimRight(shown(p)[len(shown(p))-1], " "))
+
+	log := slog.New(p.Handler().WithTimeFormat(""))
+	log.Info("cache ready")
+	log.Info("pulling image")
+	p, _ = p.Update(p.Init()())
+	require.Equal(t, 2, p.Shown(), "only the new line that matches shows")
+	require.Equal(t, 6, p.Len())
+
+	p, r := p.Update(tea.KeyPressMsg{Code: tea.KeyEscape})
+	require.True(t, r.Handled)
+	require.Empty(t, p.Filter())
+	require.Equal(t, 6, p.Shown())
+}
+
+func TestPaneEscWithoutAFilterIsNotItsOwn(t *testing.T) {
+	_, r := deployed().Update(tea.KeyPressMsg{Code: tea.KeyEscape})
+	require.False(t, r.Handled)
+}
+
+func TestPaneFilterPaintsItsMatches(t *testing.T) {
+	p := typed(deployed(), "/image")
+	require.Contains(t, p.View(), paneTheme().Match.Render("image"), "no match is current")
+	require.Equal(t, [][]int{{0, 2}, {3, 5}}, matches("Ab ab", "AB"))
+	require.Nil(t, matches("İ", "i"), "lower case changes the length")
+}
+
+func TestPaneLimitCutsIntoTheOldestRecord(t *testing.T) {
+	p := deployed().WithLimit(2)
+	require.Equal(t, 2, p.Len())
+	require.Contains(t, ansi.Strip(p.Lines()[0]), "host=db-primary", "the record's head went first")
 }

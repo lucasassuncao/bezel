@@ -122,7 +122,7 @@ An access log, numbered in a gutter, with its error lines in red and every `ERRO
 
 Source: [`examples/component/logpane/main.go`](../examples/component/logpane/main.go)
 
-A made-up deploy logging through `log/slog` from another goroutine into `logger.Pane`, levels in their colours and attributes as a tree. The pane follows the end as lines arrive; scrolling up holds it still and counts the lines that arrive meanwhile, and `end` follows again. Any other handler writes into it through `Writer`: `slog.NewJSONHandler(pane.Writer(), nil)` shows JSON lines.
+A made-up deploy logging through `log/slog` from another goroutine into two `logger.Pane`s. The top one takes the pane's own `Handler`: levels in their colours, attributes as a tree. The bottom one takes slog's JSON handler through `Writer`, `slog.NewJSONHandler(pane.Writer(), nil)`, a JSON object per line. Each pane follows the end as lines arrive; `tab` picks which one scrolls, scrolling up holds it still and counts the lines that arrive meanwhile, and `end` follows again. `/` filters the focused pane to the records holding the text, a record's attribute lines with its message, matches painted; `enter` keeps the filter as lines keep arriving and `esc` clears it.
 
 ![logpane](recordings/component/logpane.gif)
 

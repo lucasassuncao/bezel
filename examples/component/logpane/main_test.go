@@ -22,14 +22,15 @@ func frame(t *testing.T, m tea.Model, msg tea.Msg) (tea.Model, string) {
 	return m, out
 }
 
-// deploy logs n lines and hands them to the pane, as the program would.
+// deploy logs n lines and hands them to both panes, as the program would.
 func deploy(m tea.Model, n int) tea.Model {
 	mm := m.(model)
 	for i := range n {
 		mm.emit(i)
 	}
-	next, _ := mm.Update(mm.pane.Init()())
-	return next
+	m, _ = mm.Update(mm.pane.Init()())
+	m, _ = m.Update(mm.json.Init()())
+	return m
 }
 
 func TestLogPaneFollowsAndHoldsStill(t *testing.T) {
@@ -51,7 +52,18 @@ func TestLogPaneFollowsAndHoldsStill(t *testing.T) {
 	require.Contains(t, out, "new lines", "what arrived meanwhile is counted")
 
 	_, out = frame(t, m, bezeltest.Key("end"))
-	require.Contains(t, out, "following")
+	require.NotContains(t, out, "held")
+}
+
+func TestLogPaneScrollsTheFocusedPane(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	m = deploy(m, 32)
+
+	m, _ = frame(t, m, bezeltest.Key("tab"))
+	m, _ = frame(t, m, bezeltest.Key("pgup"))
+	require.True(t, m.(model).pane.Following(), "the bezel pane keeps to the end")
+	require.False(t, m.(model).json.Following(), "the focused JSON pane holds")
 }
 
 func TestLogPaneStepsTheDeploy(t *testing.T) {
@@ -60,4 +72,24 @@ func TestLogPaneStepsTheDeploy(t *testing.T) {
 	require.Equal(t, step{len(events)}, msg)
 	_, cmd := m.Update(msg)
 	require.NotNil(t, cmd, "the next line is due")
+}
+
+func TestLogPaneFiltersTheFocusedPane(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	m = deploy(m, 16)
+
+	m, _ = frame(t, m, bezeltest.Key("/"))
+	for _, k := range "refused" {
+		m, _ = frame(t, m, bezeltest.Key(string(k)))
+	}
+	m, out := frame(t, m, bezeltest.Key("enter"))
+	t.Log("\n" + out)
+	require.Contains(t, out, "/refused")
+	require.Contains(t, out, "6 of 40 lines", "two records, three lines each")
+	require.Contains(t, out, "16 lines · following", "the JSON pane is not focused: unfiltered")
+
+	m, _ = frame(t, m, bezeltest.Key("/"))
+	m, _ = frame(t, m, bezeltest.Key("q"))
+	require.Equal(t, "refusedq", m.(model).pane.Filter(), "q is text while filtering")
 }

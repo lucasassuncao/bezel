@@ -1,6 +1,7 @@
 // Log pane: a made-up deploy logging through slog from another goroutine into
-// logger.Pane, which follows the end as lines arrive. Scrolling up holds it
-// still and counts what arrives meanwhile; end follows again.
+// two logger.Panes, bezel's Handler above and slog's JSON through Writer below.
+// Scrolling up holds a pane still and counts what arrives; end follows again.
+// / filters the focused pane to the records holding the text typed.
 package main
 
 import (
@@ -21,7 +22,7 @@ import (
 )
 
 // every is how often the deploy logs a line.
-const every = 350 * time.Millisecond
+const every = 600 * time.Millisecond
 
 // event is one line the deploy logs.
 type event struct {
@@ -45,31 +46,47 @@ var events = []event{
 type step struct{ n int }
 
 type model struct {
-	sh   shell.Shell
-	th   theme.Resolved
-	pane logger.Pane
-	log  *slog.Logger
+	sh     shell.Shell
+	th     theme.Resolved
+	pane   logger.Pane // bezel's Handler
+	json   logger.Pane // slog's JSON handler, through Writer
+	log    *slog.Logger
+	jsonLg *slog.Logger
 }
 
 func newModel() model {
 	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
-		Layout: layout.Rows(layout.Fill("log")),
+		Layout: layout.Rows(layout.Fill("log"), layout.Fill("json")),
 		Theme:  th,
 		Title:  "log pane",
 		Actions: []shell.Action{
+			shell.ChangePane(),
 			shell.Scroll(),
 			shell.Custom("end", "follow", nil, shell.DisplayOnly()),
+			shell.Custom("/", "filter", nil, shell.DisplayOnly()),
 			shell.Quit(),
 		},
 	})
 	pane := logger.NewPane(th)
 	log := slog.New(pane.Handler().WithLevel(slog.LevelDebug).WithTimeFormat("15:04:05"))
-	return model{sh: sh, th: th, pane: pane, log: log}
+	json := logger.NewPane(th)
+	jsonLg := slog.New(slog.NewJSONHandler(json.Writer(), &slog.HandlerOptions{
+		Level: slog.LevelDebug, ReplaceAttr: clock,
+	}))
+	return model{sh: sh, th: th, pane: pane, json: json, log: log, jsonLg: jsonLg}
 }
 
-// Init waits for the pane's lines and starts the deploy.
-func (m model) Init() tea.Cmd { return tea.Batch(m.pane.Init(), m.next(0)) }
+// clock writes the time as the bezel pane does, so the two lines line up.
+func clock(_ []string, a slog.Attr) slog.Attr {
+	if a.Key == slog.TimeKey {
+		a.Value = slog.StringValue(a.Value.Time().Format("15:04:05"))
+	}
+	return a
+}
+
+// Init waits for both panes' lines and starts the deploy.
+func (m model) Init() tea.Cmd { return tea.Batch(m.pane.Init(), m.json.Init(), m.next(0)) }
 
 // next logs line n after a pause, from the command's own goroutine.
 func (m model) next(n int) tea.Cmd {
@@ -80,10 +97,15 @@ func (m model) next(n int) tea.Cmd {
 func (m model) emit(n int) tea.Msg {
 	e := events[n%len(events)]
 	m.log.Log(context.Background(), e.level, e.msg, e.attrs...)
+	m.jsonLg.Log(context.Background(), e.level, e.msg, e.attrs...)
 	return step{n + 1}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// While filtering every key is text for the filter, tab and q included.
+	if k, ok := msg.(tea.KeyPressMsg); ok && m.focused().Filtering() {
+		return m.toFocused(k)
+	}
 	var r bezel.Result
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
@@ -92,31 +114,66 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		in := draw.InnerRect(m.sh.Rect("log"))
 		m.pane = m.pane.SetWidth(in.W).SetHeight(in.H)
+		in = draw.InnerRect(m.sh.Rect("json"))
+		m.json = m.json.SetWidth(in.W).SetHeight(in.H)
 		return m, nil
 	case step:
 		return m, m.next(msg.n)
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
+	case tea.KeyPressMsg, tea.MouseWheelMsg:
+		if k, ok := msg.(tea.KeyPressMsg); ok && k.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
+		return m.toFocused(msg)
 	}
-	m.pane, r = m.pane.Update(msg) // keys, the wheel and the lines
+	// Lines: each pane takes only its own feed's.
+	var rj bezel.Result
+	m.pane, r = m.pane.Update(msg)
+	m.json, rj = m.json.Update(msg)
+	return m, tea.Batch(r.Cmd, rj.Cmd)
+}
+
+// focused is the pane the keys go to.
+func (m model) focused() logger.Pane {
+	if m.sh.Focused() == "json" {
+		return m.json
+	}
+	return m.pane
+}
+
+// toFocused hands msg to the focused pane.
+func (m model) toFocused(msg tea.Msg) (tea.Model, tea.Cmd) {
+	p, r := m.focused().Update(msg)
+	if m.sh.Focused() == "json" {
+		m.json = p
+	} else {
+		m.pane = p
+	}
 	return m, r.Cmd
 }
 
 func (m model) View() tea.View {
+	return m.sh.View(map[string]shell.Pane{
+		"log":  panel("deploy · bezel", m.pane),
+		"json": panel("deploy · json", m.json),
+	})
+}
+
+// panel draws p with how many lines it holds and whether it follows.
+func panel(title string, p logger.Pane) shell.Pane {
 	state := "following"
-	if !m.pane.Following() {
+	if !p.Following() {
 		state = "held"
 	}
-	return m.sh.View(map[string]shell.Pane{
-		"log": {
-			Title:  "deploy",
-			Bottom: fmt.Sprintf("%d lines · %s", m.pane.Len(), state),
-			Scroll: m.pane.Scroll(),
-			Body:   func(layout.Rect) string { return m.pane.View() },
-		},
-	})
+	lines := fmt.Sprintf("%d lines", p.Len())
+	if p.Filter() != "" {
+		lines = fmt.Sprintf("%d of %d lines", p.Shown(), p.Len())
+	}
+	return shell.Pane{
+		Title:  title,
+		Bottom: lines + " · " + state,
+		Scroll: p.Scroll(),
+		Body:   func(layout.Rect) string { return p.View() },
+	}
 }
 
 func main() {

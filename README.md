@@ -134,7 +134,7 @@ go run ./examples/app
 - [`icon`](component/icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
 - [`toast`](component/toast): notices that slide into a corner, stack and leave on their own.
 - [`inline`](component/inline): a yes/no question and a progress bar for CLIs that print logs.
-- [`logger`](component/logger): a `slog.Handler` that hangs every attribute under its message as a tree and wraps long values without cutting them, and `Pane`, a log panel that follows the end as lines arrive.
+- [`logger`](component/logger): a `slog.Handler` that hangs every attribute under its message as a tree and wraps long values without cutting them, and `Pane`, a log panel that follows the end as lines arrive and filters them with `/`.
 - [`themebrowser`](component/themebrowser): the preset table behind a `--list-themes` flag.
 
 **Effects**
