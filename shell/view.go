@@ -160,7 +160,7 @@ func (s Shell) render(panes map[string]Pane) string {
 
 	out := draw.FitBlock(strings.Join(rows, "\n"), s.width, s.height)
 	if s.overlays.Len() > 0 {
-		out = s.overlays.View(body, out)
+		out = s.overlays.ViewOver(body, out, s.backdrop)
 	}
 	if s.toasts.Len() > 0 {
 		// Narrower than the screen, so a toast never hangs off its left edge.

@@ -38,7 +38,7 @@ Every colour role and a list drawn with it. `n` and `p` step through a few prese
 
 Source: [`examples/frame/overlay/main.go`](../examples/frame/overlay/main.go)
 
-The ready-made modals, one per row: an alert, a confirm that answers the app, a prompt that refuses an empty name, the help list, a pager over a command's output and a file picker. `enter` opens the one under the cursor and `esc` closes it.
+The ready-made modals, one per row: an alert, a confirm that answers the app, a prompt that refuses an empty name, the help list, a pager over a command's output and a file picker. `enter` opens the one under the cursor and `esc` closes it. Behind an open modal the screen steps back: its colours blend toward the theme's background by `theme.Resolved.Backdrop` (0.4 dark, 0.3 light, 0 to turn it off), fading in over 150 ms when the modal opens through `overlay.Open` or an action.
 
 ![overlay](recordings/frame/overlay.gif)
 

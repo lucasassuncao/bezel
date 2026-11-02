@@ -35,10 +35,13 @@ func toastCmd(cmd tea.Cmd) tea.Cmd {
 // its own models from Rect on the same message.
 func (s Shell) Update(msg tea.Msg) (Shell, bezel.Result) {
 	s = s.ready()
+	before := s.overlays.Len()
 	next, handled, cmd := s.update(msg)
 	if !handled {
 		return s, bezel.Result{}
 	}
+	next, fade := next.opened(before)
+	cmd = tea.Batch(cmd, fade)
 	// The one place a message re-resolves the layout, so no branch can forget to.
 	_, resize := msg.(tea.WindowSizeMsg)
 	return next.relayout(), bezel.Result{Handled: !resize, Cmd: cmd}
@@ -54,6 +57,9 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		}
 
 	case animation.FrameMsg:
+		if next, ok, cmd := s.fadeFrame(m); ok {
+			return next, true, cmd
+		}
 		if s.spin.Owns(m) {
 			var r bezel.Result
 			s.spin, r = s.spin.Update(m)

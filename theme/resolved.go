@@ -53,6 +53,9 @@ type Resolved struct {
 	// CaretBlink is how often every text input built with this theme flips its
 	// caret; zero is 530ms. Tests shrink it, as each key arms one.
 	CaretBlink time.Duration
+	// Backdrop is how far the screen behind a modal blends toward Background:
+	// 0.4 dark, 0.3 light, 0 without a Background or to turn it off.
+	Backdrop float64
 	// Series and Ramp are Colors' own, as foreground styles.
 	Series [6]lipgloss.Style
 	Ramp   [3]lipgloss.Style
@@ -67,9 +70,19 @@ func Resolve(t Theme, dark bool) Resolved {
 	rt.Colors = c
 	if c.Background != "" {
 		rt.Background, rt.Foreground = lipgloss.Color(c.Background), lipgloss.Color(c.Text)
+		rt.Backdrop = backdropLight
+		if dark {
+			rt.Backdrop = backdropDark
+		}
 	}
 	return rt
 }
+
+// The default Backdrop: a light screen shows a blend more, so it takes less.
+const (
+	backdropDark  = 0.4
+	backdropLight = 0.3
+)
 
 // buildDerivedStyles creates the lipgloss styles from the resolved palette.
 func buildDerivedStyles(c Colors) Resolved {

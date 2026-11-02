@@ -199,8 +199,17 @@ func (s Stack) replaceTop(o Overlay) Stack {
 
 // View composites every layer, bottom first, centred over background.
 func (s Stack) View(body layout.Rect, background string) string {
+	return s.ViewOver(body, background, nil)
+}
+
+// ViewOver is View with behind applied once to the screen under the top
+// layer, lower layers included: a backdrop. nil is View.
+func (s Stack) ViewOver(body layout.Rect, background string, behind func(screen string) string) string {
 	out := draw.PadHeight(background, body.Y+body.H)
-	for _, o := range s.items {
+	for i, o := range s.items {
+		if i == len(s.items)-1 && behind != nil {
+			out = behind(out)
+		}
 		fg, x, y := place(o, body)
 		out = draw.Composite(fg, out, x, y)
 	}

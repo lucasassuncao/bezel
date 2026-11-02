@@ -1,5 +1,5 @@
 // Overlay: the ready-made modals, one per row; enter opens the one under
-// the cursor and esc closes it.
+// the cursor, the screen behind it fading back, and esc closes it.
 package main
 
 import (
@@ -103,11 +103,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case openMsg:
 		o := m.modal()
-		m.sh = m.sh.Push(o)
-		// The picker reads its directory once it is on top to receive it.
+		// The picker reads its directory once it is on top to receive it, so
+		// it goes on at once; Open, through the shell, fades the backdrop in.
 		if fp, ok := o.(overlay.FilePicker); ok {
+			m.sh = m.sh.Push(o)
 			return m, fp.Init()
 		}
+		return m, overlay.Open(o)
 	case doneMsg:
 		m.sh, cmd = m.sh.SetStatus(msg.text, shell.OK, 3*time.Second)
 		return m, cmd
