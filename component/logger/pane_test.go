@@ -120,3 +120,11 @@ func TestPaneTakesLinesFromManyGoroutines(t *testing.T) {
 	}
 	require.Equal(t, 200, p.Len())
 }
+
+func TestPaneTakesAnyHandlerThroughItsWriter(t *testing.T) {
+	p := sized(NewPane(paneTheme())).SetWidth(80)
+	slog.New(slog.NewJSONHandler(p.Writer(), nil)).Info("saved", "file", "a.txt")
+	p, _ = p.Update(p.Init()())
+	require.Equal(t, 1, p.Len(), "one JSON record, one line")
+	require.Contains(t, p.Lines()[0], `"msg":"saved","file":"a.txt"}`)
+}

@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"io"
 	"slices"
 	"strings"
 	"sync"
@@ -87,6 +88,10 @@ func (p Pane) Handler() Handler {
 	}
 	return h
 }
+
+// Writer is where any other handler writes into the pane, a pane line per
+// line of text: slog.NewJSONHandler(pane.Writer(), nil) shows JSON lines.
+func (p Pane) Writer() io.Writer { return p.feed }
 
 // Write takes the formatted record and wakes the pane, without waiting.
 func (f *feed) Write(b []byte) (int, error) {
