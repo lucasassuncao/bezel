@@ -1,6 +1,6 @@
 // Package logger is a slog.Handler that prints for people: the time, the level
-// and the message on one line, and every attribute under it as a child of a
-// tree, wrapped at the terminal's width without losing a character.
+// and the message on one line, every attribute under it as a branch of a tree.
+// Pane shows the same lines in a panel that follows the end as they arrive.
 package logger
 
 import (

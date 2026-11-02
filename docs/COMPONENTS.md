@@ -259,7 +259,7 @@ A CLI that prints logs, asks one question below them, then redraws a progress ba
 
 Source: [`examples/component/logger/main.go`](../examples/component/logger/main.go)
 
-A run that sorts downloads, logged through `log/slog`. Each message gets its own line and every attribute hangs under it as a branch of a tree, groups as nested branches; a long path wraps under its own start instead of being cut. `--json` sends the same calls to slog's JSON handler.
+A run that sorts downloads, logged through `log/slog`. Each message gets its own line and every attribute hangs under it as a branch of a tree, groups as nested branches; a long path wraps under its own start instead of being cut. `--json` sends the same calls to slog's JSON handler. Inside a TUI, `logger.NewPane` takes the same lines in a panel that follows the end, holds still while you scroll up and counts what arrived meanwhile.
 
 ![logger](recordings/component/logger.gif)
 
