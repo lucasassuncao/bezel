@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/component/chart"
 ```
 
-Package chart draws numbers in cells: Area and Spark a run of them over time, the newest on the right, and Bars a few side by side, one row each. Every cell is cut to an eighth, so a bar or a column grows smoothly.
+Package chart draws numbers in cells: Area and Spark a run of them over time, the newest on the right, Lines several runs in braille over a y axis, and Bars a few side by side, one row each, their edges cut to an eighth.
 
 ## Index
 
@@ -17,8 +17,10 @@ Package chart draws numbers in cells: Area and Spark a run of them over time, th
 - [func Donut\(value, total float64, size int, th theme.Resolved\) string](<#Donut>)
 - [func Fill\(th theme.Resolved, opts ...Option\) lipgloss.Style](<#Fill>)
 - [func Heat\(values \[\]\[\]float64, top float64, th theme.Resolved\) string](<#Heat>)
+- [func Lines\(lines \[\]Line, lo, hi float64, width, height int, th theme.Resolved, opts ...Option\) string](<#Lines>)
 - [func Spark\(values \[\]float64, top float64, width int, th theme.Resolved, opts ...Option\) string](<#Spark>)
 - [type Bar](<#Bar>)
+- [type Line](<#Line>)
 - [type Option](<#Option>)
   - [func InSeries\(i int\) Option](<#InSeries>)
 
@@ -68,6 +70,15 @@ func Heat(values [][]float64, top float64, th theme.Resolved) string
 
 Heat is values as a grid of cells two columns wide, each coloured along the theme's ramp by its share of top; a value at or below zero is a muted dot.
 
+<a name="Lines"></a>
+## func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/lines.go#L28>)
+
+```go
+func Lines(lines []Line, lo, hi float64, width, height int, th theme.Resolved, opts ...Option) string
+```
+
+Lines draws each line in braille, width by height cells: the y axis on the left from lo at the bottom to hi at the top, the newest values on the right and, when a line has a Label, a key on the last row.
+
 <a name="Spark"></a>
 ## func [Spark](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/chart.go#L75>)
 
@@ -88,6 +99,18 @@ type Bar struct {
     Value float64
     Text  string
     Style *lipgloss.Style
+}
+```
+
+<a name="Line"></a>
+## type [Line](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/lines.go#L16-L19>)
+
+Line is one series of Lines: its values, oldest first, and its name for the key under the chart; a NaN leaves a gap.
+
+```go
+type Line struct {
+    Label  string
+    Values []float64
 }
 ```
 

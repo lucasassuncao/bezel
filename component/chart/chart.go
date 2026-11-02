@@ -1,6 +1,6 @@
-// Package chart draws numbers in cells: Area and Spark a run of them over
-// time, the newest on the right, and Bars a few side by side, one row each.
-// Every cell is cut to an eighth, so a bar or a column grows smoothly.
+// Package chart draws numbers in cells: Area and Spark a run of them over time,
+// the newest on the right, Lines several runs in braille over a y axis, and
+// Bars a few side by side, one row each, their edges cut to an eighth.
 package chart
 
 import (

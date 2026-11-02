@@ -74,5 +74,6 @@ func FuzzChartsStayInTheirBox(f *testing.F) {
 		within("area", Area(vs, top, w, h, th()), max(h, 1))
 		within("spark", Spark(vs, top, w, th()), 1)
 		within("bars", Bars([]Bar{{Label: "a", Value: a}, {Label: "bb", Value: b}}, top, w, th()), 0)
+		within("lines", Lines([]Line{{Label: "a", Values: vs}, {Values: []float64{c, b}}}, a, top, w, h, th()), max(h, 1))
 	})
 }
