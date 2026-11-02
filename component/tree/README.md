@@ -23,6 +23,7 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
   - [func VimKeys\(\) Keys](<#VimKeys>)
 - [type Model](<#Model>)
   - [func New\[N Noder\[N\]\]\(nodes \[\]N\) Model\[N\]](<#New>)
+  - [func \(m Model\[N\]\) BusyMark\(th theme.Resolved\) string](<#Model[N].BusyMark>)
   - [func \(m Model\[N\]\) Cursor\(\) int](<#Model[N].Cursor>)
   - [func \(m Model\[N\]\) CursorTo\(match func\(N\) bool\) \(Model\[N\], bool\)](<#Model[N].CursorTo>)
   - [func \(m Model\[N\]\) Guides\(\) \[\]string](<#Model[N].Guides>)
@@ -41,6 +42,7 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
   - [func \(m Model\[N\]\) SetNode\(idx int, mut func\(\*N\)\) Model\[N\]](<#Model[N].SetNode>)
   - [func \(m Model\[N\]\) SetNodes\(nodes \[\]N\) Model\[N\]](<#Model[N].SetNodes>)
   - [func \(m Model\[N\]\) SetOffset\(n int\) Model\[N\]](<#Model[N].SetOffset>)
+  - [func \(m Model\[N\]\) Tick\(\) tea.Cmd](<#Model[N].Tick>)
   - [func \(m Model\[N\]\) Update\(msg tea.Msg\) \(Model\[N\], bezel.Result\)](<#Model[N].Update>)
   - [func \(m Model\[N\]\) View\(th theme.Resolved, row func\(n N, idx int, selected bool\) string\) string](<#Model[N].View>)
   - [func \(m Model\[N\]\) Visible\(\) \[\]int](<#Model[N].Visible>)
@@ -48,6 +50,7 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
   - [func \(m Model\[N\]\) WithEmptyMessage\(s string\) Model\[N\]](<#Model[N].WithEmptyMessage>)
   - [func \(m Model\[N\]\) WithKeys\(k Keys\) Model\[N\]](<#Model[N].WithKeys>)
   - [func \(m Model\[N\]\) WithScrollOff\(n int\) Model\[N\]](<#Model[N].WithScrollOff>)
+  - [func \(m Model\[N\]\) WithSpinner\(s spinner.Spinner\) Model\[N\]](<#Model[N].WithSpinner>)
   - [func \(m Model\[N\]\) WithStyles\(edit func\(Styles\) Styles\) Model\[N\]](<#Model[N].WithStyles>)
 - [type Noder](<#Noder>)
 - [type Styles](<#Styles>)
@@ -55,7 +58,7 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
 
 
 <a name="At"></a>
-## func [At](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L282>)
+## func [At](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L290>)
 
 ```go
 func At(cursor int, vis []int) int
@@ -73,7 +76,7 @@ type Collapsed[N any] struct{ Node N }
 ```
 
 <a name="Connectors"></a>
-## type [Connectors](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L64>)
+## type [Connectors](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L66>)
 
 Connectors are what Guides draws before a row, one piece per level under the top: Mid for a row with siblings after it, Last for the last one, Pipe where an outer level runs on below and Space where it ended.
 
@@ -82,7 +85,7 @@ type Connectors struct{ Mid, Last, Pipe, Space string }
 ```
 
 <a name="DefaultConnectors"></a>
-### func [DefaultConnectors](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L67>)
+### func [DefaultConnectors](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L69>)
 
 ```go
 func DefaultConnectors() Connectors
@@ -100,7 +103,7 @@ type Expanded[N any] struct{ Node N }
 ```
 
 <a name="Info"></a>
-## type [Info](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L29-L35>)
+## type [Info](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L30-L37>)
 
 Info is what the tree reads from a node.
 
@@ -111,11 +114,12 @@ type Info struct {
     Expanded bool
     Section  bool // a heading or spacer: skipped by the cursor
     Hidden   bool // left out, and everything under it with it
+    Busy     bool // working: the row func draws BusyMark in place of its icon
 }
 ```
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L38-L40>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L40-L42>)
 
 Keys are the bindings the tree answers to.
 
@@ -126,7 +130,7 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L43>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L45>)
 
 ```go
 func DefaultKeys() Keys
@@ -135,7 +139,7 @@ func DefaultKeys() Keys
 DefaultKeys are the four arrows.
 
 <a name="VimKeys"></a>
-### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L54>)
+### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L56>)
 
 ```go
 func VimKeys() Keys
@@ -144,7 +148,7 @@ func VimKeys() Keys
 VimKeys are DefaultKeys with vim's letters added: k/j to move, h/l to close and open.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L75-L85>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L77-L88>)
 
 Model is a value: every method returns the new tree. The zero value is usable and answers to DefaultKeys.
 
@@ -155,16 +159,25 @@ type Model[N Noder[N]] struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L98>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L106>)
 
 ```go
 func New[N Noder[N]](nodes []N) Model[N]
 ```
 
-New builds a tree over nodes with the cursor on the first row that is not a section; SetHeight gives it the rows its pane has.
+New builds a tree over nodes with the cursor on the first row that is not a section; SetHeight gives it the rows its pane has. With a Busy node, Tick turns the spinner.
+
+<a name="Model[N].BusyMark"></a>
+### func \(Model\[N\]\) [BusyMark](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L22>)
+
+```go
+func (m Model[N]) BusyMark(th theme.Resolved) string
+```
+
+BusyMark is the spinner's frame in the Busy style, padded to its widest: a row func draws it in place of a Busy node's icon.
 
 <a name="Model[N].Cursor"></a>
-### func \(Model\[N\]\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L150>)
+### func \(Model\[N\]\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L158>)
 
 ```go
 func (m Model[N]) Cursor() int
@@ -173,7 +186,7 @@ func (m Model[N]) Cursor() int
 Cursor is the cursor's place among the visible rows.
 
 <a name="Model[N].CursorTo"></a>
-### func \(Model\[N\]\) [CursorTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L486>)
+### func \(Model\[N\]\) [CursorTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L501>)
 
 ```go
 func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool)
@@ -182,7 +195,7 @@ func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool)
 CursorTo moves the cursor to the first visible row match accepts, or leaves it when none does, as a nil match. Reports whether it moved.
 
 <a name="Model[N].Guides"></a>
-### func \(Model\[N\]\) [Guides](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L198>)
+### func \(Model\[N\]\) [Guides](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L206>)
 
 ```go
 func (m Model[N]) Guides() []string
@@ -191,7 +204,7 @@ func (m Model[N]) Guides() []string
 Guides is the connector prefix of every visible row, in Visible's order, for a row function to draw before its label; a top\-level row has none.
 
 <a name="Model[N].Height"></a>
-### func \(Model\[N\]\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L153>)
+### func \(Model\[N\]\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L161>)
 
 ```go
 func (m Model[N]) Height() int
@@ -200,7 +213,7 @@ func (m Model[N]) Height() int
 Height is the rows the tree takes.
 
 <a name="Model[N].Index"></a>
-### func \(Model\[N\]\) [Index](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L278>)
+### func \(Model\[N\]\) [Index](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L286>)
 
 ```go
 func (m Model[N]) Index() int
@@ -209,7 +222,7 @@ func (m Model[N]) Index() int
 Index is the Nodes index under the cursor, or \-1.
 
 <a name="Model[N].Legend"></a>
-### func \(Model\[N\]\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L178>)
+### func \(Model\[N\]\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L186>)
 
 ```go
 func (m Model[N]) Legend() []legend.Entry
@@ -218,7 +231,7 @@ func (m Model[N]) Legend() []legend.Entry
 Legend lists the keys the tree answers to.
 
 <a name="Model[N].Len"></a>
-### func \(Model\[N\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L140>)
+### func \(Model\[N\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L148>)
 
 ```go
 func (m Model[N]) Len() int
@@ -227,7 +240,7 @@ func (m Model[N]) Len() int
 Len is how many nodes the tree holds, folded or not.
 
 <a name="Model[N].Move"></a>
-### func \(Model\[N\]\) [Move](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L351>)
+### func \(Model\[N\]\) [Move](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L366>)
 
 ```go
 func (m Model[N]) Move(delta int) Model[N]
@@ -236,7 +249,7 @@ func (m Model[N]) Move(delta int) Model[N]
 Move walks delta rows, stepping over section rows and stopping at the last row rather than running into a trailing heading.
 
 <a name="Model[N].MoveTo"></a>
-### func \(Model\[N\]\) [MoveTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L425>)
+### func \(Model\[N\]\) [MoveTo](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L440>)
 
 ```go
 func (m Model[N]) MoveTo(i int) Model[N]
@@ -245,7 +258,7 @@ func (m Model[N]) MoveTo(i int) Model[N]
 MoveTo jumps to a visible row, snapping backwards over section rows: the last row of a grouped list is a node only by coincidence.
 
 <a name="Model[N].Node"></a>
-### func \(Model\[N\]\) [Node](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L131>)
+### func \(Model\[N\]\) [Node](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L139>)
 
 ```go
 func (m Model[N]) Node(i int) N
@@ -254,7 +267,7 @@ func (m Model[N]) Node(i int) N
 Node is the node at index i of Nodes, folded or not; the zero N out of range.
 
 <a name="Model[N].Nodes"></a>
-### func \(Model\[N\]\) [Nodes](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L128>)
+### func \(Model\[N\]\) [Nodes](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L136>)
 
 ```go
 func (m Model[N]) Nodes() []N
@@ -263,7 +276,7 @@ func (m Model[N]) Nodes() []N
 Nodes is a copy of the nodes, every one, folded or not.
 
 <a name="Model[N].Reveal"></a>
-### func \(Model\[N\]\) [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L503>)
+### func \(Model\[N\]\) [Reveal](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L518>)
 
 ```go
 func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool)
@@ -272,7 +285,7 @@ func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool)
 Reveal is CursorTo for a row that may sit under collapsed parents: the ancestors of the first match in Nodes are expanded first. Ancestors are the nearer rows above it with a smaller depth.
 
 <a name="Model[N].Scroll"></a>
-### func \(Model\[N\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L371>)
+### func \(Model\[N\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L386>)
 
 ```go
 func (m Model[N]) Scroll() layout.Scroll
@@ -281,7 +294,7 @@ func (m Model[N]) Scroll() layout.Scroll
 Scroll is where the tree shows its visible rows from, for a pane's scrollbar.
 
 <a name="Model[N].Selected"></a>
-### func \(Model\[N\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L268>)
+### func \(Model\[N\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L276>)
 
 ```go
 func (m Model[N]) Selected() (N, bool)
@@ -290,7 +303,7 @@ func (m Model[N]) Selected() (N, bool)
 Selected is the node under the cursor, false when no row is visible.
 
 <a name="Model[N].SetHeight"></a>
-### func \(Model\[N\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L108>)
+### func \(Model\[N\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L116>)
 
 ```go
 func (m Model[N]) SetHeight(h int) Model[N]
@@ -299,7 +312,7 @@ func (m Model[N]) SetHeight(h int) Model[N]
 SetHeight changes the rows the tree takes and keeps the cursor in view.
 
 <a name="Model[N].SetNode"></a>
-### func \(Model\[N\]\) [SetNode](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L292>)
+### func \(Model\[N\]\) [SetNode](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L300>)
 
 ```go
 func (m Model[N]) SetNode(idx int, mut func(*N)) Model[N]
@@ -308,16 +321,16 @@ func (m Model[N]) SetNode(idx int, mut func(*N)) Model[N]
 SetNode returns the tree with a fresh Nodes slice in which nodes\[idx\] was changed by mut: copy\-on\-write, never in place. A nil mut changes nothing.
 
 <a name="Model[N].SetNodes"></a>
-### func \(Model\[N\]\) [SetNodes](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L115>)
+### func \(Model\[N\]\) [SetNodes](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L123>)
 
 ```go
 func (m Model[N]) SetNodes(nodes []N) Model[N]
 ```
 
-SetNodes replaces the nodes after a reload, keeping the cursor on a row and in view.
+SetNodes replaces the nodes after a reload, keeping the cursor on a row and in view. Call Tick after it when a node is Busy.
 
 <a name="Model[N].SetOffset"></a>
-### func \(Model\[N\]\) [SetOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L144>)
+### func \(Model\[N\]\) [SetOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L152>)
 
 ```go
 func (m Model[N]) SetOffset(n int) Model[N]
@@ -325,17 +338,26 @@ func (m Model[N]) SetOffset(n int) Model[N]
 
 SetOffset scrolls the visible rows to start at n, as a restored view was, clamped so the cursor stays in view.
 
+<a name="Model[N].Tick"></a>
+### func \(Model\[N\]\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L18>)
+
+```go
+func (m Model[N]) Tick() tea.Cmd
+```
+
+Tick is the command for the Busy spinner's next frame, nil while no node is busy: call it after New, SetNodes or SetNode.
+
 <a name="Model[N].Update"></a>
-### func \(Model\[N\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L306>)
+### func \(Model\[N\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L314>)
 
 ```go
 func (m Model[N]) Update(msg tea.Msg) (Model[N], bezel.Result)
 ```
 
-Update takes the tree's keys and a bezel.ClickMsg on a row. Opening or closing a parent reports an [Expanded](<#Expanded>) or a [Collapsed](<#Collapsed>); any other message comes back unhandled and unchanged.
+Update takes the tree's keys, a bezel.ClickMsg on a row and the Busy spinner's frames. Opening or closing a parent reports an [Expanded](<#Expanded>) or a [Collapsed](<#Collapsed>); any other message comes back unhandled and unchanged.
 
 <a name="Model[N].View"></a>
-### func \(Model\[N\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L539>)
+### func \(Model\[N\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L554>)
 
 ```go
 func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) string) string
@@ -344,7 +366,7 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 View renders the visible rows through row, which draws one node knowing whether it is under the cursor. The last row becomes "↓ N more" when rows overflow; short trees are padded to Height. A tree not yet sized \(Height \<= 0\) renders nothing.
 
 <a name="Model[N].Visible"></a>
-### func \(Model\[N\]\) [Visible](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L244>)
+### func \(Model\[N\]\) [Visible](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L252>)
 
 ```go
 func (m Model[N]) Visible() []int
@@ -353,7 +375,7 @@ func (m Model[N]) Visible() []int
 Visible returns the indices into Nodes that are rendered, honouring each parent's collapsed state.
 
 <a name="Model[N].WithConnectors"></a>
-### func \(Model\[N\]\) [WithConnectors](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L184>)
+### func \(Model\[N\]\) [WithConnectors](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L192>)
 
 ```go
 func (m Model[N]) WithConnectors(c Connectors) Model[N]
@@ -362,7 +384,7 @@ func (m Model[N]) WithConnectors(c Connectors) Model[N]
 WithConnectors changes the lines Guides draws.
 
 <a name="Model[N].WithEmptyMessage"></a>
-### func \(Model\[N\]\) [WithEmptyMessage](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L122>)
+### func \(Model\[N\]\) [WithEmptyMessage](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L130>)
 
 ```go
 func (m Model[N]) WithEmptyMessage(s string) Model[N]
@@ -371,7 +393,7 @@ func (m Model[N]) WithEmptyMessage(s string) Model[N]
 WithEmptyMessage is shown, dimmed, when no row is visible; " \(empty\)" until set.
 
 <a name="Model[N].WithKeys"></a>
-### func \(Model\[N\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L172>)
+### func \(Model\[N\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L180>)
 
 ```go
 func (m Model[N]) WithKeys(k Keys) Model[N]
@@ -380,7 +402,7 @@ func (m Model[N]) WithKeys(k Keys) Model[N]
 WithKeys rebinds the tree.
 
 <a name="Model[N].WithScrollOff"></a>
-### func \(Model\[N\]\) [WithScrollOff](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L191>)
+### func \(Model\[N\]\) [WithScrollOff](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L199>)
 
 ```go
 func (m Model[N]) WithScrollOff(n int) Model[N]
@@ -388,8 +410,17 @@ func (m Model[N]) WithScrollOff(n int) Model[N]
 
 WithScrollOff keeps n rows in view above and below the cursor while it moves, where the tree has them.
 
+<a name="Model[N].WithSpinner"></a>
+### func \(Model\[N\]\) [WithSpinner](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L11>)
+
+```go
+func (m Model[N]) WithSpinner(s spinner.Spinner) Model[N]
+```
+
+WithSpinner turns s for the Busy nodes instead of spinner.MiniDot.
+
 <a name="Model[N].WithStyles"></a>
-### func \(Model\[N\]\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L157>)
+### func \(Model\[N\]\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L165>)
 
 ```go
 func (m Model[N]) WithStyles(edit func(Styles) Styles) Model[N]
@@ -398,7 +429,7 @@ func (m Model[N]) WithStyles(edit func(Styles) Styles) Model[N]
 WithStyles changes the styles derived from the theme through edit, under whatever theme View gets. It replaces an earlier edit.
 
 <a name="Noder"></a>
-## type [Noder](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L23-L26>)
+## type [Noder](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L24-L27>)
 
 Noder is a node the tree can read and whose expansion it can set. Expand returns a changed copy: the tree never writes through a shared slice.
 
@@ -410,7 +441,7 @@ type Noder[N any] interface {
 ```
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L88-L91>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L91-L95>)
 
 Styles are how a tree paints what it draws itself; each row is the app's.
 
@@ -418,17 +449,18 @@ Styles are how a tree paints what it draws itself; each row is the app's.
 type Styles struct {
     Empty lipgloss.Style // EmptyMessage, or "(empty)"
     More  lipgloss.Style // the "↓ N more" row
+    Busy  lipgloss.Style // BusyMark
 }
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L94>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L99>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles
 ```
 
-DefaultStyles dim both.
+DefaultStyles dim the empty message and the more row, and paint BusyMark in the accent.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 

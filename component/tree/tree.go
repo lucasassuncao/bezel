@@ -11,6 +11,7 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -32,6 +33,7 @@ type Info struct {
 	Expanded bool
 	Section  bool // a heading or spacer: skipped by the cursor
 	Hidden   bool // left out, and everything under it with it
+	Busy     bool // working: the row func draws BusyMark in place of its icon
 }
 
 // Keys are the bindings the tree answers to.
@@ -81,6 +83,7 @@ type Model[N Noder[N]] struct {
 	keys      *Keys
 	lines     *Connectors
 	scrollOff int
+	spin      spinner.Model // turns while a node is Busy
 	edit      func(Styles) Styles
 }
 
@@ -88,20 +91,25 @@ type Model[N Noder[N]] struct {
 type Styles struct {
 	Empty lipgloss.Style // EmptyMessage, or "(empty)"
 	More  lipgloss.Style // the "↓ N more" row
+	Busy  lipgloss.Style // BusyMark
 }
 
-// DefaultStyles dim both.
-func DefaultStyles(th theme.Resolved) Styles { return Styles{Empty: th.Dim, More: th.Dim} }
+// DefaultStyles dim the empty message and the more row, and paint BusyMark
+// in the accent.
+func DefaultStyles(th theme.Resolved) Styles {
+	return Styles{Empty: th.Dim, More: th.Dim, Busy: th.Accent}
+}
 
 // New builds a tree over nodes with the cursor on the first row that is not
-// a section; SetHeight gives it the rows its pane has.
+// a section; SetHeight gives it the rows its pane has. With a Busy node,
+// Tick turns the spinner.
 func New[N Noder[N]](nodes []N) Model[N] {
 	m := Model[N]{nodes: slices.Clone(nodes)}
 	vis := m.Visible()
 	for m.cursor < len(vis) && nodes[vis[m.cursor]].TreeInfo().Section {
 		m.cursor++
 	}
-	return m
+	return m.spun()
 }
 
 // SetHeight changes the rows the tree takes and keeps the cursor in view.
@@ -111,10 +119,10 @@ func (m Model[N]) SetHeight(h int) Model[N] {
 }
 
 // SetNodes replaces the nodes after a reload, keeping the cursor on a row
-// and in view.
+// and in view. Call Tick after it when a node is Busy.
 func (m Model[N]) SetNodes(nodes []N) Model[N] {
 	m.nodes = slices.Clone(nodes)
-	return m.clamp()
+	return m.clamp().spun()
 }
 
 // WithEmptyMessage is shown, dimmed, when no row is visible; "  (empty)"
@@ -297,12 +305,12 @@ func (m Model[N]) SetNode(idx int, mut func(*N)) Model[N] {
 	copy(nodes, m.nodes)
 	mut(&nodes[idx])
 	m.nodes = nodes
-	return m
+	return m.spun()
 }
 
-// Update takes the tree's keys and a bezel.ClickMsg on a row. Opening or
-// closing a parent reports an [Expanded] or a [Collapsed]; any other message
-// comes back unhandled and unchanged.
+// Update takes the tree's keys, a bezel.ClickMsg on a row and the Busy
+// spinner's frames. Opening or closing a parent reports an [Expanded] or a
+// [Collapsed]; any other message comes back unhandled and unchanged.
 func (m Model[N]) Update(msg tea.Msg) (Model[N], bezel.Result) {
 	var ev any
 	var handled bool
@@ -316,6 +324,13 @@ func (m Model[N]) Update(msg tea.Msg) (Model[N], bezel.Result) {
 		handled = true
 	case bezel.ClickMsg:
 		m, ev, handled = m.click(msg.Y)
+	default:
+		if !m.spin.Owns(msg) {
+			return m, bezel.Result{}
+		}
+		var r bezel.Result
+		m.spin, r = m.spin.Update(msg)
+		return m, r
 	}
 	if !handled {
 		return m, bezel.Result{}

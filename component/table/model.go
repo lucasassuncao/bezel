@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -18,10 +19,12 @@ import (
 )
 
 // Item is one row of a Model: its cells in column order, and a payload of
-// the caller's type T. A cell may carry its own colour.
+// the caller's type T. A cell may carry its own colour. A Busy row shows a
+// turning spinner where the cursor's marker goes.
 type Item[T any] struct {
 	Cells []string
 	Value T
+	Busy  bool
 }
 
 // Keys are the bindings the table answers to.
@@ -78,7 +81,8 @@ type Model[T any] struct {
 	find   filterMode
 	match  func(query, text string) bool // nil is Contains
 	fuzzy  bool
-	blur   bool // drawn without the cursor's colour, and deaf to keys
+	spin   spinner.Model // turns while a row is Busy
+	blur   bool          // drawn without the cursor's colour, and deaf to keys
 	edit   func(Styles) Styles
 }
 
@@ -88,18 +92,20 @@ type Styles struct {
 	Cursor  lipgloss.Style // the cursor row's marker and its plain cells
 	Blurred lipgloss.Style // the cursor row's marker while the table is blurred
 	More    lipgloss.Style // the "↓ N more" row
+	Busy    lipgloss.Style // the spinner on a Busy row
 }
 
-// DefaultStyles take the header from the theme's table role and paint the
-// cursor row in the cursor role.
+// DefaultStyles take the header from the theme's table role, paint the
+// cursor row in the cursor role and a busy row's spinner in the accent.
 func DefaultStyles(th theme.Resolved) Styles {
-	return Styles{Header: th.TableHeader, Cursor: th.Cursor, Blurred: th.Dim, More: th.Dim}
+	return Styles{Header: th.TableHeader, Cursor: th.Cursor, Blurred: th.Dim, More: th.Dim, Busy: th.Accent}
 }
 
 // New builds a table with the cursor on the first row; SetHeight gives it
-// the rows its pane has, header included.
+// the rows its pane has, header included. With a Busy row, Tick turns the
+// spinner.
 func New[T any](cols []Column, items []Item[T]) Model[T] {
-	m := Model[T]{cols: slices.Clone(cols), keys: DefaultKeys()}
+	m := Model[T]{cols: slices.Clone(cols), keys: DefaultKeys(), spin: spinner.New(spinner.MiniDot())}
 	return m.withItems(items).SetHeight(0)
 }
 
@@ -229,8 +235,8 @@ func (m Model[T]) SetHeight(h int) Model[T] {
 	return m.clamp().refilter()
 }
 
-// Update takes the table's keys, unless it is blurred, and a bezel.ClickMsg
-// on a row. Choosing a row, or a match at the / prompt, reports a [Chosen];
+// Update takes the table's keys unless blurred, a bezel.ClickMsg on a row and
+// the Busy spinner's frames. Choosing a row or a / match reports a [Chosen];
 // any other message comes back unhandled and unchanged.
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	var chosen, handled bool
@@ -247,6 +253,13 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 		handled = true
 	case bezel.ClickMsg:
 		m, chosen, handled = m.click(msg.Y)
+	default:
+		if !m.spin.Owns(msg) {
+			return m, bezel.Result{}
+		}
+		var r bezel.Result
+		m.spin, r = m.spin.Update(msg)
+		return m, r
 	}
 	if !handled {
 		return m, bezel.Result{}
@@ -346,7 +359,7 @@ func (m Model[T]) withItems(items []Item[T]) Model[T] {
 		rows[i] = it.Cells
 	}
 	m.widths = natural(m.cols, rows)
-	return m
+	return m.spun()
 }
 
 // SetWidth changes the cells the table takes; columns shrink to fit.
@@ -377,16 +390,22 @@ func (m Model[T]) View(th theme.Resolved) string {
 	}
 	w = w.Clamp(len(rows))
 	start, end, below := w.Bounds(len(rows))
+	busy := m.busyMark(st)
 	for i := start; i < end; i++ {
 		cells := rows[i].Cells
+		lead := pad
 		switch {
+		case rows[i].Busy:
+			lead = busy
 		case i == w.Cursor && m.blur:
-			lines = append(lines, st.Blurred.Render(marker)+Row(widths, cells))
+			lead = st.Blurred.Render(marker)
 		case i == w.Cursor:
-			lines = append(lines, st.Cursor.Render(marker)+Row(widths, cursorCells(cells, st.Cursor)))
-		default:
-			lines = append(lines, pad+Row(widths, cells))
+			lead = st.Cursor.Render(marker)
 		}
+		if i == w.Cursor && !m.blur {
+			cells = cursorCells(cells, st.Cursor)
+		}
+		lines = append(lines, lead+Row(widths, cells))
 	}
 	if below > 0 {
 		lines = append(lines, draw.More(below, draw.Width(marker), st.More))
@@ -426,7 +445,7 @@ func first[T any](it Item[T]) string {
 func cloneItems[T any](items []Item[T]) []Item[T] {
 	out := make([]Item[T], len(items))
 	for i, it := range items {
-		out[i] = Item[T]{Cells: slices.Clone(it.Cells), Value: it.Value}
+		out[i] = Item[T]{Cells: slices.Clone(it.Cells), Value: it.Value, Busy: it.Busy}
 	}
 	return out
 }

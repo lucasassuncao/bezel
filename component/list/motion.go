@@ -99,9 +99,10 @@ func (m Model[T]) glide() float64 {
 // Active reports whether the list is still moving.
 func (m Model[T]) Active() bool { return m.mo.run.Active() }
 
-// Tick is the command for the list's next frame, nil while it is still: call
-// it after SetRows to start what it set moving.
-func (m Model[T]) Tick() tea.Cmd { return m.mo.run.Tick() }
+// Tick is the command for the list's next frames, its motion's and its Busy
+// spinner's, nil while both are still: call it after SetRows to start what
+// it set moving.
+func (m Model[T]) Tick() tea.Cmd { return tea.Batch(m.mo.run.Tick(), m.spin.Tick()) }
 
 // FrameAt is the list's frame for at, for a test that delivers frames itself.
 func (m Model[T]) FrameAt(at time.Time) tea.Msg { return m.mo.run.FrameAt(at) }

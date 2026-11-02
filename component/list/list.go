@@ -14,6 +14,7 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/paginator"
+	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/fuzzy"
 	"github.com/lucasassuncao/bezel/key"
@@ -32,6 +33,7 @@ type Row[T any] struct {
 	Description string
 	Section     bool
 	Mark        string
+	Busy        bool // a spinner turns in place of Mark
 	Style       *lipgloss.Style
 	Value       T
 }
@@ -79,7 +81,8 @@ type Model[T any] struct {
 	match  func(query, label string) bool // nil is Contains
 	fuzzy  bool
 	mo     motion
-	height int // the lines the list takes, title and status included
+	spin   spinner.Model // turns while a row is Busy
+	height int           // the lines the list takes, title and status included
 	title  string
 	status bool
 	pages  bool
@@ -98,15 +101,16 @@ type Styles struct {
 	Status      lipgloss.Style
 	Arrive      lipgloss.Style // its foreground is where a new row fades from
 	Gone        lipgloss.Style // its foreground is where a removed row fades to
+	Busy        lipgloss.Style // the spinner on a Busy row
 }
 
 // DefaultStyles draw the cursor row in the cursor role over dim rows, the
 // title in bold accent and the new and removed rows fading through the
-// accent and the border.
+// accent and the border; a busy row's spinner is in the accent.
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{
 		Title: th.Accent.Bold(true), Section: th.Section, Row: th.Dim, Cursor: th.Cursor,
-		Description: th.Muted, More: th.Dim, Status: th.Muted,
+		Description: th.Muted, More: th.Dim, Status: th.Muted, Busy: th.Accent,
 		Arrive: lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Accent)),
 		Gone:   lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Border)),
 	}
@@ -133,11 +137,11 @@ type filterMode struct {
 }
 
 // New builds a list with the cursor on the first selectable row; SetHeight
-// gives it the rows its pane has.
+// gives it the rows its pane has. With a Busy row, Tick turns the spinner.
 func New[T any](rows []Row[T]) Model[T] {
-	m := Model[T]{rows: slices.Clone(rows), keys: DefaultKeys()}
+	m := Model[T]{rows: slices.Clone(rows), keys: DefaultKeys(), spin: spinner.New(spinner.MiniDot())}
 	m.win = layout.Window{Cursor: firstSelectable(rows)}
-	return m.fit()
+	return m.fit().spun()
 }
 
 // WithMatch filters with match, which gets the typed text and each label:
@@ -279,7 +283,7 @@ func (m Model[T]) Scroll() layout.Scroll {
 
 // SetRows replaces the rows, keeping the cursor on the row with the same
 // label when it survives (at the same index first), else on the first
-// selectable one.
+// selectable one. Call Tick after it, for the motion and the Busy spinner.
 func (m Model[T]) SetRows(rows []Row[T]) Model[T] {
 	before, cursor := m.rows, m.win.Cursor
 	return m.setRows(rows).changed(before, cursor)
@@ -294,7 +298,7 @@ func (m Model[T]) setRows(rows []Row[T]) Model[T] {
 	m.rows = slices.Clone(rows)
 	m = m.fit()
 	if at < len(m.rows) && !m.rows[at].Section && m.rows[at].Label == prev {
-		return m.clampScroll().refilter()
+		return m.clampScroll().refilter().spun()
 	}
 	m.win.Cursor = firstSelectable(m.rows)
 	for i, r := range m.rows {
@@ -303,7 +307,7 @@ func (m Model[T]) setRows(rows []Row[T]) Model[T] {
 			break
 		}
 	}
-	return m.clampScroll().refilter()
+	return m.clampScroll().refilter().spun()
 }
 
 // SetHeight updates the lines the list takes and re-clamps the scroll.
@@ -372,6 +376,11 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	case bezel.ClickMsg:
 		m, chosen, handled = m.click(msg.Y)
 	default:
+		if m.spin.Owns(msg) {
+			var r bezel.Result
+			m.spin, r = m.spin.Update(msg)
+			return m, r
+		}
 		run, p, ok, cmd := m.mo.run.Update(msg)
 		if !ok {
 			return m, bezel.Result{}
@@ -387,7 +396,7 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	}
 	r := bezel.Result{Handled: true}
 	if m.mo.run.ID != before {
-		r.Cmd = m.Tick() // a new motion began; the old frames are foreign now
+		r.Cmd = m.mo.run.Tick() // a new motion began; the old frames are foreign now
 	}
 	if row, ok := m.Selected(); chosen && ok {
 		r.Event = Chosen[T]{Row: row}
@@ -708,7 +717,7 @@ func (m Model[T]) rowLines(st *Styles) (lines []string, of []int) {
 	start, end, below := m.bounds()
 	cursor := m.cursorRow()
 
-	two := m.itemLines() == 2
+	two, busy := m.itemLines() == 2, m.busyMark(st)
 	lines, of = make([]string, 0, end-start), make([]int, 0, end-start)
 	for i := start; i < end; i++ {
 		if g, ok := m.ghostLine(i, st); ok {
@@ -724,9 +733,9 @@ func (m Model[T]) rowLines(st *Styles) (lines []string, of []int) {
 			lines = append(lines, heading)
 		case i != cursor && arriving != nil:
 			r.Style = arriving
-			lines = append(lines, renderRow(r, false, st, nil, two))
+			lines = append(lines, renderRow(r, false, st, nil, two, busy))
 		default:
-			lines = append(lines, renderRow(r, i == cursor, st, nil, two))
+			lines = append(lines, renderRow(r, i == cursor, st, nil, two, busy))
 		}
 		of = append(of, i)
 	}
@@ -762,7 +771,7 @@ func (m Model[T]) viewFilter(st *Styles) string {
 		if m.fuzzy {
 			_, hits, _ = fuzzy.Match(m.find.text, r.Label)
 		}
-		lines = append(lines, renderRow(r, i == w.Cursor, st, hits, two))
+		lines = append(lines, renderRow(r, i == w.Cursor, st, hits, two, m.busyMark(st)))
 	}
 	if below > 0 {
 		lines = append(lines, moreRow(below, st))
@@ -777,9 +786,10 @@ func (m Model[T]) viewFilter(st *Styles) string {
 // moreRow stands in for the last row while n rows are hidden below it.
 func moreRow(n int, st *Styles) string { return draw.More(n, 2, st.More) }
 
-// renderRow is a row in its style, the runes of its label at hits
-// underlined, and with two its description, or a blank, under it.
-func renderRow[T any](r Row[T], selected bool, st *Styles, hits []int, two bool) string {
+// renderRow is a row in its style, the runes of its label at hits underlined,
+// with two its description (or a blank) under it, and when Busy the frame busy
+// in place of its Mark, or of the lead when it has none.
+func renderRow[T any](r Row[T], selected bool, st *Styles, hits []int, two bool, busy string) string {
 	style, lead := st.Row, "  "
 	switch {
 	case selected:
@@ -787,12 +797,21 @@ func renderRow[T any](r Row[T], selected bool, st *Styles, hits []int, two bool)
 	case r.Style != nil:
 		style = *r.Style
 	}
-	if r.Mark != "" {
-		lead += r.Mark + "  "
+	var head string
+	switch {
+	case r.Busy && r.Mark != "":
+		gap := strings.Repeat(" ", max(draw.Width(r.Mark)-draw.Width(busy), 0))
+		head = style.Render(lead) + busy + style.Render(gap+"  ")
+	case r.Busy:
+		head = busy + style.Render(strings.Repeat(" ", max(draw.Width(lead)-draw.Width(busy), 0)))
+	case r.Mark != "":
+		head = style.Render(lead + r.Mark + "  ")
+	default:
+		head = style.Render(lead)
 	}
-	row := style.Render(lead) + underlined(draw.OneLine(r.Label), hits, style)
+	row := head + underlined(draw.OneLine(r.Label), hits, style)
 	if two {
-		indent := strings.Repeat(" ", utf8.RuneCountInString(lead))
+		indent := strings.Repeat(" ", draw.Width(head))
 		row += "\n" + st.Description.Render(indent+draw.OneLine(r.Description))
 	}
 	return row

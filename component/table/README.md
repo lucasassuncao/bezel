@@ -40,11 +40,13 @@ Package table sizes columns to their contents, giving way in a declared order wh
   - [func \(m Model\[T\]\) SetHeight\(h int\) Model\[T\]](<#Model[T].SetHeight>)
   - [func \(m Model\[T\]\) SetItems\(items \[\]Item\[T\]\) Model\[T\]](<#Model[T].SetItems>)
   - [func \(m Model\[T\]\) SetWidth\(w int\) Model\[T\]](<#Model[T].SetWidth>)
+  - [func \(m Model\[T\]\) Tick\(\) tea.Cmd](<#Model[T].Tick>)
   - [func \(m Model\[T\]\) Update\(msg tea.Msg\) \(Model\[T\], bezel.Result\)](<#Model[T].Update>)
   - [func \(m Model\[T\]\) View\(th theme.Resolved\) string](<#Model[T].View>)
   - [func \(m Model\[T\]\) WithFuzzy\(on bool\) Model\[T\]](<#Model[T].WithFuzzy>)
   - [func \(m Model\[T\]\) WithKeys\(k Keys\) Model\[T\]](<#Model[T].WithKeys>)
   - [func \(m Model\[T\]\) WithMatch\(match func\(query, text string\) bool\) Model\[T\]](<#Model[T].WithMatch>)
+  - [func \(m Model\[T\]\) WithSpinner\(s spinner.Spinner\) Model\[T\]](<#Model[T].WithSpinner>)
   - [func \(m Model\[T\]\) WithStyles\(edit func\(Styles\) Styles\) Model\[T\]](<#Model[T].WithStyles>)
 - [type Styles](<#Styles>)
   - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
@@ -117,19 +119,20 @@ type Column struct {
 ```
 
 <a name="Item"></a>
-## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L22-L25>)
+## type [Item](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L24-L28>)
 
-Item is one row of a Model: its cells in column order, and a payload of the caller's type T. A cell may carry its own colour.
+Item is one row of a Model: its cells in column order, and a payload of the caller's type T. A cell may carry its own colour. A Busy row shows a turning spinner where the cursor's marker goes.
 
 ```go
 type Item[T any] struct {
     Cells []string
     Value T
+    Busy  bool
 }
 ```
 
 <a name="FromValues"></a>
-### func [FromValues](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L156>)
+### func [FromValues](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L162>)
 
 ```go
 func FromValues[T any](text, sep string) []Item[T]
@@ -138,7 +141,7 @@ func FromValues[T any](text, sep string) []Item[T]
 FromValues is the rows of delimited text, one per line, its cells split at sep; blank lines are skipped. The payload is left zero.
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L28-L31>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L31-L34>)
 
 Keys are the bindings the table answers to.
 
@@ -150,7 +153,7 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L35>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L38>)
 
 ```go
 func DefaultKeys() Keys
@@ -159,7 +162,7 @@ func DefaultKeys() Keys
 DefaultKeys are the arrows, pgup/pgdown, ctrl\+u/ctrl\+d for half a page, home/end, enter, / and esc.
 
 <a name="VimKeys"></a>
-### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L54>)
+### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L57>)
 
 ```go
 func VimKeys() Keys
@@ -168,7 +171,7 @@ func VimKeys() Keys
 VimKeys are DefaultKeys with vim's letters added: k/j to move, g/G to the ends and ctrl\+b/f to page. The filter prompt still takes them as text.
 
 <a name="Model"></a>
-## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L70-L83>)
+## type [Model](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L73-L87>)
 
 Model is a table with a cursor: the header stays put and the rows under it scroll. A value: every method returns the new table.
 
@@ -179,16 +182,16 @@ type Model[T any] struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L101>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L107>)
 
 ```go
 func New[T any](cols []Column, items []Item[T]) Model[T]
 ```
 
-New builds a table with the cursor on the first row; SetHeight gives it the rows its pane has, header included.
+New builds a table with the cursor on the first row; SetHeight gives it the rows its pane has, header included. With a Busy row, Tick turns the spinner.
 
 <a name="Model[T].Blur"></a>
-### func \(Model\[T\]\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L137>)
+### func \(Model\[T\]\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L143>)
 
 ```go
 func (m Model[T]) Blur() Model[T]
@@ -197,7 +200,7 @@ func (m Model[T]) Blur() Model[T]
 Blur stops the table taking keys and draws its cursor row dimmed, for a pane that lost the focus.
 
 <a name="Model[T].Cursor"></a>
-### func \(Model\[T\]\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L174>)
+### func \(Model\[T\]\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L180>)
 
 ```go
 func (m Model[T]) Cursor() int
@@ -224,7 +227,7 @@ func (m Model[T]) Filtering() bool
 Filtering reports whether the / prompt is open and taking the keys.
 
 <a name="Model[T].Focus"></a>
-### func \(Model\[T\]\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L130>)
+### func \(Model\[T\]\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L136>)
 
 ```go
 func (m Model[T]) Focus() Model[T]
@@ -233,7 +236,7 @@ func (m Model[T]) Focus() Model[T]
 Focus lets the table take keys and paints its cursor row; a table is focused when built.
 
 <a name="Model[T].Focused"></a>
-### func \(Model\[T\]\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L143>)
+### func \(Model\[T\]\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L149>)
 
 ```go
 func (m Model[T]) Focused() bool
@@ -242,7 +245,7 @@ func (m Model[T]) Focused() bool
 Focused reports whether the table takes keys.
 
 <a name="Model[T].Items"></a>
-### func \(Model\[T\]\) [Items](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L168>)
+### func \(Model\[T\]\) [Items](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L174>)
 
 ```go
 func (m Model[T]) Items() []Item[T]
@@ -251,7 +254,7 @@ func (m Model[T]) Items() []Item[T]
 Items is a copy of every row, cells included.
 
 <a name="Model[T].Legend"></a>
-### func \(Model\[T\]\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L146>)
+### func \(Model\[T\]\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L152>)
 
 ```go
 func (m Model[T]) Legend() []legend.Entry
@@ -260,7 +263,7 @@ func (m Model[T]) Legend() []legend.Entry
 Legend lists the keys the table answers to now: the filter's while it is open.
 
 <a name="Model[T].Len"></a>
-### func \(Model\[T\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L171>)
+### func \(Model\[T\]\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L177>)
 
 ```go
 func (m Model[T]) Len() int
@@ -269,7 +272,7 @@ func (m Model[T]) Len() int
 Len is how many rows there are.
 
 <a name="Model[T].Scroll"></a>
-### func \(Model\[T\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L196>)
+### func \(Model\[T\]\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L202>)
 
 ```go
 func (m Model[T]) Scroll() layout.Scroll
@@ -278,7 +281,7 @@ func (m Model[T]) Scroll() layout.Scroll
 Scroll is where the table shows its rows from, for a pane's scrollbar; while filtering, where the matches show from.
 
 <a name="Model[T].Selected"></a>
-### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L178>)
+### func \(Model\[T\]\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L184>)
 
 ```go
 func (m Model[T]) Selected() (Item[T], bool)
@@ -287,7 +290,7 @@ func (m Model[T]) Selected() (Item[T], bool)
 Selected is a copy of the row under the cursor, false when there are none. While filtering it is the row under the filter cursor.
 
 <a name="Model[T].SetHeight"></a>
-### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L226>)
+### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L232>)
 
 ```go
 func (m Model[T]) SetHeight(h int) Model[T]
@@ -296,7 +299,7 @@ func (m Model[T]) SetHeight(h int) Model[T]
 SetHeight updates the rows the table takes, header included.
 
 <a name="Model[T].SetItems"></a>
-### func \(Model\[T\]\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L207>)
+### func \(Model\[T\]\) [SetItems](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L213>)
 
 ```go
 func (m Model[T]) SetItems(items []Item[T]) Model[T]
@@ -305,7 +308,7 @@ func (m Model[T]) SetItems(items []Item[T]) Model[T]
 SetItems replaces the rows, keeping the cursor on the row with the same first cell when it survives \(at the same index first\), else at the same index: a refresh that drops a row lands on the one that took its place.
 
 <a name="Model[T].SetWidth"></a>
-### func \(Model\[T\]\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L353>)
+### func \(Model\[T\]\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L366>)
 
 ```go
 func (m Model[T]) SetWidth(w int) Model[T]
@@ -313,17 +316,26 @@ func (m Model[T]) SetWidth(w int) Model[T]
 
 SetWidth changes the cells the table takes; columns shrink to fit.
 
+<a name="Model[T].Tick"></a>
+### func \(Model\[T\]\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/table/busy.go#L19>)
+
+```go
+func (m Model[T]) Tick() tea.Cmd
+```
+
+Tick is the command for the Busy spinner's next frame, nil while no row is busy: call it after New or SetItems.
+
 <a name="Model[T].Update"></a>
-### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L235>)
+### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L241>)
 
 ```go
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result)
 ```
 
-Update takes the table's keys, unless it is blurred, and a bezel.ClickMsg on a row. Choosing a row, or a match at the / prompt, reports a [Chosen](<#Chosen>); any other message comes back unhandled and unchanged.
+Update takes the table's keys unless blurred, a bezel.ClickMsg on a row and the Busy spinner's frames. Choosing a row or a / match reports a [Chosen](<#Chosen>); any other message comes back unhandled and unchanged.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L361>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L374>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved) string
@@ -341,7 +353,7 @@ func (m Model[T]) WithFuzzy(on bool) Model[T]
 WithFuzzy filters by the typed letters in order, anywhere in the row, best match first.
 
 <a name="Model[T].WithKeys"></a>
-### func \(Model\[T\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L123>)
+### func \(Model\[T\]\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L129>)
 
 ```go
 func (m Model[T]) WithKeys(k Keys) Model[T]
@@ -358,8 +370,17 @@ func (m Model[T]) WithMatch(match func(query, text string) bool) Model[T]
 
 WithMatch filters with match, which gets the typed text and each row's cells joined by spaces, colours stripped. nil is Contains again. It ends WithFuzzy.
 
+<a name="Model[T].WithSpinner"></a>
+### func \(Model\[T\]\) [WithSpinner](<https://github.com/lucasassuncao/bezel/blob/main/component/table/busy.go#L12>)
+
+```go
+func (m Model[T]) WithSpinner(s spinner.Spinner) Model[T]
+```
+
+WithSpinner turns s on the Busy rows instead of spinner.MiniDot.
+
 <a name="Model[T].WithStyles"></a>
-### func \(Model\[T\]\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L108>)
+### func \(Model\[T\]\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L114>)
 
 ```go
 func (m Model[T]) WithStyles(edit func(Styles) Styles) Model[T]
@@ -368,7 +389,7 @@ func (m Model[T]) WithStyles(edit func(Styles) Styles) Model[T]
 WithStyles changes the styles derived from the theme through edit, under whatever theme View gets. It replaces an earlier edit.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L86-L91>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L90-L96>)
 
 Styles are how a table paints its parts.
 
@@ -378,17 +399,18 @@ type Styles struct {
     Cursor  lipgloss.Style // the cursor row's marker and its plain cells
     Blurred lipgloss.Style // the cursor row's marker while the table is blurred
     More    lipgloss.Style // the "↓ N more" row
+    Busy    lipgloss.Style // the spinner on a Busy row
 }
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L95>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L100>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles
 ```
 
-DefaultStyles take the header from the theme's table role and paint the cursor row in the cursor role.
+DefaultStyles take the header from the theme's table role, paint the cursor row in the cursor role and a busy row's spinner in the accent.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 
