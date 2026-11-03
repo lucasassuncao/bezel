@@ -741,7 +741,7 @@ func NewHelp(sections []HelpSection, th theme.Resolved) Help
 NewHelp lists sections, with no title over them.
 
 <a name="Help.Legend"></a>
-### func \(Help\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L66>)
+### func \(Help\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L78>)
 
 ```go
 func (h Help) Legend() []legend.Entry
@@ -768,7 +768,7 @@ func (h Help) Update(msg tea.Msg) (Overlay, bezel.Result)
 
 
 <a name="Help.View"></a>
-### func \(Help\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L67>)
+### func \(Help\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/help.go#L79>)
 
 ```go
 func (h Help) View(body layout.Rect) string

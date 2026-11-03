@@ -56,3 +56,24 @@ func TestHelpClosesOnTheKeysItWasGiven(t *testing.T) {
 	require.Equal(t, tea.Msg(CloseMsg{}), cmd())
 	require.Contains(t, ansi.Strip(h.View(layout.Rect{W: 60, H: 20})), "x closes")
 }
+
+func TestALongKeyWidensTheColumnForEveryRow(t *testing.T) {
+	h := NewHelp([]HelpSection{{Name: "app", Entries: []legend.Entry{
+		legend.New("q", "quit"), legend.New("ctrl+shift+arrows", "resize"),
+	}}}, theme.Resolved{})
+	plain := ansi.Strip(h.View(layout.Rect{W: 80, H: 20}))
+	var quit, resize int
+	for _, l := range strings.Split(plain, "\n") {
+		if i := strings.Index(l, "quit"); i >= 0 {
+			quit = ansi.StringWidth(l[:i])
+		}
+		if i := strings.Index(l, "resize"); i >= 0 {
+			resize = ansi.StringWidth(l[:i])
+		}
+	}
+	require.NotZero(t, quit)
+	require.Equal(t, quit, resize, "the descriptions start in one column")
+
+	short := NewHelp([]HelpSection{{Name: "app", Entries: []legend.Entry{legend.New("q", "quit")}}}, theme.Resolved{})
+	require.Contains(t, ansi.Strip(short.View(layout.Rect{W: 80, H: 20})), "  q                quit", "short keys keep their column")
+}

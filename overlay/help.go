@@ -63,19 +63,32 @@ func (h Help) Update(msg tea.Msg) (Overlay, bezel.Result) {
 	return h, bezel.Result{Handled: isKey}
 }
 
+// keyWidth is the key column: the longest key in any section, and at least
+// 15 cells so short keys line up as they always have.
+func (h Help) keyWidth() int {
+	w := 15
+	for _, s := range h.sections {
+		for _, e := range s.Entries {
+			w = max(w, draw.Width(e.Help.Key))
+		}
+	}
+	return w
+}
+
 func (h Help) Legend() []legend.Entry { return legend.FromBindings([]key.Binding{h.keys.Close}) }
 func (h Help) View(body layout.Rect) string {
 	var lines []string
 	if h.title != "" {
 		lines = append(lines, accent(h.style()).Bold(true).Render(h.title), "")
 	}
+	keyW := h.keyWidth()
 	for i, s := range h.sections {
 		if i > 0 {
 			lines = append(lines, "")
 		}
 		lines = append(lines, accent(h.style()).Bold(true).Render(s.Name), "")
 		for _, e := range s.Entries {
-			lines = append(lines, "  "+draw.Pad(e.Help.Key+" ", 16)+" "+e.Help.Desc)
+			lines = append(lines, "  "+draw.Pad(e.Help.Key, keyW)+"  "+e.Help.Desc)
 		}
 	}
 	lines = append(lines, "", h.hint().Text.Render(h.keys.Close.Help().Key+" closes"))
