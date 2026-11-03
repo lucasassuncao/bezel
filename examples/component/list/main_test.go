@@ -58,14 +58,14 @@ func TestListFilterTakesEveryKey(t *testing.T) {
 
 func TestListTurnsASpinnerOnABusyRow(t *testing.T) {
 	var m tea.Model = newModel()
-	require.NotNil(t, m.Init(), "orange starts busy")
+	require.Nil(t, m.Init(), "no row starts busy")
 	m, out := frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
-	require.Contains(t, out, "  ⠋  [ ] orange", "the spinner takes the mark")
+	require.NotContains(t, out, "⠋")
 
 	m, cmd := m.Update(bezeltest.Key("b"))
 	_, out = frame(t, m, cmd())
-	t.Log("\n" + out)
 	require.Contains(t, out, "▶ ⠋  [ ] banana", "b marks the cursor row")
+	require.Contains(t, out, "•  [ ] orange", "the other rows keep their mark")
 }
 
 func TestListChecksRowsForABatch(t *testing.T) {

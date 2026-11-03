@@ -31,15 +31,12 @@ func rows() []list.Row[food] {
 	}
 	return []list.Row[food]{
 		{Label: "Fruit", Section: true},
-		row("banana", 89), row("mango", 60), busy(row("orange", 47)), row("pineapple", 50),
+		row("banana", 89), row("mango", 60), row("orange", 47), row("pineapple", 50),
 		{Section: true},
 		{Label: "Vegetables", Section: true},
 		row("carrot", 41), row("spinach", 23), row("tomato", 18), row("onion", 40),
 	}
 }
-
-// busy is r with a spinner turning in place of its mark.
-func busy(r list.Row[food]) list.Row[food] { r.Busy = true; return r }
 
 type toggleBusyMsg struct{}
 
@@ -68,8 +65,8 @@ func newModel() model {
 	return model{sh: sh, th: th, list: list.New(rows()).WithMotion(120 * time.Millisecond).WithMulti(true)}
 }
 
-// Init turns the spinner of the row that starts busy.
-func (m model) Init() tea.Cmd { return m.list.Tick() }
+// Init has nothing to start: a spinner turns only once b marks a row busy.
+func (m model) Init() tea.Cmd { return nil }
 
 // toList hands a message to the list and reads what it did; the Cmd it
 // returns starts the cursor gliding to where the key moved it.
