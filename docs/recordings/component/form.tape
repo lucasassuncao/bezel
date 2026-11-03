@@ -53,6 +53,20 @@ Sleep 1.8s
 Enter
 Sleep 1s
 
+# -- Start: a date, picked from the calendar it opens --------------------------------------
+
+Tab
+Sleep 600ms
+Enter
+Wait+Screen /November 2026/
+Sleep 800ms
+Down@400ms 1
+Sleep 400ms
+Right@400ms 2
+Sleep 1.5s
+Enter
+Sleep 1s
+
 # -- Shell, docker and the port: a radio, a toggle and a checkbox -----------------------------
 
 Tab

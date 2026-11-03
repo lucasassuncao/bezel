@@ -1,6 +1,6 @@
-// Form: one of each control, filled in and submitted, the select describing
-// its options. tab and shift+tab move between them; Create reports what the
-// form holds on the status row.
+// Form: one of each control, filled in and submitted: the select describes
+// its options and the date opens a calendar. tab and shift+tab move between
+// them; Create reports what the form holds on the status row.
 package main
 
 import (
@@ -21,6 +21,7 @@ import (
 const (
 	fName = iota
 	fImage
+	fStart
 	fShell
 	fDocker
 	fPort
@@ -50,6 +51,7 @@ func newModel() model {
 		form.NewInput("Name").WithPlaceholder("my-project").WithWidth(28),
 		form.NewSelect("Image", []string{"ubuntu", "debian", "alpine"}).
 			WithDescriptions([]string{"LTS, the most packages", "stable and conservative", "small, musl libc"}),
+		form.NewDate("Start", start),
 		form.NewRadio("Shell", []string{"bash", "zsh", "fish"}),
 		form.NewToggle("Docker"),
 		form.NewCheckbox("Forward port 3000"),
@@ -57,6 +59,9 @@ func newModel() model {
 	)
 	return model{sh: sh, th: th, form: f}
 }
+
+// start is the day the date field opens on, fixed so the recording holds still.
+var start = time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC)
 
 // Init starts the caret blinking in the input the form opens on.
 func (m model) Init() tea.Cmd { return m.form.Init() }
@@ -66,6 +71,7 @@ func (m model) summary() string {
 	// Get is false for a wrong index or type, and a zero control reads as empty.
 	in, _ := form.Get[form.Input](m.form, fName)
 	image, _ := form.Get[form.Select](m.form, fImage)
+	day, _ := form.Get[form.Date](m.form, fStart)
 	sh, _ := form.Get[form.Radio](m.form, fShell)
 	docker, _ := form.Get[form.Toggle](m.form, fDocker)
 	port, _ := form.Get[form.Checkbox](m.form, fPort)
@@ -73,8 +79,8 @@ func (m model) summary() string {
 	if name == "" {
 		name = "my-project"
 	}
-	return fmt.Sprintf("created %s: %s, %s, docker %v, port 3000 %v", name,
-		image.Value(), sh.Value(), docker.On(), port.Checked())
+	return fmt.Sprintf("created %s: %s from %s, %s, docker %v, port 3000 %v", name,
+		image.Value(), day.Value(), sh.Value(), docker.On(), port.Checked())
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/component/form"
 ```
 
-Package form is the controls that ask for a value: a text input, a select, checkboxes, radios, a toggle and a button, stacked in a Form that moves focus with tab and shift\+tab. Each control is one row, its label in a shared column, painted in the theme the Form was built with.
+Package form is the controls that ask for a value: a text input, a select, a date, checkboxes, radios, a toggle and a button, stacked in a Form that moves focus with tab and shift\+tab. Each control is one row, its label in a shared column, painted in the theme the Form was built with.
 
 ## Index
 
@@ -31,6 +31,19 @@ Package form is the controls that ask for a value: a text input, a select, check
   - [func \(c Checkbox\) View\(focused bool, labelW, width int\) string](<#Checkbox.View>)
   - [func \(c Checkbox\) WithChecked\(on bool\) Checkbox](<#Checkbox.WithChecked>)
   - [func \(c Checkbox\) WithKeys\(k Keys\) Checkbox](<#Checkbox.WithKeys>)
+- [type Date](<#Date>)
+  - [func NewDate\(label string, day time.Time\) Date](<#NewDate>)
+  - [func \(d Date\) Blur\(\) Field](<#Date.Blur>)
+  - [func \(d Date\) Day\(\) time.Time](<#Date.Day>)
+  - [func \(d Date\) Focus\(\) \(Field, tea.Cmd\)](<#Date.Focus>)
+  - [func \(d Date\) Holding\(\) bool](<#Date.Holding>)
+  - [func \(d Date\) Label\(\) string](<#Date.Label>)
+  - [func \(d Date\) Update\(msg tea.Msg\) \(Field, bezel.Result\)](<#Date.Update>)
+  - [func \(d Date\) Value\(\) string](<#Date.Value>)
+  - [func \(d Date\) View\(focused bool, labelW, width int\) string](<#Date.View>)
+  - [func \(d Date\) WithCalendar\(edit func\(calendar.Model\) calendar.Model\) Date](<#Date.WithCalendar>)
+  - [func \(d Date\) WithFormat\(layout string\) Date](<#Date.WithFormat>)
+  - [func \(d Date\) WithKeys\(k Keys\) Date](<#Date.WithKeys>)
 - [type Field](<#Field>)
 - [type Form](<#Form>)
   - [func New\(th theme.Resolved, fields ...Field\) Form](<#New>)
@@ -277,6 +290,125 @@ func (c Checkbox) WithKeys(k Keys) Checkbox
 ```
 
 WithKeys rebinds the box: Press flips it.
+
+<a name="Date"></a>
+## type [Date](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L17-L26>)
+
+Date is a day picked from a calendar that opens under it: Press opens it, the calendar's keys move, Press picks and Close closes without changing it.
+
+```go
+type Date struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewDate"></a>
+### func [NewDate](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L29>)
+
+```go
+func NewDate(label string, day time.Time) Date
+```
+
+NewDate offers a day, starting on day and written as 2006\-01\-02.
+
+<a name="Date.Blur"></a>
+### func \(Date\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L73>)
+
+```go
+func (d Date) Blur() Field
+```
+
+
+
+<a name="Date.Day"></a>
+### func \(Date\) [Day](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L63>)
+
+```go
+func (d Date) Day() time.Time
+```
+
+Day is the chosen day, at midnight.
+
+<a name="Date.Focus"></a>
+### func \(Date\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L71>)
+
+```go
+func (d Date) Focus() (Field, tea.Cmd)
+```
+
+
+
+<a name="Date.Holding"></a>
+### func \(Date\) [Holding](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L70>)
+
+```go
+func (d Date) Holding() bool
+```
+
+Holding reports whether the calendar is open, keeping tab and esc from the form.
+
+<a name="Date.Label"></a>
+### func \(Date\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L67>)
+
+```go
+func (d Date) Label() string
+```
+
+
+
+<a name="Date.Update"></a>
+### func \(Date\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L80>)
+
+```go
+func (d Date) Update(msg tea.Msg) (Field, bezel.Result)
+```
+
+Update opens on Press; while open, Press or the calendar's enter picks the day under its cursor, Close closes, and the rest moves the calendar.
+
+<a name="Date.Value"></a>
+### func \(Date\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L66>)
+
+```go
+func (d Date) Value() string
+```
+
+Value is the chosen day in the field's format.
+
+<a name="Date.View"></a>
+### func \(Date\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L109>)
+
+```go
+func (d Date) View(focused bool, labelW, width int) string
+```
+
+
+
+<a name="Date.WithCalendar"></a>
+### func \(Date\) [WithCalendar](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L43>)
+
+```go
+func (d Date) WithCalendar(edit func(calendar.Model) calendar.Model) Date
+```
+
+WithCalendar sets up the calendar that opens: its range, first weekday, today or keys. The day stays the field's own.
+
+<a name="Date.WithFormat"></a>
+### func \(Date\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L36>)
+
+```go
+func (d Date) WithFormat(layout string) Date
+```
+
+WithFormat writes the day with a time.Format layout.
+
+<a name="Date.WithKeys"></a>
+### func \(Date\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L50>)
+
+```go
+func (d Date) WithKeys(k Keys) Date
+```
+
+WithKeys rebinds the field: Press opens and picks, Close closes.
 
 <a name="Field"></a>
 ## type [Field](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L23-L29>)

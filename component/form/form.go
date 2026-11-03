@@ -1,7 +1,7 @@
 // Package form is the controls that ask for a value: a text input, a select,
-// checkboxes, radios, a toggle and a button, stacked in a Form that moves focus
-// with tab and shift+tab. Each control is one row, its label in a shared column,
-// painted in the theme the Form was built with.
+// a date, checkboxes, radios, a toggle and a button, stacked in a Form that
+// moves focus with tab and shift+tab. Each control is one row, its label in a
+// shared column, painted in the theme the Form was built with.
 package form
 
 import (

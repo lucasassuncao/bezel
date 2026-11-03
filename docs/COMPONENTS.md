@@ -150,7 +150,7 @@ What the user types into: a form of controls, a one-line field, a multi-line fie
 
 Source: [`examples/component/form/main.go`](../examples/component/form/main.go)
 
-One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, each option described beside it (`WithDescriptions`), a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
+One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, each option described beside it (`WithDescriptions`), a start day picked from the calendar a `Date` opens, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
 
 ```go
 f := form.New(th,
@@ -167,6 +167,14 @@ func (m model) Init() tea.Cmd { return m.form.Init() }
 The form paints every control in its theme, and `SetTheme` repaints them all.
 
 ![form](recordings/component/form.gif)
+
+### Calendar
+
+Source: [`examples/component/calendar/main.go`](../examples/component/calendar/main.go)
+
+A month with a cursor on a day, weeks from Monday (`WithFirstWeekday`). The arrows move a day or a week, `pgup` and `pgdown` a month, and `enter` or a second click chooses the day. Nothing reads the clock: `WithToday` marks today, and `WithRange` keeps the cursor from it on. A form takes the same calendar as `form.NewDate`.
+
+![calendar](recordings/component/calendar.gif)
 
 ### Input
 
