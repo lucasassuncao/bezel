@@ -2,6 +2,7 @@ package shell
 
 import (
 	"image/color"
+	"slices"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -70,15 +71,34 @@ func (s Shell) headerRows() int {
 // helpOverlay lists every key for where the user is, unpacked: the top
 // overlay's when one is up, else the screen's. Help itself is the panel's key.
 func (s Shell) helpOverlay() overlay.Overlay {
-	keys := actionEntries(s.active(), false)
 	if top := s.overlays.Top(); top != nil {
-		keys = top.Legend()
+		keys := top.Legend()
+		if len(keys) == 0 {
+			return overlay.NewHelp(nil, s.cfg.Theme)
+		}
+		return overlay.NewHelp([]overlay.HelpSection{{Name: s.sectionName(), Entries: keys}}, s.cfg.Theme)
 	}
-	var sections []overlay.HelpSection
-	if len(keys) > 0 {
-		sections = append(sections, overlay.HelpSection{Name: s.sectionName(), Entries: keys})
+	return overlay.NewHelp(s.helpSections(), s.cfg.Theme)
+}
+
+// helpSections are the screen's keys under its name, then each Section's
+// under its own, in the order they first appear. Empty ones are left out.
+func (s Shell) helpSections() []overlay.HelpSection {
+	sections := []overlay.HelpSection{{Name: s.sectionName()}}
+	at := map[string]int{"": 0}
+	for _, a := range s.active() {
+		if !listed(a, false) {
+			continue
+		}
+		name := sectionOf(a)
+		i, ok := at[name]
+		if !ok {
+			i, at[name] = len(sections), len(sections)
+			sections = append(sections, overlay.HelpSection{Name: name})
+		}
+		sections[i].Entries = append(sections[i].Entries, a.Entry())
 	}
-	return overlay.NewHelp(sections, s.cfg.Theme)
+	return slices.DeleteFunc(sections, func(h overlay.HelpSection) bool { return len(h.Entries) == 0 })
 }
 
 // sectionName heads the keys of where the user is: the active tab, else the app.

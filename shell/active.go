@@ -55,11 +55,24 @@ func (s Shell) active() []Action {
 func actionEntries(acts []Action, withHelp bool) []legend.Entry {
 	var out []legend.Entry
 	for _, a := range acts {
-		if e := a.Entry(); len(a.binding().Keys()) > 0 && (withHelp || kindOf(a) != kindHelp) {
-			out = append(out, e)
+		if listed(a, withHelp) {
+			out = append(out, a.Entry())
 		}
 	}
 	return out
+}
+
+// listed reports whether a has a key to print: Help only when withHelp.
+func listed(a Action, withHelp bool) bool {
+	return len(a.binding().Keys()) > 0 && (withHelp || kindOf(a) != kindHelp)
+}
+
+// sectionOf is the heading a goes under in Help, empty for the screen's.
+func sectionOf(a Action) string {
+	if ac, ok := a.(*action); ok {
+		return ac.section
+	}
+	return ""
 }
 
 // inLegend is acts less the ones HelpOnly keeps to the help.

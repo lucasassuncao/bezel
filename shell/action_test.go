@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
@@ -115,4 +116,22 @@ func TestHelpOnlyLeavesTheLegendButStaysInHelpAndRuns(t *testing.T) {
 	_, r := s.Update(press("z"))
 	require.True(t, r.Handled)
 	require.True(t, ran)
+}
+
+func TestSectionGroupsTheHelpUnderItsOwnHeadings(t *testing.T) {
+	doc := Section("document")
+	s := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain(), true), Title: "demo", Actions: []Action{
+		Help(), Custom("ctrl+s", "save", nil, doc), Move(), Custom("=", "reset sizes", nil, Section("view")),
+		Custom("ctrl+u", "undo", nil, doc), Quit(),
+	}})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
+	help := ansi.Strip(s.ShowHelp().render(demoPanes()))
+	order := []string{"demo", "move", "quit", "document", "save", "undo", "view", "reset sizes"}
+	at := -1
+	for _, w := range order {
+		i := strings.Index(help, w)
+		require.Greater(t, i, at, "%q is out of place:\n%s", w, help)
+		at = i
+	}
+	require.Contains(t, ansi.Strip(s.render(demoPanes())), "save", "the legend is not changed")
 }

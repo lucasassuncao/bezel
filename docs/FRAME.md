@@ -127,6 +127,7 @@ Options shape an action without a new constructor:
 | `Group(n)` | starts a new legend row for group `n` |
 | `DisplayOnly()` | lists it but leaves its key to the focused component |
 | `HelpOnly()` | runs it and lists it in `Help`, but keeps it out of the legend: a key looked up, not read on every screen |
+| `Section(name)` | lists it in `Help` under its own heading, after the screen's keys: `Section("document")` on save, undo and reload |
 | `RunWith(run)` | keeps the key and text and replaces what it does: a `Quit` that asks first |
 | `KeyHint(k)` | prints a key beside the command in the palette without binding it |
 

@@ -55,9 +55,10 @@ type action struct {
 	when  func(Context) bool
 	run   func(ActionContext) tea.Cmd
 
-	display  bool // printed only: the focused component handles the key
-	helpOnly bool // listed by Help, left out of the legend
-	override bool // a prebuilt that runs run instead of the shell's own work
+	display  bool   // printed only: the focused component handles the key
+	helpOnly bool   // listed by Help, left out of the legend
+	section  string // the heading Help lists it under; empty for the screen's
+	override bool   // a prebuilt that runs run instead of the shell's own work
 }
 
 // Option adjusts an action at construction.
@@ -181,6 +182,11 @@ func DisplayOnly() Option { return func(a *action) { a.display = true } }
 // HelpOnly lists the action in Help but not in the legend: a key the user
 // looks up rather than reads on every screen. It still runs.
 func HelpOnly() Option { return func(a *action) { a.helpOnly = true } }
+
+// Section lists the action in Help under its own heading, name, after the
+// screen's keys; actions that share a name share the section, in the order
+// they first appear. The legend is not changed.
+func Section(name string) Option { return func(a *action) { a.section = name } }
 
 // RunWith replaces what the action does, keeping its key, text and rank: a
 // Quit that asks first, a ChangePane that moves the app's own focus.
