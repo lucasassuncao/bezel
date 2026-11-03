@@ -43,6 +43,16 @@ func TestTableDescriptionGivesWayFirst(t *testing.T) {
 	require.Contains(t, out, "BSD-3", "licences stay whole")
 }
 
+func TestTableSortsByAColumn(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 100, Height: 24}, 100)
+	_, out := frame(t, m, bezeltest.Key("ctrl+s"), 100)
+	t.Log("\n" + out)
+	require.Contains(t, out, "NAME ▲")
+	require.Less(t, strings.Index(out, "bubbletea"), strings.Index(out, "clipboard"), "by name")
+	require.Contains(t, out, "▶ [ ] bubbletea", "the cursor stays on its row")
+}
+
 func TestTableCursorScrollsAndTheEdgesFollow(t *testing.T) {
 	var m tea.Model = newModel()
 	m, out := frame(t, m, tea.WindowSizeMsg{Width: 100, Height: 24}, 100)

@@ -1,6 +1,6 @@
-// Table: rows under a fixed header, a / filter, space checking rows for a batch
-// and a spinner on the rows still updating (b toggles one). w narrows the
-// window: the description gives way first, version and licence stay whole.
+// Table: rows under a fixed header, a / filter, ctrl+s or a title's click to
+// sort, space checking rows and a spinner on the rows updating (b toggles one).
+// w narrows the window: the description gives way first.
 package main
 
 import (
@@ -85,6 +85,7 @@ func newModel() model {
 			shell.Move(),
 			shell.Custom("/", "filter", nil, shell.DisplayOnly()),
 			shell.Custom("enter", "choose", nil, shell.DisplayOnly()),
+			shell.Custom("ctrl+s", "sort", nil, shell.DisplayOnly()),
 			shell.Custom("space", "check", nil, shell.DisplayOnly()),
 			shell.Custom("b", "busy", shell.Send(toggleBusyMsg{})),
 			shell.Custom("w", "narrow/wide", shell.Send(toggleWidthMsg{})),

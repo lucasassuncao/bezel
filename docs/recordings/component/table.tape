@@ -1,4 +1,4 @@
-# table: rows scroll under the header with a scrollbar; / filters, space checks rows for a batch, b turns a spinner on a row, w narrows the window.
+# table: rows scroll under the header with a scrollbar; ctrl+s sorts by a column, / filters, space checks rows for a batch, b turns a spinner on a row, w narrows the window.
 #
 # Record from the repository root: vhs docs/recordings/component/table.tape
 
@@ -44,6 +44,13 @@ Enter
 Sleep 1.5s
 PageUp@600ms 3
 Sleep 1s
+
+Ctrl+S
+Sleep 1.5s
+Ctrl+S
+Sleep 1.5s
+Ctrl+S
+Sleep 2s
 
 Type "/"
 Sleep 600ms

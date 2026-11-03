@@ -209,7 +209,7 @@ func TestTheLegendNamesTheKeys(t *testing.T) {
 	for _, e := range New(pkgCols, pkgs(3)).SetHeight(5).Legend() {
 		keys = append(keys, e.Help.Key)
 	}
-	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "ctrl+u/d", "home/end", "enter", "/"}, keys)
+	require.Equal(t, []string{"↑/↓", "pgup/pgdn", "ctrl+u/d", "home/end", "enter", "/", "ctrl+s"}, keys)
 }
 
 func click(y int) bezel.ClickMsg {

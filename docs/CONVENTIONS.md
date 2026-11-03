@@ -131,7 +131,7 @@ The events are structs in the component's package. Read them with a type switch 
 | Package | Event |
 | --- | --- |
 | `list` | `Chosen[T]{Row}`, `Toggled[T]{Rows}` |
-| `table` | `Chosen[T]{Item}`, `Toggled[T]{Items}` |
+| `table` | `Chosen[T]{Item}`, `Toggled[T]{Items}`, `Sorted{Column, Desc}` |
 | `tree` | `Expanded[N]{Node}`, `Collapsed[N]{Node}` |
 | `browser` | `Chosen{Item}`, `Dismissed{}` |
 | `paginator` | `Paged{Page}` |

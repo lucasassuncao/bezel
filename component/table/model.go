@@ -33,10 +33,12 @@ type Keys struct {
 	Up, Down, PageUp, PageDown, HalfPageUp, HalfPageDown, Top, Bottom, Enter, Filter, Esc key.Binding
 	Erase                                                                                 key.Binding // the filter's last character
 	Check, CheckAll                                                                       key.Binding // while WithMulti
+	Sort                                                                                  key.Binding
 }
 
 // DefaultKeys are the arrows, pgup/pgdown, ctrl+u/ctrl+d for half a page,
-// home/end, enter, / and esc; space and ctrl+a check rows while WithMulti.
+// home/end, enter, / and esc, ctrl+s to sort; space and ctrl+a check rows
+// while WithMulti.
 func DefaultKeys() Keys {
 	return Keys{
 		Up:           key.New("up").WithHelp("↑/↓", "move"),
@@ -53,6 +55,7 @@ func DefaultKeys() Keys {
 		Erase:        key.New("backspace", "ctrl+h"),
 		Check:        key.New("space").WithHelp("space", "check"),
 		CheckAll:     key.New("ctrl+a").WithHelp("ctrl+a", "check all"),
+		Sort:         key.New("ctrl+s").WithHelp("ctrl+s", "sort"),
 	}
 }
 
@@ -88,6 +91,8 @@ type Model[T any] struct {
 	spin   spinner.Model // turns while a row is Busy
 	blur   bool          // drawn without the cursor's colour, and deaf to keys
 	multi  bool
+	sort   order
+	less   []func(a, b string) bool // by column; nil is Natural
 	edit   func(Styles) Styles
 }
 
@@ -112,11 +117,11 @@ func DefaultStyles(th theme.Resolved) Styles {
 	}
 }
 
-// New builds a table with the cursor on the first row; SetHeight gives it
-// the rows its pane has, header included. With a Busy row, Tick turns the
-// spinner.
+// New builds a table with the cursor on the first row, in the order given;
+// SetHeight gives it the rows its pane has, header included. With a Busy
+// row, Tick turns the spinner.
 func New[T any](cols []Column, items []Item[T]) Model[T] {
-	m := Model[T]{cols: slices.Clone(cols), keys: DefaultKeys(), spin: spinner.New(spinner.MiniDot())}
+	m := Model[T]{cols: slices.Clone(cols), keys: DefaultKeys(), spin: spinner.New(spinner.MiniDot()), sort: order{col: -1}}
 	return m.withItems(items).SetHeight(0)
 }
 
@@ -165,7 +170,7 @@ func (m Model[T]) Legend() []legend.Entry {
 	if m.find.on {
 		return legend.FromBindings([]key.Binding{k.Up, k.Down, k.Enter, k.Esc})
 	}
-	keys := []key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.HalfPageUp, k.HalfPageDown, k.Top, k.Bottom, k.Enter, k.Filter}
+	keys := []key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.HalfPageUp, k.HalfPageDown, k.Top, k.Bottom, k.Enter, k.Filter, k.Sort}
 	if m.multi {
 		keys = append(keys, k.Check, k.CheckAll)
 	}
@@ -222,9 +227,9 @@ func (m Model[T]) Scroll() layout.Scroll {
 	return m.win.Clamp(len(m.items)).Scroll(len(m.items))
 }
 
-// SetItems replaces the rows, keeping the cursor and the checks on the rows
-// with the same first cell (the cursor at the same index first), else at the
-// same index: a refresh that drops a row lands on the one that took its place.
+// SetItems replaces the rows, sorted as the table is, keeping the cursor and
+// the checks on the rows with the same first cell (the cursor at the same
+// index first), else the cursor at the same index.
 func (m Model[T]) SetItems(items []Item[T]) Model[T] {
 	prev, at := "", m.win.Cursor
 	if at < len(m.items) {
@@ -254,8 +259,8 @@ func (m Model[T]) SetHeight(h int) Model[T] {
 }
 
 // Update takes the table's keys unless blurred, a bezel.ClickMsg on a row and
-// the Busy spinner's frames. Choosing a row or a / match reports a [Chosen],
-// checking one a [Toggled]; any other message comes back unhandled.
+// the Busy spinner's frames. Choosing a row reports a [Chosen], checking one
+// a [Toggled], sorting a [Sorted]; any other message comes back unhandled.
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	var chosen, handled bool
 	switch msg := msg.(type) {
@@ -276,6 +281,9 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 			}
 			return m, r
 		}
+		if !m.find.on && key.Matches(msg, m.keys.Sort) {
+			return m.resort(m.nextSort())
+		}
 		if m.find.on {
 			m, chosen = m.updateFilter(msg)
 		} else {
@@ -283,6 +291,9 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 		}
 		handled = true
 	case bezel.ClickMsg:
+		if c := m.columnAt(msg.X); msg.Y == 0 && !m.find.on && c >= 0 {
+			return m.resort(m.sortOn(c))
+		}
 		m, chosen, handled = m.click(msg.Y)
 	default:
 		if !m.spin.Owns(msg) {
@@ -310,7 +321,7 @@ func (m Model[T]) handles(k tea.KeyPressMsg) bool {
 		return key.Matches(k, ks.Esc, ks.Enter, ks.Erase, ks.Up, ks.Down) || edit.Typed(k) != ""
 	}
 	return key.Matches(k, ks.Filter, ks.HalfPageUp, ks.HalfPageDown, ks.Up, ks.Down,
-		ks.PageUp, ks.PageDown, ks.Top, ks.Bottom, ks.Enter) ||
+		ks.PageUp, ks.PageDown, ks.Top, ks.Bottom, ks.Enter, ks.Sort) ||
 		m.multi && key.Matches(k, ks.Check, ks.CheckAll)
 }
 
@@ -381,16 +392,17 @@ func (m Model[T]) clamp() Model[T] {
 	return m
 }
 
-// withItems takes a copy of items and measures their columns once, so View
-// does not walk every row each frame.
+// withItems takes a copy of items, sorts them and measures their columns
+// once, so View does not walk every row each frame.
 func (m Model[T]) withItems(items []Item[T]) Model[T] {
 	m.items = cloneItems(items)
-	rows := make([][]string, len(m.items))
-	for i, it := range m.items {
-		rows[i] = it.Cells
-	}
-	m.widths = natural(m.cols, rows)
-	return m.spun()
+	return m.sorted().spun()
+}
+
+// resort sorts the rows by o and reports it.
+func (m Model[T]) resort(o order) (Model[T], bezel.Result) {
+	m = m.SetSort(o.col, o.desc)
+	return m, bezel.Result{Handled: true, Event: Sorted{Column: o.col, Desc: o.desc}}
 }
 
 // SetWidth changes the cells the table takes; columns shrink to fit.
@@ -408,12 +420,9 @@ func (m Model[T]) View(th theme.Resolved) string {
 	}
 	width := m.width
 	st := m.styles(th)
-	pad := strings.Repeat(" ", draw.Width(marker))
-	if m.multi {
-		pad += strings.Repeat(" ", draw.Width("[ ] "))
-	}
+	pad := strings.Repeat(" ", m.lead())
 	widths := shrink(m.cols, slices.Clone(m.widths), width-len(pad))
-	lines := []string{st.Header.Render(pad + Titles(m.cols, widths))}
+	lines := []string{st.Header.Render(pad + Titles(m.titled(), widths))}
 
 	w, rows := m.win, m.items
 	if m.find.on {
