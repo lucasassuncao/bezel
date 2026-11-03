@@ -22,7 +22,7 @@ Two tabs and two panes. `s` sets a status that clears itself, `b` shows the busy
 
 Source: [`examples/frame/layout/main.go`](../examples/frame/layout/main.go)
 
-A header over two columns, each pane printing the rect it was given. `w` narrows the window below the `Collapse` limit and the side column drops out, then comes back.
+A header over two columns, each pane printing the rect it was given. The columns are `Resizable`: dragging the border between them moves it, `ctrl+shift+←/→` narrow or widen the focused one and `=` gives the declared sizes back. `w` narrows the window below the `Collapse` limit and the side column drops out, then comes back.
 
 ![layout](recordings/frame/layout.gif)
 

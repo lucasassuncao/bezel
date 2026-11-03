@@ -4,17 +4,7 @@ package layout
 // first, so their space goes to their siblings. collapsed reports whether any
 // Collapse fired, which is what a legend needs to change its wording.
 func Resolve(n Node, body Rect, present func(name string) bool) (map[string]Rect, bool) {
-	rects := map[string]Rect{}
-	if present == nil {
-		present = func(string) bool { return true }
-	}
-	n = prune(n, present)
-	if n == nil {
-		return rects, false
-	}
-	collapsed := false
-	place(n, body, rects, &collapsed)
-	return rects, collapsed
+	return Sizes(nil).Resolve(n, body, present)
 }
 
 // prune drops absent leaves and boxes left empty. Returns nil when nothing
@@ -36,26 +26,41 @@ func prune(n Node, present func(string) bool) Node {
 		if len(kept) == 0 {
 			return nil
 		}
-		return Box{dir: v.dir, children: kept, collapseLimit: v.collapseLimit, collapseKeep: v.collapseKeep}
+		v.children = kept
+		return v
 	}
 	return nil
 }
 
-func place(n Node, r Rect, out map[string]Rect, collapsed *bool) {
+// placing is one resolve: the rects so far, whether a Collapse fired, and
+// the resizable boxes as placed, outer before inner.
+type placing struct {
+	sz        Sizes
+	rects     map[string]Rect
+	collapsed bool
+	splits    []split
+}
+
+func (p *placing) place(n Node, r Rect) {
 	switch v := n.(type) {
 	case Leaf:
-		out[v.Name] = r
+		p.rects[v.Name] = r
 	case Box:
 		length := r.W
 		if v.dir == vertical {
 			length = r.H
 		}
 		if v.collapseLimit > 0 && length < v.collapseLimit {
-			*collapsed = true
-			place(v.survivor(), r, out, collapsed)
+			p.collapsed = true
+			p.place(v.survivor(), r)
 			return
 		}
 		sizes := v.sizes(length)
+		if v.resizable && len(v.children) > 1 {
+			key := v.key()
+			sizes = scaled(p.sz[key], length, sizes)
+			p.splits = append(p.splits, split{key: key, box: v, r: r, sizes: sizes})
+		}
 		offset := 0
 		for i, c := range v.children {
 			child := r
@@ -64,10 +69,18 @@ func place(n Node, r Rect, out map[string]Rect, collapsed *bool) {
 			} else {
 				child.Y, child.H = r.Y+offset, sizes[i]
 			}
-			place(c, child, out, collapsed)
+			p.place(c, child)
 			offset += sizes[i]
 		}
 	}
+}
+
+// key is the box's first leaf, which names it in Sizes.
+func (b Box) key() string {
+	for l := range Leaves(b) {
+		return l.Name
+	}
+	return ""
 }
 
 // survivor is the child that stays when the box collapses: the one holding

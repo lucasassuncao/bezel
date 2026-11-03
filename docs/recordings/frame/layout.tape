@@ -1,4 +1,4 @@
-# layout: a header over two columns; w narrows the window and the side column collapses.
+# layout: a header over two columns that resize with ctrl+shift+arrows (= resets them); w narrows the window and the side column collapses.
 #
 # Record from the repository root: vhs docs/recordings/frame/layout.tape
 
@@ -35,6 +35,59 @@ Enter
 Wait+Screen /side/
 Show
 Sleep 2s
+
+# -- The focused column grows and shrinks; = gives the declared sizes back ---------------
+
+Tab
+Sleep 800ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Sleep 1.5s
+Tab
+Sleep 800ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Ctrl+Shift+Right
+Sleep 250ms
+Sleep 1.5s
+Type "="
+Sleep 2s
+
+# -- Too narrow: the side column collapses -------------------------------------------------
 
 Type "w"
 Sleep 2.5s

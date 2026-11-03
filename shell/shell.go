@@ -101,6 +101,9 @@ type Shell struct {
 	width, height int
 	rects         map[string]layout.Rect
 	collapsed     bool
+	sizes         layout.Sizes // the edges the user moved
+	held          drag         // the edge the mouse holds, while dragging
+	dragging      bool
 
 	tab       int
 	focus     []string // per tab, the focused leaf name
@@ -347,22 +350,22 @@ func (s Shell) visibleOrder() []string {
 
 // relayout re-resolves the layout for the current size and legend, moves
 // focus off a leaf that vanished, and gives the overlays the new body.
+// presentFunc reports the panes the last View drew; all before the first.
+func (s Shell) presentFunc() func(string) bool {
+	return func(name string) bool { return s.present == nil || s.present[name] }
+}
+
 func (s Shell) relayout() Shell {
 	if s.width <= 0 || s.height <= 0 {
 		return s // not sized yet: a zero body would collapse and steal focus
 	}
-	present := func(name string) bool {
-		if s.present == nil {
-			return true
-		}
-		return s.present[name]
-	}
+	present := s.presentFunc()
 	// A Header sized by focus or Narrow moves the body as they settle: resolve
 	// until it holds still, a few rounds at most for one that never does.
 	for range 3 {
 		body := s.Body()
 		s.overlays = s.overlays.Resize(body)
-		s.rects, s.collapsed = layout.Resolve(s.cfg.Layout, body, present)
+		s.rects, s.collapsed = s.sizes.Resolve(s.cfg.Layout, body, present)
 		if _, ok := s.rects[s.Focused()]; !ok {
 			if order := s.visibleOrder(); len(order) > 0 {
 				s = s.focusOn(order[0])

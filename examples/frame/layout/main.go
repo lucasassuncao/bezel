@@ -1,5 +1,6 @@
-// Layout: a header row over two columns; w narrows the window and the side
-// column collapses away.
+// Layout: a header row over two columns that resize: drag the edge between
+// them, or ctrl+shift+arrows on the focused one, and = resets them. w
+// narrows the window and the side column collapses away.
 package main
 
 import (
@@ -34,11 +35,15 @@ func newModel() model {
 			layout.Columns(
 				layout.Fixed("side", layout.Ratio(1, 3), layout.Min(20)),
 				layout.Fill("main"),
-			).Collapse(72, "main"),
+			).Collapse(72, "main").Resizable(),
 		),
 		Theme: th,
 		Title: "layout",
+		Mouse: true,
 		Actions: []shell.Action{
+			shell.ChangePane(),
+			shell.Resize(),
+			shell.ResetSizes(),
 			shell.Custom("w", "narrow/wide", shell.Send(toggleWidthMsg{})),
 			shell.Quit(),
 		},

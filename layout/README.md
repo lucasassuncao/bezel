@@ -20,11 +20,13 @@ Package layout declares a screen as a tree of named leaves and resolves it to re
   - [func Columns\(children ...Node\) Box](<#Columns>)
   - [func Rows\(children ...Node\) Box](<#Rows>)
   - [func \(b Box\) Collapse\(limit int, keep string\) Box](<#Box.Collapse>)
+  - [func \(b Box\) Resizable\(\) Box](<#Box.Resizable>)
 - [type Constraint](<#Constraint>)
   - [func Lines\(n int\) Constraint](<#Lines>)
   - [func Max\(n int\) Constraint](<#Max>)
   - [func Min\(n int\) Constraint](<#Min>)
   - [func Ratio\(num, den int\) Constraint](<#Ratio>)
+- [type Edge](<#Edge>)
 - [type Leaf](<#Leaf>)
   - [func Fill\(name string\) Leaf](<#Fill>)
   - [func Fixed\(name string, cs ...Constraint\) Leaf](<#Fixed>)
@@ -34,6 +36,11 @@ Package layout declares a screen as a tree of named leaves and resolves it to re
 - [type Rect](<#Rect>)
 - [type Scroll](<#Scroll>)
   - [func \(s Scroll\) Thumb\(track int\) \(pos, size int\)](<#Scroll.Thumb>)
+- [type Sizes](<#Sizes>)
+  - [func \(sz Sizes\) Edges\(n Node, body Rect, present func\(name string\) bool\) \[\]Edge](<#Sizes.Edges>)
+  - [func \(sz Sizes\) Grow\(n Node, body Rect, present func\(name string\) bool, leaf string, cols bool, delta int\) Sizes](<#Sizes.Grow>)
+  - [func \(sz Sizes\) Move\(n Node, body Rect, present func\(name string\) bool, e Edge, delta int\) Sizes](<#Sizes.Move>)
+  - [func \(sz Sizes\) Resolve\(n Node, body Rect, present func\(name string\) bool\) \(map\[string\]Rect, bool\)](<#Sizes.Resolve>)
 - [type Window](<#Window>)
   - [func \(w Window\) Bounds\(n int\) \(start, end, below int\)](<#Window.Bounds>)
   - [func \(w Window\) Clamp\(n int\) Window](<#Window.Clamp>)
@@ -51,7 +58,7 @@ func ClampScroll(cursor, offset, height int) int
 ClampScroll moves offset so that cursor stays inside a window of height rows: up when the cursor is above it, down when below. Never negative; a non\-positive height only applies the floor.
 
 <a name="Leaves"></a>
-## func [Leaves](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L98>)
+## func [Leaves](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L106>)
 
 ```go
 func Leaves(n Node) iter.Seq[Leaf]
@@ -78,7 +85,7 @@ func ScrollStart(cursor, total, height int) int
 ScrollStart keeps the cursor inside a window of height rows without jumping around: centred on it where the list allows.
 
 <a name="Box"></a>
-## type [Box](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L24-L29>)
+## type [Box](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L24-L30>)
 
 Box splits its rect among children along one axis.
 
@@ -89,7 +96,7 @@ type Box struct {
 ```
 
 <a name="Columns"></a>
-### func [Columns](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L52>)
+### func [Columns](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L53>)
 
 ```go
 func Columns(children ...Node) Box
@@ -98,7 +105,7 @@ func Columns(children ...Node) Box
 Columns lays children out left to right.
 
 <a name="Rows"></a>
-### func [Rows](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L55>)
+### func [Rows](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L56>)
 
 ```go
 func Rows(children ...Node) Box
@@ -107,7 +114,7 @@ func Rows(children ...Node) Box
 Rows lays children out top to bottom.
 
 <a name="Box.Collapse"></a>
-### func \(Box\) [Collapse](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L65>)
+### func \(Box\) [Collapse](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L66>)
 
 ```go
 func (b Box) Collapse(limit int, keep string) Box
@@ -115,8 +122,17 @@ func (b Box) Collapse(limit int, keep string) Box
 
 Collapse is b keeping only the child holding leaf keep when its axis is shorter than limit. keep may name a leaf nested deeper in that child.
 
+<a name="Box.Resizable"></a>
+### func \(Box\) [Resizable](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L73>)
+
+```go
+func (b Box) Resizable() Box
+```
+
+Resizable lets the user move the edges between b's children, through the Sizes the shell keeps; without, b splits its length as declared.
+
 <a name="Constraint"></a>
-## type [Constraint](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L80-L83>)
+## type [Constraint](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L88-L91>)
 
 Constraint shapes a Fixed leaf along its parent's axis.
 
@@ -127,7 +143,7 @@ type Constraint struct {
 ```
 
 <a name="Lines"></a>
-### func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L95>)
+### func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L103>)
 
 ```go
 func Lines(n int) Constraint
@@ -136,7 +152,7 @@ func Lines(n int) Constraint
 Lines is an exact size: rows in a Rows box, columns in a Columns box.
 
 <a name="Max"></a>
-### func [Max](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L92>)
+### func [Max](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L100>)
 
 ```go
 func Max(n int) Constraint
@@ -145,7 +161,7 @@ func Max(n int) Constraint
 Max caps the leaf's size.
 
 <a name="Min"></a>
-### func [Min](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L89>)
+### func [Min](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L97>)
 
 ```go
 func Min(n int) Constraint
@@ -154,7 +170,7 @@ func Min(n int) Constraint
 Min floors the leaf's size.
 
 <a name="Ratio"></a>
-### func [Ratio](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L86>)
+### func [Ratio](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L94>)
 
 ```go
 func Ratio(num, den int) Constraint
@@ -162,8 +178,23 @@ func Ratio(num, den int) Constraint
 
 Ratio is a share of the parent, before Min/Max clamp it.
 
+<a name="Edge"></a>
+## type [Edge](<https://github.com/lucasassuncao/bezel/blob/main/layout/sizes.go#L28-L34>)
+
+Edge is where two children of a Resizable box meet. At is the first cell of the one after: a column when Cols, between children side by side, else a row. From and To are the span it runs along, To excluded.
+
+```go
+type Edge struct {
+    Box      string // the box's key in Sizes
+    Index    int    // the edge follows child Index
+    Cols     bool
+    At       int
+    From, To int
+}
+```
+
 <a name="Leaf"></a>
-## type [Leaf](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L32-L36>)
+## type [Leaf](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L33-L37>)
 
 Leaf is a named region the app renders into.
 
@@ -175,7 +206,7 @@ type Leaf struct {
 ```
 
 <a name="Fill"></a>
-### func [Fill](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L61>)
+### func [Fill](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L62>)
 
 ```go
 func Fill(name string) Leaf
@@ -184,7 +215,7 @@ func Fill(name string) Leaf
 Fill is a leaf that takes what the fixed siblings leave.
 
 <a name="Fixed"></a>
-### func [Fixed](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L58>)
+### func [Fixed](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L59>)
 
 ```go
 func Fixed(name string, cs ...Constraint) Leaf
@@ -193,7 +224,7 @@ func Fixed(name string, cs ...Constraint) Leaf
 Fixed is a leaf sized by its constraints. With none it behaves like Fill.
 
 <a name="Leaf.Info"></a>
-### func \(Leaf\) [Info](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L40>)
+### func \(Leaf\) [Info](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L41>)
 
 ```go
 func (l Leaf) Info() Leaf
@@ -202,7 +233,7 @@ func (l Leaf) Info() Leaf
 Info marks a pane that only informs: tab skips it, though the app can still focus it on purpose \(to scroll a long hint, say\).
 
 <a name="Leaf.IsInfo"></a>
-### func \(Leaf\) [IsInfo](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L46>)
+### func \(Leaf\) [IsInfo](<https://github.com/lucasassuncao/bezel/blob/main/layout/layout.go#L47>)
 
 ```go
 func (l Leaf) IsInfo() bool
@@ -247,6 +278,51 @@ func (s Scroll) Thumb(track int) (pos, size int)
 ```
 
 Thumb places a scrollbar's thumb on a track rows long: from pos, size rows, and size 0 when every row shows. The thumb touches an end of the track only while the window does, so it never reads as the top when it is not.
+
+<a name="Sizes"></a>
+## type [Sizes](<https://github.com/lucasassuncao/bezel/blob/main/layout/sizes.go#L15>)
+
+Sizes are the cells a user gave the children of Resizable boxes, each box keyed by its first leaf. Resolve scales them to the box's length, so they hold their share through a terminal resize. nil is the boxes as declared.
+
+```go
+type Sizes map[string][]int
+```
+
+<a name="Sizes.Edges"></a>
+### func \(Sizes\) [Edges](<https://github.com/lucasassuncao/bezel/blob/main/layout/sizes.go#L74>)
+
+```go
+func (sz Sizes) Edges(n Node, body Rect, present func(name string) bool) []Edge
+```
+
+Edges are the edges of every Resizable box on screen, outer boxes first.
+
+<a name="Sizes.Grow"></a>
+### func \(Sizes\) [Grow](<https://github.com/lucasassuncao/bezel/blob/main/layout/sizes.go#L127>)
+
+```go
+func (sz Sizes) Grow(n Node, body Rect, present func(name string) bool, leaf string, cols bool, delta int) Sizes
+```
+
+Grow is sz with leaf's pane delta cells longer, or shorter when negative, along columns when cols and rows when not: the innermost Resizable box of that axis holding leaf moves the edge after it, or before it when last.
+
+<a name="Sizes.Move"></a>
+### func \(Sizes\) [Move](<https://github.com/lucasassuncao/bezel/blob/main/layout/sizes.go#L99>)
+
+```go
+func (sz Sizes) Move(n Node, body Rect, present func(name string) bool, e Edge, delta int) Sizes
+```
+
+Move is sz with edge e moved by delta cells, towards the end when positive, held where a child would drop below three cells or past the Min and Max of its constraints. sz is left as it was.
+
+<a name="Sizes.Resolve"></a>
+### func \(Sizes\) [Resolve](<https://github.com/lucasassuncao/bezel/blob/main/layout/sizes.go#L38>)
+
+```go
+func (sz Sizes) Resolve(n Node, body Rect, present func(name string) bool) (map[string]Rect, bool)
+```
+
+Resolve is the package's Resolve with sz giving the Resizable boxes their sizes.
 
 <a name="Window"></a>
 ## type [Window](<https://github.com/lucasassuncao/bezel/blob/main/layout/scroll.go#L28>)

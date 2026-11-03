@@ -37,6 +37,8 @@ const (
 	kindMove
 	kindScroll
 	kindQuit
+	kindResize
+	kindResetSizes
 	kindCustom
 )
 

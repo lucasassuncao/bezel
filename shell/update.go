@@ -48,9 +48,12 @@ var _ bezel.Model[Shell] = Shell{}
 
 func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	switch m := msg.(type) {
-	case tea.MouseClickMsg:
-		if m.Button == tea.MouseLeft {
-			return s.click(m)
+	case tea.MouseClickMsg, tea.MouseMotionMsg, tea.MouseReleaseMsg:
+		if next, ok := s.mouseResize(m.(tea.MouseMsg)); ok {
+			return next, true, nil
+		}
+		if c, ok := m.(tea.MouseClickMsg); ok && c.Button == tea.MouseLeft {
+			return s.click(c)
 		}
 
 	case animation.FrameMsg:

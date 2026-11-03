@@ -26,6 +26,7 @@ type Box struct {
 	children      []Node
 	collapseLimit int
 	collapseKeep  string
+	resizable     bool
 }
 
 // Leaf is a named region the app renders into.
@@ -64,6 +65,13 @@ func Fill(name string) Leaf { return Leaf{Name: name} }
 // shorter than limit. keep may name a leaf nested deeper in that child.
 func (b Box) Collapse(limit int, keep string) Box {
 	b.collapseLimit, b.collapseKeep = limit, keep
+	return b
+}
+
+// Resizable lets the user move the edges between b's children, through the
+// Sizes the shell keeps; without, b splits its length as declared.
+func (b Box) Resizable() Box {
+	b.resizable = true
 	return b
 }
 

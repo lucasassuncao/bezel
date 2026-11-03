@@ -74,6 +74,7 @@ layout.Rows(
 - **`Fixed`** sizes a leaf by its constraints: `Lines(n)` exactly, `Ratio(num, den)` as a share of its parent, clamped by `Min` and `Max`. **`Fill`** takes what its fixed siblings leave.
 - **`Collapse(limit, keep)`** keeps only the child holding `keep` while the box is narrower than `limit`: a two-column screen that becomes one on a small terminal.
 - **`Info()`** marks a pane that only informs: `ChangePane` skips it.
+- **`Resizable()`** lets the user move the edges between a box's children: by dragging the border between two panes with the mouse, or with the `Resize` action on the focused pane. Each pane keeps at least three cells and its `Min` and `Max`. The shell keeps the sizes as shares, so they survive a terminal resize, and `ResetSizes` gives back the declared ones.
 - A leaf the app leaves out of `View`'s map is gone for that frame, and its space goes to the others. A pane that only shows sometimes is a leaf the app sometimes leaves out.
 
 `SetLayout` swaps the whole tree while the app runs, and `Rect(name)` reports where a pane landed, for a click or a scroll that needs its size.
@@ -105,6 +106,8 @@ An `Action` is one key, defined once: the shell dispatches it, prints it in the 
 | `Help()` | `?` | opens every key the screen has, in a dialog |
 | `ChangeTab()` | `tab` | the next tab, `shift+tab` the one before |
 | `ChangePane()` | `tab` | the next pane, sending a `FocusMsg` |
+| `Resize()` | `ctrl+shift+←/→/↑/↓` | narrows, widens, shortens or heightens the focused pane, in the innermost `Resizable` box of that axis |
+| `ResetSizes()` | `=` | gives every `Resizable` box its declared sizes again |
 | `Move()`, `Scroll()` | `↑/↓` | listed only: the focused component owns the arrows |
 | `Commands()` | `:` | opens the command palette |
 | `Quit()` | `q` | quits |
@@ -189,6 +192,8 @@ case shell.ClickMsg:
 ```
 
 The components move the cursor to the row clicked, and on the row already under it do what enter would: `list` and `table` report `Chosen`, `tree` reports `Expanded` or `Collapsed`. `form` focuses the field and presses a button, a checkbox or a toggle.
+
+A press on the border between two panes of a `Resizable` box is no click: the shell holds that edge and moves it with the pointer until the button is released.
 
 A click is all `ClickMsg` carries. The rest of the mouse reaches the app as it came, and two methods move it into a pane:
 
