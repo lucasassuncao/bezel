@@ -6,14 +6,15 @@ import (
 	"slices"
 	"strings"
 	"sync"
-	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/viewport"
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -25,35 +26,65 @@ const DefaultLimit = 5000
 
 var _ bezel.Model[Pane] = Pane{}
 
-// Pane is a log panel: the lines its Handler writes, in a viewport that
-// follows the end as they arrive and holds still while the reader scrolls
-// up. A value: every method returns the new pane; its copies share one feed.
+// Pane is a log panel that follows the end as lines arrive and holds still
+// while the reader scrolls up. / filters it as list and table do, but enter
+// keeps the filter: a log has nothing to choose. Its copies share one feed.
 type Pane struct {
 	vp     viewport.Model
 	feed   *feed
 	th     theme.Resolved
-	edit   func(Styles) Styles
+	edit   func(PaneStyles) PaneStyles
 	keys   PaneKeys
 	recs   []record
 	n      int // lines in recs
 	shown  int // lines the filter keeps
-	find   string
-	typing bool // the / prompt is open
+	find   filterMode
+	match  func(query, text string) bool // nil is Contains
 	limit  int
 	height int
 	follow bool
 	unseen int // lines that arrived while it held still
 }
 
+// filterMode is the / filter: the text typed, and whether the prompt is
+// still open and taking the keys.
+type filterMode struct {
+	on   bool
+	text string
+}
+
 // record is what one Write brought: a log record's lines, and its plain
-// text in lower case for the filter.
+// text, also in lower case, for the filter.
 type record struct {
-	lines []string
-	low   string
+	lines      []string
+	plain, low string
 }
 
 func newRecord(lines []string) record {
-	return record{lines: lines, low: strings.ToLower(ansi.Strip(strings.Join(lines, "\n")))}
+	plain := ansi.Strip(strings.Join(lines, "\n"))
+	return record{lines: lines, plain: plain, low: strings.ToLower(plain)}
+}
+
+// Contains is the filter's default match: the record's text holds the
+// query, in any case.
+func Contains(query, text string) bool {
+	return strings.Contains(strings.ToLower(text), strings.ToLower(query))
+}
+
+// PaneStyles are how a Pane paints: the lines its Handler writes, and its
+// own parts around them.
+type PaneStyles struct {
+	Lines  Styles         // what the Handler writes
+	More   lipgloss.Style // the count of lines that arrived while it held still
+	Prompt lipgloss.Style // the / prompt while it takes the keys
+	Filter lipgloss.Style // the filter kept after enter
+	Match  lipgloss.Style // every match of the filter
+}
+
+// DefaultPaneStyles paint the lines as the Handler does, the count and the
+// kept filter dim, the prompt as the cursor and the matches as matches.
+func DefaultPaneStyles(th theme.Resolved) PaneStyles {
+	return PaneStyles{Lines: DefaultStyles(th), More: th.Dim, Prompt: th.Cursor, Filter: th.Dim, Match: th.Match}
 }
 
 // PaneKeys are a Pane's bindings: the viewport's to scroll, and the / filter's.
@@ -99,13 +130,12 @@ type paneLines struct {
 // NewPane is an empty pane that draws its lines in th's colours, keeps the
 // last DefaultLimit of them and wraps the long ones.
 func NewPane(th theme.Resolved) Pane {
-	// A filter has no match the reader is on: every one is painted alike.
-	same := func(s viewport.Styles) viewport.Styles { s.Current = s.Match; return s }
-	return Pane{
-		vp:   viewport.New().SetWrap(true).WithStyles(same),
+	p := Pane{
+		vp:   viewport.New().SetWrap(true),
 		feed: &feed{wake: make(chan struct{}, 1)},
 		th:   th, keys: DefaultPaneKeys(), limit: DefaultLimit, follow: true,
 	}
+	return p.restyle()
 }
 
 // WithLimit keeps the last n lines, dropping the oldest; n below 1 is 1.
@@ -114,10 +144,19 @@ func (p Pane) WithLimit(n int) Pane {
 	return p.trim().show()
 }
 
-// WithStyles edits the styles of the lines Handler writes from now on.
-func (p Pane) WithStyles(edit func(Styles) Styles) Pane {
+// WithStyles edits the pane's styles; the lines' apply to what the Handler
+// writes from now on.
+func (p Pane) WithStyles(edit func(PaneStyles) PaneStyles) Pane {
 	p.edit = edit
-	return p
+	return p.restyle()
+}
+
+// WithMatch filters with match, which gets the typed text and each record's
+// lines, colours stripped; nil is Contains again. Matches are painted only
+// under Contains, the one match that says where it found the text.
+func (p Pane) WithMatch(match func(query, text string) bool) Pane {
+	p.match = match
+	return p.show()
 }
 
 // WithKeys rebinds the pane; Scroll.Bottom is also what follows the end again.
@@ -126,14 +165,30 @@ func (p Pane) WithKeys(k PaneKeys) Pane {
 	return p
 }
 
+// styles are the pane's styles under its theme, edited.
+func (p Pane) styles() PaneStyles {
+	st := DefaultPaneStyles(p.th)
+	if p.edit != nil {
+		st = p.edit(st)
+	}
+	return st
+}
+
+// restyle hands the viewport the Match style: a filter has no match the
+// reader is on, so every one is painted alike.
+func (p Pane) restyle() Pane {
+	match := p.styles().Match
+	p.vp = p.vp.WithStyles(func(viewport.Styles) viewport.Styles {
+		return viewport.Styles{Match: match, Current: match}
+	})
+	return p
+}
+
 // Handler writes into the pane, in colour and never wrapped, from any
 // goroutine: slog.New(pane.Handler()) is a logger for it.
 func (p Pane) Handler() Handler {
-	h := New(p.feed, p.th).WithColor(true).WithWidth(-1)
-	if p.edit != nil {
-		h = h.WithStyles(p.edit)
-	}
-	return h
+	lines := p.styles().Lines
+	return New(p.feed, p.th).WithColor(true).WithWidth(-1).WithStyles(func(Styles) Styles { return lines })
 }
 
 // Writer is where any other handler writes into the pane, a pane line per
@@ -204,35 +259,33 @@ func (p Pane) Update(msg tea.Msg) (Pane, bezel.Result) {
 // the filter, esc clears it. Other keys, the scrolling ones, are not its own.
 func (p Pane) filterKey(k tea.KeyPressMsg) (Pane, bool) {
 	ks := p.keys
-	if !p.typing {
+	if !p.find.on {
 		switch {
 		case key.Matches(k, ks.Filter):
-			p.typing = true
+			p.find.on = true
 			return p.fit(), true
-		case p.find != "" && key.Matches(k, ks.Esc):
-			return p.filter(""), true
+		case p.find.text != "" && key.Matches(k, ks.Esc):
+			return p.filter(filterMode{}), true
 		}
 		return p, false
 	}
 	switch {
 	case key.Matches(k, ks.Esc):
-		p.typing = false
-		return p.filter(""), true
+		return p.filter(filterMode{}), true
 	case key.Matches(k, ks.Enter):
-		p.typing = false
+		p.find.on = false
 		return p.fit(), true
 	case key.Matches(k, ks.Erase):
-		_, size := utf8.DecodeLastRuneInString(p.find)
-		return p.filter(p.find[:len(p.find)-size]), true
-	case utf8.RuneCountInString(k.Key().Text) == 1:
-		return p.filter(p.find + k.Key().Text), true
+		return p.filter(filterMode{on: true, text: edit.Erase(p.find.text)}), true
+	case edit.Typed(k) != "":
+		return p.filter(filterMode{on: true, text: p.find.text + edit.Typed(k)}), true
 	}
 	return p, false
 }
 
-// filter shows the records holding text, in any case, and follows the end.
-func (p Pane) filter(text string) Pane {
-	p.find, p.follow, p.unseen = text, true, 0
+// filter shows the records f keeps and follows the end.
+func (p Pane) filter(f filterMode) Pane {
+	p.find, p.follow, p.unseen = f, true, 0
 	p = p.show().fit()
 	p.vp = p.vp.ToBottom()
 	return p
@@ -240,7 +293,13 @@ func (p Pane) filter(text string) Pane {
 
 // keeps reports whether the filter shows r.
 func (p Pane) keeps(r record) bool {
-	return p.find == "" || strings.Contains(r.low, strings.ToLower(p.find))
+	switch q := p.find.text; {
+	case q == "":
+		return true
+	case p.match != nil:
+		return p.match(q, r.plain)
+	}
+	return strings.Contains(r.low, strings.ToLower(p.find.text))
 }
 
 // show hands the viewport the lines the filter keeps, its matches painted.
@@ -253,12 +312,12 @@ func (p Pane) show() Pane {
 	}
 	p.shown = len(lines)
 	p.vp = p.vp.SetLines(lines)
-	if p.find == "" {
+	if p.find.text == "" || p.match != nil {
 		p.vp = p.vp.ClearHighlights()
 		return p
 	}
 	y := p.vp.YOffset()
-	p.vp = p.vp.SetHighlights(matches(p.vp.Content(), p.find)).SetYOffset(y)
+	p.vp = p.vp.SetHighlights(matches(p.vp.Content(), p.find.text)).SetYOffset(y)
 	return p
 }
 
@@ -282,9 +341,11 @@ func matches(content, q string) [][]int {
 }
 
 // add appends records, dropping the oldest lines past the limit, and keeps
-// to the end while following, else to the lines the reader is on.
+// to the end while following, else to the line the reader is on: wrapped
+// lines take several rows, so the place is kept by line, not by row.
 func (p Pane) add(batch [][]string) Pane {
 	before, added := p.shown, 0
+	top, part := p.vp.TopLine()
 	recs := slices.Clip(p.recs)
 	for _, lines := range batch {
 		r := newRecord(lines)
@@ -301,10 +362,13 @@ func (p Pane) add(batch [][]string) Pane {
 		p.unseen += added
 	}
 	p = p.fit()
-	if p.follow {
+	switch {
+	case p.follow:
 		p.vp = p.vp.ToBottom()
-	} else {
-		p.vp = p.vp.SetYOffset(p.vp.YOffset() - dropped)
+	case top < dropped:
+		p.vp = p.vp.SetTopLine(0, 0)
+	default:
+		p.vp = p.vp.SetTopLine(top-dropped, part)
 	}
 	return p
 }
@@ -330,7 +394,7 @@ func (p Pane) trim() Pane {
 
 // prompt reports whether the / prompt's row is drawn: while typing, and
 // while a kept filter applies.
-func (p Pane) prompt() bool { return p.typing || p.find != "" }
+func (p Pane) prompt() bool { return p.find.on || p.find.text != "" }
 
 // fit gives the viewport the pane's height, less the rows that count what
 // arrived while it held still and show the filter.
@@ -372,10 +436,10 @@ func (p Pane) Len() int { return p.n }
 func (p Pane) Shown() int { return p.shown }
 
 // Filtering reports whether the / prompt is open and taking the keys.
-func (p Pane) Filtering() bool { return p.typing }
+func (p Pane) Filtering() bool { return p.find.on }
 
 // Filter is the text the shown records hold, typed at the / prompt.
-func (p Pane) Filter() string { return p.find }
+func (p Pane) Filter() string { return p.find.text }
 
 // Lines is a copy of the lines the pane holds, colours included.
 func (p Pane) Lines() []string {
@@ -393,11 +457,11 @@ func (p Pane) Scroll() layout.Scroll { return p.vp.Scroll() }
 // it is open.
 func (p Pane) Legend() []legend.Entry {
 	k := p.keys
-	if p.typing {
+	if p.find.on {
 		return legend.FromBindings([]key.Binding{k.Enter, k.Esc})
 	}
 	keys := []key.Binding{k.Filter}
-	if p.find != "" {
+	if p.find.text != "" {
 		keys = append(keys, k.Esc)
 	}
 	return append(p.vp.Legend(), legend.FromBindings(keys)...)
@@ -410,6 +474,7 @@ func (p Pane) View() string {
 	if p.height <= 0 || w <= 0 {
 		return ""
 	}
+	st := p.styles()
 	var rows []string
 	if v := p.vp.View(p.th); v != "" {
 		rows = strings.Split(v, "\n")
@@ -419,13 +484,13 @@ func (p Pane) View() string {
 		if p.unseen == 1 {
 			unit = "line"
 		}
-		rows = append(rows, p.th.Dim.Render(draw.Fit(fmt.Sprintf("↓ %d new %s", p.unseen, unit), w)))
+		rows = append(rows, st.More.Render(draw.Fit(fmt.Sprintf("↓ %d new %s", p.unseen, unit), w)))
 	}
 	switch {
-	case p.typing:
-		rows = append(rows, p.th.Cursor.Render(draw.Fit("/"+p.find+"▋", w)))
-	case p.find != "":
-		rows = append(rows, p.th.Dim.Render(draw.Fit("/"+p.find, w)))
+	case p.find.on:
+		rows = append(rows, st.Prompt.Render(draw.Fit("/"+p.find.text+"▋", w)))
+	case p.find.text != "":
+		rows = append(rows, st.Filter.Render(draw.Fit("/"+p.find.text, w)))
 	}
 	return strings.Join(rows[max(len(rows)-p.height, 0):], "\n")
 }

@@ -40,13 +40,18 @@ func TestTheSpinnerStopsWhenNoRowIsBusy(t *testing.T) {
 	require.True(t, m.spin.Running(), "marking a row starts it")
 }
 
-func TestSetRowsRestartsTheSpinnerSoOneTickTurnsIt(t *testing.T) {
+func TestSetRowsKeepsTheSpinnerTurningAndASecondTickSpent(t *testing.T) {
 	m := New(busyRows()).SetHeight(3)
-	stale := m.spin.FrameAt(time.Now())
+	turning := m.FrameAt(time.Now())
 	m = m.SetRows(busyRows())
-	m, r := m.Update(stale)
+	m, r := m.Update(turning)
+	require.NotNil(t, r.Cmd, "a refresh leaves the frame on its way current")
+	m, r = m.Update(turning)
 	require.True(t, r.Handled, "a spent frame is still the list's")
 	require.Nil(t, r.Cmd, "but asks for no other")
+	require.True(t, m.Active())
+	_, done := m.Advance(time.Now())
+	require.False(t, done, "a turning spinner never settles")
 }
 
 func TestWithSpinnerAndTheBusyStyle(t *testing.T) {

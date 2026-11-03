@@ -1,6 +1,9 @@
 package tree
 
 import (
+	"slices"
+	"time"
+
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/component/spinner"
@@ -14,11 +17,26 @@ func (m Model[N]) WithSpinner(s spinner.Spinner) Model[N] {
 }
 
 // Tick is the command for the Busy spinner's next frame, nil while no node
-// is busy: call it after New, SetNodes or SetNode.
+// is busy: call it after New, SetNodes or SetNode. A second one lands spent.
 func (m Model[N]) Tick() tea.Cmd { return m.spin.Tick() }
 
-// BusyMark is the spinner's frame in the Busy style, padded to its widest:
-// a row func draws it in place of a Busy node's icon.
+// Active reports whether the Busy spinner turns.
+func (m Model[N]) Active() bool { return m.spin.Active() }
+
+// FrameAt is the spinner's frame for at, for a test that delivers frames itself.
+func (m Model[N]) FrameAt(at time.Time) tea.Msg { return m.spin.FrameAt(at) }
+
+// Advance is the tree at now, for a host that keeps its own clock; it
+// settles only once no node is busy.
+func (m Model[N]) Advance(now time.Time) (Model[N], bool) {
+	var done bool
+	m.spin, done = m.spin.Advance(now)
+	return m, done
+}
+
+// BusyMark is the spinner's frame in the Busy style, padded to its widest.
+// The row func draws it in place of a Busy node's icon: the rows, icons
+// included, are the app's to draw.
 func (m Model[N]) BusyMark(th theme.Resolved) string {
 	st := m.styles(th)
 	return m.spin.WithStyles(func(spinner.Styles) spinner.Styles {
@@ -26,19 +44,8 @@ func (m Model[N]) BusyMark(th theme.Resolved) string {
 	}).View(th)
 }
 
-// spun turns the spinner while a node is busy and stops it when none is. It
-// restarts on every change, so the Tick asked for after it is the only one
-// turning it.
+// spun turns the spinner while a node is busy and holds it when none is.
 func (m Model[N]) spun() Model[N] {
-	if len(m.spin.Spinner().Frames) == 0 { // a zero tree has no spinner yet
-		m.spin = spinner.New(spinner.MiniDot())
-	}
-	m.spin = m.spin.Stop()
-	for _, n := range m.nodes {
-		if n.TreeInfo().Busy {
-			m.spin, _ = m.spin.Start()
-			break
-		}
-	}
+	m.spin = m.spin.SetRunning(slices.ContainsFunc(m.nodes, func(n N) bool { return n.TreeInfo().Busy }))
 	return m
 }

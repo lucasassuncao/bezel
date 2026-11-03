@@ -50,8 +50,15 @@ func TestLinesBreakAtNaNAndClampOutOfRange(t *testing.T) {
 
 func TestLinesWithNothingToScale(t *testing.T) {
 	require.Empty(t, Lines(nil, 0, 1, 0, 3, th()))
-	require.Equal(t, []string{"│   ", "│   "}, lineRows([]Line{{Values: []float64{1}}}, 5, 5, 4, 2), "hi not above lo: an axis and no line")
+	require.Equal(t, []string{"│   ", "│   "}, lineRows([]Line{{Values: []float64{1}}}, 5, 4, 4, 2), "hi below lo: an axis and no line")
+	require.Equal(t, []string{"5┤ ⢀", " │  "}, lineRows([]Line{{Values: []float64{5}}}, 5, 5, 4, 2), "lo equal to hi: the line at the middle")
 	require.Equal(t, "│ ", lineRows(nil, 0, 1000000, 2, 1)[0], "no room for the labels: the axis alone")
+}
+
+func TestLinesTicksReadApartOnASmallRange(t *testing.T) {
+	require.Equal(t, []string{"0.04", "", "0.025", "", "0.01"}, axisTicks(0.01, 0.04, 5))
+	require.Equal(t, []string{"10", "", "5", "", "0"}, axisTicks(0, 10, 5))
+	require.Equal(t, "0", number(-0.01, 1), "no minus zero")
 }
 
 func trimmed(rows []string) []string {

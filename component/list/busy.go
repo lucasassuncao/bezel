@@ -1,6 +1,8 @@
 package list
 
 import (
+	"slices"
+
 	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -11,17 +13,9 @@ func (m Model[T]) WithSpinner(s spinner.Spinner) Model[T] {
 	return m.spun()
 }
 
-// spun turns the spinner while a row is busy and stops it when none is. It
-// restarts on every change, so the Tick asked for after SetRows is the only
-// one turning it.
+// spun turns the spinner while a row is busy and holds it when none is.
 func (m Model[T]) spun() Model[T] {
-	m.spin = m.spin.Stop()
-	for _, r := range m.rows {
-		if r.Busy && !r.Section {
-			m.spin, _ = m.spin.Start()
-			break
-		}
-	}
+	m.spin = m.spin.SetRunning(slices.ContainsFunc(m.rows, func(r Row[T]) bool { return r.Busy && !r.Section }))
 	return m
 }
 

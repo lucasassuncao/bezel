@@ -50,8 +50,13 @@ func TestBusyMarkTakesTheBusyStyleAndAnotherSpinner(t *testing.T) {
 	require.Equal(t, red.Render("|"), m.BusyMark(th))
 }
 
-func TestAZeroTreeGetsItsSpinnerWithItsNodes(t *testing.T) {
-	var m Model[job]
-	require.Empty(t, m.BusyMark(theme.Resolve(theme.Plain(), true)))
-	require.True(t, m.SetNodes(jobs(true)).spin.Running())
+func TestTheTreeAnswersAsAMovingThing(t *testing.T) {
+	m := New(jobs(true))
+	require.True(t, m.Active())
+	m, r := m.Update(m.FrameAt(time.Now()))
+	require.True(t, r.Handled)
+	_, done := m.Advance(time.Now())
+	require.False(t, done)
+	_, done = m.SetNodes(jobs(false)).Advance(time.Now())
+	require.True(t, done, "no busy node: settled")
 }

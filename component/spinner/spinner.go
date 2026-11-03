@@ -105,6 +105,8 @@ type Model struct {
 	frame   int
 	running bool
 	id, tag int64
+	start   time.Time // the first Advance since Start
+	from    int       // the frame Advance counts from
 	edit    func(Styles) Styles
 }
 
@@ -136,9 +138,21 @@ func (m Model) Start() (Model, tea.Cmd) {
 	if m.running || len(m.spinner.Frames) == 0 {
 		return m, nil
 	}
-	m.running = true
+	m.running, m.start, m.from = true, time.Time{}, m.frame
 	m.tag++
 	return m, m.Tick()
+}
+
+// SetRunning turns the spinner or holds it, and leaves it be when it already
+// is: an app asks for Tick after turning it on.
+func (m Model) SetRunning(on bool) Model {
+	switch {
+	case on && !m.running:
+		m, _ = m.Start()
+	case !on && m.running:
+		m = m.Stop()
+	}
+	return m
 }
 
 // Stop holds the spinner on its frame; a tick already on its way lands spent.
@@ -165,8 +179,9 @@ func (m Model) FrameAt(at time.Time) tea.Msg { return frames.NewMsg(at, m.id, m.
 // included, so a host routing frames hands it here and nowhere else.
 func (m Model) Owns(msg tea.Msg) bool { return frames.Of(msg, m.id) }
 
-// Update turns to the next frame on its own frame and arms the one after.
-// Any other message leaves it as it was, with no command.
+// Update turns to the next frame on its own frame and arms the one after,
+// which alone is current: a second Tick's frame lands spent. Any other
+// message leaves it as it was, with no command.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	if !m.Owns(msg) {
 		return m, bezel.Result{}
@@ -175,7 +190,25 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 		return m, bezel.Result{Handled: true}
 	}
 	m.frame = (m.frame + 1) % len(m.spinner.Frames)
+	m.tag++
 	return m, bezel.Result{Handled: true, Cmd: m.Tick()}
+}
+
+// Active is Running, by the name every moving thing answers to.
+func (m Model) Active() bool { return m.running }
+
+// Advance is the spinner at now, for a host that keeps its own clock: a
+// frame per Every since the first call. It never settles while running.
+func (m Model) Advance(now time.Time) (Model, bool) {
+	n := len(m.spinner.Frames)
+	if !m.running || n == 0 {
+		return m, true
+	}
+	if m.start.IsZero() {
+		m.start = now
+	}
+	m.frame = (m.from + int(frames.Paced(now.Sub(m.start))/m.spinner.Every)) % n
+	return m, false
 }
 
 // Frame is the frame showing, unstyled and unpadded; "" without frames.

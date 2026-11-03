@@ -23,9 +23,12 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
   - [func VimKeys\(\) Keys](<#VimKeys>)
 - [type Model](<#Model>)
   - [func New\[N Noder\[N\]\]\(nodes \[\]N\) Model\[N\]](<#New>)
+  - [func \(m Model\[N\]\) Active\(\) bool](<#Model[N].Active>)
+  - [func \(m Model\[N\]\) Advance\(now time.Time\) \(Model\[N\], bool\)](<#Model[N].Advance>)
   - [func \(m Model\[N\]\) BusyMark\(th theme.Resolved\) string](<#Model[N].BusyMark>)
   - [func \(m Model\[N\]\) Cursor\(\) int](<#Model[N].Cursor>)
   - [func \(m Model\[N\]\) CursorTo\(match func\(N\) bool\) \(Model\[N\], bool\)](<#Model[N].CursorTo>)
+  - [func \(m Model\[N\]\) FrameAt\(at time.Time\) tea.Msg](<#Model[N].FrameAt>)
   - [func \(m Model\[N\]\) Guides\(\) \[\]string](<#Model[N].Guides>)
   - [func \(m Model\[N\]\) Height\(\) int](<#Model[N].Height>)
   - [func \(m Model\[N\]\) Index\(\) int](<#Model[N].Index>)
@@ -167,14 +170,32 @@ func New[N Noder[N]](nodes []N) Model[N]
 
 New builds a tree over nodes with the cursor on the first row that is not a section; SetHeight gives it the rows its pane has. With a Busy node, Tick turns the spinner.
 
+<a name="Model[N].Active"></a>
+### func \(Model\[N\]\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L24>)
+
+```go
+func (m Model[N]) Active() bool
+```
+
+Active reports whether the Busy spinner turns.
+
+<a name="Model[N].Advance"></a>
+### func \(Model\[N\]\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L31>)
+
+```go
+func (m Model[N]) Advance(now time.Time) (Model[N], bool)
+```
+
+Advance is the tree at now, for a host that keeps its own clock; it settles only once no node is busy.
+
 <a name="Model[N].BusyMark"></a>
-### func \(Model\[N\]\) [BusyMark](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L22>)
+### func \(Model\[N\]\) [BusyMark](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L40>)
 
 ```go
 func (m Model[N]) BusyMark(th theme.Resolved) string
 ```
 
-BusyMark is the spinner's frame in the Busy style, padded to its widest: a row func draws it in place of a Busy node's icon.
+BusyMark is the spinner's frame in the Busy style, padded to its widest. The row func draws it in place of a Busy node's icon: the rows, icons included, are the app's to draw.
 
 <a name="Model[N].Cursor"></a>
 ### func \(Model\[N\]\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L158>)
@@ -193,6 +214,15 @@ func (m Model[N]) CursorTo(match func(N) bool) (Model[N], bool)
 ```
 
 CursorTo moves the cursor to the first visible row match accepts, or leaves it when none does, as a nil match. Reports whether it moved.
+
+<a name="Model[N].FrameAt"></a>
+### func \(Model\[N\]\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L27>)
+
+```go
+func (m Model[N]) FrameAt(at time.Time) tea.Msg
+```
+
+FrameAt is the spinner's frame for at, for a test that delivers frames itself.
 
 <a name="Model[N].Guides"></a>
 ### func \(Model\[N\]\) [Guides](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L206>)
@@ -339,13 +369,13 @@ func (m Model[N]) SetOffset(n int) Model[N]
 SetOffset scrolls the visible rows to start at n, as a restored view was, clamped so the cursor stays in view.
 
 <a name="Model[N].Tick"></a>
-### func \(Model\[N\]\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L18>)
+### func \(Model\[N\]\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L21>)
 
 ```go
 func (m Model[N]) Tick() tea.Cmd
 ```
 
-Tick is the command for the Busy spinner's next frame, nil while no node is busy: call it after New, SetNodes or SetNode.
+Tick is the command for the Busy spinner's next frame, nil while no node is busy: call it after New, SetNodes or SetNode. A second one lands spent.
 
 <a name="Model[N].Update"></a>
 ### func \(Model\[N\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L314>)
@@ -411,7 +441,7 @@ func (m Model[N]) WithScrollOff(n int) Model[N]
 WithScrollOff keeps n rows in view above and below the cursor while it moves, where the tree has them.
 
 <a name="Model[N].WithSpinner"></a>
-### func \(Model\[N\]\) [WithSpinner](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L11>)
+### func \(Model\[N\]\) [WithSpinner](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/busy.go#L14>)
 
 ```go
 func (m Model[N]) WithSpinner(s spinner.Spinner) Model[N]

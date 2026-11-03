@@ -2,11 +2,11 @@ package table
 
 import (
 	"strings"
-	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/fuzzy"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -58,13 +58,12 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], bool) {
 	case key.Matches(msg, m.keys.Enter):
 		return m.pickMatch()
 	case key.Matches(msg, m.keys.Erase):
-		if text := m.find.text; text != "" {
-			_, size := utf8.DecodeLastRuneInString(text)
-			m.find = m.filterFor(text[:len(text)-size])
+		if m.find.text != "" {
+			m.find = m.filterFor(edit.Erase(m.find.text))
 		}
-	case utf8.RuneCountInString(msg.Key().Text) == 1:
+	case edit.Typed(msg) != "":
 		// Text before the moves, so vim's j and k stay typeable while filtering.
-		m.find = m.filterFor(m.find.text + msg.Key().Text)
+		m.find = m.filterFor(m.find.text + edit.Typed(msg))
 	case key.Matches(msg, m.keys.Up):
 		m.find.win = m.find.win.Move(-1, len(m.find.idx), nil)
 	case key.Matches(msg, m.keys.Down):
@@ -105,8 +104,7 @@ func (m Model[T]) filtered(query string) []int {
 	}
 	match := m.match
 	if match == nil {
-		q := strings.ToLower(query)
-		match = func(_, text string) bool { return strings.Contains(strings.ToLower(text), q) }
+		match = Contains
 	}
 	var out []int
 	for i, t := range texts {
@@ -115,6 +113,31 @@ func (m Model[T]) filtered(query string) []int {
 		}
 	}
 	return out
+}
+
+// matched is the first cell of the row under the filter's cursor, and false
+// with the filter shut or nothing matching.
+func (m Model[T]) matched() (string, bool) {
+	if !m.find.on || m.find.win.Cursor >= len(m.find.idx) {
+		return "", false
+	}
+	return first(m.items[m.find.idx[m.find.win.Cursor]]), true
+}
+
+// refind puts the filter's cursor back on the row whose first cell is name,
+// as SetItems keeps the cursor on its row, where that row still matches.
+func (m Model[T]) refind(name string, found bool) Model[T] {
+	if !found {
+		return m
+	}
+	for k, i := range m.find.idx {
+		if first(m.items[i]) == name {
+			m.find.win.Cursor = k
+			m.find.win = m.find.win.Clamp(len(m.find.idx))
+			break
+		}
+	}
+	return m
 }
 
 // refilter matches the open filter again after the rows or the match changed.

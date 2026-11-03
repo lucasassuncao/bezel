@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -81,7 +82,7 @@ func TestPaneLinesKeepTheLevelColour(t *testing.T) {
 	p := logged(sized(NewPane(th)), 1)
 	require.Contains(t, p.Lines()[0], DefaultStyles(th).Info.Render("INFO"))
 	red := th.Danger
-	p = logged(sized(NewPane(th).WithStyles(func(s Styles) Styles { s.Info = red; return s })), 1)
+	p = logged(sized(NewPane(th).WithStyles(func(s PaneStyles) PaneStyles { s.Lines.Info = red; return s })), 1)
 	require.Contains(t, p.Lines()[0], red.Render("INFO"))
 }
 
@@ -202,4 +203,38 @@ func TestPaneLimitCutsIntoTheOldestRecord(t *testing.T) {
 	p := deployed().WithLimit(2)
 	require.Equal(t, 2, p.Len())
 	require.Contains(t, ansi.Strip(p.Lines()[0]), "host=db-primary", "the record's head went first")
+}
+
+func TestPaneStylesPaintItsOwnParts(t *testing.T) {
+	th := paneTheme()
+	red := th.Danger
+	p := typed(deployed().WithStyles(func(s PaneStyles) PaneStyles { s.Prompt, s.Match = red, red; return s }), "/image")
+	require.Contains(t, p.View(), red.Render("image"))
+	require.Contains(t, p.View(), red.Render(draw.Fit("/image▋", 40)))
+}
+
+func TestPaneWithMatchFiltersByItsOwnRule(t *testing.T) {
+	exact := func(q, text string) bool { return strings.Contains(text, q) }
+	p := typed(deployed().WithMatch(exact), "/IMAGE")
+	require.Zero(t, p.Shown(), "the case counts under this match")
+	p = typed(deployed().WithMatch(exact), "/image")
+	require.Equal(t, 1, p.Shown())
+	require.NotContains(t, p.View(), paneTheme().Match.Render("image"), "only Contains paints")
+}
+
+// A held pane keeps its line when the limit drops lines that wrap.
+func TestPaneHeldKeepsItsLineWhileWrappedLinesDrop(t *testing.T) {
+	p := NewPane(paneTheme()).WithLimit(6).SetWidth(10).SetHeight(3)
+	w := p.Writer()
+	for i := range 6 {
+		fmt.Fprintf(w, "line %d %s\n", i, strings.Repeat("x", 12)) // two rows each
+	}
+	p, _ = p.Update(p.Init()())
+	p, _ = p.Update(tea.KeyPressMsg{Code: tea.KeyPgUp})
+	require.False(t, p.Following())
+	top := strings.TrimRight(shown(p)[0], " ")
+
+	fmt.Fprintf(w, "line 6 %s\n", strings.Repeat("x", 12))
+	p, _ = p.Update(p.Init()())
+	require.Equal(t, top, strings.TrimRight(shown(p)[0], " "), "the same row stays on top")
 }

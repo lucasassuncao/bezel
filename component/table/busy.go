@@ -1,6 +1,9 @@
 package table
 
 import (
+	"slices"
+	"time"
+
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel/component/spinner"
@@ -15,20 +18,26 @@ func (m Model[T]) WithSpinner(s spinner.Spinner) Model[T] {
 }
 
 // Tick is the command for the Busy spinner's next frame, nil while no row is
-// busy: call it after New or SetItems.
+// busy: call it after New or SetItems. A second one lands spent.
 func (m Model[T]) Tick() tea.Cmd { return m.spin.Tick() }
 
-// spun turns the spinner while a row is busy and stops it when none is. It
-// restarts on every change, so the Tick asked for after SetItems is the only
-// one turning it.
+// Active reports whether the Busy spinner turns.
+func (m Model[T]) Active() bool { return m.spin.Active() }
+
+// FrameAt is the spinner's frame for at, for a test that delivers frames itself.
+func (m Model[T]) FrameAt(at time.Time) tea.Msg { return m.spin.FrameAt(at) }
+
+// Advance is the table at now, for a host that keeps its own clock; it
+// settles only once no row is busy.
+func (m Model[T]) Advance(now time.Time) (Model[T], bool) {
+	var done bool
+	m.spin, done = m.spin.Advance(now)
+	return m, done
+}
+
+// spun turns the spinner while a row is busy and holds it when none is.
 func (m Model[T]) spun() Model[T] {
-	m.spin = m.spin.Stop()
-	for _, it := range m.items {
-		if it.Busy {
-			m.spin, _ = m.spin.Start()
-			break
-		}
-	}
+	m.spin = m.spin.SetRunning(slices.ContainsFunc(m.items, func(it Item[T]) bool { return it.Busy }))
 	return m
 }
 

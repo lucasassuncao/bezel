@@ -24,7 +24,7 @@ var dotBits = [2][4]rune{{0x01, 0x02, 0x04, 0x40}, {0x08, 0x10, 0x20, 0x80}}
 
 // Lines draws each line in braille, width by height cells: the y axis on the
 // left from lo at the bottom to hi at the top, the newest values on the right
-// and, when a line has a Label, a key on the last row.
+// and a key of the Labels on the last row. lo equal to hi draws at the middle.
 func Lines(lines []Line, lo, hi float64, width, height int, th theme.Resolved, opts ...Option) string {
 	if width <= 0 || height <= 0 {
 		return ""
@@ -52,7 +52,6 @@ func Lines(lines []Line, lo, hi float64, width, height int, th theme.Resolved, o
 	for i, l := range lines {
 		g.plot(l.Values, lo, hi, i)
 	}
-	axis := lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Border))
 	rows := make([]string, height)
 	for r := range height {
 		lead, tick := "", "│"
@@ -62,7 +61,7 @@ func Lines(lines []Line, lo, hi float64, width, height int, th theme.Resolved, o
 				lead, tick = th.Dim.Render(draw.Pad(strings.Repeat(" ", labelW-draw.Width(ticks[r]))+ticks[r], labelW)), "┤"
 			}
 		}
-		rows[r] = lead + axis.Render(tick) + g.row(r, styles)
+		rows[r] = lead + th.Muted.Render(tick) + g.row(r, styles)
 	}
 	if key != "" {
 		rows = append(rows, key)
@@ -106,25 +105,52 @@ func lineKey(lines []Line, styles []lipgloss.Style) string {
 }
 
 // axisTicks is the label of each row from the top: hi, lo and, when a row
-// sits halfway, the middle; "" for the rest, and all "" unless hi > lo.
+// sits halfway, the middle; lo alone at the middle when it equals hi, and
+// all "" for a range that is not one.
 func axisTicks(lo, hi float64, height int) []string {
 	ticks := make([]string, height)
-	if hi <= lo || math.IsNaN(lo) || math.IsNaN(hi) || math.IsInf(hi-lo, 0) {
+	switch {
+	case !valid(lo, hi):
+		return ticks
+	case hi == lo:
+		ticks[(height-1)/2] = number(lo, 1)
 		return ticks
 	}
-	ticks[0] = number(hi)
+	d := decimals(hi - lo)
+	ticks[0] = number(hi, d)
 	if height > 1 {
-		ticks[height-1] = number(lo)
+		ticks[height-1] = number(lo, d)
 	}
 	if height >= 5 && (height-1)%2 == 0 {
-		ticks[(height-1)/2] = number((lo + hi) / 2)
+		ticks[(height-1)/2] = number((lo+hi)/2, d+1)
 	}
 	return ticks
 }
 
-// number is v with one decimal at most, as Bars prints a value.
-func number(v float64) string {
-	return strings.TrimSuffix(strconv.FormatFloat(v, 'f', 1, 64), ".0")
+// valid reports whether lo to hi is a range to plot: finite, hi not below lo.
+func valid(lo, hi float64) bool {
+	return hi >= lo && !math.IsNaN(lo) && !math.IsNaN(hi) && !math.IsInf(hi-lo, 0)
+}
+
+// decimals is how many a range of span needs for its ends to read apart:
+// one, and more below 1.
+func decimals(span float64) int {
+	if span >= 1 {
+		return 1
+	}
+	return min(int(math.Ceil(-math.Log10(span))), 8)
+}
+
+// number is v with d decimals at most, trailing zeros dropped.
+func number(v float64, d int) string {
+	s := strconv.FormatFloat(v, 'f', d, 64)
+	if strings.Contains(s, ".") {
+		s = strings.TrimRight(strings.TrimRight(s, "0"), ".")
+	}
+	if s == "-0" {
+		s = "0"
+	}
+	return s
 }
 
 // grid is the braille dots of the plot, and in each cell the last line that
@@ -140,10 +166,10 @@ func newGrid(w, h int) grid {
 }
 
 // plot draws the last two dots a cell of values, joined by straight runs,
-// right-aligned; a NaN breaks the line and hi not above lo draws nothing.
+// right-aligned; a NaN breaks the line, lo equal to hi draws at the middle.
 func (g grid) plot(values []float64, lo, hi float64, line int) {
 	dw, dh := g.w*2, g.h*4
-	if hi <= lo || math.IsInf(hi-lo, 0) {
+	if !valid(lo, hi) {
 		return
 	}
 	if len(values) > dw {
@@ -156,7 +182,10 @@ func (g grid) plot(values []float64, lo, hi float64, line int) {
 			have = false
 			continue
 		}
-		frac := min(max((v-lo)/(hi-lo), 0), 1)
+		frac := 0.5
+		if hi > lo {
+			frac = min(max((v-lo)/(hi-lo), 0), 1)
+		}
 		x, y := x0+i, dh-1-int(math.Round(frac*float64(dh-1)))
 		if have {
 			g.join(prevX, prevY, x, y, line)

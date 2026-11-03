@@ -137,16 +137,16 @@ New builds a list with the cursor on the first selectable row; SetHeight gives i
 func (m Model[T]) Active() bool
 ```
 
-Active reports whether the list is still moving.
+Active reports whether the list is still moving or its Busy spinner turns.
 
 <a name="Model[T].Advance"></a>
-### func \(Model\[T\]\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L112>)
+### func \(Model\[T\]\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L121>)
 
 ```go
 func (m Model[T]) Advance(now time.Time) (Model[T], bool)
 ```
 
-Advance is the list at now and whether it settled, for a host that keeps its own clock.
+Advance is the list at now and whether it settled, for a host that keeps its own clock; a turning spinner never settles.
 
 <a name="Model[T].Filter"></a>
 ### func \(Model\[T\]\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L272>)
@@ -167,13 +167,13 @@ func (m Model[T]) Filtering() bool
 Filtering reports whether the / prompt is open and taking the keys.
 
 <a name="Model[T].FrameAt"></a>
-### func \(Model\[T\]\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L108>)
+### func \(Model\[T\]\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L112>)
 
 ```go
 func (m Model[T]) FrameAt(at time.Time) tea.Msg
 ```
 
-FrameAt is the list's frame for at, for a test that delivers frames itself.
+FrameAt is the list's frame for at, for a test that delivers frames itself: its motion's while that runs, else its Busy spinner's.
 
 <a name="Model[T].InsertRow"></a>
 ### func \(Model\[T\]\) [InsertRow](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L321>)
@@ -266,7 +266,7 @@ func (m Model[T]) SetRows(rows []Row[T]) Model[T]
 SetRows replaces the rows, keeping the cursor on the row with the same label when it survives \(at the same index first\), else on the first selectable one. Call Tick after it, for the motion and the Busy spinner.
 
 <a name="Model[T].Tick"></a>
-### func \(Model\[T\]\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L105>)
+### func \(Model\[T\]\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/list/motion.go#L108>)
 
 ```go
 func (m Model[T]) Tick() tea.Cmd
@@ -284,7 +284,7 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result)
 Update takes the list's keys, a bezel.ClickMsg on a row and its own frames. Choosing a row reports a [Chosen](<#Chosen>); a move with motion returns the list's Tick. Anything else comes back unhandled and unchanged.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L633>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L631>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved) string
@@ -338,7 +338,7 @@ func (m Model[T]) WithPages(on bool) Model[T]
 WithPages shows the rows a page at a time with the page marked as dots under them, instead of scrolling.
 
 <a name="Model[T].WithSpinner"></a>
-### func \(Model\[T\]\) [WithSpinner](<https://github.com/lucasassuncao/bezel/blob/main/component/list/busy.go#L9>)
+### func \(Model\[T\]\) [WithSpinner](<https://github.com/lucasassuncao/bezel/blob/main/component/list/busy.go#L11>)
 
 ```go
 func (m Model[T]) WithSpinner(s spinner.Spinner) Model[T]

@@ -104,7 +104,7 @@ func DefaultStyles(th theme.Resolved) Styles {
 // a section; SetHeight gives it the rows its pane has. With a Busy node,
 // Tick turns the spinner.
 func New[N Noder[N]](nodes []N) Model[N] {
-	m := Model[N]{nodes: slices.Clone(nodes)}
+	m := Model[N]{nodes: slices.Clone(nodes), spin: spinner.New(spinner.MiniDot())}
 	vis := m.Visible()
 	for m.cursor < len(vis) && nodes[vis[m.cursor]].TreeInfo().Section {
 		m.cursor++

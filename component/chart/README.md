@@ -77,7 +77,7 @@ Heat is values as a grid of cells two columns wide, each coloured along the them
 func Lines(lines []Line, lo, hi float64, width, height int, th theme.Resolved, opts ...Option) string
 ```
 
-Lines draws each line in braille, width by height cells: the y axis on the left from lo at the bottom to hi at the top, the newest values on the right and, when a line has a Label, a key on the last row.
+Lines draws each line in braille, width by height cells: the y axis on the left from lo at the bottom to hi at the top, the newest values on the right and a key of the Labels on the last row. lo equal to hi draws at the middle.
 
 <a name="Spark"></a>
 ## func [Spark](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/chart.go#L75>)

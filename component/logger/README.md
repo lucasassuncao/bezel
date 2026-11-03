@@ -13,6 +13,7 @@ Package logger is a slog.Handler that prints for people: the time, the level and
 ## Index
 
 - [Constants](<#constants>)
+- [func Contains\(query, text string\) bool](<#Contains>)
 - [func ReplaceAttr\(groups \[\]string, a slog.Attr\) slog.Attr](<#ReplaceAttr>)
 - [type Handler](<#Handler>)
   - [func New\(w io.Writer, th theme.Resolved\) Handler](<#New>)
@@ -45,11 +46,14 @@ Package logger is a slog.Handler that prints for people: the time, the level and
   - [func \(p Pane\) View\(\) string](<#Pane.View>)
   - [func \(p Pane\) WithKeys\(k PaneKeys\) Pane](<#Pane.WithKeys>)
   - [func \(p Pane\) WithLimit\(n int\) Pane](<#Pane.WithLimit>)
-  - [func \(p Pane\) WithStyles\(edit func\(Styles\) Styles\) Pane](<#Pane.WithStyles>)
+  - [func \(p Pane\) WithMatch\(match func\(query, text string\) bool\) Pane](<#Pane.WithMatch>)
+  - [func \(p Pane\) WithStyles\(edit func\(PaneStyles\) PaneStyles\) Pane](<#Pane.WithStyles>)
   - [func \(p Pane\) Writer\(\) io.Writer](<#Pane.Writer>)
 - [type PaneKeys](<#PaneKeys>)
   - [func DefaultPaneKeys\(\) PaneKeys](<#DefaultPaneKeys>)
   - [func VimPaneKeys\(\) PaneKeys](<#VimPaneKeys>)
+- [type PaneStyles](<#PaneStyles>)
+  - [func DefaultPaneStyles\(th theme.Resolved\) PaneStyles](<#DefaultPaneStyles>)
 - [type Styles](<#Styles>)
   - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
 
@@ -73,6 +77,15 @@ const DefaultTimeFormat = "2006-01-02 15:04:05"
 ```go
 const LevelTrace = slog.LevelDebug - 4
 ```
+
+<a name="Contains"></a>
+## func [Contains](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L70>)
+
+```go
+func Contains(query, text string) bool
+```
+
+Contains is the filter's default match: the record's text holds the query, in any case.
 
 <a name="ReplaceAttr"></a>
 ## func [ReplaceAttr](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L335>)
@@ -203,9 +216,9 @@ func (h Handler) WithWidth(n int) Handler
 WithWidth wraps at n cells instead of the terminal's width; below zero never wraps.
 
 <a name="Pane"></a>
-## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L31-L46>)
+## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L32-L47>)
 
-Pane is a log panel: the lines its Handler writes, in a viewport that follows the end as they arrive and holds still while the reader scrolls up. A value: every method returns the new pane; its copies share one feed.
+Pane is a log panel that follows the end as lines arrive and holds still while the reader scrolls up. / filters it as list and table do, but enter keeps the filter: a log has nothing to choose. Its copies share one feed.
 
 ```go
 type Pane struct {
@@ -214,7 +227,7 @@ type Pane struct {
 ```
 
 <a name="NewPane"></a>
-### func [NewPane](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L101>)
+### func [NewPane](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L132>)
 
 ```go
 func NewPane(th theme.Resolved) Pane
@@ -223,7 +236,7 @@ func NewPane(th theme.Resolved) Pane
 NewPane is an empty pane that draws its lines in th's colours, keeps the last DefaultLimit of them and wraps the long ones.
 
 <a name="Pane.Filter"></a>
-### func \(Pane\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L378>)
+### func \(Pane\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L442>)
 
 ```go
 func (p Pane) Filter() string
@@ -232,7 +245,7 @@ func (p Pane) Filter() string
 Filter is the text the shown records hold, typed at the / prompt.
 
 <a name="Pane.Filtering"></a>
-### func \(Pane\) [Filtering](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L375>)
+### func \(Pane\) [Filtering](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L439>)
 
 ```go
 func (p Pane) Filtering() bool
@@ -241,7 +254,7 @@ func (p Pane) Filtering() bool
 Filtering reports whether the / prompt is open and taking the keys.
 
 <a name="Pane.Following"></a>
-### func \(Pane\) [Following](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L366>)
+### func \(Pane\) [Following](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L430>)
 
 ```go
 func (p Pane) Following() bool
@@ -250,7 +263,7 @@ func (p Pane) Following() bool
 Following reports whether the pane keeps to the end as lines arrive.
 
 <a name="Pane.Handler"></a>
-### func \(Pane\) [Handler](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L131>)
+### func \(Pane\) [Handler](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L189>)
 
 ```go
 func (p Pane) Handler() Handler
@@ -259,7 +272,7 @@ func (p Pane) Handler() Handler
 Handler writes into the pane, in colour and never wrapped, from any goroutine: slog.New\(pane.Handler\(\)\) is a logger for it.
 
 <a name="Pane.Init"></a>
-### func \(Pane\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L157>)
+### func \(Pane\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L212>)
 
 ```go
 func (p Pane) Init() tea.Cmd
@@ -268,7 +281,7 @@ func (p Pane) Init() tea.Cmd
 Init is the command that waits for the Handler's first lines.
 
 <a name="Pane.Legend"></a>
-### func \(Pane\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L394>)
+### func \(Pane\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L458>)
 
 ```go
 func (p Pane) Legend() []legend.Entry
@@ -277,7 +290,7 @@ func (p Pane) Legend() []legend.Entry
 Legend lists the scrolling keys and the filter's; the prompt's own while it is open.
 
 <a name="Pane.Len"></a>
-### func \(Pane\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L369>)
+### func \(Pane\) [Len](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L433>)
 
 ```go
 func (p Pane) Len() int
@@ -286,7 +299,7 @@ func (p Pane) Len() int
 Len is how many lines the pane holds, the filtered out ones included.
 
 <a name="Pane.Lines"></a>
-### func \(Pane\) [Lines](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L381>)
+### func \(Pane\) [Lines](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L445>)
 
 ```go
 func (p Pane) Lines() []string
@@ -295,7 +308,7 @@ func (p Pane) Lines() []string
 Lines is a copy of the lines the pane holds, colours included.
 
 <a name="Pane.Scroll"></a>
-### func \(Pane\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L390>)
+### func \(Pane\) [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L454>)
 
 ```go
 func (p Pane) Scroll() layout.Scroll
@@ -304,7 +317,7 @@ func (p Pane) Scroll() layout.Scroll
 Scroll is where the pane shows its lines from, for a pane's scrollbar.
 
 <a name="Pane.SetHeight"></a>
-### func \(Pane\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L356>)
+### func \(Pane\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L420>)
 
 ```go
 func (p Pane) SetHeight(h int) Pane
@@ -313,7 +326,7 @@ func (p Pane) SetHeight(h int) Pane
 SetHeight is the rows the pane takes; following, it stays on the end.
 
 <a name="Pane.SetWidth"></a>
-### func \(Pane\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L350>)
+### func \(Pane\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L414>)
 
 ```go
 func (p Pane) SetWidth(w int) Pane
@@ -322,7 +335,7 @@ func (p Pane) SetWidth(w int) Pane
 SetWidth is the pane's width in cells.
 
 <a name="Pane.Shown"></a>
-### func \(Pane\) [Shown](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L372>)
+### func \(Pane\) [Shown](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L436>)
 
 ```go
 func (p Pane) Shown() int
@@ -331,7 +344,7 @@ func (p Pane) Shown() int
 Shown is how many lines the filter keeps; Len while there is none.
 
 <a name="Pane.Update"></a>
-### func \(Pane\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L179>)
+### func \(Pane\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L234>)
 
 ```go
 func (p Pane) Update(msg tea.Msg) (Pane, bezel.Result)
@@ -340,7 +353,7 @@ func (p Pane) Update(msg tea.Msg) (Pane, bezel.Result)
 Update takes the pane's own lines, the / filter's keys, and the viewport's keys and the mouse wheel to scroll. Scrolling up holds the pane still; reaching the end follows it. Lines arriving ask for the next in Result.Cmd.
 
 <a name="Pane.View"></a>
-### func \(Pane\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L408>)
+### func \(Pane\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L472>)
 
 ```go
 func (p Pane) View() string
@@ -349,7 +362,7 @@ func (p Pane) View() string
 View is the lines in the viewport; under them, while the pane holds still, how many arrived since, and the filter while there is one.
 
 <a name="Pane.WithKeys"></a>
-### func \(Pane\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L124>)
+### func \(Pane\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L163>)
 
 ```go
 func (p Pane) WithKeys(k PaneKeys) Pane
@@ -358,7 +371,7 @@ func (p Pane) WithKeys(k PaneKeys) Pane
 WithKeys rebinds the pane; Scroll.Bottom is also what follows the end again.
 
 <a name="Pane.WithLimit"></a>
-### func \(Pane\) [WithLimit](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L112>)
+### func \(Pane\) [WithLimit](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L142>)
 
 ```go
 func (p Pane) WithLimit(n int) Pane
@@ -366,17 +379,26 @@ func (p Pane) WithLimit(n int) Pane
 
 WithLimit keeps the last n lines, dropping the oldest; n below 1 is 1.
 
-<a name="Pane.WithStyles"></a>
-### func \(Pane\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L118>)
+<a name="Pane.WithMatch"></a>
+### func \(Pane\) [WithMatch](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L157>)
 
 ```go
-func (p Pane) WithStyles(edit func(Styles) Styles) Pane
+func (p Pane) WithMatch(match func(query, text string) bool) Pane
 ```
 
-WithStyles edits the styles of the lines Handler writes from now on.
+WithMatch filters with match, which gets the typed text and each record's lines, colours stripped; nil is Contains again. Matches are painted only under Contains, the one match that says where it found the text.
+
+<a name="Pane.WithStyles"></a>
+### func \(Pane\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L149>)
+
+```go
+func (p Pane) WithStyles(edit func(PaneStyles) PaneStyles) Pane
+```
+
+WithStyles edits the pane's styles; the lines' apply to what the Handler writes from now on.
 
 <a name="Pane.Writer"></a>
-### func \(Pane\) [Writer](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L141>)
+### func \(Pane\) [Writer](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L196>)
 
 ```go
 func (p Pane) Writer() io.Writer
@@ -385,7 +407,7 @@ func (p Pane) Writer() io.Writer
 Writer is where any other handler writes into the pane, a pane line per line of text: slog.NewJSONHandler\(pane.Writer\(\), nil\) shows JSON lines.
 
 <a name="PaneKeys"></a>
-## type [PaneKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L60-L64>)
+## type [PaneKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L91-L95>)
 
 PaneKeys are a Pane's bindings: the viewport's to scroll, and the / filter's.
 
@@ -398,7 +420,7 @@ type PaneKeys struct {
 ```
 
 <a name="DefaultPaneKeys"></a>
-### func [DefaultPaneKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L68>)
+### func [DefaultPaneKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L99>)
 
 ```go
 func DefaultPaneKeys() PaneKeys
@@ -407,13 +429,37 @@ func DefaultPaneKeys() PaneKeys
 DefaultPaneKeys are the viewport's DefaultKeys, / to filter, enter to keep the filter and esc to clear it.
 
 <a name="VimPaneKeys"></a>
-### func [VimPaneKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L79>)
+### func [VimPaneKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L110>)
 
 ```go
 func VimPaneKeys() PaneKeys
 ```
 
 VimPaneKeys are DefaultPaneKeys scrolling with the viewport's VimKeys.
+
+<a name="PaneStyles"></a>
+## type [PaneStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L76-L82>)
+
+PaneStyles are how a Pane paints: the lines its Handler writes, and its own parts around them.
+
+```go
+type PaneStyles struct {
+    Lines  Styles         // what the Handler writes
+    More   lipgloss.Style // the count of lines that arrived while it held still
+    Prompt lipgloss.Style // the / prompt while it takes the keys
+    Filter lipgloss.Style // the filter kept after enter
+    Match  lipgloss.Style // every match of the filter
+}
+```
+
+<a name="DefaultPaneStyles"></a>
+### func [DefaultPaneStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/pane.go#L86>)
+
+```go
+func DefaultPaneStyles(th theme.Resolved) PaneStyles
+```
+
+DefaultPaneStyles paint the lines as the Handler does, the count and the kept filter dim, the prompt as the cursor and the matches as matches.
 
 <a name="Styles"></a>
 ## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L33-L37>)

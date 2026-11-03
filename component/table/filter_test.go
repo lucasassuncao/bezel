@@ -96,3 +96,14 @@ func TestVimKeysAreTextAtThePrompt(t *testing.T) {
 	m := filtering(New(pkgCols, pkgs(3)).SetHeight(6).WithKeys(VimKeys()), "j")
 	require.Equal(t, "j", m.Filter())
 }
+
+func TestSetItemsKeepsTheFilterOnItsRow(t *testing.T) {
+	m := filtering(New(pkgCols, pkgs(12)).SetHeight(6), "v0.1")
+	m, _ = m.Update(press(tea.KeyDown))
+	require.Equal(t, 10, sel(m).Value)
+
+	m = m.SetItems(pkgs(12)[2:]) // pkg-1 goes: a match above the cursor
+	require.Equal(t, 10, sel(m).Value, "the cursor stays on pkg-10, not on its place")
+	_, r := m.Update(press(tea.KeyEnter))
+	require.Equal(t, 10, r.Event.(Chosen[int]).Item.Value)
+}

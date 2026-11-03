@@ -342,3 +342,11 @@ func TestTheWheelIsHandledOnlyWhenEnabled(t *testing.T) {
 	_, r = m.WithWheel(0).Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
 	require.False(t, r.Handled)
 }
+
+func TestTopLineCountsWrappedRows(t *testing.T) {
+	m := sized(strings.Repeat("0123456789\n", 10), 5, 3).SetWrap(true).SetYOffset(7)
+	line, part := m.TopLine()
+	require.Equal(t, [2]int{3, 1}, [2]int{line, part}, "two rows a line")
+	m = m.SetLines(strings.Split(strings.Repeat("0123456789\n", 8), "\n")).SetTopLine(line-2, part)
+	require.Equal(t, 3, m.YOffset(), "two lines gone above: four rows up")
+}

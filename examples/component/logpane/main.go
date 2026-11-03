@@ -1,7 +1,6 @@
-// Log pane: a made-up deploy logging through slog from another goroutine into
-// two logger.Panes, bezel's Handler above and slog's JSON through Writer below.
-// Scrolling up holds a pane still and counts what arrives; end follows again.
-// / filters the focused pane to the records holding the text typed.
+// Log pane: a made-up deploy logging through slog into two logger.Panes,
+// bezel's Handler above and slog's JSON through Writer below. Scrolling up
+// holds a pane still, end follows again and / filters the focused one.
 package main
 
 import (

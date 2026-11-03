@@ -300,6 +300,13 @@ func (m Model) SetYOffset(n int) Model {
 	return m
 }
 
+// TopLine is the line at the top and which of its wrapped rows shows first,
+// for a caller that changes the lines and keeps the reader's place.
+func (m Model) TopLine() (line, part int) { return m.idx.at(m.YOffset()) }
+
+// SetTopLine makes row part of line the top, kept within the text.
+func (m Model) SetTopLine(line, part int) Model { return m.SetYOffset(m.idx.row(line) + part) }
+
 // SetXOffset pans to cell n, kept within the longest line; nothing while
 // wrapping.
 func (m Model) SetXOffset(n int) Model {

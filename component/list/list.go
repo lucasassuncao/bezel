@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"slices"
 	"strings"
-	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -16,6 +15,7 @@ import (
 	"github.com/lucasassuncao/bezel/component/paginator"
 	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/fuzzy"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -386,7 +386,7 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 			return m, bezel.Result{}
 		}
 		m.mo.run, m.mo.p = run, p
-		if !m.Active() {
+		if !m.moving() {
 			m.mo = motion{dur: m.mo.dur, p: 1}
 		}
 		return m, bezel.Result{Handled: true, Cmd: cmd}
@@ -409,8 +409,7 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 func (m Model[T]) handles(k tea.KeyPressMsg) bool {
 	ks := m.keys
 	if m.find.on {
-		return key.Matches(k, ks.Esc, ks.Enter, ks.Erase, ks.Up, ks.Down) ||
-			utf8.RuneCountInString(k.Key().Text) == 1
+		return key.Matches(k, ks.Esc, ks.Enter, ks.Erase, ks.Up, ks.Down) || edit.Typed(k) != ""
 	}
 	return key.Matches(k, ks.Filter, ks.Up, ks.Down, ks.PageUp, ks.PageDown, ks.Top, ks.Bottom, ks.Enter)
 }
@@ -451,13 +450,12 @@ func (m Model[T]) updateFilter(msg tea.KeyPressMsg) (Model[T], bool) {
 	case key.Matches(msg, m.keys.Enter):
 		return m.pickMatch()
 	case key.Matches(msg, m.keys.Erase):
-		if text := m.find.text; text != "" {
-			_, size := utf8.DecodeLastRuneInString(text)
-			m.find = m.filterFor(text[:len(text)-size])
+		if m.find.text != "" {
+			m.find = m.filterFor(edit.Erase(m.find.text))
 		}
-	case utf8.RuneCountInString(msg.Key().Text) == 1:
+	case edit.Typed(msg) != "":
 		// Text before the moves, so vim's j and k stay typeable while filtering.
-		m.find = m.filterFor(m.find.text + msg.Key().Text)
+		m.find = m.filterFor(m.find.text + edit.Typed(msg))
 	case key.Matches(msg, m.keys.Up, m.keys.Down):
 		d, n := 1, len(m.find.idx)
 		if key.Matches(msg, m.keys.Up) {

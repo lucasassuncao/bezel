@@ -41,7 +41,7 @@ func (m Model[T]) start(from float64) Model[T] {
 	if m.mo.dur <= 0 {
 		return m
 	}
-	if m.Active() { // glide on from where the highlight is drawn now
+	if m.moving() { // glide on from where the highlight is drawn now
 		from = m.mo.from + (from-m.mo.from)*frames.Or(m.mo.run.Ease)(m.mo.p)
 	}
 	m.mo.from = from
@@ -89,33 +89,42 @@ func (m Model[T]) changed(before []Row[T], cursor int) Model[T] {
 
 // glide is the row the cursor is drawn on now, fractional while it moves.
 func (m Model[T]) glide() float64 {
-	if !m.Active() {
+	if !m.moving() {
 		return float64(m.win.Cursor)
 	}
 	q := frames.Or(m.mo.run.Ease)(m.mo.p)
 	return m.mo.from + (float64(m.win.Cursor)-m.mo.from)*q
 }
 
-// Active reports whether the list is still moving.
-func (m Model[T]) Active() bool { return m.mo.run.Active() }
+// Active reports whether the list is still moving or its Busy spinner turns.
+func (m Model[T]) Active() bool { return m.moving() || m.spin.Active() }
+
+// moving reports whether the cursor glides or a row lights up or fades.
+func (m Model[T]) moving() bool { return m.mo.run.Active() }
 
 // Tick is the command for the list's next frames, its motion's and its Busy
 // spinner's, nil while both are still: call it after SetRows to start what
 // it set moving.
 func (m Model[T]) Tick() tea.Cmd { return tea.Batch(m.mo.run.Tick(), m.spin.Tick()) }
 
-// FrameAt is the list's frame for at, for a test that delivers frames itself.
-func (m Model[T]) FrameAt(at time.Time) tea.Msg { return m.mo.run.FrameAt(at) }
+// FrameAt is the list's frame for at, for a test that delivers frames itself:
+// its motion's while that runs, else its Busy spinner's.
+func (m Model[T]) FrameAt(at time.Time) tea.Msg {
+	if m.moving() {
+		return m.mo.run.FrameAt(at)
+	}
+	return m.spin.FrameAt(at)
+}
 
 // Advance is the list at now and whether it settled, for a host that keeps
-// its own clock.
+// its own clock; a turning spinner never settles.
 func (m Model[T]) Advance(now time.Time) (Model[T], bool) {
-	if !m.Active() {
-		return m, true
-	}
-	m.mo.run, m.mo.p = m.mo.run.Advance(now)
-	if !m.Active() {
-		m.mo = motion{dur: m.mo.dur, p: 1}
+	m.spin, _ = m.spin.Advance(now)
+	if m.moving() {
+		m.mo.run, m.mo.p = m.mo.run.Advance(now)
+		if !m.moving() {
+			m.mo = motion{dur: m.mo.dur, p: 1}
+		}
 	}
 	return m, !m.Active()
 }
@@ -128,7 +137,7 @@ func (m Model[T]) cursorRow() int {
 // arriving is the style of a row that just arrived, fading from the accent
 // to the row's own colour; nil when the row is settled.
 func (m Model[T]) arriving(r Row[T], st *Styles) *lipgloss.Style {
-	if !m.Active() || !m.mo.fresh[r.Label] {
+	if !m.moving() || !m.mo.fresh[r.Label] {
 		return nil
 	}
 	own := st.Row
@@ -142,7 +151,7 @@ func (m Model[T]) arriving(r Row[T], st *Styles) *lipgloss.Style {
 // ghostLine is the ghost at row i, faded by how far the motion is, and false
 // when no ghost sits there.
 func (m Model[T]) ghostLine(i int, st *Styles) (string, bool) {
-	if !m.Active() {
+	if !m.moving() {
 		return "", false
 	}
 	for _, g := range m.mo.gone {

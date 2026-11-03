@@ -26,12 +26,15 @@ Package table sizes columns to their contents, giving way in a declared order wh
   - [func VimKeys\(\) Keys](<#VimKeys>)
 - [type Model](<#Model>)
   - [func New\[T any\]\(cols \[\]Column, items \[\]Item\[T\]\) Model\[T\]](<#New>)
+  - [func \(m Model\[T\]\) Active\(\) bool](<#Model[T].Active>)
+  - [func \(m Model\[T\]\) Advance\(now time.Time\) \(Model\[T\], bool\)](<#Model[T].Advance>)
   - [func \(m Model\[T\]\) Blur\(\) Model\[T\]](<#Model[T].Blur>)
   - [func \(m Model\[T\]\) Cursor\(\) int](<#Model[T].Cursor>)
   - [func \(m Model\[T\]\) Filter\(\) string](<#Model[T].Filter>)
   - [func \(m Model\[T\]\) Filtering\(\) bool](<#Model[T].Filtering>)
   - [func \(m Model\[T\]\) Focus\(\) Model\[T\]](<#Model[T].Focus>)
   - [func \(m Model\[T\]\) Focused\(\) bool](<#Model[T].Focused>)
+  - [func \(m Model\[T\]\) FrameAt\(at time.Time\) tea.Msg](<#Model[T].FrameAt>)
   - [func \(m Model\[T\]\) Items\(\) \[\]Item\[T\]](<#Model[T].Items>)
   - [func \(m Model\[T\]\) Legend\(\) \[\]legend.Entry](<#Model[T].Legend>)
   - [func \(m Model\[T\]\) Len\(\) int](<#Model[T].Len>)
@@ -190,6 +193,24 @@ func New[T any](cols []Column, items []Item[T]) Model[T]
 
 New builds a table with the cursor on the first row; SetHeight gives it the rows its pane has, header included. With a Busy row, Tick turns the spinner.
 
+<a name="Model[T].Active"></a>
+### func \(Model\[T\]\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/table/busy.go#L25>)
+
+```go
+func (m Model[T]) Active() bool
+```
+
+Active reports whether the Busy spinner turns.
+
+<a name="Model[T].Advance"></a>
+### func \(Model\[T\]\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/table/busy.go#L32>)
+
+```go
+func (m Model[T]) Advance(now time.Time) (Model[T], bool)
+```
+
+Advance is the table at now, for a host that keeps its own clock; it settles only once no row is busy.
+
 <a name="Model[T].Blur"></a>
 ### func \(Model\[T\]\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L143>)
 
@@ -244,6 +265,15 @@ func (m Model[T]) Focused() bool
 
 Focused reports whether the table takes keys.
 
+<a name="Model[T].FrameAt"></a>
+### func \(Model\[T\]\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/table/busy.go#L28>)
+
+```go
+func (m Model[T]) FrameAt(at time.Time) tea.Msg
+```
+
+FrameAt is the spinner's frame for at, for a test that delivers frames itself.
+
 <a name="Model[T].Items"></a>
 ### func \(Model\[T\]\) [Items](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L174>)
 
@@ -290,7 +320,7 @@ func (m Model[T]) Selected() (Item[T], bool)
 Selected is a copy of the row under the cursor, false when there are none. While filtering it is the row under the filter cursor.
 
 <a name="Model[T].SetHeight"></a>
-### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L232>)
+### func \(Model\[T\]\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L233>)
 
 ```go
 func (m Model[T]) SetHeight(h int) Model[T]
@@ -317,16 +347,16 @@ func (m Model[T]) SetWidth(w int) Model[T]
 SetWidth changes the cells the table takes; columns shrink to fit.
 
 <a name="Model[T].Tick"></a>
-### func \(Model\[T\]\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/table/busy.go#L19>)
+### func \(Model\[T\]\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/table/busy.go#L22>)
 
 ```go
 func (m Model[T]) Tick() tea.Cmd
 ```
 
-Tick is the command for the Busy spinner's next frame, nil while no row is busy: call it after New or SetItems.
+Tick is the command for the Busy spinner's next frame, nil while no row is busy: call it after New or SetItems. A second one lands spent.
 
 <a name="Model[T].Update"></a>
-### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L241>)
+### func \(Model\[T\]\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L242>)
 
 ```go
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result)
@@ -371,7 +401,7 @@ func (m Model[T]) WithMatch(match func(query, text string) bool) Model[T]
 WithMatch filters with match, which gets the typed text and each row's cells joined by spaces, colours stripped. nil is Contains again. It ends WithFuzzy.
 
 <a name="Model[T].WithSpinner"></a>
-### func \(Model\[T\]\) [WithSpinner](<https://github.com/lucasassuncao/bezel/blob/main/component/table/busy.go#L12>)
+### func \(Model\[T\]\) [WithSpinner](<https://github.com/lucasassuncao/bezel/blob/main/component/table/busy.go#L15>)
 
 ```go
 func (m Model[T]) WithSpinner(s spinner.Spinner) Model[T]

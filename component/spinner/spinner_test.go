@@ -153,3 +153,34 @@ func TestForeignFrameIsNotHandled(t *testing.T) {
 
 // withCmd keeps the command of an Update, for the tests that run it.
 func withCmd[T any](m T, r bezel.Result) (T, tea.Cmd) { return m, r.Cmd }
+
+func TestASecondTickLandsSpent(t *testing.T) {
+	m, first := New(fast(Line())).Start()
+	second := m.Tick()
+	m, _ = withCmd(m.Update(first()))
+	m, cmd := withCmd(m.Update(second()))
+	require.Equal(t, "/", m.Frame(), "one frame, not two")
+	require.Nil(t, cmd)
+}
+
+func TestSetRunningLeavesAStateItIsAlreadyIn(t *testing.T) {
+	m := New(fast(Line())).SetRunning(true)
+	require.True(t, m.Active())
+	tick := m.Tick()
+	m = m.SetRunning(true)
+	m, cmd := withCmd(m.Update(tick()))
+	require.Equal(t, "/", m.Frame(), "the turning tick still turns it")
+	require.NotNil(t, cmd)
+	require.False(t, m.SetRunning(false).Active())
+}
+
+func TestAdvanceShowsAFramePerEvery(t *testing.T) {
+	m, _ := New(Line()).Start()
+	at := time.Unix(0, 0)
+	m, done := m.Advance(at)
+	require.False(t, done)
+	m, _ = m.Advance(at.Add(250 * time.Millisecond))
+	require.Equal(t, "-", m.Frame(), "two tenths past the first")
+	_, done = m.Stop().Advance(at)
+	require.True(t, done, "a held spinner is settled")
+}

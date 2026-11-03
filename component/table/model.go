@@ -3,7 +3,6 @@ package table
 import (
 	"slices"
 	"strings"
-	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -12,6 +11,7 @@ import (
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -215,9 +215,10 @@ func (m Model[T]) SetItems(items []Item[T]) Model[T] {
 	if at < len(m.items) {
 		prev = first(m.items[at])
 	}
+	match, found := m.matched()
 	m = m.withItems(items)
 	if at < len(m.items) && first(m.items[at]) == prev {
-		return m.clamp().refilter()
+		return m.clamp().refilter().refind(match, found)
 	}
 	for i, it := range m.items {
 		if first(it) == prev {
@@ -225,7 +226,7 @@ func (m Model[T]) SetItems(items []Item[T]) Model[T] {
 			break
 		}
 	}
-	return m.clamp().refilter()
+	return m.clamp().refilter().refind(match, found)
 }
 
 // SetHeight updates the rows the table takes, header included.
@@ -276,8 +277,7 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 func (m Model[T]) handles(k tea.KeyPressMsg) bool {
 	ks := m.keys
 	if m.find.on {
-		return key.Matches(k, ks.Esc, ks.Enter, ks.Erase, ks.Up, ks.Down) ||
-			utf8.RuneCountInString(k.Key().Text) == 1
+		return key.Matches(k, ks.Esc, ks.Enter, ks.Erase, ks.Up, ks.Down) || edit.Typed(k) != ""
 	}
 	return key.Matches(k, ks.Filter, ks.HalfPageUp, ks.HalfPageDown, ks.Up, ks.Down,
 		ks.PageUp, ks.PageDown, ks.Top, ks.Bottom, ks.Enter)
