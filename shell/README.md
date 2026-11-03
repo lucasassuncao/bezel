@@ -45,6 +45,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func When\(f func\(Context\) bool\) Option](<#When>)
   - [func WithKey\(keys ...string\) Option](<#WithKey>)
 - [type Pane](<#Pane>)
+- [type ResizedMsg](<#ResizedMsg>)
 - [type Shell](<#Shell>)
   - [func New\(cfg Config\) Shell](<#New>)
   - [func \(s Shell\) ActiveTab\(\) int](<#Shell.ActiveTab>)
@@ -205,7 +206,7 @@ func Quit(opts ...Option) Action
 Quit leaves the program.
 
 <a name="ResetSizes"></a>
-### func [ResetSizes](<https://github.com/lucasassuncao/bezel/blob/main/shell/resize.go#L24>)
+### func [ResetSizes](<https://github.com/lucasassuncao/bezel/blob/main/shell/resize.go#L26>)
 
 ```go
 func ResetSizes(opts ...Option) Action
@@ -214,7 +215,7 @@ func ResetSizes(opts ...Option) Action
 ResetSizes gives every Resizable box the sizes its layout declares again.
 
 <a name="Resize"></a>
-### func [Resize](<https://github.com/lucasassuncao/bezel/blob/main/shell/resize.go#L18>)
+### func [Resize](<https://github.com/lucasassuncao/bezel/blob/main/shell/resize.go#L20>)
 
 ```go
 func Resize(opts ...Option) Action
@@ -448,6 +449,15 @@ type Pane struct {
     Accent color.Color   // the edges' colour, focused or not; nil keeps the theme's
     Body   func(inner layout.Rect) string
 }
+```
+
+<a name="ResizedMsg"></a>
+## type [ResizedMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/resize.go#L32>)
+
+ResizedMsg is sent when an edge between panes moved, by the mouse, Resize or ResetSizes: the app sizes its models from Rect again, as on a resize.
+
+```go
+type ResizedMsg struct{}
 ```
 
 <a name="Shell"></a>

@@ -74,7 +74,7 @@ layout.Rows(
 - **`Fixed`** sizes a leaf by its constraints: `Lines(n)` exactly, `Ratio(num, den)` as a share of its parent, clamped by `Min` and `Max`. **`Fill`** takes what its fixed siblings leave.
 - **`Collapse(limit, keep)`** keeps only the child holding `keep` while the box is narrower than `limit`: a two-column screen that becomes one on a small terminal.
 - **`Info()`** marks a pane that only informs: `ChangePane` skips it.
-- **`Resizable()`** lets the user move the edges between a box's children: by dragging the border between two panes with the mouse, or with the `Resize` action on the focused pane. Each pane keeps at least three cells and its `Min` and `Max`. The shell keeps the sizes as shares, so they survive a terminal resize, and `ResetSizes` gives back the declared ones.
+- **`Resizable()`** lets the user move the edges between a box's children: by dragging the border between two panes with the mouse, or with the `Resize` action on the focused pane. Each pane keeps at least three cells and its `Min` and `Max`. The shell keeps the sizes as shares, so they survive a terminal resize, and `ResetSizes` gives back the declared ones. Each move sends a `shell.ResizedMsg`, on which the app sizes its models from `Rect` again, as on a `tea.WindowSizeMsg`.
 - A leaf the app leaves out of `View`'s map is gone for that frame, and its space goes to the others. A pane that only shows sometimes is a leaf the app sometimes leaves out.
 
 `SetLayout` swaps the whole tree while the app runs, and `Rect(name)` reports where a pane landed, for a click or a scroll that needs its size.

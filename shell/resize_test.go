@@ -29,8 +29,11 @@ func TestDraggingAnEdgeResizesThePanes(t *testing.T) {
 	s, r := s.Update(click(list.X+list.W-1, y))
 	require.True(t, r.Handled)
 	require.Nil(t, r.Cmd, "a press on an edge is no click on a pane")
-	s, _ = s.Update(tea.MouseMotionMsg{X: list.X + list.W + 9, Y: y, Button: tea.MouseLeft})
+	s, r = s.Update(tea.MouseMotionMsg{X: list.X + list.W + 9, Y: y, Button: tea.MouseLeft})
 	require.Equal(t, list.W+10, s.Rect("list").W)
+	require.Equal(t, ResizedMsg{}, r.Cmd(), "the app sizes its models again")
+	_, r = s.Update(tea.MouseMotionMsg{X: list.X + list.W + 9, Y: y, Button: tea.MouseLeft})
+	require.Nil(t, r.Cmd, "the edge did not move")
 	s, r = s.Update(tea.MouseReleaseMsg{X: list.X + list.W + 19, Y: y})
 	require.True(t, r.Handled)
 	require.Equal(t, list.W+20, s.Rect("list").W)
@@ -62,11 +65,14 @@ func TestResizeGrowsTheFocusedPaneAndResetSizesUndoesIt(t *testing.T) {
 	s, _ = s.Update(ctrlShift(tea.KeyLeft))
 	require.Equal(t, w-2, s.Rect("list").W)
 
+	require.Equal(t, ResizedMsg{}, r.Cmd())
+
 	s = s.SetFocus("detail")
 	s, _ = s.Update(ctrlShift(tea.KeyRight))
 	require.Equal(t, w-4, s.Rect("list").W, "the last pane grows by its left edge")
-	s, _ = s.Update(ctrlShift(tea.KeyDown))
+	s, r = s.Update(ctrlShift(tea.KeyDown))
 	require.Equal(t, w-4, s.Rect("list").W, "no Resizable rows: nothing moves")
+	require.Nil(t, r.Cmd)
 
 	s, _ = s.Update(press("="))
 	require.Equal(t, w, s.Rect("list").W)

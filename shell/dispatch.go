@@ -39,10 +39,12 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 		from := s.Focused()
 		return s.focused(from, s.nextPane(backward(ac, pressed)).relayout()) // so FocusMsg names where focus really lands
 	case kindResize:
-		return s.resized(ac, pressed).relayout(), nil
+		next := s.resized(ac, pressed)
+		return next.relayout(), next.resizedFrom(s)
 	case kindResetSizes:
-		s.sizes = nil
-		return s.relayout(), nil
+		next := s
+		next.sizes = nil
+		return next.relayout(), next.resizedFrom(s)
 	}
 	return s, a.Run(ActionContext{Context: s.Context(), Arg: arg})
 }
