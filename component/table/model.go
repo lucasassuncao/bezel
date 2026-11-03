@@ -34,11 +34,12 @@ type Keys struct {
 	Erase                                                                                 key.Binding // the filter's last character
 	Check, CheckAll                                                                       key.Binding // while WithMulti
 	Sort                                                                                  key.Binding
+	Left, Right                                                                           key.Binding // between cells, while WithCells
 }
 
 // DefaultKeys are the arrows, pgup/pgdown, ctrl+u/ctrl+d for half a page,
 // home/end, enter, / and esc, ctrl+s to sort; space and ctrl+a check rows
-// while WithMulti.
+// while WithMulti, and ←/→ move between cells while WithCells.
 func DefaultKeys() Keys {
 	return Keys{
 		Up:           key.New("up").WithHelp("↑/↓", "move"),
@@ -56,14 +57,17 @@ func DefaultKeys() Keys {
 		Check:        key.New("space").WithHelp("space", "check"),
 		CheckAll:     key.New("ctrl+a").WithHelp("ctrl+a", "check all"),
 		Sort:         key.New("ctrl+s").WithHelp("ctrl+s", "sort"),
+		Left:         key.New("left").WithHelp("←/→", "cell"),
+		Right:        key.New("right"),
 	}
 }
 
-// VimKeys are DefaultKeys with vim's letters added: k/j to move, g/G to the
-// ends and ctrl+b/f to page. The filter prompt still takes them as text.
+// VimKeys are DefaultKeys with vim's letters added: k/j to move, h/l between
+// cells, g/G to the ends and ctrl+b/f to page. The filter still takes text.
 func VimKeys() Keys {
 	k := DefaultKeys()
 	k.Up, k.Down = key.New("up", "k").WithHelp("↑/↓ k/j", "move"), key.New("down", "j")
+	k.Left, k.Right = key.New("left", "h").WithHelp("←/→ h/l", "cell"), key.New("right", "l")
 	k.Top, k.Bottom = key.New("home", "g").WithHelp("g/G", "ends"), key.New("end", "G")
 	k.PageUp, k.PageDown = key.New("pgup", "ctrl+b").WithHelp("^b/^f", "page"), key.New("pgdown", "ctrl+f")
 	return k
@@ -91,6 +95,8 @@ type Model[T any] struct {
 	spin   spinner.Model // turns while a row is Busy
 	blur   bool          // drawn without the cursor's colour, and deaf to keys
 	multi  bool
+	cells  bool // the cursor is on a cell, col its column
+	col    int
 	sort   order
 	less   []func(a, b string) bool // by column; nil is Natural
 	edit   func(Styles) Styles
@@ -105,15 +111,16 @@ type Styles struct {
 	Busy    lipgloss.Style // the spinner on a Busy row
 	Box     lipgloss.Style // an unchecked row's box while WithMulti
 	Checked lipgloss.Style // a checked row's box
+	Cell    lipgloss.Style // the cell under the cursor while WithCells
 }
 
 // DefaultStyles take the header from the theme's table role, paint the
-// cursor row in the cursor role, a busy row's spinner and a checked box in
-// the accent and an empty box muted.
+// cursor row in the cursor role and its cell as the caret, a busy row's
+// spinner and a checked box in the accent and an empty box muted.
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{
 		Header: th.TableHeader, Cursor: th.Cursor, Blurred: th.Dim, More: th.Dim, Busy: th.Accent,
-		Box: th.Muted, Checked: th.Accent,
+		Box: th.Muted, Checked: th.Accent, Cell: th.Caret,
 	}
 }
 
@@ -173,6 +180,9 @@ func (m Model[T]) Legend() []legend.Entry {
 	keys := []key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.HalfPageUp, k.HalfPageDown, k.Top, k.Bottom, k.Enter, k.Filter, k.Sort}
 	if m.multi {
 		keys = append(keys, k.Check, k.CheckAll)
+	}
+	if m.cells {
+		keys = append(keys[:1], append([]key.Binding{k.Left}, keys[1:]...)...)
 	}
 	return legend.FromBindings(keys)
 }
@@ -268,21 +278,8 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 		if m.blur || !m.handles(msg) {
 			return m, bezel.Result{}
 		}
-		if m.multi && !m.find.on && key.Matches(msg, m.keys.Check, m.keys.CheckAll) {
-			var items []Item[T]
-			if key.Matches(msg, m.keys.Check) {
-				m, items = m.check()
-			} else {
-				m, items = m.checkAll()
-			}
-			r := bezel.Result{Handled: true}
-			if len(items) > 0 {
-				r.Event = Toggled[T]{Items: items}
-			}
-			return m, r
-		}
-		if !m.find.on && key.Matches(msg, m.keys.Sort) {
-			return m.resort(m.nextSort())
+		if next, r, ok := m.option(msg); ok {
+			return next, r
 		}
 		if m.find.on {
 			m, chosen = m.updateFilter(msg)
@@ -295,6 +292,9 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 			return m.resort(m.sortOn(c))
 		}
 		m, chosen, handled = m.click(msg.Y)
+		if c := m.columnAt(msg.X); handled && m.cells && c >= 0 {
+			m.col = c
+		}
 	default:
 		if !m.spin.Owns(msg) {
 			return m, bezel.Result{}
@@ -313,6 +313,36 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	return m, r
 }
 
+// option is a key of what the table was set up for, outside the filter:
+// checking rows, sorting them and moving between cells.
+func (m Model[T]) option(k tea.KeyPressMsg) (Model[T], bezel.Result, bool) {
+	ks := m.keys
+	switch {
+	case m.find.on:
+		return m, bezel.Result{}, false
+	case m.multi && key.Matches(k, ks.Check, ks.CheckAll):
+		var items []Item[T]
+		if key.Matches(k, ks.Check) {
+			m, items = m.check()
+		} else {
+			m, items = m.checkAll()
+		}
+		r := bezel.Result{Handled: true}
+		if len(items) > 0 {
+			r.Event = Toggled[T]{Items: items}
+		}
+		return m, r, true
+	case key.Matches(k, ks.Sort):
+		m, r := m.resort(m.nextSort())
+		return m, r, true
+	case m.cells && key.Matches(k, ks.Left):
+		return m.moveColumn(-1), bezel.Result{Handled: true}, true
+	case m.cells && key.Matches(k, ks.Right):
+		return m.moveColumn(1), bezel.Result{Handled: true}, true
+	}
+	return m, bezel.Result{}, false
+}
+
 // handles reports whether k is one of the table's bindings, or text for an
 // open filter.
 func (m Model[T]) handles(k tea.KeyPressMsg) bool {
@@ -322,7 +352,8 @@ func (m Model[T]) handles(k tea.KeyPressMsg) bool {
 	}
 	return key.Matches(k, ks.Filter, ks.HalfPageUp, ks.HalfPageDown, ks.Up, ks.Down,
 		ks.PageUp, ks.PageDown, ks.Top, ks.Bottom, ks.Enter, ks.Sort) ||
-		m.multi && key.Matches(k, ks.Check, ks.CheckAll)
+		m.multi && key.Matches(k, ks.Check, ks.CheckAll) ||
+		m.cells && key.Matches(k, ks.Left, ks.Right)
 }
 
 // press is one of the table's keys: the table after it and whether it chose.
@@ -446,7 +477,7 @@ func (m Model[T]) View(th theme.Resolved) string {
 			lead = st.Cursor.Render(marker)
 		}
 		if i == w.Cursor && !m.blur {
-			cells = cursorCells(cells, st.Cursor)
+			cells = cursorCells(m.markCell(cells, widths, st.Cell), st.Cursor)
 		}
 		lines = append(lines, lead+m.box(rows[i], st)+Row(widths, cells))
 	}

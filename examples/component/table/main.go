@@ -1,4 +1,4 @@
-// Table: rows under a fixed header, a / filter, ctrl+s or a title's click to
+// Table: a cell cursor over rows under a fixed header, a / filter, ctrl+s to
 // sort, space checking rows and a spinner on the rows updating (b toggles one).
 // w narrows the window: the description gives way first.
 package main
@@ -85,6 +85,7 @@ func newModel() model {
 			shell.Move(),
 			shell.Custom("/", "filter", nil, shell.DisplayOnly()),
 			shell.Custom("enter", "choose", nil, shell.DisplayOnly()),
+			shell.Custom("←/→", "cell", nil, shell.DisplayOnly()),
 			shell.Custom("ctrl+s", "sort", nil, shell.DisplayOnly()),
 			shell.Custom("space", "check", nil, shell.DisplayOnly()),
 			shell.Custom("b", "busy", shell.Send(toggleBusyMsg{})),
@@ -92,7 +93,7 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, tbl: table.New(cols, items()).WithMulti(true)}
+	return model{sh: sh, th: th, tbl: table.New(cols, items()).WithMulti(true).WithCells(true)}
 }
 
 // Init turns the spinners of the rows that start busy.
@@ -166,7 +167,9 @@ func (m model) detail(r layout.Rect) string {
 		return ""
 	}
 	c := it.Cells
-	out := m.field("version", c[1], r.W) + m.field("licence", c[2], r.W) + "\n"
+	cell, _ := m.tbl.Cell()
+	out := m.field("version", c[1], r.W) + m.field("licence", c[2], r.W)
+	out += m.field("cell", cols[m.tbl.Column()].Title+": "+cell, r.W) + "\n"
 	return out + "  " + strings.Join(draw.Wrap(c[3], r.W-2), "\n  ")
 }
 

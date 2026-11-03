@@ -1,7 +1,8 @@
 package table
 
 // Chosen is the event of a row being chosen: enter, or a click on the row
-// already under the cursor. Item is a copy of that row.
+// already under the cursor. Item is a copy of that row; the Model's Column
+// says which cell while it is WithCells.
 type Chosen[T any] struct{ Item Item[T] }
 
 // Toggled is the event of rows checked or unchecked while the table is

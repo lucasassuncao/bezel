@@ -43,6 +43,14 @@ func TestTableDescriptionGivesWayFirst(t *testing.T) {
 	require.Contains(t, out, "BSD-3", "licences stay whole")
 }
 
+func TestTableCursorMovesBetweenCells(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 100, Height: 24}, 100)
+	m, _ = frame(t, m, bezeltest.Key("right"), 100)
+	_, out := frame(t, m, bezeltest.Key("right"), 100)
+	require.Contains(t, out, "cell     LICENCE: MIT")
+}
+
 func TestTableSortsByAColumn(t *testing.T) {
 	var m tea.Model = newModel()
 	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 100, Height: 24}, 100)

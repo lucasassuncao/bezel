@@ -106,7 +106,7 @@ A directory tree over the app's own node type. The arrows expand and collapse; `
 
 Source: [`examples/component/table/main.go`](../examples/component/table/main.go)
 
-Columns sized to their contents, and a cursor over rows that scroll under a fixed header, with the position at the foot of the pane, a scrollbar down its edge and the row's detail below. `pgdown` and `pgup` move a page at a time, `enter` reports the chosen row, `ctrl+s` sorts by a column and then the other way (a click on a title does too, `Natural` puts `v1.4` before `v1.11` and `WithLess` gives a column its own order), `/` filters the rows, `space` checks rows for a batch (`WithMulti`), `b` turns a spinner on a row the way the two still updating have, and `w` narrows the window: the description gives way first, and the version and licence stay whole.
+Columns sized to their contents, and a cursor over rows that scroll under a fixed header, with the position at the foot of the pane, a scrollbar down its edge and the row's detail below. `pgdown` and `pgup` move a page at a time, `←`/`→` move between cells (`WithCells`; the detail shows the cell), `enter` reports the chosen row, `ctrl+s` sorts by a column and then the other way (a click on a title does too, `Natural` puts `v1.4` before `v1.11` and `WithLess` gives a column its own order), `/` filters the rows, `space` checks rows for a batch (`WithMulti`), `b` turns a spinner on a row the way the two still updating have, and `w` narrows the window: the description gives way first, and the version and licence stay whole.
 
 ![table](recordings/component/table.gif)
 
