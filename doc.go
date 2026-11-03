@@ -36,6 +36,8 @@
 //     section headings and a / filter.
 //   - [github.com/lucasassuncao/bezel/component/calendar]: a month with a
 //     cursor on a day; a form's date field opens it.
+//   - [github.com/lucasassuncao/bezel/component/breadcrumb]: a path in one
+//     row with a cursor on a part, its middle giving way when narrow.
 //   - [github.com/lucasassuncao/bezel/component/paginator]: pages over a run of
 //     items, drawn as dots or as "2/5".
 //   - [github.com/lucasassuncao/bezel/component/tree]: a flat depth-first tree

@@ -50,7 +50,7 @@ if m.acc.IsOpen(i) { ... }
 
 - Getters are the bare noun: `Cursor()`, `Value()`, never `GetCursor()`.
 - A bool is an adjective or participle: `Running()`, `Focused()`, `Active()`. `Is`/`Has` leads only when the bare word is already an action on the type: `IsOpen` beside `Toggle`, `IsBusy` beside `Busy`, `HasOverlay` beside `Push`.
-- Every model with a cursor over items has `Selected() (T, bool)`: `list`, `tree`, `table.Model`, `browser`, `calendar` (a day). A form control's `Selected() int` is an index instead.
+- Every model with a cursor over items has `Selected() (T, bool)`: `list`, `tree`, `table.Model`, `browser`, `calendar` (a day), `breadcrumb` (a part). A form control's `Selected() int` is an index instead.
 - What went wrong is an `error`: checks are `func(string) error` (`input.WithValidate`, `Prompt.WithValidate`), and the getter is `Err()`.
 
 ## The theme
@@ -68,7 +68,7 @@ Where the theme goes depends on who calls `View`. If bezel does, the component k
 | --- | --- | --- |
 | bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `overlay`, `textbox`, `input`, `tags`, `cursor`, `logger` |
 | bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic | `form` |
-| the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `calendar`, `timer`, `stopwatch`, `viewport`, `accordion` |
+| the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `calendar`, `breadcrumb`, `timer`, `stopwatch`, `viewport`, `accordion` |
 | nobody: a plain function | after the data | `progress`, `chart`, `inline`, `icon.Set.Render` |
 | the shell | `Config.Theme`; `SetTheme` also repaints open dialogs | `shell` |
 
@@ -95,7 +95,7 @@ Each package is in one class, and a non-themable one says so in its doc comment:
 
 | Class | The app can | Packages |
 | --- | --- | --- |
-| Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `calendar`, `input`, `tags`, `textbox`, `form`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, every `overlay` dialog but `Alert` |
+| Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `calendar`, `breadcrumb`, `input`, `tags`, `textbox`, `form`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, every `overlay` dialog but `Alert` |
 | Theme only | switch the theme (a plain function keeps no edit) | `chart`, `progress.Bar` and siblings, `inline`, `icon.Set.Render` |
 | Non-themable | nothing: the colours mean something, or are arguments | `overlay.Alert` and any `Kind` tint, `toast` (its `draw.Kind` colours are fixed), `animation` and subpackages, `effect`, `themebrowser` |
 
@@ -136,6 +136,7 @@ The events are structs in the component's package. Read them with a type switch 
 | `browser` | `Chosen{Item}`, `Dismissed{}` |
 | `paginator` | `Paged{Page}` |
 | `calendar` | `Chosen{Day}` |
+| `breadcrumb` | `Chosen{Path}` |
 | `tags` | `Added{Tag}`, `Removed{Tag}` |
 
 An event reports; the app decides what it means. A cursor that starts to move puts its own `Tick()` in `Result.Cmd`, so the app never calls it after `Update`; `Tick()` stays public for after `SetRows`. A new component answers this signature, never a new shape.

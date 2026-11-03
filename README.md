@@ -117,6 +117,7 @@ go run ./examples/app
 
 - [`list`](component/list): a cursor list with sections, a `/` filter and rows checked for a batch.
 - [`calendar`](component/calendar): a month with a cursor on a day, and the calendar a form's date field opens.
+- [`breadcrumb`](component/breadcrumb): a path in one row, `kv › apps › prod`, with a cursor on a part and its middle giving way when narrow.
 - [`paginator`](component/paginator): pages as dots or "2/5", and the slice of items each page shows.
 - [`tree`](component/tree): an expandable tree, generic over your node type.
 - [`table`](component/table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header, sorted by a column and checked for a batch.

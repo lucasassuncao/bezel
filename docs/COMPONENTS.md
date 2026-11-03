@@ -78,6 +78,14 @@ Rows under section headings the cursor skips, `enter` showing the payload a row 
 
 ![list](recordings/component/list.gif)
 
+### Breadcrumb
+
+Source: [`examples/component/breadcrumb/main.go`](../examples/component/breadcrumb/main.go)
+
+A store browsed by path: `enter` on a folder goes into it and the path grows. `tab` moves to the path, where `←`/`→` pick a part and `enter`, or a second click, goes back up to it: `Chosen` carries the path up to that part. A window too narrow for the whole path gives way from the middle as `…`, keeping the first part, the last ones and the part under the cursor. `Blur` hides the cursor while another pane has the keys.
+
+![breadcrumb](recordings/component/breadcrumb.gif)
+
 ### Paginator
 
 Source: [`examples/component/paginator/main.go`](../examples/component/paginator/main.go)
