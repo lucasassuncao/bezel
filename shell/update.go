@@ -114,6 +114,9 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		switch msg.(type) {
 		case tea.KeyPressMsg, tea.PasteMsg:
 			// Scopes are judged live: an answer may have changed them.
+			if next, ok := s.paletteKey(msg); ok {
+				return next, true, nil
+			}
 			if p, ok := s.overlays.Top().(palette.Model); ok {
 				s.overlays = s.overlays.Pop().Push(p.SetItems(s.paletteItems()))
 			}

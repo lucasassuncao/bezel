@@ -70,3 +70,15 @@ func TestWithStylesRecoloursTheNote(t *testing.T) {
 	m := New(nil, theme.Resolve(theme.Mint(), true)).WithStyles(func(s Styles) Styles { s.Note = red; return s })
 	require.Contains(t, m.View(layout.Rect{W: 40, H: 5}), red.Render("  no command matches"))
 }
+
+func TestSetHeightIsTheListsHeight(t *testing.T) {
+	var its []Item
+	for i := range 20 {
+		its = append(its, Item{Name: string(rune('a' + i)), Available: true})
+	}
+	m := New(its, theme.Resolve(theme.Plain(), true))
+	require.Equal(t, DefaultHeight, m.Height())
+	m = m.SetHeight(12)
+	require.Equal(t, 1+12, lipgloss.Height(m.View(layout.Rect{W: 60, H: 30})), "the rule, 11 rows and the more line")
+	require.Equal(t, 1, m.SetHeight(0).Height())
+}

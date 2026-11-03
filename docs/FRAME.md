@@ -106,8 +106,8 @@ An `Action` is one key, defined once: the shell dispatches it, prints it in the 
 | `Help()` | `?` | opens every key the screen has, in a dialog |
 | `ChangeTab()` | `tab` | the next tab, `shift+tab` the one before |
 | `ChangePane()` | `tab` | the next pane, sending a `FocusMsg` |
-| `Resize()` | `ctrl+shift+←/→/↑/↓` | narrows, widens, shortens or heightens the focused pane, in the innermost `Resizable` box of that axis |
-| `ResetSizes()` | `=` | gives every `Resizable` box its declared sizes again |
+| `Resize()` | `ctrl+shift+←/→/↑/↓` | narrows, widens, shortens or heightens the focused pane, in the innermost `Resizable` box of that axis; with the `:` palette open, `↑/↓` shorten or heighten the palette |
+| `ResetSizes()` | `=` | gives every `Resizable` box its declared sizes again, and the palette its `Config.PaletteLines` |
 | `Move()`, `Scroll()` | `↑/↓` | listed only: the focused component owns the arrows |
 | `Commands()` | `:` | opens the command palette |
 | `Quit()` | `q` | quits |
@@ -195,7 +195,7 @@ case shell.ClickMsg:
 
 The components move the cursor to the row clicked, and on the row already under it do what enter would: `list` and `table` report `Chosen`, `tree` reports `Expanded` or `Collapsed`. `form` focuses the field and presses a button, a checkbox or a toggle.
 
-A press on the border between two panes of a `Resizable` box is no click: the shell holds that edge and moves it with the pointer until the button is released.
+A press on the border between two panes of a `Resizable` box is no click: the shell holds that edge and moves it with the pointer until the button is released. The `:` palette's rule works the same way: dragging it makes the list taller or shorter, and the palette reopens at that height.
 
 A click is all `ClickMsg` carries. The rest of the mouse reaches the app as it came, and two methods move it into a pane:
 
@@ -250,7 +250,7 @@ shell.Command("goto", "open a path", func(c shell.ActionContext) tea.Cmd {
 }, shell.Arg("path"))
 ```
 
-`:` opens the command palette at the foot of the screen. It lists every action with a name, the ones starting with what is typed first and then those holding its letters in order (`:tme` finds `:theme`, the letters underlined), completes it with `tab`, and passes what follows the name to the action as `ActionContext.Arg`: `:goto kv/app` runs the action `Named("goto")` with `Arg` `kv/app`. An unknown command, or one the session refuses, says so on the status row.
+`:` opens the command palette at the foot of the screen. It lists every action with a name, the ones starting with what is typed first and then those holding its letters in order (`:tme` finds `:theme`, the letters underlined), completes it with `tab`, and passes what follows the name to the action as `ActionContext.Arg`: `:goto kv/app` runs the action `Named("goto")` with `Arg` `kv/app`. An unknown command, or one the session refuses, says so on the status row. The list takes `Config.PaletteLines` lines, 8 by default; the user resizes it with the mouse on its rule or with `Resize`'s `↑/↓`.
 
 The legend is built from the same actions, filtered by `Needs` and `When`, and packed into `Config.LegendLines` rows, two by default. Keys that do not fit are counted, and `?` lists them all. A component lists its own keys through its `Legend()`, from the same bindings it answers to, so the hint never drifts from the key.
 

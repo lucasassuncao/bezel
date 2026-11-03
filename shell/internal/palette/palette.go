@@ -36,8 +36,9 @@ type DoneMsg struct {
 	Err string
 }
 
-// Rows is how many candidates show at once: past this, type, do not scroll.
-const Rows = 8
+// DefaultHeight is how many lines the list takes until SetHeight says else, a
+// "… N more" line included: past it, type or scroll.
+const DefaultHeight = 8
 
 // Keys are the bindings the palette answers to besides esc and the typing.
 // Down has no help of its own: Up's "↑/↓" names both.
@@ -65,6 +66,7 @@ type Model struct {
 	edit   func(Styles) Styles
 	st     *Styles // DefaultStyles of th, edited; rebuilt, never written
 	keys   Keys
+	rows   int // candidates shown at once; DefaultHeight when 0
 }
 
 // Styles are how the palette paints its list; the typed line is an input's.
@@ -140,6 +142,20 @@ func (m Model) SetTheme(th theme.Resolved) overlay.Overlay {
 func (m Model) WithKeys(k Keys) Model {
 	m.keys = k
 	return m
+}
+
+// SetHeight sets how many lines the list takes, at least one.
+func (m Model) SetHeight(n int) Model {
+	m.rows = max(n, 1)
+	return m
+}
+
+// Height is how many lines the list takes when the body has room.
+func (m Model) Height() int {
+	if m.rows == 0 {
+		return DefaultHeight
+	}
+	return m.rows
 }
 
 // SetItems replaces the commands, judged again by the owner, keeping the typed

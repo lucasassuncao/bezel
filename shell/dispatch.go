@@ -43,7 +43,7 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 		return next.relayout(), next.resizedFrom(s)
 	case kindResetSizes:
 		next := s
-		next.sizes = nil
+		next.sizes, next.paletteLines = nil, 0
 		return next.relayout(), next.resizedFrom(s)
 	}
 	return s, a.Run(ActionContext{Context: s.Context(), Arg: arg})

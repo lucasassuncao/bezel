@@ -54,9 +54,9 @@ func (m Model) View(body layout.Rect) string {
 // rowLimit is how many candidates fit a body height h, after the rule, the
 // error line and the "… N more" row. h <= 0 is a body not yet sized.
 func (m Model) rowLimit(h, n int) int {
-	limit := Rows
+	limit := m.Height()
 	if h > 0 {
-		limit = min(Rows, h-1)
+		limit = min(limit, h-1)
 		if m.err != "" {
 			limit--
 		}

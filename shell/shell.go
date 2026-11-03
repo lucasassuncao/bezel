@@ -80,6 +80,9 @@ type Config struct {
 	// StatusStyle is where status messages show: StatusBar, the default, or
 	// Toast.
 	StatusStyle StatusStyle
+	// PaletteLines is how many commands the ":" palette lists at once, 8 when
+	// zero. The user can resize it like a pane; ResetSizes comes back to it.
+	PaletteLines int
 }
 
 // StatusStyle is where the shell shows SetStatus's messages, Copy's result
@@ -104,6 +107,8 @@ type Shell struct {
 	sizes         layout.Sizes // the edges the user moved
 	held          drag         // the edge the mouse holds, while dragging
 	dragging      bool
+	paletteLines  int  // the palette height the user chose; 0 for the Config's
+	paletteDrag   bool // the mouse holds the palette's rule
 
 	tab       int
 	focus     []string // per tab, the focused leaf name

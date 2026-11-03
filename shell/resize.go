@@ -2,10 +2,13 @@ package shell
 
 import (
 	"maps"
+	"slices"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/layout"
+	"github.com/lucasassuncao/bezel/shell/internal/palette"
 )
 
 // The cells Resize moves an edge per press: columns are narrow, so two.
@@ -15,14 +18,15 @@ const (
 )
 
 // Resize grows the focused pane on its keys, in order: narrower, wider,
-// shorter, taller. It moves the edges of a layout.Box marked Resizable, the
-// innermost of that axis around the pane; a pane in none stays as it is.
+// shorter, taller, moving the innermost Resizable box's edge around it. With
+// the ":" palette open, shorter and taller resize the palette instead.
 func Resize(opts ...Option) Action {
 	keys := []string{"ctrl+shift+left", "ctrl+shift+right", "ctrl+shift+up", "ctrl+shift+down"}
 	return build(&action{kind: kindResize, keys: keys, label: "ctrl+shift+arrows", desc: "resize"}, opts)
 }
 
-// ResetSizes gives every Resizable box the sizes its layout declares again.
+// ResetSizes gives every Resizable box the sizes its layout declares again,
+// and the palette its Config.PaletteLines.
 func ResetSizes(opts ...Option) Action {
 	return build(&action{kind: kindResetSizes, keys: []string{"="}, label: "=", desc: "reset sizes", name: "reset-sizes"}, opts)
 }
@@ -82,6 +86,9 @@ func (s Shell) dragTo(x, y int) Shell {
 // mouseResize is the shell's part of a press, motion or release on an edge,
 // with a ResizedMsg when the edge moved.
 func (s Shell) mouseResize(msg tea.MouseMsg) (Shell, tea.Cmd, bool) {
+	if next, ok := s.paletteMouse(msg); ok {
+		return next, nil, true
+	}
 	m := msg.Mouse()
 	switch msg.(type) {
 	case tea.MouseClickMsg:
@@ -133,4 +140,63 @@ func (s Shell) resized(a *action, pressed string) Shell {
 	}
 	s.sizes = s.sizes.Grow(s.cfg.Layout, s.Body(), s.presentFunc(), s.Focused(), cols, delta)
 	return s
+}
+
+// paletteKey is a Resize key's up or down on the open palette: shorter or
+// taller, as for a pane. Left and right stay the typed line's.
+func (s Shell) paletteKey(msg tea.Msg) (Shell, bool) {
+	p, open := s.overlays.Top().(palette.Model)
+	k, isKey := msg.(tea.KeyPressMsg)
+	if !open || !isKey {
+		return s, false
+	}
+	for _, a := range s.active() {
+		ac, ok := a.(*action)
+		if !ok || ac.kind != kindResize {
+			continue
+		}
+		switch i := slices.Index(ac.keys, k.String()); i {
+		case 2, 3:
+			return s.setPaletteHeight(p, min(p.Height(), s.Body().H-1)+2*i-5), true
+		}
+	}
+	return s, false
+}
+
+// setPaletteHeight makes n, kept to what the body holds, the open palette's
+// height and the one it opens with again.
+func (s Shell) setPaletteHeight(p palette.Model, n int) Shell {
+	s.paletteLines = max(1, min(n, s.Body().H-1))
+	s.overlays = s.overlays.Pop().Push(p.SetHeight(s.paletteLines))
+	return s
+}
+
+// paletteMouse drags the open palette's rule: a press on it holds it, and
+// the rule follows the pointer's row until the release.
+func (s Shell) paletteMouse(msg tea.MouseMsg) (Shell, bool) {
+	p, ok := s.overlays.Top().(palette.Model)
+	if !ok {
+		s.paletteDrag = false
+		return s, false
+	}
+	body, m := s.Body(), msg.Mouse()
+	lines := lipgloss.Height(p.View(body)) - 1 // under the rule
+	rule := body.Y + body.H - lines - 1
+	switch msg.(type) {
+	case tea.MouseClickMsg:
+		if m.Button != tea.MouseLeft || m.Y != rule || m.X < body.X || m.X >= body.X+body.W {
+			return s, false
+		}
+		s.paletteDrag = true
+		return s, true
+	case tea.MouseMotionMsg, tea.MouseReleaseMsg:
+		if !s.paletteDrag {
+			return s, false
+		}
+		_, released := msg.(tea.MouseReleaseMsg)
+		s = s.setPaletteHeight(p, lines+rule-m.Y)
+		s.paletteDrag = !released
+		return s, true
+	}
+	return s, false
 }

@@ -45,7 +45,19 @@ func (s Shell) paletteItems() []palette.Item {
 // that decides itself when ":" means commands and when it is text.
 func (s Shell) OpenCommands() Shell {
 	s = s.ready()
-	return s.Push(palette.New(s.paletteItems(), s.cfg.Theme)).relayout()
+	return s.Push(palette.New(s.paletteItems(), s.cfg.Theme).SetHeight(s.paletteHeight())).relayout()
+}
+
+// paletteHeight is the candidates the palette lists: the user's choice, else
+// the Config's, else the palette's own default.
+func (s Shell) paletteHeight() int {
+	switch {
+	case s.paletteLines > 0:
+		return s.paletteLines
+	case s.cfg.PaletteLines > 0:
+		return s.cfg.PaletteLines
+	}
+	return palette.DefaultHeight
 }
 
 // CommandLine is what is typed on the ":" command line, and whether it is
