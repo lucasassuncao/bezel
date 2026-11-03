@@ -62,7 +62,7 @@ More keys than one row holds: the ones cut are counted and `?` lists them all. F
 
 Source: [`examples/frame/palette/main.go`](../examples/frame/palette/main.go)
 
-The `:` command line. A name completes with `tab`, a command takes an argument, and one that is unknown or not allowed says so on the status row.
+The `:` command line. A name matches by its start, then by its letters in order (`:tme` finds `:theme`), completes with `tab`, a command takes an argument, and one that is unknown or not allowed says so on the status row.
 
 ![palette](recordings/frame/palette.gif)
 

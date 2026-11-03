@@ -243,7 +243,7 @@ shell.Command("goto", "open a path", func(c shell.ActionContext) tea.Cmd {
 }, shell.Arg("path"))
 ```
 
-`:` opens the command palette at the foot of the screen. It lists every action with a name, completes it with `tab`, and passes what follows the name to the action as `ActionContext.Arg`: `:goto kv/app` runs the action `Named("goto")` with `Arg` `kv/app`. An unknown command, or one the session refuses, says so on the status row.
+`:` opens the command palette at the foot of the screen. It lists every action with a name, the ones starting with what is typed first and then those holding its letters in order (`:tme` finds `:theme`, the letters underlined), completes it with `tab`, and passes what follows the name to the action as `ActionContext.Arg`: `:goto kv/app` runs the action `Named("goto")` with `Arg` `kv/app`. An unknown command, or one the session refuses, says so on the status row.
 
 The legend is built from the same actions, filtered by `Needs` and `When`, and packed into `Config.LegendLines` rows, two by default. Keys that do not fit are counted, and `?` lists them all. A component lists its own keys through its `Legend()`, from the same bindings it answers to, so the hint never drifts from the key.
 

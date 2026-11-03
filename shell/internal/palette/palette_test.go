@@ -213,3 +213,29 @@ func TestPaletteTabCompletesAndIsHandled(t *testing.T) {
 	require.Nil(t, r.Cmd)
 	require.Equal(t, "create", o.(Model).Value())
 }
+
+func TestFuzzyMatchesFollowThePrefixOnes(t *testing.T) {
+	m := typed(open(), "cp")
+	var got []string
+	for _, it := range m.candidates() {
+		got = append(got, it.Name)
+	}
+	require.Equal(t, []string{"copy", "copy-path"}, got, "both hold c then p; create has no p")
+
+	m = typed(open(), "c")
+	require.Equal(t, "copy", m.candidates()[0].Name, "a prefix keeps its place")
+}
+
+func TestAFuzzyMatchRunsOnlyOncePicked(t *testing.T) {
+	_, cmd := press(typed(open(), "gt"), tea.KeyEnter)
+	require.Equal(t, "unknown command: gt", done(t, cmd).Err, "a typo never runs a command")
+
+	m, _ := press(typed(open(), "gt"), tea.KeyDown)
+	_, cmd = press(m, tea.KeyEnter)
+	require.Equal(t, ran{"goto", ""}, done(t, cmd).Cmd())
+}
+
+func TestFuzzyLettersAreUnderlined(t *testing.T) {
+	m := typed(open(), "gt")
+	require.Contains(t, m.View(layout.Rect{W: 60, H: 8}), m.styles().Name.Underline(true).Render("g"))
+}

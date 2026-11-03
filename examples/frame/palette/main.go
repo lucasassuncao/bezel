@@ -1,5 +1,5 @@
-// Palette: ":" opens the command line; commands take arguments, complete
-// with tab, and an unknown or refused one says so on the status row.
+// Palette: ":" opens the command line; commands match their letters in order,
+// take arguments, complete with tab, and an unknown or refused one says so.
 package main
 
 import (

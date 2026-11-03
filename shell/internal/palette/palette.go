@@ -14,6 +14,7 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/input"
+	"github.com/lucasassuncao/bezel/internal/fuzzy"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/overlay"
@@ -188,10 +189,33 @@ func (Model) AnchorBottom() bool { return true }
 func (m Model) Value() string { return m.input.Value() }
 
 // candidates is what the line could still become: the available items whose
-// name starts with the word before the first space.
+// name starts with the word before the first space, then those holding its
+// letters in order, best first.
 func (m Model) candidates() []Item {
 	name, _ := splitLine(m.input.Value())
-	return m.matching(name)
+	return m.ranked(name)
+}
+
+// ranked is matching's items, then the rest that match name fuzzily.
+func (m Model) ranked(name string) []Item {
+	out := m.matching(name)
+	if name == "" {
+		return out
+	}
+	var rest []Item
+	for _, it := range m.items {
+		if it.Available && !strings.HasPrefix(it.Name, name) {
+			rest = append(rest, it)
+		}
+	}
+	names := make([]string, len(rest))
+	for i, it := range rest {
+		names[i] = it.Name
+	}
+	for _, i := range fuzzy.Ranked(name, names) {
+		out = append(out, rest[i])
+	}
+	return out
 }
 
 // matching is the available items whose name starts with name.
@@ -313,8 +337,9 @@ func (e ambiguousError) Error() string {
 	return e.name + " is ambiguous: " + strings.Join(names, ", ")
 }
 
-// resolve is exact name, then unique prefix. Without the first ":copy" is
-// unrunnable beside ":copy-path"; without the last ":c" fires one at random.
+// resolve is exact name, then unique prefix, then unique fuzzy match. Without
+// the first ":copy" is unrunnable beside ":copy-path"; without the second ":c"
+// fires one at random.
 func (m Model) resolve(line string) (Item, string, error) {
 	name, arg := splitLine(line)
 	if name == "" {

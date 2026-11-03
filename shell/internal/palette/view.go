@@ -2,9 +2,13 @@ package palette
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
+	"charm.land/lipgloss/v2"
+
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/fuzzy"
 	"github.com/lucasassuncao/bezel/layout"
 )
 
@@ -31,7 +35,7 @@ func (m Model) View(body layout.Rect) string {
 			nameW = max(nameW, draw.Width(label(it)))
 		}
 		for i := start; i < end; i++ {
-			lines = append(lines, m.row(cands[i], nameW, i == m.cursor, w))
+			lines = append(lines, m.row(cands[i], nameW, i == m.cursor, w, m.hits(cands[i])))
 		}
 		if end < len(cands) {
 			lines = append(lines, m.styles().Note.Render(fmt.Sprintf("  … %d more", len(cands)-end)))
@@ -66,13 +70,47 @@ func (m Model) rowLimit(h, n int) int {
 // StatusLine is the typed line, drawn where the status usually is.
 func (m Model) StatusLine(width int) string { return draw.Fit(m.input.View(), width) }
 
-func (m Model) row(it Item, nameW int, picked bool, w int) string {
-	name := draw.Pad(label(it), nameW)
+func (m Model) row(it Item, nameW int, picked bool, w int, hits []int) string {
+	st, lead := m.styles().Name, "  "
+	if picked {
+		st, lead = m.styles().Cursor, "› "
+	}
+	name := underlined(label(it), hits, st) + st.Render(strings.Repeat(" ", nameW-draw.Width(label(it))))
 	k := draw.Pad(it.Key, keyWidth)
 	if picked {
-		return draw.Cut(m.styles().Cursor.Render("› "+name+"  "+k+"  "+it.Desc), w)
+		return draw.Cut(st.Render(lead)+name+st.Render("  "+k+"  "+it.Desc), w)
 	}
-	return draw.Cut("  "+m.styles().Name.Render(name)+"  "+m.styles().Key.Render(k)+"  "+m.styles().Desc.Render(it.Desc), w)
+	return draw.Cut(lead+name+"  "+m.styles().Key.Render(k)+"  "+m.styles().Desc.Render(it.Desc), w)
+}
+
+// hits is where the typed name's letters fell in it's label, for a fuzzy
+// match only: a prefix needs no marking.
+func (m Model) hits(it Item) []int {
+	name, _ := splitLine(m.input.Value())
+	if name == "" || strings.HasPrefix(it.Name, name) {
+		return nil
+	}
+	_, at, _ := fuzzy.Match(name, it.Name)
+	for i := range at {
+		at[i]++ // the label's ":"
+	}
+	return at
+}
+
+// underlined is s in st, the runes at hits underlined.
+func underlined(s string, hits []int, st lipgloss.Style) string {
+	if len(hits) == 0 {
+		return st.Render(s)
+	}
+	var b strings.Builder
+	for i, r := range []rune(s) {
+		if slices.Contains(hits, i) {
+			b.WriteString(st.Underline(true).Render(string(r)))
+		} else {
+			b.WriteString(st.Render(string(r)))
+		}
+	}
+	return b.String()
 }
 
 // label is how a command is written: ":goto <path>" for one taking an argument.

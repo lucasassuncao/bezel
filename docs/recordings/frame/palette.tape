@@ -1,4 +1,4 @@
-# palette: the : command line: completion, arguments, and the errors it gives.
+# palette: the : command line: completion, letters matched in order, arguments, and the errors it gives.
 #
 # Record from the repository root: vhs docs/recordings/frame/palette.tape
 
@@ -50,6 +50,19 @@ Enter
 Sleep 2s
 
 Type ":theme strawberry"
+Sleep 800ms
+Enter
+Sleep 2s
+
+# -- Letters in order, not only a prefix -----------------------------------------------
+
+Type ":"
+Sleep 600ms
+Type@200ms "tme"
+Sleep 2s
+Tab
+Sleep 600ms
+Type "mint"
 Sleep 800ms
 Enter
 Sleep 2s

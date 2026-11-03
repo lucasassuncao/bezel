@@ -100,3 +100,13 @@ func TestPaletteGotoWithoutAnItem(t *testing.T) {
 	t.Log("\n" + out)
 	require.Contains(t, out, "> apple", "the cursor stays put")
 }
+
+func TestPaletteMatchesLettersInOrder(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	m = typeKeys(m, ":", "t", "m", "e")
+	_, out := frame(t, m, nil)
+	t.Log("\n" + out)
+	require.Contains(t, out, ":theme", "t, m and e in order")
+	require.NotContains(t, out, "no command matches")
+}
