@@ -1,11 +1,12 @@
 // Form: one of each control, filled in and submitted: the select describes
-// its options, the date opens a calendar, a number steps and a slider slides.
-// tab and shift+tab move between them; Create reports what the form holds.
+// its options, the date opens a calendar, a number steps, a slider slides and
+// enter turns labels into chips. Create reports what the form holds.
 package main
 
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -25,6 +26,7 @@ const (
 	fShell
 	fCPUs
 	fMemory
+	fLabels
 	fDocker
 	fPort
 )
@@ -57,6 +59,7 @@ func newModel() model {
 		form.NewRadio("Shell", []string{"bash", "zsh", "fish"}),
 		form.NewNumber("CPUs", 2).WithRange(1, 16),
 		form.NewSlider("Memory GB", 4).WithRange(1, 32).WithWidth(24),
+		form.NewTags("Labels").WithSuggestions([]string{"api", "web", "worker"}).WithPlaceholder("enter adds"),
 		form.NewToggle("Docker"),
 		form.NewCheckbox("Forward port 3000"),
 		form.NewButton("Create", func() tea.Msg { return createMsg{} }),
@@ -79,14 +82,24 @@ func (m model) summary() string {
 	sh, _ := form.Get[form.Radio](m.form, fShell)
 	cpus, _ := form.Get[form.Number](m.form, fCPUs)
 	mem, _ := form.Get[form.Slider](m.form, fMemory)
+	labels, _ := form.Get[form.Tags](m.form, fLabels)
 	docker, _ := form.Get[form.Toggle](m.form, fDocker)
 	port, _ := form.Get[form.Checkbox](m.form, fPort)
 	name := in.Value()
 	if name == "" {
 		name = "my-project"
 	}
-	return fmt.Sprintf("created %s: %s from %s, %s, %g cpus, %g GB, docker %v, port %v", name,
-		image.Value(), day.Value(), sh.Value(), cpus.Value(), mem.Value(), docker.On(), port.Checked())
+	return fmt.Sprintf("%s: %s from %s, %s, %g cpus, %g GB, %s, docker %s, port %s", name,
+		image.Value(), day.Value(), sh.Value(), cpus.Value(), mem.Value(), strings.Join(labels.Tags(), "+"),
+		onOff(docker.On()), onOff(port.Checked()))
+}
+
+// onOff is a switch's state, short enough for the status row.
+func onOff(on bool) string {
+	if on {
+		return "on"
+	}
+	return "off"
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

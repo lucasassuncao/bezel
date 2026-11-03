@@ -150,7 +150,7 @@ What the user types into: a form of controls, a one-line field, a multi-line fie
 
 Source: [`examples/component/form/main.go`](../examples/component/form/main.go)
 
-One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, each option described beside it (`WithDescriptions`), a start day picked from the calendar a `Date` opens, a `Number` stepped with the arrows or typed, a `Slider`, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
+One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, each option described beside it (`WithDescriptions`), a start day picked from the calendar a `Date` opens, a `Number` stepped with the arrows or typed, a `Slider`, labels that `enter` turns into chips (`Tags`), a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
 
 ```go
 f := form.New(th,
@@ -183,6 +183,14 @@ Source: [`examples/component/input/main.go`](../examples/component/input/main.go
 Four one-line fields. The name must not be empty, and says so once you leave it blank; the command completes on `tab` from its suggestions; the password shows only its mask; the time is typed into `WithFormat("9999-99-99 99:99")`, which writes the dashes and the colon, drops what does not fit and hints the rest. `↑/↓` move between them and `enter` submits. Every key is text, so the app quits on `esc`.
 
 ![input](recordings/component/input.gif)
+
+### Tags
+
+Source: [`examples/component/tags/main.go`](../examples/component/tags/main.go)
+
+Chips that filter a list: type a topic and `enter` makes it a chip, `tab` takes the suggestion shown, and `backspace` on an empty field takes the last chip off. The packages left are the ones with every topic. A tag already there is not added twice, and chips that do not fit the width give way from the oldest as "+N". A form takes it as `form.NewTags`.
+
+![tags](recordings/component/tags.gif)
 
 ### Textbox
 

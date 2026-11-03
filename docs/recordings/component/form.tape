@@ -84,6 +84,17 @@ Tab
 Sleep 500ms
 Right@150ms 8
 Sleep 1s
+
+# -- Labels: enter turns what is typed into a chip -----------------------------------------
+
+Tab
+Sleep 500ms
+Type@150ms "web"
+Enter
+Sleep 600ms
+Type@150ms "api"
+Enter
+Sleep 1s
 Tab
 Sleep 500ms
 Space
@@ -98,7 +109,7 @@ Sleep 1s
 Tab
 Sleep 700ms
 Enter
-Wait+Screen /created api/
+Wait+Screen /docker on/
 Sleep 3s
 
 Hide

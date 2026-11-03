@@ -28,7 +28,7 @@ The packages at the root are the ones every app touches: `shell` to embed, `them
 
 ## component/
 
-What an app creates and draws inside a pane: `list`, `paginator`, `calendar`, `tree`, `table`, `viewport`, `browser`, `filepicker`, `accordion`, `form`, `input`, `textbox`, `cursor`, `progress`, `spinner`, `timer`, `stopwatch`, `chart`, `icon` and `toast`, and the three that print into a terminal instead of taking it over, `inline`, `logger` and `themebrowser`.
+What an app creates and draws inside a pane: `list`, `paginator`, `calendar`, `tree`, `table`, `viewport`, `browser`, `filepicker`, `accordion`, `form`, `input`, `tags`, `textbox`, `cursor`, `progress`, `spinner`, `timer`, `stopwatch`, `chart`, `icon` and `toast`, and the three that print into a terminal instead of taking it over, `inline`, `logger` and `themebrowser`.
 
 A component imports the foundation, the motion packages and, where it is made of others, other components: `form` holds `input`s, `inline` draws a `progress` bar, `themebrowser` is a `table`, `progress` moves on an `animation.Spring`. A motion type stays inside: no stable component shows one in its API, since `animation` and `effect` are experimental. A component never imports the frame, so any of them works in a pane, in a dialog or in a program without a shell. That is also why the shell cannot click a list for the app: it finds the pane under the pointer and sends a `ClickMsg`, and the app, which holds the list, hands it on. `overlay.FilePicker` is the one dialog built on a component, `filepicker`. `component/` is a folder, not a package: each component is its own package, `component/list` imported as `list`.
 
@@ -59,7 +59,7 @@ Plumbing more than one folder needs and no app should depend on. Go lets only th
 | `cells` | a drawn block read back into styled cells, and the canvas they are put into | `effect`, `animation/scene` |
 | `noise` | the hash randomness is drawn from, the same for the same frame | `effect`, `animation/text`, `animation/scene` |
 | `hue` | colours turned round the HSL wheel | `effect`, `animation/text` |
-| `edit` | a line of graphemes with a caret, the editing `input` and `textbox` share, and the caret's blink | `input`, `textbox`, `cursor`, `viewport`, `animation/text` |
+| `edit` | a line of graphemes with a caret, the editing `input` and `textbox` share, the caret's blink and the text a filter types | `input`, `textbox`, `cursor`, `viewport`, `list`, `table`, `logger`, `form`, `animation/text` |
 | `clip` | the system clipboard, read as the paste a terminal sends | `input`, `textbox` |
 
 A public type can still come from here: `animation.FrameMsg` and `animation.Ease` are aliases of `frames` types, so every package names one type while the run behind it stays private.

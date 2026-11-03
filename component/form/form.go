@@ -1,7 +1,7 @@
 // Package form is the controls that ask for a value: a text input, a select,
-// a date, a number, a slider, checkboxes, radios, a toggle and a button, in a
-// Form that moves focus with tab and shift+tab. Each control is one row, its
-// label in a shared column, painted in the theme the Form was built with.
+// a date, a number, a slider, tags, checkboxes, radios, a toggle and a button,
+// in a Form that moves focus with tab and shift+tab. Each control is one row,
+// its label in a shared column, painted in the theme the Form was built with.
 package form
 
 import (
@@ -230,6 +230,8 @@ func (f Form) Legend() []legend.Entry {
 		own = []key.Binding{k.Up}
 	case Input:
 		return append(legend.FromBindings([]key.Binding{k.Next, k.Prev}), fl.in.Legend()...)
+	case Tags:
+		return append(legend.FromBindings([]key.Binding{k.Next, k.Prev}), fl.tg.Legend()...)
 	}
 	return legend.FromBindings(append([]key.Binding{k.Next, k.Prev}, own...))
 }

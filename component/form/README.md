@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/component/form"
 ```
 
-Package form is the controls that ask for a value: a text input, a select, a date, a number, a slider, checkboxes, radios, a toggle and a button, in a Form that moves focus with tab and shift\+tab. Each control is one row, its label in a shared column, painted in the theme the Form was built with.
+Package form is the controls that ask for a value: a text input, a select, a date, a number, a slider, tags, checkboxes, radios, a toggle and a button, in a Form that moves focus with tab and shift\+tab. Each control is one row, its label in a shared column, painted in the theme the Form was built with.
 
 ## Index
 
@@ -128,6 +128,19 @@ Package form is the controls that ask for a value: a text input, a select, a dat
   - [func \(s Slider\) WithWidth\(n int\) Slider](<#Slider.WithWidth>)
 - [type Styles](<#Styles>)
   - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
+- [type Tags](<#Tags>)
+  - [func NewTags\(label string\) Tags](<#NewTags>)
+  - [func \(t Tags\) Blur\(\) Field](<#Tags.Blur>)
+  - [func \(t Tags\) Focus\(\) \(Field, tea.Cmd\)](<#Tags.Focus>)
+  - [func \(t Tags\) Init\(\) tea.Cmd](<#Tags.Init>)
+  - [func \(t Tags\) Label\(\) string](<#Tags.Label>)
+  - [func \(t Tags\) Tags\(\) \[\]string](<#Tags.Tags>)
+  - [func \(t Tags\) Update\(msg tea.Msg\) \(Field, bezel.Result\)](<#Tags.Update>)
+  - [func \(t Tags\) View\(focused bool, labelW, width int\) string](<#Tags.View>)
+  - [func \(t Tags\) WithPlaceholder\(s string\) Tags](<#Tags.WithPlaceholder>)
+  - [func \(t Tags\) WithSuggestions\(list \[\]string\) Tags](<#Tags.WithSuggestions>)
+  - [func \(t Tags\) WithTags\(list \[\]string\) Tags](<#Tags.WithTags>)
+  - [func \(t Tags\) WithWidth\(width int\) Tags](<#Tags.WithWidth>)
 - [type Toggle](<#Toggle>)
   - [func NewToggle\(label string\) Toggle](<#NewToggle>)
   - [func \(t Toggle\) Blur\(\) Field](<#Toggle.Blur>)
@@ -480,7 +493,7 @@ func (f Form) Field(i int) Field
 Field is the i\-th field as it is now, nil when i is out of range; assert it to read its value, or use Get.
 
 <a name="Form.Focused"></a>
-### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L238>)
+### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L240>)
 
 ```go
 func (f Form) Focused() int
@@ -516,7 +529,7 @@ func (f Form) SetTheme(th theme.Resolved) Form
 SetTheme repaints every bezel control in the form; a Field of the app's own keeps its look.
 
 <a name="Form.SetWidth"></a>
-### func \(Form\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L283>)
+### func \(Form\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L285>)
 
 ```go
 func (f Form) SetWidth(w int) Form
@@ -525,7 +538,7 @@ func (f Form) SetWidth(w int) Form
 SetWidth changes the cells every row of the form takes.
 
 <a name="Form.Update"></a>
-### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L245>)
+### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L247>)
 
 ```go
 func (f Form) Update(msg tea.Msg) (Form, bezel.Result)
@@ -534,7 +547,7 @@ func (f Form) Update(msg tea.Msg) (Form, bezel.Result)
 Update moves the focus on tab and shift\+tab \(unless the field holds them\), presses the field a bezel.ClickMsg lands on, and hands every other message to the focused field. A click past the fields comes back unhandled.
 
 <a name="Form.View"></a>
-### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L339>)
+### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L341>)
 
 ```go
 func (f Form) View() string
@@ -1226,6 +1239,125 @@ func DefaultStyles(th theme.Resolved) Styles
 ```
 
 DefaultStyles mark the focus and the chosen in the accent, mute the empty marks and the descriptions and paint a switch on in success.
+
+<a name="Tags"></a>
+## type [Tags](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L13-L17>)
+
+Tags is a field whose text becomes chips: enter adds a tag, backspace on an empty field takes the last one off.
+
+```go
+type Tags struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewTags"></a>
+### func [NewTags](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L20>)
+
+```go
+func NewTags(label string) Tags
+```
+
+NewTags is an empty field 30 cells wide.
+
+<a name="Tags.Blur"></a>
+### func \(Tags\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L73>)
+
+```go
+func (t Tags) Blur() Field
+```
+
+
+
+<a name="Tags.Focus"></a>
+### func \(Tags\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L67>)
+
+```go
+func (t Tags) Focus() (Field, tea.Cmd)
+```
+
+
+
+<a name="Tags.Init"></a>
+### func \(Tags\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L53>)
+
+```go
+func (t Tags) Init() tea.Cmd
+```
+
+Init starts the caret blinking when the form opens focused on the field.
+
+<a name="Tags.Label"></a>
+### func \(Tags\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L50>)
+
+```go
+func (t Tags) Label() string
+```
+
+
+
+<a name="Tags.Tags"></a>
+### func \(Tags\) [Tags](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L49>)
+
+```go
+func (t Tags) Tags() []string
+```
+
+Tags is a copy of the tags, in the order they were added.
+
+<a name="Tags.Update"></a>
+### func \(Tags\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L61>)
+
+```go
+func (t Tags) Update(msg tea.Msg) (Field, bezel.Result)
+```
+
+Update hands msg to the tags and reports what they reported.
+
+<a name="Tags.View"></a>
+### func \(Tags\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L78>)
+
+```go
+func (t Tags) View(focused bool, labelW, width int) string
+```
+
+
+
+<a name="Tags.WithPlaceholder"></a>
+### func \(Tags\) [WithPlaceholder](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L37>)
+
+```go
+func (t Tags) WithPlaceholder(s string) Tags
+```
+
+WithPlaceholder shows s, dimmed, while there is neither a tag nor text.
+
+<a name="Tags.WithSuggestions"></a>
+### func \(Tags\) [WithSuggestions](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L31>)
+
+```go
+func (t Tags) WithSuggestions(list []string) Tags
+```
+
+WithSuggestions offers to complete a tag from list; tab takes the one shown.
+
+<a name="Tags.WithTags"></a>
+### func \(Tags\) [WithTags](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L25>)
+
+```go
+func (t Tags) WithTags(list []string) Tags
+```
+
+WithTags is the field holding list, the way a form opens on saved values.
+
+<a name="Tags.WithWidth"></a>
+### func \(Tags\) [WithWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/form/tags.go#L43>)
+
+```go
+func (t Tags) WithWidth(width int) Tags
+```
+
+WithWidth gives the chips and the text width cells.
 
 <a name="Toggle"></a>
 ## type [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/component/form/fields.go#L260-L266>)

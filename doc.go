@@ -50,10 +50,13 @@
 //     screen, labels left and the selected item's detail right.
 //   - [github.com/lucasassuncao/bezel/component/accordion]: sections that open
 //     and close onto their text, sliding.
-//   - [github.com/lucasassuncao/bezel/component/form]: Input, Select, Checkbox,
-//     Radio, Toggle and Button, stacked in a Form that moves focus with tab.
+//   - [github.com/lucasassuncao/bezel/component/form]: Input, Select, Date,
+//     Number, Slider, Tags, Checkbox, Radio, Toggle and Button, stacked in a
+//     Form that moves focus with tab.
 //   - [github.com/lucasassuncao/bezel/component/input]: a one-line text field
-//     with readline keys, a placeholder and a mask for secrets.
+//     with readline keys, a placeholder, a mask for secrets and a format.
+//   - [github.com/lucasassuncao/bezel/component/tags]: a field that turns what
+//     is typed into chips.
 //   - [github.com/lucasassuncao/bezel/component/textbox]: a multi-line text
 //     field with numbered lines that wrap at its width.
 //   - [github.com/lucasassuncao/bezel/component/cursor]: a text field's caret
