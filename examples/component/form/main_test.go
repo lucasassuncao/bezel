@@ -73,3 +73,12 @@ func TestTypingQDoesNotQuit(t *testing.T) {
 	_, out := frame(t, m, nil)
 	require.Contains(t, out, "[q")
 }
+
+func TestFormSelectDescribesItsOptions(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	m = press(m, "tab", "enter")
+	_, out := frame(t, m, nil)
+	t.Log("\n" + out)
+	require.Contains(t, out, "alpine  small, musl libc")
+}

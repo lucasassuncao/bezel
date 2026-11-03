@@ -1,6 +1,7 @@
 package form
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -125,4 +126,16 @@ func TestWithsOpenTheControlsOnSavedValues(t *testing.T) {
 
 	in := NewInput("Name").WithPlaceholder("my-project").WithWidth(12)
 	require.Contains(t, ansi.Strip(in.View(false, 4, 40)), "my-project")
+}
+
+func TestSelectDescribesItsOptionsWhileOpen(t *testing.T) {
+	th := theme.Resolve(theme.Plain(), true)
+	s := NewSelect("Image", []string{"ubuntu", "alpine"}).WithDescriptions([]string{"LTS release", "small"})
+	f := New(th, s)
+	require.NotContains(t, ansi.Strip(f.SetWidth(40).View()), "LTS", "closed: no descriptions")
+
+	f, _ = press(f, "enter")
+	lines := strings.Split(ansi.Strip(f.SetWidth(40).View()), "\n")
+	require.Equal(t, "→ ubuntu  LTS release", strings.TrimSpace(lines[1]))
+	require.Equal(t, "alpine  small", strings.TrimSpace(lines[2]), "aligned after the widest option")
 }

@@ -1,4 +1,4 @@
-# form: one of each control, filled in and submitted.
+# form: one of each control, filled in and submitted; the select describes its options while open.
 #
 # Record from the repository root: vhs docs/recordings/component/form.tape
 
@@ -49,7 +49,7 @@ Enter
 Wait+Screen /alpine/
 Sleep 800ms
 Down@400ms 2
-Sleep 600ms
+Sleep 1.8s
 Enter
 Sleep 1s
 

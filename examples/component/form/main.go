@@ -1,5 +1,6 @@
-// Form: one of each control, filled in and submitted. tab and shift+tab move
-// between them; Create reports what the form holds on the status row.
+// Form: one of each control, filled in and submitted, the select describing
+// its options. tab and shift+tab move between them; Create reports what the
+// form holds on the status row.
 package main
 
 import (
@@ -47,7 +48,8 @@ func newModel() model {
 	})
 	f := form.New(th,
 		form.NewInput("Name").WithPlaceholder("my-project").WithWidth(28),
-		form.NewSelect("Image", []string{"ubuntu", "debian", "alpine"}),
+		form.NewSelect("Image", []string{"ubuntu", "debian", "alpine"}).
+			WithDescriptions([]string{"LTS, the most packages", "stable and conservative", "small, musl libc"}),
 		form.NewRadio("Shell", []string{"bash", "zsh", "fish"}),
 		form.NewToggle("Docker"),
 		form.NewCheckbox("Forward port 3000"),

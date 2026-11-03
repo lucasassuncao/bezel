@@ -87,15 +87,16 @@ type Styles struct {
 	Chosen       lipgloss.Style // a ticked box, the chosen radio, an open select's arrow
 	Option       lipgloss.Style // an option not chosen, and "off"
 	On           lipgloss.Style // a switch that is on
+	Description  lipgloss.Style // an option's description in an open select
 	Button       draw.ButtonStyle
 }
 
 // DefaultStyles mark the focus and the chosen in the accent, mute the
-// empty marks and paint a switch that is on in the success colour.
+// empty marks and the descriptions and paint a switch on in success.
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{
 		Marker: th.Accent, Label: th.Dim, FocusedLabel: th.Bold, Edge: th.Muted, FocusedEdge: th.Accent,
-		Chosen: th.Accent, Option: th.Dim, On: th.Success, Button: th.Button,
+		Chosen: th.Accent, Option: th.Dim, On: th.Success, Description: th.Muted, Button: th.Button,
 	}
 }
 

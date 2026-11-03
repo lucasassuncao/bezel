@@ -320,6 +320,7 @@ func (t Toggle) View(focused bool, labelW, width int) string {
 type Select struct {
 	label    string
 	options  []string
+	descs    []string // by option, beside it while the list is open
 	selected int
 	cursor   int
 	open     bool
@@ -337,6 +338,13 @@ func NewSelect(label string, options []string) Select {
 func (s Select) WithSelected(i int) Select {
 	s.selected = clampOption(i, s.options)
 	s.cursor = s.selected
+	return s
+}
+
+// WithDescriptions gives each option, by index, a short text drawn beside
+// it while the list is open; a missing one leaves its option bare.
+func (s Select) WithDescriptions(descs []string) Select {
+	s.descs = slices.Clone(descs)
 	return s
 }
 
@@ -412,14 +420,22 @@ func (s Select) View(focused bool, labelW, width int) string {
 	if !s.open {
 		return head
 	}
+	st := styles(s.st)
 	indent := strings.Repeat(" ", 2+labelW+2*min(labelW, 1))
+	widest := 0
+	for _, o := range s.options {
+		widest = max(widest, draw.Width(o))
+	}
 	lines := []string{head}
 	for i, o := range s.options {
+		lead, text := "  ", st.Option.Render(o)
 		if i == s.cursor {
-			lines = append(lines, draw.Fit(indent+styles(s.st).Chosen.Render(s.set.Arrow+" ")+styles(s.st).FocusedLabel.Render(o), width))
-			continue
+			lead, text = st.Chosen.Render(s.set.Arrow+" "), st.FocusedLabel.Render(o)
 		}
-		lines = append(lines, draw.Fit(indent+"  "+styles(s.st).Option.Render(o), width))
+		if d := optionAt(s.descs, i); d != "" {
+			text += strings.Repeat(" ", widest-draw.Width(o)+2) + st.Description.Render(d)
+		}
+		lines = append(lines, draw.Fit(indent+lead+text, width))
 	}
 	return strings.Join(lines, "\n")
 }
