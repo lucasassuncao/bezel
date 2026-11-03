@@ -53,15 +53,17 @@ func TestFormIsFilledInAndSubmitted(t *testing.T) {
 	require.Contains(t, out, "‹ ubuntu ›")
 
 	m = press(m, "a", "p", "i")
-	m = press(m, "tab", "enter", "down", "down", "enter") // image: alpine
-	m = press(m, "tab", "enter", "down", "enter")         // start: a week on
-	m = press(m, "tab", "right")                          // shell: zsh
-	m = press(m, "tab", "space")                          // docker on
-	m = press(m, "tab", "space")                          // forward the port
-	m = press(m, "tab", "enter")                          // Create
+	m = press(m, "tab", "enter", "down", "down", "enter")   // image: alpine
+	m = press(m, "tab", "enter", "down", "enter")           // start: a week on
+	m = press(m, "tab", "right")                            // shell: zsh
+	m = press(m, "tab", "up", "up")                         // cpus: 4
+	m = press(m, "tab", "right", "right", "right", "right") // memory: 8 GB
+	m = press(m, "tab", "space")                            // docker on
+	m = press(m, "tab", "space")                            // forward the port
+	m = press(m, "tab", "enter")                            // Create
 	_, out = frame(t, m, nil)
 	t.Log("\n" + out)
-	require.Contains(t, out, "created api: alpine from 2026-11-09, zsh, docker true, port 3000 true")
+	require.Contains(t, out, "created api: alpine from 2026-11-09, zsh, 4 cpus, 8 GB, docker true, port true")
 }
 
 func TestTypingQDoesNotQuit(t *testing.T) {

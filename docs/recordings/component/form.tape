@@ -73,6 +73,17 @@ Tab
 Sleep 500ms
 Right@500ms 1
 Sleep 800ms
+
+# -- CPUs and memory: a number steps, a slider slides -----------------------------------------
+
+Tab
+Sleep 500ms
+Up@400ms 2
+Sleep 800ms
+Tab
+Sleep 500ms
+Right@150ms 8
+Sleep 1s
 Tab
 Sleep 500ms
 Space

@@ -1,6 +1,6 @@
 // Form: one of each control, filled in and submitted: the select describes
-// its options and the date opens a calendar. tab and shift+tab move between
-// them; Create reports what the form holds on the status row.
+// its options, the date opens a calendar, a number steps and a slider slides.
+// tab and shift+tab move between them; Create reports what the form holds.
 package main
 
 import (
@@ -23,6 +23,8 @@ const (
 	fImage
 	fStart
 	fShell
+	fCPUs
+	fMemory
 	fDocker
 	fPort
 )
@@ -53,6 +55,8 @@ func newModel() model {
 			WithDescriptions([]string{"LTS, the most packages", "stable and conservative", "small, musl libc"}),
 		form.NewDate("Start", start),
 		form.NewRadio("Shell", []string{"bash", "zsh", "fish"}),
+		form.NewNumber("CPUs", 2).WithRange(1, 16),
+		form.NewSlider("Memory GB", 4).WithRange(1, 32).WithWidth(24),
 		form.NewToggle("Docker"),
 		form.NewCheckbox("Forward port 3000"),
 		form.NewButton("Create", func() tea.Msg { return createMsg{} }),
@@ -73,14 +77,16 @@ func (m model) summary() string {
 	image, _ := form.Get[form.Select](m.form, fImage)
 	day, _ := form.Get[form.Date](m.form, fStart)
 	sh, _ := form.Get[form.Radio](m.form, fShell)
+	cpus, _ := form.Get[form.Number](m.form, fCPUs)
+	mem, _ := form.Get[form.Slider](m.form, fMemory)
 	docker, _ := form.Get[form.Toggle](m.form, fDocker)
 	port, _ := form.Get[form.Checkbox](m.form, fPort)
 	name := in.Value()
 	if name == "" {
 		name = "my-project"
 	}
-	return fmt.Sprintf("created %s: %s from %s, %s, docker %v, port 3000 %v", name,
-		image.Value(), day.Value(), sh.Value(), docker.On(), port.Checked())
+	return fmt.Sprintf("created %s: %s from %s, %s, %g cpus, %g GB, docker %v, port %v", name,
+		image.Value(), day.Value(), sh.Value(), cpus.Value(), mem.Value(), docker.On(), port.Checked())
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

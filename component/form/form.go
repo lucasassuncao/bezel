@@ -1,7 +1,7 @@
 // Package form is the controls that ask for a value: a text input, a select,
-// a date, checkboxes, radios, a toggle and a button, stacked in a Form that
-// moves focus with tab and shift+tab. Each control is one row, its label in a
-// shared column, painted in the theme the Form was built with.
+// a date, a number, a slider, checkboxes, radios, a toggle and a button, in a
+// Form that moves focus with tab and shift+tab. Each control is one row, its
+// label in a shared column, painted in the theme the Form was built with.
 package form
 
 import (
@@ -42,8 +42,9 @@ type Keys struct {
 	Next, Prev  key.Binding // the form: move the focus
 	Press       key.Binding // a checkbox, toggle or button; opens and picks in a select
 	Left, Right key.Binding // a radio; either one flips a toggle
-	Up, Down    key.Binding // an open select
+	Up, Down    key.Binding // an open select; a number steps on them
 	Close       key.Binding // an open select, leaving its value as it was
+	Erase       key.Binding // a number's last character
 }
 
 // DefaultKeys are tab and shift+tab, space or enter, the arrows and esc.
@@ -57,6 +58,7 @@ func DefaultKeys() Keys {
 		Up:    key.New("up").WithHelp("↑/↓", "move"),
 		Down:  key.New("down"),
 		Close: key.New("esc").WithHelp("esc", "close"),
+		Erase: key.New("backspace", "ctrl+h"),
 	}
 }
 
@@ -215,10 +217,17 @@ func (f Form) Legend() []legend.Entry {
 			return legend.FromBindings([]key.Binding{k.Up, k.Press, k.Close})
 		}
 		own = []key.Binding{k.Press}
+	case Date:
+		if fl.Holding() {
+			return append(fl.cal.Legend(), legend.FromBindings([]key.Binding{k.Close})...)
+		}
+		own = []key.Binding{k.Press}
 	case Checkbox, Toggle, Button:
 		own = []key.Binding{k.Press}
-	case Radio:
+	case Radio, Slider:
 		own = []key.Binding{k.Left}
+	case Number:
+		own = []key.Binding{k.Up}
 	case Input:
 		return append(legend.FromBindings([]key.Binding{k.Next, k.Prev}), fl.in.Legend()...)
 	}

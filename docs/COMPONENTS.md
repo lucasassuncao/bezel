@@ -150,7 +150,7 @@ What the user types into: a form of controls, a one-line field, a multi-line fie
 
 Source: [`examples/component/form/main.go`](../examples/component/form/main.go)
 
-One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, each option described beside it (`WithDescriptions`), a start day picked from the calendar a `Date` opens, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
+One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, each option described beside it (`WithDescriptions`), a start day picked from the calendar a `Date` opens, a `Number` stepped with the arrows or typed, a `Slider`, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
 
 ```go
 f := form.New(th,
