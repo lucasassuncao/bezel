@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # git-cliff walks the history back to the previous tag.
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # git-cliff renders every commit with its whole message (cliff.toml), the
+      # same notes `make tag` wrote into the tag.
+      - name: Generate release notes
+        run: make release-notes
+
+      # bezel is a library, so the release carries the notes and no binaries.
+      # A tag with a suffix, such as v1.0.0-rc.1, is marked as a pre-release.
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          prerelease=""
+          case "$TAG" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "$TAG" --title "$TAG" --notes-file release-notes.md --verify-tag $prerelease

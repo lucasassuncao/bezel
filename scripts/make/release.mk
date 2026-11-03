@@ -1,6 +1,11 @@
 ##@ Release
 
-.PHONY: notes tag
+.PHONY: notes release-notes tag
+
+# The tag at HEAD, so it matches what `make tag` wrote into the tag message.
+## Write the git-cliff notes of the tag at HEAD into release-notes.md
+release-notes: $(GITCLIFF)
+	@$(GITCLIFF) --current --strip all -o $(RELEASE_NOTES)
 
 ## Print the git-cliff notes that `make tag` would write for the untagged commits
 notes: $(GITCLIFF)

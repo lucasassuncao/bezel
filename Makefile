@@ -26,10 +26,11 @@ endif
 script = $(SCRIPT_RUN) $(SCRIPT_DIR)/$(1)$(SCRIPT_EXT)
 
 # Project variables
-MODULE_NAME  := bezel
-SBOM_FILE    := sbom.json
-COVERAGE_DIR := coverage
-SITE_DIR     := site
+MODULE_NAME   := bezel
+SBOM_FILE     := sbom.json
+COVERAGE_DIR  := coverage
+SITE_DIR      := site
+RELEASE_NOTES := release-notes.md
 
 MAKE_DIR := scripts/make
 
@@ -65,6 +66,6 @@ all-basic: deps fmt docs lint test-coverage
 
 ## Remove coverage artifacts, installed tools and cache
 clean: clean-tools
-	@$(call script,remove) $(COVERAGE_DIR) $(SBOM_FILE) $(SITE_DIR)
+	@$(call script,remove) $(COVERAGE_DIR) $(SBOM_FILE) $(SITE_DIR) $(RELEASE_NOTES)
 	@echo "Cleaning Go build and test cache..."
 	@go clean -cache -testcache
