@@ -1,4 +1,4 @@
-# list: rows under headings, a spinner on a busy row (space toggles it), a / filter, and enter showing the row's payload.
+# list: rows under headings, space checking rows for a batch, a spinner on a busy row (b toggles it), a / filter, and enter showing the row's payload.
 #
 # Record from the repository root: vhs docs/recordings/component/list.tape
 
@@ -44,11 +44,24 @@ Enter
 Wait+Screen /kcal/
 Sleep 2s
 
-# -- A busy row ---------------------------------------------------------------------
+# -- Checking rows for a batch -------------------------------------------------------
 
 Space
-Sleep 2.5s
+Sleep 600ms
+Down
+Sleep 400ms
 Space
+Sleep 600ms
+Down
+Sleep 400ms
+Space
+Sleep 2s
+
+# -- A busy row ---------------------------------------------------------------------
+
+Type "b"
+Sleep 2.5s
+Type "b"
 Sleep 1s
 
 # -- The filter ------------------------------------------------------------------------

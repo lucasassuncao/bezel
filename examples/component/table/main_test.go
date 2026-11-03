@@ -33,7 +33,7 @@ func TestTableDescriptionGivesWayFirst(t *testing.T) {
 	t.Log("\n" + out)
 	var row string
 	for _, l := range strings.Split(out, "\n") {
-		if strings.Contains(l, "▶ bubbletea") {
+		if strings.Contains(l, "▶ [ ] bubbletea") {
 			row = l
 		}
 	}
@@ -50,7 +50,7 @@ func TestTableCursorScrollsAndTheEdgesFollow(t *testing.T) {
 
 	m, out = frame(t, m, bezeltest.Key("end"), 100)
 	t.Log("\n" + out)
-	require.Contains(t, out, "▶ x/sync")
+	require.Contains(t, out, "▶ [ ] x/sync")
 	require.Contains(t, out, " 18/18 ")
 	require.Contains(t, out, "NAME", "the header stays put")
 
@@ -62,7 +62,7 @@ func TestTableFiltersAndTurnsSpinners(t *testing.T) {
 	var m tea.Model = newModel()
 	require.NotNil(t, m.Init(), "the rows that start busy turn")
 	m, out := frame(t, m, tea.WindowSizeMsg{Width: 100, Height: 24}, 100)
-	require.Contains(t, out, "⠋ lipgloss", "a busy row has the spinner for a marker")
+	require.Contains(t, out, "⠋ [ ] lipgloss", "a busy row has the spinner for a marker")
 
 	m, _ = frame(t, m, bezeltest.Key("/"), 100)
 	for _, k := range []string{"x", "/", "s"} {
@@ -72,11 +72,15 @@ func TestTableFiltersAndTurnsSpinners(t *testing.T) {
 	t.Log("\n" + out)
 	require.Contains(t, out, "/x/s▋", "w and q are text at the prompt too")
 	require.Contains(t, out, " 2 of 18 ")
-	require.Contains(t, out, "▶ x/sync")
+	require.Contains(t, out, "▶ [ ] x/sync")
 	require.NotContains(t, out, "bubbletea")
 
 	m, _ = frame(t, m, bezeltest.Key("esc"), 100)
-	m, cmd := m.Update(bezeltest.Key("space"))
-	_, out = frame(t, m, cmd(), 100)
-	require.Contains(t, out, "⠋ bubbletea", "space marks the cursor row")
+	m, cmd := m.Update(bezeltest.Key("b"))
+	m, out = frame(t, m, cmd(), 100)
+	require.Contains(t, out, "⠋ [ ] bubbletea", "b marks the cursor row")
+
+	_, out = frame(t, m, bezeltest.Key("space"), 100)
+	require.Contains(t, out, "[x] bubbletea", "space checks it")
+	require.Contains(t, out, "1 checked")
 }

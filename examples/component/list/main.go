@@ -1,11 +1,12 @@
-// List: rows under section headings, a / filter, enter showing the payload
-// the chosen row carries, a cursor that glides from row to row and a spinner
-// on a busy row, which space turns on and off.
+// List: rows under section headings, a / filter, enter showing the payload,
+// a gliding cursor, space checking rows for a batch and a spinner on a busy
+// row, which b turns on and off.
 package main
 
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -59,11 +60,12 @@ func newModel() model {
 			shell.Move(),
 			shell.Custom("/", "filter", nil, shell.DisplayOnly()),
 			shell.Custom("enter", "choose", nil, shell.DisplayOnly()),
-			shell.Custom("space", "busy", shell.Send(toggleBusyMsg{})),
+			shell.Custom("space", "check", nil, shell.DisplayOnly()),
+			shell.Custom("b", "busy", shell.Send(toggleBusyMsg{})),
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, list: list.New(rows()).WithMotion(120 * time.Millisecond)}
+	return model{sh: sh, th: th, list: list.New(rows()).WithMotion(120 * time.Millisecond).WithMulti(true)}
 }
 
 // Init turns the spinner of the row that starts busy.
@@ -100,17 +102,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) detail() string {
-	if m.chosen == nil {
-		return m.th.Dim.Render("enter shows the row's payload")
+	out := m.th.Dim.Render("enter shows the row's payload")
+	if m.chosen != nil {
+		out = fmt.Sprintf("%s\n\n%d kcal per 100 g", m.th.Accent.Render(m.chosen.name), m.chosen.calories)
 	}
-	return fmt.Sprintf("%s\n\n%d kcal per 100 g", m.th.Accent.Render(m.chosen.name), m.chosen.calories)
+	var names []string
+	for _, r := range m.list.Checked() {
+		names = append(names, r.Label)
+	}
+	if len(names) > 0 {
+		out += "\n\n" + m.th.Dim.Render("checked: ") + strings.Join(names, ", ")
+	}
+	return out
 }
 
 func (m model) View() tea.View {
 	// Sized before the pane is drawn: the scrollbar is the pane's, not the body's.
 	l := m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
 	return m.sh.View(map[string]shell.Pane{
-		"list": {Title: "food", Scroll: l.Scroll(), Body: func(layout.Rect) string {
+		"list": {Title: "food", Bottom: fmt.Sprintf("%d checked", len(l.Checked())), Scroll: l.Scroll(), Body: func(layout.Rect) string {
 			return l.View(m.th)
 		}},
 		"detail": {Title: "payload", Body: func(layout.Rect) string { return m.detail() }},

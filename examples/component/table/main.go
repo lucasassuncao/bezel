@@ -1,6 +1,6 @@
-// Table: a cursor over rows that scroll under a fixed header, a / filter and a
-// spinner on the rows still updating (space toggles one). w narrows the window:
-// the description gives way first, version and licence stay whole.
+// Table: rows under a fixed header, a / filter, space checking rows for a batch
+// and a spinner on the rows still updating (b toggles one). w narrows the
+// window: the description gives way first, version and licence stay whole.
 package main
 
 import (
@@ -85,12 +85,13 @@ func newModel() model {
 			shell.Move(),
 			shell.Custom("/", "filter", nil, shell.DisplayOnly()),
 			shell.Custom("enter", "choose", nil, shell.DisplayOnly()),
-			shell.Custom("space", "busy", shell.Send(toggleBusyMsg{})),
+			shell.Custom("space", "check", nil, shell.DisplayOnly()),
+			shell.Custom("b", "busy", shell.Send(toggleBusyMsg{})),
 			shell.Custom("w", "narrow/wide", shell.Send(toggleWidthMsg{})),
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, tbl: table.New(cols, items())}
+	return model{sh: sh, th: th, tbl: table.New(cols, items()).WithMulti(true)}
 }
 
 // Init turns the spinners of the rows that start busy.
@@ -173,6 +174,9 @@ func (m model) View() tea.View {
 	pos := fmt.Sprintf("%d/%d", m.tbl.Cursor()+1, m.tbl.Len())
 	if m.tbl.Filtering() {
 		pos = fmt.Sprintf("%d of %d", m.tbl.Scroll().Total, m.tbl.Len())
+	}
+	if n := len(m.tbl.Checked()); n > 0 {
+		pos = fmt.Sprintf("%d checked · %s", n, pos)
 	}
 	return m.sh.View(map[string]shell.Pane{
 		"table": {

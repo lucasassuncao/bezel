@@ -115,10 +115,10 @@ go run ./examples/app
 
 **Components**, in [`component`](component): what goes inside the panes.
 
-- [`list`](component/list): a cursor list with sections and a `/` filter.
+- [`list`](component/list): a cursor list with sections, a `/` filter and rows checked for a batch.
 - [`paginator`](component/paginator): pages as dots or "2/5", and the slice of items each page shows.
 - [`tree`](component/tree): an expandable tree, generic over your node type.
-- [`table`](component/table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header.
+- [`table`](component/table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header, checked for a batch.
 - [`form`](component/form): `Input`, `Select`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
 - [`input`](component/input): a one-line text field with readline keys, a placeholder and a mask for secrets.
 - [`textbox`](component/textbox): a multi-line text field with line numbers.

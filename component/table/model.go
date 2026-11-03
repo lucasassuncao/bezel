@@ -22,19 +22,21 @@ import (
 // the caller's type T. A cell may carry its own colour. A Busy row shows a
 // turning spinner where the cursor's marker goes.
 type Item[T any] struct {
-	Cells []string
-	Value T
-	Busy  bool
+	Cells   []string
+	Value   T
+	Busy    bool
+	Checked bool // ticked for a batch, while the table is WithMulti
 }
 
 // Keys are the bindings the table answers to.
 type Keys struct {
 	Up, Down, PageUp, PageDown, HalfPageUp, HalfPageDown, Top, Bottom, Enter, Filter, Esc key.Binding
 	Erase                                                                                 key.Binding // the filter's last character
+	Check, CheckAll                                                                       key.Binding // while WithMulti
 }
 
 // DefaultKeys are the arrows, pgup/pgdown, ctrl+u/ctrl+d for half a page,
-// home/end, enter, / and esc.
+// home/end, enter, / and esc; space and ctrl+a check rows while WithMulti.
 func DefaultKeys() Keys {
 	return Keys{
 		Up:           key.New("up").WithHelp("↑/↓", "move"),
@@ -49,6 +51,8 @@ func DefaultKeys() Keys {
 		Filter:       key.New("/").WithHelp("/", "filter"),
 		Esc:          key.New("esc").WithHelp("esc", "stop filtering"),
 		Erase:        key.New("backspace", "ctrl+h"),
+		Check:        key.New("space").WithHelp("space", "check"),
+		CheckAll:     key.New("ctrl+a").WithHelp("ctrl+a", "check all"),
 	}
 }
 
@@ -83,6 +87,7 @@ type Model[T any] struct {
 	fuzzy  bool
 	spin   spinner.Model // turns while a row is Busy
 	blur   bool          // drawn without the cursor's colour, and deaf to keys
+	multi  bool
 	edit   func(Styles) Styles
 }
 
@@ -93,12 +98,18 @@ type Styles struct {
 	Blurred lipgloss.Style // the cursor row's marker while the table is blurred
 	More    lipgloss.Style // the "↓ N more" row
 	Busy    lipgloss.Style // the spinner on a Busy row
+	Box     lipgloss.Style // an unchecked row's box while WithMulti
+	Checked lipgloss.Style // a checked row's box
 }
 
 // DefaultStyles take the header from the theme's table role, paint the
-// cursor row in the cursor role and a busy row's spinner in the accent.
+// cursor row in the cursor role, a busy row's spinner and a checked box in
+// the accent and an empty box muted.
 func DefaultStyles(th theme.Resolved) Styles {
-	return Styles{Header: th.TableHeader, Cursor: th.Cursor, Blurred: th.Dim, More: th.Dim, Busy: th.Accent}
+	return Styles{
+		Header: th.TableHeader, Cursor: th.Cursor, Blurred: th.Dim, More: th.Dim, Busy: th.Accent,
+		Box: th.Muted, Checked: th.Accent,
+	}
 }
 
 // New builds a table with the cursor on the first row; SetHeight gives it
@@ -154,7 +165,11 @@ func (m Model[T]) Legend() []legend.Entry {
 	if m.find.on {
 		return legend.FromBindings([]key.Binding{k.Up, k.Down, k.Enter, k.Esc})
 	}
-	return legend.FromBindings([]key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.HalfPageUp, k.HalfPageDown, k.Top, k.Bottom, k.Enter, k.Filter})
+	keys := []key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.HalfPageUp, k.HalfPageDown, k.Top, k.Bottom, k.Enter, k.Filter}
+	if m.multi {
+		keys = append(keys, k.Check, k.CheckAll)
+	}
+	return legend.FromBindings(keys)
 }
 
 // FromValues is the rows of delimited text, one per line, its cells split
@@ -207,16 +222,18 @@ func (m Model[T]) Scroll() layout.Scroll {
 	return m.win.Clamp(len(m.items)).Scroll(len(m.items))
 }
 
-// SetItems replaces the rows, keeping the cursor on the row with the same
-// first cell when it survives (at the same index first), else at the same
-// index: a refresh that drops a row lands on the one that took its place.
+// SetItems replaces the rows, keeping the cursor and the checks on the rows
+// with the same first cell (the cursor at the same index first), else at the
+// same index: a refresh that drops a row lands on the one that took its place.
 func (m Model[T]) SetItems(items []Item[T]) Model[T] {
 	prev, at := "", m.win.Cursor
 	if at < len(m.items) {
 		prev = first(m.items[at])
 	}
 	match, found := m.matched()
+	before := m.items
 	m = m.withItems(items)
+	keepChecks(before, m.items)
 	if at < len(m.items) && first(m.items[at]) == prev {
 		return m.clamp().refilter().refind(match, found)
 	}
@@ -237,14 +254,27 @@ func (m Model[T]) SetHeight(h int) Model[T] {
 }
 
 // Update takes the table's keys unless blurred, a bezel.ClickMsg on a row and
-// the Busy spinner's frames. Choosing a row or a / match reports a [Chosen];
-// any other message comes back unhandled and unchanged.
+// the Busy spinner's frames. Choosing a row or a / match reports a [Chosen],
+// checking one a [Toggled]; any other message comes back unhandled.
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	var chosen, handled bool
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		if m.blur || !m.handles(msg) {
 			return m, bezel.Result{}
+		}
+		if m.multi && !m.find.on && key.Matches(msg, m.keys.Check, m.keys.CheckAll) {
+			var items []Item[T]
+			if key.Matches(msg, m.keys.Check) {
+				m, items = m.check()
+			} else {
+				m, items = m.checkAll()
+			}
+			r := bezel.Result{Handled: true}
+			if len(items) > 0 {
+				r.Event = Toggled[T]{Items: items}
+			}
+			return m, r
 		}
 		if m.find.on {
 			m, chosen = m.updateFilter(msg)
@@ -280,7 +310,8 @@ func (m Model[T]) handles(k tea.KeyPressMsg) bool {
 		return key.Matches(k, ks.Esc, ks.Enter, ks.Erase, ks.Up, ks.Down) || edit.Typed(k) != ""
 	}
 	return key.Matches(k, ks.Filter, ks.HalfPageUp, ks.HalfPageDown, ks.Up, ks.Down,
-		ks.PageUp, ks.PageDown, ks.Top, ks.Bottom, ks.Enter)
+		ks.PageUp, ks.PageDown, ks.Top, ks.Bottom, ks.Enter) ||
+		m.multi && key.Matches(k, ks.Check, ks.CheckAll)
 }
 
 // press is one of the table's keys: the table after it and whether it chose.
@@ -378,6 +409,9 @@ func (m Model[T]) View(th theme.Resolved) string {
 	width := m.width
 	st := m.styles(th)
 	pad := strings.Repeat(" ", draw.Width(marker))
+	if m.multi {
+		pad += strings.Repeat(" ", draw.Width("[ ] "))
+	}
 	widths := shrink(m.cols, slices.Clone(m.widths), width-len(pad))
 	lines := []string{st.Header.Render(pad + Titles(m.cols, widths))}
 
@@ -393,7 +427,7 @@ func (m Model[T]) View(th theme.Resolved) string {
 	busy := m.busyMark(st)
 	for i := start; i < end; i++ {
 		cells := rows[i].Cells
-		lead := pad
+		lead := strings.Repeat(" ", draw.Width(marker))
 		switch {
 		case rows[i].Busy:
 			lead = busy
@@ -405,7 +439,7 @@ func (m Model[T]) View(th theme.Resolved) string {
 		if i == w.Cursor && !m.blur {
 			cells = cursorCells(cells, st.Cursor)
 		}
-		lines = append(lines, lead+Row(widths, cells))
+		lines = append(lines, lead+m.box(rows[i], st)+Row(widths, cells))
 	}
 	if below > 0 {
 		lines = append(lines, draw.More(below, draw.Width(marker), st.More))
@@ -445,7 +479,7 @@ func first[T any](it Item[T]) string {
 func cloneItems[T any](items []Item[T]) []Item[T] {
 	out := make([]Item[T], len(items))
 	for i, it := range items {
-		out[i] = Item[T]{Cells: slices.Clone(it.Cells), Value: it.Value, Busy: it.Busy}
+		out[i] = Item[T]{Cells: slices.Clone(it.Cells), Value: it.Value, Busy: it.Busy, Checked: it.Checked}
 	}
 	return out
 }

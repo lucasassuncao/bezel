@@ -34,6 +34,7 @@ type Row[T any] struct {
 	Section     bool
 	Mark        string
 	Busy        bool // a spinner turns in place of Mark
+	Checked     bool // ticked for a batch, while the list is WithMulti
 	Style       *lipgloss.Style
 	Value       T
 }
@@ -42,9 +43,11 @@ type Row[T any] struct {
 type Keys struct {
 	Up, Down, PageUp, PageDown, Top, Bottom, Enter, Filter, Esc key.Binding
 	Erase                                                       key.Binding // the filter's last character
+	Check, CheckAll                                             key.Binding // while WithMulti
 }
 
-// DefaultKeys are the arrows, pgup/pgdown, home/end, enter, / and esc.
+// DefaultKeys are the arrows, pgup/pgdown, home/end, enter, / and esc; space
+// and ctrl+a check rows while the list is WithMulti.
 func DefaultKeys() Keys {
 	return Keys{
 		Up:       key.New("up").WithHelp("↑/↓", "move"),
@@ -57,6 +60,8 @@ func DefaultKeys() Keys {
 		Filter:   key.New("/").WithHelp("/", "filter"),
 		Esc:      key.New("esc").WithHelp("esc", "stop filtering"),
 		Erase:    key.New("backspace", "ctrl+h"),
+		Check:    key.New("space").WithHelp("space", "check"),
+		CheckAll: key.New("ctrl+a").WithHelp("ctrl+a", "check all"),
 	}
 }
 
@@ -87,6 +92,7 @@ type Model[T any] struct {
 	status bool
 	pages  bool
 	wrap   bool
+	multi  bool
 	edit   func(Styles) Styles
 }
 
@@ -102,15 +108,19 @@ type Styles struct {
 	Arrive      lipgloss.Style // its foreground is where a new row fades from
 	Gone        lipgloss.Style // its foreground is where a removed row fades to
 	Busy        lipgloss.Style // the spinner on a Busy row
+	Box         lipgloss.Style // an unchecked row's box while WithMulti
+	Checked     lipgloss.Style // a checked row's box
 }
 
 // DefaultStyles draw the cursor row in the cursor role over dim rows, the
 // title in bold accent and the new and removed rows fading through the
-// accent and the border; a busy row's spinner is in the accent.
+// accent and the border; a busy row's spinner and a checked box are in the
+// accent, an empty box muted.
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{
 		Title: th.Accent.Bold(true), Section: th.Section, Row: th.Dim, Cursor: th.Cursor,
 		Description: th.Muted, More: th.Dim, Status: th.Muted, Busy: th.Accent,
+		Box: th.Muted, Checked: th.Accent,
 		Arrive: lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Accent)),
 		Gone:   lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Border)),
 	}
@@ -190,7 +200,11 @@ func (m Model[T]) Legend() []legend.Entry {
 	if m.find.on {
 		return legend.FromBindings([]key.Binding{k.Up, k.Down, k.Enter, k.Esc})
 	}
-	return legend.FromBindings([]key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.Top, k.Bottom, k.Enter, k.Filter})
+	keys := []key.Binding{k.Up, k.Down, k.PageUp, k.PageDown, k.Top, k.Bottom, k.Enter, k.Filter}
+	if m.multi {
+		keys = append(keys, k.Check, k.CheckAll)
+	}
+	return legend.FromBindings(keys)
 }
 
 // itemLines is the lines a row takes: two once a row has a description.
@@ -283,7 +297,7 @@ func (m Model[T]) Scroll() layout.Scroll {
 
 // SetRows replaces the rows, keeping the cursor on the row with the same
 // label when it survives (at the same index first), else on the first
-// selectable one. Call Tick after it, for the motion and the Busy spinner.
+// selectable one, and the checks by label. Call Tick after it.
 func (m Model[T]) SetRows(rows []Row[T]) Model[T] {
 	before, cursor := m.rows, m.win.Cursor
 	return m.setRows(rows).changed(before, cursor)
@@ -295,7 +309,7 @@ func (m Model[T]) setRows(rows []Row[T]) Model[T] {
 	if r, ok := m.Selected(); ok {
 		prev = r.Label
 	}
-	m.rows = slices.Clone(rows)
+	m.rows = keepChecks(m.rows, rows)
 	m = m.fit()
 	if at < len(m.rows) && !m.rows[at].Section && m.rows[at].Label == prev {
 		return m.clampScroll().refilter().spun()
@@ -357,6 +371,22 @@ func (m Model[T]) Selected() (Row[T], bool) {
 	return m.rows[m.win.Cursor], true
 }
 
+// at is the index of the row under the cursor, the filter's while it is
+// open; -1 on a heading or with none.
+func (m Model[T]) at() int {
+	i := m.win.Cursor
+	if m.find.on {
+		if m.find.win.Cursor >= len(m.find.idx) {
+			return -1
+		}
+		i = m.find.idx[m.find.win.Cursor]
+	}
+	if i >= len(m.rows) || m.rows[i].Section {
+		return -1
+	}
+	return i
+}
+
 // picked reports whether a row is under the cursor.
 func (m Model[T]) picked() bool {
 	_, ok := m.Selected()
@@ -364,13 +394,26 @@ func (m Model[T]) picked() bool {
 }
 
 // Update takes the list's keys, a bezel.ClickMsg on a row and its own
-// frames. Choosing a row reports a [Chosen]; a move with motion returns the
-// list's Tick. Anything else comes back unhandled and unchanged.
+// frames. Choosing a row reports a [Chosen], checking one a [Toggled]; a move
+// with motion returns the list's Tick. Anything else comes back unhandled.
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 	var chosen, handled bool
 	before := m.mo.run.ID
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
+		if m.multi && !m.find.on && key.Matches(msg, m.keys.Check, m.keys.CheckAll) {
+			var rows []Row[T]
+			if key.Matches(msg, m.keys.Check) {
+				m, rows = m.check()
+			} else {
+				m, rows = m.checkAll()
+			}
+			r := bezel.Result{Handled: true}
+			if len(rows) > 0 {
+				r.Event = Toggled[T]{Rows: rows}
+			}
+			return m, r
+		}
 		handled = m.handles(msg)
 		m, chosen = m.press(msg)
 	case bezel.ClickMsg:
@@ -731,9 +774,9 @@ func (m Model[T]) rowLines(st *Styles) (lines []string, of []int) {
 			lines = append(lines, heading)
 		case i != cursor && arriving != nil:
 			r.Style = arriving
-			lines = append(lines, renderRow(r, false, st, nil, two, busy))
+			lines = append(lines, renderRow(r, false, st, nil, two, busy, m.checkBox(r, st)))
 		default:
-			lines = append(lines, renderRow(r, i == cursor, st, nil, two, busy))
+			lines = append(lines, renderRow(r, i == cursor, st, nil, two, busy, m.checkBox(r, st)))
 		}
 		of = append(of, i)
 	}
@@ -769,7 +812,7 @@ func (m Model[T]) viewFilter(st *Styles) string {
 		if m.fuzzy {
 			_, hits, _ = fuzzy.Match(m.find.text, r.Label)
 		}
-		lines = append(lines, renderRow(r, i == w.Cursor, st, hits, two, m.busyMark(st)))
+		lines = append(lines, renderRow(r, i == w.Cursor, st, hits, two, m.busyMark(st), m.checkBox(r, st)))
 	}
 	if below > 0 {
 		lines = append(lines, moreRow(below, st))
@@ -784,10 +827,10 @@ func (m Model[T]) viewFilter(st *Styles) string {
 // moreRow stands in for the last row while n rows are hidden below it.
 func moreRow(n int, st *Styles) string { return draw.More(n, 2, st.More) }
 
-// renderRow is a row in its style, the runes of its label at hits underlined,
-// with two its description (or a blank) under it, and when Busy the frame busy
+// renderRow is a row in its style, box before its label and the runes at
+// hits underlined, two's description under it, and when Busy the frame busy
 // in place of its Mark, or of the lead when it has none.
-func renderRow[T any](r Row[T], selected bool, st *Styles, hits []int, two bool, busy string) string {
+func renderRow[T any](r Row[T], selected bool, st *Styles, hits []int, two bool, busy, box string) string {
 	style, lead := st.Row, "  "
 	switch {
 	case selected:
@@ -807,6 +850,7 @@ func renderRow[T any](r Row[T], selected bool, st *Styles, hits []int, two bool,
 	default:
 		head = style.Render(lead)
 	}
+	head += box
 	row := head + underlined(draw.OneLine(r.Label), hits, style)
 	if two {
 		indent := strings.Repeat(" ", draw.Width(head))

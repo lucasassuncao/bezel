@@ -60,10 +60,21 @@ func TestListTurnsASpinnerOnABusyRow(t *testing.T) {
 	var m tea.Model = newModel()
 	require.NotNil(t, m.Init(), "orange starts busy")
 	m, out := frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
-	require.Contains(t, out, "  ⠋  orange", "the spinner takes the mark")
+	require.Contains(t, out, "  ⠋  [ ] orange", "the spinner takes the mark")
 
-	m, cmd := m.Update(bezeltest.Key("space"))
+	m, cmd := m.Update(bezeltest.Key("b"))
 	_, out = frame(t, m, cmd())
 	t.Log("\n" + out)
-	require.Contains(t, out, "▶ ⠋  banana", "space marks the cursor row")
+	require.Contains(t, out, "▶ ⠋  [ ] banana", "b marks the cursor row")
+}
+
+func TestListChecksRowsForABatch(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
+	m, _ = frame(t, m, bezeltest.Key("space"))
+	m, _ = frame(t, m, bezeltest.Key("down"))
+	_, out := frame(t, m, bezeltest.Key("space"))
+	require.Contains(t, out, "[x] banana")
+	require.Contains(t, out, "checked: banana, mango")
+	require.Contains(t, out, "2 checked")
 }

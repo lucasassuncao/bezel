@@ -74,7 +74,7 @@ What a pane shows: rows with a cursor, a tree, a table, pages of items, a long t
 
 Source: [`examples/component/list/main.go`](../examples/component/list/main.go)
 
-Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included. `WithMotion` makes the cursor glide from row to row, a row that arrives light up and one that leaves fade where it was; `Update` starts the motion and takes its frames, so the app hands it every message. A row marked `Busy` turns a spinner in place of its mark; `space` marks the row under the cursor.
+Rows under section headings the cursor skips, `enter` showing the payload a row carries, and a `/` filter that takes every key, `q` included. `WithMotion` makes the cursor glide from row to row, a row that arrives light up and one that leaves fade where it was; `Update` starts the motion and takes its frames, so the app hands it every message. `WithMulti` lets `space` check rows for a batch and `ctrl+a` check them all; the checked rows show in the payload pane. A row marked `Busy` turns a spinner in place of its mark; `b` marks the row under the cursor.
 
 ![list](recordings/component/list.gif)
 
@@ -106,7 +106,7 @@ A directory tree over the app's own node type. The arrows expand and collapse; `
 
 Source: [`examples/component/table/main.go`](../examples/component/table/main.go)
 
-Columns sized to their contents, and a cursor over rows that scroll under a fixed header, with the position at the foot of the pane, a scrollbar down its edge and the row's detail below. `pgdown` and `pgup` move a page at a time, `enter` reports the chosen row, `/` filters the rows, `space` turns a spinner on a row the way the two still updating have, and `w` narrows the window: the description gives way first, and the version and licence stay whole.
+Columns sized to their contents, and a cursor over rows that scroll under a fixed header, with the position at the foot of the pane, a scrollbar down its edge and the row's detail below. `pgdown` and `pgup` move a page at a time, `enter` reports the chosen row, `/` filters the rows, `space` checks rows for a batch (`WithMulti`), `b` turns a spinner on a row the way the two still updating have, and `w` narrows the window: the description gives way first, and the version and licence stay whole.
 
 ![table](recordings/component/table.gif)
 
