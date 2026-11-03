@@ -4,9 +4,11 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/key"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 func TestPrebuiltActionsPrintFixedText(t *testing.T) {
@@ -97,4 +99,20 @@ func TestNilActionsTabsAndOptionsAreSkipped(t *testing.T) {
 	s := New(Config{Tabs: []Tab{nil, tab}, Actions: []Action{nil}}).SetActions(nil).SetTabs(nil, tab)
 	require.NotPanics(t, func() { _ = s.Body(); _ = s.render(nil) })
 	require.Equal(t, 0, s.SetTab(1).ActiveTab(), "the nil tab was left out, so there is no second")
+}
+
+func TestHelpOnlyLeavesTheLegendButStaysInHelpAndRuns(t *testing.T) {
+	ran := false
+	resize := Custom("z", "zoom", func(ActionContext) tea.Cmd { ran = true; return nil }, HelpOnly())
+	s := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain(), true), Actions: []Action{Help(), resize, Quit()}})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 120, Height: 30})
+
+	plain := ansi.Strip(s.render(demoPanes()))
+	require.NotContains(t, plain, "zoom")
+	require.Contains(t, plain, "quit")
+	require.Contains(t, ansi.Strip(s.ShowHelp().render(demoPanes())), "zoom")
+
+	_, r := s.Update(press("z"))
+	require.True(t, r.Handled)
+	require.True(t, ran)
 }

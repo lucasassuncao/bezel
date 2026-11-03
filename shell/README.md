@@ -38,6 +38,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func Arg\(placeholder string\) Option](<#Arg>)
   - [func DisplayOnly\(\) Option](<#DisplayOnly>)
   - [func Group\(n int\) Option](<#Group>)
+  - [func HelpOnly\(\) Option](<#HelpOnly>)
   - [func KeyHint\(k string\) Option](<#KeyHint>)
   - [func Named\(name string\) Option](<#Named>)
   - [func Needs\(c Capability\) Option](<#Needs>)
@@ -94,7 +95,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
 
 
 <a name="Check"></a>
-## func [Check](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L197>)
+## func [Check](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L202>)
 
 ```go
 func Check(actions ...Action) error
@@ -112,7 +113,7 @@ func IsStatusExpiry(msg tea.Msg) bool
 IsStatusExpiry reports a status timer's message, or a toast's frame, for a harness that must not feed timers back into the loop.
 
 <a name="Send"></a>
-## func [Send](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L141>)
+## func [Send](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L142>)
 
 ```go
 func Send(msg tea.Msg) func(ActionContext) tea.Cmd
@@ -134,7 +135,7 @@ type Action interface {
 ```
 
 <a name="ChangePane"></a>
-### func [ChangePane](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L108>)
+### func [ChangePane](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L109>)
 
 ```go
 func ChangePane(opts ...Option) Action
@@ -143,7 +144,7 @@ func ChangePane(opts ...Option) Action
 ChangePane cycles the panes on screen, for an app without tabs.
 
 <a name="ChangeTab"></a>
-### func [ChangeTab](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L103>)
+### func [ChangeTab](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L104>)
 
 ```go
 func ChangeTab(opts ...Option) Action
@@ -152,7 +153,7 @@ func ChangeTab(opts ...Option) Action
 ChangeTab cycles the tabs; the first key walks forward, the rest back.
 
 <a name="Command"></a>
-### func [Command](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L135>)
+### func [Command](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L136>)
 
 ```go
 func Command(name, desc string, run func(ActionContext) tea.Cmd, opts ...Option) Action
@@ -161,7 +162,7 @@ func Command(name, desc string, run func(ActionContext) tea.Cmd, opts ...Option)
 Command is palette\-only: no key, reached as :name.
 
 <a name="Commands"></a>
-### func [Commands](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L98>)
+### func [Commands](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L99>)
 
 ```go
 func Commands(opts ...Option) Action
@@ -170,7 +171,7 @@ func Commands(opts ...Option) Action
 Commands opens the command palette.
 
 <a name="Custom"></a>
-### func [Custom](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L130>)
+### func [Custom](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L131>)
 
 ```go
 func Custom(keys, desc string, run func(ActionContext) tea.Cmd, opts ...Option) Action
@@ -179,7 +180,7 @@ func Custom(keys, desc string, run func(ActionContext) tea.Cmd, opts ...Option) 
 Custom is an app key: keys is bound literally and printed as is. Use WithKey for several keys under one label \("←/→"\).
 
 <a name="Help"></a>
-### func [Help](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L93>)
+### func [Help](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L94>)
 
 ```go
 func Help(opts ...Option) Action
@@ -188,7 +189,7 @@ func Help(opts ...Option) Action
 Help opens the key list for where the user is.
 
 <a name="Move"></a>
-### func [Move](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L113>)
+### func [Move](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L114>)
 
 ```go
 func Move(opts ...Option) Action
@@ -197,7 +198,7 @@ func Move(opts ...Option) Action
 Move says the arrows move the cursor. Display only.
 
 <a name="Quit"></a>
-### func [Quit](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L123>)
+### func [Quit](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L124>)
 
 ```go
 func Quit(opts ...Option) Action
@@ -224,7 +225,7 @@ func Resize(opts ...Option) Action
 Resize grows the focused pane on its keys, in order: narrower, wider, shorter, taller. It moves the edges of a layout.Box marked Resizable, the innermost of that axis around the pane; a pane in none stays as it is.
 
 <a name="Scroll"></a>
-### func [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L118>)
+### func [Scroll](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L119>)
 
 ```go
 func Scroll(opts ...Option) Action
@@ -346,7 +347,7 @@ const (
 ```
 
 <a name="Option"></a>
-## type [Option](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L63>)
+## type [Option](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L64>)
 
 Option adjusts an action at construction.
 
@@ -355,7 +356,7 @@ type Option func(*action)
 ```
 
 <a name="Arg"></a>
-### func [Arg](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L149>)
+### func [Arg](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L150>)
 
 ```go
 func Arg(placeholder string) Option
@@ -364,7 +365,7 @@ func Arg(placeholder string) Option
 Arg makes the palette show ":name \<placeholder\>" and pass what follows.
 
 <a name="DisplayOnly"></a>
-### func [DisplayOnly](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L178>)
+### func [DisplayOnly](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L179>)
 
 ```go
 func DisplayOnly() Option
@@ -373,7 +374,7 @@ func DisplayOnly() Option
 DisplayOnly prints the action but never handles its key, so the key reaches the focused component that owns it, as Move does for the arrows.
 
 <a name="Group"></a>
-### func [Group](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L156>)
+### func [Group](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L157>)
 
 ```go
 func Group(n int) Option
@@ -381,8 +382,17 @@ func Group(n int) Option
 
 Group puts the action in legend row group n: each group starts a new row while Config.LegendLines allows. Ungrouped actions are group 0.
 
+<a name="HelpOnly"></a>
+### func [HelpOnly](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L183>)
+
+```go
+func HelpOnly() Option
+```
+
+HelpOnly lists the action in Help but not in the legend: a key the user looks up rather than reads on every screen. It still runs.
+
 <a name="KeyHint"></a>
-### func [KeyHint](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L174>)
+### func [KeyHint](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L175>)
 
 ```go
 func KeyHint(k string) Option
@@ -391,7 +401,7 @@ func KeyHint(k string) Option
 KeyHint prints k beside the command in the palette without binding it or listing it in the legend: for an app that still routes that key itself.
 
 <a name="Named"></a>
-### func [Named](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L146>)
+### func [Named](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L147>)
 
 ```go
 func Named(name string) Option
@@ -400,7 +410,7 @@ func Named(name string) Option
 Named puts the action in the palette as :name.
 
 <a name="Needs"></a>
-### func [Needs](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L152>)
+### func [Needs](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L153>)
 
 ```go
 func Needs(c Capability) Option
@@ -409,7 +419,7 @@ func Needs(c Capability) Option
 Needs drops the action where the session refuses c.
 
 <a name="RunWith"></a>
-### func [RunWith](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L182>)
+### func [RunWith](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L187>)
 
 ```go
 func RunWith(run func(ActionContext) tea.Cmd) Option
@@ -418,7 +428,7 @@ func RunWith(run func(ActionContext) tea.Cmd) Option
 RunWith replaces what the action does, keeping its key, text and rank: a Quit that asks first, a ChangePane that moves the app's own focus.
 
 <a name="When"></a>
-### func [When](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L159>)
+### func [When](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L160>)
 
 ```go
 func When(f func(Context) bool) Option
@@ -427,7 +437,7 @@ func When(f func(Context) bool) Option
 When keeps the action only while f reports true.
 
 <a name="WithKey"></a>
-### func [WithKey](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L163>)
+### func [WithKey](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L164>)
 
 ```go
 func WithKey(keys ...string) Option

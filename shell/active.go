@@ -62,6 +62,17 @@ func actionEntries(acts []Action, withHelp bool) []legend.Entry {
 	return out
 }
 
+// inLegend is acts less the ones HelpOnly keeps to the help.
+func inLegend(acts []Action) []Action {
+	out := make([]Action, 0, len(acts))
+	for _, a := range acts {
+		if ac, ok := a.(*action); !ok || !ac.helpOnly {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
 // helpAction is the Help among acts, the active actions, or nil.
 func helpAction(acts []Action) Action {
 	for _, a := range acts {

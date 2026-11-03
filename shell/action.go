@@ -56,6 +56,7 @@ type action struct {
 	run   func(ActionContext) tea.Cmd
 
 	display  bool // printed only: the focused component handles the key
+	helpOnly bool // listed by Help, left out of the legend
 	override bool // a prebuilt that runs run instead of the shell's own work
 }
 
@@ -176,6 +177,10 @@ func KeyHint(k string) Option { return func(a *action) { a.hint = k } }
 // DisplayOnly prints the action but never handles its key, so the key
 // reaches the focused component that owns it, as Move does for the arrows.
 func DisplayOnly() Option { return func(a *action) { a.display = true } }
+
+// HelpOnly lists the action in Help but not in the legend: a key the user
+// looks up rather than reads on every screen. It still runs.
+func HelpOnly() Option { return func(a *action) { a.helpOnly = true } }
 
 // RunWith replaces what the action does, keeping its key, text and rank: a
 // Quit that asks first, a ChangePane that moves the app's own focus.
