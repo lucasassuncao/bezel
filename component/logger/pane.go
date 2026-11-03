@@ -165,6 +165,13 @@ func (p Pane) WithKeys(k PaneKeys) Pane {
 	return p
 }
 
+// SetTheme repaints the pane under th, its WithStyles edit kept. Lines already
+// written keep their colours; a Handler taken after it writes in th's.
+func (p Pane) SetTheme(th theme.Resolved) Pane {
+	p.th = th
+	return p.restyle()
+}
+
 // styles are the pane's styles under its theme, edited.
 func (p Pane) styles() PaneStyles {
 	st := DefaultPaneStyles(p.th)

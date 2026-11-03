@@ -238,3 +238,21 @@ func TestPaneHeldKeepsItsLineWhileWrappedLinesDrop(t *testing.T) {
 	p, _ = p.Update(p.Init()())
 	require.Equal(t, top, strings.TrimRight(shown(p)[0], " "), "the same row stays on top")
 }
+
+func TestPaneSetThemeRepaintsWhatComesNext(t *testing.T) {
+	mint, dracula := theme.Resolve(theme.Mint(), true), theme.Resolve(mustTheme(t, "dracula"), true)
+	p := NewPane(mint).WithStyles(func(s PaneStyles) PaneStyles { s.Filter = s.Filter.Bold(true); return s })
+	require.NotEqual(t, DefaultPaneStyles(dracula).Match.GetForeground(), p.styles().Match.GetForeground())
+	p = p.SetTheme(dracula)
+	require.Equal(t, DefaultPaneStyles(dracula).Match.GetForeground(), p.styles().Match.GetForeground())
+	require.True(t, p.styles().Filter.GetBold(), "the edit is kept")
+	p = logged(sized(p), 1)
+	require.Contains(t, p.Lines()[0], DefaultStyles(dracula).Info.Render("INFO"))
+}
+
+func mustTheme(t *testing.T, name string) theme.Theme {
+	t.Helper()
+	th, err := theme.Lookup(name)
+	require.NoError(t, err)
+	return th
+}
