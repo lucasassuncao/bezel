@@ -166,6 +166,13 @@ var themeRegistry = []struct {
 	{"Miscellaneous", []namedTheme{
 		{"default", Default}, {"plain", Plain}, {"terminal", Terminal}, {"mint", Mint},
 	}},
+	{"Classic", []namedTheme{
+		{"gruvbox", gruvbox}, {"dracula", dracula}, {"nord", nord}, {"tokyonight", tokyoNight}, {"ubuntu", ubuntu},
+		{"noctisazureus", noctisAzureus},
+	}},
+	{"Styles", []namedTheme{
+		{"retro", retro},
+	}},
 }
 
 // allNamedThemes flattens themeRegistry into a single slice, dropping the
@@ -266,6 +273,70 @@ func Terminal() Theme {
 func Mint() Theme {
 	return Theme{Colors: Colors{
 		Accent: "#3EB489", Selection: "#98DFAF", Border: "#4A7B6F", Dim: "#2E4F46", Success: "#2ECC71", Danger: "#E74C3C", Background: "#0B1B15",
+	}}
+}
+
+// gruvbox is morhetz's retro palette, for a dark terminal.
+func gruvbox() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#FE8019", Selection: "#FABD2F", Border: "#7C6F64", Dim: "#A89984", Text: "#EBDBB2", Background: "#282828",
+		Success: "#B8BB26", Warning: "#FABD2F", Danger: "#FB4934", Info: "#83A598", OnAccent: "#282828",
+		Series: [6]string{"#B8BB26", "#8EC07C", "#FE8019", "#83A598", "#FABD2F", "#D3869B"},
+		Ramp:   [3]string{"#B8BB26", "#FABD2F", "#FE8019"},
+	}}
+}
+
+// dracula is Zeno Rocha's purple and pink on a blue-grey night.
+func dracula() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#BD93F9", Selection: "#FF79C6", Border: "#6272A4", Dim: "#6272A4", Text: "#F8F8F2", Background: "#282A36",
+		Success: "#50FA7B", Warning: "#FFB86C", Danger: "#FF5555", Info: "#8BE9FD", OnAccent: "#282A36",
+		Series: [6]string{"#50FA7B", "#8BE9FD", "#FFB86C", "#BD93F9", "#F1FA8C", "#FF79C6"},
+	}}
+}
+
+// nord is Arctic Ice Studio's frost blues over polar night.
+func nord() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#88C0D0", Selection: "#8FBCBB", Border: "#616E88", Dim: "#616E88", Text: "#D8DEE9", Background: "#2E3440",
+		Success: "#A3BE8C", Warning: "#EBCB8B", Danger: "#BF616A", Info: "#81A1C1", OnAccent: "#2E3440",
+		Series: [6]string{"#A3BE8C", "#88C0D0", "#D08770", "#81A1C1", "#EBCB8B", "#B48EAD"},
+	}}
+}
+
+// tokyoNight is enkia's night variant: neon blues on deep indigo.
+func tokyoNight() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#7AA2F7", Selection: "#BB9AF7", Border: "#565F89", Dim: "#565F89", Text: "#C0CAF5", Background: "#1A1B26",
+		Success: "#9ECE6A", Warning: "#E0AF68", Danger: "#F7768E", Info: "#7DCFFF", OnAccent: "#1A1B26",
+		Series: [6]string{"#9ECE6A", "#7DCFFF", "#FF9E64", "#7AA2F7", "#E0AF68", "#BB9AF7"},
+	}}
+}
+
+// ubuntu is Ubuntu's terminal: its orange over the aubergine background,
+// with the Yaru palette's bright colours for the states.
+func ubuntu() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#E95420", Selection: "#FFFFFF", Border: "#AEA79F", Dim: "#8E8780", Text: "#EEEEEC", Background: "#300A24",
+		Success: "#33D17A", Warning: "#E9AD0C", Danger: "#F66151", Info: "#33C7DE", OnAccent: "#300A24",
+		Series: [6]string{"#33D17A", "#33C7DE", "#E9AD0C", "#2A7BDE", "#C061CB", "#F66151"},
+	}}
+}
+
+// noctisAzureus is Noctis's Azureus: sky and sea greens on a deep navy.
+func noctisAzureus() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#49ACE9", Selection: "#49D6E9", Border: "#475E6C", Dim: "#475E6C", Text: "#BECFDA", Background: "#051B29",
+		Success: "#49E9A6", Warning: "#E4B781", Danger: "#E66533", Info: "#49D6E9", OnAccent: "#051B29",
+		Series: [6]string{"#49E9A6", "#49D6E9", "#E4B781", "#49ACE9", "#DF769B", "#E66533"},
+	}}
+}
+
+// retro is an amber CRT: every colour glows out of the same phosphor.
+func retro() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#FFCC00", Selection: "#FF6600", Border: "#665500", Dim: "#CC8800", Text: "#FFB000", Background: "#1A1200",
+		Success: "#33FF00", Warning: "#FFCC00", Danger: "#FF0033", Info: "#CC8800", OnAccent: "#1A1200",
 	}}
 }
 

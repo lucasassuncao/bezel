@@ -31,7 +31,7 @@ func TestThemeStepsThroughPresets(t *testing.T) {
 
 	m, cmd := m.Update(bezeltest.Key("n"))
 	m, out = frame(t, m, cmd())
-	require.Contains(t, out, "terminal")
+	require.Contains(t, out, "gruvbox")
 
 	m, cmd = m.Update(bezeltest.Key("p"))
 	m, _ = m.Update(cmd())

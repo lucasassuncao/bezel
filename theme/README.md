@@ -28,7 +28,7 @@ Package theme is the palette and the lipgloss styles every bezel app draws with.
 
 
 <a name="All"></a>
-## func [All](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L193>)
+## func [All](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L200>)
 
 ```go
 func All() map[string]Theme
@@ -37,7 +37,7 @@ func All() map[string]Theme
 All returns all built\-in theme presets keyed by their CLI name. Useful for \-\-theme flag validation and \-\-list\-themes output in host CLIs.
 
 <a name="DarkTerminal"></a>
-## func [DarkTerminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L281>)
+## func [DarkTerminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L352>)
 
 ```go
 func DarkTerminal() bool
@@ -46,7 +46,7 @@ func DarkTerminal() bool
 DarkTerminal asks the terminal on stdin/stdout whether its background is dark, for code that resolves a theme outside a running bubbletea program. A redirected stdin or stdout is not asked, and reads as dark.
 
 <a name="Category"></a>
-## type [Category](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L216-L219>)
+## type [Category](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L223-L226>)
 
 Category groups a set of related built\-in theme names for display purposes \- e.g. a \-\-list\-themes command that wants headings instead of one flat list.
 
@@ -58,7 +58,7 @@ type Category struct {
 ```
 
 <a name="Categories"></a>
-### func [Categories](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L223>)
+### func [Categories](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L230>)
 
 ```go
 func Categories() []Category
@@ -167,7 +167,7 @@ type Theme struct {
 ```
 
 <a name="Default"></a>
-### func [Default](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L233>)
+### func [Default](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L240>)
 
 ```go
 func Default() Theme
@@ -176,7 +176,7 @@ func Default() Theme
 Default leaves every colour to the adaptive default, light or dark as the terminal is. Each preset builds a fresh Theme: a change never reaches the next.
 
 <a name="Lookup"></a>
-### func [Lookup](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L203>)
+### func [Lookup](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L210>)
 
 ```go
 func Lookup(name string) (Theme, error)
@@ -185,7 +185,7 @@ func Lookup(name string) (Theme, error)
 Lookup is the built\-in theme called name, in any case; empty is Default. The error names what was asked for; the caller adds where its list is.
 
 <a name="Mint"></a>
-### func [Mint](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L266>)
+### func [Mint](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L273>)
 
 ```go
 func Mint() Theme
@@ -194,7 +194,7 @@ func Mint() Theme
 Mint is a green accent on a dark background.
 
 <a name="Plain"></a>
-### func [Plain](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L236>)
+### func [Plain](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L243>)
 
 ```go
 func Plain() Theme
@@ -203,7 +203,7 @@ func Plain() Theme
 Plain is the terminal's own 16 ANSI colours.
 
 <a name="Terminal"></a>
-### func [Terminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L251>)
+### func [Terminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L258>)
 
 ```go
 func Terminal() Theme

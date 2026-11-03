@@ -29,7 +29,7 @@ Each value is a lipgloss colour string: a hex value (`"#7C3AED"`) or an ANSI cod
 
 ## Presets
 
-bezel ships four presets, each a function that builds a fresh `Theme`, so no app can change one for another:
+bezel ships four presets as functions, each building a fresh `Theme`, so no app can change one for another:
 
 - **`Default()`** leaves every role empty, so each follows the terminal's light or dark background.
 - **`Plain()`** uses only the 16 ANSI colours, for a terminal with few.
@@ -37,6 +37,8 @@ bezel ships four presets, each a function that builds a fresh `Theme`, so no app
 - **`Mint()`** is a green accent on a dark background of its own.
 
 The first three keep the terminal's background; `Mint` brings its own, so what the terminal answers changes nothing.
+
+Seven more are there by name only: `gruvbox`, `dracula`, `nord`, `tokyonight`, `ubuntu` and `noctisazureus` under Classic, and `retro`, an amber CRT, under Styles. Each brings its own background, like `Mint`.
 
 For a `--theme` flag, `theme.Lookup(name)` finds a preset by name in any case, empty being `Default`, and `theme.All()` and `theme.Categories()` list them. For `--list-themes`, [`themebrowser`](../component/themebrowser) draws every preset with its palette:
 

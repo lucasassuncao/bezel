@@ -83,7 +83,7 @@
           ctx.stroke();
         }
       } else {
-        ctx.font = it.size + "px 'JetBrains Mono', monospace";
+        ctx.font = it.size + "px 'JetBrains Mono', 'JetBrains Mono Full', monospace";
         ctx.fillText(it.glyph, x, y);
       }
     }
