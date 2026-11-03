@@ -87,6 +87,7 @@ type Model struct {
 	matches     []int    // the suggestions the text starts, in order
 	pick        int      // the match shown, an index into matches
 	limit       int      // the most characters the field holds; 0 is no cap
+	format      []slot   // WithFormat's pattern; nil takes any text
 	validate    func(string) error
 	err         error // validate's answer for the text as it is
 }
@@ -249,7 +250,7 @@ func (m Model) WithKeys(k Keys) Model {
 // SetValue is the field holding s, the caret at its end, as a form opens on
 // a saved value.
 func (m Model) SetValue(s string) Model {
-	m.line = edit.NewLine(m.capped(oneLine(s), 0))
+	m.line = edit.NewLine(m.formatted(m.capped(oneLine(s), 0)))
 	return m.scroll().match().check()
 }
 
@@ -345,8 +346,12 @@ func (m Model) match() Model {
 	return m
 }
 
-// ghost is what the current suggestion adds to the text, drawn after it.
+// ghost is what the current suggestion adds to the text, or what the format
+// still asks for, drawn after it.
 func (m *Model) ghost() []string {
+	if h := m.hint(); len(h) > 0 {
+		return h
+	}
 	s := m.CurrentSuggestion()
 	if s == "" || m.mask != "" || m.line.Cursor() != m.line.Len() {
 		return nil
@@ -514,6 +519,9 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 // edited takes l, keeps the caret in view, and lights it for a full blink:
 // a caret that went dark while typing would seem to lag.
 func (m Model) edited(l edit.Line) (Model, tea.Cmd) {
+	if f := m.formatted(l.String()); f != l.String() {
+		l = edit.NewLine(f) // laid on the format again, the caret at its end
+	}
 	changed := l.String() != m.line.String() // a caret move leaves both alone
 	m.line = l
 	if m = m.scroll(); changed {

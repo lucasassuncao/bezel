@@ -1,4 +1,4 @@
-# input: a name that must not be empty, a command tab completes and a masked password.
+# input: a name that must not be empty, a command tab completes, a masked password and a time typed into a format.
 #
 # Record from the repository root: vhs docs/recordings/component/input.tape
 
@@ -58,6 +58,13 @@ Sleep 1s
 Down
 Type "s3cret"
 Sleep 1s
+
+# -- The time, laid on its format ------------------------------------------------------
+
+Down
+Sleep 600ms
+Type@220ms "202611021430"
+Sleep 1.5s
 Enter
 Wait+Screen /rollback/
 Sleep 2.5s

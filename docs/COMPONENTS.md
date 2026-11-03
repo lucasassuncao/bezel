@@ -180,7 +180,7 @@ A month with a cursor on a day, weeks from Monday (`WithFirstWeekday`). The arro
 
 Source: [`examples/component/input/main.go`](../examples/component/input/main.go)
 
-Three one-line fields. The name must not be empty, and says so once you leave it blank; the command completes on `tab` from its suggestions; the password shows only its mask. `↑/↓` move between them and `enter` submits. Every key is text, so the app quits on `esc`.
+Four one-line fields. The name must not be empty, and says so once you leave it blank; the command completes on `tab` from its suggestions; the password shows only its mask; the time is typed into `WithFormat("9999-99-99 99:99")`, which writes the dashes and the colon, drops what does not fit and hints the rest. `↑/↓` move between them and `enter` submits. Every key is text, so the app quits on `esc`.
 
 ![input](recordings/component/input.gif)
 

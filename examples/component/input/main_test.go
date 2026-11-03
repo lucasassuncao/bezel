@@ -48,9 +48,14 @@ func TestInputSubmitsEveryField(t *testing.T) {
 	m = typed(m, "s3cret")
 	_, out := frame(t, m, nil)
 	require.NotContains(t, out, "s3cret", "the password shows only its mask")
+	m, _ = m.Update(bezeltest.Key("down"))
+	m = typed(m, "2026110")
+	_, out = frame(t, m, nil)
+	require.Contains(t, out, "2026-11-0_ __:__", "the format writes the dashes and hints the rest")
+	m = typed(m, "21430")
 	out = enter(t, m)
 	t.Log("\n" + out)
-	require.Contains(t, out, `ana runs "rollback" (password: 6 characters)`)
+	require.Contains(t, out, `ana runs "rollback" (password: 6 characters) at 2026-11-02 14:30`)
 }
 
 // Leaving the name empty says so under it, and enter refuses to submit.

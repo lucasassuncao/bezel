@@ -63,6 +63,13 @@ func (i Input) WithValue(s string) Input {
 	return i
 }
 
+// WithFormat holds the text to pattern: 9 a digit, a a letter, * anything,
+// the rest written for the user, as "9999-99-99" for a date.
+func (i Input) WithFormat(pattern string) Input {
+	i.in = i.in.WithFormat(pattern)
+	return i
+}
+
 // WithMask draws every character as mask, for a password or a token.
 func (i Input) WithMask(mask rune) Input {
 	i.in = i.in.WithMask(mask)

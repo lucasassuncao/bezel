@@ -1,6 +1,6 @@
-// Input: three one-line fields. A name that must not be empty, a command that
-// tab completes from suggestions, and a password behind a mask. ↑/↓ move
-// between them, enter submits; every key is text, so esc quits.
+// Input: a name that must not be empty, a command that tab completes, a
+// password behind a mask and a time typed into a format. ↑/↓ move between
+// them, enter submits; every key is text, so esc quits.
 package main
 
 import (
@@ -21,7 +21,7 @@ import (
 
 var commands = []string{"deploy", "describe", "delete", "logs", "restart", "rollback", "status"}
 
-var labels = []string{"name", "command", "password"}
+var labels = []string{"name", "command", "password", "when"}
 
 // prompt leads the command field, and takes its width from the text's.
 const prompt = "$ "
@@ -56,7 +56,8 @@ func newModel() model {
 		})
 	command := input.New(th).WithPrompt(prompt).WithPlaceholder("tab completes").SetSuggestions(commands)
 	password := input.New(th).WithPlaceholder("never shown").WithMask('•')
-	fields := []input.Model{name, command, password}
+	when := input.New(th).WithFormat("9999-99-99 99:99")
+	fields := []input.Model{name, command, password, when}
 	fields[0], _ = fields[0].Focus()
 	return model{sh: sh, th: th, fields: fields}
 }
@@ -80,6 +81,9 @@ func (m model) submit() (model, tea.Cmd) {
 	}
 	text := fmt.Sprintf("%s runs %q (password: %d characters)",
 		m.fields[0].Value(), m.fields[1].Value(), len([]rune(m.fields[2].Value())))
+	if m.fields[3].Complete() {
+		text += " at " + m.fields[3].Value()
+	}
 	m.sh, cmd = m.sh.SetStatus(text, shell.Info, 4*time.Second)
 	return m, cmd
 }

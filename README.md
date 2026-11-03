@@ -121,7 +121,7 @@ go run ./examples/app
 - [`tree`](component/tree): an expandable tree, generic over your node type.
 - [`table`](component/table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header, sorted by a column and checked for a batch.
 - [`form`](component/form): `Input`, `Select`, `Date`, `Number`, `Slider`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
-- [`input`](component/input): a one-line text field with readline keys, a placeholder and a mask for secrets.
+- [`input`](component/input): a one-line text field with readline keys, a placeholder, a mask for secrets and a format such as `9999-99-99`.
 - [`textbox`](component/textbox): a multi-line text field with line numbers.
 - [`viewport`](component/viewport): scrollable text, wrapped or panned, with line numbers and search highlights.
 - [`cursor`](component/cursor): a caret that blinks, stays or hides, for fields of your own.
