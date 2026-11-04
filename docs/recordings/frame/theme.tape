@@ -56,6 +56,16 @@ Type "n"
 Sleep 1.5s
 Type "n"
 Sleep 1.5s
+Type "n"
+Sleep 1.5s
+Type "n"
+Sleep 1.5s
+Type "n"
+Sleep 1.5s
+Type "n"
+Sleep 1.5s
+Type "n"
+Sleep 1.5s
 Type "p"
 Sleep 1.5s
 
