@@ -54,3 +54,17 @@ func FuzzDialogsStayInTheBody(f *testing.F) {
 		}
 	})
 }
+
+// A message wider than the box breaks at words instead of losing its end.
+func TestALongMessageWrapsAtWords(t *testing.T) {
+	msg := "the token expired while the secret was being written, so nothing was saved"
+	body := layout.Rect{W: 40, H: 20}
+	out := ansi.Strip(NewAlert(draw.Danger, "Error", msg, theme.Resolved{}).View(body))
+	require.NotContains(t, out, "…")
+	require.Contains(t, out, "saved")
+	words := strings.Join(strings.Fields(out), " ")
+	require.Contains(t, words, msg)
+	for _, l := range strings.Split(out, "\n") {
+		require.LessOrEqual(t, ansi.StringWidth(l), body.W)
+	}
+}

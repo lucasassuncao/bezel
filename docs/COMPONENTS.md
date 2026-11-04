@@ -122,7 +122,7 @@ Columns sized to their contents, and a cursor over rows that scroll under a fixe
 
 Source: [`examples/component/viewport/main.go`](../examples/component/viewport/main.go)
 
-An access log, numbered in a gutter, with its error lines in red and every `ERROR` highlighted. The arrows, `pgup`/`pgdown` and `home`/`end` scroll, `←` and `→` pan the long lines, `n` and `N` go from error to error, `w` wraps the lines, and the mouse wheel scrolls.
+An access log, numbered in a gutter, with its error lines in red and every `ERROR` highlighted. The arrows, `pgup`/`pgdown` and `home`/`end` scroll, `←` and `→` pan the long lines, `n` and `N` go from error to error, `w` wraps the lines at words, and the mouse wheel scrolls.
 
 ![viewport](recordings/component/viewport.gif)
 

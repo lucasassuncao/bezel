@@ -79,7 +79,7 @@ func (c Confirm) Legend() []legend.Entry {
 }
 
 func (c Confirm) View(body layout.Rect) string {
-	return dialog(c.title, []string{c.message}, strings.Join(c.buttons(), "  "), c.style(), body)
+	return dialog(c.title, prose([]string{c.message}, body), strings.Join(c.buttons(), "  "), c.style(), body)
 }
 
 // buttons are Yes and No as View draws them.

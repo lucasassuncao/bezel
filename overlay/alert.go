@@ -40,13 +40,13 @@ func (a Alert) Update(msg tea.Msg) (Overlay, bezel.Result) {
 func (a Alert) Legend() []legend.Entry { return []legend.Entry{legend.New("any key", "close")} }
 
 func (a Alert) View(body layout.Rect) string {
-	lines := []string{a.message}
+	lines := prose([]string{a.message}, body)
 	return dialog(a.title, lines, a.okButton(lines), a.style(), body)
 }
 
 // Click closes the alert on a click on OK.
 func (a Alert) Click(x, y int, body layout.Rect) (Overlay, bezel.Result) {
-	row := a.okButton([]string{a.message})
+	row := a.okButton(prose([]string{a.message}, body))
 	if buttonAt(a.View(body), row, dialogFrame(a.style()), []string{a.button("OK", true)}, x, y) == 0 {
 		return a, bezel.Result{Handled: true, Cmd: Close()}
 	}
@@ -78,6 +78,20 @@ func dialog(title string, content []string, buttons string, style lipgloss.Style
 		lines = append(lines, "", buttons)
 	}
 	return Box(lines, body, dialogFrame(style))
+}
+
+// prose is a dialog's text broken at words to the width Box gives it, where
+// a long line would otherwise be cut.
+func prose(lines []string, body layout.Rect) []string {
+	out := make([]string, 0, len(lines))
+	for _, l := range lines {
+		if l == "" {
+			out = append(out, l)
+			continue
+		}
+		out = append(out, draw.Wrap(l, Inner(body))...)
+	}
+	return out
 }
 
 // dialogFrame is the box a dialog draws in: style, padded clear of its border.

@@ -38,3 +38,12 @@ func TestAWideGraphemeIsNeverSplitAcrossRows(t *testing.T) {
 	require.Equal(t, []int{0, 2, 4}, breaks("全角全", 3))
 	require.Equal(t, []int{0, 3, 6}, breaks("abcdefgh", 3))
 }
+
+func TestWrapBreaksAfterTheLastSpaceThatFits(t *testing.T) {
+	require.Equal(t, []int{0, 6, 12}, breaks("hello world again", 8))
+	require.Equal(t, []int{0, 4}, breaks("abc defg", 4))
+	require.Equal(t, []int{0, 5}, breaks("abcd efg", 4), "the space at the edge hangs")
+	require.Equal(t, []int{0, 3, 6}, breaks("abcdefgh", 3), "a word longer than the row is cut")
+	require.Equal(t, []int{0, 3}, breaks("全 角全", 4))
+	require.Equal(t, 3, newIndex([]string{"hello world again"}).wrapped(8).total())
+}

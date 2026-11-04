@@ -414,7 +414,7 @@ SetWidth is the viewport's width in cells, the gutter included; the line at the 
 func (m Model) SetWrap(on bool) Model
 ```
 
-SetWrap folds long lines into rows, or cuts them for panning; the line at the top stays there.
+SetWrap folds long lines into rows, after the last space that fits, or cuts them for panning; the line at the top stays there.
 
 <a name="Model.SetXOffset"></a>
 ### func \(Model\) [SetXOffset](<https://github.com/lucasassuncao/bezel/blob/main/component/viewport/viewport.go#L312>)

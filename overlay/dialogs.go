@@ -46,7 +46,8 @@ func (t Text) Update(msg tea.Msg) (Overlay, bezel.Result) {
 func (t Text) Legend() []legend.Entry { return []legend.Entry{legend.New("any key", "close")} }
 
 func (t Text) View(body layout.Rect) string {
-	return dialog(t.title, t.lines, t.okButton(t.lines), t.style(), body)
+	lines := prose(t.lines, body)
+	return dialog(t.title, lines, t.okButton(lines), t.style(), body)
 }
 
 // Option is one thing a Choice offers: the key that picks it, what it says
@@ -109,7 +110,7 @@ func (c Choice) Legend() []legend.Entry {
 // View draws each option as a button naming its keys. The one enter picks is
 // filled in the dialog's colour, since that is what enter will do.
 func (c Choice) View(body layout.Rect) string {
-	return dialog(c.title, c.lines, strings.Join(c.buttons(), "  "), c.style(), body)
+	return dialog(c.title, prose(c.lines, body), strings.Join(c.buttons(), "  "), c.style(), body)
 }
 
 // buttons are the options as View draws them.

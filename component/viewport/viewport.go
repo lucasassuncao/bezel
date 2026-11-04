@@ -255,8 +255,8 @@ func (m Model) SetHeight(h int) Model {
 	return m
 }
 
-// SetWrap folds long lines into rows, or cuts them for panning; the line at
-// the top stays there.
+// SetWrap folds long lines into rows, after the last space that fits, or
+// cuts them for panning; the line at the top stays there.
 func (m Model) SetWrap(on bool) Model {
 	return m.keepTop(func(m Model) Model {
 		m.wrap = on

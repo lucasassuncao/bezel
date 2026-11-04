@@ -312,7 +312,7 @@ type BottomAnchored interface{ AnchorBottom() bool }
 ```
 
 <a name="Choice"></a>
-## type [Choice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L67-L72>)
+## type [Choice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L68-L73>)
 
 Choice is a dialog with a body and keyed options: apply / dry\-run / cancel. Picking one runs its command and closes the dialog. Esc closes it too.
 
@@ -323,7 +323,7 @@ type Choice struct {
 ```
 
 <a name="NewChoice"></a>
-### func [NewChoice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L75>)
+### func [NewChoice](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L76>)
 
 ```go
 func NewChoice(title, text string, options []Option, th theme.Resolved) Choice
@@ -332,7 +332,7 @@ func NewChoice(title, text string, options []Option, th theme.Resolved) Choice
 NewChoice shows text under title with options as its buttons.
 
 <a name="Choice.Click"></a>
-### func \(Choice\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L125>)
+### func \(Choice\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L126>)
 
 ```go
 func (c Choice) Click(x, y int, body layout.Rect) (Overlay, bezel.Result)
@@ -341,7 +341,7 @@ func (c Choice) Click(x, y int, body layout.Rect) (Overlay, bezel.Result)
 Click runs the option whose button it lands on, as its key would.
 
 <a name="Choice.Legend"></a>
-### func \(Choice\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L94>)
+### func \(Choice\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L95>)
 
 ```go
 func (c Choice) Legend() []legend.Entry
@@ -359,7 +359,7 @@ func (c Choice) SetTheme(th theme.Resolved) Overlay
 SetTheme repaints the choice under th.
 
 <a name="Choice.Update"></a>
-### func \(Choice\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L79>)
+### func \(Choice\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L80>)
 
 ```go
 func (c Choice) Update(msg tea.Msg) (Overlay, bezel.Result)
@@ -368,7 +368,7 @@ func (c Choice) Update(msg tea.Msg) (Overlay, bezel.Result)
 
 
 <a name="Choice.View"></a>
-### func \(Choice\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L111>)
+### func \(Choice\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L112>)
 
 ```go
 func (c Choice) View(body layout.Rect) string
@@ -845,7 +845,7 @@ type HelpSection struct {
 ```
 
 <a name="Option"></a>
-## type [Option](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L54-L58>)
+## type [Option](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L55-L59>)
 
 Option is one thing a Choice offers: the key that picks it, what it says in the hint, and what it does. A nil Do only closes the dialog.
 
@@ -858,7 +858,7 @@ type Option struct {
 ```
 
 <a name="Opt"></a>
-### func [Opt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L61>)
+### func [Opt](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L62>)
 
 ```go
 func Opt(keys, label string, do tea.Cmd) Option
@@ -1011,7 +1011,7 @@ func VimPagerKeys() PagerKeys
 VimPagerKeys scroll with viewport.VimKeys and close as DefaultPagerKeys do.
 
 <a name="Pick"></a>
-## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L136-L144>)
+## type [Pick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L137-L145>)
 
 Pick is a dialog that chooses one row of a list with the arrows: which source manages this, which preset to apply. Enter runs OnPick with the cursor; esc closes with nothing. A list taller than the body scrolls.
 
@@ -1022,7 +1022,7 @@ type Pick struct {
 ```
 
 <a name="NewPick"></a>
-### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L170>)
+### func [NewPick](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L171>)
 
 ```go
 func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick
@@ -1031,7 +1031,7 @@ func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.R
 NewPick lists rows with the cursor on the first. onPick may be nil, which makes enter only close.
 
 <a name="Pick.Cursor"></a>
-### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L195>)
+### func \(Pick\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L196>)
 
 ```go
 func (p Pick) Cursor() int
@@ -1040,7 +1040,7 @@ func (p Pick) Cursor() int
 Cursor is the index of the row under the cursor.
 
 <a name="Pick.Legend"></a>
-### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L233>)
+### func \(Pick\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L234>)
 
 ```go
 func (p Pick) Legend() []legend.Entry
@@ -1049,7 +1049,7 @@ func (p Pick) Legend() []legend.Entry
 
 
 <a name="Pick.Resize"></a>
-### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L198>)
+### func \(Pick\) [Resize](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L199>)
 
 ```go
 func (p Pick) Resize(body layout.Rect) Overlay
@@ -1067,7 +1067,7 @@ func (p Pick) SetTheme(th theme.Resolved) Overlay
 SetTheme repaints the pick under th.
 
 <a name="Pick.Update"></a>
-### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L214>)
+### func \(Pick\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L215>)
 
 ```go
 func (p Pick) Update(msg tea.Msg) (Overlay, bezel.Result)
@@ -1076,7 +1076,7 @@ func (p Pick) Update(msg tea.Msg) (Overlay, bezel.Result)
 
 
 <a name="Pick.View"></a>
-### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L238>)
+### func \(Pick\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L239>)
 
 ```go
 func (p Pick) View(body layout.Rect) string
@@ -1085,7 +1085,7 @@ func (p Pick) View(body layout.Rect) string
 
 
 <a name="Pick.WithCursor"></a>
-### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L188>)
+### func \(Pick\) [WithCursor](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L189>)
 
 ```go
 func (p Pick) WithCursor(i int) Pick
@@ -1094,7 +1094,7 @@ func (p Pick) WithCursor(i int) Pick
 WithCursor starts the cursor on row i, such as the value already chosen; an index outside the rows is clamped to them.
 
 <a name="Pick.WithKeys"></a>
-### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L175>)
+### func \(Pick\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L176>)
 
 ```go
 func (p Pick) WithKeys(k PickKeys) Pick
@@ -1112,7 +1112,7 @@ func (p Pick) WithKind(k draw.Kind) Pick
 WithKind tints the pick for what it decides.
 
 <a name="Pick.WithNotes"></a>
-### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L181>)
+### func \(Pick\) [WithNotes](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L182>)
 
 ```go
 func (p Pick) WithNotes(notes ...string) Pick
@@ -1130,7 +1130,7 @@ func (p Pick) WithStyles(edit func(Styles) Styles) Pick
 WithStyles changes the styles derived from the theme through edit.
 
 <a name="PickKeys"></a>
-## type [PickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L148-L150>)
+## type [PickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L149-L151>)
 
 PickKeys are the bindings a Pick answers to besides esc. Down has no help of its own: Up's "↑/↓" names both.
 
@@ -1141,7 +1141,7 @@ type PickKeys struct {
 ```
 
 <a name="DefaultPickKeys"></a>
-### func [DefaultPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L153>)
+### func [DefaultPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L154>)
 
 ```go
 func DefaultPickKeys() PickKeys
@@ -1150,7 +1150,7 @@ func DefaultPickKeys() PickKeys
 DefaultPickKeys are the arrows and enter.
 
 <a name="VimPickKeys"></a>
-### func [VimPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L162>)
+### func [VimPickKeys](<https://github.com/lucasassuncao/bezel/blob/main/overlay/dialogs.go#L163>)
 
 ```go
 func VimPickKeys() PickKeys

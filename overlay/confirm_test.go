@@ -1,10 +1,12 @@
 package overlay
 
 import (
+	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/draw"
@@ -88,4 +90,11 @@ func TestConfirmClickOnYesSendsItsCommand(t *testing.T) {
 	require.True(t, r.Handled)
 	require.True(t, isClose(r.Cmd))
 	require.True(t, fired)
+}
+
+func TestAConfirmWrapsItsMessage(t *testing.T) {
+	msg := "delete kv/app/prod/db and every version it keeps, which cannot be undone later"
+	out := ansi.Strip(NewConfirm("Delete", msg, nil, theme.Resolved{}).View(layout.Rect{W: 40, H: 20}))
+	require.NotContains(t, out, "…")
+	require.Contains(t, strings.Join(strings.Fields(out), " "), msg)
 }

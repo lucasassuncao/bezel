@@ -14,7 +14,7 @@ import (
 type index struct {
 	lines   []string // the content's, shared and never written
 	widths  []int
-	narrow  []bool // the plain text is printable ASCII, so rows are arithmetic
+	narrow  []bool // the plain text is printable ASCII: a byte is a cell
 	before  []int  // nil when not wrapping; else len(widths)+1 running sums
 	longest int
 }
@@ -35,8 +35,8 @@ func (x index) wrapped(width int) index {
 	width = max(width, 1)
 	x.before = make([]int, len(x.widths)+1)
 	for i, w := range x.widths {
-		n := max(1, (w+width-1)/width)
-		if !x.narrow[i] {
+		n := 1
+		if w > width {
 			n = len(breaks(x.lines[i], width))
 		}
 		x.before[i+1] = x.before[i] + n
@@ -82,29 +82,51 @@ func (x index) at(row int) (line, part int) {
 }
 
 // breaks is where each of line's rows starts, in cells, wrapped at width:
-// never inside a grapheme, so a wide one at the edge opens the next row.
+// after the last space that fits, else mid-word, never inside a grapheme. A
+// space at the edge hangs past it instead of opening the next row.
 func breaks(line string, width int) []int {
 	width = max(width, 1)
 	plain := plainOf(line)
+	w := wrapper{width: width, out: []int{0}, after: -1}
 	if isNarrow(plain) {
-		out := make([]int, max(1, (len(plain)+width-1)/width))
-		for i := range out {
-			out[i] = i * width
+		for i := 0; i < len(plain); i++ {
+			w.add(1, plain[i] == ' ')
 		}
-		return out
+		return w.out
 	}
-	out := []int{0}
-	pos, used := 0, 0
 	for _, g := range edit.Graphemes(plain) {
-		c := edit.Cells(g)
-		if used > 0 && used+c > width {
-			out = append(out, pos)
-			used = 0
-		}
-		pos += c
-		used += c
+		w.add(edit.Cells(g), g == " ")
 	}
-	return out
+	return w.out
+}
+
+// wrapper lays cells into rows: start and used are the row's, after is the
+// cell past its last space, -1 for none.
+type wrapper struct {
+	width, pos, start, used, after int
+	out                            []int
+}
+
+func (w *wrapper) add(cells int, space bool) {
+	if w.used > 0 && w.used+cells > w.width {
+		if space {
+			w.pos += cells
+			w.out = append(w.out, w.pos)
+			w.start, w.used, w.after = w.pos, 0, -1
+			return
+		}
+		brk := w.pos
+		if w.after > w.start {
+			brk = w.after
+		}
+		w.out = append(w.out, brk)
+		w.start, w.after = brk, -1
+	}
+	w.pos += cells
+	w.used = w.pos - w.start
+	if space {
+		w.after = w.pos
+	}
 }
 
 // plainOf is line without its escape sequences; most lines have none.
