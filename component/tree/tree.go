@@ -40,15 +40,25 @@ type Info struct {
 // Keys are the bindings the tree answers to.
 type Keys struct {
 	Up, Down, Left, Right key.Binding
+	Filter, Esc, Enter    key.Binding // with WithFilter
+	Erase                 key.Binding // the filter's last character
+	Check, CheckAll       key.Binding // with WithMulti
 }
 
-// DefaultKeys are the four arrows.
+// DefaultKeys are the four arrows, / to filter, enter to keep the node found
+// and esc to go back, and space and ctrl+a to check.
 func DefaultKeys() Keys {
 	return Keys{
-		Up:    key.New("up").WithHelp("↑/↓", "move"),
-		Down:  key.New("down"),
-		Left:  key.New("left").WithHelp("←/→", "close/open"),
-		Right: key.New("right"),
+		Up:       key.New("up").WithHelp("↑/↓", "move"),
+		Down:     key.New("down"),
+		Left:     key.New("left").WithHelp("←/→", "close/open"),
+		Right:    key.New("right"),
+		Filter:   key.New("/").WithHelp("/", "filter"),
+		Esc:      key.New("esc").WithHelp("esc", "clear filter"),
+		Enter:    key.New("enter").WithHelp("enter", "keep"),
+		Erase:    key.New("backspace", "ctrl+h"),
+		Check:    key.New("space").WithHelp("space", "check"),
+		CheckAll: key.New("ctrl+a").WithHelp("ctrl+a", "check all"),
 	}
 }
 
@@ -86,19 +96,30 @@ type Model[N Noder[N]] struct {
 	scrollOff int
 	spin      spinner.Model // turns while a node is Busy
 	edit      func(Styles) Styles
+	text      func(N) string // what the filter matches; nil: no filter
+	match     func(query, text string) bool
+	find      filterMode
+	multi     bool
+	checked   map[int]bool // by index into nodes; shared, never written
 }
 
 // Styles are how a tree paints what it draws itself; each row is the app's.
 type Styles struct {
-	Empty lipgloss.Style // EmptyMessage, or "(empty)"
-	More  lipgloss.Style // the "↓ N more" row
-	Busy  lipgloss.Style // BusyMark
+	Empty   lipgloss.Style // EmptyMessage, or "(empty)"
+	More    lipgloss.Style // the "↓ N more" row
+	Busy    lipgloss.Style // BusyMark
+	Prompt  lipgloss.Style // the / prompt while filtering
+	Box     lipgloss.Style // an unchecked node's box while WithMulti
+	Checked lipgloss.Style // a checked node's box
 }
 
-// DefaultStyles dim the empty message and the more row, and paint BusyMark
-// in the accent.
+// DefaultStyles dim the empty message, the more row and an empty box, and
+// paint BusyMark, the prompt and a checked box in the accent.
 func DefaultStyles(th theme.Resolved) Styles {
-	return Styles{Empty: th.Dim, More: th.Dim, Busy: th.Accent}
+	return Styles{
+		Empty: th.Dim, More: th.Dim, Busy: th.Accent,
+		Prompt: th.Cursor, Box: th.Dim, Checked: th.Accent,
+	}
 }
 
 // New builds a tree over nodes with the cursor on the first row that is not
@@ -120,8 +141,12 @@ func (m Model[N]) SetHeight(h int) Model[N] {
 }
 
 // SetNodes replaces the nodes after a reload, keeping the cursor on a row
-// and in view. Call Tick after it when a node is Busy.
+// and in view. Checks are kept by place, so a reload of another length clears
+// them. Call Tick after it when a node is Busy.
 func (m Model[N]) SetNodes(nodes []N) Model[N] {
+	if len(nodes) != len(m.nodes) {
+		m.checked = nil
+	}
 	m.nodes = slices.Clone(nodes)
 	return m.clamp().spun()
 }
@@ -183,10 +208,21 @@ func (m Model[N]) WithKeys(k Keys) Model[N] {
 	return m
 }
 
-// Legend lists the keys the tree answers to.
+// Legend lists the keys the tree answers to now: the filter's while it is
+// open.
 func (m Model[N]) Legend() []legend.Entry {
 	k := m.bindings()
-	return legend.FromBindings([]key.Binding{k.Up, k.Down, k.Left, k.Right})
+	if m.find.on {
+		return legend.FromBindings([]key.Binding{k.Up, k.Down, k.Enter, k.Esc})
+	}
+	keys := []key.Binding{k.Up, k.Down, k.Left, k.Right}
+	if m.text != nil {
+		keys = append(keys, k.Filter)
+	}
+	if m.multi {
+		keys = append(keys, k.Check, k.CheckAll)
+	}
+	return legend.FromBindings(keys)
 }
 
 // WithConnectors changes the lines Guides draws.
@@ -249,8 +285,12 @@ func (m Model[N]) bindings() Keys {
 }
 
 // Visible returns the indices into Nodes that are rendered, honouring each
-// parent's collapsed state.
+// parent's collapsed state; while the filter narrows, its matches and their
+// ancestors.
 func (m Model[N]) Visible() []int {
+	if m.narrowing() {
+		return m.filtered()
+	}
 	vis := make([]int, 0, len(m.nodes))
 	var collapsed []int // depths of collapsed or hidden ancestors: inside one, rows are skipped
 	for i, n := range m.nodes {
@@ -318,7 +358,14 @@ func (m Model[N]) Update(msg tea.Msg) (Model[N], bezel.Result) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		keys := m.bindings()
-		if !key.Matches(msg, keys.Up, keys.Down, keys.Left, keys.Right) {
+		switch {
+		case m.find.on:
+			return m.updateFilter(msg, keys), bezel.Result{Handled: true}
+		case m.text != nil && key.Matches(msg, keys.Filter):
+			return m.openFilter(), bezel.Result{Handled: true}
+		case m.multi && key.Matches(msg, keys.Check, keys.CheckAll):
+			return m.toggle(msg, keys)
+		case !key.Matches(msg, keys.Up, keys.Down, keys.Left, keys.Right):
 			return m, bezel.Result{}
 		}
 		m, ev = m.press(msg, keys)
@@ -385,9 +432,14 @@ func (m Model[N]) isSection(vis []int) func(int) bool {
 }
 
 // window is the tree's scroll as a layout.Window. Cursor, Offset and Height
-// stay fields of their own: callers read and set them.
+// stay fields of their own: callers read and set them. The prompt takes the
+// last row while the filter is open.
 func (m Model[N]) window() layout.Window {
-	return layout.Window{Cursor: m.cursor, Offset: m.offset, Height: m.height}
+	h := m.height
+	if m.find.on && h > 1 {
+		h--
+	}
+	return layout.Window{Cursor: m.cursor, Offset: m.offset, Height: h}
 }
 
 // Scroll is where the tree shows its visible rows from, for a pane's scrollbar.
@@ -566,13 +618,14 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 	if m.height <= 0 {
 		return ""
 	}
+	st := m.styles(th)
 	vis := m.Visible()
 	if len(vis) == 0 {
 		msg := m.empty
 		if msg == "" {
 			msg = "  (empty)"
 		}
-		return m.styles(th).Empty.Render(msg)
+		return m.withPrompt(st.Empty.Render(msg), 1, st)
 	}
 	// Nodes may have shrunk under a scrolled tree; Clamp never scrolls past the end.
 	w := m.window().Clamp(len(vis))
@@ -580,15 +633,27 @@ func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) 
 
 	var sb strings.Builder
 	for vi := start; vi < end; vi++ {
-		sb.WriteString(row(m.nodes[vis[vi]], vis[vi], vi == w.Cursor))
+		sb.WriteString(m.checkBox(vis[vi], st) + row(m.nodes[vis[vi]], vis[vi], vi == w.Cursor))
 		sb.WriteByte('\n')
 	}
 	if below > 0 {
-		sb.WriteString(draw.More(below, 2, m.styles(th).More))
+		sb.WriteString(draw.More(below, 2, st.More))
 	} else {
-		for i := end - start; i < m.height; i++ {
+		for i := end - start; i < w.Height; i++ {
 			sb.WriteByte('\n')
 		}
 	}
-	return strings.TrimSuffix(sb.String(), "\n")
+	return m.withPrompt(strings.TrimSuffix(sb.String(), "\n"), max(w.Height, 1), st)
+}
+
+// withPrompt is body, rows lines tall, padded down to the / prompt on the
+// tree's last row while the filter is open.
+func (m Model[N]) withPrompt(body string, rows int, st Styles) string {
+	if !m.find.on {
+		return body
+	}
+	if m.height > 1 {
+		body += strings.Repeat("\n", max(m.height-1-rows, 0))
+	}
+	return body + "\n" + st.Prompt.Render("/"+m.find.text+"▋")
 }

@@ -132,7 +132,7 @@ The events are structs in the component's package. Read them with a type switch 
 | --- | --- |
 | `list` | `Chosen[T]{Row}`, `Toggled[T]{Rows}` |
 | `table` | `Chosen[T]{Item}`, `Toggled[T]{Items}`, `Sorted{Column, Desc}` |
-| `tree` | `Expanded[N]{Node}`, `Collapsed[N]{Node}` |
+| `tree` | `Expanded[N]{Node}`, `Collapsed[N]{Node}`, `Toggled[N]{Nodes}` |
 | `browser` | `Chosen{Item}`, `Dismissed{}` |
 | `paginator` | `Paged{Page}` |
 | `calendar` | `Chosen{Day}` |

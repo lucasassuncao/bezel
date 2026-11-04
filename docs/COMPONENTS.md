@@ -106,7 +106,7 @@ The repository browsed inside a pane, directories first and sizes in a column. `
 
 Source: [`examples/component/tree/main.go`](../examples/component/tree/main.go)
 
-A directory tree over the app's own node type. The arrows expand and collapse; `:reveal` opens every parent on the way down to a path. `go.mod` is `Busy`, so the row func draws `BusyMark` in place of its icon; `space` marks the node under the cursor.
+A directory tree over the app's own node type. The arrows expand and collapse; `:reveal` opens every parent on the way down to a path. `go.mod` is `Busy`, so the row func draws `BusyMark` in place of its icon; `space` marks the node under the cursor. The tree also filters like the list, given each node's text (`WithFilter`: `/` narrows it to the matches and the parents above them), and checks nodes for a batch (`WithMulti`), drawing the boxes itself.
 
 ![tree](recordings/component/tree.gif)
 
