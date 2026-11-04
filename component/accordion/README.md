@@ -120,7 +120,7 @@ func (m Model) IsOpen(i int) bool
 IsOpen reports whether section i is open, or opening.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L201>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L213>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -129,7 +129,7 @@ func (m Model) Legend() []legend.Entry
 Legend is the keys the accordion answers to.
 
 <a name="Model.SetWidth"></a>
-### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L206>)
+### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L218>)
 
 ```go
 func (m Model) SetWidth(w int) Model
@@ -153,10 +153,10 @@ Toggle opens section i when it is closed and closes it when it is open.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 ```
 
-Update moves the cursor and toggles on keys, and slides the sections on their own frames.
+Update moves the cursor and toggles on keys, takes a click on a heading as that toggle, and slides the sections on their own frames.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L213>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L248>)
 
 ```go
 func (m Model) View(th theme.Resolved) string

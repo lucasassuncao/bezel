@@ -12,6 +12,8 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/icon"
+	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/wheel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
@@ -171,18 +173,34 @@ func (m Model) ItemsOnPage(n int) int {
 }
 
 // Update turns the page on Prev and Next, which are its keys even on the
-// first and last page. A change reports a [Paged]; any other message comes
-// back unhandled and unchanged.
+// first and last page, on the wheel, and to the dot a click lands on. A
+// change reports a [Paged]; any other message comes back unhandled.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
-	k, ok := msg.(tea.KeyPressMsg)
-	if !ok || !key.Matches(k, m.keys.Prev, m.keys.Next) {
-		return m, bezel.Result{}
-	}
 	before := m.page
-	if key.Matches(k, m.keys.Prev) {
-		m = m.Prev()
-	} else {
-		m = m.Next()
+	switch msg := msg.(type) {
+	case tea.KeyPressMsg:
+		switch {
+		case key.Matches(msg, m.keys.Prev):
+			m = m.Prev()
+		case key.Matches(msg, m.keys.Next):
+			m = m.Next()
+		default:
+			return m, bezel.Result{}
+		}
+	case tea.MouseWheelMsg:
+		rows, ok := wheel.Rows(msg)
+		if !ok {
+			return m, bezel.Result{}
+		}
+		m = m.SetPage(m.page + rows)
+	case bezel.ClickMsg:
+		w := draw.Width(m.icons.Pending)
+		if m.display != Dots || w == 0 || msg.Y != 0 || msg.X < 0 || msg.X/w >= m.Pages() {
+			return m, bezel.Result{}
+		}
+		m = m.SetPage(msg.X / w)
+	default:
+		return m, bezel.Result{}
 	}
 	r := bezel.Result{Handled: true}
 	if m.page != before {

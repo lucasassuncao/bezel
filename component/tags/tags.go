@@ -150,9 +150,25 @@ func (m Model) Legend() []legend.Entry {
 }
 
 // Update adds the text as a tag on Add, reporting [Added], and takes the last
-// tag off on Remove while the text is empty, reporting [Removed]. Everything
-// else goes to the input. A tag already there is not added twice.
+// tag off on Remove while the text is empty, reporting [Removed]; a click on
+// a chip takes that one off. Everything else goes to the input. A tag already
+// there is not added twice.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	if c, ok := msg.(bezel.ClickMsg); ok {
+		i, field := m.chipAt(c.X)
+		switch {
+		case i >= 0:
+			t := m.tags[i]
+			m.tags = slices.Delete(slices.Clone(m.tags), i, i+1)
+			return m, bezel.Result{Handled: true, Event: Removed{Tag: t}}
+		case field >= 0:
+			c.X = field
+			var r bezel.Result
+			m.in, r = m.in.Update(c)
+			return m, r
+		}
+		return m, bezel.Result{}
+	}
 	if k, ok := msg.(tea.KeyPressMsg); ok && m.in.Focused() {
 		switch {
 		case key.Matches(k, m.keys.Add):
@@ -184,9 +200,30 @@ func (m Model) add(t string) (Model, bool) {
 	return m, true
 }
 
-// View is the chips, then the field in the cells they leave. Chips that do
-// not fit give way from the oldest, counted as "+N".
-func (m Model) View() string {
+// chipAt is the tag whose chip covers cell x of View, -1 for none; off the
+// chips, field is x within the field, -1 when x falls on the "+N" count.
+func (m Model) chipAt(x int) (tag, field int) {
+	chips, from := m.chips()
+	at := moreWidth(from)
+	if x < at {
+		return -1, -1
+	}
+	for i := from; i < len(chips); i++ {
+		w := draw.Width(chips[i])
+		if x < at+w {
+			return i, -1
+		}
+		at += w + 1
+		if x < at {
+			return -1, -1 // the gap after a chip
+		}
+	}
+	return -1, x - at
+}
+
+// chips is every tag drawn as a chip, and the first that fits: those before
+// it give way, oldest first.
+func (m Model) chips() ([]string, int) {
 	st := m.styles()
 	chips := make([]string, len(m.tags))
 	for i, t := range m.tags {
@@ -198,6 +235,14 @@ func (m Model) View() string {
 		from--
 		used += draw.Width(chips[from]) + 1
 	}
+	return chips, from
+}
+
+// View is the chips, then the field in the cells they leave. Chips that do
+// not fit give way from the oldest, counted as "+N".
+func (m Model) View() string {
+	st := m.styles()
+	chips, from := m.chips()
 	var b strings.Builder
 	if from > 0 {
 		b.WriteString(st.More.Render(more(from)) + " ")

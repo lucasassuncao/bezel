@@ -384,3 +384,14 @@ func moded(m Model, mode cursor.Mode) Model {
 	m, _ = m.SetCursorMode(mode)
 	return m
 }
+
+func TestAClickPutsTheCaretWhereItLands(t *testing.T) {
+	m, _ := New(theme.Resolved{}).WithPrompt("> ").SetValue("hello world").Focus()
+	m, r := m.Update(bezel.ClickMsg{MouseClickMsg: tea.MouseClickMsg{X: 2 + 6, Button: tea.MouseLeft}})
+	require.True(t, r.Handled)
+	require.Equal(t, 6, m.Cursor())
+	m, _ = m.Update(tea.MouseClickMsg{X: 40, Button: tea.MouseLeft})
+	require.Equal(t, 11, m.Cursor(), "past the text is its end")
+	_, r = m.Blur().Update(tea.MouseClickMsg{X: 3, Button: tea.MouseLeft})
+	require.False(t, r.Handled, "a blurred field leaves the click to its host")
+}

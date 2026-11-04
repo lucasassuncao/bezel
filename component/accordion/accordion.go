@@ -163,9 +163,21 @@ func (m Model) Advance(now time.Time) (Model, bool) {
 	return m, !m.Active()
 }
 
-// Update moves the cursor and toggles on keys, and slides the sections on
-// their own frames.
+// Update moves the cursor and toggles on keys, takes a click on a heading as
+// that toggle, and slides the sections on their own frames.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	if c, ok := msg.(bezel.ClickMsg); ok {
+		i, heading := m.sectionAt(c.Y)
+		if i < 0 {
+			return m, bezel.Result{}
+		}
+		m.cursor = i
+		if !heading {
+			return m, bezel.Result{Handled: true}
+		}
+		next, cmd := m.Toggle(i)
+		return next, bezel.Result{Handled: true, Cmd: cmd}
+	}
 	if k, ok := msg.(tea.KeyPressMsg); ok {
 		switch {
 		case key.Matches(k, m.keys.Up):
@@ -206,6 +218,29 @@ func (m Model) Legend() []legend.Entry {
 func (m Model) SetWidth(w int) Model {
 	m.width = w
 	return m
+}
+
+// sectionAt is the section drawn on row y of View and whether y is its
+// heading; -1 past the last.
+func (m Model) sectionAt(y int) (int, bool) {
+	if y < 0 || m.width <= 0 {
+		return -1, false
+	}
+	for i, s := range m.sections {
+		if y == 0 {
+			return i, true
+		}
+		y--
+		if share := m.folds[i].share(); share > 0 {
+			body := len(draw.Wrap(s.Body, max(m.width-2, 1)))
+			shown := int(math.Round(share * float64(body)))
+			if y < shown {
+				return i, false
+			}
+			y -= shown
+		}
+	}
+	return -1, false
 }
 
 // View is every heading, and under each as much of its body as it is open,

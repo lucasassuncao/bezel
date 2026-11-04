@@ -132,3 +132,16 @@ func TestTheDefaultDotsFollowTheEnvironment(t *testing.T) {
 	t.Setenv("BEZEL_ASCII", "1")
 	require.Equal(t, "*oo", ansi.Strip(New(10).SetItems(30).WithDisplay(Dots).View(th)))
 }
+
+func TestTheWheelAndAClickOnADotTurnThePage(t *testing.T) {
+	m := New(10).SetItems(50).WithDisplay(Dots)
+	m, r := m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.Equal(t, Paged{Page: 1}, r.Event)
+	m, r = m.Update(bezel.ClickMsg{MouseClickMsg: tea.MouseClickMsg{X: 3, Button: tea.MouseLeft}})
+	require.Equal(t, Paged{Page: 3}, r.Event)
+	require.Equal(t, 3, m.Page())
+	_, r = m.Update(bezel.ClickMsg{MouseClickMsg: tea.MouseClickMsg{X: 9, Button: tea.MouseLeft}})
+	require.False(t, r.Handled, "past the last dot")
+	_, r = m.WithDisplay(Numbers).Update(bezel.ClickMsg{MouseClickMsg: tea.MouseClickMsg{X: 0, Button: tea.MouseLeft}})
+	require.False(t, r.Handled, "numbers have no dot to aim at")
+}

@@ -320,6 +320,9 @@ func (m Model) handles(msg tea.Msg) bool {
 	case tea.MouseWheelMsg:
 		_, ok := wheel.Rows(msg)
 		return ok
+	case bezel.ClickMsg:
+		_, ok := m.rowAt(msg.Y)
+		return ok
 	case tea.KeyPressMsg:
 		km := m.keys
 		if m.drives.open() {
@@ -348,12 +351,45 @@ func (m Model) update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.updateDrives(msg)
 		}
 		return m.key(msg)
+	case bezel.ClickMsg:
+		return m.click(msg.Y)
 	case tea.MouseWheelMsg:
 		if rows, ok := wheel.Rows(msg); ok && m.drives.open() {
 			m.drives.win = m.drives.win.Move(rows, len(m.drives.roots), nil)
 		} else if ok {
 			m.win = m.win.Move(rows, len(m.entries), nil)
 		}
+	}
+	return m, nil
+}
+
+// rowAt is the entry, or the drive, drawn on row y of View; false off them.
+func (m Model) rowAt(y int) (int, bool) {
+	w, n := m.win, len(m.entries)
+	if m.drives.open() {
+		w, n = m.drives.win, len(m.drives.roots)
+	}
+	start, end, _ := w.Clamp(n).Bounds(n)
+	if y < 0 || start+y >= end {
+		return 0, false
+	}
+	return start + y, true
+}
+
+// click moves the cursor to the row under it, or on the row already there
+// does what enter does: a drive opens, an entry is picked as Pick picks it.
+func (m Model) click(y int) (Model, tea.Cmd) {
+	i, ok := m.rowAt(y)
+	switch {
+	case !ok:
+	case m.drives.open() && i == m.drives.win.Cursor:
+		return m.browse(m.drives.roots[i], "")
+	case m.drives.open():
+		m.drives.win.Cursor = i
+	case i == m.win.Cursor:
+		return m.pick()
+	default:
+		m.win.Cursor = i
 	}
 	return m, nil
 }

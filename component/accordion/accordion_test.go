@@ -175,3 +175,25 @@ func TestTheWheelMovesTheCursor(t *testing.T) {
 	m, _ = m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelUp})
 	require.Equal(t, 0, m.Cursor(), "it stops at the first section")
 }
+
+func click(y int) bezel.ClickMsg {
+	return bezel.ClickMsg{MouseClickMsg: tea.MouseClickMsg{Y: y, Button: tea.MouseLeft}}
+}
+
+func TestAClickOnAHeadingTogglesIt(t *testing.T) {
+	m := New(sections()).SetWidth(20)
+	m, r := m.Update(click(1))
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd)
+	require.Equal(t, 1, m.Cursor())
+	require.True(t, m.IsOpen(1))
+
+	m = opened(m, time.Second)
+	m, r = m.Update(click(2)) // the open section's body
+	require.True(t, r.Handled)
+	require.Nil(t, r.Cmd, "a click on a body only moves the cursor")
+	require.True(t, m.IsOpen(1))
+
+	_, r = m.Update(click(30))
+	require.False(t, r.Handled)
+}

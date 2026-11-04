@@ -411,9 +411,13 @@ func (m Model) tick() tea.Cmd {
 	return tea.Tick(edit.Blink(m.resolved().CaretBlink), func(time.Time) tea.Msg { return msg })
 }
 
-// Update edits on a key or a paste while focused, and flips the caret on its
-// own BlinkMsg. A key it has no use for leaves it as it was, with no command.
+// Update edits on a key or a paste while focused, puts the caret where a click
+// lands, and flips the caret on its own BlinkMsg. A key it has no use for
+// leaves it as it was, with no command.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	if c, ok := msg.(bezel.ClickMsg); ok {
+		msg = c.MouseClickMsg
+	}
 	next, cmd := m.update(msg)
 	return next, bezel.Result{Handled: m.handles(msg), Cmd: cmd}
 }
@@ -428,6 +432,8 @@ func (m Model) handles(msg tea.Msg) bool {
 		return m.focused
 	case tea.KeyPressMsg:
 		return m.focused && (m.bound(msg) || (oneLine(msg.Key().Text) != "" && msg.Mod&typingMods == 0))
+	case tea.MouseClickMsg:
+		return m.focused && msg.Button == tea.MouseLeft
 	}
 	return false
 }
@@ -459,8 +465,27 @@ func (m Model) update(msg tea.Msg) (Model, tea.Cmd) {
 		if m.focused {
 			return m.key(msg)
 		}
+	case tea.MouseClickMsg:
+		if m.focused && msg.Button == tea.MouseLeft {
+			return m.edited(m.line.SetCursor(m.indexAt(msg.X)))
+		}
 	}
 	return m, nil
+}
+
+// indexAt is the grapheme drawn at cell x of View, the end past the text; a
+// hidden field shows nothing to aim at, so its caret goes to the end.
+func (m Model) indexAt(x int) int {
+	x -= ansi.StringWidth(m.prompt)
+	if m.hidden || x < 0 {
+		return min(m.offset, m.line.Len())
+	}
+	for i := m.offset; i < m.line.Len(); i++ {
+		if x -= m.cell(i); x < 0 {
+			return i
+		}
+	}
+	return m.line.Len()
 }
 
 // typingMods are the modifiers that make a key a command, never text.

@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -75,4 +76,23 @@ func TestABlurredFieldTakesNoKeys(t *testing.T) {
 	_, r := New(th).SetTags([]string{"go"}).Update(tea.KeyPressMsg{Code: tea.KeyBackspace})
 	require.False(t, r.Handled)
 	require.Len(t, focused().Legend(), 3)
+}
+
+func click(x int) bezel.ClickMsg {
+	return bezel.ClickMsg{MouseClickMsg: tea.MouseClickMsg{X: x, Button: tea.MouseLeft}}
+}
+
+func TestAClickOnAChipRemovesIt(t *testing.T) {
+	m := focused().SetTags([]string{"go", "tui"}).SetWidth(30)
+	next, r := m.Update(click(6)) // " go " then a gap, then " tui "
+	require.Equal(t, Removed{Tag: "tui"}, r.Event)
+	require.Equal(t, []string{"go"}, next.Tags())
+
+	_, r = m.Update(click(4))
+	require.False(t, r.Handled, "the gap between chips is nothing")
+
+	m, r = m.Update(click(11 + 1))
+	require.True(t, r.Handled, "past the chips the field takes it")
+	require.Nil(t, r.Event)
+	require.Equal(t, []string{"go", "tui"}, m.Tags())
 }

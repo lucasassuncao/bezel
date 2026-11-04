@@ -145,7 +145,7 @@ func (m Model) Init() tea.Cmd
 Init reads the first directory.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L445>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L481>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -181,7 +181,7 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 Update takes the picker's own listings and its keys; Picked then says whether enter picked something.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L454>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L490>)
 
 ```go
 func (m Model) View(th theme.Resolved) string

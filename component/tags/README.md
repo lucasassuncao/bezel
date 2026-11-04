@@ -178,13 +178,13 @@ func (m Model) Tags() []string
 Tags is a copy of the tags, in the order they were added.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/tags/tags.go#L155>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/tags/tags.go#L156>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 ```
 
-Update adds the text as a tag on Add, reporting [Added](<#Added>), and takes the last tag off on Remove while the text is empty, reporting [Removed](<#Removed>). Everything else goes to the input. A tag already there is not added twice.
+Update adds the text as a tag on Add, reporting [Added](<#Added>), and takes the last tag off on Remove while the text is empty, reporting [Removed](<#Removed>); a click on a chip takes that one off. Everything else goes to the input. A tag already there is not added twice.
 
 <a name="Model.Value"></a>
 ### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/tags/tags.go#L126>)
@@ -196,7 +196,7 @@ func (m Model) Value() string
 Value is the text typed and not yet a tag.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tags/tags.go#L189>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tags/tags.go#L243>)
 
 ```go
 func (m Model) View() string

@@ -247,3 +247,28 @@ func TestTheWheelMovesTheCursor(t *testing.T) {
 	require.True(t, r.Handled)
 	require.Equal(t, "main.go", filepath.Base(m.Highlighted()))
 }
+
+func clickAt(y int) bezel.ClickMsg {
+	return bezel.ClickMsg{MouseClickMsg: tea.MouseClickMsg{Y: y, Button: tea.MouseLeft}}
+}
+
+func TestAClickMovesTheCursorAndASecondPicks(t *testing.T) {
+	dir := tree(t)
+	m := New(dir)
+	m = load(t, m, m.Init())
+	m, r := m.Update(clickAt(2))
+	require.True(t, r.Handled)
+	require.Equal(t, "notes.txt", filepath.Base(m.Highlighted()))
+	m, _ = m.Update(clickAt(2))
+	path, ok := m.Picked()
+	require.True(t, ok)
+	require.Equal(t, filepath.Join(dir, "notes.txt"), path)
+
+	m, _ = m.Update(clickAt(0))
+	m, r = m.Update(clickAt(0))
+	m = load(t, m, r.Cmd)
+	require.Equal(t, filepath.Join(dir, "sub"), m.Dir(), "a directory opens")
+
+	_, r = m.Update(clickAt(9))
+	require.False(t, r.Handled)
+}

@@ -292,13 +292,13 @@ func (m Model) TerminalCursor() *tea.Cursor
 TerminalCursor is the terminal's cursor for a field made WithTerminalCursor, placed within the field's view: add the field's origin before handing it to tea.View. nil while blurred, hidden, or painting its own caret.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L416>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L417>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 ```
 
-Update edits on a key or a paste while focused, and flips the caret on its own BlinkMsg. A key it has no use for leaves it as it was, with no command.
+Update edits on a key or a paste while focused, puts the caret where a click lands, and flips the caret on its own BlinkMsg. A key it has no use for leaves it as it was, with no command.
 
 <a name="Model.Value"></a>
 ### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L366>)
@@ -310,7 +310,7 @@ func (m Model) Value() string
 Value is the text in the field.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L607>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L632>)
 
 ```go
 func (m Model) View() string
