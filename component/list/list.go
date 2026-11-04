@@ -17,6 +17,7 @@ import (
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/fuzzy"
+	"github.com/lucasassuncao/bezel/internal/wheel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -418,6 +419,12 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
 		m, chosen = m.press(msg)
 	case bezel.ClickMsg:
 		m, chosen, handled = m.click(msg.Y)
+	case tea.MouseWheelMsg:
+		rows, ok := wheel.Rows(msg)
+		if !ok {
+			return m, bezel.Result{}
+		}
+		m, handled = m.jump(rows), true
 	default:
 		if m.spin.Owns(msg) {
 			var r bezel.Result

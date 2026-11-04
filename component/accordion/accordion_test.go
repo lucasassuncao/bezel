@@ -166,3 +166,12 @@ func appText(ss ...string) bool {
 	}
 	return true
 }
+
+func TestTheWheelMovesTheCursor(t *testing.T) {
+	m, r := New(sections()).Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.True(t, r.Handled)
+	require.Equal(t, 1, m.Cursor())
+	m, _ = m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelUp})
+	m, _ = m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelUp})
+	require.Equal(t, 0, m.Cursor(), "it stops at the first section")
+}

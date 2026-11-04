@@ -20,6 +20,7 @@ import (
 	"github.com/lucasassuncao/bezel/internal/clip"
 	"github.com/lucasassuncao/bezel/internal/edit"
 	"github.com/lucasassuncao/bezel/internal/frames"
+	"github.com/lucasassuncao/bezel/internal/wheel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -606,6 +607,9 @@ func (m Model) handles(msg tea.Msg) bool {
 		return m.focused && msg.Button == tea.MouseLeft
 	case tea.MouseMotionMsg, tea.MouseReleaseMsg:
 		return m.focused && m.dragging
+	case tea.MouseWheelMsg:
+		_, ok := wheel.Rows(msg)
+		return ok && m.height > 0
 	}
 	return false
 }
@@ -645,9 +649,17 @@ func (m Model) update(msg tea.Msg) (Model, tea.Cmd) {
 		if m.focused {
 			return m.mouse(msg.(tea.MouseMsg))
 		}
+	case tea.MouseWheelMsg:
+		if rows, ok := wheel.Rows(msg); ok && m.height > 0 {
+			m.top = max(min(m.top+rows*wheelRows, m.rowCount()-m.height), 0)
+		}
 	}
 	return m, nil
 }
+
+// wheelRows is how far a wheel notch scrolls the text; the caret stays put
+// until the next key brings it back into view.
+const wheelRows = 3
 
 // mouse selects with the left button: a click puts the caret on the cell and
 // anchors there, shift+click extends from the old anchor, a drag drags the

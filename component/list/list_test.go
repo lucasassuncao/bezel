@@ -545,3 +545,12 @@ func appText(ss ...string) bool {
 	}
 	return true
 }
+
+func TestTheWheelMovesTheCursor(t *testing.T) {
+	m, r := bigList(10).Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.True(t, r.Handled)
+	row, _ := m.Selected()
+	require.Equal(t, 1, row.Value)
+	_, r = m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown, Mod: tea.ModShift})
+	require.False(t, r.Handled, "shift pans, which a list does not")
+}

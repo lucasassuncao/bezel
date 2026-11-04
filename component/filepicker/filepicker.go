@@ -16,6 +16,7 @@ import (
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/frames"
+	"github.com/lucasassuncao/bezel/internal/wheel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -316,6 +317,9 @@ func (m Model) handles(msg tea.Msg) bool {
 		return msg.id == m.id
 	case volumesMsg:
 		return msg.id == m.id
+	case tea.MouseWheelMsg:
+		_, ok := wheel.Rows(msg)
+		return ok
 	case tea.KeyPressMsg:
 		km := m.keys
 		if m.drives.open() {
@@ -344,6 +348,12 @@ func (m Model) update(msg tea.Msg) (Model, tea.Cmd) {
 			return m.updateDrives(msg)
 		}
 		return m.key(msg)
+	case tea.MouseWheelMsg:
+		if rows, ok := wheel.Rows(msg); ok && m.drives.open() {
+			m.drives.win = m.drives.win.Move(rows, len(m.drives.roots), nil)
+		} else if ok {
+			m.win = m.win.Move(rows, len(m.entries), nil)
+		}
 	}
 	return m, nil
 }

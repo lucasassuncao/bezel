@@ -239,3 +239,11 @@ func TestWithStylesPaintsTheRefusedFiles(t *testing.T) {
 	m = load(t, m, m.Init())
 	require.Contains(t, m.View(th), marked.Render("notes.txt"))
 }
+
+func TestTheWheelMovesTheCursor(t *testing.T) {
+	m := New(tree(t))
+	m = load(t, m, m.Init())
+	m, r := m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.True(t, r.Handled)
+	require.Equal(t, "main.go", filepath.Base(m.Highlighted()))
+}

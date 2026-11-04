@@ -13,6 +13,7 @@ import (
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/wheel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -324,6 +325,13 @@ func (m Model[N]) Update(msg tea.Msg) (Model[N], bezel.Result) {
 		handled = true
 	case bezel.ClickMsg:
 		m, ev, handled = m.click(msg.Y)
+	case tea.MouseWheelMsg:
+		rows, ok := wheel.Rows(msg)
+		vis := m.Visible()
+		if !ok || len(vis) == 0 {
+			return m, bezel.Result{}
+		}
+		m, handled = m.move(rows, vis), true
 	default:
 		if !m.spin.Owns(msg) {
 			return m, bezel.Result{}

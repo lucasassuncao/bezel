@@ -459,3 +459,10 @@ func FuzzTreeStaysInItsHeight(f *testing.F) {
 		require.LessOrEqual(t, len(strings.Split(view, "\n")), h, "%q", view)
 	})
 }
+
+func TestTheWheelMovesTheCursor(t *testing.T) {
+	m := newTree(10)
+	down, r := m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.True(t, r.Handled)
+	require.Equal(t, m.Move(1).Cursor(), down.Cursor())
+}

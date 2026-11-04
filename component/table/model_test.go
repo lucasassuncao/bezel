@@ -246,3 +246,11 @@ func TestWithStylesRecoloursTheHeader(t *testing.T) {
 	head := strings.Split(m.SetWidth(40).View(theme.Resolve(theme.Mint(), true)), "\n")[0]
 	require.Equal(t, red.Render(ansi.Strip(head)), head, "the edit holds under another theme")
 }
+
+func TestTheWheelMovesTheCursor(t *testing.T) {
+	m, r := New(pkgCols, pkgs(10)).SetHeight(5).Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.True(t, r.Handled)
+	require.Equal(t, 1, m.Cursor())
+	m, _ = m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelUp})
+	require.Equal(t, 0, m.Cursor())
+}

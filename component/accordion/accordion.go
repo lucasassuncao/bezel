@@ -14,6 +14,7 @@ import (
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/frames"
+	"github.com/lucasassuncao/bezel/internal/wheel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
@@ -177,6 +178,10 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 		default:
 			return m, bezel.Result{}
 		}
+		return m, bezel.Result{Handled: true}
+	}
+	if rows, ok := wheel.Rows(msg); ok {
+		m.cursor = min(max(m.cursor+rows, 0), max(len(m.sections)-1, 0))
 		return m, bezel.Result{Handled: true}
 	}
 	for i, f := range m.folds {

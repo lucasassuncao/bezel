@@ -172,6 +172,8 @@ case shell.ClickMsg: // already moved into the pane's cells
 
 A click enters through `Update`, like a key. `shell.ClickMsg` is `bezel.ClickMsg`: the pane's name, which the app routes by, and the click in the pane's cells. `list`, `table.Model` and `tree` use `Y`: the first click moves the cursor, a click on the current row does what enter does and reports the same event. `form.Form` focuses the field and presses a button, a checkbox or a toggle. A leaf that tracks press, drag and release (`textbox`) takes the click in the same `Update`, and the drag as the `tea.Mouse*Msg` that `shell.MouseIn` hands it. A dialog of the app's own that wants clicks implements `overlay.Clicker`, a role interface and not a second `Update`.
 
+The wheel enters the same way, as the `tea.MouseWheelMsg` that `shell.Mouse` moves into the pane. `list`, `table.Model`, `tree`, `filepicker` and `accordion` move the cursor a row a notch; `viewport` and `textbox` scroll the text and leave the cursor. A turn with shift held, or sideways, pans, so only the `viewport` takes it.
+
 ## Time is a message
 
 ```go

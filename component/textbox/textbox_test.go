@@ -575,3 +575,13 @@ func moded(m Model, mode cursor.Mode) Model {
 	m, _ = m.SetCursorMode(mode)
 	return m
 }
+
+// The wheel scrolls the text and leaves the caret where it was.
+func TestTheWheelScrollsTheText(t *testing.T) {
+	m := focused("one\ntwo\nthree\nfour\nfive\nsix").SetWidth(40).SetHeight(2).MoveTo(0, 0)
+	m, r := m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.True(t, r.Handled)
+	require.Contains(t, ansi.Strip(m.View()), "four")
+	require.NotContains(t, ansi.Strip(m.View()), "one")
+	require.Equal(t, 0, m.Line())
+}
