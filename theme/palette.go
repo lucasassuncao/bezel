@@ -168,10 +168,10 @@ var themeRegistry = []struct {
 	}},
 	{"Classic", []namedTheme{
 		{"gruvbox", gruvbox}, {"dracula", dracula}, {"nord", nord}, {"tokyonight", tokyoNight}, {"ubuntu", ubuntu},
-		{"noctisazureus", noctisAzureus},
+		{"noctisazureus", noctisAzureus}, {"catppuccin", catppuccin}, {"rosepine", rosePine},
 	}},
 	{"Styles", []namedTheme{
-		{"retro", retro},
+		{"retro", retro}, {"minimal", minimal}, {"cyberpunk", cyberpunk}, {"ocean", ocean},
 	}},
 }
 
@@ -337,6 +337,51 @@ func retro() Theme {
 	return Theme{Colors: Colors{
 		Accent: "#FFCC00", Selection: "#FF6600", Border: "#665500", Dim: "#CC8800", Text: "#FFB000", Background: "#1A1200",
 		Success: "#33FF00", Warning: "#FFCC00", Danger: "#FF0033", Info: "#CC8800", OnAccent: "#1A1200",
+	}}
+}
+
+// catppuccin is Catppuccin's Mocha: mauve and pastels on a soft dark base.
+func catppuccin() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#CBA6F7", Selection: "#F5C2E7", Border: "#585B70", Dim: "#6C7086", Text: "#CDD6F4", Background: "#1E1E2E",
+		Success: "#A6E3A1", Warning: "#F9E2AF", Danger: "#F38BA8", Info: "#89B4FA", OnAccent: "#1E1E2E",
+		Series: [6]string{"#A6E3A1", "#94E2D5", "#FAB387", "#89B4FA", "#F9E2AF", "#CBA6F7"},
+	}}
+}
+
+// rosePine is Rosé Pine's main variant: rose and iris over a dusky base.
+func rosePine() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#EBBCBA", Selection: "#C4A7E7", Border: "#524F67", Dim: "#6E6A86", Text: "#E0DEF4", Background: "#191724",
+		Success: "#31748F", Warning: "#F6C177", Danger: "#EB6F92", Info: "#9CCFD8", OnAccent: "#191724",
+		Series: [6]string{"#31748F", "#9CCFD8", "#F6C177", "#C4A7E7", "#EBBCBA", "#EB6F92"},
+	}}
+}
+
+// minimal is white on near-black: one blue for links, colour only for state.
+func minimal() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#FFFFFF", Selection: "#FFFFFF", Border: "#444444", Dim: "#888888", Text: "#EDEDED", Background: "#0A0A0A",
+		Success: "#00C853", Warning: "#F5A623", Danger: "#EE0000", Info: "#0070F3", OnAccent: "#0A0A0A",
+		Series: [6]string{"#00C853", "#0070F3", "#F5A623", "#888888", "#EDEDED", "#EE0000"},
+	}}
+}
+
+// cyberpunk is neon night: cyan and magenta on a blue-black.
+func cyberpunk() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#00FFFF", Selection: "#FF00FF", Border: "#4A4A6A", Dim: "#4A4A6A", Text: "#E0E0FF", Background: "#0D0D1A",
+		Success: "#00FF88", Warning: "#FFAA00", Danger: "#FF0044", Info: "#FFFF00", OnAccent: "#0D0D1A",
+		Series: [6]string{"#00FF88", "#00FFFF", "#FFAA00", "#FF00FF", "#FFFF00", "#FF0044"},
+	}}
+}
+
+// ocean is sky blue and sea foam over deep water.
+func ocean() Theme {
+	return Theme{Colors: Colors{
+		Accent: "#48DBFB", Selection: "#55EFC4", Border: "#576574", Dim: "#576574", Text: "#C8D6E5", Background: "#0B1929",
+		Success: "#00D2D3", Warning: "#FECA57", Danger: "#FF6B6B", Info: "#0ABDE3", OnAccent: "#0B1929",
+		Series: [6]string{"#00D2D3", "#48DBFB", "#FECA57", "#0ABDE3", "#55EFC4", "#FF6B6B"},
 	}}
 }
 

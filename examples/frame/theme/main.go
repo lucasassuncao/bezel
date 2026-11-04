@@ -16,7 +16,7 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-var presets = []string{"mint", "gruvbox", "dracula", "nord", "tokyonight", "ubuntu", "noctisazureus", "retro", "terminal", "plain", "default"}
+var presets = []string{"mint", "gruvbox", "dracula", "nord", "tokyonight", "ubuntu", "noctisazureus", "catppuccin", "rosepine", "retro", "minimal", "cyberpunk", "ocean", "terminal", "plain", "default"}
 
 type stepMsg struct{ by int }
 

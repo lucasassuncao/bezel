@@ -38,7 +38,7 @@ bezel ships four presets as functions, each building a fresh `Theme`, so no app 
 
 The first three keep the terminal's background; `Mint` brings its own, so what the terminal answers changes nothing.
 
-Seven more are there by name only: `gruvbox`, `dracula`, `nord`, `tokyonight`, `ubuntu` and `noctisazureus` under Classic, and `retro`, an amber CRT, under Styles. Each brings its own background, like `Mint`.
+Twelve more are there by name only: `gruvbox`, `dracula`, `nord`, `tokyonight`, `ubuntu`, `noctisazureus`, `catppuccin` (Mocha) and `rosepine` under Classic, and under Styles `retro`, an amber CRT, `minimal`, `cyberpunk` and `ocean`. Each brings its own background, like `Mint`.
 
 For a `--theme` flag, `theme.Lookup(name)` finds a preset by name in any case, empty being `Default`, and `theme.All()` and `theme.Categories()` list them. For `--list-themes`, [`themebrowser`](../component/themebrowser) draws every preset with its palette:
 

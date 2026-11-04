@@ -37,7 +37,7 @@ func All() map[string]Theme
 All returns all built\-in theme presets keyed by their CLI name. Useful for \-\-theme flag validation and \-\-list\-themes output in host CLIs.
 
 <a name="DarkTerminal"></a>
-## func [DarkTerminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L352>)
+## func [DarkTerminal](<https://github.com/lucasassuncao/bezel/blob/main/theme/palette.go#L397>)
 
 ```go
 func DarkTerminal() bool
