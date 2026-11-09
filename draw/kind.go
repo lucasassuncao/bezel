@@ -30,3 +30,7 @@ func (k Kind) Color() color.Color {
 		return lipgloss.Color("#3B82F6")
 	}
 }
+
+// On is the colour of text drawn over a Kind's Color: near black, which
+// reads on all four.
+func (k Kind) On() color.Color { return lipgloss.Color("#111111") }

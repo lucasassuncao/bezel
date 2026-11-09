@@ -24,6 +24,7 @@ m.list = m.list.SetRows(reloaded) // SetX: a live change, after something happen
 - **`NewX(required..., th)`** takes only what the component cannot work without, the theme last when it takes one. It returns only the value; a command to start it comes from `Init()`.
 - **`WithX`** is everything optional. A switch takes its state, `WithWrap(on bool)`, so an app can pass a setting it read. An argument most callers would pass as `nil`, `""`, `0` or `false` is a `With`, and so is each of two same-typed parameters in a row: `text.NewTicker(v, dur).WithUp(c).WithDown(c)` cannot be swapped by mistake.
 - **`SetX`** changes a live model: `SetRows`, `SetTheme`, `SetStatus`. What can change live has only the `Set`, never a `With` doing the same.
+- **An action that starts something returns its command with the value**: `m.in, cmd = m.in.Focus()`, and so `Start()`, `Toggle()`, `Push(...)`, `SetPercent(p)`, `Busy(text)`. The command is the blink, the tick or the frames the action needs; run it, or nothing moves.
 - **A variant is named, not built**: a preset of a shared type is a bare name, `spinner.Dot()`, `effect.Wipe(...)`, `theme.Mint()`.
 - **`Config` struct** only where an app sets many fields at once, as `shell.Config`.
 - **A declared tree is not a model**: `layout`'s builders read as the screen they describe, `layout.Fixed("help").Info()` and `Columns(...).Collapse(72, "detail")`, so they keep their short names instead of `WithX`.
@@ -38,7 +39,7 @@ case tea.WindowSizeMsg: // the shell laid out the panes and handed the size on
 
 A size is never a constructor parameter nor an argument of `View`: it comes through `SetHeight`/`SetWidth` once the terminal says how big it is. A model not sized yet draws nothing. A layout that changes without a resize (`SetLayout`) sizes again after the change.
 
-Sized this way: `list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`; `browser` has `SetListHeight` and `SetPreviewHeight`.
+Sized this way: `list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`, `logger.Pane`; `input`, `tags` and `breadcrumb` take a width only; `browser` has `SetListHeight` and `SetPreviewHeight`.
 
 ### Getters and errors
 
@@ -50,7 +51,7 @@ if m.acc.IsOpen(i) { ... }
 
 - Getters are the bare noun: `Cursor()`, `Value()`, never `GetCursor()`.
 - A bool is an adjective or participle: `Running()`, `Focused()`, `Active()`. `Is`/`Has` leads only when the bare word is already an action on the type: `IsOpen` beside `Toggle`, `IsBusy` beside `Busy`, `HasOverlay` beside `Push`.
-- Every model with a cursor over items has `Selected() (T, bool)`: `list`, `tree`, `table.Model`, `browser`, `calendar` (a day), `breadcrumb` (a part). A form control's `Selected() int` is an index instead.
+- Every model with a cursor over items has `Selected() (T, bool)`: `list`, `tree`, `table.Model`, `browser`, `calendar` (a day), `breadcrumb` (a part), `filepicker` (a path). A form control's `Selected() int` is an index instead.
 - What went wrong is an `error`: checks are `func(string) error` (`input.WithValidate`, `Prompt.WithValidate`), and the getter is `Err()`.
 
 ## The theme
@@ -68,8 +69,8 @@ Where the theme goes depends on who calls `View`. If bezel does, the component k
 | --- | --- | --- |
 | bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `overlay`, `textbox`, `input`, `tags`, `cursor`, `logger` |
 | bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic | `form` |
-| the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `calendar`, `breadcrumb`, `timer`, `stopwatch`, `viewport`, `accordion` |
-| nobody: a plain function | after the data | `progress`, `chart`, `inline`, `icon.Set.Render` |
+| the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `calendar`, `breadcrumb`, `timer`, `stopwatch`, `viewport`, `accordion`, `filepicker`, `progress.Model` |
+| nobody: a plain function | after the data | `progress.Bar` and siblings, `chart`, `inline`, `icon.Set.Render` |
 | the shell | `Config.Theme`; `SetTheme` also repaints open dialogs | `shell` |
 
 - A dialog that reports something is tinted with `WithKind(draw.Danger)`; `Alert` takes its `draw.Kind` in the constructor. A Kind's colour is fixed (blue, green, yellow, red), the same under every theme and whatever `WithStyles` does; a dialog with no Kind keeps the theme's look.
@@ -137,6 +138,7 @@ The events are structs in the component's package. Read them with a type switch 
 | `paginator` | `Paged{Page}` |
 | `calendar` | `Chosen{Day}` |
 | `breadcrumb` | `Chosen{Path}` |
+| `filepicker` | `Chosen{Path}` |
 | `tags` | `Added{Tag}`, `Removed{Tag}` |
 
 An event reports; the app decides what it means. A cursor that starts to move puts its own `Tick()` in `Result.Cmd`, so the app never calls it after `Update`; `Tick()` stays public for after `SetRows`. A new component answers this signature, never a new shape.

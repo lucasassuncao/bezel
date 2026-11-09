@@ -74,3 +74,20 @@ func TestAnUnsizedModelDrawsNothing(t *testing.T) {
 	m, _ := New().SetPercent(0.5)
 	require.Empty(t, m.View(th()))
 }
+
+func TestAModelMovesOnTheSharedFive(t *testing.T) {
+	m := New().SetWidth(20)
+	require.Nil(t, m.Tick(), "at rest it asks for no frame")
+	m, _ = m.SetPercent(1)
+	require.NotNil(t, m.Tick())
+
+	_, r := m.Update(m.FrameAt(time.Unix(1, 0)))
+	require.True(t, r.Handled, "FrameAt is the bar's own frame")
+
+	m, done := m.Advance(time.Unix(1, 0))
+	require.False(t, done)
+	m, done = m.Advance(time.Unix(60, 0))
+	require.True(t, done)
+	require.InDelta(t, 1, m.Shown(), 0.001)
+	require.Nil(t, m.Tick())
+}

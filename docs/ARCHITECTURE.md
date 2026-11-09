@@ -55,12 +55,13 @@ Plumbing more than one folder needs and no app should depend on. Go lets only th
 
 | Package | What it holds | Who uses it |
 | --- | --- | --- |
-| `frames` | the frame message, the run a timed motion keeps, the motion switches read from the environment | `animation`, `effect`, and the components that move: `list`, `accordion`, `toast` |
+| `frames` | the frame message, the run a timed motion keeps, the id a model tags its own messages with, the motion switches read from the environment | `animation`, `effect`, the components that move (`list`, `accordion`, `toast`, `spinner`) and the ones that tag a message of their own (`timer`, `stopwatch`, `cursor`, `input`, `textbox`, `filepicker`) |
 | `cells` | a drawn block read back into styled cells, and the canvas they are put into | `effect`, `animation/scene` |
-| `noise` | the hash randomness is drawn from, the same for the same frame | `effect`, `animation/text`, `animation/scene` |
+| `noise` | the hash randomness is drawn from, the same for the same frame | `animation`, `effect`, `animation/text`, `animation/scene` |
 | `hue` | colours turned round the HSL wheel | `effect`, `animation/text` |
-| `edit` | a line of graphemes with a caret, the editing `input` and `textbox` share, the caret's blink and the text a filter types | `input`, `textbox`, `cursor`, `viewport`, `list`, `table`, `logger`, `form`, `animation/text` |
-| `clip` | the system clipboard, read as the paste a terminal sends | `input`, `textbox` |
+| `edit` | a line of graphemes with a caret, the editing `input` and `textbox` share, the caret's blink and the text a filter types | `input`, `textbox`, `cursor`, `viewport`, `list`, `table`, `tree`, `logger`, `form`, `animation/text` |
+| `clip` | the system clipboard, read as the paste a terminal sends and written off the event loop | `input`, `textbox`, `themebrowser`, `shell` |
+| `fuzzy` | a query matched by its letters in order, scored so the best match ranks first | `list`, `table`, `themebrowser`, the `:` palette |
 | `wheel` | a mouse wheel turn read as rows, shift and sideways turns left to panning | `list`, `table`, `tree`, `filepicker`, `accordion`, `textbox`, `paginator` |
 
 A public type can still come from here: `animation.FrameMsg` and `animation.Ease` are aliases of `frames` types, so every package names one type while the run behind it stays private.

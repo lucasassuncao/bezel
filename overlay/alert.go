@@ -65,7 +65,7 @@ func (l look) button(label string, focused bool) string {
 	st := l.own().Button
 	st.Focused = st.Focused.Background(l.style().GetBorderTopForeground())
 	if l.tinted {
-		st.Focused = st.Focused.Foreground(lipgloss.Color("#111111"))
+		st.Focused = st.Focused.Foreground(l.kind.On())
 	}
 	return draw.Button(label, st, focused)
 }

@@ -106,6 +106,15 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	return m, bezel.Result{Handled: true, Cmd: frames.Tick(frames.Frame, m.id, m.tag)}
 }
 
+// Tick is the command for the stack's next frame; nil with no toast sliding
+// or while Still, when each toast expires on its own.
+func (m Model) Tick() tea.Cmd {
+	if !m.running || frames.Still() {
+		return nil
+	}
+	return frames.Tick(frames.Frame, m.id, m.tag)
+}
+
 // Active reports whether a toast is showing.
 func (m Model) Active() bool { return len(m.items) > 0 }
 

@@ -12,6 +12,7 @@ Package filepicker browses directories inside a pane: directories first, sizes a
 
 ## Index
 
+- [type Chosen](<#Chosen>)
 - [type Keys](<#Keys>)
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
   - [func VimKeys\(\) Keys](<#VimKeys>)
@@ -25,6 +26,7 @@ Package filepicker browses directories inside a pane: directories first, sizes a
   - [func \(m Model\) Init\(\) tea.Cmd](<#Model.Init>)
   - [func \(m Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
   - [func \(m Model\) Picked\(\) \(string, bool\)](<#Model.Picked>)
+  - [func \(m Model\) Selected\(\) \(string, bool\)](<#Model.Selected>)
   - [func \(m Model\) SetHeight\(h int\) Model](<#Model.SetHeight>)
   - [func \(m Model\) Update\(msg tea.Msg\) \(Model, bezel.Result\)](<#Model.Update>)
   - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
@@ -39,6 +41,15 @@ Package filepicker browses directories inside a pane: directories first, sizes a
 - [type Styles](<#Styles>)
   - [func DefaultStyles\(th theme.Resolved\) Styles](<#DefaultStyles>)
 
+
+<a name="Chosen"></a>
+## type [Chosen](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/events.go#L5>)
+
+Chosen is the event of an entry picked: enter, or a click on the entry already under the cursor. Path is absolute.
+
+```go
+type Chosen struct{ Path string }
+```
 
 <a name="Keys"></a>
 ## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L28-L31>)
@@ -127,7 +138,7 @@ func (m Model) Height() int
 Height is how many entries the picker shows.
 
 <a name="Model.Highlighted"></a>
-### func \(Model\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L227>)
+### func \(Model\) [Highlighted](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L234>)
 
 ```go
 func (m Model) Highlighted() string
@@ -145,7 +156,7 @@ func (m Model) Init() tea.Cmd
 Init reads the first directory.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L481>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L492>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -162,6 +173,15 @@ func (m Model) Picked() (string, bool)
 
 Picked is the absolute path the last Update picked, and whether it picked.
 
+<a name="Model.Selected"></a>
+### func \(Model\) [Selected](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L228>)
+
+```go
+func (m Model) Selected() (string, bool)
+```
+
+Selected is the path under the cursor, a drive while the drives show; false in an empty directory.
+
 <a name="Model.SetHeight"></a>
 ### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L199>)
 
@@ -172,16 +192,16 @@ func (m Model) SetHeight(h int) Model
 SetHeight shows as many entries as h rows hold, at least one.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L307>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L314>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 ```
 
-Update takes the picker's own listings and its keys; Picked then says whether enter picked something.
+Update takes the picker's own listings and its keys, reporting [Chosen](<#Chosen>) when enter or a click picked something; Picked says so too.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L490>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/filepicker/filepicker.go#L501>)
 
 ```go
 func (m Model) View(th theme.Resolved) string

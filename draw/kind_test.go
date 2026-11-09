@@ -14,3 +14,9 @@ func TestEveryKindHasItsOwnFixedColour(t *testing.T) {
 	require.Equal(t, lipgloss.Color("#EF4444"), Danger.Color())
 	require.Equal(t, Info.Color(), Kind(99).Color(), "out of range reads as Info")
 }
+
+func TestTextOverAKindIsNearBlack(t *testing.T) {
+	for _, k := range []Kind{Info, Success, Warning, Danger} {
+		require.Equal(t, lipgloss.Color("#111111"), k.On())
+	}
+}

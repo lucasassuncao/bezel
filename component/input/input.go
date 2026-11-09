@@ -519,7 +519,7 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 	case key.Matches(k, m.keys.DeleteWordForward):
 		l = l.DeleteWordForward()
 	case key.Matches(k, m.keys.Paste):
-		return m, clip.Paste(m.clipboard) // it comes back as a tea.PasteMsg
+		return m, clip.Paste(m.clipboard, 0) // it comes back as a tea.PasteMsg
 	case len(m.matches) > 0 && key.Matches(k, m.keys.Accept):
 		l = edit.NewLine(m.capped(m.CurrentSuggestion(), 0))
 	case len(m.matches) > 0 && key.Matches(k, m.keys.NextSuggestion):

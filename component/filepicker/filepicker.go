@@ -223,6 +223,13 @@ func (m Model) Err() error { return m.err }
 // Picked is the absolute path the last Update picked, and whether it picked.
 func (m Model) Picked() (string, bool) { return m.picked, m.picked != "" }
 
+// Selected is the path under the cursor, a drive while the drives show;
+// false in an empty directory.
+func (m Model) Selected() (string, bool) {
+	path := m.Highlighted()
+	return path, path != ""
+}
+
 // Highlighted is the path under the cursor, or "" in an empty directory.
 func (m Model) Highlighted() string {
 	if m.drives.open() {
@@ -302,11 +309,15 @@ func (m Model) allows(name string) bool {
 	return slices.ContainsFunc(m.allowed, func(ext string) bool { return strings.HasSuffix(name, ext) })
 }
 
-// Update takes the picker's own listings and its keys; Picked then says
-// whether enter picked something.
+// Update takes the picker's own listings and its keys, reporting [Chosen]
+// when enter or a click picked something; Picked says so too.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	next, cmd := m.update(msg)
-	return next, bezel.Result{Handled: m.handles(msg), Cmd: cmd}
+	r := bezel.Result{Handled: m.handles(msg), Cmd: cmd}
+	if path, ok := next.Picked(); ok {
+		r.Event = Chosen{Path: path}
+	}
+	return next, r
 }
 
 // handles reports whether msg is the picker's: its own listing, or a key

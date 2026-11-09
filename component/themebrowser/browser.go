@@ -360,7 +360,7 @@ func (m browserModel) copy() tea.Cmd {
 		return nil
 	}
 	name := it.Value
-	return clip.Copy(m.write, name, func(err error) tea.Msg { return copiedMsg{name, err} })
+	return clip.Copy(m.write, name, 0, func(err error) tea.Msg { return copiedMsg{name, err} })
 }
 
 func (m browserModel) copied(msg copiedMsg) string {

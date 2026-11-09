@@ -69,7 +69,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	m.fp, r = m.fp.Update(msg)
 	cmd = r.Cmd
-	if path, ok := m.fp.Picked(); ok {
+	if e, ok := r.Event.(filepicker.Chosen); ok {
+		path := e.Path
 		if rel, err := filepath.Rel(m.root, path); err == nil {
 			path = rel
 		}

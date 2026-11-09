@@ -20,6 +20,7 @@ Package toast shows short notices in a corner of the screen, stacked, sliding in
   - [func \(m Model\) Len\(\) int](<#Model.Len>)
   - [func \(m Model\) Over\(screen string\) string](<#Model.Over>)
   - [func \(m Model\) Push\(text string, kind draw.Kind\) \(Model, tea.Cmd\)](<#Model.Push>)
+  - [func \(m Model\) Tick\(\) tea.Cmd](<#Model.Tick>)
   - [func \(m Model\) Update\(msg tea.Msg\) \(Model, bezel.Result\)](<#Model.Update>)
   - [func \(m Model\) View\(\) string](<#Model.View>)
   - [func \(m Model\) WithTTL\(d time.Duration\) Model](<#Model.WithTTL>)
@@ -47,7 +48,7 @@ func New() Model
 New is an empty stack whose toasts stay three seconds, 36 columns wide.
 
 <a name="Model.Active"></a>
-### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L110>)
+### func \(Model\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L119>)
 
 ```go
 func (m Model) Active() bool
@@ -56,7 +57,7 @@ func (m Model) Active() bool
 Active reports whether a toast is showing.
 
 <a name="Model.Advance"></a>
-### func \(Model\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L114>)
+### func \(Model\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L123>)
 
 ```go
 func (m Model) Advance(now time.Time) (Model, bool)
@@ -65,7 +66,7 @@ func (m Model) Advance(now time.Time) (Model, bool)
 Advance is the stack at now, newcomers stamped and the expired gone, and whether it emptied.
 
 <a name="Model.FrameAt"></a>
-### func \(Model\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L128>)
+### func \(Model\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L137>)
 
 ```go
 func (m Model) FrameAt(at time.Time) tea.Msg
@@ -83,7 +84,7 @@ func (m Model) Len() int
 Len is how many toasts are showing.
 
 <a name="Model.Over"></a>
-### func \(Model\) [Over](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L187>)
+### func \(Model\) [Over](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L196>)
 
 ```go
 func (m Model) Over(screen string) string
@@ -100,6 +101,15 @@ func (m Model) Push(text string, kind draw.Kind) (Model, tea.Cmd)
 
 Push shows text as a toast of kind on top of the stack.
 
+<a name="Model.Tick"></a>
+### func \(Model\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L111>)
+
+```go
+func (m Model) Tick() tea.Cmd
+```
+
+Tick is the command for the stack's next frame; nil with no toast sliding or while Still, when each toast expires on its own.
+
 <a name="Model.Update"></a>
 ### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L88>)
 
@@ -110,7 +120,7 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 Update slides the toasts on the stack's own frames and drops the ones whose time is up, asking for frames while any is showing.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L174>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/toast/toast.go#L183>)
 
 ```go
 func (m Model) View() string

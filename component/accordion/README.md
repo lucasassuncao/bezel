@@ -23,6 +23,7 @@ Package accordion is a column of sections, each a heading that opens and closes 
   - [func \(m Model\) IsOpen\(i int\) bool](<#Model.IsOpen>)
   - [func \(m Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
   - [func \(m Model\) SetWidth\(w int\) Model](<#Model.SetWidth>)
+  - [func \(m Model\) Tick\(\) tea.Cmd](<#Model.Tick>)
   - [func \(m Model\) Toggle\(i int\) \(Model, tea.Cmd\)](<#Model.Toggle>)
   - [func \(m Model\) Update\(msg tea.Msg\) \(Model, bezel.Result\)](<#Model.Update>)
   - [func \(m Model\) View\(th theme.Resolved\) string](<#Model.View>)
@@ -93,7 +94,7 @@ func (m Model) Active() bool
 Active reports whether any section is still opening or closing.
 
 <a name="Model.Advance"></a>
-### func \(Model\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L155>)
+### func \(Model\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L167>)
 
 ```go
 func (m Model) Advance(now time.Time) (Model, bool)
@@ -120,7 +121,7 @@ func (m Model) IsOpen(i int) bool
 IsOpen reports whether section i is open, or opening.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L213>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L225>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -129,13 +130,22 @@ func (m Model) Legend() []legend.Entry
 Legend is the keys the accordion answers to.
 
 <a name="Model.SetWidth"></a>
-### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L218>)
+### func \(Model\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L230>)
 
 ```go
 func (m Model) SetWidth(w int) Model
 ```
 
 SetWidth changes the cells the accordion takes; bodies wrap to it.
+
+<a name="Model.Tick"></a>
+### func \(Model\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L155>)
+
+```go
+func (m Model) Tick() tea.Cmd
+```
+
+Tick is the command for the next frame of every section still moving, nil once all have settled.
 
 <a name="Model.Toggle"></a>
 ### func \(Model\) [Toggle](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L131>)
@@ -147,7 +157,7 @@ func (m Model) Toggle(i int) (Model, tea.Cmd)
 Toggle opens section i when it is closed and closes it when it is open.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L168>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L180>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
@@ -156,7 +166,7 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 Update moves the cursor and toggles on keys, takes a click on a heading as that toggle, and slides the sections on their own frames.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L248>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/accordion/accordion.go#L260>)
 
 ```go
 func (m Model) View(th theme.Resolved) string

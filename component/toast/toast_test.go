@@ -149,3 +149,13 @@ func FuzzOverKeepsTheScreenSize(f *testing.F) {
 		}
 	})
 }
+
+func TestTickAsksForAFrameOnlyWhileAToastSlides(t *testing.T) {
+	m := New()
+	require.Nil(t, m.Tick(), "an empty stack asks for nothing")
+	m, _ = m.Push("saved", draw.Success)
+	require.NotNil(t, m.Tick())
+	m, _ = m.Update(m.FrameAt(time.Unix(1, 0)))
+	m, _ = m.Update(m.FrameAt(time.Unix(60, 0)))
+	require.Nil(t, m.Tick(), "the last toast gone, the frames stop")
+}

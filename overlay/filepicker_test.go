@@ -261,6 +261,12 @@ func TestFilePickerHandsOverTheFullPath(t *testing.T) {
 	require.Contains(t, drain(cmd()), tea.Msg(filePickedMsg{filepath.Join(dir, "main.go")}))
 }
 
+// withVolumes is p listing its drives through fn, not the machine's.
+func withVolumes(p FilePicker, fn func() []string) FilePicker {
+	p.m = p.m.WithVolumes(fn)
+	return p
+}
+
 // rootOf is the root of the volume dir is on: `C:\` on Windows, "/" elsewhere.
 func rootOf(dir string) string { return filepath.VolumeName(dir) + string(filepath.Separator) }
 
@@ -269,10 +275,8 @@ func rootOf(dir string) string { return filepath.VolumeName(dir) + string(filepa
 func TestFilePickerLeavesARootThroughTheDrives(t *testing.T) {
 	other := pickerTree(t)
 	start := rootOf(other)
-	volumes = func() []string { return []string{start, other} }
-	t.Cleanup(func() { volumes = nil })
 
-	p := newPicker(start)
+	p := withVolumes(newPicker(start), func() []string { return []string{start, other} })
 	p, cmd := pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyLeft})
 	p = load(t, p, cmd)
 	v := pickerView(p)
@@ -291,11 +295,8 @@ func TestFilePickerLeavesARootThroughTheDrives(t *testing.T) {
 
 // With no drive list, as off Windows, ← at the root just stays there.
 func TestFilePickerStaysAtARootWithoutDrives(t *testing.T) {
-	volumes = func() []string { return nil }
-	t.Cleanup(func() { volumes = nil })
-
 	start := rootOf(t.TempDir())
-	p := newPicker(start)
+	p := withVolumes(newPicker(start), func() []string { return nil })
 	p, cmd := pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyLeft})
 	p = load(t, p, cmd)
 	require.Equal(t, start, p.Dir())
@@ -309,11 +310,8 @@ func TestFilePickerScrollsALongDriveList(t *testing.T) {
 	for i := range 12 {
 		drives = append(drives, fmt.Sprintf("D%02d:%c", i, filepath.Separator))
 	}
-	volumes = func() []string { return drives }
-	t.Cleanup(func() { volumes = nil })
-
 	body := layout.Rect{W: 60, H: 14}
-	p := newPicker(start).Resize(body).(FilePicker)
+	p := withVolumes(newPicker(start), func() []string { return drives }).Resize(body).(FilePicker)
 	p, cmd := pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyLeft})
 	p = load(t, p, cmd)
 	require.Contains(t, ansi.Strip(p.View(body)), "↓ 6 more")

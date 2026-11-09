@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"strings"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -114,6 +115,20 @@ func (m Model) Shown() float64 { return m.spring.Value() }
 
 // Active reports whether the bar is still moving.
 func (m Model) Active() bool { return m.spring.Active() }
+
+// Tick is the command for the bar's next frame, nil once it has settled.
+func (m Model) Tick() tea.Cmd { return m.spring.Tick() }
+
+// FrameAt is the bar's frame for at, for a test or a host that delivers
+// frames itself.
+func (m Model) FrameAt(at time.Time) tea.Msg { return m.spring.FrameAt(at) }
+
+// Advance is the bar moved to now, and whether it settled.
+func (m Model) Advance(now time.Time) (Model, bool) {
+	var done bool
+	m.spring, done = m.spring.Advance(now)
+	return m, done
+}
 
 // Update moves the bar on its own frames until it settles.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {

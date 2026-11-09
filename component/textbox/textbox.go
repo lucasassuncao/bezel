@@ -262,7 +262,7 @@ func (m Model) Copy() tea.Cmd {
 		return nil
 	}
 	text := m.SelectedText()
-	return clip.Copy(m.write, text, func(err error) tea.Msg { return CopiedMsg{Text: text, Err: err} })
+	return clip.Copy(m.write, text, 0, func(err error) tea.Msg { return CopiedMsg{Text: text, Err: err} })
 }
 
 // WithCharLimit caps the text at n characters, a line break counting as one:
@@ -786,7 +786,7 @@ func (m Model) key(k tea.KeyPressMsg) (Model, tea.Cmd) {
 	case wordKey(k, keys) != nil:
 		m = m.setLine(wordKey(k, keys)(l.Line))
 	case key.Matches(k, keys.Paste):
-		return m, clip.Paste(m.clipboard) // it comes back as a tea.PasteMsg
+		return m, clip.Paste(m.clipboard, 0) // it comes back as a tea.PasteMsg
 	default:
 		text := edit.Printable(k.Key().Text)
 		if text == "" || k.Mod&typingMods != 0 {

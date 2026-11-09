@@ -42,10 +42,6 @@ func VimFilePickerKeys() FilePickerKeys { return FilePickerKeys(filepicker.VimKe
 // title, the directory and the hint, and a gap after each of the first two.
 const pickerChrome = 6
 
-// volumes lists the drives for every picker; nil is the system's. A
-// variable so tests can stand in their own.
-var volumes func() []string
-
 // NewFilePicker browses dir, files only, without hidden entries. onPick,
 // which may be nil, gets the absolute path.
 func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, th theme.Resolved) FilePicker {
@@ -108,7 +104,7 @@ func (p FilePicker) Update(msg tea.Msg) (Overlay, bezel.Result) {
 		msg = m.Msg
 	}
 	var r bezel.Result
-	p.m, r = p.m.WithVolumes(volumes).Update(msg)
+	p.m, r = p.m.Update(msg)
 	_, isKey := msg.(tea.KeyPressMsg)
 	handled := isKey || r.Handled
 	path, picked := p.m.Picked()

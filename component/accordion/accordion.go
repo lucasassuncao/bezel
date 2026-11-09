@@ -150,6 +150,18 @@ func (m Model) Active() bool {
 	return false
 }
 
+// Tick is the command for the next frame of every section still moving, nil
+// once all have settled.
+func (m Model) Tick() tea.Cmd {
+	var cmds []tea.Cmd
+	for _, f := range m.folds {
+		if f.run.Active() {
+			cmds = append(cmds, f.run.Tick())
+		}
+	}
+	return tea.Batch(cmds...)
+}
+
 // Advance is every opening or closing section at now, and whether all have
 // settled; each section keeps its own clock, so there is no one FrameAt.
 func (m Model) Advance(now time.Time) (Model, bool) {

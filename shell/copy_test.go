@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/lucasassuncao/bezel/internal/clip"
 )
 
 // run feeds a command's message back into the shell, the way the program would.
@@ -44,13 +42,10 @@ func TestCopyReportsTheFailureInTheAppsWords(t *testing.T) {
 // A helper that never returns must not freeze the program: the copy gives up
 // and says what is most likely wrong.
 func TestCopyGivesUpOnAHelperThatHangs(t *testing.T) {
-	old := clip.Timeout
-	clip.Timeout = 20 * time.Millisecond
-	t.Cleanup(func() { clip.Timeout = old })
-
 	block := make(chan struct{})
 	defer close(block)
 	s := sized(New(clipConfig(func(string) error { <-block; return nil })))
+	s.clipLimit = 20 * time.Millisecond
 
 	cmd := s.Copy("x", "copied", "copy")
 	s = run(t, s, func() any { return cmd() })
@@ -65,27 +60,6 @@ func TestCopyStatusIsSafeToDraw(t *testing.T) {
 	cmd := s.Copy("x", "copied", "copy")
 	s = run(t, s, func() any { return cmd() })
 	require.NotContains(t, s.Status(), "\x1b")
-}
-
-// The timeout, like the writer, is read when Copy is called, on the loop.
-func TestCopyUsesTheTimeoutSetWhenItWasCalled(t *testing.T) {
-	old := clip.Timeout
-	t.Cleanup(func() { clip.Timeout = old })
-	clip.Timeout = 20 * time.Millisecond
-
-	block := make(chan struct{})
-	defer close(block)
-	s := sized(New(clipConfig(func(string) error { <-block; return nil })))
-	cmd := s.Copy("x", "copied", "copy")
-	clip.Timeout = time.Hour
-
-	done := make(chan any, 1)
-	go func() { done <- cmd() }()
-	select {
-	case <-done:
-	case <-time.After(5 * time.Second):
-		t.Fatal("the copy waited on the timeout set after it was called")
-	}
 }
 
 // clipConfig is actionConfig writing the clipboard through write.

@@ -106,8 +106,9 @@ type Shell struct {
 	sizes         layout.Sizes // the edges the user moved
 	held          drag         // the edge the mouse holds, while dragging
 	dragging      bool
-	paletteLines  int  // the palette height the user chose; 0 for the Config's
-	paletteDrag   bool // the mouse holds the palette's rule
+	paletteLines  int           // the palette height the user chose; 0 for the Config's
+	paletteDrag   bool          // the mouse holds the palette's rule
+	clipLimit     time.Duration // how long Copy waits on the clipboard; 0 is clip.Timeout
 
 	tab       int
 	focus     []string // per tab, the focused leaf name

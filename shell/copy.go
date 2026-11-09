@@ -24,7 +24,7 @@ var errClipboardTimeout = errors.New("the clipboard did not answer: check that x
 // instead of freezing the program.
 func (s Shell) Copy(text, done, failed string) tea.Cmd {
 	s = s.ready()
-	return clip.Copy(s.cfg.Clipboard, text, func(err error) tea.Msg {
+	return clip.Copy(s.cfg.Clipboard, text, s.clipLimit, func(err error) tea.Msg {
 		if errors.Is(err, clip.ErrTimeout) {
 			err = errClipboardTimeout
 		}

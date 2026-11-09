@@ -197,3 +197,13 @@ func TestAClickOnAHeadingTogglesIt(t *testing.T) {
 	_, r = m.Update(click(30))
 	require.False(t, r.Handled)
 }
+
+func TestTickAsksForFramesOnlyWhileASectionMoves(t *testing.T) {
+	m := New(sections()).SetWidth(30)
+	require.Nil(t, m.Tick(), "nothing moving, no frame")
+	m, _ = m.Toggle(0)
+	require.NotNil(t, m.Tick())
+	m, _ = m.Advance(time.Unix(10, 0))
+	m, _ = m.Advance(time.Unix(11, 0))
+	require.Nil(t, m.Tick(), "settled, the frames stop")
+}

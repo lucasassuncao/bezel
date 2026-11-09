@@ -47,6 +47,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [type Edges](<#Edges>)
 - [type Kind](<#Kind>)
   - [func \(k Kind\) Color\(\) color.Color](<#Kind.Color>)
+  - [func \(k Kind\) On\(\) color.Color](<#Kind.On>)
 - [type PanelStyle](<#PanelStyle>)
 
 
@@ -389,6 +390,15 @@ func (k Kind) Color() color.Color
 ```
 
 Color is k's fixed colour; a Kind out of range is Info's blue.
+
+<a name="Kind.On"></a>
+### func \(Kind\) [On](<https://github.com/lucasassuncao/bezel/blob/main/draw/kind.go#L36>)
+
+```go
+func (k Kind) On() color.Color
+```
+
+On is the colour of text drawn over a Kind's Color: near black, which reads on all four.
 
 <a name="PanelStyle"></a>
 ## type [PanelStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L15-L21>)
