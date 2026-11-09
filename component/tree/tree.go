@@ -608,9 +608,8 @@ func (m Model[N]) Reveal(match func(N) bool) (Model[N], bool) {
 }
 
 // View renders the visible rows through row, which draws one node knowing
-// whether it is under the cursor. The last row becomes "↓ N more" when rows
-// overflow; short trees are padded to Height. A tree not yet sized
-// (Height <= 0) renders nothing.
+// whether it is under the cursor. Overflow ends in a "↓ N more" row, a short
+// tree is padded to Height and an unsized one (Height <= 0) renders nothing.
 func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) string) string {
 	if row == nil {
 		row = func(N, int, bool) string { return "" }

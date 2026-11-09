@@ -24,19 +24,17 @@ import (
 	"github.com/lucasassuncao/bezel/theme"
 )
 
-// Row is one line, carrying a payload of the caller's type T. A Section row
-// is a heading (or a blank spacer when its Label is empty) and cannot be
-// selected. Mark is a glyph before the label; Style colours an unselected
-// row, falling back to the theme's Dim. A Description shows muted under the
-// label, and once one row has one every row takes two lines.
+// Row is one line, carrying a payload of the caller's type T. A Section row is
+// a heading, or a blank spacer with no Label, and cannot be selected. Once one
+// row has a Description, shown muted under the label, every row takes two lines.
 type Row[T any] struct {
 	Label       string
 	Description string
 	Section     bool
-	Mark        string
-	Busy        bool // a spinner turns in place of Mark
-	Checked     bool // ticked for a batch, while the list is WithMulti
-	Style       *lipgloss.Style
+	Mark        string          // a glyph before the label
+	Busy        bool            // a spinner turns in place of Mark
+	Checked     bool            // ticked for a batch, while the list is WithMulti
+	Style       *lipgloss.Style // a row off the cursor; nil is the theme's Dim
 	Value       T
 }
 
@@ -114,9 +112,8 @@ type Styles struct {
 }
 
 // DefaultStyles draw the cursor row in the cursor role over dim rows, the
-// title in bold accent and the new and removed rows fading through the
-// accent and the border; a busy row's spinner and a checked box are in the
-// accent, an empty box muted.
+// title, spinner and checked box in the accent, and new and removed rows
+// fading through the accent and the border.
 func DefaultStyles(th theme.Resolved) Styles {
 	return Styles{
 		Title: th.Accent.Bold(true), Section: th.Section, Row: th.Dim, Cursor: th.Cursor,

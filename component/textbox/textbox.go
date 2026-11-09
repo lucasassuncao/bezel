@@ -45,10 +45,9 @@ type Keys struct {
 	Copy, Cut                                                key.Binding // the selection, to the clipboard
 }
 
-// DefaultKeys are the arrows, pgup/pgdown, ctrl+home/end for the ends of the
-// text, and the readline keys an input answers to, ctrl+v to paste; shift
-// with a move selects, alt+a selects everything, alt+w copies it and alt+x
-// cuts it; alt+u, alt+l and alt+c change a word's case, ctrl+t transposes.
+// DefaultKeys are the arrows, pgup/pgdown, ctrl+home/end, ctrl+v to paste and
+// an input's readline keys; shift with a move selects, alt+a/w/x select all,
+// copy and cut, alt+u/l/c change a word's case and ctrl+t transposes.
 func DefaultKeys() Keys {
 	return Keys{
 		Left:              key.New("left", "ctrl+b"),

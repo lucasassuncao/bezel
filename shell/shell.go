@@ -37,10 +37,9 @@ type Context struct {
 	Can           func(Capability) bool
 }
 
-// Tab answers for one screen of the app: its name in the strip, the status
-// text and the keys for where the user is. Status and Actions run several
-// times a frame, so keep them cheap and free of side effects. A Tab that is a
-// value is read as given: hand it back through SetTabs when it changes.
+// Tab answers for one screen: its name in the strip, its status and keys.
+// Status and Actions run several times a frame, so keep them cheap and pure.
+// A Tab held by value is read as given: hand it back through SetTabs.
 type Tab interface {
 	Name() string
 	Status(ctx Context) string

@@ -72,12 +72,12 @@ func (a Scene) static(cv cells.Canvas, w, h int) {
 	}
 }
 
-// plasma colours every cell's background by the classic sum of sines, rows
-// counted double so the ripples are round.
 // plasmaShades is how many steps the gradient takes: blending once per shade
 // a frame, not once per cell, and finer than the eye tells apart.
 const plasmaShades = 64
 
+// plasma colours every cell's background by the classic sum of sines, rows
+// counted double so the ripples are round.
 func (a Scene) plasma(cv cells.Canvas, w, h int) {
 	from, to := a.color(0), a.color(1)
 	var shades [plasmaShades]color.Color

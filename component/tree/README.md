@@ -454,13 +454,13 @@ func (m Model[N]) Update(msg tea.Msg) (Model[N], bezel.Result)
 Update takes the tree's keys, a bezel.ClickMsg on a row and the Busy spinner's frames. Opening or closing a parent reports an [Expanded](<#Expanded>) or a [Collapsed](<#Collapsed>); any other message comes back unhandled and unchanged.
 
 <a name="Model[N].View"></a>
-### func \(Model\[N\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L614>)
+### func \(Model\[N\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L613>)
 
 ```go
 func (m Model[N]) View(th theme.Resolved, row func(n N, idx int, selected bool) string) string
 ```
 
-View renders the visible rows through row, which draws one node knowing whether it is under the cursor. The last row becomes "↓ N more" when rows overflow; short trees are padded to Height. A tree not yet sized \(Height \<= 0\) renders nothing.
+View renders the visible rows through row, which draws one node knowing whether it is under the cursor. Overflow ends in a "↓ N more" row, a short tree is padded to Height and an unsized one \(Height \<= 0\) renders nothing.
 
 <a name="Model[N].Visible"></a>
 ### func \(Model\[N\]\) [Visible](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/tree.go#L290>)

@@ -8,7 +8,7 @@
 import "github.com/lucasassuncao/bezel/component/form"
 ```
 
-Package form is the controls that ask for a value: a text input, a select, a date, a number, a slider, tags, checkboxes, radios, a toggle and a button, in a Form that moves focus with tab and shift\+tab. Each control is one row, its label in a shared column, painted in the theme the Form was built with.
+Package form is the controls that ask for a value, from a text input to a button, in a Form that moves focus with tab and shift\+tab. Each control is one row, its label in a shared column, painted in the Form's theme.
 
 ## Index
 
@@ -155,7 +155,7 @@ Package form is the controls that ask for a value: a text input, a select, a dat
 
 
 <a name="Get"></a>
-## func [Get](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L196>)
+## func [Get](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L195>)
 
 ```go
 func Get[T Field](f Form, i int) (T, bool)
@@ -449,7 +449,7 @@ func (d Date) WithKeys(k Keys) Date
 WithKeys rebinds the field: Press opens and picks, Close closes.
 
 <a name="Field"></a>
-## type [Field](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L23-L29>)
+## type [Field](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L22-L28>)
 
 Field is one control. It gets keys only while focused, and draws its label padded to labelW so a form's values start in one column.
 
@@ -464,7 +464,7 @@ type Field interface {
 ```
 
 <a name="Form"></a>
-## type [Form](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L107-L114>)
+## type [Form](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L106-L113>)
 
 Form is fields in a column. tab and shift\+tab move the focus; every other key goes to the field in focus.
 
@@ -475,7 +475,7 @@ type Form struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L118>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L117>)
 
 ```go
 func New(th theme.Resolved, fields ...Field) Form
@@ -484,7 +484,7 @@ func New(th theme.Resolved, fields ...Field) Form
 New is a form over fields, painted in th and focused on the first; nil fields are left out. Init starts the focused field.
 
 <a name="Form.Field"></a>
-### func \(Form\) [Field](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L187>)
+### func \(Form\) [Field](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L186>)
 
 ```go
 func (f Form) Field(i int) Field
@@ -493,7 +493,7 @@ func (f Form) Field(i int) Field
 Field is the i\-th field as it is now, nil when i is out of range; assert it to read its value, or use Get.
 
 <a name="Form.Focused"></a>
-### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L240>)
+### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L239>)
 
 ```go
 func (f Form) Focused() int
@@ -502,7 +502,7 @@ func (f Form) Focused() int
 Focused is the index of the field in focus.
 
 <a name="Form.Init"></a>
-### func \(Form\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L129>)
+### func \(Form\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L128>)
 
 ```go
 func (f Form) Init() tea.Cmd
@@ -511,7 +511,7 @@ func (f Form) Init() tea.Cmd
 Init is the focused field's command when it is an Initer, such as the caret blink of the input the form opens on.
 
 <a name="Form.Legend"></a>
-### func \(Form\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L208>)
+### func \(Form\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L207>)
 
 ```go
 func (f Form) Legend() []legend.Entry
@@ -520,7 +520,7 @@ func (f Form) Legend() []legend.Entry
 Legend is the keys for where the focus is: an open select's own, or tab and shift\+tab with what the focused control answers to. An app's own Field adds nothing.
 
 <a name="Form.SetTheme"></a>
-### func \(Form\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L141>)
+### func \(Form\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L140>)
 
 ```go
 func (f Form) SetTheme(th theme.Resolved) Form
@@ -529,7 +529,7 @@ func (f Form) SetTheme(th theme.Resolved) Form
 SetTheme repaints every bezel control in the form; a Field of the app's own keeps its look.
 
 <a name="Form.SetWidth"></a>
-### func \(Form\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L285>)
+### func \(Form\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L284>)
 
 ```go
 func (f Form) SetWidth(w int) Form
@@ -538,7 +538,7 @@ func (f Form) SetWidth(w int) Form
 SetWidth changes the cells every row of the form takes.
 
 <a name="Form.Update"></a>
-### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L247>)
+### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L246>)
 
 ```go
 func (f Form) Update(msg tea.Msg) (Form, bezel.Result)
@@ -547,7 +547,7 @@ func (f Form) Update(msg tea.Msg) (Form, bezel.Result)
 Update moves the focus on tab and shift\+tab \(unless the field holds them\), presses the field a bezel.ClickMsg lands on, and hands every other message to the focused field. A click past the fields comes back unhandled.
 
 <a name="Form.View"></a>
-### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L341>)
+### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L340>)
 
 ```go
 func (f Form) View() string
@@ -556,7 +556,7 @@ func (f Form) View() string
 View is every field, SetWidth cells wide, labels in one column; nothing until SetWidth sizes it.
 
 <a name="Form.WithKeys"></a>
-### func \(Form\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L174>)
+### func \(Form\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L173>)
 
 ```go
 func (f Form) WithKeys(k Keys) Form
@@ -565,7 +565,7 @@ func (f Form) WithKeys(k Keys) Form
 WithKeys rebinds the form and every bezel control in it; a Field of the app's own keeps its keys.
 
 <a name="Form.WithStyles"></a>
-### func \(Form\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L148>)
+### func \(Form\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L147>)
 
 ```go
 func (f Form) WithStyles(edit func(Styles) Styles) Form
@@ -574,7 +574,7 @@ func (f Form) WithStyles(edit func(Styles) Styles) Form
 WithStyles changes the styles derived from the theme through edit, now and after every SetTheme. It replaces an earlier edit.
 
 <a name="Holder"></a>
-## type [Holder](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L37>)
+## type [Holder](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L36>)
 
 Holder is a Field that wants the keys a Form would otherwise take, such as an open Select keeping tab and esc until it closes.
 
@@ -583,7 +583,7 @@ type Holder interface{ Holding() bool }
 ```
 
 <a name="Initer"></a>
-## type [Initer](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L33>)
+## type [Initer](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L32>)
 
 Initer is a Field with a command to run when the form opens focused on it. Form.Init runs it.
 
@@ -720,7 +720,7 @@ func (i Input) WithWidth(width int) Input
 WithWidth keeps the field width cells wide whatever it holds.
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L41-L48>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L40-L47>)
 
 Keys are the bindings a form and its controls answer to. Each control reads the ones that concern it, and the Form only Next and Prev.
 
@@ -736,7 +736,7 @@ type Keys struct {
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L51>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L50>)
 
 ```go
 func DefaultKeys() Keys
@@ -745,7 +745,7 @@ func DefaultKeys() Keys
 DefaultKeys are tab and shift\+tab, space or enter, the arrows and esc.
 
 <a name="VimKeys"></a>
-### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L67>)
+### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L66>)
 
 ```go
 func VimKeys() Keys
@@ -1212,7 +1212,7 @@ func (s Slider) WithWidth(n int) Slider
 WithWidth draws the bar n cells wide, at least 2.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L83-L94>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L82-L93>)
 
 Styles are how a form paints its controls; one set serves every control.
 
@@ -1232,7 +1232,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L98>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L97>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles

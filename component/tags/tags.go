@@ -149,10 +149,9 @@ func (m Model) Legend() []legend.Entry {
 	return append(legend.FromBindings([]key.Binding{m.keys.Add, m.keys.Remove}), m.in.Legend()...)
 }
 
-// Update adds the text as a tag on Add, reporting [Added], and takes the last
-// tag off on Remove while the text is empty, reporting [Removed]; a click on
-// a chip takes that one off. Everything else goes to the input. A tag already
-// there is not added twice.
+// Update adds the text as a tag on Add unless it is already there, and takes
+// the last one off on Remove while the text is empty, or the one clicked. It
+// reports [Added] or [Removed]; everything else goes to the input.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	if c, ok := msg.(bezel.ClickMsg); ok {
 		i, field := m.chipAt(c.X)
