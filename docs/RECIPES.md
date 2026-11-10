@@ -90,7 +90,7 @@ for i, f := range files {
 log.Info("moved", "files", len(files), "to", dest)
 ```
 
-`theme.DarkTerminal()` asks the terminal for its background, since no bubbletea program is there to send `tea.BackgroundColorMsg`. The logger hangs every attribute under its message as a tree and wraps long values at the terminal's width.
+`theme.DarkTerminal()` asks the terminal for its background, since no bubbletea program is there to send `tea.BackgroundColorMsg`. The logger hangs every attribute under its message as a tree and wraps long values at the terminal's width. [A CLI without the frame](CLI.md) has the rest: every form field asked on its own with `inline.Ask`, each with its recording.
 
 ## A read-only mode
 

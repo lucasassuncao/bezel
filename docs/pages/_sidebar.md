@@ -1,6 +1,7 @@
 - **Start**
   - [A first app](EXAMPLE.md)
   - [The frame](FRAME.md)
+  - [A CLI without the frame](CLI.md)
   - [Theme](THEME.md)
   - [Recipes](RECIPES.md)
 

@@ -8,11 +8,12 @@
 import "github.com/lucasassuncao/bezel/component/inline"
 ```
 
-Package inline is for CLIs that print logs and now and then ask one question, beside progress.Bar redrawn with \\r: nothing takes the screen. Theme only: the functions take a theme but keep no Styles to edit.
+Package inline is for CLIs that print logs and now and then ask one question, yes/no or any form field, beside progress.Bar: nothing takes the screen. Theme only: the functions take a theme but keep no Styles to edit.
 
 ## Index
 
 - [Variables](<#variables>)
+- [func Ask\[F form.Field\]\(f F, th theme.Resolved, opts ...tea.ProgramOption\) \(F, error\)](<#Ask>)
 - [func Confirm\(title string, th theme.Resolved, opts ...tea.ProgramOption\) \(bool, error\)](<#Confirm>)
 
 
@@ -23,6 +24,15 @@ Package inline is for CLIs that print logs and now and then ask one question, be
 ```go
 var ErrAborted = errors.New("inline: aborted")
 ```
+
+<a name="Ask"></a>
+## func [Ask](<https://github.com/lucasassuncao/bezel/blob/main/component/inline/ask.go#L22>)
+
+```go
+func Ask[F form.Field](f F, th theme.Resolved, opts ...tea.ProgramOption) (F, error)
+```
+
+Ask asks for one form field below the current line and returns it as the user left it: a select or multiselect opens at once, enter answers, esc or ctrl\+c return ErrAborted. opts reach the program as in Confirm.
 
 <a name="Confirm"></a>
 ## func [Confirm](<https://github.com/lucasassuncao/bezel/blob/main/component/inline/inline.go#L24>)

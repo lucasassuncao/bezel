@@ -46,10 +46,11 @@ A pane missing from the map gives its space back that frame.
 ## Documentation
 
 | Guide | What it covers |
-|---|---|
+| --- | --- |
 | [A first app](docs/EXAMPLE.md) | a small task list built step by step, from the model to its tests |
 | [The frame](docs/FRAME.md) | the shell, layout, tabs, actions, focus, status row, dialogs and palette |
 | [Theme](docs/THEME.md) | the presets, a theme of your own, light and dark, recolouring one component |
+| [A CLI without the frame](docs/CLI.md) | questions, bars and logs printed below a command's output: every form field asked on its own, with a recording each |
 | [Recipes](docs/RECIPES.md) | how to test an app, write a dialog, build a CLI, add a read-only mode, take --theme, animate your own drawing |
 | [Components](docs/COMPONENTS.md) | every package's example and recording |
 | [Effects](docs/EFFECTS.md) | effects, lights and transitions over a drawn block |
@@ -137,15 +138,15 @@ go run ./examples/app
 - [`chart`](component/chart): `Area` and `Spark` charts of a run of numbers, braille `Lines` of several runs over a y axis, labelled `Bars` side by side, a `Heat` grid and a `Donut`.
 - [`icon`](component/icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
 - [`toast`](component/toast): notices that slide into a corner, stack and leave on their own.
-- [`inline`](component/inline): a yes/no question and a progress bar for CLIs that print logs.
+- [`inline`](component/inline): a yes/no question, any form field asked on its own, and a progress bar for CLIs that print logs.
 - [`logger`](component/logger): a `slog.Handler` that hangs every attribute under its message as a tree and wraps long values without cutting them, and `Pane`, a log panel that follows the end as lines arrive and filters them with `/`.
 - [`themebrowser`](component/themebrowser): the preset table behind a `--list-themes` flag.
 
-**Effects**
+**Effects**, in [`effect`](effect): what plays over a block already drawn.
 
 - [`effect`](effect): effects and lights over any drawn block (fades, dissolves, slides, a melt, a tint, a spotlight, a hover), kept to rows or a part of it, transitions from one block to the next, and intent presets.
 
-**Animation**
+**Animation**, in [`animation`](animation): what moves, and the one clock that drives it.
 
 - [`animation`](animation): tweens on a dozen easing curves that delay, repeat and yoyo, springs, points, physics (a drop, a pendulum, an orbit, a flock, a rubber band) and animated chart values, with one clock to drive them; `BEZEL_NO_MOTION` turns motion off and `BEZEL_MOTION` sets its speed.
 - [`animation/text`](animation/text): text that types, scrolls, shimmers, scrambles, rolls, waves, decrypts, blinks and rises.

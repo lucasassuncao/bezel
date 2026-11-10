@@ -1,4 +1,4 @@
-# inline: a CLI that logs, asks one question below the logs, and draws a bar.
+# inline: a CLI that logs, asks for a mirror and a yes/no below the logs, and draws a bar.
 #
 # Record from the repository root: vhs docs/recordings/component/inline.tape
 
@@ -35,6 +35,11 @@ Enter
 Wait+Screen /fetching index/
 Show
 
+Wait+Screen /Mirror/
+Sleep 1.5s
+Down
+Sleep 700ms
+Enter
 Wait+Screen /Download them now/
 Sleep 1.5s
 Type "y"

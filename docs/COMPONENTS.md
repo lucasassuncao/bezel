@@ -150,7 +150,7 @@ A column of questions, each a heading that opens onto its answer, sliding rather
 
 ![accordion](recordings/component/accordion.gif)
 
-## Input
+## Forms and input
 
 What the user types into: a form of controls, a wizard that splits forms into pages, a one-line field, a multi-line field, and the caret any field of your own can draw.
 
@@ -300,15 +300,31 @@ Notices that slide into the top right corner, stack with the newest on top, and 
 
 ## Outside a full screen
 
-For a CLI that prints logs rather than takes the screen, and for the tests that drive a model.
+For a CLI that prints logs rather than takes the screen, and for the tests that drive a model. [A CLI without the frame](CLI.md) puts them together, with a recording of every form field asked on its own.
 
 ### Inline
 
 Source: [`examples/component/inline/main.go`](../examples/component/inline/main.go)
 
-A CLI that prints logs, asks one question below them, then redraws a progress bar in place. Nothing takes over the screen.
+A CLI that prints logs, asks which mirror to use and whether to go ahead below them, then redraws a progress bar in place. Nothing takes over the screen. `Confirm(title, th)` asks yes or no; `Ask(field, th)` asks for any form field on its own, a select or multiselect open at once, and returns it as the user left it:
+
+```go
+mirror, err := inline.Ask(form.NewSelect("Mirror", []string{"europe", "us-east", "asia"}), th)
+if errors.Is(err, inline.ErrAborted) {
+	return nil // esc or ctrl+c
+}
+fmt.Println(mirror.Value())
+```
 
 ![inline](recordings/component/inline.gif)
+
+### Ask
+
+Source: [`examples/component/ask/main.go`](../examples/component/ask/main.go)
+
+One form field asked below a CLI's output with `inline.Ask`, named on the command line: `ask select`, `ask tags`, and the eight others. Each prints a line, asks, and prints what it did with the answer; [A CLI without the frame](CLI.md#any-form-field) has every field's recording.
+
+![ask select](recordings/component/ask/select.gif)
 
 ### Logger
 
@@ -364,7 +380,7 @@ The frame's own keys are not a struct. Each one is a [`shell.Action`](FRAME.md#a
 
 ## Recording
 
-The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the three that print into the terminal rather than take it over, `inline`, `logger` and `themebrowser`, run behind a `clear` so their command line never shows. The galleries, of animation, text, scenes and effects, have a tape per tab. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
+The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the four that print into the terminal rather than take it over, `inline`, `ask`, `logger` and `themebrowser`, run behind a `clear` so their command line never shows. The galleries, of animation, text, scenes and effects, have a tape per tab, and `ask` one per field, under `recordings/component/ask`. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
 
 ```sh
 vhs docs/recordings/component/list.tape
