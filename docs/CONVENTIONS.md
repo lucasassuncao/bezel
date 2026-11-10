@@ -39,7 +39,7 @@ case tea.WindowSizeMsg: // the shell laid out the panes and handed the size on
 
 A size is never a constructor parameter nor an argument of `View`: it comes through `SetHeight`/`SetWidth` once the terminal says how big it is. A model not sized yet draws nothing. A layout that changes without a resize (`SetLayout`) sizes again after the change.
 
-Sized this way: `list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`, `logger.Pane`; `input`, `tags` and `breadcrumb` take a width only; `browser` has `SetListHeight` and `SetPreviewHeight`.
+Sized this way: `list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`, `logger.Pane`; `input`, `tags`, `breadcrumb` and `wizard` take a width only; `browser` has `SetListHeight` and `SetPreviewHeight`.
 
 ### Getters and errors
 
@@ -68,7 +68,7 @@ Where the theme goes depends on who calls `View`. If bezel does, the component k
 | Who calls `View` | Where the theme goes | Packages |
 | --- | --- | --- |
 | bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `overlay`, `textbox`, `input`, `tags`, `cursor`, `logger` |
-| bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic | `form` |
+| bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic; `wizard.New(th, pages...)` repaints each page's form the same way | `form`, `wizard` |
 | the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `calendar`, `breadcrumb`, `timer`, `stopwatch`, `viewport`, `accordion`, `filepicker`, `progress.Model` |
 | nobody: a plain function | after the data | `progress.Bar` and siblings, `chart`, `inline`, `icon.Set.Render` |
 | the shell | `Config.Theme`; `SetTheme` also repaints open dialogs | `shell` |
@@ -96,7 +96,7 @@ Each package is in one class, and a non-themable one says so in its doc comment:
 
 | Class | The app can | Packages |
 | --- | --- | --- |
-| Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `calendar`, `breadcrumb`, `input`, `tags`, `textbox`, `form`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, every `overlay` dialog but `Alert` |
+| Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `calendar`, `breadcrumb`, `input`, `tags`, `textbox`, `form`, `wizard`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, every `overlay` dialog but `Alert` |
 | Theme only | switch the theme (a plain function keeps no edit) | `chart`, `progress.Bar` and siblings, `inline`, `icon.Set.Render` |
 | Non-themable | nothing: the colours mean something, or are arguments | `overlay.Alert` and any `Kind` tint, `toast` (its `draw.Kind` colours are fixed), `animation` and subpackages, `effect`, `themebrowser` |
 
@@ -140,6 +140,7 @@ The events are structs in the component's package. Read them with a type switch 
 | `breadcrumb` | `Chosen{Path}` |
 | `filepicker` | `Chosen{Path}` |
 | `tags` | `Added{Tag}`, `Removed{Tag}` |
+| `wizard` | `Stepped{Step}`, `Done{}` |
 
 An event reports; the app decides what it means. A cursor that starts to move puts its own `Tick()` in `Result.Cmd`, so the app never calls it after `Update`; `Tick()` stays public for after `SetRows`. A new component answers this signature, never a new shape.
 
@@ -172,7 +173,7 @@ case shell.ClickMsg: // already moved into the pane's cells
 	}
 ```
 
-A click enters through `Update`, like a key. `shell.ClickMsg` is `bezel.ClickMsg`: the pane's name, which the app routes by, and the click in the pane's cells. `list`, `table.Model`, `tree` and `filepicker` use `Y`: the first click moves the cursor, a click on the current row does what enter does and reports the same event. `accordion` toggles the heading clicked. `input` puts the caret on the cell clicked, `tags` takes off the chip clicked and reports `Removed`, and `paginator` turns to the dot clicked. `form.Form` focuses the field and presses a button, a checkbox or a toggle. A leaf that tracks press, drag and release (`textbox`) takes the click in the same `Update`, and the drag as the `tea.Mouse*Msg` that `shell.MouseIn` hands it. A dialog of the app's own that wants clicks implements `overlay.Clicker`, a role interface and not a second `Update`.
+A click enters through `Update`, like a key. `shell.ClickMsg` is `bezel.ClickMsg`: the pane's name, which the app routes by, and the click in the pane's cells. `list`, `table.Model`, `tree` and `filepicker` use `Y`: the first click moves the cursor, a click on the current row does what enter does and reports the same event. `accordion` toggles the heading clicked. `input` puts the caret on the cell clicked, `tags` takes off the chip clicked and reports `Removed`, and `paginator` turns to the dot clicked. `form.Form` focuses the field and presses a button, a checkbox or a toggle; `wizard` hands a click on its form to it and turns the page on Back or Next. A leaf that tracks press, drag and release (`textbox`) takes the click in the same `Update`, and the drag as the `tea.Mouse*Msg` that `shell.MouseIn` hands it. A dialog of the app's own that wants clicks implements `overlay.Clicker`, a role interface and not a second `Update`.
 
 The wheel enters the same way, as the `tea.MouseWheelMsg` that `shell.Mouse` moves into the pane. `list`, `table.Model`, `tree`, `filepicker` and `accordion` move the cursor a row a notch, `paginator` a page; `viewport` and `textbox` scroll the text and leave the cursor. A turn with shift held, or sideways, pans, so only the `viewport` takes it.
 

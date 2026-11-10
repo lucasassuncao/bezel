@@ -297,7 +297,7 @@ func FuzzFormStaysInItsWidth(f *testing.F) {
 			t.Skip()
 		}
 		w = (w%100 + 100) % 100
-		fm := New(th(), NewInput(label), NewSelect(label, []string{"a", label}), NewCheckbox(label), NewToggle(label), NewButton(button, nil)).SetWidth(w)
+		fm := New(th(), NewInput(label), NewSelect(label, []string{"a", label}), NewMultiSelect(label, []string{"a", label}).WithChecked(0, 1), NewCheckbox(label), NewToggle(label), NewButton(button, nil)).SetWidth(w)
 		for i, l := range strings.Split(fm.View(), "\n") {
 			require.LessOrEqual(t, ansi.StringWidth(l), w, "row %d: %q", i, l)
 		}

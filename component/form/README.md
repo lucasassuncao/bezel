@@ -76,6 +76,21 @@ Package form is the controls that ask for a value, from a text input to a button
 - [type Keys](<#Keys>)
   - [func DefaultKeys\(\) Keys](<#DefaultKeys>)
   - [func VimKeys\(\) Keys](<#VimKeys>)
+- [type MultiSelect](<#MultiSelect>)
+  - [func NewMultiSelect\(label string, options \[\]string\) MultiSelect](<#NewMultiSelect>)
+  - [func \(m MultiSelect\) Blur\(\) Field](<#MultiSelect.Blur>)
+  - [func \(m MultiSelect\) Checked\(\) \[\]int](<#MultiSelect.Checked>)
+  - [func \(m MultiSelect\) Filter\(\) string](<#MultiSelect.Filter>)
+  - [func \(m MultiSelect\) Focus\(\) \(Field, tea.Cmd\)](<#MultiSelect.Focus>)
+  - [func \(m MultiSelect\) Holding\(\) bool](<#MultiSelect.Holding>)
+  - [func \(m MultiSelect\) Label\(\) string](<#MultiSelect.Label>)
+  - [func \(m MultiSelect\) Update\(msg tea.Msg\) \(Field, bezel.Result\)](<#MultiSelect.Update>)
+  - [func \(m MultiSelect\) Values\(\) \[\]string](<#MultiSelect.Values>)
+  - [func \(m MultiSelect\) View\(focused bool, labelW, width int\) string](<#MultiSelect.View>)
+  - [func \(m MultiSelect\) WithChecked\(indices ...int\) MultiSelect](<#MultiSelect.WithChecked>)
+  - [func \(m MultiSelect\) WithHeight\(rows int\) MultiSelect](<#MultiSelect.WithHeight>)
+  - [func \(m MultiSelect\) WithIcons\(set icon.Set\) MultiSelect](<#MultiSelect.WithIcons>)
+  - [func \(m MultiSelect\) WithKeys\(k Keys\) MultiSelect](<#MultiSelect.WithKeys>)
 - [type Number](<#Number>)
   - [func NewNumber\(label string, value float64\) Number](<#NewNumber>)
   - [func \(n Number\) Blur\(\) Field](<#Number.Blur>)
@@ -155,7 +170,7 @@ Package form is the controls that ask for a value, from a text input to a button
 
 
 <a name="Get"></a>
-## func [Get](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L195>)
+## func [Get](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L200>)
 
 ```go
 func Get[T Field](f Form, i int) (T, bool)
@@ -464,7 +479,7 @@ type Field interface {
 ```
 
 <a name="Form"></a>
-## type [Form](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L106-L113>)
+## type [Form](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L111-L118>)
 
 Form is fields in a column. tab and shift\+tab move the focus; every other key goes to the field in focus.
 
@@ -475,7 +490,7 @@ type Form struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L117>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L122>)
 
 ```go
 func New(th theme.Resolved, fields ...Field) Form
@@ -484,7 +499,7 @@ func New(th theme.Resolved, fields ...Field) Form
 New is a form over fields, painted in th and focused on the first; nil fields are left out. Init starts the focused field.
 
 <a name="Form.Field"></a>
-### func \(Form\) [Field](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L186>)
+### func \(Form\) [Field](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L191>)
 
 ```go
 func (f Form) Field(i int) Field
@@ -493,7 +508,7 @@ func (f Form) Field(i int) Field
 Field is the i\-th field as it is now, nil when i is out of range; assert it to read its value, or use Get.
 
 <a name="Form.Focused"></a>
-### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L239>)
+### func \(Form\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L249>)
 
 ```go
 func (f Form) Focused() int
@@ -502,7 +517,7 @@ func (f Form) Focused() int
 Focused is the index of the field in focus.
 
 <a name="Form.Init"></a>
-### func \(Form\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L128>)
+### func \(Form\) [Init](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L133>)
 
 ```go
 func (f Form) Init() tea.Cmd
@@ -511,7 +526,7 @@ func (f Form) Init() tea.Cmd
 Init is the focused field's command when it is an Initer, such as the caret blink of the input the form opens on.
 
 <a name="Form.Legend"></a>
-### func \(Form\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L207>)
+### func \(Form\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L212>)
 
 ```go
 func (f Form) Legend() []legend.Entry
@@ -520,7 +535,7 @@ func (f Form) Legend() []legend.Entry
 Legend is the keys for where the focus is: an open select's own, or tab and shift\+tab with what the focused control answers to. An app's own Field adds nothing.
 
 <a name="Form.SetTheme"></a>
-### func \(Form\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L140>)
+### func \(Form\) [SetTheme](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L145>)
 
 ```go
 func (f Form) SetTheme(th theme.Resolved) Form
@@ -529,7 +544,7 @@ func (f Form) SetTheme(th theme.Resolved) Form
 SetTheme repaints every bezel control in the form; a Field of the app's own keeps its look.
 
 <a name="Form.SetWidth"></a>
-### func \(Form\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L284>)
+### func \(Form\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L294>)
 
 ```go
 func (f Form) SetWidth(w int) Form
@@ -538,7 +553,7 @@ func (f Form) SetWidth(w int) Form
 SetWidth changes the cells every row of the form takes.
 
 <a name="Form.Update"></a>
-### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L246>)
+### func \(Form\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L256>)
 
 ```go
 func (f Form) Update(msg tea.Msg) (Form, bezel.Result)
@@ -547,7 +562,7 @@ func (f Form) Update(msg tea.Msg) (Form, bezel.Result)
 Update moves the focus on tab and shift\+tab \(unless the field holds them\), presses the field a bezel.ClickMsg lands on, and hands every other message to the focused field. A click past the fields comes back unhandled.
 
 <a name="Form.View"></a>
-### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L340>)
+### func \(Form\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L350>)
 
 ```go
 func (f Form) View() string
@@ -556,7 +571,7 @@ func (f Form) View() string
 View is every field, SetWidth cells wide, labels in one column; nothing until SetWidth sizes it.
 
 <a name="Form.WithKeys"></a>
-### func \(Form\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L173>)
+### func \(Form\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L178>)
 
 ```go
 func (f Form) WithKeys(k Keys) Form
@@ -565,7 +580,7 @@ func (f Form) WithKeys(k Keys) Form
 WithKeys rebinds the form and every bezel control in it; a Field of the app's own keeps its keys.
 
 <a name="Form.WithStyles"></a>
-### func \(Form\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L147>)
+### func \(Form\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L152>)
 
 ```go
 func (f Form) WithStyles(edit func(Styles) Styles) Form
@@ -720,7 +735,7 @@ func (i Input) WithWidth(width int) Input
 WithWidth keeps the field width cells wide whatever it holds.
 
 <a name="Keys"></a>
-## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L40-L47>)
+## type [Keys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L40-L49>)
 
 Keys are the bindings a form and its controls answer to. Each control reads the ones that concern it, and the Form only Next and Prev.
 
@@ -731,27 +746,166 @@ type Keys struct {
     Left, Right key.Binding // a radio; either one flips a toggle
     Up, Down    key.Binding // an open select; a number steps on them
     Close       key.Binding // an open select, leaving its value as it was
-    Erase       key.Binding // a number's last character
+    Erase       key.Binding // a number's last character, a multiselect filter's
+    Check       key.Binding // an open multiselect: the option under the cursor
+    CheckAll    key.Binding // an open multiselect: every option its filter shows
 }
 ```
 
 <a name="DefaultKeys"></a>
-### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L50>)
+### func [DefaultKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L53>)
 
 ```go
 func DefaultKeys() Keys
 ```
 
-DefaultKeys are tab and shift\+tab, space or enter, the arrows and esc.
+DefaultKeys are tab and shift\+tab, space or enter, the arrows, esc and ctrl\+a.
 
 <a name="VimKeys"></a>
-### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L66>)
+### func [VimKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L71>)
 
 ```go
 func VimKeys() Keys
 ```
 
-VimKeys are DefaultKeys with h/l added to a radio and a toggle and k/j to an open select. An input still takes them as text.
+VimKeys are DefaultKeys with h/l added to a radio and a toggle and k/j to an open select. An input and a multiselect's filter still take them as text.
+
+<a name="MultiSelect"></a>
+## type [MultiSelect](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L23-L37>)
+
+MultiSelect is any number of values out of a list that opens under it: enter opens it, typing filters it fuzzily, space checks the option under the cursor, enter keeps the checks and esc puts back the ones it opened with.
+
+```go
+type MultiSelect struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewMultiSelect"></a>
+### func [NewMultiSelect](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L40>)
+
+```go
+func NewMultiSelect(label string, options []string) MultiSelect
+```
+
+NewMultiSelect offers options with none checked and six rows open.
+
+<a name="MultiSelect.Blur"></a>
+### func \(MultiSelect\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L115>)
+
+```go
+func (m MultiSelect) Blur() Field
+```
+
+Blur closes the list and keeps its checks, as enter would.
+
+<a name="MultiSelect.Checked"></a>
+### func \(MultiSelect\) [Checked](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L87>)
+
+```go
+func (m MultiSelect) Checked() []int
+```
+
+Checked is the indices of the checked options, in the options' order.
+
+<a name="MultiSelect.Filter"></a>
+### func \(MultiSelect\) [Filter](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L107>)
+
+```go
+func (m MultiSelect) Filter() string
+```
+
+Filter is the text typed into the open list.
+
+<a name="MultiSelect.Focus"></a>
+### func \(MultiSelect\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L112>)
+
+```go
+func (m MultiSelect) Focus() (Field, tea.Cmd)
+```
+
+
+
+<a name="MultiSelect.Holding"></a>
+### func \(MultiSelect\) [Holding](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L111>)
+
+```go
+func (m MultiSelect) Holding() bool
+```
+
+Holding reports whether the list is open, keeping tab and esc from the form.
+
+<a name="MultiSelect.Label"></a>
+### func \(MultiSelect\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L108>)
+
+```go
+func (m MultiSelect) Label() string
+```
+
+
+
+<a name="MultiSelect.Update"></a>
+### func \(MultiSelect\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L125>)
+
+```go
+func (m MultiSelect) Update(msg tea.Msg) (Field, bezel.Result)
+```
+
+Update opens on Press. While open it takes Up, Down, Check, CheckAll, Press, Close, Erase and every key that types a character into the filter.
+
+<a name="MultiSelect.Values"></a>
+### func \(MultiSelect\) [Values](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L98>)
+
+```go
+func (m MultiSelect) Values() []string
+```
+
+Values is the checked options, in the options' order.
+
+<a name="MultiSelect.View"></a>
+### func \(MultiSelect\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L233>)
+
+```go
+func (m MultiSelect) View(focused bool, labelW, width int) string
+```
+
+
+
+<a name="MultiSelect.WithChecked"></a>
+### func \(MultiSelect\) [WithChecked](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L50>)
+
+```go
+func (m MultiSelect) WithChecked(indices ...int) MultiSelect
+```
+
+WithChecked checks the options at the indices given; one out of range is left out. It is the way a form opens on saved values.
+
+<a name="MultiSelect.WithHeight"></a>
+### func \(MultiSelect\) [WithHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L61>)
+
+```go
+func (m MultiSelect) WithHeight(rows int) MultiSelect
+```
+
+WithHeight shows at most rows options while open, at least one.
+
+<a name="MultiSelect.WithIcons"></a>
+### func \(MultiSelect\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L81>)
+
+```go
+func (m MultiSelect) WithIcons(set icon.Set) MultiSelect
+```
+
+WithIcons draws the list's marks from set instead of icon.FromEnv's.
+
+<a name="MultiSelect.WithKeys"></a>
+### func \(MultiSelect\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/multi.go#L68>)
+
+```go
+func (m MultiSelect) WithKeys(k Keys) MultiSelect
+```
+
+WithKeys rebinds the field: Press opens it and keeps the checks, Up and Down move, Check and CheckAll check, Erase edits the filter, Close puts them back.
 
 <a name="Number"></a>
 ## type [Number](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L63-L69>)
@@ -1212,7 +1366,7 @@ func (s Slider) WithWidth(n int) Slider
 WithWidth draws the bar n cells wide, at least 2.
 
 <a name="Styles"></a>
-## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L82-L93>)
+## type [Styles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L87-L98>)
 
 Styles are how a form paints its controls; one set serves every control.
 
@@ -1232,7 +1386,7 @@ type Styles struct {
 ```
 
 <a name="DefaultStyles"></a>
-### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L97>)
+### func [DefaultStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/form/form.go#L102>)
 
 ```go
 func DefaultStyles(th theme.Resolved) Styles

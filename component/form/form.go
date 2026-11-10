@@ -43,26 +43,31 @@ type Keys struct {
 	Left, Right key.Binding // a radio; either one flips a toggle
 	Up, Down    key.Binding // an open select; a number steps on them
 	Close       key.Binding // an open select, leaving its value as it was
-	Erase       key.Binding // a number's last character
+	Erase       key.Binding // a number's last character, a multiselect filter's
+	Check       key.Binding // an open multiselect: the option under the cursor
+	CheckAll    key.Binding // an open multiselect: every option its filter shows
 }
 
-// DefaultKeys are tab and shift+tab, space or enter, the arrows and esc.
+// DefaultKeys are tab and shift+tab, space or enter, the arrows, esc and
+// ctrl+a.
 func DefaultKeys() Keys {
 	return Keys{
-		Next:  key.New("tab").WithHelp("tab", "next"),
-		Prev:  key.New("shift+tab").WithHelp("shift+tab", "previous"),
-		Press: key.New("space", "enter").WithHelp("space", "press"),
-		Left:  key.New("left").WithHelp("←/→", "choose"),
-		Right: key.New("right"),
-		Up:    key.New("up").WithHelp("↑/↓", "move"),
-		Down:  key.New("down"),
-		Close: key.New("esc").WithHelp("esc", "close"),
-		Erase: key.New("backspace", "ctrl+h"),
+		Next:     key.New("tab").WithHelp("tab", "next"),
+		Prev:     key.New("shift+tab").WithHelp("shift+tab", "previous"),
+		Press:    key.New("space", "enter").WithHelp("space", "press"),
+		Left:     key.New("left").WithHelp("←/→", "choose"),
+		Right:    key.New("right"),
+		Up:       key.New("up").WithHelp("↑/↓", "move"),
+		Down:     key.New("down"),
+		Close:    key.New("esc").WithHelp("esc", "close"),
+		Erase:    key.New("backspace", "ctrl+h"),
+		Check:    key.New("space").WithHelp("space", "check"),
+		CheckAll: key.New("ctrl+a").WithHelp("ctrl+a", "check all"),
 	}
 }
 
 // VimKeys are DefaultKeys with h/l added to a radio and a toggle and k/j to
-// an open select. An input still takes them as text.
+// an open select. An input and a multiselect's filter still take them as text.
 func VimKeys() Keys {
 	k := DefaultKeys()
 	k.Left, k.Right = key.New("left", "h").WithHelp("h/l", "choose"), key.New("right", "l")
@@ -214,6 +219,11 @@ func (f Form) Legend() []legend.Entry {
 	case Select:
 		if fl.Holding() {
 			return legend.FromBindings([]key.Binding{k.Up, k.Press, k.Close})
+		}
+		own = []key.Binding{k.Press}
+	case MultiSelect:
+		if fl.Holding() {
+			return fl.openLegend()
 		}
 		own = []key.Binding{k.Press}
 	case Date:

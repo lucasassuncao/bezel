@@ -152,7 +152,7 @@ A column of questions, each a heading that opens onto its answer, sliding rather
 
 ## Input
 
-What the user types into: a form of controls, a one-line field, a multi-line field, and the caret any field of your own can draw.
+What the user types into: a form of controls, a wizard that splits forms into pages, a one-line field, a multi-line field, and the caret any field of your own can draw.
 
 ### Form
 
@@ -172,9 +172,31 @@ f := form.New(th,
 func (m model) Init() tea.Cmd { return m.form.Init() }
 ```
 
-The form paints every control in its theme, and `SetTheme` repaints them all.
+The form paints every control in its theme, and `SetTheme` repaints them all. `form.NewMultiSelect` checks any number of options out of a list that opens under it: typing filters it fuzzily, `space` checks, `ctrl+a` checks every option shown, `enter` keeps the checks and `esc` puts back the ones it opened with. The wizard below has one.
 
 ![form](recordings/component/form.gif)
+
+### Wizard
+
+Source: [`examples/component/wizard/main.go`](../examples/component/wizard/main.go)
+
+A dev container set up over three pages the app defines, each a `form.Form` under a title. The steps run along the top, a ✓ on the ones behind. `pgdown` or a click on Next turns the page, `pgup` or Back turns it back, and going back keeps what was filled in. A page's `WithCheck` runs before the wizard leaves it: the first will not move on without a name, the second without a tool checked in its `MultiSelect`. Next on the last page reads Finish and reports `wizard.Done`; the app reads the values through `form.Get` on each `Page(i).Form()`.
+
+```go
+wiz := wizard.New(th,
+	wizard.NewPage("Project", form.New(th, form.NewInput("Name"))).WithCheck(named),
+	wizard.NewPage("Tools", form.New(th, form.NewMultiSelect("Tools", tools))),
+)
+wiz, r := wiz.Update(msg)
+if _, ok := r.Event.(wizard.Done); ok {
+	ms, _ := form.Get[form.MultiSelect](wiz.Page(1).Form(), 0)
+	use(ms.Values())
+}
+```
+
+`WithLabels` renames Back, Next and Finish; `WithKeys` rebinds the page turns, and tab stays the form's.
+
+![wizard](recordings/component/wizard.gif)
 
 ### Calendar
 

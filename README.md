@@ -121,7 +121,8 @@ go run ./examples/app
 - [`paginator`](component/paginator): pages as dots or "2/5", and the slice of items each page shows.
 - [`tree`](component/tree): an expandable tree, generic over your node type.
 - [`table`](component/table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header, sorted by a column and checked for a batch.
-- [`form`](component/form): `Input`, `Select`, `Date`, `Number`, `Slider`, `Tags`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
+- [`form`](component/form): `Input`, `Select`, `MultiSelect`, `Date`, `Number`, `Slider`, `Tags`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
+- [`wizard`](component/wizard): forms split into pages, the steps drawn on top and a check before each page is left.
 - [`tags`](component/tags): a field that turns what is typed into chips, for filters and labels.
 - [`input`](component/input): a one-line text field with readline keys, a placeholder, a mask for secrets and a format such as `9999-99-99`.
 - [`textbox`](component/textbox): a multi-line text field with line numbers.
