@@ -182,6 +182,10 @@ func (m Model) WithMask(mask rune) Model {
 	return m.scroll()
 }
 
+// Secret reports whether the text is kept off the screen, by WithMask or
+// WithHidden: what draws it after the field should not show it either.
+func (m Model) Secret() bool { return m.mask != "" || m.hidden }
+
 // WithHidden draws none of the text, not even a mask, so not even its length
 // shows; the caret stays on the first cell. Word keys run to the ends.
 func (m Model) WithHidden(on bool) Model {

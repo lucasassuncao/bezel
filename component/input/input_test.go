@@ -78,7 +78,9 @@ func TestAPasteIsOneLine(t *testing.T) {
 }
 
 func TestTheMaskHidesTheTextAndItsWords(t *testing.T) {
+	require.False(t, focused().Secret())
 	m := focused().WithMask('•').SetValue("hunter two")
+	require.True(t, m.Secret())
 	require.Equal(t, "••••••••••", ansi.Strip(m.Blur().View()))
 	m = run(m, press(tea.KeyBackspace, tea.ModAlt))
 	require.Empty(t, m.Value(), "a word kill runs to the start: no boundary shows")
@@ -282,6 +284,7 @@ func TestTheValidatorJudgesEveryChange(t *testing.T) {
 
 func TestAHiddenFieldDrawsNoneOfItsText(t *testing.T) {
 	m := focused().WithHidden(true).SetWidth(6).SetValue("secret words")
+	require.True(t, m.Secret())
 	require.Equal(t, "      ", ansi.Strip(m.View()))
 	require.Contains(t, m.View(), th.Caret.Render(" "), "the caret on the first cell")
 	require.Empty(t, ansi.Strip(m.Blur().SetWidth(0).View()))

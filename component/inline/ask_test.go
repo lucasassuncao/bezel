@@ -83,6 +83,14 @@ func TestAskTypesIntoAnInput(t *testing.T) {
 	require.True(t, a.aborted, "q is text; esc cancels")
 }
 
+func TestAskNeverPrintsAMaskedAnswer(t *testing.T) {
+	a := answer(form.NewInput("Password").WithMask('•'), "s", "3", "c", "r", "enter")
+	got, _ := form.Get[form.Input](a.form, 0)
+	require.Equal(t, "s3cr", got.Value(), "the app still reads it")
+	require.Equal(t, "Password ******\n", shown(a), "six stars, whatever its length")
+	require.Equal(t, "Password \n", shown(answer(form.NewInput("Password").WithMask('•'), "enter")))
+}
+
 func TestAskFlipsACheckboxAndAToggle(t *testing.T) {
 	a := answer(form.NewCheckbox("Start now"), "space", "enter")
 	cb, _ := form.Get[form.Checkbox](a.form, 0)

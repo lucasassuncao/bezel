@@ -78,6 +78,9 @@ func (i Input) WithMask(mask rune) Input {
 
 // Value is the text in the field.
 func (i Input) Value() string { return i.in.Value() }
+
+// Secret reports whether WithMask keeps the text off the screen.
+func (i Input) Secret() bool  { return i.in.Secret() }
 func (i Input) Label() string { return i.label }
 
 // Init starts the caret blinking when the form opens focused on the field.

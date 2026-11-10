@@ -18,9 +18,9 @@ import (
 
 // Ask asks for one form field below the current line and returns it as the
 // user left it: a select or multiselect opens at once, enter answers, esc or
-// ctrl+c return ErrAborted. opts reach the program as in Confirm.
+// ctrl+c return ErrAborted, no terminal ErrNoTerminal. opts work as in Confirm.
 func Ask[F form.Field](f F, th theme.Resolved, opts ...tea.ProgramOption) (F, error) {
-	final, err := tea.NewProgram(newAsk(f, th), opts...).Run()
+	final, err := onTerminal(newAsk(f, th), opts)
 	if err != nil {
 		return f, err
 	}
@@ -136,7 +136,7 @@ func (a ask) View() tea.View {
 }
 
 // answer is the field's label and value, or its closed row when it has no
-// label, as a checkbox, whose text is in its box.
+// label, as a checkbox, whose text is in its box. A masked value stays hidden.
 func (a ask) answer() string {
 	fl := a.form.Field(0)
 	value := ""
@@ -151,6 +151,9 @@ func (a ask) answer() string {
 		value = strconv.FormatFloat(v.Value(), 'f', -1, 64)
 	case interface{ On() bool }:
 		value = map[bool]string{true: "on", false: "off"}[v.On()]
+	}
+	if s, ok := fl.(interface{ Secret() bool }); ok && s.Secret() && value != "" {
+		value = strings.Repeat("*", 6) // as long as any password, giving away none
 	}
 	if a.aborted {
 		value = "cancelled"

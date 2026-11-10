@@ -59,13 +59,20 @@ Each recording below is [`examples/component/ask`](../examples/component/ask/mai
 
 #### Input
 
-Typed text. `WithPlaceholder`, `WithWidth`, `WithFormat` and `WithMask` (for a password) work as in a form.
+Typed text. `WithPlaceholder`, `WithWidth`, `WithFormat` and `WithMask` work as in a form.
 
 ```go
 name, err := inline.Ask(form.NewInput("Name").WithPlaceholder("my-api").WithWidth(24), th)
 ```
 
 ![input](recordings/component/ask/input.gif)
+
+For a password or a token, `WithMask` draws each character as the rune given. `Value()` still returns the text; the line left once answered shows six stars instead, whatever its length, so the secret stays out of the scrollback:
+
+```go
+pw, err := inline.Ask(form.NewInput("Password").WithMask('•'), th)
+// the terminal keeps "Password ******"; pw.Value() is the password
+```
 
 #### Select
 
@@ -163,6 +170,24 @@ fmt.Println(labels.Tags())
 ![tags](recordings/component/ask/tags.gif)
 
 A button asks nothing on its own, so it is the one field `Ask` has no use for.
+
+### Without a terminal
+
+A question needs someone at a keyboard. When stdout or stdin is redirected, `cli > out.txt` or `cat list | cli`, `Confirm` and `Ask` open the terminal itself and ask there, so the question stays out of the file and the keys still reach it. Where no terminal opens at all, as in a CI job or a cron task, they return `inline.ErrNoTerminal` at once instead of waiting for keys that cannot come, and the app falls back to a flag or a default:
+
+```go
+region, err := inline.Ask(form.NewSelect("Region", regions), th)
+switch {
+case errors.Is(err, inline.ErrNoTerminal):
+	return fmt.Errorf("no terminal to ask on: pass --region")
+case errors.Is(err, inline.ErrAborted):
+	return nil
+case err != nil:
+	return err
+}
+```
+
+On Windows a process that has a console, even a hidden one, can always open it, so there the question waits instead. For a run nobody watches, bound it with `tea.WithContext` and a deadline: when it passes, the question returns `tea.ErrProgramKilled`.
 
 ## Output
 

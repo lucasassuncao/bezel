@@ -92,6 +92,8 @@ func TestInputMaskHidesTheValue(t *testing.T) {
 	require.Contains(t, view, "******")
 	require.NotContains(t, view, "s3cret")
 	require.Equal(t, "s3cret", in.Value())
+	require.True(t, in.Secret())
+	require.False(t, NewInput("Name").Secret())
 }
 
 func TestEachControlTakesItsOwnKeys(t *testing.T) {

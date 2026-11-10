@@ -18,11 +18,11 @@ import (
 // ErrAborted is what Confirm returns when the user pressed esc or ctrl+c.
 var ErrAborted = errors.New("inline: aborted")
 
-// Confirm asks a yes/no question below the current line. The default is No.
-// opts reach the program as given: tea.WithContext to cancel the question,
-// tea.WithInput and tea.WithOutput to answer it from a test.
+// Confirm asks a yes/no question below the current line. The default is No;
+// with no terminal to ask on, it returns ErrNoTerminal. opts reach the program:
+// tea.WithContext cancels it, tea.WithInput and tea.WithOutput answer it in a test.
 func Confirm(title string, th theme.Resolved, opts ...tea.ProgramOption) (bool, error) {
-	final, err := tea.NewProgram(newConfirm(title, th), opts...).Run()
+	final, err := onTerminal(newConfirm(title, th), opts)
 	if err != nil {
 		return false, err
 	}

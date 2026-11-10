@@ -30,6 +30,7 @@ Package input is a one\-line text field: the caret moves and kills a shell's lin
   - [func \(m Model\) Legend\(\) \[\]legend.Entry](<#Model.Legend>)
   - [func \(m Model\) MatchedSuggestions\(\) \[\]string](<#Model.MatchedSuggestions>)
   - [func \(m Model\) Placeholder\(\) string](<#Model.Placeholder>)
+  - [func \(m Model\) Secret\(\) bool](<#Model.Secret>)
   - [func \(m Model\) SetCursorMode\(mode cursor.Mode\) \(Model, tea.Cmd\)](<#Model.SetCursorMode>)
   - [func \(m Model\) SetSuggestions\(list \[\]string\) Model](<#Model.SetSuggestions>)
   - [func \(m Model\) SetTheme\(th theme.Resolved\) Model](<#Model.SetTheme>)
@@ -112,7 +113,7 @@ func New(th theme.Resolved) Model
 New is an empty field, not focused, as wide as its text.
 
 <a name="Model.Blink"></a>
-### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L401>)
+### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L405>)
 
 ```go
 func (m Model) Blink() tea.Cmd
@@ -121,7 +122,7 @@ func (m Model) Blink() tea.Cmd
 Blink is the command that keeps a focused caret blinking, for a host that focused the field before it could hand on a command; nil while blurred.
 
 <a name="Model.Blur"></a>
-### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L394>)
+### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L398>)
 
 ```go
 func (m Model) Blur() Model
@@ -130,7 +131,7 @@ func (m Model) Blur() Model
 Blur takes the keys away and hides the caret.
 
 <a name="Model.CharLimit"></a>
-### func \(Model\) [CharLimit](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L265>)
+### func \(Model\) [CharLimit](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L269>)
 
 ```go
 func (m Model) CharLimit() int
@@ -148,7 +149,7 @@ func (m Model) Complete() bool
 Complete reports whether every slot of WithFormat is filled; without a format, whether there is any text.
 
 <a name="Model.CurrentSuggestion"></a>
-### func \(Model\) [CurrentSuggestion](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L322>)
+### func \(Model\) [CurrentSuggestion](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L326>)
 
 ```go
 func (m Model) CurrentSuggestion() string
@@ -157,7 +158,7 @@ func (m Model) CurrentSuggestion() string
 CurrentSuggestion is the match the field shows, "" when none does.
 
 <a name="Model.Cursor"></a>
-### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L372>)
+### func \(Model\) [Cursor](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L376>)
 
 ```go
 func (m Model) Cursor() int
@@ -166,7 +167,7 @@ func (m Model) Cursor() int
 Cursor is how many characters sit before the caret.
 
 <a name="Model.CursorMode"></a>
-### func \(Model\) [CursorMode](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L204>)
+### func \(Model\) [CursorMode](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L208>)
 
 ```go
 func (m Model) CursorMode() cursor.Mode
@@ -175,7 +176,7 @@ func (m Model) CursorMode() cursor.Mode
 CursorMode is how the caret shows while focused.
 
 <a name="Model.Err"></a>
-### func \(Model\) [Err](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L285>)
+### func \(Model\) [Err](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L289>)
 
 ```go
 func (m Model) Err() error
@@ -184,7 +185,7 @@ func (m Model) Err() error
 Err is what the validator said of the text as it is, nil when it took it.
 
 <a name="Model.Focus"></a>
-### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L388>)
+### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L392>)
 
 ```go
 func (m Model) Focus() (Model, tea.Cmd)
@@ -193,7 +194,7 @@ func (m Model) Focus() (Model, tea.Cmd)
 Focus gives the field the keys and starts its caret blinking.
 
 <a name="Model.Focused"></a>
-### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L385>)
+### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L389>)
 
 ```go
 func (m Model) Focused() bool
@@ -202,7 +203,7 @@ func (m Model) Focused() bool
 Focused reports whether the field takes keys and shows its caret.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L376>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L380>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -211,7 +212,7 @@ func (m Model) Legend() []legend.Entry
 Legend is the keys worth a hint: completing while a suggestion shows, and pasting. The editing keys are the terminal's usual ones and go unlisted.
 
 <a name="Model.MatchedSuggestions"></a>
-### func \(Model\) [MatchedSuggestions](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L313>)
+### func \(Model\) [MatchedSuggestions](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L317>)
 
 ```go
 func (m Model) MatchedSuggestions() []string
@@ -220,7 +221,7 @@ func (m Model) MatchedSuggestions() []string
 MatchedSuggestions are the suggestions the text starts, in list order.
 
 <a name="Model.Placeholder"></a>
-### func \(Model\) [Placeholder](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L369>)
+### func \(Model\) [Placeholder](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L373>)
 
 ```go
 func (m Model) Placeholder() string
@@ -228,8 +229,17 @@ func (m Model) Placeholder() string
 
 Placeholder is what an empty field shows.
 
+<a name="Model.Secret"></a>
+### func \(Model\) [Secret](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L187>)
+
+```go
+func (m Model) Secret() bool
+```
+
+Secret reports whether the text is kept off the screen, by WithMask or WithHidden: what draws it after the field should not show it either.
+
 <a name="Model.SetCursorMode"></a>
-### func \(Model\) [SetCursorMode](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L195>)
+### func \(Model\) [SetCursorMode](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L199>)
 
 ```go
 func (m Model) SetCursorMode(mode cursor.Mode) (Model, tea.Cmd)
@@ -238,7 +248,7 @@ func (m Model) SetCursorMode(mode cursor.Mode) (Model, tea.Cmd)
 SetCursorMode sets how the caret shows while focused: blinking at the theme's pace, steady, or hidden. A focused field is lit at once, and one turned to Blinking starts its blink with the command returned.
 
 <a name="Model.SetSuggestions"></a>
-### func \(Model\) [SetSuggestions](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L297>)
+### func \(Model\) [SetSuggestions](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L301>)
 
 ```go
 func (m Model) SetSuggestions(list []string) Model
@@ -256,7 +266,7 @@ func (m Model) SetTheme(th theme.Resolved) Model
 SetTheme repaints the field after the terminal's background was learned.
 
 <a name="Model.SetValue"></a>
-### func \(Model\) [SetValue](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L252>)
+### func \(Model\) [SetValue](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L256>)
 
 ```go
 func (m Model) SetValue(s string) Model
@@ -274,7 +284,7 @@ func (m Model) SetWidth(w int) Model
 SetWidth draws the text exactly w cells wide, scrolled to keep the caret in view; zero draws it whole.
 
 <a name="Model.Suggestions"></a>
-### func \(Model\) [Suggestions](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L310>)
+### func \(Model\) [Suggestions](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L314>)
 
 ```go
 func (m Model) Suggestions() []string
@@ -283,7 +293,7 @@ func (m Model) Suggestions() []string
 Suggestions is the whole list the field completes from.
 
 <a name="Model.TerminalCursor"></a>
-### func \(Model\) [TerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L222>)
+### func \(Model\) [TerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L226>)
 
 ```go
 func (m Model) TerminalCursor() *tea.Cursor
@@ -292,7 +302,7 @@ func (m Model) TerminalCursor() *tea.Cursor
 TerminalCursor is the terminal's cursor for a field made WithTerminalCursor, placed within the field's view: add the field's origin before handing it to tea.View. nil while blurred, hidden, or painting its own caret.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L417>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L421>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
@@ -301,7 +311,7 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 Update edits on a key or a paste while focused, puts the caret where a click lands, and flips the caret on its own BlinkMsg. A key it has no use for leaves it as it was, with no command.
 
 <a name="Model.Value"></a>
-### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L366>)
+### func \(Model\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L370>)
 
 ```go
 func (m Model) Value() string
@@ -310,7 +320,7 @@ func (m Model) Value() string
 Value is the text in the field.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L632>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L636>)
 
 ```go
 func (m Model) View() string
@@ -319,7 +329,7 @@ func (m Model) View() string
 View is the prompt and the text, the caret on the cell it covers, exactly the width set \(or as wide as the text, and the caret, without one\).
 
 <a name="Model.WithCharLimit"></a>
-### func \(Model\) [WithCharLimit](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L259>)
+### func \(Model\) [WithCharLimit](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L263>)
 
 ```go
 func (m Model) WithCharLimit(n int) Model
@@ -328,7 +338,7 @@ func (m Model) WithCharLimit(n int) Model
 WithCharLimit caps the field at n characters: typing stops there and a paste is cut to what fits. Zero or less is no cap.
 
 <a name="Model.WithClipboard"></a>
-### func \(Model\) [WithClipboard](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L239>)
+### func \(Model\) [WithClipboard](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L243>)
 
 ```go
 func (m Model) WithClipboard(read func() (string, error)) Model
@@ -346,7 +356,7 @@ func (m Model) WithFormat(pattern string) Model
 WithFormat holds the text to pattern, as for a date or a document number: 9 takes a digit, a a letter and \* anything, while the rest is written for the user. "9999\-99\-99" is a date; a backslash makes 9, a or \* literal.
 
 <a name="Model.WithHidden"></a>
-### func \(Model\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L187>)
+### func \(Model\) [WithHidden](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L191>)
 
 ```go
 func (m Model) WithHidden(on bool) Model
@@ -355,7 +365,7 @@ func (m Model) WithHidden(on bool) Model
 WithHidden draws none of the text, not even a mask, so not even its length shows; the caret stays on the first cell. Word keys run to the ends.
 
 <a name="Model.WithKeys"></a>
-### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L245>)
+### func \(Model\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L249>)
 
 ```go
 func (m Model) WithKeys(k Keys) Model
@@ -400,7 +410,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit, now and after every SetTheme. It replaces an earlier edit.
 
 <a name="Model.WithTerminalCursor"></a>
-### func \(Model\) [WithTerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L214>)
+### func \(Model\) [WithTerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L218>)
 
 ```go
 func (m Model) WithTerminalCursor(on bool) Model
@@ -409,7 +419,7 @@ func (m Model) WithTerminalCursor(on bool) Model
 WithTerminalCursor leaves the caret to the terminal's own cursor: View paints none, and TerminalCursor says where to put the real one.
 
 <a name="Model.WithValidate"></a>
-### func \(Model\) [WithValidate](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L279>)
+### func \(Model\) [WithValidate](<https://github.com/lucasassuncao/bezel/blob/main/component/input/input.go#L283>)
 
 ```go
 func (m Model) WithValidate(fn func(string) error) Model
