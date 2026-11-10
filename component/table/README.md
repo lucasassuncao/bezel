@@ -17,6 +17,7 @@ Package table sizes columns to their contents, giving way in a declared order wh
 - [func Fit\(cols \[\]Column, rows \[\]\[\]string, width int\) \[\]int](<#Fit>)
 - [func Natural\(a, b string\) bool](<#Natural>)
 - [func Row\(widths \[\]int, cells \[\]string\) string](<#Row>)
+- [func Static\(cols \[\]Column, rows \[\]\[\]string, width int, th theme.Resolved\) string](<#Static>)
 - [func Titles\(cols \[\]Column, widths \[\]int\) string](<#Titles>)
 - [type Chosen](<#Chosen>)
 - [type Column](<#Column>)
@@ -110,6 +111,15 @@ func Row(widths []int, cells []string) string
 ```
 
 Row lays cells out in widths, padded to their columns and separated by Gap; the last cell is cut but not padded, so the row ends where it ends.
+
+<a name="Static"></a>
+## func [Static](<https://github.com/lucasassuncao/bezel/blob/main/component/table/static.go#L11>)
+
+```go
+func Static(cols []Column, rows [][]string, width int, th theme.Resolved) string
+```
+
+Static is the whole table as text to print, the header on top: no cursor, no scrolling. Columns fit width as in Fit; width \<= 0 keeps their own.
 
 <a name="Titles"></a>
 ## func [Titles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/table.go#L111>)

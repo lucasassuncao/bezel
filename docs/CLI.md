@@ -205,6 +205,55 @@ fmt.Println()
 
 `Bar` is the bar alone, `Meter` a row of squares, `Smooth` a bar cut to eighths of a cell, `Stepper` the stages of a run with the current one marked. The [inline recording](#yes-or-no) above ends on a `Bar`.
 
+### Tables and trees
+
+`table.Static` and `tree.Static` return the whole thing as text, ready for `fmt.Println`. There's no cursor and no scrolling; for that, use the `Model` in each package.
+
+```go
+cols := []table.Column{{Title: "NAME", Flex: true}, {Title: "STATUS"}}
+rows := [][]string{{"api", "running"}, {"worker", "stopped"}}
+fmt.Println(table.Static(cols, rows, 80, th)) // 0 keeps each column's own width
+
+fmt.Println(tree.Static([]tree.Branch{{Text: "app", Children: []tree.Branch{
+	{Text: "cmd", Children: []tree.Branch{{Text: "main.go"}}},
+	{Text: "go.mod"},
+}}}, th))
+```
+
+```text
+NAME    STATUS
+api     running
+worker  stopped
+
+app
+├─ cmd
+│  └─ main.go
+└─ go.mod
+```
+
+Which one to use:
+
+| You want to | Use | It needs |
+| --- | --- | --- |
+| show a result and move on, as `ls` does | `table.Static`, `tree.Static` | nothing: it returns a string |
+| let the user move, filter and choose | `table.New`, `tree.New` | a Bubble Tea program: a pane of the [frame](FRAME.md) or a model of your own that calls `Update` and `View` |
+
+```go
+// interactive: inside your model
+m.tbl = table.New(cols, []table.Item[string]{
+	{Cells: []string{"api", "running"}, Value: "api"},
+}).SetHeight(10).SetWidth(60)
+
+var r bezel.Result
+if m.tbl, r = m.tbl.Update(msg); r.Handled {
+	if c, ok := r.Event.(table.Chosen[string]); ok {
+		_ = c.Item.Value // the row chosen with enter
+	}
+}
+```
+
+[CONVENTIONS.md](CONVENTIONS.md#static-and-interactive) has the rule behind the names.
+
 ### Logs
 
 [`logger`](../component/logger) is a `slog.Handler`: each message on its line, every attribute hanging under it as a branch of a tree, a long value wrapped at the terminal's width.

@@ -14,6 +14,8 @@ Package tree navigates and renders a flat, depth\-first node list: rows visible 
 
 - [func At\(cursor int, vis \[\]int\) int](<#At>)
 - [func Contains\(query, text string\) bool](<#Contains>)
+- [func Static\(branches \[\]Branch, th theme.Resolved\) string](<#Static>)
+- [type Branch](<#Branch>)
 - [type Collapsed](<#Collapsed>)
 - [type Connectors](<#Connectors>)
   - [func DefaultConnectors\(\) Connectors](<#DefaultConnectors>)
@@ -87,6 +89,27 @@ func Contains(query, text string) bool
 ```
 
 Contains is the filter's default match: the node's text holds the query, in any case.
+
+<a name="Static"></a>
+## func [Static](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/static.go#L17>)
+
+```go
+func Static(branches []Branch, th theme.Resolved) string
+```
+
+Static is the whole tree as text to print, every branch open: each top branch on its own line, the rows under it hung from dimmed guides.
+
+<a name="Branch"></a>
+## type [Branch](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/static.go#L10-L13>)
+
+Branch is one row of a tree to print, and the rows under it.
+
+```go
+type Branch struct {
+    Text     string
+    Children []Branch
+}
+```
 
 <a name="Collapsed"></a>
 ## type [Collapsed](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/events.go#L9>)

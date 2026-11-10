@@ -200,6 +200,19 @@ Nothing reads the clock. `Tick` asks for frames, each frame is tagged so a model
 - `View` never writes back. An overlay that needs its size in `Update` implements `overlay.Resizer`; whatever scrolls keeps its offset in a `layout.Window` and reports it through `Scroll()`.
 - Presets (`theme.Mint()`, ...) are functions that build a fresh value each call, so no app can change one for another; point a `Theme`'s `Base` at one to build on it.
 
+## Static and interactive
+
+A component can come in two forms. The interactive one is `New` and its `Model`: it takes keys, keeps a cursor and lives inside a Bubble Tea program. The static one is a plain function that returns the whole thing as text, ready to print, with nothing to update.
+
+| Form | Name | Example |
+| --- | --- | --- |
+| interactive | `New(...)` returning a `Model` | `table.New(cols, items)`, `tree.New(nodes)` |
+| static | `Static(data..., th)` | `table.Static(cols, rows, width, th)`, `tree.Static(branches, th)` |
+
+- When a package has both, the static one is called `Static`, so that `New` never means two things.
+- `progress` and `chart` were always text, so their functions keep their nouns (`progress.Bar`, `chart.Spark`).
+- The static form takes simple data (`[][]string`, `[]tree.Branch`), not the model's types: whoever prints has no cursor or state to set up.
+
 ## Patterns by name
 
 A new component reaches for one of these before inventing a shape.

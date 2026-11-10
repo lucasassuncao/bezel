@@ -120,8 +120,8 @@ go run ./examples/app
 - [`calendar`](component/calendar): a month with a cursor on a day, and the calendar a form's date field opens.
 - [`breadcrumb`](component/breadcrumb): a path in one row, `kv › apps › prod`, with a cursor on a part and its middle giving way when narrow.
 - [`paginator`](component/paginator): pages as dots or "2/5", and the slice of items each page shows.
-- [`tree`](component/tree): an expandable tree, generic over your node type.
-- [`table`](component/table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header, sorted by a column and checked for a batch.
+- [`tree`](component/tree): an expandable tree, generic over your node type; `Static` prints one built from nested branches.
+- [`table`](component/table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header, sorted by a column and checked for a batch; `Static` prints the whole table.
 - [`form`](component/form): `Input`, `Select`, `MultiSelect`, `Date`, `Number`, `Slider`, `Tags`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
 - [`wizard`](component/wizard): forms split into pages, the steps drawn on top and a check before each page is left.
 - [`tags`](component/tags): a field that turns what is typed into chips, for filters and labels.
