@@ -5,7 +5,7 @@ What bezel promises from v1 on: which packages hold still, which may move, and w
 ## What is stable
 
 | Packages | Promise |
-|---|---|
+| --- | --- |
 | the root `bezel`, `bezeltest` | stable |
 | the foundation: `layout`, `key`, `draw`, `legend`, `theme` | stable |
 | every package under `component/` | stable |

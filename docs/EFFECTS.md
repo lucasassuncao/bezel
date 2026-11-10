@@ -20,7 +20,7 @@ if m.reveal.Active() {
 ```
 
 | Effect | What it does |
-|---|---|
+| --- | --- |
 | `FadeIn`, `FadeOut` | raises every cell's colours from a colour to its own, or sinks them into one |
 | `Dissolve`, `Coalesce` | blanks the cells one by one, or gathers the block out of nothing |
 | `SweepIn` | reveals the block behind a tinted front |
@@ -45,7 +45,7 @@ effect.Coalesce(600 * time.Millisecond).WithPattern(effect.Radial())
 Lights are effects that change colour and leave every cell in its place:
 
 | Light | What it does |
-|---|---|
+| --- | --- |
 | `Tint`, `Pulse` | washes the block towards a colour and back, once or over and over |
 | `Flash` | lights the block at once and lets the light fade: a value that changed |
 | `Press` | darkens it and lets it come back, as a key pressed down |
@@ -64,7 +64,7 @@ On the light tab a diff plays with `Melt(red).OnRows(1)` over the removed line a
 ![retro](recordings/effect/retro.gif)
 
 | Effect | What it does |
-|---|---|
+| --- | --- |
 | `Glitch` | tears the block for a moment: rows jump sideways and their colours split, then it comes back whole |
 | `PowerOff`, `PowerOn` | turns the block off like an old tube, squashed to a line, the line to a dot; or on, the other way |
 | `Scanlines` | darkens every other row, as the lines of an old screen |
@@ -82,7 +82,7 @@ On the light tab a diff plays with `Melt(red).OnRows(1)` over the removed line a
 A `Transition` carries the screen from one block to another: `Apply(from, to)` every frame, the smaller one padded to the larger's size.
 
 | Transition | What it does |
-|---|---|
+| --- | --- |
 | `Push` | the new block pushes the old one out ahead of it |
 | `Cover`, `Reveal` | the new one slides over the old, or the old slides away from over the new |
 | `CrossFade` | the colours blend, the text changing over halfway |

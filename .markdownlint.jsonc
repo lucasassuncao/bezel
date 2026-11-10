@@ -1,0 +1,11 @@
+{
+  // Go snippets are indented with tabs, as gofmt writes them.
+  "MD010": { "code_blocks": false },
+  // Tables keep a space inside every pipe, the separator row included.
+  "MD060": { "style": "compact" },
+  // A paragraph is one line; the reader's editor wraps it.
+  "MD013": false,
+  // The README opens on the logo, which swaps for a dark terminal; only HTML can.
+  "MD033": { "allowed_elements": ["p", "picture", "source", "img"] },
+  "MD041": false
+}

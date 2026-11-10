@@ -3,7 +3,7 @@
 Every animation is a value, like the rest of bezel: it reads no clock, starts on the first frame its `Tick` delivers, takes only its own frames, and hands back a changed copy. The effects that play over a drawn block live in their own package, [`effect`](../effect), and run the same way:
 
 | Package | What it moves | Page |
-|---|---|---|
+| --- | --- | --- |
 | [`animation`](../animation) | values: tweens, springs, fades, points, physics and chart data, on the easing curves, and the `Clock` that drives several at once | [Motion](#motion) |
 | [`animation/text`](../animation/text) | a line of text: typed, scrolled, shimmered, scrambled, rolled, waved, struck | [Text](#text) |
 | [`effect`](../effect) | a block that is already drawn: fades, dissolves, slides, lights, and transitions from one block to the next | [EFFECTS.md](EFFECTS.md) |
@@ -73,7 +73,7 @@ The [`animation`](../animation) package moves values: a number, a colour, a poin
 ![basics](recordings/animation/basics.gif)
 
 | Kind | What it moves |
-|---|---|
+| --- | --- |
 | `Tween`, `Float` | a whole number or a fraction from one value to another: a panel's height, a bar drawn in eighths |
 | `Spring` | a value after a target, with speed and inertia; a new target bends the motion instead of starting it over |
 | `Fade` | a colour from one to another; `Blend` mixes two at any point |
@@ -102,7 +102,7 @@ Every curve starts at exactly 0 and ends at exactly 1. `Back` and `Elastic` leav
 ![motion](recordings/animation/motion.gif)
 
 | Kind | What it does |
-|---|---|
+| --- | --- |
 | `Drop` | falls under gravity and bounces, each hop lower and quicker, until it settles |
 | `Pendulum` | swings either side of the middle, for ever or dying out `WithDecay` |
 | `Orbit` | carries a point round an ellipse; `Near` says which half it is on, to draw it in front or behind |
@@ -148,7 +148,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 ![typed](recordings/animation/text/typed.gif)
 
 | Kind | What it does |
-|---|---|
+| --- | --- |
 | `Typewriter` | reveals text a grapheme at a time |
 | `Marquee` | scrolls text wider than its room round and round |
 | `Shake` | sways a block side to side, its width kept: a refusal without words |
@@ -158,7 +158,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 ![roll](recordings/animation/text/roll.gif)
 
 | Kind | What it does |
-|---|---|
+| --- | --- |
 | `Shimmer` | sweeps a glow across text, over and over: a placeholder while something loads |
 | `Scramble` | shows text as noise that settles from the left; the noise depends only on the frame's time |
 | `Odometer` | rolls a number digit by digit, the right-hand digits spinning most; `To` rolls on to the next value |
@@ -169,7 +169,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 ![mark](recordings/animation/text/mark.gif)
 
 | Kind | What it does |
-|---|---|
+| --- | --- |
 | `Wave` | bobs a line letter by letter, a wave passing along it, on 2·amp+1 rows |
 | `Rainbow` | spreads the colour wheel along text and turns it; `WithTone` matches a theme's accent |
 | `Decrypt` | turns each letter through the flaps of a departures board until it lands, the leftmost first |
@@ -183,7 +183,7 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 ![arrive](recordings/animation/text/arrive.gif)
 
 | Kind | What it does |
-|---|---|
+| --- | --- |
 | `Stream` | shows text pushed in pieces at a steady pace, speeding up when it falls behind: an answer streamed from a model |
 | `Morph` | turns one text into another, taking out what the new one lacks and then putting in what it adds |
 | `Typist` | types like a person: unevenly, slower after a full stop, now and then a key beside the right one taken back |

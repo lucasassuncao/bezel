@@ -3,7 +3,7 @@
 The frame is what bezel draws around an app: the header and its tabs, the panes' borders, the status row, the key legend, and the dialogs and command line that open over the panes. The app draws only what goes inside the panes. Five packages make it, all at the module's root:
 
 | Package | What it does |
-|---|---|
+| --- | --- |
 | [`shell`](../shell) | the struct an app embeds: resize, tabs, focus, status, the overlay stack, the legend and the keys |
 | [`layout`](../layout) | the screen as a tree of named panes, resolved to rects every frame |
 | [`overlay`](../overlay) | the stack of dialogs, and the ready-made ones |
@@ -102,7 +102,7 @@ func (t filesTab) Actions(shell.Context) []shell.Action {
 An `Action` is one key, defined once: the shell dispatches it, prints it in the legend, lists it in the help and offers it in the command palette.
 
 | Action | Key | What it does |
-|---|---|---|
+| --- | --- | --- |
 | `Help()` | `?` | opens every key the screen has, in a dialog |
 | `ChangeTab()` | `tab` | the next tab, `shift+tab` the one before |
 | `ChangePane()` | `tab` | the next pane, sending a `FocusMsg` |
@@ -119,7 +119,7 @@ What an action runs is a function of an `ActionContext` that returns a command. 
 Options shape an action without a new constructor:
 
 | Option | What it does |
-|---|---|
+| --- | --- |
 | `WithKey(keys...)` | binds more keys under one label, as `←/→` |
 | `Named(name)`, `Arg(placeholder)` | puts it in the palette as `:name`, taking what follows as `Arg` |
 | `Needs(capability)` | drops it where the session refuses the capability |
@@ -259,7 +259,7 @@ The legend is built from the same actions, filtered by `Needs` and `When`, and p
 bezel reads the environment in two places, when asked:
 
 | Variable | Effect |
-|---|---|
+| --- | --- |
 | `BEZEL_ASCII` | icons and marks in ASCII instead of Unicode |
 | `BEZEL_NO_MOTION` | every animation born at its end, no frames asked |
 | `BEZEL_MOTION` | the speed of motion: `2` twice as fast, `0` off |

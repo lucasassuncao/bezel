@@ -13,7 +13,7 @@ body := items.View(th)                  // a component draws under the theme it 
 A theme names what a colour is *for*. `theme.Colors` has one field per role:
 
 | Role | What it colours |
-|---|---|
+| --- | --- |
 | `Background` | the whole screen, behind every pane; empty keeps the terminal's |
 | `Accent` | focused borders, section headings, legend keys |
 | `Selection` | the cursor row, the focused panel's title |
