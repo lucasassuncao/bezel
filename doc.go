@@ -76,6 +76,8 @@
 //     paused and reset.
 //   - [github.com/lucasassuncao/bezel/component/chart]: area, spark, bar,
 //     heat and donut charts of a run of numbers.
+//   - [github.com/lucasassuncao/bezel/component/canvas]: free drawing in
+//     braille: lines, boxes, circles, points and labels in your own units.
 //   - [github.com/lucasassuncao/bezel/component/icon]: one set of state marks,
 //     Unicode or ASCII, in the theme's colours.
 //   - [github.com/lucasassuncao/bezel/component/toast]: notices that slide into

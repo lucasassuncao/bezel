@@ -8,6 +8,7 @@ import (
 	"charm.land/lipgloss/v2"
 
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/braille"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -17,10 +18,6 @@ type Line struct {
 	Label  string
 	Values []float64
 }
-
-// dotBits are the braille bits of a cell's dots, by column then by row from
-// the top: a cell is two dots wide and four tall.
-var dotBits = [2][4]rune{{0x01, 0x02, 0x04, 0x40}, {0x08, 0x10, 0x20, 0x80}}
 
 // Lines draws each line in braille, width by height cells: the y axis on the
 // left from lo at the bottom to hi at the top, the newest values on the right
@@ -48,9 +45,9 @@ func Lines(lines []Line, lo, hi float64, width, height int, th theme.Resolved, o
 		return strings.TrimSuffix(strings.Repeat("\n", height)+key, "\n")
 	}
 
-	g := newGrid(plotW, height)
+	g := braille.New(plotW, height)
 	for i, l := range lines {
-		g.plot(l.Values, lo, hi, i)
+		plot(g, l.Values, lo, hi, i)
 	}
 	rows := make([]string, height)
 	for r := range height {
@@ -61,7 +58,7 @@ func Lines(lines []Line, lo, hi float64, width, height int, th theme.Resolved, o
 				lead, tick = th.Dim.Render(draw.Pad(strings.Repeat(" ", labelW-draw.Width(ticks[r]))+ticks[r], labelW)), "┤"
 			}
 		}
-		rows[r] = lead + th.Muted.Render(tick) + g.row(r, styles)
+		rows[r] = lead + th.Muted.Render(tick) + g.Row(r, styles)
 	}
 	if key != "" {
 		rows = append(rows, key)
@@ -153,22 +150,10 @@ func number(v float64, d int) string {
 	return s
 }
 
-// grid is the braille dots of the plot, and in each cell the last line that
-// put a dot there, whose colour the cell takes.
-type grid struct {
-	w, h  int
-	bits  []rune
-	owner []int
-}
-
-func newGrid(w, h int) grid {
-	return grid{w: w, h: h, bits: make([]rune, w*h), owner: make([]int, w*h)}
-}
-
 // plot draws the last two dots a cell of values, joined by straight runs,
 // right-aligned; a NaN breaks the line, lo equal to hi draws at the middle.
-func (g grid) plot(values []float64, lo, hi float64, line int) {
-	dw, dh := g.w*2, g.h*4
+func plot(g braille.Grid, values []float64, lo, hi float64, line int) {
+	dw, dh := g.Dots()
 	if !valid(lo, hi) {
 		return
 	}
@@ -188,9 +173,9 @@ func (g grid) plot(values []float64, lo, hi float64, line int) {
 		}
 		x, y := x0+i, dh-1-int(math.Round(frac*float64(dh-1)))
 		if have {
-			g.join(prevX, prevY, x, y, line)
+			join(g, prevX, prevY, x, y, line)
 		} else {
-			g.dot(x, y, line)
+			g.Set(x, y, line)
 		}
 		prevX, prevY, have = x, y, true
 	}
@@ -198,7 +183,7 @@ func (g grid) plot(values []float64, lo, hi float64, line int) {
 
 // join lights the dots from one point to the next: the column steps halfway
 // at the middle of the rise, so a jump reads as a line, not two dots.
-func (g grid) join(x0, y0, x1, y1, line int) {
+func join(g braille.Grid, x0, y0, x1, y1, line int) {
 	mid := (y0 + y1) / 2
 	step := 1
 	if y1 < y0 {
@@ -209,43 +194,10 @@ func (g grid) join(x0, y0, x1, y1, line int) {
 		if (step > 0 && y > mid) || (step < 0 && y < mid) {
 			x = x1
 		}
-		g.dot(x, y, line)
+		g.Set(x, y, line)
 		if y == y1 {
 			break
 		}
 	}
-	g.dot(x1, y1, line)
-}
-
-func (g grid) dot(x, y, line int) {
-	if x < 0 || y < 0 || x >= g.w*2 || y >= g.h*4 {
-		return
-	}
-	c := (y/4)*g.w + x/2
-	g.bits[c] |= dotBits[x%2][y%4]
-	g.owner[c] = line
-}
-
-// row is cell row r, each run of one line's cells in its colour.
-func (g grid) row(r int, styles []lipgloss.Style) string {
-	var b strings.Builder
-	cells := g.bits[r*g.w : (r+1)*g.w]
-	owners := g.owner[r*g.w : (r+1)*g.w]
-	for i := 0; i < len(cells); {
-		j := i
-		for j < len(cells) && (cells[j] == 0) == (cells[i] == 0) && (cells[i] == 0 || owners[j] == owners[i]) {
-			j++
-		}
-		if cells[i] == 0 {
-			b.WriteString(strings.Repeat(" ", j-i))
-		} else {
-			run := make([]rune, j-i)
-			for k := range run {
-				run[k] = 0x2800 + cells[i+k]
-			}
-			b.WriteString(styles[owners[i]].Render(string(run)))
-		}
-		i = j
-	}
-	return b.String()
+	g.Set(x1, y1, line)
 }

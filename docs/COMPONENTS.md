@@ -258,6 +258,14 @@ A made-up CPU load fed a sample per tick, drawn as an `Area`, as `Lines` beside 
 
 ![chart](recordings/component/chart.gif)
 
+### Canvas
+
+Source: [`examples/component/canvas/main.go`](../examples/component/canvas/main.go)
+
+A small solar system drawn in braille, in the system's own units: the orbits and planets are `Circle`s, the sun's rays `Line`s, the asteroid belt `Points`, the names `Label`s, and a `Rect` follows the outer planet. `space` pauses it, and `+` and `-` zoom by moving the region with `SetBounds`.
+
+![canvas](recordings/component/canvas.gif)
+
 ### Spinner
 
 Source: [`examples/component/spinner/main.go`](../examples/component/spinner/main.go)

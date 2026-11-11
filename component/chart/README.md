@@ -71,7 +71,7 @@ func Heat(values [][]float64, top float64, th theme.Resolved) string
 Heat is values as a grid of cells two columns wide, each coloured along the theme's ramp by its share of top; a value at or below zero is a muted dot.
 
 <a name="Lines"></a>
-## func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/lines.go#L28>)
+## func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/lines.go#L25>)
 
 ```go
 func Lines(lines []Line, lo, hi float64, width, height int, th theme.Resolved, opts ...Option) string
@@ -103,7 +103,7 @@ type Bar struct {
 ```
 
 <a name="Line"></a>
-## type [Line](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/lines.go#L16-L19>)
+## type [Line](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/lines.go#L17-L20>)
 
 Line is one series of Lines: its values, oldest first, and its name for the key under the chart; a NaN leaves a gap.
 
