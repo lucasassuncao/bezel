@@ -346,7 +346,7 @@ The table a `--list-themes` flag prints: as wide as the terminal, each colour na
 
 Source: [`examples/frame/bezeltest/main_test.go`](../examples/frame/bezeltest/main_test.go)
 
-No recording: this one is a test. A counter, and the test that drives it with the key presses a terminal would send.
+No recording: this one is a test. A counter, the test that drives it with the key presses a terminal would send, and one that checks its whole screen against a golden file.
 
 ## Changing the keys
 

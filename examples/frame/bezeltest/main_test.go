@@ -38,3 +38,10 @@ func TestKeyReadsBackAsItsName(t *testing.T) {
 		require.Equal(t, k, bezeltest.Key(k).String())
 	}
 }
+
+// The whole screen against testdata/TestCounterScreen.golden; after a change
+// to the view, go test -update rewrites it and the diff shows in review.
+func TestCounterScreen(t *testing.T) {
+	m, _ := press(model{}, "+", "+", "+")
+	bezeltest.Golden(t, m.View().Content)
+}

@@ -7,7 +7,7 @@ bezel/
 ├── shell, overlay              the frame: what an app embeds and what it opens over the panes
 ├── theme, draw, legend,        the foundation: colours, drawing, key hints, bindings and rects,
 │   key, layout                 under everything else
-├── bezeltest                   key presses for tests
+├── bezeltest                   key presses and golden files for tests
 ├── component/                  what goes inside the panes
 ├── effect/                     changes to a block that is already drawn
 ├── animation/                  values that move, and text/ and scene/
@@ -24,7 +24,7 @@ The packages at the root are the ones every app touches: `shell` to embed, `them
 - **The foundation**: `layout`, `key`, `draw`, `legend` and `theme`. They import nothing from the rest of bezel but each other, and everything else is built on them. `layout` and `key` stand alone; `draw` sits on `layout`, `legend` on `draw` and `key`, and `theme` on `draw` and `legend`, whose styles it fills in.
 - **The frame**: `overlay` and `shell`. They are the top of the stack: they compose components (the prompt's `input`, the pager's `viewport`, the busy `spinner`), and nothing in the module imports them except one another and the examples. `legend`, `overlay` and the `:` palette are not components, though they draw: the shell owns them, builds them from its `Action`s and draws them around the panes, and an app never places one in a pane of its own.
 
-`bezeltest` is apart from both: it builds the key presses a terminal sends, for tests, and imports nothing from bezel.
+`bezeltest` is apart from both: it builds the key presses a terminal sends and checks screens against golden files, for tests, and imports nothing from bezel.
 
 ## component/
 

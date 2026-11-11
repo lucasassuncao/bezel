@@ -279,6 +279,7 @@ next, _ = next.Update(bezeltest.Key("d"))
 ```
 
 - [`bezeltest.Key`](../bezeltest) builds the key press a terminal sends for `"tab"`, `"ctrl+s"` or `"q"`.
+- `bezeltest.Golden(t, view)` compares a whole screen with `testdata/<test name>.golden`, colours stripped; `GoldenANSI` keeps them. `go test -update` writes the files, so a change to the view shows up as a diff in review.
 - Commands are functions: call one to get the message it would send, and feed that back to `Update`.
 - An animation asks for frames with `Tick`; a test hands it its own with `FrameAt(time)`, so no test waits on a clock. `animation.Record` plays one to its end as text. See [ANIMATIONS.md](ANIMATIONS.md).
 - Set `BEZEL_NO_MOTION=1` in a test that only cares where things land, and clear it in `TestMain` when a CI sets `TERM=dumb`.

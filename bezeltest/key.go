@@ -1,5 +1,6 @@
 // Package bezeltest builds what a terminal would send, for tests that drive a
-// Bubble Tea model. It depends on nothing else in bezel.
+// Bubble Tea model, and checks what it draws against golden files. It depends
+// on nothing else in bezel.
 package bezeltest
 
 import (
