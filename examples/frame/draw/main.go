@@ -75,6 +75,7 @@ func (m model) sections(w int) []string {
 	add("Button", draw.Button("Save", m.th.Button, true)+"  "+draw.Button("Cancel", m.th.Button, false))
 	add("Wrap", draw.Wrap(paragraph, min(w, 40))...)
 	add("Truncate", draw.Truncate("a line much longer than the room it has to fit in", 24))
+	add("Link", draw.Link("bezel on GitHub", "https://github.com/lucasassuncao/bezel", m.th.Accent.Underline(true)))
 	add("NumberLines", draw.NumberLines(source, m.th.Muted))
 	add("EmptyState", draw.EmptyState(layout.Rect{W: w, H: 4}, "nothing here", "press n to add one", m.th.Chrome))
 	return out

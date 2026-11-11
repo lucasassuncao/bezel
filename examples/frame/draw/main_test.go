@@ -29,7 +29,7 @@ func TestDrawScrollsThroughTheSections(t *testing.T) {
 	require.Contains(t, out, "HEADER")
 	require.NotContains(t, out, "EMPTYSTATE")
 
-	for range 40 {
+	for range 60 {
 		m, _ = m.Update(bezeltest.Key("down"))
 	}
 	_, out = frame(t, m, nil)
@@ -59,4 +59,14 @@ func TestDrawShowsACardAndButtons(t *testing.T) {
 	require.Contains(t, out, "[u] upgrade")
 	require.Contains(t, out, "Save")
 	require.Contains(t, out, "Cancel")
+}
+
+// The link is plain text to the eye and an OSC 8 sequence to the terminal.
+func TestDrawLinksToTheRepository(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = m.Update(tea.WindowSizeMsg{Width: 80, Height: 80})
+	raw := m.View().Content
+	require.Contains(t, ansi.Strip(raw), "bezel on GitHub")
+	require.Contains(t, raw, "\x1b]8;id=bezel-")
+	require.Contains(t, raw, ";https://github.com/lucasassuncao/bezel\a")
 }

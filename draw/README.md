@@ -27,6 +27,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func Header\(width int, title, subtitle, right string, st ChromeStyle\) string](<#Header>)
 - [func Heading\(name string, style lipgloss.Style, width int\) string](<#Heading>)
 - [func InnerRect\(r layout.Rect\) layout.Rect](<#InnerRect>)
+- [func Link\(text, url string, style lipgloss.Style\) string](<#Link>)
 - [func More\(n, indent int, st lipgloss.Style\) string](<#More>)
 - [func NumberLines\(s string, style lipgloss.Style\) string](<#NumberLines>)
 - [func OneLine\(s string\) string](<#OneLine>)
@@ -184,6 +185,15 @@ func InnerRect(r layout.Rect) layout.Rect
 ```
 
 InnerRect is what a Panel leaves for content: one border cell and one padding cell on each side horizontally, one border row above and below.
+
+<a name="Link"></a>
+## func [Link](<https://github.com/lucasassuncao/bezel/blob/main/draw/link.go#L13>)
+
+```go
+func Link(text, url string, style lipgloss.Style) string
+```
+
+Link is text in style, clickable to url in a terminal that knows OSC 8 and plain text in one that does not; empty text shows the url itself.
 
 <a name="More"></a>
 ## func [More](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L14>)
