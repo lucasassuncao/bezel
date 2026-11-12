@@ -21,6 +21,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func Cut\(s string, width int\) string](<#Cut>)
 - [func Divider\(width int, label string, st DividerStyle\) string](<#Divider>)
 - [func EmptyState\(r layout.Rect, message, hint string, st ChromeStyle\) string](<#EmptyState>)
+- [func ExpandTabs\(s string\) string](<#ExpandTabs>)
 - [func Fit\(s string, width int\) string](<#Fit>)
 - [func FitBlock\(s string, width, height int\) string](<#FitBlock>)
 - [func Gutter\(n int, style lipgloss.Style\) string](<#Gutter>)
@@ -58,6 +59,12 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 
 ```go
 const GutterWidth = 7
+```
+
+<a name="TabStop"></a>TabStop is the cells between the tab stops ExpandTabs runs a tab to.
+
+```go
+const TabStop = 4
 ```
 
 <a name="BlockSize"></a>
@@ -106,7 +113,7 @@ func CompositeCenter(fg, bg string) string
 CompositeCenter centres fg over bg.
 
 <a name="Cut"></a>
-## func [Cut](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L114>)
+## func [Cut](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L140>)
 
 ```go
 func Cut(s string, width int) string
@@ -131,6 +138,15 @@ func EmptyState(r layout.Rect, message, hint string, st ChromeStyle) string
 ```
 
 EmptyState centres a message, and a hint under it, inside r.
+
+<a name="ExpandTabs"></a>
+## func [ExpandTabs](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L116>)
+
+```go
+func ExpandTabs(s string) string
+```
+
+ExpandTabs turns each tab into the spaces up to the next TabStop, counting the cells before it, escapes left out. Width counts a tab as no cells, and the terminal would jump it to a tab stop of its own.
 
 <a name="Fit"></a>
 ## func [Fit](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L35>)
@@ -169,7 +185,7 @@ func Header(width int, title, subtitle, right string, st ChromeStyle) string
 Header is one row: title and subtitle on the left, right pinned to the far edge, the whole thing cut to width and line breaks drawn as spaces.
 
 <a name="Heading"></a>
-## func [Heading](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L122>)
+## func [Heading](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L148>)
 
 ```go
 func Heading(name string, style lipgloss.Style, width int) string
@@ -214,7 +230,7 @@ func NumberLines(s string, style lipgloss.Style) string
 NumberLines prefixes every line of s with its 1\-based Gutter, before any scrolling, so the numbers stay absolute.
 
 <a name="OneLine"></a>
-## func [OneLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L128>)
+## func [OneLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L154>)
 
 ```go
 func OneLine(s string) string
@@ -304,7 +320,7 @@ func Truncate(s string, width int) string
 Truncate cuts s to width cells with an ellipsis. width \<= 0 leaves s alone.
 
 <a name="Width"></a>
-## func [Width](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L111>)
+## func [Width](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L137>)
 
 ```go
 func Width(s string) int

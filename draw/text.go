@@ -107,6 +107,32 @@ func NumberLines(s string, style lipgloss.Style) string {
 	return strings.Join(lines, "\n")
 }
 
+// TabStop is the cells between the tab stops ExpandTabs runs a tab to.
+const TabStop = 4
+
+// ExpandTabs turns each tab into the spaces up to the next TabStop, counting
+// the cells before it, escapes left out. Width counts a tab as no cells, and
+// the terminal would jump it to a tab stop of its own.
+func ExpandTabs(s string) string {
+	if !strings.Contains(s, "\t") {
+		return s
+	}
+	parts := strings.Split(s, "\t")
+	var b strings.Builder
+	col := 0
+	for i, p := range parts {
+		b.WriteString(p)
+		if i == len(parts)-1 {
+			break
+		}
+		col += ansi.StringWidth(p)
+		pad := TabStop - col%TabStop
+		b.WriteString(strings.Repeat(" ", pad))
+		col += pad
+	}
+	return b.String()
+}
+
 // Width is how many cells s takes on screen, escapes ignored.
 func Width(s string) int { return ansi.StringWidth(s) }
 

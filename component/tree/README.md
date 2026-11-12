@@ -91,7 +91,7 @@ func Contains(query, text string) bool
 Contains is the filter's default match: the node's text holds the query, in any case.
 
 <a name="Static"></a>
-## func [Static](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/static.go#L17>)
+## func [Static](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/static.go#L18>)
 
 ```go
 func Static(branches []Branch, th theme.Resolved) string
@@ -100,7 +100,7 @@ func Static(branches []Branch, th theme.Resolved) string
 Static is the whole tree as text to print, every branch open: each top branch on its own line, the rows under it hung from dimmed guides.
 
 <a name="Branch"></a>
-## type [Branch](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/static.go#L10-L13>)
+## type [Branch](<https://github.com/lucasassuncao/bezel/blob/main/component/tree/static.go#L11-L14>)
 
 Branch is one row of a tree to print, and the rows under it.
 

@@ -111,3 +111,8 @@ func TestALineBreakOnAnEdgeKeepsThePanelsHeight(t *testing.T) {
 	out := Panel(layout.Rect{W: 14, H: 3}, Edges{Title: "a\nb", Right: "c\nd", Bottom: "e\nf"}, "x", PanelStyle{})
 	require.Len(t, strings.Split(out, "\n"), 3, "%q", out)
 }
+
+// Fit measures a tab as no cells; the terminal moves it to the next tab stop.
+func TestATabInTheBodyNeverReachesTheTerminal(t *testing.T) {
+	require.NotContains(t, Panel(layout.Rect{W: 12, H: 3}, Edges{}, "a\tb", PanelStyle{}), "\t")
+}

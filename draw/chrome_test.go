@@ -92,3 +92,9 @@ func TestHeaderAndTabsStayOneRowWithALineBreak(t *testing.T) {
 	require.NotContains(t, Header(20, "a\nb", "c\nd", "e\nf", ChromeStyle{}), "\n")
 	require.NotContains(t, Tabs(20, []string{"a\nb", "c"}, 0, ChromeStyle{}), "\n")
 }
+
+// Truncate measures a tab as no cells, then Render expands it to four.
+func TestADividerWithATabKeepsItsWidth(t *testing.T) {
+	out := Divider(12, "a\tb\tc", DividerStyle{Label: lipgloss.NewStyle().Bold(true)})
+	require.Equal(t, 12, ansi.StringWidth(out), "%q", ansi.Strip(out))
+}

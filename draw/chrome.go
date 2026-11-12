@@ -134,7 +134,7 @@ func Divider(width int, label string, st DividerStyle) string {
 	// Measured rendered: a style with padding takes cells the raw label does not.
 	room := width - lead - 2
 	pad := ansi.StringWidth(st.Label.Render("x")) - 1
-	styled := st.Label.Render(Truncate(label, max(1, room-pad)))
+	styled := st.Label.Render(Truncate(ExpandTabs(label), max(1, room-pad)))
 	rest := max(0, room-ansi.StringWidth(styled))
 	return st.Line.Render(strings.Repeat("─", lead)+" ") + styled + st.Line.Render(" "+strings.Repeat("─", rest))
 }

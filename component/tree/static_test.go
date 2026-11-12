@@ -22,3 +22,8 @@ func TestStaticPrintsEachTopBranchOnItsOwnLine(t *testing.T) {
 	require.Equal(t, "a\nb", got, "no guide, so no escape codes either")
 	require.Empty(t, Static(nil, theme.Resolved{}))
 }
+
+func TestStaticExpandsATabInARow(t *testing.T) {
+	got := Static([]Branch{{Text: "a\tb", Children: []Branch{{Text: "c\td"}}}}, theme.Resolve(theme.Plain(), true))
+	require.Equal(t, "a   b\n└─ c    d", ansi.Strip(got))
+}

@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -22,7 +23,6 @@ import (
 const (
 	defaultStep  = 6 // cells a pan moves
 	defaultWheel = 3 // lines a wheel notch scrolls
-	tabStop      = 4 // a tab runs to the next multiple of this many cells
 )
 
 // Keys are the bindings that scroll and pan. Down, Right, PageDown and the
@@ -174,7 +174,7 @@ func (m Model) SetLines(lines []string) Model {
 	for _, l := range lines {
 		l = strings.ReplaceAll(strings.ReplaceAll(l, "\r\n", "\n"), "\r", "\n")
 		for _, part := range strings.Split(l, "\n") {
-			out = append(out, clean(expandTabs(part)))
+			out = append(out, clean(draw.ExpandTabs(part)))
 		}
 	}
 	m.lines = out
@@ -186,28 +186,6 @@ func (m Model) SetLines(lines []string) Model {
 	m.y = min(max(m.y, 0), m.last())
 	m.x = min(max(m.x, 0), m.maxX())
 	return m
-}
-
-// expandTabs turns each tab into the spaces up to the next tab stop,
-// counting the cells before it, escape sequences left out.
-func expandTabs(s string) string {
-	if !strings.Contains(s, "\t") {
-		return s
-	}
-	parts := strings.Split(s, "\t")
-	var b strings.Builder
-	col := 0
-	for i, p := range parts {
-		b.WriteString(p)
-		if i == len(parts)-1 {
-			break
-		}
-		col += ansi.StringWidth(p)
-		pad := tabStop - col%tabStop
-		b.WriteString(strings.Repeat(" ", pad))
-		col += pad
-	}
-	return b.String()
 }
 
 // clean drops a control character standing alone and an escape sequence the

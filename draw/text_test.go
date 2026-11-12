@@ -136,3 +136,10 @@ func TestOneLineTurnsBreaksIntoSpaces(t *testing.T) {
 	require.Equal(t, "a b  c", OneLine("a\nb\r\nc"))
 	require.Equal(t, "plain", OneLine("plain"))
 }
+
+func TestExpandTabsRunsToTheNextTabStop(t *testing.T) {
+	require.Equal(t, "a   b", ExpandTabs("a\tb"))
+	require.Equal(t, "abcd    e", ExpandTabs("abcd\te"))
+	require.Equal(t, "\x1b[31m世\x1b[m  x", ExpandTabs("\x1b[31m世\x1b[m\tx"))
+	require.Equal(t, "plain", ExpandTabs("plain"))
+}

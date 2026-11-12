@@ -3,6 +3,7 @@ package tree
 import (
 	"strings"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -31,6 +32,7 @@ func Static(branches []Branch, th theme.Resolved) string {
 		if guides[i] != "" {
 			lines[i] = th.Dim.Render(guides[i]) + r.text
 		}
+		lines[i] = draw.ExpandTabs(lines[i]) // tab stops count the guide's cells
 	}
 	return strings.Join(lines, "\n")
 }

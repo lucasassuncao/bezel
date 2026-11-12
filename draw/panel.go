@@ -80,7 +80,7 @@ func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string {
 		if i >= pos && i < pos+size {
 			edge = thumb
 		}
-		rows = append(rows, left+" "+Fit(line, content.W)+" "+edge)
+		rows = append(rows, left+" "+Fit(ExpandTabs(line), content.W)+" "+edge)
 	}
 	rows = append(rows, bottomEdge(innerW, OneLine(edges.Bottom), e, st))
 	return strings.Join(rows, "\n")
