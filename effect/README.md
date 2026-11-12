@@ -474,7 +474,7 @@ func Vignette(dim color.Color, dur time.Duration) Effect
 Vignette darkens the block towards dim the farther a cell is from its middle.
 
 <a name="Effect.Active"></a>
-### func \(Effect\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L359>)
+### func \(Effect\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L362>)
 
 ```go
 func (e Effect) Active() bool
@@ -483,7 +483,7 @@ func (e Effect) Active() bool
 Active reports whether e is still changing the block.
 
 <a name="Effect.Advance"></a>
-### func \(Effect\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L382>)
+### func \(Effect\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L385>)
 
 ```go
 func (e Effect) Advance(now time.Time) (Effect, bool)
@@ -501,7 +501,7 @@ func (e Effect) Apply(block string) string
 Apply is block as this frame shows it, its size kept. Within and OnRows keep the change to their parts of it.
 
 <a name="Effect.FrameAt"></a>
-### func \(Effect\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L365>)
+### func \(Effect\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L368>)
 
 ```go
 func (e Effect) FrameAt(at time.Time) animation.FrameMsg
@@ -510,7 +510,7 @@ func (e Effect) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is e's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Effect.OnRows"></a>
-### func \(Effect\) [OnRows](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L225>)
+### func \(Effect\) [OnRows](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L228>)
 
 ```go
 func (e Effect) OnRows(rows ...int) Effect
@@ -519,7 +519,7 @@ func (e Effect) OnRows(rows ...int) Effect
 OnRows keeps e to whole rows of the block: the lines a diff added, the ones undo restored. Each row turns on its own, as a one\-line block.
 
 <a name="Effect.Owns"></a>
-### func \(Effect\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L392>)
+### func \(Effect\) [Owns](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L395>)
 
 ```go
 func (e Effect) Owns(msg tea.Msg) bool
@@ -528,7 +528,7 @@ func (e Effect) Owns(msg tea.Msg) bool
 Owns reports whether msg is e's current frame, for a host that routes frames to whoever owns them before handing the rest on.
 
 <a name="Effect.Reverse"></a>
-### func \(Effect\) [Reverse](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L234>)
+### func \(Effect\) [Reverse](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L237>)
 
 ```go
 func (e Effect) Reverse() Effect
@@ -537,7 +537,7 @@ func (e Effect) Reverse() Effect
 Reverse plays e backwards: an effect that brings a block in takes it away, a hover lets go.
 
 <a name="Effect.Tick"></a>
-### func \(Effect\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L362>)
+### func \(Effect\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L365>)
 
 ```go
 func (e Effect) Tick() tea.Cmd
@@ -546,7 +546,7 @@ func (e Effect) Tick() tea.Cmd
 Tick is the command for e's next frame, nil once it ended.
 
 <a name="Effect.Update"></a>
-### func \(Effect\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L368>)
+### func \(Effect\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L371>)
 
 ```go
 func (e Effect) Update(msg tea.Msg) (Effect, bezel.Result)
@@ -609,7 +609,7 @@ func (e Effect) WithYoyo(on bool) Effect
 WithYoyo sends every other run of e back: in, then out again.
 
 <a name="Effect.Within"></a>
-### func \(Effect\) [Within](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L218>)
+### func \(Effect\) [Within](<https://github.com/lucasassuncao/bezel/blob/main/effect/effect.go#L221>)
 
 ```go
 func (e Effect) Within(x, y, w, h int) Effect

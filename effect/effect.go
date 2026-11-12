@@ -170,7 +170,10 @@ func (e Effect) Apply(block string) string {
 		return e.applyGrid(g).String()
 	}
 	for _, r := range e.masks {
-		g = paste(g, e.applyGrid(crop(g, r)), r)
+		// A mask past the block's last row crops to nothing to turn.
+		if sub := crop(g, r); len(sub) > 0 {
+			g = paste(g, e.applyGrid(sub), r)
+		}
 	}
 	return g.String()
 }

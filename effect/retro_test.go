@@ -82,3 +82,8 @@ func TestStillRetroEffectsShowTheirEnd(t *testing.T) {
 	assert.Equal(t, screen, PowerOn(white, time.Second).Apply(screen))
 	assert.Empty(t, strings.TrimSpace(ansi.Strip(PowerOff(white, time.Second).Apply(screen))))
 }
+
+// A row past the block crops to an empty grid; the band must not read row -1.
+func TestPowerOffOnARowPastTheBlockLeavesItAlone(t *testing.T) {
+	assert.NotPanics(t, func() { at(PowerOff(white, time.Second).OnRows(9), 0.3).Apply(screen) })
+}
