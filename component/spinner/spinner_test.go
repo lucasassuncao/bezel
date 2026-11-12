@@ -184,3 +184,12 @@ func TestAdvanceShowsAFramePerEvery(t *testing.T) {
 	_, done = m.Stop().Advance(at)
 	require.True(t, done, "a held spinner is settled")
 }
+
+// A host's clock can step back past the first frame; the frame stays in range.
+func TestAdvanceBeforeTheStartKeepsAFrame(t *testing.T) {
+	m, _ := New(Line()).Start()
+	at := time.Unix(10, 0)
+	m, _ = m.Advance(at)
+	m, _ = m.Advance(at.Add(-time.Second))
+	require.NotPanics(t, func() { m.View(th) })
+}

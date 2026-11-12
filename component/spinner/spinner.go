@@ -207,7 +207,9 @@ func (m Model) Advance(now time.Time) (Model, bool) {
 	if m.start.IsZero() {
 		m.start = now
 	}
-	m.frame = (m.from + int(frames.Paced(now.Sub(m.start))/m.spinner.Every)) % n
+	// A host's clock may step back past the start; the frame holds there.
+	elapsed := max(now.Sub(m.start), 0)
+	m.frame = (m.from + int(frames.Paced(elapsed)/m.spinner.Every)) % n
 	return m, false
 }
 

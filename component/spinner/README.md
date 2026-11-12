@@ -84,7 +84,7 @@ func (m Model) Advance(now time.Time) (Model, bool)
 Advance is the spinner at now, for a host that keeps its own clock: a frame per Every since the first call. It never settles while running.
 
 <a name="Model.Frame"></a>
-### func \(Model\) [Frame](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L215>)
+### func \(Model\) [Frame](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L217>)
 
 ```go
 func (m Model) Frame() string
@@ -111,7 +111,7 @@ func (m Model) Owns(msg tea.Msg) bool
 Owns reports whether msg is one of this spinner's frames, a spent one included, so a host routing frames hands it here and nowhere else.
 
 <a name="Model.Running"></a>
-### func \(Model\) [Running](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L230>)
+### func \(Model\) [Running](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L232>)
 
 ```go
 func (m Model) Running() bool
@@ -129,7 +129,7 @@ func (m Model) SetRunning(on bool) Model
 SetRunning turns the spinner or holds it, and leaves it be when it already is: an app asks for Tick after turning it on.
 
 <a name="Model.Spinner"></a>
-### func \(Model\) [Spinner](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L223>)
+### func \(Model\) [Spinner](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L225>)
 
 ```go
 func (m Model) Spinner() Spinner
@@ -174,7 +174,7 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 Update turns to the next frame on its own frame and arms the one after, which alone is current: a second Tick's frame lands spent. Any other message leaves it as it was, with no command.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L233>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/spinner/spinner.go#L235>)
 
 ```go
 func (m Model) View(th theme.Resolved) string
