@@ -168,8 +168,8 @@ type Slider struct {
 
 // NewSlider offers value from 0 to 100, stepping by 1 on a bar 20 cells wide.
 func NewSlider(label string, value float64) Slider {
-	sc := scale{v: value, lo: 0, hi: 100, step: 1}
-	sc.v = sc.clamp(value)
+	sc := scale{lo: 0, hi: 100, step: 1}
+	sc.v = sc.clamp(value) // NaN keeps the 0 it starts from
 	return Slider{label: label, sc: sc, width: 20, set: icon.FromEnv(), keys: DefaultKeys()}
 }
 
@@ -234,8 +234,11 @@ func (s Slider) Update(msg tea.Msg) (Field, bezel.Result) {
 func (s Slider) View(focused bool, labelW, width int) string {
 	st := styles(s.st)
 	at := 0
+	// An endless range has no middle: Inf over Inf is NaN, and the knob stays left.
 	if span := s.sc.hi - s.sc.lo; span > 0 {
-		at = int(math.Round((s.sc.v - s.sc.lo) / span * float64(s.width-1)))
+		if f := math.Round((s.sc.v - s.sc.lo) / span * float64(s.width-1)); !math.IsNaN(f) {
+			at = int(min(max(f, 0), float64(s.width-1)))
+		}
 	}
 	bar := st.Chosen.Render(strings.Repeat(s.set.Line, at)+s.set.Running) +
 		st.Edge.Render(strings.Repeat(s.set.Line, s.width-1-at))

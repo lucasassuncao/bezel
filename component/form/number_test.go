@@ -1,6 +1,7 @@
 package form
 
 import (
+	"math"
 	"strings"
 	"testing"
 
@@ -52,4 +53,16 @@ func TestTheLegendFollowsTheField(t *testing.T) {
 	require.Equal(t, "↑/↓", f.Legend()[2].Help.Key)
 	f, _ = press(f, "tab")
 	require.Equal(t, "←/→", f.Legend()[2].Help.Key)
+}
+
+// NaN or an endless range leaves no place for the knob; the bar still draws.
+func TestASliderWithoutAPlaceForItsKnobStillDraws(t *testing.T) {
+	for name, s := range map[string]Slider{
+		"NaN value":      NewSlider("Vol", math.NaN()),
+		"infinite range": NewSlider("Vol", 5).WithRange(math.Inf(-1), math.Inf(1)),
+	} {
+		t.Run(name, func(t *testing.T) {
+			require.NotPanics(t, func() { numberForm(s).SetWidth(40).View() })
+		})
+	}
 }
