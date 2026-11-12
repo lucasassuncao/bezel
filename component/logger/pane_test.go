@@ -256,3 +256,8 @@ func mustTheme(t *testing.T, name string) theme.Theme {
 	require.NoError(t, err)
 	return th
 }
+
+// Every other model works as a zero value; a zero Pane's Writer is a nil feed.
+func TestAZeroPaneTakesAWrite(t *testing.T) {
+	require.NotPanics(t, func() { _, _ = Pane{}.Writer().Write([]byte("x\n")) })
+}

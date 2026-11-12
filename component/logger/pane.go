@@ -202,8 +202,12 @@ func (p Pane) Handler() Handler {
 // line of text: slog.NewJSONHandler(pane.Writer(), nil) shows JSON lines.
 func (p Pane) Writer() io.Writer { return p.feed }
 
-// Write takes the formatted record and wakes the pane, without waiting.
+// Write takes the formatted record and wakes the pane, without waiting. A zero
+// Pane has no feed, and what is written to it is dropped.
 func (f *feed) Write(b []byte) (int, error) {
+	if f == nil {
+		return len(b), nil
+	}
 	lines := strings.Split(strings.TrimSuffix(string(b), "\n"), "\n")
 	f.mu.Lock()
 	f.pending = append(f.pending, lines)
@@ -221,6 +225,9 @@ func (p Pane) Init() tea.Cmd { return p.listen() }
 // listen waits for lines and hands every one gathered so far to Update.
 func (p Pane) listen() tea.Cmd {
 	f := p.feed
+	if f == nil {
+		return nil // a zero Pane: nothing can ever arrive
+	}
 	return func() tea.Msg {
 		for {
 			<-f.wake

@@ -97,7 +97,8 @@ func New(w io.Writer, th theme.Resolved) Handler {
 	}
 }
 
-// WithLevel sets the lowest level printed; a *slog.LevelVar changes it live.
+// WithLevel sets the lowest level printed; a *slog.LevelVar changes it live,
+// and nil is slog.LevelInfo, as in slog.HandlerOptions.
 func (h Handler) WithLevel(l slog.Leveler) Handler {
 	h.level = l
 	return h
@@ -134,16 +135,23 @@ func (h Handler) WithIcons(set icon.Set) Handler {
 	return h
 }
 
-// WithStyles edits the default styles; a second call replaces the first edit.
+// WithStyles edits the default styles; a second call replaces the first edit,
+// and nil goes back to the defaults.
 func (h Handler) WithStyles(edit func(Styles) Styles) Handler {
 	h.edit = edit
-	st := edit(DefaultStyles(*h.th))
+	st := DefaultStyles(*h.th)
+	if edit != nil {
+		st = edit(st)
+	}
 	h.st = &st
 	return h
 }
 
 // Enabled reports whether l is at or above the level set.
 func (h Handler) Enabled(_ context.Context, l slog.Level) bool {
+	if h.level == nil {
+		return l >= slog.LevelInfo
+	}
 	return l >= h.level.Level()
 }
 

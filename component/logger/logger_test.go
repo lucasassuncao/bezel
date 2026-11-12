@@ -232,3 +232,14 @@ func FuzzLinesStayInTheWidth(f *testing.F) {
 		}
 	})
 }
+
+// slog reads a nil Leveler as Info; WithLevel(nil) should too.
+func TestANilLevelLogsFromInfo(t *testing.T) {
+	h, _ := newTest()
+	require.NotPanics(t, func() { h.WithLevel(nil).Enabled(context.Background(), slog.LevelInfo) })
+}
+
+func TestANilStylesEditKeepsTheDefaults(t *testing.T) {
+	h, _ := newTest()
+	require.NotPanics(t, func() { h.WithStyles(nil) })
+}
