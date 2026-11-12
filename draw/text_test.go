@@ -143,3 +143,9 @@ func TestExpandTabsRunsToTheNextTabStop(t *testing.T) {
 	require.Equal(t, "\x1b[31m世\x1b[m  x", ExpandTabs("\x1b[31m世\x1b[m\tx"))
 	require.Equal(t, "plain", ExpandTabs("plain"))
 }
+
+// A wide rune cannot fit a 1-cell row, but the runes after it can wrap.
+func TestWrapAtOneCellBreaksAfterAWideRune(t *testing.T) {
+	require.Equal(t, []string{"a", "b", "世", "a", "b"}, Wrap("ab世ab", 1))
+	require.Equal(t, []string{"世", "世", "", "x"}, Wrap("世世\n\nx", 1), "a real blank line stays")
+}

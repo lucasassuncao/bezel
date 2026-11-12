@@ -5,6 +5,7 @@ package draw
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"charm.land/lipgloss/v2"
@@ -40,16 +41,34 @@ func Fit(s string, width int) string {
 }
 
 // Wrap folds plain text into rows of at most width cells, breaking after
-// spaces and hyphens and cutting a word wider than a row. Newlines stay;
-// style the rows after wrapping, since a style is not re-opened per row.
+// spaces and hyphens, cutting a word wider than a row; a rune wider than a row
+// gets one alone. Newlines stay; style the rows after, as styles do not re-open.
 func Wrap(s string, width int) []string {
 	if s == "" {
 		return nil
 	}
-	if width > 0 {
-		s = ansi.Wrap(s, width, "")
+	if width <= 0 {
+		return strings.Split(s, "\n")
 	}
-	return strings.Split(s, "\n")
+	var rows []string
+	for _, line := range strings.Split(s, "\n") {
+		rows = append(rows, wrapLine(line, width)...)
+	}
+	return rows
+}
+
+// wrapLine is one line of Wrap. ansi.Wrap leaves a rune wider than the row
+// with what follows it, and blank rows before it; those lines are cut instead.
+func wrapLine(line string, width int) []string {
+	rows := strings.Split(ansi.Wrap(line, width, ""), "\n")
+	if !slices.ContainsFunc(rows, func(r string) bool { return ansi.StringWidth(r) > width }) {
+		return rows
+	}
+	rows = slices.DeleteFunc(strings.Split(ansi.Hardwrap(line, width, true), "\n"), func(r string) bool { return r == "" })
+	if len(rows) == 0 {
+		return []string{""}
+	}
+	return rows
 }
 
 // BlockSize measures a rendered block: widest line and line count.
