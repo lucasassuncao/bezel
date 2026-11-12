@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"math"
 	"strings"
 	"testing"
 
@@ -18,4 +19,10 @@ func TestGaugeKeepsTheNeedleOnTheTrack(t *testing.T) {
 	assert.Equal(t, "        ▲", strings.Split(ansi.Strip(Gauge(500, 100, 9, th())), "\n")[1])
 	assert.Equal(t, "▲        ", strings.Split(ansi.Strip(Gauge(-5, 100, 9, th())), "\n")[1])
 	assert.Equal(t, "▲        ", strings.Split(ansi.Strip(Gauge(5, 0, 9, th())), "\n")[1], "no total reads as nothing")
+}
+
+// NaN survived min and max and gave strings.Repeat a negative count.
+func TestGaugeReadsNaNAsNothing(t *testing.T) {
+	assert.Equal(t, "▲        ", strings.Split(ansi.Strip(Gauge(math.NaN(), 100, 9, th())), "\n")[1])
+	assert.Equal(t, "▲        ", strings.Split(ansi.Strip(Gauge(math.Inf(1), math.Inf(1), 9, th())), "\n")[1])
 }

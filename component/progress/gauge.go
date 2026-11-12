@@ -26,7 +26,7 @@ func Gauge(value, total float64, width int, th theme.Resolved) string {
 	}
 	at := 0
 	if total > 0 {
-		at = int(math.Round(min(max(value/total, 0), 1) * float64(width-1)))
+		at = int(math.Round(share(value/total) * float64(width-1)))
 	}
 	needle := strings.Repeat(" ", at) + th.Accent.Render("▲") + strings.Repeat(" ", width-1-at)
 	return th.Muted.Render(string(track)) + "\n" + needle
