@@ -107,6 +107,13 @@ func TestFramedPanelThumbWearsItsOwnStyle(t *testing.T) {
 	require.Contains(t, got, red.Render("█"))
 }
 
+// InnerRect gives a 4-wide panel one cell of content it does not have.
+func TestAPanelFourWideKeepsItsWidth(t *testing.T) {
+	for _, l := range strings.Split(Panel(layout.Rect{W: 4, H: 3}, Edges{}, "abc", PanelStyle{}), "\n") {
+		require.Equal(t, 4, ansi.StringWidth(l), "%q", l)
+	}
+}
+
 func TestALineBreakOnAnEdgeKeepsThePanelsHeight(t *testing.T) {
 	out := Panel(layout.Rect{W: 14, H: 3}, Edges{Title: "a\nb", Right: "c\nd", Bottom: "e\nf"}, "x", PanelStyle{})
 	require.Len(t, strings.Split(out, "\n"), 3, "%q", out)

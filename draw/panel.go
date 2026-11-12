@@ -66,6 +66,7 @@ func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string {
 	}
 
 	content := InnerRect(r)
+	content.W = r.W - 4                              // InnerRect keeps a cell a 4-wide panel does not have
 	lines := strings.SplitN(body, "\n", content.H+1) // Fit below cuts each row
 	rows := make([]string, 0, r.H)
 	rows = append(rows, top)
