@@ -3,6 +3,7 @@ package progress
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"strings"
 	"time"
 
@@ -100,10 +101,11 @@ func (m Model) SetWidth(w int) Model {
 // Width is the bar's width, the percentage included.
 func (m Model) Width() int { return m.width }
 
-// SetPercent aims the bar at p, kept within [0, 1]; the command moves it.
+// SetPercent aims the bar at p, kept within [0, 1] with NaN as 0; the command
+// moves it.
 func (m Model) SetPercent(p float64) (Model, tea.Cmd) {
 	var cmd tea.Cmd
-	m.spring, cmd = m.spring.To(min(max(p, 0), 1))
+	m.spring, cmd = m.spring.To(share(p))
 	return m, cmd
 }
 
@@ -150,7 +152,7 @@ func (m Model) ViewAs(p float64, th theme.Resolved) string {
 	if m.edit != nil {
 		st = m.edit(st)
 	}
-	p = min(max(p, 0), 1)
+	p = share(p)
 	pct := ""
 	if m.percent {
 		pct = fmt.Sprintf(m.format, p*100)
@@ -170,6 +172,14 @@ func (m Model) ViewAs(p float64, th theme.Resolved) string {
 		b.WriteString(st.Percent.Render(pct))
 	}
 	return draw.Fit(b.String(), m.width)
+}
+
+// share is p within [0, 1]. min and max hand NaN back, so it is 0 here.
+func share(p float64) float64 {
+	if math.IsNaN(p) {
+		return 0
+	}
+	return min(max(p, 0), 1)
 }
 
 // colorAt is the gradient's colour at cell i of a bar n cells wide.

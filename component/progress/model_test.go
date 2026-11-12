@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 func TestAModelSpringsToItsPercent(t *testing.T) {
@@ -90,4 +92,16 @@ func TestAModelMovesOnTheSharedFive(t *testing.T) {
 	require.True(t, done)
 	require.InDelta(t, 1, m.Shown(), 0.001)
 	require.Nil(t, m.Tick())
+}
+
+// NaN survives min and max, so the share must be checked for it.
+func TestAShareThatIsNotANumberDrawsAnEmptyBar(t *testing.T) {
+	plain := theme.Resolve(theme.Plain(), true)
+	require.NotPanics(t, func() { New().SetWidth(10).ViewAs(math.NaN(), plain) })
+
+	m, _ := New().SetWidth(10).SetPercent(math.NaN())
+	at := time.Unix(10, 0)
+	m, _ = m.Advance(at)
+	m, _ = m.Advance(at.Add(100 * time.Millisecond))
+	require.NotPanics(t, func() { m.View(plain) })
 }
