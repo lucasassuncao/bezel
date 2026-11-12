@@ -148,7 +148,7 @@ func New(th theme.Resolved) Model
 New is an empty field, not focused, sized by its text until SetWidth and SetHeight say otherwise.
 
 <a name="Model.Blink"></a>
-### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L532>)
+### func \(Model\) [Blink](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L538>)
 
 ```go
 func (m Model) Blink() tea.Cmd
@@ -157,7 +157,7 @@ func (m Model) Blink() tea.Cmd
 Blink is the command that keeps a focused caret blinking, for a host's Init; Focus and every edit arm their own.
 
 <a name="Model.Blur"></a>
-### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L525>)
+### func \(Model\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L531>)
 
 ```go
 func (m Model) Blur() Model
@@ -175,7 +175,7 @@ func (m Model) CharLimit() int
 CharLimit is the most characters the text holds; zero is no cap.
 
 <a name="Model.ClearSelection"></a>
-### func \(Model\) [ClearSelection](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L916>)
+### func \(Model\) [ClearSelection](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L922>)
 
 ```go
 func (m Model) ClearSelection() Model
@@ -202,7 +202,7 @@ func (m Model) Copy() tea.Cmd
 Copy is the command that puts the selection on the clipboard, answering with a CopiedMsg; nil when nothing is selected.
 
 <a name="Model.CursorMode"></a>
-### func \(Model\) [CursorMode](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L558>)
+### func \(Model\) [CursorMode](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L564>)
 
 ```go
 func (m Model) CursorMode() cursor.Mode
@@ -211,7 +211,7 @@ func (m Model) CursorMode() cursor.Mode
 CursorMode is how the caret shows while focused.
 
 <a name="Model.Focus"></a>
-### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L518>)
+### func \(Model\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L524>)
 
 ```go
 func (m Model) Focus() (Model, tea.Cmd)
@@ -220,7 +220,7 @@ func (m Model) Focus() (Model, tea.Cmd)
 Focus gives the field the keys and starts its caret blinking.
 
 <a name="Model.Focused"></a>
-### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L515>)
+### func \(Model\) [Focused](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L521>)
 
 ```go
 func (m Model) Focused() bool
@@ -229,7 +229,7 @@ func (m Model) Focused() bool
 Focused reports whether the field takes keys and shows its caret.
 
 <a name="Model.HasSelection"></a>
-### func \(Model\) [HasSelection](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L872>)
+### func \(Model\) [HasSelection](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L878>)
 
 ```go
 func (m Model) HasSelection() bool
@@ -238,7 +238,7 @@ func (m Model) HasSelection() bool
 HasSelection reports whether some text is selected.
 
 <a name="Model.Height"></a>
-### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L502>)
+### func \(Model\) [Height](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L508>)
 
 ```go
 func (m Model) Height() int
@@ -247,7 +247,7 @@ func (m Model) Height() int
 Height is how many rows the field shows.
 
 <a name="Model.InsertString"></a>
-### func \(Model\) [InsertString](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L956>)
+### func \(Model\) [InsertString](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L962>)
 
 ```go
 func (m Model) InsertString(s string) Model
@@ -256,7 +256,7 @@ func (m Model) InsertString(s string) Model
 InsertString puts s at the caret as typing would, in place of a selection and within the limits, and leaves the caret after it.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L506>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L512>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -310,7 +310,7 @@ func (m Model) Placeholder() string
 Placeholder is what an empty field shows.
 
 <a name="Model.PositionAt"></a>
-### func \(Model\) [PositionAt](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L706>)
+### func \(Model\) [PositionAt](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L712>)
 
 ```go
 func (m Model) PositionAt(x, y int) Position
@@ -319,7 +319,7 @@ func (m Model) PositionAt(x, y int) Position
 PositionAt is the place in the text drawn at cell \(x, y\) of the field's view, counted from its top left; a cell past the text lands on the nearest place in it.
 
 <a name="Model.Rows"></a>
-### func \(Model\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L1154>)
+### func \(Model\) [Rows](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L1160>)
 
 ```go
 func (m Model) Rows() int
@@ -328,7 +328,7 @@ func (m Model) Rows() int
 Rows is how many rows the text takes at the width set, its wrapped lines counted: a form that grows the field sets its height from it.
 
 <a name="Model.Select"></a>
-### func \(Model\) [Select](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L907>)
+### func \(Model\) [Select](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L913>)
 
 ```go
 func (m Model) Select(from, to Position) Model
@@ -337,7 +337,7 @@ func (m Model) Select(from, to Position) Model
 Select selects from one position to another, both kept within the text; the caret lands on to.
 
 <a name="Model.SelectedText"></a>
-### func \(Model\) [SelectedText](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L891>)
+### func \(Model\) [SelectedText](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L897>)
 
 ```go
 func (m Model) SelectedText() string
@@ -346,7 +346,7 @@ func (m Model) SelectedText() string
 SelectedText is the text the selection holds, its lines joined by "\\n".
 
 <a name="Model.Selection"></a>
-### func \(Model\) [Selection](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L878>)
+### func \(Model\) [Selection](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L884>)
 
 ```go
 func (m Model) Selection() (start, end Position)
@@ -355,7 +355,7 @@ func (m Model) Selection() (start, end Position)
 Selection is the selected text's start and end, the end just past it; both are the caret when nothing is selected.
 
 <a name="Model.SetCursorMode"></a>
-### func \(Model\) [SetCursorMode](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L548>)
+### func \(Model\) [SetCursorMode](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L554>)
 
 ```go
 func (m Model) SetCursorMode(mode cursor.Mode) (Model, tea.Cmd)
@@ -364,7 +364,7 @@ func (m Model) SetCursorMode(mode cursor.Mode) (Model, tea.Cmd)
 SetCursorMode sets how the caret shows while focused: blinking at the theme's pace, steady, or hidden. A focused field is lit at once, and one turned to Blinking starts its blink with the command returned.
 
 <a name="Model.SetHeight"></a>
-### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L480>)
+### func \(Model\) [SetHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L486>)
 
 ```go
 func (m Model) SetHeight(h int) Model
@@ -400,7 +400,7 @@ func (m Model) SetWidth(w int) Model
 SetWidth is the field's width in cells, the gutter included; zero draws each line whole.
 
 <a name="Model.TerminalCursor"></a>
-### func \(Model\) [TerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L571>)
+### func \(Model\) [TerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L577>)
 
 ```go
 func (m Model) TerminalCursor() *tea.Cursor
@@ -409,7 +409,7 @@ func (m Model) TerminalCursor() *tea.Cursor
 TerminalCursor is the terminal's cursor for a field made WithTerminalCursor, placed within the field's view: add the field's origin before handing it to tea.View. nil while blurred, hidden, or painting its own caret.
 
 <a name="Model.Update"></a>
-### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L586>)
+### func \(Model\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L592>)
 
 ```go
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
@@ -427,7 +427,7 @@ func (m Model) Value() string
 Value is the text, its lines joined by "\\n".
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L1224>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L1230>)
 
 ```go
 func (m Model) View() string
@@ -436,7 +436,7 @@ func (m Model) View() string
 View is the rows in the window, each a gutter and a wrapped piece of a line, exactly the width and height set; rows past the text show "\~".
 
 <a name="Model.Width"></a>
-### func \(Model\) [Width](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L499>)
+### func \(Model\) [Width](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L505>)
 
 ```go
 func (m Model) Width() int
@@ -472,7 +472,7 @@ func (m Model) WithClipboardWrite(write func(string) error) Model
 WithClipboardWrite writes the clipboard through write on a copy or a cut, for a test that must not touch the machine's own; nil is the system's.
 
 <a name="Model.WithDynamicHeight"></a>
-### func \(Model\) [WithDynamicHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L489>)
+### func \(Model\) [WithDynamicHeight](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L495>)
 
 ```go
 func (m Model) WithDynamicHeight(least, most int) Model
@@ -505,7 +505,7 @@ WithKeys rebinds the editing keys.
 func (m Model) WithLineNumbers(on bool) Model
 ```
 
-WithLineNumbers shows or hides the gutter of line numbers; it shows by default.
+WithLineNumbers shows or hides the gutter of line numbers; it shows by default, except on a field too narrow for it and a cell of text.
 
 <a name="Model.WithMaxLines"></a>
 ### func \(Model\) [WithMaxLines](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L278>)
@@ -553,7 +553,7 @@ func (m Model) WithStyles(edit func(Styles) Styles) Model
 WithStyles changes the styles derived from the theme through edit, now and after every SetTheme. It replaces an earlier edit.
 
 <a name="Model.WithTerminalCursor"></a>
-### func \(Model\) [WithTerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L562>)
+### func \(Model\) [WithTerminalCursor](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L568>)
 
 ```go
 func (m Model) WithTerminalCursor(on bool) Model
@@ -562,7 +562,7 @@ func (m Model) WithTerminalCursor(on bool) Model
 WithTerminalCursor leaves the caret to the terminal's own cursor: View paints none, and TerminalCursor says where to put the real one.
 
 <a name="Model.Word"></a>
-### func \(Model\) [Word](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L966>)
+### func \(Model\) [Word](<https://github.com/lucasassuncao/bezel/blob/main/component/textbox/textbox.go#L972>)
 
 ```go
 func (m Model) Word() string

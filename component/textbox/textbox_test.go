@@ -585,3 +585,11 @@ func TestTheWheelScrollsTheText(t *testing.T) {
 	require.NotContains(t, ansi.Strip(m.View()), "one")
 	require.Equal(t, 0, m.Line())
 }
+
+// SetWidth counts the gutter, so a narrow field must not draw it whole.
+func TestANarrowFieldKeepsItsGutterWithinTheWidth(t *testing.T) {
+	m := New(th()).SetWidth(5).SetHeight(2).SetValue("abc")
+	for _, row := range strings.Split(m.View(), "\n") {
+		require.LessOrEqual(t, ansi.StringWidth(row), 5, "%q", ansi.Strip(row))
+	}
+}

@@ -412,7 +412,7 @@ func (m Model) rewrap() Model {
 }
 
 // WithLineNumbers shows or hides the gutter of line numbers; it shows by
-// default.
+// default, except on a field too narrow for it and a cell of text.
 func (m Model) WithLineNumbers(on bool) Model {
 	m = m.ready()
 	m.noNumbers = !on
@@ -446,10 +446,16 @@ func (m Model) WithPlaceholder(s string) Model {
 // Placeholder is what an empty field shows.
 func (m Model) Placeholder() string { return m.holder }
 
+// numbered reports whether the gutter shows: asked for, and with a cell of
+// text left beside it and the prompt, since SetWidth counts the gutter.
+func (m *Model) numbered() bool {
+	return !m.noNumbers && (m.width == 0 || m.width > draw.GutterWidth+m.promptW)
+}
+
 // lead is the cells before the text on every row: the gutter and the prompt.
 func (m *Model) lead() int {
 	w := m.promptW
-	if !m.noNumbers {
+	if m.numbered() {
 		w += draw.GutterWidth
 	}
 	return w
@@ -459,7 +465,7 @@ func (m *Model) lead() int {
 func (m *Model) margin(i, k int) string {
 	var b strings.Builder
 	switch {
-	case m.noNumbers:
+	case !m.numbered():
 	case k == 0:
 		b.WriteString(draw.Gutter(i+1, m.styles().Gutter))
 	default:
@@ -1257,7 +1263,7 @@ func (m Model) View() string {
 		}
 	}
 	filler := strings.Repeat(" ", m.lead())
-	if !m.noNumbers {
+	if m.numbered() {
 		filler = m.styles().Gutter.Render(strings.Repeat(" ", draw.GutterWidth-4)+"~ │ ") + strings.Repeat(" ", m.promptW)
 	}
 	for len(rows) < m.height {
