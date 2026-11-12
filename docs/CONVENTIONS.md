@@ -224,7 +224,7 @@ A new component reaches for one of these before inventing a shape.
 | Chain of responsibility | `Shell.Update`: overlays, then the status input, then actions, then the app |
 | Command | `shell.Action`: a key, a name and what it runs, as data |
 | Functional options | `shell.Option`, every `With` |
-| Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `Clicker`, `Themer`, `form.Holder`, `form.Initer` |
+| Role interfaces | `overlay.EscOwner`, `Resizer`, `StatusLiner`, `BottomAnchored`, `Clicker`, `Themer`, `Initer`, `form.Holder`, `form.Initer` |
 | Strategy | `list.WithMatch`, `Prompt.WithValidate`, `Config.Can`, `When`: the app decides, bezel applies |
 | Cascade | `theme.Theme.Base`: each layer overrides the one below |
 

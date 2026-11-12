@@ -104,9 +104,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case openMsg:
 		o := m.modal()
 		m.sh = m.sh.Push(o)
-		// The picker reads its directory once it is on top to receive it.
-		if fp, ok := o.(overlay.FilePicker); ok {
-			return m, fp.Init()
+		// Push takes no command: a dialog with something to start, the prompt's
+		// caret or the picker's listing, gets its Init once it is on top.
+		if in, ok := o.(overlay.Initer); ok {
+			return m, in.Init()
 		}
 	case doneMsg:
 		m.sh, cmd = m.sh.SetStatus(msg.text, shell.OK, 3*time.Second)

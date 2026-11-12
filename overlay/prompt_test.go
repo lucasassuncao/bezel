@@ -4,11 +4,14 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/component/cursor"
+	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
@@ -135,4 +138,11 @@ func BenchmarkTypingInAPrompt(b *testing.B) {
 		p, _ = p.Update(back)
 		_ = p.View(body)
 	}
+}
+
+func TestPromptInitBlinksItsCaret(t *testing.T) {
+	p := NewPrompt("t", nil, theme.Resolved{CaretBlink: time.Nanosecond})
+	require.IsType(t, input.BlinkMsg{}, p.Init()())
+	steady, _ := input.New(theme.Resolved{}).SetCursorMode(cursor.Steady)
+	require.Nil(t, p.WithInput(steady).Init(), "a caret that does not blink asks for nothing")
 }

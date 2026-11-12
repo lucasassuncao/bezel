@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/shell/internal/palette"
 )
 
@@ -42,10 +43,20 @@ func (s Shell) paletteItems() []palette.Item {
 }
 
 // OpenCommands opens the palette over the declared named actions, for an app
-// that decides itself when ":" means commands and when it is text.
+// that decides itself when ":" means commands and when it is text. Its caret
+// blinks from the first key on; the Commands action starts it at once.
 func (s Shell) OpenCommands() Shell {
 	s = s.ready()
 	return s.Push(palette.New(s.paletteItems(), s.cfg.Theme).SetHeight(s.paletteHeight())).relayout()
+}
+
+// initTop is the command that starts the overlay just pushed, nil when it
+// has none: Push takes no command, so whoever pushed runs it.
+func (s Shell) initTop() tea.Cmd {
+	if in, ok := s.overlays.Top().(overlay.Initer); ok {
+		return in.Init()
+	}
+	return nil
 }
 
 // paletteHeight is the candidates the palette lists: the user's choice, else

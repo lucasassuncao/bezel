@@ -239,3 +239,8 @@ func TestFuzzyLettersAreUnderlined(t *testing.T) {
 	m := typed(open(), "gt")
 	require.Contains(t, m.View(layout.Rect{W: 60, H: 8}), m.styles().Name.Underline(true).Render("g"))
 }
+
+func TestInitBlinksTheCommandLine(t *testing.T) {
+	m := New(nil, theme.Resolved{CaretBlink: time.Nanosecond})
+	require.IsType(t, input.BlinkMsg{}, m.Init()())
+}

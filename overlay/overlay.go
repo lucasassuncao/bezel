@@ -56,6 +56,11 @@ type Themer interface {
 	SetTheme(th theme.Resolved) Overlay
 }
 
+// Initer is implemented by overlays with a command to start them: a prompt's
+// caret blink, a file picker's first listing. The stack runs it on a PushMsg,
+// so Open starts the dialog; after Stack.Push, run Init yourself.
+type Initer interface{ Init() tea.Cmd }
+
 // CloseMsg pops the top overlay.
 type CloseMsg struct{}
 
@@ -166,7 +171,11 @@ func (s Stack) Update(msg tea.Msg) (Stack, bezel.Result) {
 	case CloseMsg:
 		return s.Pop(), bezel.Result{Handled: true}
 	case PushMsg:
-		return s.Push(m.Overlay), bezel.Result{Handled: true}
+		r := bezel.Result{Handled: true}
+		if in, ok := m.Overlay.(Initer); ok {
+			r.Cmd = in.Init() // once it is on top, where its answer finds it
+		}
+		return s.Push(m.Overlay), r
 	}
 	top := s.Top()
 	if top == nil {

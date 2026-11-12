@@ -3,6 +3,7 @@ package overlay
 import (
 	"strings"
 	"testing"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -10,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -265,4 +267,17 @@ func TestButtonAtFindsEachButtonOnItsRow(t *testing.T) {
 	require.Equal(t, -1, buttonAt(view, " ", frame, buttons, 7, 2), "the gap")
 	require.Equal(t, -1, buttonAt(view, " ", frame, buttons, 2, 0), "another row")
 	require.Equal(t, -1, buttonAt(view, " ", frame, buttons, 1, 2), "the lead")
+}
+
+// A dialog opened with Open starts what it needs: the stack runs its Init.
+func TestAPushedOverlayIsInited(t *testing.T) {
+	th := theme.Resolved{CaretBlink: time.Nanosecond}
+	s, r := Stack{}.Update(Open(NewPrompt("t", nil, th))())
+	require.NotNil(t, r.Cmd, "the prompt's caret starts blinking as it opens")
+	require.IsType(t, input.BlinkMsg{}, r.Cmd())
+
+	_, r = s.Update(Open(NewText("t", "no Init", th))())
+	require.Nil(t, r.Cmd, "a dialog with nothing to start asks for nothing")
+	_, r = s.Update(PushMsg{})
+	require.Nil(t, r.Cmd, "nothing pushed, nothing to start")
 }

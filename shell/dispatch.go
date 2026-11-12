@@ -32,7 +32,8 @@ func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {
 	case kindHelp:
 		return s.Push(s.helpOverlay()), nil
 	case kindCommands:
-		return s.OpenCommands(), nil
+		s = s.OpenCommands()
+		return s, s.initTop()
 	case kindChangeTab:
 		return s.SetTab(cycle(s.tab, len(s.cfg.Tabs), backward(ac, pressed))), nil
 	case kindChangePane:

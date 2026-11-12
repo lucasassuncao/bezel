@@ -549,7 +549,7 @@ func (s Shell) ClearStatus() Shell
 ClearStatus removes the banner now, and makes its pending timer a no\-op.
 
 <a name="Shell.CommandLine"></a>
-### func \(Shell\) [CommandLine](<https://github.com/lucasassuncao/bezel/blob/main/shell/palette.go#L65>)
+### func \(Shell\) [CommandLine](<https://github.com/lucasassuncao/bezel/blob/main/shell/palette.go#L76>)
 
 ```go
 func (s Shell) CommandLine() (string, bool)
@@ -648,13 +648,13 @@ func (s Shell) Narrow() bool
 Narrow reports whether a Collapse fired in the current layout.
 
 <a name="Shell.OpenCommands"></a>
-### func \(Shell\) [OpenCommands](<https://github.com/lucasassuncao/bezel/blob/main/shell/palette.go#L46>)
+### func \(Shell\) [OpenCommands](<https://github.com/lucasassuncao/bezel/blob/main/shell/palette.go#L48>)
 
 ```go
 func (s Shell) OpenCommands() Shell
 ```
 
-OpenCommands opens the palette over the declared named actions, for an app that decides itself when ":" means commands and when it is text.
+OpenCommands opens the palette over the declared named actions, for an app that decides itself when ":" means commands and when it is text. Its caret blinks from the first key on; the Commands action starts it at once.
 
 <a name="Shell.PaneAt"></a>
 ### func \(Shell\) [PaneAt](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L19>)

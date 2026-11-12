@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -13,7 +12,6 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
-	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -159,28 +157,18 @@ func TestFilePickerFitsAShortBody(t *testing.T) {
 	require.Contains(t, v, filepath.Base(p.Highlighted()), "the cursor row stays in view")
 }
 
-// Open pushes the picker before it reads, so the listing reaches it on top.
+// Open pushes the picker, and the stack reads its directory once it is on
+// top, so the listing reaches it there. It reads once: Open runs no Init.
 func TestFilePickerOpenPushesThenReads(t *testing.T) {
 	dir := pickerTree(t)
-	s := Stack{}
-	for _, c := range sequence(t, newPicker(dir).Open()()) {
-		var r bezel.Result
-		s, r = s.Update(c())
-		require.True(t, r.Handled)
-	}
+	push := newPicker(dir).Open()()
+	require.IsType(t, PushMsg{}, push, "the stack's push runs the Init")
+	s, r := Stack{}.Update(push)
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd, "the pushed picker reads its directory")
+	s, r = s.Update(r.Cmd())
+	require.True(t, r.Handled)
 	require.Contains(t, ansi.Strip(s.Top().View(layout.Rect{W: 80, H: 30})), "notes.txt")
-}
-
-// sequence unpacks tea.Sequence's message, an unexported []tea.Cmd, in order.
-func sequence(t *testing.T, msg tea.Msg) []tea.Cmd {
-	t.Helper()
-	v := reflect.ValueOf(msg)
-	require.Equal(t, reflect.Slice, v.Kind(), "Open must return a sequence")
-	cmds := make([]tea.Cmd, v.Len())
-	for i := range cmds {
-		cmds[i] = v.Index(i).Interface().(tea.Cmd)
-	}
-	return cmds
 }
 
 func TestFilePickerWithDirsPicksADirectory(t *testing.T) {

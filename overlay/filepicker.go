@@ -87,11 +87,12 @@ func (p FilePicker) WithHidden(on bool) FilePicker {
 }
 
 // Init reads the first directory, answering through TopMsg. The picker must
-// already be on top of the stack to receive it: push it first, as Open does.
+// already be on top of the stack to receive it; the stack runs Init itself
+// when Open pushes the picker.
 func (p FilePicker) Init() tea.Cmd { return ToTop(p.m.Init()) }
 
-// Open pushes the picker and then reads its directory, in that order.
-func (p FilePicker) Open() tea.Cmd { return tea.Sequence(Open(p), p.Init()) }
+// Open pushes the picker; the stack then reads its directory through Init.
+func (p FilePicker) Open() tea.Cmd { return Open(p) }
 
 // Dir is the directory being browsed.
 func (p FilePicker) Dir() string { return p.m.Dir() }

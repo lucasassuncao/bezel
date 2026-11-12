@@ -95,6 +95,9 @@ func New(items []Item, th theme.Resolved) Model {
 	return Model{input: in, cursor: -1, th: &th, keys: DefaultKeys()}.restyle().SetItems(items)
 }
 
+// Init is the command that keeps the command line's caret blinking.
+func (m Model) Init() tea.Cmd { return m.input.Blink() }
+
 // noTheme and noStyles are what a zero Model works with; never written.
 var (
 	noTheme  theme.Resolved

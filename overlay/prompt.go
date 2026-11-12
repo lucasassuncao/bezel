@@ -54,6 +54,10 @@ func NewPrompt(title string, onAccept func(value string) tea.Cmd, th theme.Resol
 	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, look: lookOf(th), keys: DefaultPromptKeys()}
 }
 
+// Init is the command that keeps the caret blinking; nil when it does not
+// blink. The stack runs it when Open pushes the prompt.
+func (p Prompt) Init() tea.Cmd { return p.input.Blink() }
+
 // WithKeys rebinds the prompt.
 func (p Prompt) WithKeys(k PromptKeys) Prompt {
 	p.keys = k

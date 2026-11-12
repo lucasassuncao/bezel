@@ -2,6 +2,7 @@ package shell
 
 import (
 	"testing"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/require"
@@ -141,4 +142,19 @@ func TestActionsStandAsideForTheInput(t *testing.T) {
 	require.False(t, ran)
 	got, _ := s.Input()
 	require.Equal(t, "p", got.Value())
+}
+
+// The ":" palette's caret blinks from the moment it opens, not the first key.
+func TestOpeningThePaletteStartsItsCaret(t *testing.T) {
+	th := theme.Resolve(theme.Plain(), true)
+	th.CaretBlink = time.Nanosecond
+	s := New(Config{Layout: twoPane(), Theme: th, Actions: []Action{Commands()}})
+	s, r := s.Update(press(":"))
+	require.True(t, s.HasOverlay())
+	require.NotNil(t, r.Cmd, "opening the palette arms its caret")
+	blink := r.Cmd()
+	require.IsType(t, input.BlinkMsg{}, blink)
+	_, r = s.Update(blink)
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd, "the palette's own blink re-arms")
 }
