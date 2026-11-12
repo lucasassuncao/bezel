@@ -1,11 +1,19 @@
 # Theme
 
-Every colour bezel draws comes from one place, the [`theme`](../theme) package. An app picks a theme, resolves it for the terminal it runs in, and hands the result to the shell and to every component. Nothing else holds a colour of its own.
+Every colour bezel draws comes from one place, the [`theme`](../theme) package. Pick a theme, resolve it for the terminal, and hand the result to the shell and your components. Switch the theme and the whole app changes with it: borders, lists, dialogs, the legend and your own text.
+
+![one app, several themes](recordings/frame/theme.gif)
+
+```sh
+go run ./examples/frame/theme   # n and p step through the presets
+```
+
+In code it's three lines:
 
 ```go
 th := theme.Resolve(theme.Mint(), true) // a preset, for a dark terminal
 sh := shell.New(shell.Config{Theme: th /* ... */})
-body := items.View(th)                  // a component draws under the theme it is handed
+body := items.View(th)                  // a component draws with the theme it is given
 ```
 
 ## Roles, not colours
@@ -29,25 +37,45 @@ Each value is a lipgloss colour string: a hex value (`"#7C3AED"`) or an ANSI cod
 
 ## Presets
 
-bezel ships four presets as functions, each building a fresh `Theme`, so no app can change one for another:
+bezel ships sixteen presets. Each is a function that builds a fresh `Theme`, so one app can't change a preset for another.
 
-- **`Default()`** leaves every role empty, so each follows the terminal's light or dark background.
-- **`Plain()`** uses only the 16 ANSI colours, for a terminal with few.
-- **`Terminal()`** takes every colour from the terminal's own palette, so the app matches the scheme the user already runs.
-- **`Mint()`** is a green accent on a dark background of its own.
+| Name | Group | How it looks |
+| --- | --- | --- |
+| `default` | Miscellaneous | no colours of its own: follows the terminal, light or dark |
+| `plain` | Miscellaneous | only the 16 ANSI colours, for terminals with few |
+| `terminal` | Miscellaneous | the terminal's own palette, so the app matches the user's scheme |
+| `mint` | Miscellaneous | a green accent on a dark green background |
+| `gruvbox` | Classic | warm orange and yellow on dark brown |
+| `dracula` | Classic | purple and pink on blue-grey |
+| `nord` | Classic | frost blues on polar night |
+| `tokyonight` | Classic | neon blues on deep indigo |
+| `ubuntu` | Classic | Ubuntu orange on aubergine |
+| `noctisazureus` | Classic | sky blue and sea green on deep navy |
+| `catppuccin` | Classic | Catppuccin Mocha: mauve and pastels |
+| `rosepine` | Classic | rose and iris on a dusky base |
+| `retro` | Styles | an amber CRT |
+| `minimal` | Styles | white on near-black, colour only for state |
+| `cyberpunk` | Styles | cyan and magenta on blue-black |
+| `ocean` | Styles | sky blue and sea foam on deep water |
 
-The first three keep the terminal's background; `Mint` brings its own, so what the terminal answers changes nothing.
+`default`, `plain` and `terminal` keep the terminal's background. Every other preset paints its own, so it looks the same whatever the terminal's colours are.
 
-Twelve more are there by name only: `gruvbox`, `dracula`, `nord`, `tokyonight`, `ubuntu`, `noctisazureus`, `catppuccin` (Mocha) and `rosepine` under Classic, and under Styles `retro`, an amber CRT, `minimal`, `cyberpunk` and `ocean`. Each brings its own background, like `Mint`.
+Four of them have a function of their own (`theme.Default()`, `Plain()`, `Terminal()`, `Mint()`). Every one can be found by name: `theme.Lookup(name)` takes any case and gives `Default` for an empty name, and `theme.All()` and `theme.Categories()` list them all. That's what a `--theme` flag needs.
 
-For a `--theme` flag, `theme.Lookup(name)` finds a preset by name in any case, empty being `Default`, and `theme.All()` and `theme.Categories()` list them. For `--list-themes`, [`themebrowser`](../component/themebrowser) draws every preset with its palette:
+### Browsing them
+
+[`themebrowser`](../component/themebrowser) shows every preset in a table with its colours, so users can pick one. It's what a `--list-themes` flag prints:
+
+![themebrowser](recordings/component/themebrowser.gif)
 
 ```go
 if listThemes {
-	return themebrowser.BrowseInTerminal(theme.Default()) // a scrollable table, or plain lines in a pipe
+	return themebrowser.BrowseInTerminal(theme.Default()) // a table in a terminal, plain lines in a pipe
 }
 t, err := theme.Lookup(flagTheme)
 ```
+
+In a terminal the table fits the width, `/` filters it and `enter` copies a theme's name. Piped into a file or another command, it prints the names instead, one line per group. Try it with `go run ./examples/component/themebrowser`.
 
 ## A theme of your own
 
@@ -83,16 +111,18 @@ The answer can come after the first frame, so the app starts from a guess, usual
 
 ## The background
 
-A theme with a `Background` paints the whole screen, not just the text: `Resolved.Background` is that colour and `Resolved.Foreground` its `Text`, both nil when the theme has none. The shell hands them to the terminal: `Shell.View` returns a `tea.View` with both set. An app that draws without the shell sets them itself:
+A theme with a `Background` colours the whole screen, not just the text. `Resolved.Background` is that colour and `Resolved.Foreground` is its `Text`; both are nil when the theme has no background.
+
+With the shell you don't have to do anything: `Shell.View` returns a `tea.View` with both colours set. Without the shell, set them yourself:
 
 ```go
 v := tea.NewView(content)
 v.BackgroundColor, v.ForegroundColor = m.th.Background, m.th.Foreground
 ```
 
-bubbletea sets the terminal's own colours while the program runs and puts them back when it quits, so the space between the styled text changes too. A terminal that cannot set them keeps its own, and nothing breaks.
+Bubble Tea changes the terminal's colours while the program runs and puts them back when it quits, so the gaps between styled text get the colour too. A terminal that can't do this keeps its own colours, and nothing breaks.
 
-Such a theme decides light or dark from its background, not from the terminal: `Resolve` ignores `dark`, so a light background on a dark terminal still gets dark text. A program that prints into the terminal rather than take it over, as `inline` and `logger` do, leaves the background alone.
+A theme with a background also decides light or dark by itself: `Resolve` ignores the `dark` argument. So a light theme on a dark terminal still gets dark text. Programs that print into the terminal instead of taking it over, like `inline` and `logger`, never touch the background.
 
 ## Drawing with it
 
@@ -125,13 +155,13 @@ Who calls `View` decides where a component takes its theme, and [CONVENTIONS.md]
 
 ## What follows the theme
 
-Most components follow the theme and also take a `WithStyles` edit. A plain function such as `chart.Bars` or `progress.Bar` follows the theme but keeps no edit. Some things do not follow it at all, on purpose:
+Almost everything follows the theme, and most components also accept a `WithStyles` edit. Plain functions like `chart.Bars` or `progress.Bar` follow the theme but take no edit. A few things ignore the theme on purpose:
 
-- `overlay.Alert`, the `Kind` tint of any dialog, and `toast`: blue, green, yellow and red say what happened, so a `draw.Kind` has a fixed colour that no theme or edit changes;
-- `animation`, `animation/text`, `animation/scene` and `effect`: their colours are arguments, often read from the theme by the app (`th.Accent.GetForeground()`);
-- `themebrowser`, which shows every theme and so is painted by none.
+- **Alerts, dialog tints and toasts.** Blue, green, yellow and red tell the user what happened, so these colours stay fixed whatever the theme.
+- **Animations, scenes and effects.** Their colours are arguments. Usually the app reads them from the theme, as in `th.Accent.GetForeground()`.
+- **`themebrowser`.** It shows every theme, so it can't be painted by one.
 
-[CONVENTIONS.md](CONVENTIONS.md#styles) lists every package's class.
+[CONVENTIONS.md](CONVENTIONS.md#styles) says which group each package is in.
 
 ## One component, recoloured
 

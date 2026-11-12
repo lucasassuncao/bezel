@@ -122,7 +122,7 @@ if err != nil {
 }
 ```
 
-Resolve `t` for the terminal's background once it answers, as [Theme](THEME.md#light-and-dark) shows, and again whenever it changes.
+Resolve `t` for the terminal's background once it answers, as [Theme](THEME.md#light-and-dark) shows, and again whenever it changes. Every preset, and what the browser looks like, is in [Presets](THEME.md#presets).
 
 ## Animate your own drawing
 

@@ -7,6 +7,7 @@
 
 - **Packages**
   - [Components](COMPONENTS.md)
+  - [Packages](PACKAGES.md)
   - [Effects](EFFECTS.md)
   - [Animations](ANIMATIONS.md)
 

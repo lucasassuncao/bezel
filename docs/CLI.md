@@ -254,6 +254,37 @@ if m.tbl, r = m.tbl.Update(msg); r.Handled {
 
 [CONVENTIONS.md](CONVENTIONS.md#static-and-interactive) has the rule behind the names.
 
+### Boxes, headers and charts
+
+What the frame draws with also works on its own: [`draw`](../draw) and [`chart`](../component/chart) return text, so `fmt.Println` is enough.
+
+```go
+th := theme.Resolve(theme.Mint(), true)
+
+body := "3 services updated\n1 skipped"
+_, h := draw.BlockSize(body) // a box takes the exact size it is given: the text plus its two edges
+
+fmt.Println(draw.Header(50, "deploy", "v1.4.2", "prod", th.Chrome))
+fmt.Println(draw.Panel(layout.Rect{W: 40, H: h + 2}, draw.Edges{Title: "Summary"}, body, th.Panel))
+fmt.Println(draw.Divider(40, "Usage", draw.DividerStyle{Line: th.Dim, Label: th.Bold}))
+fmt.Println(chart.Spark([]float64{3, 5, 2, 8, 6, 9, 4, 7}, 10, 20, th))
+fmt.Println(chart.Bars([]chart.Bar{{Label: "api", Value: 42}, {Label: "worker", Value: 17}}, 50, 30, th))
+```
+
+```text
+ deploy · v1.4.2                              prod
+╭─ Summary ────────────────────────────╮
+│ 3 services updated                   │
+│ 1 skipped                            │
+╰──────────────────────────────────────╯
+── Usage ───────────────────────────────
+            ▂▄▂▆▅▇▃▆
+api    ████████████████▊    42
+worker ██████▊              17
+```
+
+Each one takes its colours from a part of the theme: `th.Chrome` for the header, `th.Panel` for a box, and `draw.Card` too, which adds a footer under a rule. `chart` takes the whole `th`: besides `Spark` and `Bars` there are `Area`, `Lines`, `Heat` and `Donut`.
+
 ### Logs
 
 [`logger`](../component/logger) is a `slog.Handler`: each message on its line, every attribute hanging under it as a branch of a tree, a long value wrapped at the terminal's width.
@@ -286,14 +317,4 @@ Source: [`examples/component/logger/main.go`](../examples/component/logger/main.
 
 ### Themes
 
-[`themebrowser`](../component/themebrowser) is what a `--list-themes` flag prints: `BrowseInTerminal` draws a table of the presets and their colours, `/` filters it and enter copies a name, and in a pipe it writes `List`'s plain lines instead.
-
-```go
-if err := themebrowser.BrowseInTerminal(theme.Default()); err != nil {
-	return err
-}
-```
-
-![themebrowser](recordings/component/themebrowser.gif)
-
-Source: [`examples/component/themebrowser/main.go`](../examples/component/themebrowser/main.go)
+For a `--list-themes` flag, `themebrowser.BrowseInTerminal(th)` shows a table of every preset in a terminal and prints the names in a pipe. [Browsing them](THEME.md#browsing-them) in THEME.md has the recording and the details.

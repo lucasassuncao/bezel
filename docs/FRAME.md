@@ -1,6 +1,6 @@
 # The frame
 
-The frame is what bezel draws around an app: the header and its tabs, the panes' borders, the status row, the key legend, and the dialogs and command line that open over the panes. The app draws only what goes inside the panes. Five packages make it, all at the module's root:
+The frame is everything on screen that isn't your content: the title and tabs at the top, the borders around each pane, the status row, the key hints at the bottom, and the dialogs that open on top. bezel draws all of it; your app draws only what goes inside each pane. Five packages make the frame:
 
 | Package | What it does |
 | --- | --- |
@@ -49,12 +49,12 @@ func (m model) View() tea.View {
 }
 ```
 
-1. **`shell.Config`** says everything up front: the layout, the theme, the title, the tabs and the keys that hold on every screen.
-2. **`Update`** hands every message to the shell first. `Handled` true means it was the shell's (a key an action took, a dialog's) and the app returns at once; false means the app's turn. A resize the shell lays out and still hands on as false, so the app sizes its models from `Rect` on the same message.
-3. **`View`** hands the shell a `Pane` per leaf of the layout: a title and a `Body` that draws into the inner rect the shell computed. A leaf missing from the map gives its space back that frame.
-4. **`Init`** asks the terminal for its background, so the theme can be resolved [light or dark](THEME.md#light-and-dark).
+1. **`shell.Config`** describes the screen once: the layout of the panes, the theme, the title, the tabs and the keys that work everywhere.
+2. **`Update`** passes every message to the shell first. If `Handled` is true, the shell used it (a key bound to an action, or a dialog that is open) and you return. If it's false, the message is yours. A resize is both: the shell lays out the panes and still hands it on, so you can size your own models with `m.sh.Rect(name)` on the same message.
+3. **`View`** gives the shell one `Pane` per pane in the layout: a title and a `Body` function that draws into the space the shell worked out. Leave a pane out of the map and the others take its space.
+4. **`Init`** asks the terminal for its background colour, so the theme can pick its [light or dark](THEME.md#light-and-dark) version.
 
-The shell is a value, like every bezel model: each method that changes it returns the changed copy, and the app keeps it in its own model.
+Like every bezel model, the shell is a value: a method that changes it returns a new copy, and you keep that copy in your model.
 
 ## Layout
 

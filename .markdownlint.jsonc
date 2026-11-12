@@ -5,7 +5,7 @@
   "MD060": { "style": "compact" },
   // A paragraph is one line; the reader's editor wraps it.
   "MD013": false,
-  // The README opens on the logo, which swaps for a dark terminal; only HTML can.
-  "MD033": { "allowed_elements": ["p", "picture", "source", "img"] },
+  // The README's logo swaps for a dark terminal and its gallery is a grid; only HTML can.
+  "MD033": { "allowed_elements": ["p", "picture", "source", "img", "table", "tr", "td", "a"] },
   "MD041": false
 }

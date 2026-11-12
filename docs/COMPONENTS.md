@@ -1,8 +1,22 @@
 # Components
 
-One small program per package, each with a recording of it running; `bezeltest`, a helper for tests, has a test instead. Every GIF is a real session of its program, recorded from the `.tape` beside it in [`docs/recordings`](recordings). Run any of them with `go run ./examples/<group>/<name>`, as `go run ./examples/component/list`; for a small app that puts several together, `go run ./examples/app`, explained step by step in [EXAMPLE.md](EXAMPLE.md).
+Every package has a small program that shows it, and a recording of that program running. Run any of them from the repo:
 
-The widgets that go inside the panes live under [`component`](../component); the frame around them, and the key presses for tests, sit at the root. The effects have [EFFECTS.md](EFFECTS.md) and the animations [ANIMATIONS.md](ANIMATIONS.md).
+```sh
+go run ./examples/component/list     # or any other: ./examples/<group>/<name>
+go run ./examples/app                # a small app that uses several together
+```
+
+The app is explained step by step in [A first app](EXAMPLE.md). Effects and animations have their own pages: [EFFECTS.md](EFFECTS.md) and [ANIMATIONS.md](ANIMATIONS.md). Each GIF is recorded from the `.tape` next to it in [`docs/recordings`](recordings).
+
+**Jump to:**
+
+- [The frame](#the-frame): [Shell](#shell), [Layout](#layout), [Theme](#theme), [Overlay](#overlay), [Draw](#draw), [Legend](#legend), [Palette](#palette)
+- [Lists, tables and text](#lists-tables-and-text): [List](#list), [Breadcrumb](#breadcrumb), [Paginator](#paginator), [Filepicker](#filepicker), [Tree](#tree), [Table](#table), [Viewport](#viewport), [Log pane](#log-pane), [Browser](#browser), [Accordion](#accordion)
+- [Forms and input](#forms-and-input): [Form](#form), [Wizard](#wizard), [Calendar](#calendar), [Input](#input), [Tags](#tags), [Textbox](#textbox), [Cursor](#cursor)
+- [Progress, time and state](#progress-time-and-state): [Progress](#progress), [Chart](#chart), [Canvas](#canvas), [Spinner](#spinner), [Timer](#timer), [Stopwatch](#stopwatch), [Icon](#icon), [Toast](#toast)
+- [Outside a full screen](#outside-a-full-screen): [Inline](#inline), [Ask](#ask), [Logger](#logger), [Themebrowser](#themebrowser), [Bezeltest](#bezeltest)
+- [Changing the keys](#changing-the-keys), [Recording](#recording)
 
 ## The frame
 
@@ -30,7 +44,7 @@ A header over two columns, each pane printing the rect it was given. The columns
 
 Source: [`examples/frame/theme/main.go`](../examples/frame/theme/main.go)
 
-Every colour role and a list drawn with it. `n` and `p` step through a few presets, and `SetTheme` swaps them on the running shell.
+Every colour role and a list drawn with it. `n` and `p` step through a few presets, and `SetTheme` swaps them on the running shell. [THEME.md](THEME.md) explains the roles, the presets and a theme of your own.
 
 ![theme](recordings/frame/theme.gif)
 
@@ -346,7 +360,7 @@ A run that sorts downloads, logged through `log/slog`. Each message gets its own
 
 Source: [`examples/component/themebrowser/main.go`](../examples/component/themebrowser/main.go)
 
-The table a `--list-themes` flag prints: as wide as the terminal, each colour named, `/` to filter and `enter` to copy a theme's name; plain lines in a pipe.
+The table a `--list-themes` flag prints: as wide as the terminal, each colour named, `/` to filter and `enter` to copy a theme's name; plain lines in a pipe. [THEME.md](THEME.md#presets) lists every preset.
 
 ![themebrowser](recordings/component/themebrowser.gif)
 

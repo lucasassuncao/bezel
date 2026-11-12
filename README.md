@@ -5,43 +5,184 @@
   </picture>
 </p>
 
-A TUI framework for [Bubble Tea](https://github.com/charmbracelet/bubbletea) v2. bezel owns the frame: resize, tabs, focus, overlays, the status row and the key legend. Your app draws what goes *inside* the panes, with components, effects and animations that share one theme.
+[![Go Reference](https://pkg.go.dev/badge/github.com/lucasassuncao/bezel.svg)](https://pkg.go.dev/github.com/lucasassuncao/bezel)
+[![CI](https://github.com/lucasassuncao/bezel/actions/workflows/ci.yml/badge.svg)](https://github.com/lucasassuncao/bezel/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/lucasassuncao/bezel)](https://github.com/lucasassuncao/bezel/releases)
+[![License](https://img.shields.io/github/license/lucasassuncao/bezel)](LICENSE)
+
+**bezel is a framework for building terminal user interfaces (TUIs) in Go.**
+
+Layout, widgets, themes, dialogs, key bindings and animation in one library, so you write your app and not the plumbing around it. Built on [Bubble Tea](https://github.com/charmbracelet/bubbletea) v2.
+
+![a task list built with bezel](docs/recordings/app.gif)
+
+Try it without cloning anything:
+
+```sh
+go run github.com/lucasassuncao/bezel/examples/app@latest
+```
+
+## Why bezel
+
+- **The whole screen is handled.** Resize, panes, tabs, focus, a status row, a busy spinner and a key legend come with the frame. You only draw what goes inside each pane.
+- **Layout as a tree.** Columns and rows of fixed, ratio and fill panes, with min/max sizes and panes that collapse on narrow terminals.
+- **Over 25 widgets.** Lists, tables, trees, forms, a text editor, charts, a braille canvas, calendars, progress bars, toasts and more.
+- **Dialogs ready to use.** Alert, confirm, prompt, pickers, a pager, a file picker, a help screen and a `:` command palette.
+- **One theme for everything.** Sixteen presets, light and dark, and every widget recolours with them.
+- **Keys you declare once.** An action's key, its legend entry and its palette command come from the same place.
+- **Motion when you want it.** Tweens, springs, physics, text effects, transitions and scenes, all driven by messages, so they are testable and can be switched off.
+- **Easy to test.** Press keys in a test, check the rendered screen, and compare it with a golden file.
+- **Works outside full-screen apps too.** Ask questions, show progress bars and print logs in a plain CLI.
+
+## Gallery
+
+<table>
+  <tr>
+    <td><a href="docs/COMPONENTS.md"><img src="docs/recordings/component/table.gif" alt="table"></a></td>
+    <td><a href="docs/COMPONENTS.md"><img src="docs/recordings/component/chart.gif" alt="charts"></a></td>
+    <td><a href="docs/COMPONENTS.md"><img src="docs/recordings/component/form.gif" alt="form"></a></td>
+  </tr>
+  <tr>
+    <td><a href="docs/FRAME.md"><img src="docs/recordings/frame/overlay.gif" alt="dialogs"></a></td>
+    <td><a href="docs/FRAME.md"><img src="docs/recordings/frame/palette.gif" alt="command palette"></a></td>
+    <td><a href="docs/THEME.md"><img src="docs/recordings/frame/theme.gif" alt="themes"></a></td>
+  </tr>
+  <tr>
+    <td><a href="docs/COMPONENTS.md"><img src="docs/recordings/component/canvas.gif" alt="canvas"></a></td>
+    <td><a href="docs/EFFECTS.md"><img src="docs/recordings/effect/light.gif" alt="effects"></a></td>
+    <td><a href="docs/ANIMATIONS.md"><img src="docs/recordings/animation/scene.gif" alt="scenes"></a></td>
+  </tr>
+</table>
+
+Every package has its own example and recording in [COMPONENTS.md](docs/COMPONENTS.md), [EFFECTS.md](docs/EFFECTS.md) and [ANIMATIONS.md](docs/ANIMATIONS.md).
+
+## Quickstart
 
 ```sh
 go get github.com/lucasassuncao/bezel
 ```
 
-## Shape of an app
+A whole program: a list on the left, the selected item on the right, and the keys at the bottom. It is also [`examples/quickstart`](examples/quickstart/main.go), so `go run ./examples/quickstart` runs it, and its test keeps this copy compiling.
 
 ```go
-sh := shell.New(shell.Config{
-    Layout: layout.Columns(
-        layout.Fixed("list", layout.Ratio(1, 3), layout.Min(26), layout.Max(52)),
-        layout.Fill("detail"),
-    ).Collapse(72, "detail"),
-    Tabs:    tabs, // each implements shell.Tab: Name(), Status(ctx) and Actions(ctx)
-    Theme:   theme.Resolve(theme.Mint(), true), // re-resolve on tea.BackgroundColorMsg
-    Title:   "my app",
-    Actions: []shell.Action{shell.Help(), shell.ChangeTab(), shell.Move(), shell.Quit()},
-})
+package main
+
+import (
+	"fmt"
+	"os"
+
+	tea "charm.land/bubbletea/v2"
+
+	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/component/list"
+	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/layout"
+	"github.com/lucasassuncao/bezel/shell"
+	"github.com/lucasassuncao/bezel/theme"
+)
+
+type model struct {
+	sh   shell.Shell
+	th   theme.Resolved
+	list list.Model[string]
+}
+
+func newModel() model {
+	th := theme.Resolve(theme.Mint(), true)
+	return model{
+		th: th,
+		sh: shell.New(shell.Config{
+			Title: "fruit",
+			Theme: th,
+			Layout: layout.Columns(
+				layout.Fixed("list", layout.Ratio(1, 3), layout.Min(20)),
+				layout.Fill("detail"),
+			),
+			Actions: []shell.Action{shell.Move(), shell.Help(), shell.Quit()},
+		}),
+		list: list.New([]list.Row[string]{
+			{Label: "apple", Value: "red and crisp"},
+			{Label: "banana", Value: "yellow and soft"},
+			{Label: "cherry", Value: "small and sweet"},
+		}),
+	}
+}
+
+func (m model) Init() tea.Cmd { return nil }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-    var r bezel.Result
-    if m.sh, r = m.sh.Update(msg); r.Handled {
-        return m, r.Cmd // overlays and every action: the shell's
-    }
-    // the resize, laid out; the messages your actions Send; the keys no action claims
+	// The shell goes first: resize, dialogs and the keys of its actions.
+	var r bezel.Result
+	if m.sh, r = m.sh.Update(msg); r.Handled {
+		return m, r.Cmd
+	}
+	// Whatever is left is yours: here, the arrows move the list.
+	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
+	m.list, r = m.list.Update(msg)
+	return m, r.Cmd
 }
 
 func (m model) View() tea.View {
-    return m.sh.View(map[string]shell.Pane{
-        "list":   {Title: "Items", Body: m.renderList},   // func(inner layout.Rect) string
-        "detail": {Title: m.path,  Body: m.renderDetail},
-    })
+	return m.sh.View(map[string]shell.Pane{
+		"list": {Title: "Fruit", Body: func(layout.Rect) string {
+			return m.list.View(m.th)
+		}},
+		"detail": {Title: "Detail", Body: func(layout.Rect) string {
+			row, _ := m.list.Selected()
+			return row.Value
+		}},
+	})
+}
+
+func main() {
+	if _, err := tea.NewProgram(newModel()).Run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
 ```
 
-A pane missing from the map gives its space back that frame.
+What it draws, after one press of `↓`:
+
+```text
+ fruit
+
+┏━ Fruit ━━━━━━━━━━━━━┓╭─ Detail ────────────────────────────────────╮
+┃   apple             ┃│ yellow and soft                             │
+┃ ▶ banana            ┃│                                             │
+┃   cherry            ┃│                                             │
+┃                     ┃│                                             │
+┗━━━━━━━━━━━━━━━━━━━━━┛╰─────────────────────────────────────────────╯
+
+[↑/↓] move  [?] help  [q] quit
+```
+
+Resizing the terminal, the borders, the focused pane, the help screen on `?` and quitting on `q` all came from the shell. The program only said what the panes are and what goes in them. [A first app](docs/EXAMPLE.md) takes it further: adding and deleting items, a confirm dialog, a status message and tests.
+
+## How it fits with Bubble Tea
+
+bezel doesn't replace [Bubble Tea](https://github.com/charmbracelet/bubbletea); it sits inside it. You still write a `tea.Model` and run it with `tea.NewProgram`, and every Bubble Tea message reaches you as usual. bezel gives that model the pieces a real app needs:
+
+- `shell.Shell` is the screen around your content. Put it in your model and pass it each message first; it tells you if it used the message.
+- The components (`list`, `table`, `form`, ...) are values with the same `Update` and `View` shape, so they slot into your model the same way.
+- Nothing is global and nothing reads the clock, so a test can drive the whole app with key presses and check what it draws.
+
+## Requirements
+
+- Go 1.26 or newer.
+- Any modern terminal. Colours are brought down to what the terminal can show, and `BEZEL_ASCII=1` draws the state marks (✓ ✗ ●) in ASCII.
+- Tested on Linux, macOS and Windows in CI.
+
+The API may still change before v1; [STABILITY.md](docs/STABILITY.md) says which packages are stable and what a minor release may change.
+
+## What's inside
+
+- **The frame:** `shell`, `layout`, `theme`, `overlay` (dialogs), `draw`, `legend`, `key`, and `bezeltest` for tests.
+- **Components:** list, table, tree, form, wizard, input, textbox, viewport, file picker, calendar, chart, canvas, progress, spinner, timer, stopwatch, toast, logger, and more.
+- **Effects:** fades, dissolves, slides, lights and transitions over anything already drawn.
+- **Animation:** tweens, springs, physics, text effects and full-screen scenes.
+
+The full list, with a line on each package, is in [PACKAGES.md](docs/PACKAGES.md).
 
 ## Documentation
 
@@ -53,101 +194,11 @@ A pane missing from the map gives its space back that frame.
 | [A CLI without the frame](docs/CLI.md) | questions, bars and logs printed below a command's output: every form field asked on its own, with a recording each |
 | [Recipes](docs/RECIPES.md) | how to test an app, write a dialog, build a CLI, add a read-only mode, take --theme, animate your own drawing |
 | [Components](docs/COMPONENTS.md) | every package's example and recording |
+| [Packages](docs/PACKAGES.md) | every package, grouped by what it is for |
 | [Effects](docs/EFFECTS.md) | effects, lights and transitions over a drawn block |
 | [Animations](docs/ANIMATIONS.md) | tweens, springs, physics, text and scenes, and the clock that drives them |
 | [Architecture](docs/ARCHITECTURE.md) | what each folder holds, and what may import what |
 | [Conventions](docs/CONVENTIONS.md) | the rules every package follows: where the theme goes, the one `Update` |
 | [Stability](docs/STABILITY.md) | what v1 promises: the stable and the experimental packages, and what a minor release may change |
 
-Each package also has its own `README.md`, generated from its doc comments.
-
-## Examples
-
-### Shell
-
-Source: [`examples/frame/shell/main.go`](examples/frame/shell/main.go)
-
-Two tabs and two panes. `s` sets a status that clears itself, `b` shows the busy spinner until the work is done, `tab` switches tab and `?` lists every key.
-
-![shell](docs/recordings/frame/shell.gif)
-
-### Overlay
-
-Source: [`examples/frame/overlay/main.go`](examples/frame/overlay/main.go)
-
-The ready-made modals, one per row: an alert, a confirm that answers the app, a prompt that refuses an empty name, the help list, a pager over a command's output and a file picker. `enter` opens the one under the cursor and `esc` closes it.
-
-![overlay](docs/recordings/frame/overlay.gif)
-
-### Form
-
-Source: [`examples/component/form/main.go`](examples/component/form/main.go)
-
-One of each control: a name typed into an `Input`, an image picked from a `Select` that opens under it, a `Radio`, a `Toggle` and a `Checkbox`, then the `Button` that submits. `tab` and `shift+tab` move between them; Create reports the values on the status row.
-
-![form](docs/recordings/component/form.gif)
-
-Every package has its own example and recording in [COMPONENTS.md](docs/COMPONENTS.md); the effects have [EFFECTS.md](docs/EFFECTS.md) and the animations [ANIMATIONS.md](docs/ANIMATIONS.md).
-
-### A first app
-
-Source: [`examples/app/main.go`](examples/app/main.go)
-
-A task list built from a few of them: a list, a progress line, a prompt to add a task and a confirm to delete one. [EXAMPLE.md](docs/EXAMPLE.md) walks through the code step by step; `--read-only` hides the keys that change the list.
-
-![demo](docs/recordings/app.gif)
-
-```sh
-go run ./examples/app
-```
-
-## Packages
-
-**The frame**, at the root: what every screen is built in.
-
-- [`shell`](shell): the struct you embed. Tabs, focus, status, a busy spinner, overlays and the legend; keys are `Action`s that drive the key, the legend and the palette at once.
-- [`layout`](layout): the screen as a tree of `Columns`, `Rows`, `Fixed` and `Fill`, resolved to rects. `Collapse` drops a pane below a width.
-- [`theme`](theme): semantic colours, eleven presets, and the styles every package draws with.
-- [`overlay`](overlay): a stack of modals: `Alert`, `Confirm`, `Prompt`, `Pick`, `Choice`, `Help`, `Pager`, `FilePicker`.
-- [`draw`](draw): ANSI-safe text fitting, panels (text and a scrollbar in their edges), cards, header, tabs, dividers and buttons.
-- [`legend`](legend): key hints, filtered by what the session allows and packed into a few rows.
-- [`key`](key): key bindings, with the help the legend prints; a `Binding` is a value, switched off by its `Disabled` field.
-- [`bezeltest`](bezeltest): key presses for tests that drive a model.
-
-**Components**, in [`component`](component): what goes inside the panes.
-
-- [`list`](component/list): a cursor list with sections, a `/` filter and rows checked for a batch.
-- [`calendar`](component/calendar): a month with a cursor on a day, and the calendar a form's date field opens.
-- [`breadcrumb`](component/breadcrumb): a path in one row, `kv › apps › prod`, with a cursor on a part and its middle giving way when narrow.
-- [`paginator`](component/paginator): pages as dots or "2/5", and the slice of items each page shows.
-- [`tree`](component/tree): an expandable tree, generic over your node type; `Static` prints one built from nested branches.
-- [`table`](component/table): columns sized to their contents within a width, and a cursor over rows that scroll under a fixed header, sorted by a column and checked for a batch; `Static` prints the whole table.
-- [`form`](component/form): `Input`, `Select`, `MultiSelect`, `Date`, `Number`, `Slider`, `Tags`, `Checkbox`, `Radio`, `Toggle` and `Button`, lined up in one column.
-- [`wizard`](component/wizard): forms split into pages, the steps drawn on top and a check before each page is left.
-- [`tags`](component/tags): a field that turns what is typed into chips, for filters and labels.
-- [`input`](component/input): a one-line text field with readline keys, a placeholder, a mask for secrets and a format such as `9999-99-99`.
-- [`textbox`](component/textbox): a multi-line text field with line numbers.
-- [`viewport`](component/viewport): scrollable text, wrapped or panned, with line numbers and search highlights.
-- [`cursor`](component/cursor): a caret that blinks, stays or hides, for fields of your own.
-- [`browser`](component/browser): a list on the left, the selected item's detail on the right.
-- [`accordion`](component/accordion): sections that open and close onto their text, sliding.
-- [`progress`](component/progress): `Bar`, `Line`, `Smooth`, `Meter` and `Stepper`, each one row.
-- [`spinner`](component/spinner): twelve spinners and your own frames, each ticking on its own.
-- [`timer`](component/timer): a countdown that says when time is up.
-- [`stopwatch`](component/stopwatch): time counted up, paused and reset.
-- [`chart`](component/chart): `Area` and `Spark` charts of a run of numbers, braille `Lines` of several runs over a y axis, labelled `Bars` side by side, a `Heat` grid and a `Donut`.
-- [`icon`](component/icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
-- [`toast`](component/toast): notices that slide into a corner, stack and leave on their own.
-- [`inline`](component/inline): a yes/no question, any form field asked on its own, and a progress bar for CLIs that print logs.
-- [`logger`](component/logger): a `slog.Handler` that hangs every attribute under its message as a tree and wraps long values without cutting them, and `Pane`, a log panel that follows the end as lines arrive and filters them with `/`.
-- [`themebrowser`](component/themebrowser): the preset table behind a `--list-themes` flag.
-
-**Effects**, in [`effect`](effect): what plays over a block already drawn.
-
-- [`effect`](effect): effects and lights over any drawn block (fades, dissolves, slides, a melt, a tint, a spotlight, a hover), kept to rows or a part of it, transitions from one block to the next, and intent presets.
-
-**Animation**, in [`animation`](animation): what moves, and the one clock that drives it.
-
-- [`animation`](animation): tweens on a dozen easing curves that delay, repeat and yoyo, springs, points, physics (a drop, a pendulum, an orbit, a flock, a rubber band) and animated chart values, with one clock to drive them; `BEZEL_NO_MOTION` turns motion off and `BEZEL_MOTION` sets its speed.
-- [`animation/text`](animation/text): text that types, scrolls, shimmers, scrambles, rolls, waves, decrypts, blinks and rises.
-- [`animation/scene`](animation/scene): rain, snow, confetti, fireworks, stars, static and plasma, alone or behind a block.
+Each package also has its own `README.md`, generated from its doc comments, and its API is on [pkg.go.dev](https://pkg.go.dev/github.com/lucasassuncao/bezel).
