@@ -104,13 +104,13 @@ func Natural(a, b string) bool
 Natural is the default order of a column: the cells' text, colours stripped and in any case, with each run of digits compared as a number, so v1.4 comes before v1.11 and 9 before 10.
 
 <a name="Row"></a>
-## func [Row](<https://github.com/lucasassuncao/bezel/blob/main/component/table/table.go#L94>)
+## func [Row](<https://github.com/lucasassuncao/bezel/blob/main/component/table/table.go#L95>)
 
 ```go
 func Row(widths []int, cells []string) string
 ```
 
-Row lays cells out in widths, padded to their columns and separated by Gap; the last cell is cut but not padded, so the row ends where it ends.
+Row lays cells out in widths, padded to their columns and separated by Gap; the last cell is cut but not padded, so the row ends where it ends. A line break in a cell is a space: a row is one line.
 
 <a name="Static"></a>
 ## func [Static](<https://github.com/lucasassuncao/bezel/blob/main/component/table/static.go#L11>)
@@ -122,7 +122,7 @@ func Static(cols []Column, rows [][]string, width int, th theme.Resolved) string
 Static is the whole table as text to print, the header on top: no cursor, no scrolling. Columns fit width as in Fit; width \<= 0 keeps their own.
 
 <a name="Titles"></a>
-## func [Titles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/table.go#L111>)
+## func [Titles](<https://github.com/lucasassuncao/bezel/blob/main/component/table/table.go#L112>)
 
 ```go
 func Titles(cols []Column, widths []int) string

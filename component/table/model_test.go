@@ -254,3 +254,9 @@ func TestTheWheelMovesTheCursor(t *testing.T) {
 	m, _ = m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelUp})
 	require.Equal(t, 0, m.Cursor())
 }
+
+func TestALineBreakInACellKeepsTheTableToItsHeight(t *testing.T) {
+	m := New([]Column{{Title: "x\ny"}}, []Item[int]{{Cells: []string{"a\nb"}}, {Cells: []string{"c"}}}).SetWidth(20).SetHeight(3)
+	out := m.View(th)
+	require.Len(t, strings.Split(out, "\n"), 3, "%q", ansi.Strip(out))
+}

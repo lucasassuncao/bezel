@@ -87,3 +87,8 @@ func TestTabAtFindsTheTabUnderAColumn(t *testing.T) {
 	require.Equal(t, 6, TabAt(24, seven, 6, ChromeStyle{}, x), "scrolled, as Tabs draws it")
 	require.Equal(t, -1, TabAt(24, seven, 6, ChromeStyle{}, 0), "the scroll mark is no tab")
 }
+
+func TestHeaderAndTabsStayOneRowWithALineBreak(t *testing.T) {
+	require.NotContains(t, Header(20, "a\nb", "c\nd", "e\nf", ChromeStyle{}), "\n")
+	require.NotContains(t, Tabs(20, []string{"a\nb", "c"}, 0, ChromeStyle{}), "\n")
+}

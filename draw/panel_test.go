@@ -106,3 +106,8 @@ func TestFramedPanelThumbWearsItsOwnStyle(t *testing.T) {
 	got := Panel(layout.Rect{W: 12, H: 5}, Edges{Scroll: layout.Scroll{Visible: 3, Total: 9}}, "", PanelStyle{Thumb: red})
 	require.Contains(t, got, red.Render("█"))
 }
+
+func TestALineBreakOnAnEdgeKeepsThePanelsHeight(t *testing.T) {
+	out := Panel(layout.Rect{W: 14, H: 3}, Edges{Title: "a\nb", Right: "c\nd", Bottom: "e\nf"}, "x", PanelStyle{})
+	require.Len(t, strings.Split(out, "\n"), 3, "%q", out)
+}

@@ -115,7 +115,7 @@ func Cut(s string, width int) string
 Cut is Truncate without the ellipsis: the line ends where the width does.
 
 <a name="Divider"></a>
-## func [Divider](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L123>)
+## func [Divider](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L125>)
 
 ```go
 func Divider(width int, label string, st DividerStyle) string
@@ -124,7 +124,7 @@ func Divider(width int, label string, st DividerStyle) string
 Divider is a horizontal rule width cells long, with label set into it after a short lead when one is given: "── Label ─────".
 
 <a name="EmptyState"></a>
-## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L146>)
+## func [EmptyState](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L148>)
 
 ```go
 func EmptyState(r layout.Rect, message, hint string, st ChromeStyle) string
@@ -166,7 +166,7 @@ Gutter is one line\-number cell, for a textarea prompt or NumberLines.
 func Header(width int, title, subtitle, right string, st ChromeStyle) string
 ```
 
-Header is one row: title and subtitle on the left, right pinned to the far edge, the whole thing cut to width.
+Header is one row: title and subtitle on the left, right pinned to the far edge, the whole thing cut to width and line breaks drawn as spaces.
 
 <a name="Heading"></a>
 ## func [Heading](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L122>)
@@ -241,7 +241,7 @@ func PadHeight(s string, height int) string
 PadHeight grows a block to height lines so a Composite has rows to land on.
 
 <a name="Panel"></a>
-## func [Panel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L42>)
+## func [Panel](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L43>)
 
 ```go
 func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string
@@ -268,7 +268,7 @@ func SanitizeLines(s string) []string
 SanitizeLines handles legitimately multi\-line text \- a policy, a role's configuration \- keeping the breaks and neutralising the rest. A trailing carriage return is CRLF and not content, so a Windows document reads clean.
 
 <a name="StatusLine"></a>
-## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L141>)
+## func [StatusLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L143>)
 
 ```go
 func StatusLine(width int, text string, style lipgloss.Style) string
@@ -277,7 +277,7 @@ func StatusLine(width int, text string, style lipgloss.Style) string
 StatusLine is one row of text in a style, exactly width cells.
 
 <a name="TabAt"></a>
-## func [TabAt](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L46>)
+## func [TabAt](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L47>)
 
 ```go
 func TabAt(width int, names []string, active int, st ChromeStyle, x int) int
@@ -286,13 +286,13 @@ func TabAt(width int, names []string, active int, st ChromeStyle, x int) int
 TabAt is the tab Tabs draws at column x with the same arguments, \-1 over a gap, a scroll mark or past the last tab.
 
 <a name="Tabs"></a>
-## func [Tabs](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L38>)
+## func [Tabs](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L39>)
 
 ```go
 func Tabs(width int, names []string, active int, st ChromeStyle) string
 ```
 
-Tabs is one row of names, the active one styled apart.
+Tabs is one row of names, the active one styled apart; a line break in a name is a space.
 
 <a name="Truncate"></a>
 ## func [Truncate](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L19>)
@@ -349,7 +349,7 @@ type ChromeStyle struct {
 ```
 
 <a name="DividerStyle"></a>
-## type [DividerStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L117-L119>)
+## type [DividerStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/chrome.go#L119-L121>)
 
 DividerStyle paints a Divider: Line the rule, Label the text set into it.
 
@@ -360,9 +360,9 @@ type DividerStyle struct {
 ```
 
 <a name="Edges"></a>
-## type [Edges](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L27-L31>)
+## type [Edges](<https://github.com/lucasassuncao/bezel/blob/main/draw/panel.go#L28-L32>)
 
-Edges is what a panel draws into its border besides the lines.
+Edges is what a panel draws into its border besides the lines, each on one row: a line break in them is a space.
 
 ```go
 type Edges struct {

@@ -23,7 +23,8 @@ type PanelStyle struct {
 // thumbMark is a scrollbar's thumb: a full cell, apart from any edge's line.
 const thumbMark = "█"
 
-// Edges is what a panel draws into its border besides the lines.
+// Edges is what a panel draws into its border besides the lines, each on one
+// row: a line break in them is a space.
 type Edges struct {
 	Title, Right string        // the top edge; Right is dropped before Title is cut
 	Bottom       string        // the far end of the bottom edge, dropped when it does not fit
@@ -46,13 +47,13 @@ func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string {
 	innerW := r.W - 2
 	e := st.edge()
 
-	label := st.Title.Render(" " + edges.Title + " ")
+	label := st.Title.Render(" " + OneLine(edges.Title) + " ")
 	if maxLabel := innerW - 1; ansi.StringWidth(label) > maxLabel {
 		label = ansi.Truncate(label, maxLabel, "… ")
 	}
 	tail := ""
 	if edges.Right != "" {
-		tail = st.Right.Render(" " + edges.Right + " ")
+		tail = st.Right.Render(" " + OneLine(edges.Right) + " ")
 	}
 	top := st.Border.Render(e.TopLeft+e.Top) + label
 	if fill := innerW - 2 - ansi.StringWidth(label) - ansi.StringWidth(tail); tail != "" && fill > 0 {
@@ -81,7 +82,7 @@ func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string {
 		}
 		rows = append(rows, left+" "+Fit(line, content.W)+" "+edge)
 	}
-	rows = append(rows, bottomEdge(innerW, edges.Bottom, e, st))
+	rows = append(rows, bottomEdge(innerW, OneLine(edges.Bottom), e, st))
 	return strings.Join(rows, "\n")
 }
 

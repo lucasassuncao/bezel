@@ -91,12 +91,13 @@ func total(ws []int) int {
 
 // Row lays cells out in widths, padded to their columns and separated by
 // Gap; the last cell is cut but not padded, so the row ends where it ends.
+// A line break in a cell is a space: a row is one line.
 func Row(widths []int, cells []string) string {
 	parts := make([]string, len(widths))
 	for i, w := range widths {
 		cell := ""
 		if i < len(cells) {
-			cell = cells[i]
+			cell = draw.OneLine(cells[i])
 		}
 		if i == len(widths)-1 {
 			parts[i] = draw.Truncate(cell, w)

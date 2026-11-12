@@ -20,21 +20,22 @@ type ChromeStyle struct {
 }
 
 // Header is one row: title and subtitle on the left, right pinned to the far
-// edge, the whole thing cut to width.
+// edge, the whole thing cut to width and line breaks drawn as spaces.
 func Header(width int, title, subtitle, right string, st ChromeStyle) string {
-	left := st.Title.Render(title)
+	left := st.Title.Render(OneLine(title))
 	if subtitle != "" {
-		left += st.Info.Render(" · " + subtitle)
+		left += st.Info.Render(" · " + OneLine(subtitle))
 	}
 	rightR := ""
 	if right != "" {
-		rightR = st.Info.Render(right)
+		rightR = st.Info.Render(OneLine(right))
 	}
 	gap := max(0, width-ansi.StringWidth(left)-ansi.StringWidth(rightR))
 	return Fit(left+strings.Repeat(" ", gap)+rightR, width)
 }
 
-// Tabs is one row of names, the active one styled apart.
+// Tabs is one row of names, the active one styled apart; a line break in a
+// name is a space.
 func Tabs(width int, names []string, active int, st ChromeStyle) string {
 	parts := tabParts(names, active, st)
 	lo, hi, before, after := tabSpan(parts, active, width, st)
@@ -61,6 +62,7 @@ func TabAt(width int, names []string, active int, st ChromeStyle, x int) int {
 func tabParts(names []string, active int, st ChromeStyle) []string {
 	parts := make([]string, len(names))
 	for i, n := range names {
+		n = OneLine(n)
 		if i == active {
 			parts[i] = st.TabActive.Render(" " + n + " ")
 		} else {
