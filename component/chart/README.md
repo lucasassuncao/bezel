@@ -62,13 +62,13 @@ func Fill(th theme.Resolved, opts ...Option) lipgloss.Style
 Fill is the style a bar or a line in opts is filled with: the theme's i\-th series colour under InSeries\(i\), the accent otherwise. progress.Smooth reads it too, so one InSeries serves both packages.
 
 <a name="Heat"></a>
-## func [Heat](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/heat.go#L12>)
+## func [Heat](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/heat.go#L13>)
 
 ```go
 func Heat(values [][]float64, top float64, th theme.Resolved) string
 ```
 
-Heat is values as a grid of cells two columns wide, each coloured along the theme's ramp by its share of top; a value at or below zero is a muted dot.
+Heat is values as a grid of cells two columns wide, each coloured along the theme's ramp by its share of top; a value at or below zero, or NaN, is a muted dot.
 
 <a name="Lines"></a>
 ## func [Lines](<https://github.com/lucasassuncao/bezel/blob/main/component/chart/lines.go#L25>)

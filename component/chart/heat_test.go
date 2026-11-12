@@ -1,6 +1,7 @@
 package chart
 
 import (
+	"math"
 	"strings"
 	"testing"
 
@@ -17,4 +18,10 @@ func TestHeatDrawsTwoColumnsACell(t *testing.T) {
 
 func TestHeatWithoutATopIsAllDots(t *testing.T) {
 	assert.Equal(t, "····", ansi.Strip(Heat([][]float64{{3, 4}}, 0, th())))
+}
+
+// NaN passes a share <= 0 check and indexed the ramp with int(NaN).
+func TestHeatDrawsANumberItCannotPlaceAsADot(t *testing.T) {
+	assert.Equal(t, "··██", ansi.Strip(Heat([][]float64{{math.NaN(), 10}}, 10, th())))
+	assert.Equal(t, "··", ansi.Strip(Heat([][]float64{{math.Inf(1)}}, math.Inf(1), th())))
 }
