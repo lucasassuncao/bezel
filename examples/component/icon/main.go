@@ -67,13 +67,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
-	switch msg := msg.(type) {
-	case swapMsg:
+	if _, ok := msg.(swapMsg); ok {
 		m.ascii = !m.ascii
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m, nil
 }

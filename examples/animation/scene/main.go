@@ -48,14 +48,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, r.Cmd
 	}
 	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case sceneMsg:
+	if _, ok := msg.(sceneMsg); ok {
 		m.sc, cmd = m.sc.next(m.th)
 		return m, cmd
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	m.sc, cmd = m.sc.update(msg)
 	return m, cmd

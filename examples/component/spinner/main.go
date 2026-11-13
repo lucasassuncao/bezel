@@ -85,10 +85,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 		}
 		return m, tea.Batch(cmds...)
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m, nil
 }

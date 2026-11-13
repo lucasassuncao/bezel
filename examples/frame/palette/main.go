@@ -26,7 +26,6 @@ type (
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	cursor int
 }
 
@@ -47,18 +46,17 @@ func actions() []shell.Action {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fill("items")),
-		Theme:   th,
+		Base:    theme.Mint(),
 		Title:   "palette",
 		Can:     func(c shell.Capability) bool { return c != "write" },
 		Actions: actions(),
 	})
-	return model{sh: sh, th: th}
+	return model{sh: sh}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -80,14 +78,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.sh, cmd = m.sh.SetStatus(err.Error(), shell.Error, 0)
 			return m, cmd
 		}
-		m.th = theme.Resolve(t, true)
-		m.sh = m.sh.SetTheme(m.th)
+		m.sh = m.sh.SetBase(t)
 	case clearMsg:
 		m.cursor = 0
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		case "ctrl+c":
-			return m, tea.Quit
 		case "up":
 			m.cursor = max(0, m.cursor-1)
 		case "down":
@@ -103,7 +98,7 @@ func (m model) View() tea.View {
 			var b strings.Builder
 			for i, it := range items {
 				if i == m.cursor {
-					b.WriteString(m.th.Cursor.Render("> "+it) + "\n")
+					b.WriteString(m.sh.Theme().Cursor.Render("> "+it) + "\n")
 					continue
 				}
 				b.WriteString("  " + it + "\n")

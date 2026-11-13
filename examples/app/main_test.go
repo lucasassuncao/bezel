@@ -105,3 +105,18 @@ func TestReadOnlyHidesDelete(t *testing.T) {
 	m = press(m, "d")
 	require.NotContains(t, ansi.Strip(m.View().Content), "Delete task")
 }
+
+// A list emptied and filled again keeps the height its pane gave it.
+func TestATaskAddedToAnEmptyListShows(t *testing.T) {
+	m := sized(t, false)
+	for range 4 {
+		m = press(press(m, "d"), "y")
+	}
+	require.Contains(t, ansi.Strip(m.View().Content), "nothing to do")
+	m = press(m, "n")
+	for _, k := range strings.Split("again", "") {
+		m = press(m, k)
+	}
+	m = press(m, "enter")
+	require.Contains(t, ansi.Strip(m.View().Content), "▶ ○  again", "the list shows it, not just the detail")
+}

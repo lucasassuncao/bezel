@@ -44,7 +44,7 @@ func newModel() model {
 		Title:  "input",
 		Actions: []shell.Action{
 			// q would be text here, so esc quits instead.
-			shell.Quit(shell.WithKey("esc")),
+			shell.Quit(shell.WithKey("esc", "ctrl+c")),
 		},
 	})
 	name := input.New(th).WithPlaceholder("who is deploying").
@@ -95,8 +95,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	if k, ok := msg.(tea.KeyPressMsg); ok {
 		switch k.String() {
-		case "ctrl+c":
-			return m, tea.Quit
 		case "up":
 			return m.move(-1)
 		case "down":

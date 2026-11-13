@@ -66,7 +66,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
-	switch msg := msg.(type) {
+	switch msg.(type) {
 	case tickMsg:
 		if m.done < total {
 			m.done++
@@ -82,10 +82,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.step = min(len(steps), m.step+1)
 	case prevMsg:
 		m.step = max(0, m.step-1)
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m, nil
 }

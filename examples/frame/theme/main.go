@@ -22,7 +22,6 @@ type stepMsg struct{ by int }
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	preset int
 }
 
@@ -39,60 +38,56 @@ func newModel() model {
 	return model{sh: sh}.apply(0)
 }
 
-// apply resolves preset i and hands it to the shell and to the panes.
+// apply hands preset i to the shell, which resolves it light or dark.
 func (m model) apply(i int) model {
 	m.preset = (i + len(presets)) % len(presets)
 	t, err := theme.Lookup(presets[m.preset])
 	if err != nil {
 		panic(err) // every name in presets is built in
 	}
-	m.th = theme.Resolve(t, true)
-	m.sh = m.sh.SetTheme(m.th).SetSubtitle(presets[m.preset])
+	m.sh = m.sh.SetBase(t).SetSubtitle(presets[m.preset])
 	return m
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
-	switch msg := msg.(type) {
-	case stepMsg:
-		return m.apply(m.preset + msg.by), nil
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
+	if step, ok := msg.(stepMsg); ok {
+		return m.apply(m.preset + step.by), nil
 	}
 	return m, nil
 }
 
 func (m model) roles() string {
+	th := m.sh.Theme()
 	rows := []struct {
 		name  string
 		style lipgloss.Style
 	}{
-		{"Accent", m.th.Accent}, {"Success", m.th.Success}, {"Warning", m.th.Warning},
-		{"Danger", m.th.Danger}, {"Info", m.th.Info}, {"Dim", m.th.Dim}, {"Muted", m.th.Muted},
+		{"Accent", th.Accent}, {"Success", th.Success}, {"Warning", th.Warning},
+		{"Danger", th.Danger}, {"Info", th.Info}, {"Dim", th.Dim}, {"Muted", th.Muted},
 	}
 	var b strings.Builder
 	for _, r := range rows {
 		b.WriteString(r.style.Render(fmt.Sprintf("■■ %-8s", r.name)) + "\n")
 	}
-	b.WriteString("\n" + m.th.Badge.Render(" badge ") + " " + m.th.Key.Render("ctrl+s") + " saves")
+	b.WriteString("\n" + th.Badge.Render(" badge ") + " " + th.Key.Render("ctrl+s") + " saves")
 	return b.String()
 }
 
 func (m model) sample() string {
+	th := m.sh.Theme()
 	return strings.Join([]string{
-		m.th.Section.Render("FRUIT"),
-		m.th.Cursor.Render("> banana"),
+		th.Section.Render("FRUIT"),
+		th.Cursor.Render("> banana"),
 		"  mango",
-		m.th.Dim.Render("  kiwi (out of season)"),
+		th.Dim.Render("  kiwi (out of season)"),
 		"",
-		m.th.Success.Render("✓ saved") + "  " + m.th.Danger.Render("✗ 2 errors"),
+		th.Success.Render("✓ saved") + "  " + th.Danger.Render("✗ 2 errors"),
 	}, "\n")
 }
 

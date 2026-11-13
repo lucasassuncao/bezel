@@ -67,7 +67,7 @@ func newModel() model {
 			shell.Custom("tab", "complete", nil, shell.DisplayOnly()),
 			shell.Custom("backspace", "remove", nil, shell.DisplayOnly()),
 			// Every letter is text here, so esc quits.
-			shell.Quit(shell.WithKey("esc")),
+			shell.Quit(shell.WithKey("esc", "ctrl+c")),
 		},
 	})
 	tg := tags.New(th).WithPlaceholder("a topic, then enter").SetSuggestions(topics())
@@ -78,9 +78,6 @@ func newModel() model {
 func (m model) Init() tea.Cmd { return m.tg.Blink() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if k, ok := msg.(tea.KeyPressMsg); ok && k.String() == "ctrl+c" {
-		return m, tea.Quit
-	}
 	var r bezel.Result
 	if m.tg, r = m.tg.Update(msg); r.Handled {
 		return m, r.Cmd

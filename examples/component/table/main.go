@@ -107,7 +107,7 @@ func (m model) resize() model {
 		w = min(narrowWidth, m.realW)
 	}
 	m.sh, _ = m.sh.Update(tea.WindowSizeMsg{Width: w, Height: m.realH})
-	m.tbl = m.tbl.SetHeight(draw.InnerRect(m.sh.Rect("table")).H)
+	m.tbl = m.tbl.SetHeight(m.sh.Inner("table").H)
 	return m
 }
 
@@ -124,16 +124,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
-	switch msg := msg.(type) {
+	switch msg.(type) {
 	case toggleWidthMsg:
 		m.narrow = !m.narrow
 		return m.resize(), nil
 	case toggleBusyMsg:
 		return m.toggleBusy()
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m.toTable(msg) // keys, and the spinner's frames
 }

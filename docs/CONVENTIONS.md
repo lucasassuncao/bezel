@@ -33,11 +33,13 @@ m.list = m.list.SetRows(reloaded) // SetX: a live change, after something happen
 ### Sizes
 
 ```go
-case tea.WindowSizeMsg: // the shell laid out the panes and handed the size on
-	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("items")).H)
+if m.sh, r = m.sh.Update(msg); r.Handled {
+	return m, r.Cmd
+}
+m.list = m.list.SetHeight(m.sh.Inner("items").H) // before the list takes msg
 ```
 
-A size is never a constructor parameter nor an argument of `View`: it comes through `SetHeight`/`SetWidth` once the terminal says how big it is. A model not sized yet draws nothing. A layout that changes without a resize (`SetLayout`) sizes again after the change.
+A size is never a constructor parameter nor an argument of `View`: it comes through `SetHeight`/`SetWidth` once the terminal says how big it is. A model not sized yet draws nothing. One rule covers every way a pane changes size (a resize, a dragged edge, a collapse): size a pane's models from `m.sh.Inner(name)` before they take a message. A layout that changes without a message (`SetLayout`) sizes again after the change.
 
 Sized this way: `list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`, `logger.Pane`; `input`, `tags`, `breadcrumb` and `wizard` take a width only; `browser` has `SetListHeight` and `SetPreviewHeight`.
 
@@ -60,7 +62,7 @@ if m.acc.IsOpen(i) { ... }
 overlay.NewConfirm("Delete", item, yes, th) // bezel calls View: theme in the constructor
 m.list.View(th)                             // the app calls View: theme in View
 progress.Line("tasks", done, total, w, th)  // a plain function: theme after the data
-shell.New(shell.Config{Theme: th})          // the shell: in Config, SetTheme to change
+shell.New(shell.Config{Base: theme.Mint()}) // the shell: resolves it; m.sh.Theme() to read
 ```
 
 Where the theme goes depends on who calls `View`. If bezel does, the component keeps the theme from its constructor. If the app does, the app passes it each time, so one model draws under any theme.
@@ -71,7 +73,7 @@ Where the theme goes depends on who calls `View`. If bezel does, the component k
 | bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic; `wizard.New(th, pages...)` repaints each page's form the same way | `form`, `wizard` |
 | the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `calendar`, `breadcrumb`, `timer`, `stopwatch`, `viewport`, `accordion`, `filepicker`, `progress.Model` |
 | nobody: a plain function | after the data | `progress.Bar` and siblings, `chart`, `inline`, `icon.Set.Render` |
-| the shell | `Config.Theme`; `SetTheme` also repaints open dialogs | `shell` |
+| the shell | `Config.Base`, resolved light or dark on the answer `Init` asks for, `SetBase` to change; or `Config.Theme`/`SetTheme` for fixed styles. Either repaints open dialogs | `shell` |
 
 - A dialog that reports something is tinted with `WithKind(draw.Danger)`; `Alert` takes its `draw.Kind` in the constructor. A Kind's colour is fixed (blue, green, yellow, red), the same under every theme and whatever `WithStyles` does; a dialog with no Kind keeps the theme's look.
 - `draw`, `legend` and `overlay.Box` take raw lipgloss styles: `theme` imports them, so they cannot import it.

@@ -24,13 +24,13 @@ func newModel() model {
 			layout.Fixed("list", layout.Ratio(1, 3), layout.Min(24)),
 			layout.Fill("detail"),
 		),
-		Theme:   theme.Resolve(theme.Mint(), true),
+		Base:    theme.Mint(),
 		Title:   "my app",
 		Actions: []shell.Action{shell.Help(), shell.ChangePane(), shell.Move(), shell.Quit()},
 	})}
 }
 
-func (m model) Init() tea.Cmd { return tea.RequestBackgroundColor }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -50,9 +50,9 @@ func (m model) View() tea.View {
 ```
 
 1. **`shell.Config`** describes the screen once: the layout of the panes, the theme, the title, the tabs and the keys that work everywhere.
-2. **`Update`** passes every message to the shell first. If `Handled` is true, the shell used it (a key bound to an action, or a dialog that is open) and you return. If it's false, the message is yours. A resize is both: the shell lays out the panes and still hands it on, so you can size your own models with `m.sh.Rect(name)` on the same message.
+2. **`Update`** passes every message to the shell first. If `Handled` is true, the shell used it (a key bound to an action, or a dialog that is open) and you return. If it's false, the message is yours. A resize is both: the shell lays out the panes and still hands it on. Before a model takes a message, size it with `m.sh.Inner(name)`, the space inside that pane's border, the same rect its `Body` gets.
 3. **`View`** gives the shell one `Pane` per pane in the layout: a title and a `Body` function that draws into the space the shell worked out. Leave a pane out of the map and the others take its space.
-4. **`Init`** asks the terminal for its background colour, so the theme can pick its [light or dark](THEME.md#light-and-dark) version.
+4. **`Init`** returns `m.sh.Init()`, which asks the terminal for its background colour. The shell resolves `Base` for the answer, [light or dark](THEME.md#light-and-dark), and hands the answer on too.
 
 Like every bezel model, the shell is a value: a method that changes it returns a new copy, and you keep that copy in your model.
 
@@ -74,10 +74,10 @@ layout.Rows(
 - **`Fixed`** sizes a leaf by its constraints: `Lines(n)` exactly, `Ratio(num, den)` as a share of its parent, clamped by `Min` and `Max`. **`Fill`** takes what its fixed siblings leave.
 - **`Collapse(limit, keep)`** keeps only the child holding `keep` while the box is narrower than `limit`: a two-column screen that becomes one on a small terminal.
 - **`Info()`** marks a pane that only informs: `ChangePane` skips it.
-- **`Resizable()`** lets the user move the edges between a box's children: by dragging the border between two panes with the mouse, or with the `Resize` action on the focused pane. Each pane keeps at least three cells and its `Min` and `Max`. The shell keeps the sizes as shares, so they survive a terminal resize, and `ResetSizes` gives back the declared ones. Each move sends a `shell.ResizedMsg`, on which the app sizes its models from `Rect` again, as on a `tea.WindowSizeMsg`.
+- **`Resizable()`** lets the user move the edges between a box's children: by dragging the border between two panes with the mouse, or with the `Resize` action on the focused pane. Each pane keeps at least three cells and its `Min` and `Max`. The shell keeps the sizes as shares, so they survive a terminal resize, and `ResetSizes` gives back the declared ones. Each move sends a `shell.ResizedMsg`, on which the app sizes its models from `Inner` again, as on a `tea.WindowSizeMsg`.
 - A leaf the app leaves out of `View`'s map is gone for that frame, and its space goes to the others. A pane that only shows sometimes is a leaf the app sometimes leaves out.
 
-`SetLayout` swaps the whole tree while the app runs, and `Rect(name)` reports where a pane landed, for a click or a scroll that needs its size.
+`SetLayout` swaps the whole tree while the app runs. `Rect(name)` reports where a pane landed, border included, and `Inner(name)` the space inside it, for a model that needs its size.
 
 ## Tabs
 
@@ -110,7 +110,7 @@ An `Action` is one key, defined once: the shell dispatches it, prints it in the 
 | `ResetSizes()` | `=` | gives every `Resizable` box its declared sizes again, and the palette its `Config.PaletteLines` |
 | `Move()`, `Scroll()` | `↑/↓` | listed only: the focused component owns the arrows |
 | `Commands()` | `:` | opens the command palette |
-| `Quit()` | `q` | quits |
+| `Quit()` | `q`, `ctrl+c` | quits; `ctrl+c` works even with a dialog open or a line being typed |
 | `Custom(keys, desc, run)` | `keys` | the app's own |
 | `Command(name, desc, run)` | none | palette only, as `:name` |
 
@@ -120,7 +120,7 @@ Options shape an action without a new constructor:
 
 | Option | What it does |
 | --- | --- |
-| `WithKey(keys...)` | binds more keys under one label, as `←/→` |
+| `WithKey(keys...)` | replaces its keys, several under one label as `←/→`: `Quit(WithKey("esc", "ctrl+c"))` where `q` is text |
 | `Named(name)`, `Arg(placeholder)` | puts it in the palette as `:name`, taking what follows as `Arg` |
 | `Needs(capability)` | drops it where the session refuses the capability |
 | `When(func(Context) bool)` | keeps it only while the function says so: a key that only means something in one pane |

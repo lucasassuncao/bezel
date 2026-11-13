@@ -73,14 +73,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
-	switch msg := msg.(type) {
-	case toggleWidthMsg:
+	if _, ok := msg.(toggleWidthMsg); ok {
 		m.narrow = !m.narrow
 		return m.resize(), nil
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m, nil
 }

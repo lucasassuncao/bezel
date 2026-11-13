@@ -48,7 +48,7 @@ func TestTextboxCountsLines(t *testing.T) {
 func TestTextboxSelectsWithTheMouse(t *testing.T) {
 	var m tea.Model = newModel()
 	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
-	in := draw.InnerRect(m.(model).sh.Rect("text"))
+	in := m.(model).sh.Inner("text")
 	x, y := in.X+draw.GutterWidth, in.Y
 	m, cmd := m.Update(tea.MouseClickMsg{X: x, Y: y, Button: tea.MouseLeft})
 	m, _ = m.Update(cmd()) // the shell.ClickMsg it sends

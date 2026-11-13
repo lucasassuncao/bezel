@@ -54,15 +54,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
-	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
-	case shell.ClickMsg:
-		if msg.Pane != "calendar" {
-			return m, nil
-		}
+	if c, ok := msg.(shell.ClickMsg); ok && c.Pane != "calendar" {
+		return m, nil
 	}
 	m.cal, r = m.cal.Update(msg)
 	if c, ok := r.Event.(calendar.Chosen); ok {

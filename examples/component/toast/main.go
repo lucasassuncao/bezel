@@ -57,14 +57,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, r.Cmd
 	}
 	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case pushMsg:
-		m.toasts, cmd = m.toasts.Push(msg.text, msg.kind)
+	if p, ok := msg.(pushMsg); ok {
+		m.toasts, cmd = m.toasts.Push(p.text, p.kind)
 		return m, cmd
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	m.toasts, r = m.toasts.Update(msg)
 	return m, r.Cmd

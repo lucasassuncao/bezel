@@ -14,7 +14,6 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/tree"
-	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/theme"
@@ -100,7 +99,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, r.Cmd
 	}
 	var cmd tea.Cmd
-	m.tree = m.tree.SetHeight(draw.InnerRect(m.sh.Rect("tree")).H)
+	m.tree = m.tree.SetHeight(m.sh.Inner("tree").H)
 	switch msg := msg.(type) {
 	case revealMsg:
 		var ok bool
@@ -111,10 +110,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case toggleBusyMsg:
 		m.tree = m.tree.SetNode(m.tree.Index(), func(e *entry) { e.busy = !e.busy })
 		return m, m.tree.Tick()
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	m.tree, r = m.tree.Update(msg) // keys, and the spinner's frames
 	return m, r.Cmd

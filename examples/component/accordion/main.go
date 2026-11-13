@@ -48,9 +48,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
-	if k, ok := msg.(tea.KeyPressMsg); ok && k.String() == "ctrl+c" {
-		return m, tea.Quit
-	}
 	m.acc, r = m.acc.Update(msg)
 	return m, r.Cmd
 }

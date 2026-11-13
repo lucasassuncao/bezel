@@ -88,10 +88,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case zoomMsg:
 		m.zoom = min(max(m.zoom*float64(msg), 3), 40)
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m, nil
 }

@@ -57,15 +57,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, r.Cmd
 	}
 	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case permsMsg:
+	if _, ok := msg.(permsMsg); ok {
 		m.perms = !m.perms
 		m.fp = m.fp.WithPermissions(m.perms)
 		return m, nil
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	m.fp, r = m.fp.Update(msg)
 	cmd = r.Cmd

@@ -14,7 +14,6 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/logger"
-	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/theme"
@@ -111,17 +110,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		in := draw.InnerRect(m.sh.Rect("log"))
+		in := m.sh.Inner("log")
 		m.pane = m.pane.SetWidth(in.W).SetHeight(in.H)
-		in = draw.InnerRect(m.sh.Rect("json"))
+		in = m.sh.Inner("json")
 		m.json = m.json.SetWidth(in.W).SetHeight(in.H)
 		return m, nil
 	case step:
 		return m, m.next(msg.n)
 	case tea.KeyPressMsg, tea.MouseWheelMsg:
-		if k, ok := msg.(tea.KeyPressMsg); ok && k.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 		return m.toFocused(msg)
 	}
 	// Lines: each pane takes only its own feed's.

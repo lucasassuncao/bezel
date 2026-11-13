@@ -216,8 +216,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.steady, _ = m.steady.To(target)
 			m.bouncy, _ = m.bouncy.To(target)
 			return m.run(nil)
-		case "ctrl+c":
-			return m, tea.Quit
 		}
 	}
 	return m, nil

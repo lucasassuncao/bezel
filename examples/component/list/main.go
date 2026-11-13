@@ -13,7 +13,6 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/list"
-	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/theme"
@@ -71,7 +70,7 @@ func (m model) Init() tea.Cmd { return nil }
 // toList hands a message to the list and reads what it did; the Cmd it
 // returns starts the cursor gliding to where the key moved it.
 func (m model) toList(msg tea.Msg) (model, tea.Cmd) {
-	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
+	m.list = m.list.SetHeight(m.sh.Inner("list").H)
 	var r bezel.Result
 	m.list, r = m.list.Update(msg)
 	if c, ok := r.Event.(list.Chosen[food]); ok {
@@ -88,9 +87,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
-	}
-	if key, ok := msg.(tea.KeyPressMsg); ok && key.String() == "ctrl+c" {
-		return m, tea.Quit
 	}
 	if _, ok := msg.(toggleBusyMsg); ok {
 		return m.toggleBusy()
@@ -115,7 +111,7 @@ func (m model) detail() string {
 
 func (m model) View() tea.View {
 	// Sized before the pane is drawn: the scrollbar is the pane's, not the body's.
-	l := m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
+	l := m.list.SetHeight(m.sh.Inner("list").H)
 	return m.sh.View(map[string]shell.Pane{
 		"list": {Title: "food", Bottom: fmt.Sprintf("%d checked", len(l.Checked())), Scroll: l.Scroll(), Body: func(layout.Rect) string {
 			return l.View(m.th)

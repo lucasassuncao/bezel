@@ -80,8 +80,8 @@ func (m model) enter(path []string) model {
 
 // resize fits the crumbs and the list to their panes.
 func (m model) resize() model {
-	m.crumbs = m.crumbs.SetWidth(draw.InnerRect(m.sh.Rect("path")).W)
-	m.items = m.items.SetHeight(draw.InnerRect(m.sh.Rect("entries")).H)
+	m.crumbs = m.crumbs.SetWidth(m.sh.Inner("path").W)
+	m.items = m.items.SetHeight(m.sh.Inner("entries").H)
 	return m
 }
 
@@ -97,9 +97,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		return m.resize(), nil
 	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 		if m.sh.Focused() == "path" {
 			return m.toCrumbs(msg), nil
 		}

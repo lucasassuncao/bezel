@@ -46,12 +46,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	if key, ok := msg.(tea.KeyPressMsg); ok {
 		switch key.String() {
-		case "ctrl+c":
-			return m, tea.Quit
 		case "up":
 			m.offset = max(0, m.offset-1)
 		case "down":
-			r := draw.InnerRect(m.sh.Rect("draw"))
+			r := m.sh.Inner("draw")
 			m.offset = min(m.offset+1, max(0, len(m.lines(r.W))-r.H))
 		}
 	}

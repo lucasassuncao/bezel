@@ -76,10 +76,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case restartMsg:
 		m.tm, cmd = m.tm.Reset(timeout).Start()
 		return m, cmd
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m, nil
 }

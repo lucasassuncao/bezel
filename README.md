@@ -75,7 +75,6 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/list"
-	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/theme"
@@ -83,17 +82,14 @@ import (
 
 type model struct {
 	sh   shell.Shell
-	th   theme.Resolved
 	list list.Model[string]
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	return model{
-		th: th,
 		sh: shell.New(shell.Config{
 			Title: "fruit",
-			Theme: th,
+			Base:  theme.Mint(),
 			Layout: layout.Columns(
 				layout.Fixed("list", layout.Ratio(1, 3), layout.Min(20)),
 				layout.Fill("detail"),
@@ -108,7 +104,7 @@ func newModel() model {
 	}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// The shell goes first: resize, dialogs and the keys of its actions.
@@ -117,7 +113,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, r.Cmd
 	}
 	// Whatever is left is yours: here, the arrows move the list.
-	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
+	m.list = m.list.SetHeight(m.sh.Inner("list").H)
 	m.list, r = m.list.Update(msg)
 	return m, r.Cmd
 }
@@ -125,7 +121,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() tea.View {
 	return m.sh.View(map[string]shell.Pane{
 		"list": {Title: "Fruit", Body: func(layout.Rect) string {
-			return m.list.View(m.th)
+			return m.list.View(m.sh.Theme())
 		}},
 		"detail": {Title: "Detail", Body: func(layout.Rect) string {
 			row, _ := m.list.Selected()

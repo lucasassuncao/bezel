@@ -8,13 +8,14 @@ Every colour bezel draws comes from one place, the [`theme`](../theme) package. 
 go run ./examples/frame/theme   # n and p step through the presets
 ```
 
-In code it's three lines:
+With the shell it's two lines:
 
 ```go
-th := theme.Resolve(theme.Mint(), true) // a preset, for a dark terminal
-sh := shell.New(shell.Config{Theme: th /* ... */})
-body := items.View(th)                  // a component draws with the theme it is given
+sh := shell.New(shell.Config{Base: theme.Mint() /* ... */}) // the shell resolves it
+body := items.View(sh.Theme())                              // a component draws with the theme it is given
 ```
+
+Without the shell, `theme.Resolve(theme.Mint(), dark)` gives the same styles.
 
 ## Roles, not colours
 
@@ -93,21 +94,17 @@ Everything not set comes from `Mint`, and what `Mint` leaves empty from the adap
 
 ## Light and dark
 
-`theme.Resolve(t, dark)` turns a theme into the styles everything draws with, for a dark or a light background. The terminal says which: ask in `Init`, and resolve again when it answers.
+`theme.Resolve(t, dark)` turns a theme into the styles everything draws with, for a dark or a light background. The terminal says which, and the shell does the asking: give it the theme as `Config.Base` and return `m.sh.Init()` from `Init`.
 
 ```go
-func (m model) Init() tea.Cmd { return tea.RequestBackgroundColor }
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if bg, ok := msg.(tea.BackgroundColorMsg); ok {
-		m.th = theme.Resolve(m.theme, bg.IsDark())
-		m.sh = m.sh.SetTheme(m.th)
-	}
-	// ...
-}
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 ```
 
-The answer can come after the first frame, so the app starts from a guess, usually dark, and switches once. Code that resolves a theme outside a running program, a `--list-themes` or a plain CLI, asks with `theme.DarkTerminal()`.
+The answer can come after the first frame, so the shell starts from dark and switches once. It still hands the answer on (`Handled` false), for a component that took the theme in its constructor and wants `SetTheme(m.sh.Theme())`. A component that takes the theme in `View` needs nothing.
+
+`SetBase(t)` switches to another theme and keeps following the terminal. `Config.Theme` or `SetTheme(resolved)` fix the styles instead: the shell no longer asks or re-resolves, for an app that builds its own `Resolved`.
+
+Without the shell, ask yourself: return `tea.RequestBackgroundColor` from `Init` and resolve again on `tea.BackgroundColorMsg`. Code that resolves a theme outside a running program, a `--list-themes` or a plain CLI, asks with `theme.DarkTerminal()`.
 
 ## The background
 

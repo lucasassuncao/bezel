@@ -77,10 +77,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		c := m.cursors[m.focus]
 		m.cursors[m.focus], cmd = c.SetMode((c.Mode() + 1) % 3)
 		return m, cmd
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m, nil
 }

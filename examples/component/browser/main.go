@@ -12,7 +12,6 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/browser"
-	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/theme"
@@ -76,10 +75,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if !ok {
 		return m, nil
 	}
-	if key.String() == "ctrl+c" {
-		return m, tea.Quit
-	}
-	m.browser = m.browser.SetPreviewHeight(draw.InnerRect(m.sh.Rect("preview")).H)
+	m.browser = m.browser.SetPreviewHeight(m.sh.Inner("preview").H)
 	m.browser, r = m.browser.Update(key)
 	// The shell's focus is only the border; the browser owns which side moves.
 	if m.browser.PreviewFocused() {

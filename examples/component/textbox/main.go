@@ -11,7 +11,6 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/textbox"
-	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/theme"
@@ -36,7 +35,7 @@ func newModel() model {
 		Actions: []shell.Action{
 			shell.Custom("ctrl+s", "count lines", shell.Send(countMsg{})),
 			// q would be text here, so esc quits instead.
-			shell.Quit(shell.WithKey("esc")),
+			shell.Quit(shell.WithKey("esc", "ctrl+c")),
 		},
 	})
 	ta, _ := textbox.New(th).SetValue(seed).Focus()
@@ -47,7 +46,7 @@ func (m model) Init() tea.Cmd { return m.ta.Blink() }
 
 // fit sizes the text area to the pane the shell placed.
 func (m model) fit() model {
-	r := draw.InnerRect(m.sh.Rect("text"))
+	r := m.sh.Inner("text")
 	m.ta = m.ta.SetWidth(r.W).SetHeight(r.H)
 	return m
 }
@@ -63,10 +62,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.sh, cmd = m.sh.SetStatus(text, shell.Info, 3*time.Second)
 		return m, cmd
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	case shell.ClickMsg: // the press, already in the pane's cells
 		m.ta, r = m.ta.Update(msg)
 		return m, r.Cmd

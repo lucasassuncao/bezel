@@ -14,7 +14,6 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/component/viewport"
-	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/theme"
@@ -99,7 +98,7 @@ func (m model) Init() tea.Cmd { return nil }
 
 // sized fits the viewport to the pane's inside, as the shell last laid it out.
 func (m model) sized() model {
-	r := draw.InnerRect(m.sh.Rect("log"))
+	r := m.sh.Inner("log")
 	m.vp = m.vp.SetWidth(r.W).SetHeight(r.H)
 	return m
 }
@@ -118,9 +117,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case wrapMsg:
 		m.vp = m.vp.SetWrap(!m.vp.Wrap())
 	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 		m.vp, _ = m.vp.Update(msg)
 	case tea.MouseWheelMsg:
 		m.vp, _ = m.vp.Update(msg)

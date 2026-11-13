@@ -39,14 +39,12 @@ type (
 ```go
 type model struct {
 	sh    shell.Shell
-	th    theme.Resolved
 	tasks []task
 	list  list.Model[int] // each row carries its task's index
 }
 ```
 
-- `sh` is the frame: header, borders, status row, legend and dialogs.
-- `th` is the resolved theme everything draws with.
+- `sh` is the frame: header, borders, status row, legend and dialogs. It also holds the theme: `m.sh.Theme()` is what everything draws with.
 - `list` is a [`list`](../component/list) whose rows carry an `int`, the index of their task, so a row leads back to the task it shows.
 
 Everything is a value: each method that changes the shell or the list returns a new one, and the model keeps it.
@@ -55,13 +53,12 @@ Everything is a value: each method that changes the shell or the list returns a 
 
 ```go
 func newModel(readOnly bool) model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(
 			layout.Fixed("tasks", layout.Ratio(1, 2), layout.Min(30)),
 			layout.Fill("detail").Info(),
 		).Collapse(70, "tasks"),
-		Theme:    th,
+		Base:     theme.Mint(),
 		Title:    "tasks",
 		Subtitle: "a bezel demo",
 		Can:      func(c shell.Capability) bool { return c != "write" || !readOnly },
@@ -79,11 +76,11 @@ func newModel(readOnly bool) model {
 ```
 
 - **The layout** is two panes side by side, `tasks` taking half and at least 30 columns, `detail` the rest. `Info()` says the detail only informs, so focus never goes there. Below 70 columns `Collapse` keeps only the tasks.
-- **The theme** is the `Mint` preset, resolved for a dark terminal until the terminal says otherwise (step 5).
+- **The theme** is the `Mint` preset. Given as `Base`, the shell resolves it light or dark by itself, once `Init` has asked the terminal (step 5).
 - **The actions** are the keys. Each one is defined once, and the shell prints it in the legend, lists it under `?` and runs it. `shell.Send(msg)` makes a key send a message, and `Move()` only says the arrows move the cursor; the list handles them.
 - **`Needs("write")` and `Can`** are how `--read-only` works: `Can` refuses `write`, and every action that needs it disappears from the keys, the legend and the help. No handler checks a flag.
 
-The rest of `newModel` puts the first tasks in and builds the list from them.
+The rest of `newModel` makes an empty list, puts the first tasks in and fills the list from them.
 
 ## 4. The list
 
@@ -96,11 +93,7 @@ func (m model) refresh() model {
 			rows[i].Mark = "✓"
 		}
 	}
-	if m.list.Len() == 0 {
-		m.list = list.New(rows)
-	} else {
-		m.list = m.list.SetRows(rows)
-	}
+	m.list = m.list.SetRows(rows)
 	return m
 }
 
@@ -117,16 +110,14 @@ func (m model) current() (int, bool) {
 ## 5. Update: the shell first
 
 ```go
+func (m model) Init() tea.Cmd { return m.sh.Init() }
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if bg, ok := msg.(tea.BackgroundColorMsg); ok {
-		m.th = theme.Resolve(theme.Mint(), bg.IsDark())
-		m.sh = m.sh.SetTheme(m.th)
-		return m, nil
-	}
 	var r bezel.Result
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
+	m.list = m.list.SetHeight(m.sh.Inner("tasks").H)
 	switch msg := msg.(type) {
 	// ...
 	}
@@ -134,9 +125,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 ```
 
-Every message goes to the shell first. It takes the keys its actions own and every key while a dialog is open; `Handled` true means there is nothing left for the app. A resize it lays out and hands on (`Handled` false), so the app can size its own models from `Rect`. Then the app handles what is its own.
+Every message goes to the shell first. It takes the keys its actions own and every key while a dialog is open; `Handled` true means there is nothing left for the app. Two messages it uses and still hands on (`Handled` false): a resize, once the panes are laid out, and the terminal's answer about its background, which `m.sh.Init()` asked for and which re-themes the shell. [THEME.md](THEME.md#light-and-dark) has the details.
 
-The background colour comes before it all: `Init` asks the terminal for it, and the answer resolves the theme again, light or dark. [THEME.md](THEME.md#light-and-dark) has the details.
+Then the list is sized, before it takes anything. It needs to know how many rows it shows to scroll right, and `m.sh.Inner("tasks")` is the space inside the pane's border. Then the app handles what is its own.
 
 ## 6. A prompt and a confirm
 
@@ -146,7 +137,7 @@ The background colour comes before it all: `Init` asks the terminal for it, and 
 case askAddMsg:
 	ask := overlay.NewPrompt("New task", func(title string) tea.Cmd {
 		return func() tea.Msg { return addMsg{title: title} }
-	}, m.th).WithValidate(func(typed string) error {
+	}, m.sh.Theme()).WithValidate(func(typed string) error {
 		if strings.TrimSpace(typed) == "" {
 			return errors.New("a task needs a title")
 		}
@@ -168,7 +159,7 @@ Deleting asks first, the same way, with a confirm drawn in the danger colour:
 case askDropMsg:
 	if i, ok := m.current(); ok {
 		yes := func() tea.Msg { return dropMsg{} }
-		ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.th).WithKind(draw.Danger)
+		ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.sh.Theme()).WithKind(draw.Danger)
 		return m, overlay.Open(ask)
 	}
 ```
@@ -179,26 +170,21 @@ case askDropMsg:
 
 ```go
 case tea.KeyPressMsg:
-	if msg.String() == "ctrl+c" {
-		return m, tea.Quit
-	}
-	m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("tasks")).H)
 	m.list, _ = m.list.Update(msg)
 ```
 
-A key no action took reaches the app, which hands it to the list: the arrows, `home`, `end`. The list needs to know how many rows it shows to scroll right, so it is sized to the inside of its pane first. `m.sh.Rect("tasks")` is where the shell put the pane, and `draw.InnerRect` takes the border off.
+A key no action took reaches the app, which hands it to the list: the arrows, `home`, `end`. `ctrl+c` never gets here: `shell.Quit()` takes it, even with a dialog open.
 
 ## 8. View: the panes
 
 ```go
 func (m model) View() tea.View {
-	l := m.list.SetHeight(draw.InnerRect(m.sh.Rect("tasks")).H)
 	return m.sh.View(map[string]shell.Pane{
 		"tasks": {
 			Title:  "tasks",
 			Bottom: fmt.Sprintf("%d/%d done", m.doneCount(), len(m.tasks)),
-			Scroll: l.Scroll(),
-			Body:   func(layout.Rect) string { return l.View(m.th) },
+			Scroll: m.list.Scroll(),
+			Body:   func(layout.Rect) string { return m.list.View(m.sh.Theme()) },
 		},
 		"detail": {Title: "detail", Body: m.detail},
 	})
@@ -211,21 +197,22 @@ The detail pane draws the task under the cursor, and a [`progress`](../component
 
 ```go
 func (m model) detail(r layout.Rect) string {
+	th := m.sh.Theme()
 	i, ok := m.current()
 	if !ok {
-		return draw.EmptyState(r, "nothing to do", "n adds a task", m.th.Chrome)
+		return draw.EmptyState(r, "nothing to do", "n adds a task", th.Chrome)
 	}
 	t := m.tasks[i]
-	state := m.th.Warning.Render("to do")
+	state := th.Warning.Render("to do")
 	if t.done {
-		state = m.th.Success.Render("done")
+		state = th.Success.Render("done")
 	}
 	return strings.Join([]string{
-		m.th.Accent.Render(t.title),
+		th.Accent.Render(t.title),
 		"",
-		m.th.Dim.Render("state  ") + state,
+		th.Dim.Render("state  ") + state,
 		"",
-		progress.Line("all tasks", m.doneCount(), len(m.tasks), r.W, m.th),
+		progress.Line("all tasks", m.doneCount(), len(m.tasks), r.W, th),
 	}, "\n")
 }
 ```

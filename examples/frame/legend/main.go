@@ -79,10 +79,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case didMsg:
 		m.sh, cmd = m.sh.SetStatus(msg.what, shell.Info, 2*time.Second)
 		return m, cmd
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m, nil
 }

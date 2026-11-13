@@ -69,7 +69,7 @@ func (d rename) View(body layout.Rect) string {
 func (d rename) Legend() []legend.Entry { return legend.FromBindings([]key.Binding{d.keys.Save}) }
 ```
 
-Open it from `Update` with `overlay.Open(newRename(item, m.th))`. `overlay.Box` sizes the box to the body and `overlay.Inner(body)` says how wide its text may be. More, each by one method: `SetTheme` (`overlay.Themer`) to repaint when the theme changes, `Resize` (`overlay.Resizer`) to learn the body's size in `Update`, `Click` (`overlay.Clicker`) to take the mouse.
+Open it from `Update` with `overlay.Open(newRename(item, m.sh.Theme()))`. `overlay.Box` sizes the box to the body and `overlay.Inner(body)` says how wide its text may be. More, each by one method: `SetTheme` (`overlay.Themer`) to repaint when the theme changes, `Resize` (`overlay.Resizer`) to learn the body's size in `Update`, `Click` (`overlay.Clicker`) to take the mouse.
 
 ## A CLI without the shell
 

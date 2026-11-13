@@ -95,7 +95,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	var cmd tea.Cmd
 	at := m.sh.ActiveTab()
-	m.lists[at] = m.lists[at].SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
+	m.lists[at] = m.lists[at].SetHeight(m.sh.Inner("list").H)
 	switch msg := msg.(type) {
 	case saveMsg:
 		m.sh, cmd = m.sh.SetStatus("saved "+m.selected(), shell.OK, 2*time.Second)
@@ -122,9 +122,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		}
 	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 		m.lists[at], _ = m.lists[at].Update(msg)
 	}
 	return m, nil
@@ -132,7 +129,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	at := m.sh.ActiveTab()
-	l := m.lists[at].SetHeight(draw.InnerRect(m.sh.Rect("list")).H)
+	l := m.lists[at].SetHeight(m.sh.Inner("list").H)
 	return m.sh.View(map[string]shell.Pane{
 		"list": {Title: m.tabs[at].name, Body: func(layout.Rect) string { return l.View(m.th) }},
 		"detail": {Title: "detail", Body: func(r layout.Rect) string {

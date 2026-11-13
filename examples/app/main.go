@@ -40,19 +40,17 @@ type (
 
 type model struct {
 	sh    shell.Shell
-	th    theme.Resolved
 	tasks []task
 	list  list.Model[int] // each row carries its task's index
 }
 
 func newModel(readOnly bool) model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(
 			layout.Fixed("tasks", layout.Ratio(1, 2), layout.Min(30)),
 			layout.Fill("detail").Info(),
 		).Collapse(70, "tasks"),
-		Theme:    th,
+		Base:     theme.Mint(),
 		Title:    "tasks",
 		Subtitle: "a bezel demo",
 		Can:      func(c shell.Capability) bool { return c != "write" || !readOnly },
@@ -65,7 +63,7 @@ func newModel(readOnly bool) model {
 			shell.Quit(),
 		},
 	})
-	m := model{sh: sh, th: th, tasks: []task{
+	m := model{sh: sh, list: list.New[int](nil), tasks: []task{
 		{title: "write the release notes", done: true},
 		{title: "record the demo"},
 		{title: "answer the issue about themes"},
@@ -83,11 +81,7 @@ func (m model) refresh() model {
 			rows[i].Mark = "✓"
 		}
 	}
-	if m.list.Len() == 0 {
-		m.list = list.New(rows)
-	} else {
-		m.list = m.list.SetRows(rows)
-	}
+	m.list = m.list.SetRows(rows)
 	return m
 }
 
@@ -99,24 +93,21 @@ func (m model) current() (int, bool) {
 	return 0, false
 }
 
-func (m model) Init() tea.Cmd { return tea.RequestBackgroundColor }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if bg, ok := msg.(tea.BackgroundColorMsg); ok {
-		m.th = theme.Resolve(theme.Mint(), bg.IsDark())
-		m.sh = m.sh.SetTheme(m.th)
-		return m, nil
-	}
 	var r bezel.Result
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
+	// The list scrolls by how many rows its pane shows.
+	m.list = m.list.SetHeight(m.sh.Inner("tasks").H)
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case askAddMsg:
 		ask := overlay.NewPrompt("New task", func(title string) tea.Cmd {
 			return func() tea.Msg { return addMsg{title: title} }
-		}, m.th).WithValidate(func(typed string) error {
+		}, m.sh.Theme()).WithValidate(func(typed string) error {
 			if strings.TrimSpace(typed) == "" {
 				return errors.New("a task needs a title")
 			}
@@ -137,7 +128,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case askDropMsg:
 		if i, ok := m.current(); ok {
 			yes := func() tea.Msg { return dropMsg{} }
-			ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.th).WithKind(draw.Danger)
+			ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.sh.Theme()).WithKind(draw.Danger)
 			return m, overlay.Open(ask)
 		}
 	case dropMsg:
@@ -149,11 +140,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		}
 	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 		// Every key no action took is the list's: the arrows, home and end.
-		m.list = m.list.SetHeight(draw.InnerRect(m.sh.Rect("tasks")).H)
 		m.list, _ = m.list.Update(msg)
 	}
 	return m, nil
@@ -172,32 +159,32 @@ func (m model) doneCount() int {
 
 // detail is the selected task, and how far along the whole list is.
 func (m model) detail(r layout.Rect) string {
+	th := m.sh.Theme()
 	i, ok := m.current()
 	if !ok {
-		return draw.EmptyState(r, "nothing to do", "n adds a task", m.th.Chrome)
+		return draw.EmptyState(r, "nothing to do", "n adds a task", th.Chrome)
 	}
 	t := m.tasks[i]
-	state := m.th.Warning.Render("to do")
+	state := th.Warning.Render("to do")
 	if t.done {
-		state = m.th.Success.Render("done")
+		state = th.Success.Render("done")
 	}
 	return strings.Join([]string{
-		m.th.Accent.Render(t.title),
+		th.Accent.Render(t.title),
 		"",
-		m.th.Dim.Render("state  ") + state,
+		th.Dim.Render("state  ") + state,
 		"",
-		progress.Line("all tasks", m.doneCount(), len(m.tasks), r.W, m.th),
+		progress.Line("all tasks", m.doneCount(), len(m.tasks), r.W, th),
 	}, "\n")
 }
 
 func (m model) View() tea.View {
-	l := m.list.SetHeight(draw.InnerRect(m.sh.Rect("tasks")).H)
 	return m.sh.View(map[string]shell.Pane{
 		"tasks": {
 			Title:  "tasks",
 			Bottom: fmt.Sprintf("%d/%d done", m.doneCount(), len(m.tasks)),
-			Scroll: l.Scroll(),
-			Body:   func(layout.Rect) string { return l.View(m.th) },
+			Scroll: m.list.Scroll(),
+			Body:   func(layout.Rect) string { return m.list.View(m.sh.Theme()) },
 		},
 		"detail": {Title: "detail", Body: m.detail},
 	})

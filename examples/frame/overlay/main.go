@@ -114,8 +114,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		case "ctrl+c":
-			return m, tea.Quit
 		case "up":
 			m.cursor = max(0, m.cursor-1)
 		case "down":

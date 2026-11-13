@@ -107,10 +107,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.run(tea.Batch(a, b, c, d))
 	case animation.FrameMsg:
 		return m.frame(msg)
-	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 	}
 	return m, nil
 }

@@ -60,9 +60,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.pg = m.pg.WithDisplay(show)
 	case tea.KeyPressMsg:
-		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
-		}
 		m.pg, _ = m.pg.Update(msg)
 	}
 	return m, nil
