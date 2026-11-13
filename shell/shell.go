@@ -7,6 +7,8 @@ import (
 	"slices"
 	"time"
 
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/lucasassuncao/bezel/component/input"
 	"github.com/lucasassuncao/bezel/component/spinner"
 	"github.com/lucasassuncao/bezel/component/toast"
@@ -48,9 +50,14 @@ type Tab interface {
 
 // Config is everything a Shell needs up front.
 type Config struct {
-	Layout   layout.Node
-	Tabs     []Tab // nil for a single-screen app
-	Theme    theme.Resolved
+	Layout layout.Node
+	Tabs   []Tab // nil for a single-screen app
+	// Theme fixes the styles. Left zero, the shell resolves Base instead: for
+	// a dark terminal at first, then for the background Init asks about.
+	Theme theme.Resolved
+	// Base is the theme the shell follows when Theme is zero; its own zero
+	// value is theme.Default().
+	Base     theme.Theme
 	Title    string
 	Subtitle string
 	Version  string
@@ -100,6 +107,9 @@ const (
 type Shell struct {
 	cfg *Config // shared by every copy and never written: see withCfg
 
+	adaptive bool // the theme is Base's, resolved again on each background answer
+	light    bool // the terminal last reported a light background
+
 	width, height int
 	rects         map[string]layout.Rect
 	collapsed     bool
@@ -143,11 +153,25 @@ func New(cfg Config) Shell {
 	if len(cfg.Spinner.Frames) == 0 {
 		cfg.Spinner.Frames = spinner.Dot().Frames
 	}
+	adaptive := cfg.Theme.Colors == (theme.Colors{}) // Resolve fills every role
+	if adaptive {
+		cfg.Theme = theme.Resolve(cfg.Base, true)
+	}
 	focus := resized(nil, max(1, len(cfg.Tabs)), firstLeaf(cfg.Layout))
 	return Shell{
-		cfg: &cfg, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
+		cfg: &cfg, adaptive: adaptive, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
 		spin: spinner.New(cfg.Spinner),
 	}
+}
+
+// Init asks the terminal for its background while the shell follows Base, so
+// the answer resolves it light or dark; nil with a fixed Theme. The app's
+// Init returns it.
+func (s Shell) Init() tea.Cmd {
+	if s.ready().adaptive {
+		return tea.RequestBackgroundColor
+	}
+	return nil
 }
 
 // ready is s, or for the zero Shell the one New(Config{}) builds, so a host
@@ -242,10 +266,25 @@ func (s Shell) SetLayout(n layout.Node) Shell {
 	return s.relayout()
 }
 
-// SetTheme swaps the styles, for a terminal that answered light or dark
-// after the shell was built.
+// SetTheme fixes the styles to th: a background answer no longer changes
+// them, until SetBase.
 func (s Shell) SetTheme(th theme.Resolved) Shell {
 	s = s.ready()
+	s.adaptive = false
+	return s.withTheme(th)
+}
+
+// SetBase makes the shell follow t: resolved now for the background the
+// terminal last reported, dark before it answers, and again on each answer.
+func (s Shell) SetBase(t theme.Theme) Shell {
+	s = s.ready()
+	s = s.withCfg(func(c *Config) { c.Base = t })
+	s.adaptive = true
+	return s.withTheme(theme.Resolve(t, !s.light))
+}
+
+// withTheme repaints the shell, and the dialog or input it holds, in th.
+func (s Shell) withTheme(th theme.Resolved) Shell {
 	s = s.withCfg(func(c *Config) { c.Theme = th })
 	s.overlays = s.overlays.SetTheme(th)
 	if s.typing {

@@ -158,3 +158,34 @@ func TestOpeningThePaletteStartsItsCaret(t *testing.T) {
 	require.True(t, r.Handled)
 	require.NotNil(t, r.Cmd, "the palette's own blink re-arms")
 }
+
+var ctrlC = tea.KeyPressMsg{Code: 'c', Mod: tea.ModCtrl}
+
+func TestQuitAlsoTakesCtrlC(t *testing.T) {
+	s := sized(New(actionConfig()).SetActions(Quit()))
+	_, r := s.Update(ctrlC)
+	require.IsType(t, tea.QuitMsg{}, r.Cmd())
+}
+
+// ctrl+c can't be typed, so no dialog or line being typed keeps it from Quit,
+// and it does what Quit was told to.
+func TestCtrlCQuitsPastADialogAndTheInput(t *testing.T) {
+	s := sized(New(actionConfig()).SetActions(Quit(RunWith(Send(ping{})))))
+	_, r := s.Push(overlay.NewText("t", "x", theme.Resolved{})).Update(ctrlC)
+	require.True(t, r.Handled)
+	require.Equal(t, ping{}, r.Cmd())
+
+	in, _ := input.New(theme.Resolved{}).Focus()
+	_, r = s.SetInput(in).Update(ctrlC)
+	require.Equal(t, ping{}, r.Cmd())
+}
+
+// A Quit rebound without ctrl+c leaves it to the open dialog.
+func TestAReboundQuitLeavesCtrlCToTheDialog(t *testing.T) {
+	s := sized(New(actionConfig()).SetActions(Quit(WithKey("q"))))
+	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
+	_, r := s.Update(ctrlC)
+	if r.Cmd != nil {
+		require.NotEqual(t, tea.QuitMsg{}, r.Cmd())
+	}
+}

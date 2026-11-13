@@ -121,10 +121,11 @@ func Scroll(opts ...Option) Action {
 	return build(&action{kind: kindScroll, keys: []string{"up", "down"}, label: "↑/↓", desc: "scroll"}, opts)
 }
 
-// Quit leaves the program.
+// Quit leaves the program on q, or on ctrl+c even past an open dialog or a
+// line being typed. The legend prints q; RunWith changes what both keys do.
 func Quit(opts ...Option) Action {
 	quit := func(ActionContext) tea.Cmd { return tea.Quit }
-	return build(&action{kind: kindQuit, keys: []string{"q"}, label: "q", desc: "quit", name: "quit", run: quit}, opts)
+	return build(&action{kind: kindQuit, keys: []string{"q", "ctrl+c"}, label: "q", desc: "quit", name: "quit", run: quit}, opts)
 }
 
 // Custom is an app key: keys is bound literally and printed as is. Use

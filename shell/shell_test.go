@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"image/color"
 	"strings"
 	"testing"
 	"time"
@@ -295,4 +296,48 @@ func TestSetThemeReachesAnOpenDialog(t *testing.T) {
 	s = s.Push(overlay.NewText("t", "body", plain)).SetTheme(mint)
 	body := layout.Rect{W: 60, H: 20}
 	require.Equal(t, overlay.NewText("t", "body", mint).View(body), s.TopOverlay().View(body))
+}
+
+// A shell given no Theme follows Base: dark until the terminal answers, then
+// the answer, which still reaches the app for its own models.
+func TestAZeroThemeFollowsTheBackground(t *testing.T) {
+	s := New(Config{Layout: twoPane()})
+	require.NotNil(t, s.Init())
+	require.Equal(t, theme.Resolve(theme.Default(), true).Colors, s.Theme().Colors)
+
+	s, r := s.Update(tea.BackgroundColorMsg{Color: color.White})
+	require.False(t, r.Handled)
+	require.Equal(t, theme.Resolve(theme.Default(), false).Colors, s.Theme().Colors)
+}
+
+func TestAFixedThemeIgnoresTheBackground(t *testing.T) {
+	s := newShell()
+	require.Nil(t, s.Init())
+	s, r := s.Update(tea.BackgroundColorMsg{Color: color.White})
+	require.False(t, r.Handled)
+	require.Equal(t, theme.Resolve(theme.Plain(), true).Colors, s.Theme().Colors)
+}
+
+// SetBase resolves for the last answer, even one heard while fixed; SetTheme
+// fixes the styles again.
+func TestSetBaseAndSetThemeSwitchFollowing(t *testing.T) {
+	s, _ := newShell().Update(tea.BackgroundColorMsg{Color: color.White})
+	s = s.SetBase(theme.Default())
+	require.NotNil(t, s.Init())
+	require.Equal(t, theme.Resolve(theme.Default(), false).Colors, s.Theme().Colors)
+
+	plain := theme.Resolve(theme.Plain(), true)
+	s, _ = s.SetTheme(plain).Update(tea.BackgroundColorMsg{Color: color.Black})
+	require.Nil(t, s.Init())
+	require.Equal(t, plain.Colors, s.Theme().Colors)
+}
+
+// A dialog open when the answer comes repaints with the shell.
+func TestTheBackgroundAnswerReachesAnOpenDialog(t *testing.T) {
+	s := New(Config{Layout: layout.Columns(layout.Fill("a"))})
+	s = s.Push(overlay.NewText("t", "body", s.Theme()))
+	s, _ = s.Update(tea.BackgroundColorMsg{Color: color.White})
+	body := layout.Rect{W: 60, H: 20}
+	light := theme.Resolve(theme.Default(), false)
+	require.Equal(t, overlay.NewText("t", "body", light).View(body), s.TopOverlay().View(body))
 }

@@ -21,6 +21,20 @@ func (s Shell) runKey(k tea.KeyPressMsg) (Shell, tea.Cmd, bool) {
 	return s, nil, false
 }
 
+// interrupt is the live Quit bound to ctrl+c, a key no dialog or typed line
+// may keep; nil for any other key.
+func (s Shell) interrupt(k tea.KeyPressMsg) Action {
+	if k.String() != "ctrl+c" {
+		return nil
+	}
+	for _, a := range s.active() {
+		if ac, ok := a.(*action); ok && ac.kind == kindQuit && !ac.displayOnly() && key.Matches(k, a.binding()) {
+			return a
+		}
+	}
+	return nil
+}
+
 // run performs a: the shell's own work for the prebuilt kinds, a.Run for the
 // rest. pressed is the key that fired it, "" from the palette.
 func (s Shell) run(a Action, arg, pressed string) (Shell, tea.Cmd) {

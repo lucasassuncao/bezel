@@ -11,6 +11,7 @@ import (
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/shell/internal/palette"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // statusExpiredMsg clears the status whose sequence it carries. A stale one,
@@ -30,7 +31,7 @@ func toastCmd(cmd tea.Cmd) tea.Cmd {
 
 // Update takes what is the shell's: resize, status ticks, overlays, the status
 // input, help, tabs, focus and left clicks, a pane's coming back as a ClickMsg.
-// A resize stays unhandled, so the app sizes its models from Rect on it too.
+// A resize or a background answer stays unhandled: the app's models need it too.
 func (s Shell) Update(msg tea.Msg) (Shell, bezel.Result) {
 	s = s.ready()
 	next, handled, cmd := s.update(msg)
@@ -38,8 +39,17 @@ func (s Shell) Update(msg tea.Msg) (Shell, bezel.Result) {
 		return s, bezel.Result{}
 	}
 	// The one place a message re-resolves the layout, so no branch can forget to.
-	_, resize := msg.(tea.WindowSizeMsg)
-	return next.relayout(), bezel.Result{Handled: !resize, Cmd: cmd}
+	return next.relayout(), bezel.Result{Handled: !passedOn(msg), Cmd: cmd}
+}
+
+// passedOn reports a message the shell uses and still hands the app: a resize
+// to size its models by, a background answer to re-theme them.
+func passedOn(msg tea.Msg) bool {
+	switch msg.(type) {
+	case tea.WindowSizeMsg, tea.BackgroundColorMsg:
+		return true
+	}
+	return false
 }
 
 var _ bezel.Model[Shell] = Shell{}
@@ -64,6 +74,9 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		s.width, s.height = m.Width, m.Height
 		return s, true, nil
+
+	case tea.BackgroundColorMsg:
+		return s.background(m), true, nil
 
 	case statusExpiredMsg:
 		if m.seq == s.statusSeq {
@@ -108,6 +121,10 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		return s.blink(b)
 	}
 
+	if next, cmd, ok := s.quitPastModals(msg); ok {
+		return next, true, cmd
+	}
+
 	if s.overlays.Len() > 0 {
 		switch msg.(type) {
 		case tea.KeyPressMsg, tea.PasteMsg:
@@ -144,6 +161,31 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		return next, true, cmd
 	}
 	return s, false, nil
+}
+
+// background takes the terminal's answer: the theme follows it while the
+// shell follows Base, and SetBase will start from it otherwise.
+func (s Shell) background(msg tea.BackgroundColorMsg) Shell {
+	s.light = !msg.IsDark()
+	if s.adaptive {
+		s = s.withTheme(theme.Resolve(s.cfg.Base, msg.IsDark()))
+	}
+	return s
+}
+
+// quitPastModals runs Quit on ctrl+c while a dialog or the status row's
+// input would otherwise take the key.
+func (s Shell) quitPastModals(msg tea.Msg) (Shell, tea.Cmd, bool) {
+	k, ok := msg.(tea.KeyPressMsg)
+	if !ok || (s.overlays.Len() == 0 && !s.typing) {
+		return s, nil, false
+	}
+	a := s.interrupt(k)
+	if a == nil {
+		return s, nil, false
+	}
+	next, cmd := s.run(a, "", k.String())
+	return next, cmd, true
 }
 
 // SetStatus shows text on the status row, or as a toast in the Toast style.

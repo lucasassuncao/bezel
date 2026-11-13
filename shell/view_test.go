@@ -337,3 +337,13 @@ func FuzzScreenFillsTheTerminal(f *testing.F) {
 		}
 	})
 }
+
+// Inner is the rect Body is handed, so a model sized by it fits the pane.
+func TestInnerIsTheRectBodyGets(t *testing.T) {
+	s := sized(newShell())
+	var got layout.Rect
+	_ = s.render(map[string]Pane{"list": {Body: func(r layout.Rect) string { got = r; return "" }}, "detail": {}})
+	require.Equal(t, got, s.Inner("list"))
+	require.Equal(t, draw.InnerRect(s.Rect("detail")), s.Inner("detail"))
+	require.Equal(t, layout.Rect{}, s.Inner("nowhere"))
+}

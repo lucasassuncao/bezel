@@ -22,6 +22,17 @@ func (s Shell) Body() layout.Rect {
 	return layout.Rect{X: 0, Y: top, W: s.width, H: max(1, s.height-top-bottom)}
 }
 
+// Inner is the rect a pane's Body draws into: Rect less the border and
+// padding. Size the pane's models by it before they take a message; the zero
+// Rect when the pane is not on screen.
+func (s Shell) Inner(name string) layout.Rect {
+	r, ok := s.rects[name]
+	if !ok || r.W <= 0 || r.H <= 0 {
+		return layout.Rect{}
+	}
+	return draw.InnerRect(r)
+}
+
 // chromeRows measures the chrome without rendering the panes.
 func (s Shell) chromeRows() (top, bottom int, legendLines []string) {
 	top = s.headerRows() + 1 // a blank row always sits above the panes
