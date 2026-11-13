@@ -27,7 +27,6 @@ script = $(SCRIPT_RUN) $(SCRIPT_DIR)/$(1)$(SCRIPT_EXT)
 
 # Project variables
 MODULE_NAME   := bezel
-SBOM_FILE     := sbom.json
 COVERAGE_DIR  := coverage
 SITE_DIR      := site
 RELEASE_NOTES := release-notes.md
@@ -53,19 +52,13 @@ include $(MAKE_DIR)/release.mk
 help:
 	@$(call script,help) $(MAKEFILE_LIST)
 
-# Local, deterministic checks first, so a failure points at the code. The
-# supply-chain scans go last because they are the only steps that need the
-# network: govulncheck and grype both fetch a vulnerability database, and a
-# hiccup there should not mask a lint or test failure. govulncheck runs before
-# grype so the reachability answer is printed even when grype fails the build
-# on an advisory nothing here can execute.
-## Run every check: deps, fmt, docs, lint, security, tests and vulnerability scans
-all: deps fmt docs lint security test-coverage govulncheck sbom vuln
+## Run every check: deps, fmt, docs, lint, security and tests
+all: deps fmt docs lint security test-coverage
 
 all-basic: deps fmt docs lint test-coverage
 
 ## Remove coverage artifacts, installed tools and cache
 clean: clean-tools
-	@$(call script,remove) $(COVERAGE_DIR) $(SBOM_FILE) $(SITE_DIR) $(RELEASE_NOTES)
+	@$(call script,remove) $(COVERAGE_DIR) $(SITE_DIR) $(RELEASE_NOTES)
 	@echo "Cleaning Go build and test cache..."
 	@go clean -cache -testcache

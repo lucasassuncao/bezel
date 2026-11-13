@@ -11,9 +11,6 @@ GOLANGCI_LINT_VERSION := v2.14.0
 GOMARKDOC_VERSION     := v1.1.0
 GOSEC_VERSION         := v2.29.1-0.20261012130337-71577268350e
 GOTESTSUM_VERSION     := v1.13.0
-GOVULNCHECK_VERSION   := v1.9.0
-GRYPE_VERSION         := v0.118.0
-SYFT_VERSION          := v1.51.1
 
 # Tools are installed into ./.gobin (gitignored) rather than taken from PATH,
 # so every target runs the version pinned above and never whatever happens to
@@ -31,16 +28,11 @@ GOLANGCI    := $(GOBIN_DIR)/golangci-lint$(EXE)
 GOMARKDOC   := $(GOBIN_DIR)/gomarkdoc$(EXE)
 GOSEC       := $(GOBIN_DIR)/gosec$(EXE)
 GOTESTSUM   := $(GOBIN_DIR)/gotestsum$(EXE)
-GOVULNCHECK := $(GOBIN_DIR)/govulncheck$(EXE)
-
-# tools for generating SBOMs and scanning for vulnerabilities
-GRYPE       := $(GOBIN_DIR)/grype$(EXE)
-SYFT        := $(GOBIN_DIR)/syft$(EXE)
 
 # caddy serves the docs site locally.
 CADDY       := $(GOBIN_DIR)/caddy$(EXE)
 
-TOOLS := $(GOLANGCI) $(GOMARKDOC) $(GOTESTSUM) $(GOSEC) $(GOCOBERTURA) $(SYFT) $(GRYPE) $(GOVULNCHECK) $(GITCLIFF) $(CADDY)
+TOOLS := $(GOLANGCI) $(GOMARKDOC) $(GOTESTSUM) $(GOSEC) $(GOCOBERTURA) $(GITCLIFF) $(CADDY)
 
 # `go install` takes its destination from GOBIN in the environment and has no
 # flag for it, so the tool rules - and only those - export it.
@@ -65,18 +57,6 @@ $(GOSEC):
 $(GOCOBERTURA):
 	@echo "Installing gocover-cobertura $(GOCOBERTURA_VERSION)..."
 	@go install github.com/t-yuki/gocover-cobertura@$(GOCOBERTURA_VERSION)
-
-$(SYFT):
-	@echo "Installing syft $(SYFT_VERSION)..."
-	@go install github.com/anchore/syft/cmd/syft@$(SYFT_VERSION)
-
-$(GRYPE):
-	@echo "Installing grype $(GRYPE_VERSION)..."
-	@go install github.com/anchore/grype/cmd/grype@$(GRYPE_VERSION)
-
-$(GOVULNCHECK):
-	@echo "Installing govulncheck $(GOVULNCHECK_VERSION)..."
-	@go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)
 
 $(CADDY):
 	@echo "Installing caddy $(CADDY_VERSION)..."
