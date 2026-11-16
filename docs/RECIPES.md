@@ -49,8 +49,8 @@ type rename struct {
 	th   theme.Resolved
 }
 
-func newRename(name string, th theme.Resolved) rename {
-	d := rename{name: name, th: th}
+func newRename(name string) rename {
+	d := rename{name: name}
 	d.keys.Save = key.New("enter").WithHelp("enter", "save")
 	return d
 }
@@ -67,9 +67,12 @@ func (d rename) View(body layout.Rect) string {
 }
 
 func (d rename) Legend() []legend.Entry { return legend.FromBindings([]key.Binding{d.keys.Save}) }
+
+// SetTheme is how the stack hands the dialog its theme: as it opens and on each change.
+func (d rename) SetTheme(th theme.Resolved) overlay.Overlay { d.th = th; return d }
 ```
 
-Open it from `Update` with `overlay.Open(newRename(item, m.sh.Theme()))`. `overlay.Box` sizes the box to the body and `overlay.Inner(body)` says how wide its text may be. More, each by one method: `SetTheme` (`overlay.Themer`) to repaint when the theme changes, `Resize` (`overlay.Resizer`) to learn the body's size in `Update`, `Click` (`overlay.Clicker`) to take the mouse.
+Open it from `Update` with `overlay.Open(newRename(item))`; its `SetTheme` (`overlay.Themer`) gets the shell's theme, so the constructor takes none. `overlay.Box` sizes the box to the body and `overlay.Inner(body)` says how wide its text may be. More, each by one method: `Resize` (`overlay.Resizer`) to learn the body's size in `Update`, `Click` (`overlay.Clicker`) to take the mouse.
 
 ## A CLI without the shell
 

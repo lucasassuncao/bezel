@@ -11,7 +11,6 @@ import (
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // FilePicker browses directories in a modal. Enter picks a file and closes,
@@ -44,9 +43,9 @@ const pickerChrome = 6
 
 // NewFilePicker browses dir, files only, without hidden entries. onPick,
 // which may be nil, gets the absolute path.
-func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd, th theme.Resolved) FilePicker {
+func NewFilePicker(title, dir string, onPick func(path string) tea.Cmd) FilePicker {
 	m := filepicker.New(dir).WithKeys(filepicker.Keys(DefaultFilePickerKeys()))
-	return FilePicker{look: lookOf(th), title: title, m: m, onPick: onPick}
+	return FilePicker{title: title, m: m, onPick: onPick}
 }
 
 // WithKeys rebinds the picker.

@@ -88,11 +88,11 @@ func (s Shell) helpOverlay() overlay.Overlay {
 	if top := s.overlays.Top(); top != nil {
 		keys := top.Legend()
 		if len(keys) == 0 {
-			return overlay.NewHelp(nil, s.cfg.Theme)
+			return overlay.NewHelp(nil)
 		}
-		return overlay.NewHelp([]overlay.HelpSection{{Name: s.sectionName(), Entries: keys}}, s.cfg.Theme)
+		return overlay.NewHelp([]overlay.HelpSection{{Name: s.sectionName(), Entries: keys}})
 	}
-	return overlay.NewHelp(s.helpSections(), s.cfg.Theme)
+	return overlay.NewHelp(s.helpSections())
 }
 
 // helpSections are the screen's keys under its name, then each Section's

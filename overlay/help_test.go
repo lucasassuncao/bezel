@@ -14,10 +14,10 @@ import (
 )
 
 func TestHelpListsEverySectionAndCloses(t *testing.T) {
-	h := NewHelp([]HelpSection{
+	h := themed(NewHelp([]HelpSection{
 		{Name: "list", Entries: []legend.Entry{legend.New("↑/↓", "move"), legend.New("enter", "open")}},
 		{Name: "detail", Entries: []legend.Entry{legend.New("pgdn", "page")}},
-	}, theme.Resolved{}).WithTitle("Keys")
+	}), theme.Resolved{}).WithTitle("Keys")
 	plain := ansi.Strip(h.View(layout.Rect{W: 60, H: 20}))
 	require.True(t, strings.HasPrefix(strings.TrimSpace(plain), "Keys"), "the title leads the box")
 	require.Contains(t, plain, "list")
@@ -29,9 +29,9 @@ func TestHelpListsEverySectionAndCloses(t *testing.T) {
 }
 
 func TestHelpAlignsWideKeysByCells(t *testing.T) {
-	h := NewHelp([]HelpSection{
+	h := themed(NewHelp([]HelpSection{
 		{Name: "s", Entries: []legend.Entry{legend.New("漢字", "wide"), legend.New("ab", "narrow")}},
-	}, theme.Resolved{})
+	}), theme.Resolved{})
 	col := map[string]int{}
 	for _, l := range strings.Split(ansi.Strip(h.View(layout.Rect{W: 60, H: 20})), "\n") {
 		for _, d := range []string{"wide", "narrow"} {
@@ -46,7 +46,7 @@ func TestHelpAlignsWideKeysByCells(t *testing.T) {
 func TestHelpClosesOnTheKeysItWasGiven(t *testing.T) {
 	keys := DefaultHelpKeys()
 	keys.Close = bind("x", "close")
-	h := NewHelp(nil, theme.Resolved{}).WithKeys(keys)
+	h := themed(NewHelp(nil), theme.Resolved{}).WithKeys(keys)
 
 	_, r := h.Update(press("q"))
 	cmd := r.Cmd
@@ -58,9 +58,9 @@ func TestHelpClosesOnTheKeysItWasGiven(t *testing.T) {
 }
 
 func TestALongKeyWidensTheColumnForEveryRow(t *testing.T) {
-	h := NewHelp([]HelpSection{{Name: "app", Entries: []legend.Entry{
+	h := themed(NewHelp([]HelpSection{{Name: "app", Entries: []legend.Entry{
 		legend.New("q", "quit"), legend.New("ctrl+shift+arrows", "resize"),
-	}}}, theme.Resolved{})
+	}}}), theme.Resolved{})
 	plain := ansi.Strip(h.View(layout.Rect{W: 80, H: 20}))
 	var quit, resize int
 	for _, l := range strings.Split(plain, "\n") {
@@ -74,6 +74,6 @@ func TestALongKeyWidensTheColumnForEveryRow(t *testing.T) {
 	require.NotZero(t, quit)
 	require.Equal(t, quit, resize, "the descriptions start in one column")
 
-	short := NewHelp([]HelpSection{{Name: "app", Entries: []legend.Entry{legend.New("q", "quit")}}}, theme.Resolved{})
+	short := themed(NewHelp([]HelpSection{{Name: "app", Entries: []legend.Entry{legend.New("q", "quit")}}}), theme.Resolved{})
 	require.Contains(t, ansi.Strip(short.View(layout.Rect{W: 80, H: 20})), "  q                quit", "short keys keep their column")
 }

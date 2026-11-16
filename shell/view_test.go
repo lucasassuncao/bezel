@@ -111,7 +111,7 @@ func TestCheckPanesNamesEveryPaneTheLayoutLacks(t *testing.T) {
 func TestOverlayFloatsOverThePanes(t *testing.T) {
 	s := newShell()
 	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
-	s = s.Push(overlay.NewAlert(draw.Info, "Saved", "written", theme.Resolved{Modal: lipgloss.NewStyle().Border(lipgloss.NormalBorder())}))
+	s = s.Push(overlay.NewAlert(draw.Info, "Saved", "written"))
 	out := ansi.Strip(s.render(demoPanes()))
 	require.Contains(t, out, "written")
 	require.Contains(t, out, "item one") // background still there
@@ -171,13 +171,12 @@ func TestLegendPinsTheShellHelpKey(t *testing.T) {
 // No overlay changes the legend: it is always the screen's. A modal draws its
 // own keys inside its box.
 func TestNoOverlayChangesTheLegend(t *testing.T) {
-	st := lipgloss.NewStyle()
 	for name, o := range map[string]overlay.Overlay{
-		"alert":   overlay.NewAlert(draw.Info, "t", "m", theme.Resolved{Modal: st}),
-		"text":    overlay.NewText("t", "body", theme.Resolved{Modal: st}),
-		"confirm": overlay.NewConfirm("t", "m", nil, theme.Resolved{Modal: st}),
-		"pick":    overlay.NewPick("t", []string{"a", "b"}, nil, theme.Resolved{Modal: st}),
-		"prompt":  overlay.NewPrompt("t", nil, theme.Resolved{Modal: st}),
+		"alert":   overlay.NewAlert(draw.Info, "t", "m"),
+		"text":    overlay.NewText("t", "body"),
+		"confirm": overlay.NewConfirm("t", "m", nil),
+		"pick":    overlay.NewPick("t", []string{"a", "b"}, nil),
+		"prompt":  overlay.NewPrompt("t", nil),
 	} {
 		s := newShell(stubTab{name: "a", actions: []Action{Custom("x", "do x", nil), Help()}})
 		s, _ = s.Update(tea.WindowSizeMsg{Width: 100, Height: 30})

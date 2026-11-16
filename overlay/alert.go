@@ -10,7 +10,6 @@ import (
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // Alert is a message box with an OK button; any key dismisses it.
@@ -22,9 +21,8 @@ type Alert struct {
 }
 
 // NewAlert is an alert of kind, its border in that Kind's fixed colour.
-func NewAlert(kind draw.Kind, title, message string, th theme.Resolved) Alert {
-	l := lookOf(th).withKind(kind)
-	return Alert{look: l, title: title, message: message}
+func NewAlert(kind draw.Kind, title, message string) Alert {
+	return Alert{look: look{}.withKind(kind), title: title, message: message}
 }
 
 // Kind is what the alert reports.

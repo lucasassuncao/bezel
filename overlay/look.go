@@ -35,9 +35,6 @@ type look struct {
 	tinted bool
 }
 
-// lookOf is a look at th, untinted.
-func lookOf(th theme.Resolved) look { return look{th: &th}.restyle() }
-
 // restyle derives the styles from the theme and applies the app's edit.
 func (l look) restyle() look {
 	st := DefaultStyles(*l.styles())

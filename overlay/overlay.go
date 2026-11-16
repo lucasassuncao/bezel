@@ -51,7 +51,8 @@ type Resizer interface {
 }
 
 // Themer is implemented by overlays that repaint under a new theme; every
-// bezel dialog does. Stack.SetTheme hands the theme to each.
+// bezel dialog does, and is built without one: the stack hands each its
+// theme on Push and on every SetTheme.
 type Themer interface {
 	SetTheme(th theme.Resolved) Overlay
 }
@@ -93,19 +94,21 @@ func ToTop(cmd tea.Cmd) tea.Cmd {
 // Stack is a value: every method returns the new stack.
 type Stack struct {
 	items []Overlay
-	body  layout.Rect // what Resize last gave, zero before
+	body  layout.Rect     // what Resize last gave, zero before
+	th    *theme.Resolved // what SetTheme last gave, nil before; never written
 }
 
-// Push is the stack with o on top, sized to the stack's body when it has one;
-// a nil o leaves the stack as it was.
+// Push is the stack with o on top, in the stack's theme and sized to its body
+// once it has them; a nil o leaves the stack as it was.
 func (s Stack) Push(o Overlay) Stack {
 	if o == nil {
 		return s
 	}
 	items := make([]Overlay, len(s.items)+1)
 	copy(items, s.items)
-	items[len(s.items)] = s.fit(o)
-	return Stack{items: items, body: s.body}
+	items[len(s.items)] = s.fit(s.themed(o))
+	s.items = items
+	return s
 }
 
 // Pop is the stack without its top overlay; an empty stack stays empty.
@@ -114,24 +117,32 @@ func (s Stack) Pop() Stack {
 		return s
 	}
 	n := len(s.items) - 1
-	return Stack{items: s.items[:n:n], body: s.body}
+	s.items = s.items[:n:n]
+	return s
 }
 
-// Resize hands body to every Resizer layer, the hidden ones too. A shell does
-// it on each layout; an app driving a Stack itself calls it on every resize.
-// SetTheme repaints every overlay on the stack that is a Themer.
+// SetTheme repaints every Themer on the stack in th, and every one pushed
+// after. A shell does it as it starts and on each theme change.
 func (s Stack) SetTheme(th theme.Resolved) Stack {
+	s.th = &th
 	items := make([]Overlay, len(s.items))
 	for i, o := range s.items {
-		if t, ok := o.(Themer); ok {
-			o = t.SetTheme(th)
-		}
-		items[i] = o
+		items[i] = s.themed(o)
 	}
 	s.items = items
 	return s
 }
 
+// themed is o in the stack's theme, or o as it is before SetTheme.
+func (s Stack) themed(o Overlay) Overlay {
+	if t, ok := o.(Themer); ok && s.th != nil {
+		return t.SetTheme(*s.th)
+	}
+	return o
+}
+
+// Resize hands body to every Resizer layer, the hidden ones too. A shell does
+// it on each layout; an app driving a Stack itself calls it on every resize.
 func (s Stack) Resize(body layout.Rect) Stack {
 	if body == s.body {
 		return s
@@ -172,10 +183,14 @@ func (s Stack) Update(msg tea.Msg) (Stack, bezel.Result) {
 		return s.Pop(), bezel.Result{Handled: true}
 	case PushMsg:
 		r := bezel.Result{Handled: true}
-		if in, ok := m.Overlay.(Initer); ok {
-			r.Cmd = in.Init() // once it is on top, where its answer finds it
+		if m.Overlay == nil {
+			return s, r
 		}
-		return s.Push(m.Overlay), r
+		s = s.Push(m.Overlay)
+		if in, ok := s.Top().(Initer); ok {
+			r.Cmd = in.Init() // themed and on top, where its answer finds it
+		}
+		return s, r
 	}
 	top := s.Top()
 	if top == nil {
@@ -203,7 +218,8 @@ func (s Stack) replaceTop(o Overlay) Stack {
 	items := make([]Overlay, len(s.items))
 	copy(items, s.items)
 	items[len(items)-1] = o
-	return Stack{items: items, body: s.body}
+	s.items = items
+	return s
 }
 
 // View composites every layer, bottom first, centred over background.

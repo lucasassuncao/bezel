@@ -147,7 +147,7 @@ Who calls `View` decides where a component takes its theme, and [CONVENTIONS.md]
 
 - the shell, from `Config.Base`, switched with `SetBase` and read back with `Theme()`;
 - a component the app draws, in `View(th, ...)`, so one model draws under any theme;
-- a dialog, which bezel draws, as its constructor's last argument;
+- a dialog, nowhere: the shell hands it its own theme as it opens;
 - a form, as `form.New(th, fields...)`, which paints every control in it;
 - a plain function, such as a progress bar or a chart, after the data it draws.
 

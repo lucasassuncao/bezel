@@ -11,7 +11,6 @@ import (
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // Text is a titled block of lines any key dismisses: a help screen, a notice.
@@ -22,8 +21,8 @@ type Text struct {
 }
 
 // NewText shows text under title until any key.
-func NewText(title, text string, th theme.Resolved) Text {
-	return Text{title: title, lines: textLines(text), look: lookOf(th)}
+func NewText(title, text string) Text {
+	return Text{title: title, lines: textLines(text)}
 }
 
 // textLines is text split into lines, CRLF read as LF and trailing blank
@@ -73,8 +72,8 @@ type Choice struct {
 }
 
 // NewChoice shows text under title with options as its buttons.
-func NewChoice(title, text string, options []Option, th theme.Resolved) Choice {
-	return Choice{title: title, lines: textLines(text), options: slices.Clone(options), look: lookOf(th)}
+func NewChoice(title, text string, options []Option) Choice {
+	return Choice{title: title, lines: textLines(text), options: slices.Clone(options)}
 }
 
 func (c Choice) Update(msg tea.Msg) (Overlay, bezel.Result) {
@@ -168,8 +167,8 @@ func VimPickKeys() PickKeys {
 
 // NewPick lists rows with the cursor on the first. onPick may be nil, which
 // makes enter only close.
-func NewPick(title string, rows []string, onPick func(i int) tea.Cmd, th theme.Resolved) Pick {
-	return Pick{look: lookOf(th), title: title, rows: slices.Clone(rows), onPick: onPick, keys: DefaultPickKeys()}
+func NewPick(title string, rows []string, onPick func(i int) tea.Cmd) Pick {
+	return Pick{title: title, rows: slices.Clone(rows), onPick: onPick, keys: DefaultPickKeys()}
 }
 
 // WithKeys rebinds the pick; the keys drawn in its box follow the bindings' help.

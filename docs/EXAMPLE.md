@@ -137,7 +137,7 @@ Then the list is sized, before it takes anything. It needs to know how many rows
 case askAddMsg:
 	ask := overlay.NewPrompt("New task", func(title string) tea.Cmd {
 		return bezel.Emit(addMsg{title: title})
-	}, m.sh.Theme()).WithValidate(func(typed string) error {
+	}).WithValidate(func(typed string) error {
 		if strings.TrimSpace(typed) == "" {
 			return errors.New("a task needs a title")
 		}
@@ -159,7 +159,7 @@ Deleting asks first, the same way, with a confirm drawn in the danger colour:
 case askDropMsg:
 	if i, ok := m.current(); ok {
 		yes := bezel.Emit(dropMsg{})
-		ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.sh.Theme()).WithKind(draw.Danger)
+		ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes).WithKind(draw.Danger)
 		return m, overlay.Open(ask)
 	}
 ```

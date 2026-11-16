@@ -24,7 +24,7 @@ func numbered(n int) string {
 
 func TestPagerShowsOnePageAndScrolls(t *testing.T) {
 	body := layout.Rect{W: 60, H: 18} // 10 rows of text once the chrome is paid
-	p := NewPager("Output", numbered(40), theme.Resolved{}).Resize(body)
+	p := themed(NewPager("Output", numbered(40)), theme.Resolved{}).Resize(body)
 
 	view := ansi.Strip(p.View(body))
 	require.Contains(t, view, "line 1")
@@ -40,7 +40,7 @@ func TestPagerShowsOnePageAndScrolls(t *testing.T) {
 
 func TestPagerStopsAtTheLastPage(t *testing.T) {
 	body := layout.Rect{W: 60, H: 18}
-	p := NewPager("Output", numbered(40), theme.Resolved{}).Resize(body)
+	p := themed(NewPager("Output", numbered(40)), theme.Resolved{}).Resize(body)
 
 	o, _ := p.Update(tea.KeyPressMsg{Code: tea.KeyEnd})
 	require.Equal(t, 30, o.(Pager).Offset(), "end shows the last page full, not one line")
@@ -52,7 +52,7 @@ func TestPagerStopsAtTheLastPage(t *testing.T) {
 }
 
 func TestPagerCloses(t *testing.T) {
-	p := NewPager("Output", "one\r\ntwo\r\n", theme.Resolved{})
+	p := themed(NewPager("Output", "one\r\ntwo\r\n"), theme.Resolved{})
 	require.NotContains(t, p.View(layout.Rect{W: 60, H: 18}), "\r")
 
 	for _, k := range []string{"q", "enter"} {
@@ -69,7 +69,7 @@ func TestPagerCloses(t *testing.T) {
 
 // Scrolling is a copy's own: an earlier Pager keeps its place.
 func TestPagerCopiesScrollApart(t *testing.T) {
-	p := NewPager("Output", numbered(40), theme.Resolved{}).Resize(layout.Rect{W: 60, H: 18}).(Pager)
+	p := themed(NewPager("Output", numbered(40)), theme.Resolved{}).Resize(layout.Rect{W: 60, H: 18}).(Pager)
 	o, _ := p.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 
 	require.Equal(t, 1, o.(Pager).Offset())
@@ -79,9 +79,9 @@ func TestPagerCopiesScrollApart(t *testing.T) {
 // A dialog keeps the lines it was given, whatever the caller does after.
 func TestDialogsKeepTheirLines(t *testing.T) {
 	lines := []string{"original"}
-	text := NewText("T", strings.Join(lines, "\n"), theme.Resolved{})
-	pick := NewPick("P", lines, nil, theme.Resolved{}).WithNotes(lines...)
-	choice := NewChoice("C", strings.Join(lines, "\n"), []Option{Opt("y", "yes", nil)}, theme.Resolved{})
+	text := themed(NewText("T", strings.Join(lines, "\n")), theme.Resolved{})
+	pick := themed(NewPick("P", lines, nil), theme.Resolved{}).WithNotes(lines...)
+	choice := themed(NewChoice("C", strings.Join(lines, "\n"), []Option{Opt("y", "yes", nil)}), theme.Resolved{})
 	lines[0] = "changed"
 
 	body := layout.Rect{W: 60, H: 18}
@@ -93,7 +93,7 @@ func TestDialogsKeepTheirLines(t *testing.T) {
 func TestPagerScrollsOnTheKeysItWasGiven(t *testing.T) {
 	keys := DefaultPagerKeys()
 	keys.Down = key.New("n")
-	p := NewPager("t", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12", theme.Resolved{}).WithKeys(keys)
+	p := themed(NewPager("t", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12"), theme.Resolved{}).WithKeys(keys)
 	o := p.Resize(layout.Rect{W: 60, H: 12})
 
 	o, _ = o.Update(press("j"))
@@ -104,7 +104,7 @@ func TestPagerScrollsOnTheKeysItWasGiven(t *testing.T) {
 
 func TestPagerPansALongLine(t *testing.T) {
 	body := layout.Rect{W: 60, H: 18}
-	o := NewPager("t", strings.Repeat("x", 100)+"END", theme.Resolved{}).Resize(body)
+	o := themed(NewPager("t", strings.Repeat("x", 100)+"END"), theme.Resolved{}).Resize(body)
 	require.NotContains(t, ansi.Strip(o.View(body)), "END")
 	for range 20 {
 		o, _ = o.Update(tea.KeyPressMsg{Code: tea.KeyRight})
@@ -114,6 +114,6 @@ func TestPagerPansALongLine(t *testing.T) {
 
 func TestPagerScrollsOnTheWheel(t *testing.T) {
 	body := layout.Rect{W: 60, H: 18}
-	o, _ := NewPager("Output", numbered(40), theme.Resolved{}).Resize(body).Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	o, _ := themed(NewPager("Output", numbered(40)), theme.Resolved{}).Resize(body).Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
 	require.Equal(t, 3, o.(Pager).Offset())
 }

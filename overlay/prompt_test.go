@@ -20,9 +20,9 @@ import (
 type acceptedMsg struct{ value string }
 
 func newPrompt() Prompt {
-	return NewPrompt("New secret", func(v string) tea.Cmd {
+	return themed(NewPrompt("New secret", func(v string) tea.Cmd {
 		return func() tea.Msg { return acceptedMsg{v} }
-	}, theme.Resolved{})
+	}), theme.Resolved{})
 }
 
 func typeInto(p Prompt, s string) Prompt {
@@ -141,7 +141,7 @@ func BenchmarkTypingInAPrompt(b *testing.B) {
 }
 
 func TestPromptInitBlinksItsCaret(t *testing.T) {
-	p := NewPrompt("t", nil, theme.Resolved{CaretBlink: time.Nanosecond})
+	p := themed(NewPrompt("t", nil), theme.Resolved{CaretBlink: time.Nanosecond})
 	require.IsType(t, input.BlinkMsg{}, p.Init()())
 	steady, _ := input.New(theme.Resolved{}).SetCursorMode(cursor.Steady)
 	require.Nil(t, p.WithInput(steady).Init(), "a caret that does not blink asks for nothing")

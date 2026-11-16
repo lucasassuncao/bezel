@@ -49,9 +49,9 @@ func DefaultPromptKeys() PromptKeys {
 }
 
 // NewPrompt builds a prompt with a "> " input; onAccept may be nil.
-func NewPrompt(title string, onAccept func(value string) tea.Cmd, th theme.Resolved) Prompt {
-	in, _ := input.New(th).WithPrompt("> ").Focus()
-	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, look: lookOf(th), keys: DefaultPromptKeys()}
+func NewPrompt(title string, onAccept func(value string) tea.Cmd) Prompt {
+	in, _ := input.New(theme.Resolved{}).WithPrompt("> ").Focus() // themed with the prompt
+	return Prompt{title: title, input: in, accept: "confirm", onAccept: onAccept, keys: DefaultPromptKeys()}
 }
 
 // Init is the command that keeps the caret blinking; nil when it does not

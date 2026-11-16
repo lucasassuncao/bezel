@@ -10,7 +10,6 @@ import (
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // HelpSection is one group of keys under a heading.
@@ -39,8 +38,8 @@ func DefaultHelpKeys() HelpKeys {
 }
 
 // NewHelp lists sections, with no title over them.
-func NewHelp(sections []HelpSection, th theme.Resolved) Help {
-	return Help{look: lookOf(th), sections: slices.Clone(sections), keys: DefaultHelpKeys()}
+func NewHelp(sections []HelpSection) Help {
+	return Help{sections: slices.Clone(sections), keys: DefaultHelpKeys()}
 }
 
 // WithKeys rebinds the help; the line under the keys follows Close's help.

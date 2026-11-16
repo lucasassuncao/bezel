@@ -58,16 +58,14 @@ func newModel() model {
 }
 
 func (m model) modal() overlay.Overlay {
-	th := m.sh.Theme()
 	switch kinds[m.cursor] {
 	case "Alert":
-		return overlay.NewAlert(draw.Warning, "Disk almost full",
-			"91% of /var is in use.", th)
+		return overlay.NewAlert(draw.Warning, "Disk almost full", "91% of /var is in use.")
 	case "Confirm":
 		return overlay.NewConfirm("Delete notes.txt?", "It cannot be restored.",
-			bezel.Emit(doneMsg{"deleted notes.txt"}), th).WithKind(draw.Danger)
+			bezel.Emit(doneMsg{"deleted notes.txt"})).WithKind(draw.Danger)
 	case "Prompt":
-		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return bezel.Emit(doneMsg{"created " + v}) }, th).
+		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return bezel.Emit(doneMsg{"created " + v}) }).
 			WithLabel("name").
 			WithValidate(func(s string) error {
 				if strings.TrimSpace(s) == "" {
@@ -76,15 +74,14 @@ func (m model) modal() overlay.Overlay {
 				return nil
 			})
 	case "Pager":
-		return overlay.NewPager("go test ./...", testLog(), th)
+		return overlay.NewPager("go test ./...", testLog())
 	case "FilePicker":
-		return overlay.NewFilePicker("Open a file", ".", func(path string) tea.Cmd { return bezel.Emit(doneMsg{"picked " + filepath.Base(path)}) },
-			th)
+		return overlay.NewFilePicker("Open a file", ".", func(path string) tea.Cmd { return bezel.Emit(doneMsg{"picked " + filepath.Base(path)}) })
 	default:
 		return overlay.NewHelp([]overlay.HelpSection{
 			{Name: "Navigation", Entries: []legend.Entry{legend.New("↑/↓", "move"), legend.New("enter", "open")}},
 			{Name: "App", Entries: []legend.Entry{legend.New("q", "quit")}},
-		}, th).WithTitle("Keys")
+		}).WithTitle("Keys")
 	}
 }
 

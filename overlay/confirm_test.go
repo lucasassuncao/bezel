@@ -17,7 +17,7 @@ import (
 func TestConfirmRunsOnYesAndClosesOnNo(t *testing.T) {
 	fired := false
 	onYes := func() tea.Msg { fired = true; return nil }
-	c := NewConfirm("Delete?", "this cannot be undone", onYes, theme.Resolved{})
+	c := themed(NewConfirm("Delete?", "this cannot be undone", onYes), theme.Resolved{})
 
 	_, r := c.Update(press("n"))
 	cmd := r.Cmd
@@ -33,7 +33,7 @@ func TestConfirmRunsOnYesAndClosesOnNo(t *testing.T) {
 }
 
 func TestConfirmIgnoresVimKeys(t *testing.T) {
-	c := NewConfirm("Delete?", "", nil, theme.Resolved{})
+	c := themed(NewConfirm("Delete?", "", nil), theme.Resolved{})
 	for _, k := range []string{"h", "l"} {
 		o, _ := c.Update(press(k))
 		require.False(t, o.(Confirm).no, k)
@@ -45,7 +45,7 @@ func TestConfirmIgnoresVimKeys(t *testing.T) {
 // The button enter would press is filled in the colour the dialog's kind gives its border.
 func TestConfirmFillsItsFocusedButtonInItsKindsColour(t *testing.T) {
 	th := theme.Resolve(theme.Mint(), true)
-	c := NewConfirm("Delete?", "gone for good", nil, th).WithKind(draw.Danger)
+	c := themed(NewConfirm("Delete?", "gone for good", nil), th).WithKind(draw.Danger)
 	view := c.View(layout.Rect{W: 80, H: 20})
 	require.Contains(t, view, th.Button.Focused.Background(draw.Danger.Color()).Foreground(lipgloss.Color("#111111")).Render("  Yes  "))
 	require.Contains(t, view, th.Button.Blurred.Render("  No  "))
@@ -54,7 +54,7 @@ func TestConfirmFillsItsFocusedButtonInItsKindsColour(t *testing.T) {
 func TestConfirmAnswersToTheKeysItWasGiven(t *testing.T) {
 	keys := DefaultConfirmKeys()
 	keys.Yes = bind("s", "sim")
-	c := NewConfirm("Apagar?", "", func() tea.Msg { return nil }, theme.Resolved{}).WithKeys(keys)
+	c := themed(NewConfirm("Apagar?", "", func() tea.Msg { return nil }), theme.Resolved{}).WithKeys(keys)
 
 	_, r := c.Update(press("y"))
 	cmd := r.Cmd
@@ -67,7 +67,7 @@ func TestConfirmAnswersToTheKeysItWasGiven(t *testing.T) {
 
 func TestConfirmAnswersAClickOnItsButtons(t *testing.T) {
 	fired := false
-	c := NewConfirm("Delete?", "for good", func() tea.Msg { fired = true; return nil }, theme.Resolved{})
+	c := themed(NewConfirm("Delete?", "for good", func() tea.Msg { fired = true; return nil }), theme.Resolved{})
 	s := Stack{}.Push(c)
 	x, y := cellOf(t, s, "No")
 	_, r := s.Click(x, y, clickBody)
@@ -83,7 +83,7 @@ func TestConfirmAnswersAClickOnItsButtons(t *testing.T) {
 
 func TestConfirmClickOnYesSendsItsCommand(t *testing.T) {
 	fired := false
-	c := NewConfirm("Delete?", "for good", func() tea.Msg { fired = true; return nil }, theme.Resolved{})
+	c := themed(NewConfirm("Delete?", "for good", func() tea.Msg { fired = true; return nil }), theme.Resolved{})
 	s := Stack{}.Push(c)
 	x, y := cellOf(t, s, "Yes")
 	_, r := s.Click(x, y, clickBody)
@@ -94,7 +94,7 @@ func TestConfirmClickOnYesSendsItsCommand(t *testing.T) {
 
 func TestAConfirmWrapsItsMessage(t *testing.T) {
 	msg := "delete kv/app/prod/db and every version it keeps, which cannot be undone later"
-	out := ansi.Strip(NewConfirm("Delete", msg, nil, theme.Resolved{}).View(layout.Rect{W: 40, H: 20}))
+	out := ansi.Strip(themed(NewConfirm("Delete", msg, nil), theme.Resolved{}).View(layout.Rect{W: 40, H: 20}))
 	require.NotContains(t, out, "…")
 	require.Contains(t, strings.Join(strings.Fields(out), " "), msg)
 }

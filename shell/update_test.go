@@ -17,7 +17,7 @@ import (
 
 func TestOverlayConsumesKeysBeforeTheApp(t *testing.T) {
 	s := newShell()
-	s = s.Push(overlay.NewAlert(draw.Info, "hi", "there", theme.Resolved{}))
+	s = s.Push(overlay.NewAlert(draw.Info, "hi", "there"))
 	s, r := s.Update(press("x"))
 	require.True(t, r.Handled)
 	require.NotNil(t, r.Cmd)
@@ -30,7 +30,7 @@ func TestOverlayConsumesKeysBeforeTheApp(t *testing.T) {
 // again after a resize, before anything has drawn it.
 func TestOverlaysAreSizedToTheBody(t *testing.T) {
 	pgdown := tea.KeyPressMsg{Code: tea.KeyPgDown}
-	pager := overlay.NewPager("Out", strings.Repeat("line\n", 200), theme.Resolved{})
+	pager := overlay.NewPager("Out", strings.Repeat("line\n", 200))
 	// page is how far one pgdown goes in a pager sized by hand.
 	page := func(body layout.Rect) int {
 		o, _ := pager.Resize(body).Update(pgdown)
@@ -125,7 +125,7 @@ func TestStatusInputTakesAPasteAndItsBlink(t *testing.T) {
 // armed belongs to an input the app drives itself.
 func TestABlinkReachesTheFieldThatArmedIt(t *testing.T) {
 	fast := theme.Resolved{CaretBlink: time.Nanosecond}
-	s := newShell().Push(overlay.NewPrompt("name", nil, fast))
+	s := newShell().SetTheme(fast).Push(overlay.NewPrompt("name", nil))
 	s, r := s.Update(press("a"))
 	_, r = s.Update(r.Cmd())
 	require.True(t, r.Handled)
@@ -153,14 +153,14 @@ type answer struct{}
 // An async answer landing while a modal is up belongs to the app.
 func TestForeignMessagesPassAnOpenOverlay(t *testing.T) {
 	s := sized(New(actionConfig()))
-	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
+	s = s.Push(overlay.NewText("t", "x"))
 	_, r := s.Update(answer{})
 	require.False(t, r.Handled)
 }
 
 func TestKeysStillReachAnOpenOverlay(t *testing.T) {
 	s := sized(New(actionConfig()))
-	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
+	s = s.Push(overlay.NewText("t", "x"))
 	_, r := s.Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
 	require.True(t, r.Handled)
 }
@@ -169,7 +169,7 @@ func TestKeysStillReachAnOpenOverlay(t *testing.T) {
 // non-key messages pass it by for the app.
 func TestTopMsgReachesAnOpenOverlay(t *testing.T) {
 	s := sized(New(actionConfig()))
-	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
+	s = s.Push(overlay.NewText("t", "x"))
 	_, r := s.Update(overlay.TopMsg{Msg: answer{}})
 	require.True(t, r.Handled)
 }

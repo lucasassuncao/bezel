@@ -234,11 +234,11 @@ Dialogs float over the panes in a stack. The top one takes every key, `esc` clos
 ```go
 shell.Custom("d", "delete", func(shell.ActionContext) tea.Cmd {
 	yes := bezel.Emit(deleteMsg{})
-	return overlay.Open(overlay.NewConfirm("Delete", "Delete main.go?", yes, th))
+	return overlay.Open(overlay.NewConfirm("Delete", "Delete main.go?", yes))
 })
 ```
 
-`overlay.Open(o)` is the command that pushes a dialog, from an action or anywhere a command goes; `Push(o)` and `Pop()` do it on the shell directly. `Open` also runs the dialog's `Init`, which starts a prompt's caret blinking and reads a file picker's folder; after `Push`, run it yourself. A dialog closes itself by returning `overlay.Close()`, and hands its answer back the way an action does, as a command the app receives: `bezel.Emit(msg)` sends msg. The ready-made ones are `Alert`, `Confirm`, `Prompt`, `Choice`, `Pick`, `Text`, `Help`, `Pager` and `FilePicker`.
+`overlay.Open(o)` is the command that pushes a dialog, from an action or anywhere a command goes; `Push(o)` and `Pop()` do it on the shell directly. `Open` also runs the dialog's `Init`, which starts a prompt's caret blinking and reads a file picker's folder; after `Push`, run it yourself. A dialog closes itself by returning `overlay.Close()`, and hands its answer back the way an action does, as a command the app receives: `bezel.Emit(msg)` sends msg. The ready-made ones are `Alert`, `Confirm`, `Prompt`, `Choice`, `Pick`, `Text`, `Help`, `Pager` and `FilePicker`. None takes a theme: the shell paints each in its own as it opens, and again when the theme changes.
 
 A dialog of the app's own is any type with `Update`, `View(body)` and `Legend()`. Small interfaces opt it into more: `Resizer` hears the body's size before it draws, `EscOwner` keeps `esc` for itself, `StatusLiner` draws the status row while on top, `BottomAnchored` sits at the foot of the screen instead of the middle, `Initer` has a command to run as it opens, and `Clicker` takes [the mouse](#the-mouse).
 

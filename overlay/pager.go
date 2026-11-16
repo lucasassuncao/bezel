@@ -12,7 +12,6 @@ import (
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // Pager is a titled block of text taller than a dialog: a command's output, a
@@ -50,11 +49,11 @@ const pagerChrome = 2 + 2 + 2 + 2
 
 // NewPager shows text from its first line. CRLF reads as LF and trailing
 // blank lines are dropped.
-func NewPager(title, text string, th theme.Resolved) Pager {
+func NewPager(title, text string) Pager {
 	keys := DefaultPagerKeys()
 	vp := viewport.New().WithKeys(keys.Keys).SetContent(strings.TrimRight(strings.ReplaceAll(text, "\r\n", "\n"), "\n"))
 	widest, _ := draw.BlockSize(strings.Join(vp.Lines(), "\n"))
-	return Pager{title: title, vp: vp, widest: widest, look: lookOf(th), keys: keys}
+	return Pager{title: title, vp: vp, widest: widest, keys: keys}
 }
 
 // WithKeys rebinds the pager; its legend and position line follow the bindings' help.

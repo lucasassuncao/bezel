@@ -15,7 +15,7 @@ import (
 )
 
 func TestAlertClosesOnAnyKey(t *testing.T) {
-	a := NewAlert(draw.Info, "Saved", "written to disk", theme.Resolved{})
+	a := themed(NewAlert(draw.Info, "Saved", "written to disk"), theme.Resolved{})
 	_, r := a.Update(press("x"))
 	cmd := r.Cmd
 	require.NotNil(t, cmd)
@@ -37,13 +37,13 @@ func FuzzDialogsStayInTheBody(f *testing.F) {
 		th := theme.Resolve(theme.Plain(), true)
 		body := layout.Rect{W: w, H: h}
 		for name, o := range map[string]Overlay{
-			"alert":   NewAlert(draw.Info, title, text, th),
-			"confirm": NewConfirm(title, text, nil, th),
-			"text":    NewText(title, text, th),
-			"choice":  NewChoice(title, text, []Option{Opt("y", "yes", nil), Opt("n", "no", nil)}, th),
-			"pick":    NewPick(title, []string{text, title, "third"}, nil, th),
-			"pager":   NewPager(title, text, th),
-			"prompt":  NewPrompt(title, nil, th),
+			"alert":   themed(NewAlert(draw.Info, title, text), th),
+			"confirm": themed(NewConfirm(title, text, nil), th),
+			"text":    themed(NewText(title, text), th),
+			"choice":  themed(NewChoice(title, text, []Option{Opt("y", "yes", nil), Opt("n", "no", nil)}), th),
+			"pick":    themed(NewPick(title, []string{text, title, "third"}, nil), th),
+			"pager":   themed(NewPager(title, text), th),
+			"prompt":  themed(NewPrompt(title, nil), th),
 		} {
 			if r, ok := o.(Resizer); ok {
 				o = r.Resize(body)
@@ -59,7 +59,7 @@ func FuzzDialogsStayInTheBody(f *testing.F) {
 func TestALongMessageWrapsAtWords(t *testing.T) {
 	msg := "the token expired while the secret was being written, so nothing was saved"
 	body := layout.Rect{W: 40, H: 20}
-	out := ansi.Strip(NewAlert(draw.Danger, "Error", msg, theme.Resolved{}).View(body))
+	out := ansi.Strip(themed(NewAlert(draw.Danger, "Error", msg), theme.Resolved{}).View(body))
 	require.NotContains(t, out, "…")
 	require.Contains(t, out, "saved")
 	words := strings.Join(strings.Fields(out), " ")

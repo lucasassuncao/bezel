@@ -390,7 +390,7 @@ l := list.New(rows).SetHeight(10).WithKeys(k)
   l := list.New(rows).WithKeys(list.VimKeys())            // k/j, g/G, ctrl+b/f
   vp := viewport.New().WithKeys(viewport.VimKeys())       // and h/l, ctrl+u/d
   f := form.New(th, fields...).WithKeys(form.VimKeys())   // h/l and k/j in the controls
-  p := overlay.NewPick(title, rows, onPick, th).WithKeys(overlay.VimPickKeys())
+  p := overlay.NewPick(title, rows, onPick).WithKeys(overlay.VimPickKeys())
   ```
 
   `VimKeys()` is in `list`, `tree`, `table`, `browser`, `accordion`, `viewport`, `paginator`, `filepicker` and `form`; `overlay` has `VimPickKeys`, `VimFilePickerKeys` and `VimPagerKeys`. A preset is a starting point like the defaults: change one binding of it as above. Where a field is typed into (`input`, `textbox`, the `:` palette, a list's filter prompt) letters stay text.

@@ -45,7 +45,10 @@ func (f *fake) Legend() []legend.Entry  { return []legend.Entry{legend.New("x", 
 func (f *fake) OwnsEsc() bool           { return f.ownsEsc }
 
 func press(k string) tea.KeyPressMsg { return tea.KeyPressMsg{Code: rune(k[0]), Text: k} }
-func esc() tea.KeyPressMsg           { return tea.KeyPressMsg{Code: tea.KeyEscape} }
+
+// themed is o painted in th, the way a stack paints what it pushes.
+func themed[T Themer](o T, th theme.Resolved) T { return o.SetTheme(th).(T) }
+func esc() tea.KeyPressMsg                      { return tea.KeyPressMsg{Code: tea.KeyEscape} }
 
 // drain runs a tea.BatchMsg (or a single msg) and returns what it produced.
 func drain(m tea.Msg) []tea.Msg {
@@ -165,13 +168,13 @@ func TestTopMsgWithoutAnOverlayIsDropped(t *testing.T) {
 // knows what fits before anything has been drawn.
 func TestStackSizesItsOverlays(t *testing.T) {
 	pgdown := tea.KeyPressMsg{Code: tea.KeyPgDown}
-	pager := NewPager("Out", numbered(60), theme.Resolved{})
+	pager := themed(NewPager("Out", numbered(60)), theme.Resolved{})
 
 	s := Stack{}.Resize(layout.Rect{W: 60, H: 18}).Push(pager)
 	s, _ = s.Update(pgdown)
 	require.Equal(t, 10, s.Top().(Pager).Offset(), "pushed onto a sized stack")
 
-	s = s.Push(NewText("t", "", theme.Resolved{})).Resize(layout.Rect{W: 60, H: 13}).Pop()
+	s = s.Push(themed(NewText("t", ""), theme.Resolved{})).Resize(layout.Rect{W: 60, H: 13}).Pop()
 	s, _ = s.Update(pgdown)
 	require.Equal(t, 15, s.Top().(Pager).Offset(), "a layer under the top was resized too")
 
@@ -191,11 +194,11 @@ func hint(o Overlay) string { return ansi.Strip(legend.HintLine(o.Legend(), lege
 func TestDialogLegendsNameTheirKeys(t *testing.T) {
 	th := theme.Resolved{}
 	for want, o := range map[string]Overlay{
-		"[←/→] choose · [enter] pick · [y/n] answer · [esc] cancel": NewConfirm("t", "m", nil, th),
-		"[↑/↓] choose · [enter] pick · [esc] cancel":                NewPick("t", []string{"a"}, nil, th),
-		"[esc] close": NewHelp(nil, th),
-		"[↑/↓] scroll · [←/→] pan · [pgup/pgdn] page · [esc] close": NewPager("t", "x", th),
-		"[enter] confirm · [esc] cancel":                            NewPrompt("t", nil, th),
+		"[←/→] choose · [enter] pick · [y/n] answer · [esc] cancel": themed(NewConfirm("t", "m", nil), th),
+		"[↑/↓] choose · [enter] pick · [esc] cancel":                themed(NewPick("t", []string{"a"}, nil), th),
+		"[esc] close": themed(NewHelp(nil), th),
+		"[↑/↓] scroll · [←/→] pan · [pgup/pgdn] page · [esc] close": themed(NewPager("t", "x"), th),
+		"[enter] confirm · [esc] cancel":                            themed(NewPrompt("t", nil), th),
 	} {
 		require.Equal(t, want, hint(o))
 	}
@@ -245,7 +248,7 @@ func isClose(cmd tea.Cmd) bool {
 }
 
 func TestAClickReachesTheTopDialogInItsOwnCells(t *testing.T) {
-	s := Stack{}.Push(NewAlert(draw.Info, "Saved", "all done", theme.Resolved{}))
+	s := Stack{}.Push(themed(NewAlert(draw.Info, "Saved", "all done"), theme.Resolved{}))
 	x, y := cellOf(t, s, "OK")
 	_, r := s.Click(x, y, clickBody)
 	cmd := r.Cmd
@@ -272,12 +275,38 @@ func TestButtonAtFindsEachButtonOnItsRow(t *testing.T) {
 // A dialog opened with Open starts what it needs: the stack runs its Init.
 func TestAPushedOverlayIsInited(t *testing.T) {
 	th := theme.Resolved{CaretBlink: time.Nanosecond}
-	s, r := Stack{}.Update(Open(NewPrompt("t", nil, th))())
+	s, r := Stack{}.Update(Open(themed(NewPrompt("t", nil), th))())
 	require.NotNil(t, r.Cmd, "the prompt's caret starts blinking as it opens")
 	require.IsType(t, input.BlinkMsg{}, r.Cmd())
 
-	_, r = s.Update(Open(NewText("t", "no Init", th))())
+	_, r = s.Update(Open(themed(NewText("t", "no Init"), th))())
 	require.Nil(t, r.Cmd, "a dialog with nothing to start asks for nothing")
 	_, r = s.Update(PushMsg{})
 	require.Nil(t, r.Cmd, "nothing pushed, nothing to start")
+}
+
+// probe says, from Init, whether the stack themed it before starting it.
+type probe struct {
+	Text
+	themed bool
+}
+
+func (p probe) SetTheme(theme.Resolved) Overlay { p.themed = true; return p }
+func (p probe) Init() tea.Cmd                   { return bezel.Emit(p.themed) }
+
+// A dialog is built without a theme: the stack paints it with its own.
+func TestAPushedDialogTakesTheStacksTheme(t *testing.T) {
+	plain := theme.Resolve(theme.Plain(), true)
+	body := layout.Rect{W: 60, H: 20}
+	s := Stack{}.SetTheme(plain).Push(NewText("t", "body"))
+	require.Equal(t, themed(NewText("t", "body"), plain).View(body), s.Top().View(body))
+	require.Equal(t, NewText("t", "body").View(body), Stack{}.Push(NewText("t", "body")).Top().View(body),
+		"a stack never given a theme leaves the dialog as it was built")
+}
+
+func TestOpenStartsADialogInTheStacksTheme(t *testing.T) {
+	s, r := Stack{}.SetTheme(theme.Resolve(theme.Plain(), true)).Update(Open(probe{})())
+	require.Equal(t, true, r.Cmd())
+	_, r = s.Update(PushMsg{})
+	require.Nil(t, r.Cmd, "nothing pushed: the dialog under it is not started again")
 }

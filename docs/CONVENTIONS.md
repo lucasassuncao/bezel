@@ -59,17 +59,19 @@ if m.acc.IsOpen(i) { ... }
 ## The theme
 
 ```go
-overlay.NewConfirm("Delete", item, yes, th) // bezel calls View: theme in the constructor
+input.New(th)                               // bezel calls View: theme in the constructor
+overlay.NewConfirm("Delete", item, yes)     // a dialog: the stack it opens on themes it
 m.list.View(th)                             // the app calls View: theme in View
 progress.Line("tasks", done, total, w, th)  // a plain function: theme after the data
 shell.New(shell.Config{Base: theme.Mint()}) // the shell: resolves it; m.sh.Theme() to read
 ```
 
-Where the theme goes depends on who calls `View`. If bezel does, the component keeps the theme from its constructor. If the app does, the app passes it each time, so one model draws under any theme.
+Where the theme goes depends on who calls `View`. If bezel does, the component keeps the theme from its constructor, or, for a dialog, from the stack it opens on. If the app does, the app passes it each time, so one model draws under any theme.
 
 | Who calls `View` | Where the theme goes | Packages |
 | --- | --- | --- |
-| bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `overlay`, `textbox`, `input`, `tags`, `cursor`, `logger` |
+| bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `textbox`, `input`, `tags`, `cursor`, `logger` |
+| bezel, for a dialog | nowhere: `Push`, `Open` and the stack's `SetTheme` hand it the stack's theme, the shell's (`overlay.Themer`) | `overlay` |
 | bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic; `wizard.New(th, pages...)` repaints each page's form the same way | `form`, `wizard` |
 | the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `calendar`, `breadcrumb`, `timer`, `stopwatch`, `viewport`, `accordion`, `filepicker`, `progress.Model` |
 | nobody: a plain function | after the data | `progress.Bar` and siblings, `chart`, `inline`, `icon.Set.Render` |

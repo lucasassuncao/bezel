@@ -228,7 +228,7 @@ func TestEveryChangeLeavesTheLayoutResolved(t *testing.T) {
 		{"SetLegendLines", func(s Shell) Shell { return s.SetLegendLines(3) }},
 		{"ShowHelp", func(s Shell) Shell { return s.ShowHelp() }},
 		{"OpenCommands", func(s Shell) Shell { return s.OpenCommands() }},
-		{"Push", func(s Shell) Shell { return s.Push(overlay.NewText("t", "x", theme.Resolved{})) }},
+		{"Push", func(s Shell) Shell { return s.Push(overlay.NewText("t", "x")) }},
 		{"Pop", func(s Shell) Shell { return s.ShowHelp().Pop() }},
 		{"SetInput", func(s Shell) Shell { return s.SetInput(in) }},
 		{"ClearInput", func(s Shell) Shell { return s.SetInput(in).ClearInput() }},
@@ -289,13 +289,24 @@ func TestTheZeroShellIsAnEmptyOne(t *testing.T) {
 	require.Equal(t, 0, w+h)
 }
 
+// A dialog is built without a theme: Push and Open paint it with the shell's.
+func TestADialogTakesTheShellsTheme(t *testing.T) {
+	mint := theme.Resolve(theme.Mint(), true)
+	s := New(Config{Layout: layout.Columns(layout.Fill("a")), Theme: mint})
+	body := layout.Rect{W: 60, H: 20}
+	want := overlay.NewText("t", "body").SetTheme(mint).View(body)
+	require.Equal(t, want, s.Push(overlay.NewText("t", "body")).TopOverlay().View(body))
+	opened, _ := s.Update(overlay.Open(overlay.NewText("t", "body"))())
+	require.Equal(t, want, opened.TopOverlay().View(body))
+}
+
 // A dialog open when the terminal's background is learned repaints with it.
 func TestSetThemeReachesAnOpenDialog(t *testing.T) {
 	plain, mint := theme.Resolve(theme.Plain(), true), theme.Resolve(theme.Mint(), true)
 	s := New(Config{Layout: layout.Columns(layout.Fill("a")), Theme: plain})
-	s = s.Push(overlay.NewText("t", "body", plain)).SetTheme(mint)
+	s = s.Push(overlay.NewText("t", "body")).SetTheme(mint)
 	body := layout.Rect{W: 60, H: 20}
-	require.Equal(t, overlay.NewText("t", "body", mint).View(body), s.TopOverlay().View(body))
+	require.Equal(t, overlay.NewText("t", "body").SetTheme(mint).View(body), s.TopOverlay().View(body))
 }
 
 // A shell given no Theme follows Base: dark until the terminal answers, then
@@ -335,9 +346,9 @@ func TestSetBaseAndSetThemeSwitchFollowing(t *testing.T) {
 // A dialog open when the answer comes repaints with the shell.
 func TestTheBackgroundAnswerReachesAnOpenDialog(t *testing.T) {
 	s := New(Config{Layout: layout.Columns(layout.Fill("a"))})
-	s = s.Push(overlay.NewText("t", "body", s.Theme()))
+	s = s.Push(overlay.NewText("t", "body"))
 	s, _ = s.Update(tea.BackgroundColorMsg{Color: color.White})
 	body := layout.Rect{W: 60, H: 20}
 	light := theme.Resolve(theme.Default(), false)
-	require.Equal(t, overlay.NewText("t", "body", light).View(body), s.TopOverlay().View(body))
+	require.Equal(t, overlay.NewText("t", "body").SetTheme(light).View(body), s.TopOverlay().View(body))
 }

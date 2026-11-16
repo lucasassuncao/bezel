@@ -129,7 +129,7 @@ func TestARefusedActionDoesNotRun(t *testing.T) {
 func TestActionsStandAsideForAnOverlay(t *testing.T) {
 	ran := false
 	s := sized(New(actionConfig()).SetActions(Custom("p", "ping", func(ActionContext) tea.Cmd { ran = true; return nil })))
-	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
+	s = s.Push(overlay.NewText("t", "x"))
 	s.Update(keyP)
 	require.False(t, ran)
 }
@@ -171,7 +171,7 @@ func TestQuitAlsoTakesCtrlC(t *testing.T) {
 // and it does what Quit was told to.
 func TestCtrlCQuitsPastADialogAndTheInput(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Quit(RunWith(Send(ping{})))))
-	_, r := s.Push(overlay.NewText("t", "x", theme.Resolved{})).Update(ctrlC)
+	_, r := s.Push(overlay.NewText("t", "x")).Update(ctrlC)
 	require.True(t, r.Handled)
 	require.Equal(t, ping{}, r.Cmd())
 
@@ -183,7 +183,7 @@ func TestCtrlCQuitsPastADialogAndTheInput(t *testing.T) {
 // A Quit rebound without ctrl+c leaves it to the open dialog.
 func TestAReboundQuitLeavesCtrlCToTheDialog(t *testing.T) {
 	s := sized(New(actionConfig()).SetActions(Quit(WithKey("q"))))
-	s = s.Push(overlay.NewText("t", "x", theme.Resolved{}))
+	s = s.Push(overlay.NewText("t", "x"))
 	_, r := s.Update(ctrlC)
 	if r.Cmd != nil {
 		require.NotEqual(t, tea.QuitMsg{}, r.Cmd())

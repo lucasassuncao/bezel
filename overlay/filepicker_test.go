@@ -30,9 +30,9 @@ func pickerTree(t *testing.T) string {
 }
 
 func newPicker(dir string) FilePicker {
-	return NewFilePicker("Open file", dir, func(path string) tea.Cmd {
+	return themed(NewFilePicker("Open file", dir, func(path string) tea.Cmd {
 		return func() tea.Msg { return filePickedMsg{path} }
-	}, theme.Resolved{})
+	}), theme.Resolved{})
 }
 
 // load runs a command the picker returned and feeds its message back, the
@@ -199,7 +199,7 @@ func TestFilePickerWithHiddenListsDotfiles(t *testing.T) {
 // Without onPick, picking still closes: the caller reads nothing back.
 func TestFilePickerWithoutOnPickJustCloses(t *testing.T) {
 	dir := pickerTree(t)
-	p := NewFilePicker("Open", dir, nil, theme.Resolved{})
+	p := themed(NewFilePicker("Open", dir, nil), theme.Resolved{})
 	p = load(t, p, p.Init())
 	p, _ = pressPicker(t, p, tea.KeyPressMsg{Code: tea.KeyDown})
 

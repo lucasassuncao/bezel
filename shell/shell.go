@@ -160,7 +160,7 @@ func New(cfg Config) Shell {
 	focus := resized(nil, max(1, len(cfg.Tabs)), firstLeaf(cfg.Layout))
 	return Shell{
 		cfg: &cfg, adaptive: adaptive, focus: focus, ringFocus: slices.Clone(focus), rects: map[string]layout.Rect{},
-		spin: spinner.New(cfg.Spinner),
+		spin: spinner.New(cfg.Spinner), overlays: overlay.Stack{}.SetTheme(cfg.Theme),
 	}
 }
 

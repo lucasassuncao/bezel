@@ -9,7 +9,6 @@ import (
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // Confirm asks yes/no with two buttons, Yes focused. ←/→ or tab move the
@@ -41,8 +40,8 @@ func DefaultConfirmKeys() ConfirmKeys {
 }
 
 // NewConfirm asks message under title; onYes runs on a yes and may be nil.
-func NewConfirm(title, message string, onYes tea.Cmd, th theme.Resolved) Confirm {
-	return Confirm{title: title, message: message, onYes: onYes, look: lookOf(th), keys: DefaultConfirmKeys()}
+func NewConfirm(title, message string, onYes tea.Cmd) Confirm {
+	return Confirm{title: title, message: message, onYes: onYes, keys: DefaultConfirmKeys()}
 }
 
 // WithKeys rebinds the confirm; its legend follows the bindings' help.
