@@ -31,7 +31,6 @@ func (p page) Actions(shell.Context) []shell.Action { return p.actions }
 
 type model struct {
 	sh    shell.Shell
-	th    theme.Resolved
 	clock animation.Clock // drives every tab but the loading panel
 
 	dr drawing
@@ -41,10 +40,9 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fill("main")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "effect",
 		Tabs: []shell.Tab{
 			page{"draw", []shell.Action{
@@ -70,8 +68,9 @@ func newModel() model {
 		},
 		Actions: []shell.Action{shell.ChangeTab(), shell.Quit()},
 	})
+	th := sh.Theme()
 	return model{
-		sh: sh, th: th, clock: animation.NewClock(),
+		sh: sh, clock: animation.NewClock(),
 		lt: newLights(th),
 		sw: newSwaps(),
 		rt: newRetros(th),
@@ -79,7 +78,7 @@ func newModel() model {
 }
 
 // Init plays the first effect, the diff and the loading panel at once.
-func (m model) Init() tea.Cmd { return func() tea.Msg { return startMsg{} } }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), func() tea.Msg { return startMsg{} }) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -92,8 +91,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	switch msg := msg.(type) {
 	case startMsg:
-		m.dr = m.dr.again(m.th)
-		m.lt = m.lt.diff(m.th)
+		m.dr = m.dr.again(m.sh.Theme())
+		m.lt = m.lt.diff(m.sh.Theme())
 		m.rt, cmd = m.rt.start()
 		return m.run(cmd)
 	case animation.FrameMsg:
@@ -104,32 +103,33 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // key acts on the keys of every tab, and reports whether msg was one of them.
 func (m model) key(msg tea.Msg) (model, tea.Cmd, bool) {
+	th := m.sh.Theme()
 	var cmd tea.Cmd
 	switch msg.(type) {
 	case effectMsg:
-		m.dr = m.dr.nextEffect(m.th)
+		m.dr = m.dr.nextEffect(th)
 	case patternMsg:
-		m.dr = m.dr.nextPattern(m.th)
+		m.dr = m.dr.nextPattern(th)
 	case againMsg:
-		m.dr = m.dr.again(m.th)
+		m.dr = m.dr.again(th)
 	case lightMsg:
-		m.lt = m.lt.next(m.th)
+		m.lt = m.lt.next(th)
 	case shineMsg:
-		m.lt = m.lt.again(m.th)
+		m.lt = m.lt.again(th)
 	case diffMsg:
-		m.lt = m.lt.diff(m.th)
+		m.lt = m.lt.diff(th)
 	case undoMsg:
-		m.lt = m.lt.undo(m.th)
+		m.lt = m.lt.undo(th)
 	case swapMsg:
 		m.sw = m.sw.next()
 	case againSwap:
 		m.sw = m.sw.again()
 	case retroMsg:
-		m.rt = m.rt.next(m.th)
+		m.rt = m.rt.next(th)
 	case rewindMsg:
-		m.rt = m.rt.again(m.th)
+		m.rt = m.rt.again(th)
 	case loadingMsg:
-		m.rt, cmd = m.rt.toggleLoading(m.th)
+		m.rt, cmd = m.rt.toggleLoading(th)
 	default:
 		return m, nil, false
 	}
@@ -170,17 +170,18 @@ func (m model) moving() bool {
 }
 
 func (m model) View() tea.View {
+	th := m.sh.Theme()
 	return m.sh.View(map[string]shell.Pane{
 		"main": {Title: "every effect", Right: still(), Body: func(layout.Rect) string {
 			switch m.sh.ActiveTab() {
 			case 1:
-				return m.lt.rows(m.th, m.label)
+				return m.lt.rows(th, m.label)
 			case 2:
-				return m.sw.rows(m.th, m.label)
+				return m.sw.rows(th, m.label)
 			case 3:
-				return m.rt.rows(m.th, m.label)
+				return m.rt.rows(th, m.label)
 			}
-			return m.dr.rows(m.th, m.label)
+			return m.dr.rows(th, m.label)
 		}},
 	})
 }
@@ -195,7 +196,7 @@ func still() string {
 
 // label is a row's kind and variant, in two fixed columns.
 func (m model) label(kind, variant string) string {
-	return m.th.Accent.Render(fmt.Sprintf("%-11s", kind)) + m.th.Muted.Render(fmt.Sprintf("%-14s", variant))
+	return m.sh.Theme().Accent.Render(fmt.Sprintf("%-11s", kind)) + m.sh.Theme().Muted.Render(fmt.Sprintf("%-14s", variant))
 }
 
 func main() {

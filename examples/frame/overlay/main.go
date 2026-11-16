@@ -40,15 +40,13 @@ type (
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	cursor int
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("kinds")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "overlay",
 		Actions: []shell.Action{
 			shell.Move(),
@@ -56,22 +54,23 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th}
+	return model{sh: sh}
 }
 
 // done is the command a modal runs on its answer: a status for the app.
 func done(text string) tea.Cmd { return func() tea.Msg { return doneMsg{text} } }
 
 func (m model) modal() overlay.Overlay {
+	th := m.sh.Theme()
 	switch kinds[m.cursor] {
 	case "Alert":
 		return overlay.NewAlert(draw.Warning, "Disk almost full",
-			"91% of /var is in use.", m.th)
+			"91% of /var is in use.", th)
 	case "Confirm":
 		return overlay.NewConfirm("Delete notes.txt?", "It cannot be restored.",
-			done("deleted notes.txt"), m.th).WithKind(draw.Danger)
+			done("deleted notes.txt"), th).WithKind(draw.Danger)
 	case "Prompt":
-		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return done("created " + v) }, m.th).
+		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return done("created " + v) }, th).
 			WithLabel("name").
 			WithValidate(func(s string) error {
 				if strings.TrimSpace(s) == "" {
@@ -80,19 +79,19 @@ func (m model) modal() overlay.Overlay {
 				return nil
 			})
 	case "Pager":
-		return overlay.NewPager("go test ./...", testLog(), m.th)
+		return overlay.NewPager("go test ./...", testLog(), th)
 	case "FilePicker":
 		return overlay.NewFilePicker("Open a file", ".", func(path string) tea.Cmd { return done("picked " + filepath.Base(path)) },
-			m.th)
+			th)
 	default:
 		return overlay.NewHelp([]overlay.HelpSection{
 			{Name: "Navigation", Entries: []legend.Entry{legend.New("↑/↓", "move"), legend.New("enter", "open")}},
 			{Name: "App", Entries: []legend.Entry{legend.New("q", "quit")}},
-		}, m.th).WithTitle("Keys")
+		}, th).WithTitle("Keys")
 	}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -129,7 +128,7 @@ func (m model) View() tea.View {
 			var b strings.Builder
 			for i, k := range kinds {
 				if i == m.cursor {
-					b.WriteString(m.th.Cursor.Render("> "+k) + "\n")
+					b.WriteString(m.sh.Theme().Cursor.Render("> "+k) + "\n")
 					continue
 				}
 				b.WriteString("  " + k + "\n")

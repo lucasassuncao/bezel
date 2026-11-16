@@ -22,22 +22,20 @@ const source = "package main\n\nfunc main() {\n    println(\"hi\")\n}"
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	offset int
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fill("draw")),
-		Theme:   th,
+		Base:    theme.Mint(),
 		Title:   "draw",
 		Actions: []shell.Action{shell.Scroll(), shell.Quit()},
 	})
-	return model{sh: sh, th: th}
+	return model{sh: sh}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -58,24 +56,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // sections draws every helper at width w, one block per helper.
 func (m model) sections(w int) []string {
+	th := m.sh.Theme()
 	var out []string
 	add := func(name string, lines ...string) {
-		out = append(out, draw.Heading(name, m.th.Section, w))
+		out = append(out, draw.Heading(name, th.Section, w))
 		out = append(out, lines...)
 		out = append(out, "")
 	}
-	add("Header", draw.Header(w, "my app", "kv/app/prod", "v1.2.0", m.th.Chrome))
-	add("Tabs", draw.Tabs(w, []string{"secrets", "policies", "auth"}, 1, m.th.Chrome))
-	add("Divider", draw.Divider(w, "", draw.DividerStyle{Line: m.th.Muted}), draw.Divider(w, "Packages", draw.DividerStyle{Line: m.th.Muted, Label: m.th.Accent}))
+	add("Header", draw.Header(w, "my app", "kv/app/prod", "v1.2.0", th.Chrome))
+	add("Tabs", draw.Tabs(w, []string{"secrets", "policies", "auth"}, 1, th.Chrome))
+	add("Divider", draw.Divider(w, "", draw.DividerStyle{Line: th.Muted}), draw.Divider(w, "Packages", draw.DividerStyle{Line: th.Muted, Label: th.Accent}))
 	card := draw.Card(layout.Rect{W: min(w, 40), H: 7}, "git", "version  2.47.0\nsource   winget\nscope    machine",
-		m.th.Key.Render("[u]")+" upgrade  "+m.th.Key.Render("[r]")+" remove", m.th.Panel)
+		th.Key.Render("[u]")+" upgrade  "+th.Key.Render("[r]")+" remove", th.Panel)
 	add("Card", strings.Split(card, "\n")...)
-	add("Button", draw.Button("Save", m.th.Button, true)+"  "+draw.Button("Cancel", m.th.Button, false))
+	add("Button", draw.Button("Save", th.Button, true)+"  "+draw.Button("Cancel", th.Button, false))
 	add("Wrap", draw.Wrap(paragraph, min(w, 40))...)
 	add("Truncate", draw.Truncate("a line much longer than the room it has to fit in", 24))
-	add("Link", draw.Link("bezel on GitHub", "https://github.com/lucasassuncao/bezel", m.th.Accent.Underline(true)))
-	add("NumberLines", draw.NumberLines(source, m.th.Muted))
-	add("EmptyState", draw.EmptyState(layout.Rect{W: w, H: 4}, "nothing here", "press n to add one", m.th.Chrome))
+	add("Link", draw.Link("bezel on GitHub", "https://github.com/lucasassuncao/bezel", th.Accent.Underline(true)))
+	add("NumberLines", draw.NumberLines(source, th.Muted))
+	add("EmptyState", draw.EmptyState(layout.Rect{W: w, H: 4}, "nothing here", "press n to add one", th.Chrome))
 	return out
 }
 

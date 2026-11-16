@@ -33,10 +33,9 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("wizard")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "wizard",
 		Actions: []shell.Action{
 			shell.Custom("tab", "next field", nil, shell.DisplayOnly()),
@@ -45,6 +44,7 @@ func newModel() model {
 			shell.Custom("ctrl+c", "quit", nil, shell.DisplayOnly()),
 		},
 	})
+	th := sh.Theme()
 	wiz := wizard.New(th,
 		wizard.NewPage("Project", form.New(th,
 			form.NewInput("Name").WithPlaceholder("my-api").WithWidth(28),
@@ -78,7 +78,7 @@ func someTool(f form.Form) error {
 }
 
 // Init starts the caret blinking in the name the wizard opens on.
-func (m model) Init() tea.Cmd { return m.wiz.Init() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.wiz.Init()) }
 
 // summary is what Finish reports: every value the pages hold.
 func (m model) summary() string {

@@ -33,7 +33,7 @@ func press(t *testing.T, m tea.Model, keys ...string) tea.Model {
 
 func TestEnterGoesDownAndThePathGoesBackUp(t *testing.T) {
 	var m tea.Model = newModel()
-	require.Nil(t, m.Init())
+	require.NotNil(t, m.Init(), "the shell asks for the terminal's background")
 	m, out := frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 16})
 	t.Log("\n" + out)
 	require.Contains(t, out, "apps/")

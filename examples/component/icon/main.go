@@ -42,25 +42,23 @@ type swapMsg struct{}
 
 type model struct {
 	sh    shell.Shell
-	th    theme.Resolved
 	ascii bool
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("icons")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "icon",
 		Actions: []shell.Action{
 			shell.Custom("a", "swap set", shell.Send(swapMsg{})),
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th}
+	return model{sh: sh}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -81,30 +79,32 @@ func (m model) set() (icon.Set, string) {
 }
 
 func (m model) body(r layout.Rect) string {
-	out := []string{draw.Heading("States", m.th.Section, r.W), ""}
+	th := m.sh.Theme()
+	out := []string{draw.Heading("States", th.Section, r.W), ""}
 	for _, s := range states {
-		out = append(out, fmt.Sprintf("  %-9s %s   %s", s.name, icon.Unicode().Render(s.st, m.th), icon.ASCII().Render(s.st, m.th)))
+		out = append(out, fmt.Sprintf("  %-9s %s   %s", s.name, icon.Unicode().Render(s.st, th), icon.ASCII().Render(s.st, th)))
 	}
 	set, name := m.set()
-	out = append(out, "", draw.Heading("Packages · "+name, m.th.Section, r.W), "")
+	out = append(out, "", draw.Heading("Packages · "+name, th.Section, r.W), "")
 	for _, p := range packages {
-		out = append(out, fmt.Sprintf("  %s %-8s %s", set.Render(p.st, m.th), p.name, m.th.Dim.Render(p.note)))
+		out = append(out, fmt.Sprintf("  %s %-8s %s", set.Render(p.st, th), p.name, th.Dim.Render(p.note)))
 	}
-	out = append(out, "", draw.Heading("Tree · "+name, m.th.Section, r.W), "")
+	out = append(out, "", draw.Heading("Tree · "+name, th.Section, r.W), "")
 	return strings.Join(append(out, m.tree(set)...), "\n")
 }
 
 // tree is a source chain drawn with the set's connectors: each source hangs off
 // the application, and the one that answered carries why.
 func (m model) tree(set icon.Set) []string {
-	conn := func(last bool) string { return m.th.Muted.Render(set.Connector(last)) }
-	indent := func(last bool) string { return m.th.Muted.Render(set.Indent(last)) }
+	th := m.sh.Theme()
+	conn := func(last bool) string { return th.Muted.Render(set.Connector(last)) }
+	indent := func(last bool) string { return th.Muted.Render(set.Indent(last)) }
 	return []string{
 		"  lazygit",
-		"  " + conn(false) + "winget  " + m.th.Dim.Render("not offered"),
-		"  " + conn(false) + "scoop   " + m.th.Success.Render("installed 0.42.0"),
-		"  " + indent(false) + conn(true) + m.th.Dim.Render("bucket extras"),
-		"  " + conn(true) + "github  " + m.th.Dim.Render("not tried"),
+		"  " + conn(false) + "winget  " + th.Dim.Render("not offered"),
+		"  " + conn(false) + "scoop   " + th.Success.Render("installed 0.42.0"),
+		"  " + indent(false) + conn(true) + th.Dim.Render("bucket extras"),
+		"  " + conn(true) + "github  " + th.Dim.Render("not tried"),
 	}
 }
 

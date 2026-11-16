@@ -38,16 +38,14 @@ func tick() tea.Cmd {
 
 type model struct {
 	sh   shell.Shell
-	th   theme.Resolved
 	done int
 	step int
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("progress")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "progress",
 		Actions: []shell.Action{
 			shell.Custom("r", "restart", shell.Send(restartMsg{})),
@@ -56,10 +54,10 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th}
+	return model{sh: sh}
 }
 
-func (m model) Init() tea.Cmd { return tick() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), tick()) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -87,19 +85,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) body(r layout.Rect) string {
+	th := m.sh.Theme()
 	w := r.W - 2
 	out := []string{
-		draw.Heading("Line", m.th.Section, r.W),
-		" " + progress.Line("downloading", m.done, total, w, m.th),
+		draw.Heading("Line", th.Section, r.W),
+		" " + progress.Line("downloading", m.done, total, w, th),
 		"",
-		draw.Heading("Bar", m.th.Section, r.W),
-		" " + progress.Bar(m.done, total, min(w, 30), m.th),
+		draw.Heading("Bar", th.Section, r.W),
+		" " + progress.Bar(m.done, total, min(w, 30), th),
 		"",
-		draw.Heading("Stepper", m.th.Section, r.W),
-		" " + progress.Stepper(steps, m.step, w, m.th, icon.Unicode()),
+		draw.Heading("Stepper", th.Section, r.W),
+		" " + progress.Stepper(steps, m.step, w, th, icon.Unicode()),
 		"",
-		" " + m.th.Muted.Render("at 30 columns"),
-		" " + progress.Stepper(steps, m.step, 30, m.th, icon.Unicode()),
+		" " + th.Muted.Render("at 30 columns"),
+		" " + progress.Stepper(steps, m.step, 30, th, icon.Unicode()),
 	}
 	return strings.Join(out, "\n")
 }

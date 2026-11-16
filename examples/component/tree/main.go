@@ -61,7 +61,6 @@ type (
 
 type model struct {
 	sh   shell.Shell
-	th   theme.Resolved
 	tree tree.Model[entry]
 }
 
@@ -78,20 +77,19 @@ func actions() []shell.Action {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fixed("tree", layout.Ratio(1, 2)), layout.Fill("detail")),
-		Theme:   th,
+		Base:    theme.Mint(),
 		Title:   "tree",
 		Actions: actions(),
 	})
 	nodes := slices.Clone(files)
 	nodes[len(nodes)-2].busy = true // go.mod
-	return model{sh: sh, th: th, tree: tree.New(nodes)}
+	return model{sh: sh, tree: tree.New(nodes)}
 }
 
 // Init turns the spinner of the node that starts busy.
-func (m model) Init() tea.Cmd { return m.tree.Tick() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.tree.Tick()) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -125,10 +123,10 @@ func (m model) row(e entry, _ int, selected bool) string {
 	}
 	paint := func(s string) string { return s }
 	if selected {
-		paint = func(s string) string { return m.th.Cursor.Render(s) }
+		paint = func(s string) string { return m.sh.Theme().Cursor.Render(s) }
 	}
 	if e.busy { // the spinner in its own colour, the rest in the row's
-		return paint(strings.Repeat("  ", e.depth)) + m.tree.BusyMark(m.th) + paint(" "+path.Base(e.path))
+		return paint(strings.Repeat("  ", e.depth)) + m.tree.BusyMark(m.sh.Theme()) + paint(" "+path.Base(e.path))
 	}
 	return paint(strings.Repeat("  ", e.depth) + icon + path.Base(e.path))
 }
@@ -142,13 +140,13 @@ func (m model) detail() string {
 	if e.dir {
 		kind = "directory"
 	}
-	return fmt.Sprintf("%s\n\n%s", m.th.Accent.Render(e.path), m.th.Dim.Render(kind))
+	return fmt.Sprintf("%s\n\n%s", m.sh.Theme().Accent.Render(e.path), m.sh.Theme().Dim.Render(kind))
 }
 
 func (m model) View() tea.View {
 	return m.sh.View(map[string]shell.Pane{
 		"tree": {Title: "files", Body: func(r layout.Rect) string {
-			return m.tree.SetHeight(r.H).View(m.th, m.row)
+			return m.tree.SetHeight(r.H).View(m.sh.Theme(), m.row)
 		}},
 		"detail": {Title: "detail", Body: func(layout.Rect) string { return m.detail() }},
 	})

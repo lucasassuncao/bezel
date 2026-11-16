@@ -58,15 +58,13 @@ func gutter(r viewport.GutterRow) string {
 
 type model struct {
 	sh shell.Shell
-	th theme.Resolved
 	vp viewport.Model
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("log")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "viewport",
 		Actions: []shell.Action{
 			shell.Custom("↑/↓", "scroll", nil, shell.DisplayOnly()),
@@ -78,6 +76,7 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
+	th := sh.Theme()
 	content := accessLog()
 	vp := viewport.New().
 		WithGutter(gutter).
@@ -91,10 +90,10 @@ func newModel() model {
 		SetContent(content).
 		SetHighlights(regexp.MustCompile(`ERROR`).FindAllStringIndex(content, -1)).
 		ToTop()
-	return model{sh: sh, th: th, vp: vp}
+	return model{sh: sh, vp: vp}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 // sized fits the viewport to the pane's inside, as the shell last laid it out.
 func (m model) sized() model {
@@ -131,7 +130,7 @@ func (m model) View() tea.View {
 			Title:  "access.log",
 			Bottom: fmt.Sprintf("%3.0f%%", vp.ScrollPercent()*100),
 			Scroll: vp.Scroll(),
-			Body:   func(layout.Rect) string { return vp.View(m.th) },
+			Body:   func(layout.Rect) string { return vp.View(m.sh.Theme()) },
 		},
 	})
 	v.MouseMode = tea.MouseModeCellMotion

@@ -24,16 +24,14 @@ type displayMsg struct{}
 
 type model struct {
 	sh   shell.Shell
-	th   theme.Resolved
 	pg   paginator.Model
 	dots bool
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("paginator")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "paginator",
 		Actions: []shell.Action{
 			shell.Custom("←/→", "page", nil, shell.DisplayOnly()),
@@ -41,10 +39,10 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, pg: paginator.New(8).SetItems(total)}
+	return model{sh: sh, pg: paginator.New(8).SetItems(total)}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -66,7 +64,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) body(r layout.Rect) string {
-	out := []string{draw.Heading("Items", m.th.Section, r.W), ""}
+	out := []string{draw.Heading("Items", m.sh.Theme().Section, r.W), ""}
 	start, end := m.pg.Bounds(total)
 	for i := start; i < end; i++ {
 		out = append(out, fmt.Sprintf("  item %d", i+1))
@@ -74,7 +72,7 @@ func (m model) body(r layout.Rect) string {
 	for range m.pg.PerPage() - (end - start) {
 		out = append(out, "")
 	}
-	return strings.Join(append(out, "", "  "+m.pg.View(m.th)), "\n")
+	return strings.Join(append(out, "", "  "+m.pg.View(m.sh.Theme())), "\n")
 }
 
 func (m model) View() tea.View {

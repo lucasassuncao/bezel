@@ -26,10 +26,9 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("text")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "textbox",
 		Mouse:  true,
 		Actions: []shell.Action{
@@ -38,11 +37,12 @@ func newModel() model {
 			shell.Quit(shell.WithKey("esc", "ctrl+c")),
 		},
 	})
+	th := sh.Theme()
 	ta, _ := textbox.New(th).SetValue(seed).Focus()
 	return model{sh: sh, ta: ta}
 }
 
-func (m model) Init() tea.Cmd { return m.ta.Blink() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.ta.Blink()) }
 
 // fit sizes the text area to the pane the shell placed.
 func (m model) fit() model {

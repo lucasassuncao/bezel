@@ -45,7 +45,7 @@ func TestITurnsTheCurvesRound(t *testing.T) {
 
 // A curve that leaves [0,1] shows past its marks, kept on the track.
 func TestADotPastItsMarksStaysOnTheTrack(t *testing.T) {
-	th := newModel().th
+	th := newModel().sh.Theme()
 	for _, v := range []float64{-1, -0.1, 0, 0.5, 1, 1.2, 3} {
 		out := dotOn(th, v)
 		require.Contains(t, out, "●")

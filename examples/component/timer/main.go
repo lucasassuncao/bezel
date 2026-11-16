@@ -27,15 +27,13 @@ type (
 
 type model struct {
 	sh shell.Shell
-	th theme.Resolved
 	tm timer.Model
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("timer")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "timer",
 		Actions: []shell.Action{
 			shell.Custom("space", "stop/resume", shell.Send(toggleMsg{})),
@@ -44,7 +42,7 @@ func newModel() model {
 		},
 	})
 	tm := timer.New(timeout).WithEvery(time.Second / 10).WithFormat(tenths)
-	return model{sh: sh, th: th, tm: tm}
+	return model{sh: sh, tm: tm}
 }
 
 // tenths writes d to a tenth of a second, so the width never jumps between
@@ -52,7 +50,7 @@ func newModel() model {
 func tenths(d time.Duration) string { return fmt.Sprintf("%.1fs", d.Seconds()) }
 
 // Init starts the countdown the way r does.
-func (m model) Init() tea.Cmd { return func() tea.Msg { return restartMsg{} } }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), func() tea.Msg { return restartMsg{} }) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -81,10 +79,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) body(r layout.Rect) string {
+	th := m.sh.Theme()
 	out := []string{
-		draw.Heading("Countdown", m.th.Section, r.W),
+		draw.Heading("Countdown", th.Section, r.W),
 		"",
-		"  " + m.th.Dim.Render("left ") + m.tm.View(m.th),
+		"  " + th.Dim.Render("left ") + m.tm.View(th),
 	}
 	return strings.Join(out, "\n")
 }

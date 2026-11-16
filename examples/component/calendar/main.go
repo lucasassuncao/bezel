@@ -23,16 +23,14 @@ var today = time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC)
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	cal    calendar.Model
 	chosen *time.Time
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fixed("calendar", layout.Lines(calendar.Width+4)), layout.Fill("day")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "calendar",
 		Mouse:  true,
 		Actions: []shell.Action{
@@ -44,10 +42,10 @@ func newModel() model {
 		},
 	})
 	cal := calendar.New(today).WithToday(today).WithFirstWeekday(time.Monday).WithRange(today, time.Time{})
-	return model{sh: sh, th: th, cal: cal}
+	return model{sh: sh, cal: cal}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -66,18 +64,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // detail is the day under the cursor and the one chosen last.
 func (m model) detail() string {
+	th := m.sh.Theme()
 	day, _ := m.cal.Selected()
-	out := m.th.Dim.Render("cursor  ") + day.Format("Monday, 2 January 2006")
-	out += "\n" + m.th.Dim.Render("        ") + fmt.Sprintf("%d days from today", int(day.Sub(today).Hours()/24))
+	out := th.Dim.Render("cursor  ") + day.Format("Monday, 2 January 2006")
+	out += "\n" + th.Dim.Render("        ") + fmt.Sprintf("%d days from today", int(day.Sub(today).Hours()/24))
 	if m.chosen != nil {
-		out += "\n\n" + m.th.Dim.Render("chosen  ") + m.th.Accent.Render(m.chosen.Format(time.DateOnly))
+		out += "\n\n" + th.Dim.Render("chosen  ") + th.Accent.Render(m.chosen.Format(time.DateOnly))
 	}
 	return out
 }
 
 func (m model) View() tea.View {
 	return m.sh.View(map[string]shell.Pane{
-		"calendar": {Title: "month", Body: func(layout.Rect) string { return m.cal.View(m.th) }},
+		"calendar": {Title: "month", Body: func(layout.Rect) string { return m.cal.View(m.sh.Theme()) }},
 		"day":      {Title: "day", Body: func(r layout.Rect) string { return draw.FitBlock(m.detail(), r.W, r.H) }},
 	})
 }

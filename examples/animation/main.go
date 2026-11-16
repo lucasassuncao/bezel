@@ -68,7 +68,6 @@ var eases = []struct {
 
 type model struct {
 	sh    shell.Shell
-	th    theme.Resolved
 	clock animation.Clock // drives everything but the pendulum, the orbit and the hints
 
 	bars           []animation.Tween
@@ -99,10 +98,9 @@ func shape(h int) layout.Node {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: shape(0),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "animation",
 		Tabs: []shell.Tab{
 			page{"basics", []shell.Action{
@@ -146,9 +144,10 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
+	th := sh.Theme()
 	muted := th.Muted.GetForeground()
 	return model{
-		sh: sh, th: th, clock: animation.NewClock(),
+		sh: sh, clock: animation.NewClock(),
 		steady: animation.NewSpring(0), bouncy: animation.NewSpring(0).WithDamping(0.3),
 		fade:  animation.NewFade(muted, muted, 0),
 		pulse: animation.NewFade(muted, muted, 0),
@@ -161,7 +160,7 @@ func newModel() model {
 }
 
 // Init starts the race as soon as the program runs.
-func (m model) Init() tea.Cmd { return func() tea.Msg { return startMsg{} } }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), func() tea.Msg { return startMsg{} }) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -182,15 +181,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case replayMsg:
 		return m.replay().run(nil)
 	case fadeMsg:
-		m.fade = animation.NewFade(m.th.Accent.GetForeground(), m.th.Muted.GetForeground(), 1500*time.Millisecond)
+		th := m.sh.Theme()
+		m.fade = animation.NewFade(th.Accent.GetForeground(), th.Muted.GetForeground(), 1500*time.Millisecond)
 		return m.run(nil)
 	case pulseMsg:
+		th := m.sh.Theme()
 		if m.pulse.Active() {
-			muted := m.th.Muted.GetForeground()
+			muted := th.Muted.GetForeground()
 			m.pulse = animation.NewFade(muted, muted, 0)
 			return m, nil
 		}
-		m.pulse = animation.NewFade(m.th.Accent.GetForeground(), m.th.Muted.GetForeground(), 700*time.Millisecond).
+		m.pulse = animation.NewFade(th.Accent.GetForeground(), th.Muted.GetForeground(), 700*time.Millisecond).
 			WithYoyo(true).WithRepeat(animation.Forever)
 		return m.run(nil)
 	case toggleMsg:
@@ -344,21 +345,22 @@ func (m model) moving() bool {
 }
 
 func (m model) View() tea.View {
+	th := m.sh.Theme()
 	return m.sh.View(map[string]shell.Pane{
 		"main": {Title: "every animation", Right: still(), Body: func(layout.Rect) string {
 			switch m.sh.ActiveTab() {
 			case 1:
-				return m.cv.rows(m.th, m.label)
+				return m.cv.rows(th, m.label)
 			case 2:
-				return m.mv.rows(m.th, m.label)
+				return m.mv.rows(th, m.label)
 			case 3:
-				return m.ph.rows(m.th, m.label)
+				return m.ph.rows(th, m.label)
 			case 4:
-				return m.dt.rows(m.th, m.label)
+				return m.dt.rows(th, m.label)
 			case 5:
-				return m.fl.rows(m.th, m.label)
+				return m.fl.rows(th, m.label)
 			case 6:
-				return m.pp.rows(m.th, m.label)
+				return m.pp.rows(th, m.label)
 			}
 			return m.gallery()
 		}},
@@ -387,8 +389,8 @@ func (m model) gallery() string {
 		label("spring", "steady")+m.spring(m.steady),
 		label("", "bouncy")+m.spring(m.bouncy),
 		"",
-		label("float", "sub-cell")+progress.Smooth(int(m.smooth.Value()*1000), 1000, track, m.th),
-		label("count-up", "ease out")+m.th.Bold.Render(thousands(m.count.Value())+" files"),
+		label("float", "sub-cell")+progress.Smooth(int(m.smooth.Value()*1000), 1000, track, m.sh.Theme()),
+		label("count-up", "ease out")+m.sh.Theme().Bold.Render(thousands(m.count.Value())+" files"),
 		label("fade", "accent→muted")+lipgloss.NewStyle().Foreground(m.fade.Value()).Render(saved),
 		"",
 		label("pulse", "yoyo forever")+lipgloss.NewStyle().Foreground(m.pulse.Value()).Render("● waiting for the server"),
@@ -400,14 +402,15 @@ func (m model) gallery() string {
 // bar is cur of track cells filled.
 func (m model) bar(cur int) string {
 	cur = min(max(cur, 0), track)
-	return m.th.Accent.Render(strings.Repeat("█", cur)) + m.th.Muted.Render(strings.Repeat("░", track-cur))
+	return m.sh.Theme().Accent.Render(strings.Repeat("█", cur)) + m.sh.Theme().Muted.Render(strings.Repeat("░", track-cur))
 }
 
 // spring is a track with a dot where s is now, kept on the track when it
 // overshoots past either end.
 func (m model) spring(s animation.Spring) string {
+	th := m.sh.Theme()
 	at := min(max(s.Int(), 0), track-1)
-	return m.th.Muted.Render(strings.Repeat("·", at)) + m.th.Accent.Render("●") + m.th.Muted.Render(strings.Repeat("·", track-1-at))
+	return th.Muted.Render(strings.Repeat("·", at)) + th.Accent.Render("●") + th.Muted.Render(strings.Repeat("·", track-1-at))
 }
 
 // thousands is n with a comma every three digits.
@@ -434,7 +437,7 @@ func (m model) blocks() string {
 		if i < len(m.cascade) {
 			cur = m.cascade[i].Value()
 		}
-		parts[i] = m.th.Accent.Render(strings.Repeat("▮", cur)) + strings.Repeat(" ", block-cur)
+		parts[i] = m.sh.Theme().Accent.Render(strings.Repeat("▮", cur)) + strings.Repeat(" ", block-cur)
 	}
 	return strings.Join(parts, " ")
 }
@@ -449,5 +452,5 @@ func still() string {
 
 // label is a row's kind and variant, in two fixed columns.
 func (m model) label(kind, variant string) string {
-	return m.th.Accent.Render(fmt.Sprintf("%-11s", kind)) + m.th.Muted.Render(fmt.Sprintf("%-14s", variant))
+	return m.sh.Theme().Accent.Render(fmt.Sprintf("%-11s", kind)) + m.sh.Theme().Muted.Render(fmt.Sprintf("%-14s", variant))
 }

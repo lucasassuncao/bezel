@@ -33,22 +33,20 @@ var presets = []struct {
 
 type model struct {
 	sh       shell.Shell
-	th       theme.Resolved
 	spinners [12]spinner.Model
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("spinner")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "spinner",
 		Actions: []shell.Action{
 			shell.Custom("space", "stop/start", shell.Send(toggleMsg{})),
 			shell.Quit(),
 		},
 	})
-	m := model{sh: sh, th: th}
+	m := model{sh: sh}
 	for i, p := range presets {
 		m.spinners[i] = spinner.New(p.s)
 	}
@@ -56,7 +54,7 @@ func newModel() model {
 }
 
 // Init starts the spinners the way space does.
-func (m model) Init() tea.Cmd { return func() tea.Msg { return toggleMsg{} } }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), func() tea.Msg { return toggleMsg{} }) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -90,9 +88,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) body(r layout.Rect) string {
-	out := []string{draw.Heading("Presets", m.th.Section, r.W), ""}
+	out := []string{draw.Heading("Presets", m.sh.Theme().Section, r.W), ""}
 	for i, p := range presets {
-		out = append(out, "  "+fmt.Sprintf("%-11s", p.name)+m.spinners[i].View(m.th))
+		out = append(out, "  "+fmt.Sprintf("%-11s", p.name)+m.spinners[i].View(m.sh.Theme()))
 	}
 	return strings.Join(out, "\n")
 }

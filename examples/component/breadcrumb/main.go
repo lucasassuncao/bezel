@@ -34,17 +34,15 @@ var store = map[string][]string{
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	crumbs breadcrumb.Model
 	items  list.Model[string]
 	opened string // the last secret enter opened
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fixed("path", layout.Lines(3)), layout.Fill("entries")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "breadcrumb",
 		Mouse:  true,
 		Actions: []shell.Action{
@@ -56,7 +54,7 @@ func newModel() model {
 		},
 	})
 	sh = sh.SetFocus("entries")
-	m := model{sh: sh, th: th, crumbs: breadcrumb.New(nil).Blur(), items: list.New[string](nil)}
+	m := model{sh: sh, crumbs: breadcrumb.New(nil).Blur(), items: list.New[string](nil)}
 	return m.enter([]string{"kv"})
 }
 
@@ -85,7 +83,7 @@ func (m model) resize() model {
 	return m
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -146,16 +144,17 @@ func (m model) toItems(msg tea.Msg) model {
 
 // entries is the list, and the secret enter opened under it.
 func (m model) entries(r layout.Rect) string {
-	out := m.items.View(m.th)
+	th := m.sh.Theme()
+	out := m.items.View(th)
 	if m.opened != "" {
-		out += "\n\n" + m.th.Dim.Render("opened  ") + m.th.Accent.Render(m.opened)
+		out += "\n\n" + th.Dim.Render("opened  ") + th.Accent.Render(m.opened)
 	}
 	return draw.FitBlock(out, r.W, r.H)
 }
 
 func (m model) View() tea.View {
 	return m.sh.View(map[string]shell.Pane{
-		"path":    {Title: "path", Body: func(layout.Rect) string { return m.crumbs.View(m.th) }},
+		"path":    {Title: "path", Body: func(layout.Rect) string { return m.crumbs.View(m.sh.Theme()) }},
 		"entries": {Title: "entries", Body: m.entries},
 	})
 }

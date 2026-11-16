@@ -52,15 +52,13 @@ func topics() []string {
 
 type model struct {
 	sh shell.Shell
-	th theme.Resolved
 	tg tags.Model
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fixed("filter", layout.Lines(3)), layout.Fill("packages")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "tags",
 		Actions: []shell.Action{
 			shell.Custom("enter", "add", nil, shell.DisplayOnly()),
@@ -70,12 +68,13 @@ func newModel() model {
 			shell.Quit(shell.WithKey("esc", "ctrl+c")),
 		},
 	})
+	th := sh.Theme()
 	tg := tags.New(th).WithPlaceholder("a topic, then enter").SetSuggestions(topics())
 	tg, _ = tg.Focus()
-	return model{sh: sh, th: th, tg: tg}
+	return model{sh: sh, tg: tg}
 }
 
-func (m model) Init() tea.Cmd { return m.tg.Blink() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.tg.Blink()) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -100,10 +99,10 @@ func (m model) matching() []pkg {
 func (m model) list(r layout.Rect) string {
 	var out []string
 	for _, p := range m.matching() {
-		out = append(out, fmt.Sprintf("%-11s", p.name)+m.th.Dim.Render(strings.Join(p.topics, ", ")))
+		out = append(out, fmt.Sprintf("%-11s", p.name)+m.sh.Theme().Dim.Render(strings.Join(p.topics, ", ")))
 	}
 	if len(out) == 0 {
-		out = append(out, m.th.Dim.Render("no package has every topic"))
+		out = append(out, m.sh.Theme().Dim.Render("no package has every topic"))
 	}
 	return draw.FitBlock(strings.Join(out, "\n"), r.W, r.H)
 }

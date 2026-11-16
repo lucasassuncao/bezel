@@ -45,7 +45,6 @@ type step struct{ n int }
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	pane   logger.Pane // bezel's Handler
 	json   logger.Pane // slog's JSON handler, through Writer
 	log    *slog.Logger
@@ -53,10 +52,9 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fill("log"), layout.Fill("json")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "log pane",
 		Actions: []shell.Action{
 			shell.ChangePane(),
@@ -66,13 +64,14 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
+	th := sh.Theme()
 	pane := logger.NewPane(th)
 	log := slog.New(pane.Handler().WithLevel(slog.LevelDebug).WithTimeFormat("15:04:05"))
 	json := logger.NewPane(th)
 	jsonLg := slog.New(slog.NewJSONHandler(json.Writer(), &slog.HandlerOptions{
 		Level: slog.LevelDebug, ReplaceAttr: clock,
 	}))
-	return model{sh: sh, th: th, pane: pane, json: json, log: log, jsonLg: jsonLg}
+	return model{sh: sh, pane: pane, json: json, log: log, jsonLg: jsonLg}
 }
 
 // clock writes the time as the bezel pane does, so the two lines line up.
@@ -84,7 +83,9 @@ func clock(_ []string, a slog.Attr) slog.Attr {
 }
 
 // Init waits for both panes' lines and starts the deploy.
-func (m model) Init() tea.Cmd { return tea.Batch(m.pane.Init(), m.json.Init(), m.next(0)) }
+func (m model) Init() tea.Cmd {
+	return tea.Batch(m.sh.Init(), tea.Batch(m.pane.Init(), m.json.Init(), m.next(0)))
+}
 
 // next logs line n after a pause, from the command's own goroutine.
 func (m model) next(n int) tea.Cmd {

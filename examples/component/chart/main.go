@@ -44,19 +44,17 @@ func load(n int) float64 {
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	n      int
 	paused bool
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(
 			layout.Fill("load"),
 			layout.Fixed("services", layout.Ratio(2, 5), layout.Min(34)),
 		),
-		Theme: th,
+		Base:  theme.Mint(),
 		Title: "chart",
 		Actions: []shell.Action{
 			shell.Custom("space", "pause", shell.Send(pauseMsg{})),
@@ -64,10 +62,10 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, n: 40}
+	return model{sh: sh, n: 40}
 }
 
-func (m model) Init() tea.Cmd { return tick() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), tick()) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -111,6 +109,7 @@ func (m model) values() []float64 {
 }
 
 func (m model) loadPane(r layout.Rect) string {
+	th := m.sh.Theme()
 	vs := m.values()
 	now := vs[len(vs)-1]
 	h := max((r.H-11)/2, 3) // the area and the lines share what the rest leaves
@@ -119,28 +118,29 @@ func (m model) loadPane(r layout.Rect) string {
 		state = "paused"
 	}
 	out := []string{
-		draw.Heading("Area", m.th.Section, r.W),
-		chart.Area(vs, top, r.W, h, m.th),
+		draw.Heading("Area", th.Section, r.W),
+		chart.Area(vs, top, r.W, h, th),
 		"",
-		draw.Heading("Lines", m.th.Section, r.W),
-		chart.Lines([]chart.Line{{Label: "cpu", Values: vs}, {Label: "memory", Values: m.memory()}}, 0, top, r.W, h+1, m.th),
+		draw.Heading("Lines", th.Section, r.W),
+		chart.Lines([]chart.Line{{Label: "cpu", Values: vs}, {Label: "memory", Values: m.memory()}}, 0, top, r.W, h+1, th),
 		"",
-		draw.Heading("Spark", m.th.Section, r.W),
-		chart.Spark(vs, top, r.W-12, m.th, chart.InSeries(1)) + m.th.Dim.Render(fmt.Sprintf("  %3.0f%%", now)),
+		draw.Heading("Spark", th.Section, r.W),
+		chart.Spark(vs, top, r.W-12, th, chart.InSeries(1)) + th.Dim.Render(fmt.Sprintf("  %3.0f%%", now)),
 		"",
-		m.th.Muted.Render(fmt.Sprintf("%d samples, %s", len(vs), state)),
+		th.Muted.Render(fmt.Sprintf("%d samples, %s", len(vs), state)),
 	}
 	return strings.Join(out, "\n")
 }
 
 func (m model) servicesPane(r layout.Rect) string {
+	th := m.sh.Theme()
 	names := []string{"api", "worker", "search", "billing", "mailer"}
 	bars := make([]chart.Bar, len(names))
 	for i, name := range names {
 		v := load(m.n + i*7)
 		bars[i] = chart.Bar{Label: name, Value: v, Text: fmt.Sprintf("%.0f%%", v)}
 		if v > 80 {
-			s := lipgloss.NewStyle().Foreground(lipgloss.Color(m.th.Colors.Danger))
+			s := lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Danger))
 			bars[i].Style = &s
 		}
 	}
@@ -153,14 +153,14 @@ func (m model) servicesPane(r layout.Rect) string {
 	}
 	done := float64(m.n % 120)
 	out := []string{
-		draw.Heading("Bars", m.th.Section, r.W),
-		chart.Bars(bars, top, r.W, m.th),
+		draw.Heading("Bars", th.Section, r.W),
+		chart.Bars(bars, top, r.W, th),
 		"",
-		draw.Heading("Heat", m.th.Section, r.W),
-		chart.Heat(week, 70, m.th),
+		draw.Heading("Heat", th.Section, r.W),
+		chart.Heat(week, 70, th),
 		"",
-		draw.Heading("Donut", m.th.Section, r.W),
-		chart.Donut(done, 120, 4, m.th),
+		draw.Heading("Donut", th.Section, r.W),
+		chart.Donut(done, 120, 4, th),
 	}
 	return strings.Join(out, "\n")
 }

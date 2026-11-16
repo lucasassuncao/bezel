@@ -69,17 +69,15 @@ type (
 
 type model struct {
 	sh           shell.Shell
-	th           theme.Resolved
 	tbl          table.Model[string]
 	realW, realH int
 	narrow       bool
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fixed("table", layout.Ratio(3, 5)), layout.Fill("detail").Info()),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "table",
 		Actions: []shell.Action{
 			shell.Move(),
@@ -93,11 +91,11 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, tbl: table.New(cols, items()).WithMulti(true).WithCells(true)}
+	return model{sh: sh, tbl: table.New(cols, items()).WithMulti(true).WithCells(true)}
 }
 
 // Init turns the spinners of the rows that start busy.
-func (m model) Init() tea.Cmd { return m.tbl.Tick() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.tbl.Tick()) }
 
 // resize hands the shell the width to draw at: the real one or narrowWidth.
 // VHS cannot resize a terminal mid-recording, so this stands in for it.
@@ -183,7 +181,7 @@ func (m model) View() tea.View {
 			Title:  "dependencies",
 			Bottom: pos,
 			Scroll: m.tbl.Scroll(),
-			Body:   func(r layout.Rect) string { return m.tbl.SetWidth(r.W).View(m.th) },
+			Body:   func(r layout.Rect) string { return m.tbl.SetWidth(r.W).View(m.sh.Theme()) },
 		},
 		"detail": {Title: it.Value, Body: m.detail},
 	})
@@ -198,5 +196,5 @@ func main() {
 
 // field is one labelled row of the detail, cut to width.
 func (m model) field(name, value string, width int) string {
-	return draw.Cut("  "+m.th.Dim.Render(fmt.Sprintf("%-8s ", name))+value, width) + "\n"
+	return draw.Cut("  "+m.sh.Theme().Dim.Render(fmt.Sprintf("%-8s ", name))+value, width) + "\n"
 }

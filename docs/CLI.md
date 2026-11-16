@@ -259,7 +259,7 @@ if m.tbl, r = m.tbl.Update(msg); r.Handled {
 What the frame draws with also works on its own: [`draw`](../draw) and [`chart`](../component/chart) return text, so `fmt.Println` is enough.
 
 ```go
-th := theme.Resolve(theme.Mint(), true)
+th := theme.Resolve(theme.Mint(), theme.DarkTerminal())
 
 body := "3 services updated\n1 skipped"
 _, h := draw.BlockSize(body) // a box takes the exact size it is given: the text plus its two edges

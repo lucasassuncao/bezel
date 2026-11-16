@@ -24,7 +24,6 @@ type pushMsg struct {
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	toasts toast.Model
 }
 
@@ -33,10 +32,9 @@ func push(text string, kind draw.Kind) func(shell.ActionContext) tea.Cmd {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("doc")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "toast",
 		Actions: []shell.Action{
 			shell.Custom("s", "saved", push("Saved notes.md", draw.Success)),
@@ -46,10 +44,10 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, toasts: toast.New().WithWidth(34)}
+	return model{sh: sh, toasts: toast.New().WithWidth(34)}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -67,7 +65,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) body(r layout.Rect) string {
 	return strings.Join([]string{
-		draw.Heading("notes.md", m.th.Section, r.W),
+		draw.Heading("notes.md", m.sh.Theme().Section, r.W),
 		"",
 		"  A toast says what happened without taking the keys:",
 		"  it slides in at the top right, stays three seconds",

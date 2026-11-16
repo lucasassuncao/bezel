@@ -25,16 +25,14 @@ type (
 
 type model struct {
 	sh      shell.Shell
-	th      theme.Resolved
 	cursors [3]cursor.Model
 	focus   int
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("cursor")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "cursor",
 		Actions: []shell.Action{
 			shell.Custom("tab", "next cursor", shell.Send(nextMsg{})),
@@ -42,7 +40,8 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	m := model{sh: sh, th: th}
+	th := sh.Theme()
+	m := model{sh: sh}
 	for i, mode := range []cursor.Mode{cursor.Blinking, cursor.Steady, cursor.Hidden} {
 		m.cursors[i], _ = cursor.New(th).SetChar("h").SetMode(mode)
 	}
@@ -51,7 +50,7 @@ func newModel() model {
 }
 
 // Init starts the blink of the cursor newModel focused.
-func (m model) Init() tea.Cmd { return m.cursors[m.focus].Blink() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.cursors[m.focus].Blink()) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -82,11 +81,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) body(r layout.Rect) string {
-	out := []string{draw.Heading("Modes", m.th.Section, r.W), ""}
+	out := []string{draw.Heading("Modes", m.sh.Theme().Section, r.W), ""}
 	for i, c := range m.cursors {
 		mark := "  "
 		if i == m.focus {
-			mark = m.th.Accent.Render("▸ ")
+			mark = m.sh.Theme().Accent.Render("▸ ")
 		}
 		out = append(out, " "+mark+fmt.Sprintf("%-10s", c.Mode())+c.View()+"ello")
 	}

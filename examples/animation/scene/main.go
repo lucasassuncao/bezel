@@ -21,26 +21,25 @@ var black = color.RGBA{0, 0, 0, 255}
 
 type model struct {
 	sh shell.Shell
-	th theme.Resolved
 	sc scenes
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fill("main")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "scene",
 		Actions: []shell.Action{
 			shell.Custom("n", "next scene", shell.Send(sceneMsg{})),
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, sc: newScenes(th)}
+	th := sh.Theme()
+	return model{sh: sh, sc: newScenes(th)}
 }
 
 // Init sets the first scene going.
-func (m model) Init() tea.Cmd { return m.sc.scene.Tick() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.sc.scene.Tick()) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -49,7 +48,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	var cmd tea.Cmd
 	if _, ok := msg.(sceneMsg); ok {
-		m.sc, cmd = m.sc.next(m.th)
+		m.sc, cmd = m.sc.next(m.sh.Theme())
 		return m, cmd
 	}
 	m.sc, cmd = m.sc.update(msg)
@@ -59,7 +58,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() tea.View {
 	return m.sh.View(map[string]shell.Pane{
 		"main": {Title: "every scene", Right: still(), Body: func(r layout.Rect) string {
-			return m.sc.rows(m.th, m.label, r.W, r.H)
+			return m.sc.rows(m.sh.Theme(), m.label, r.W, r.H)
 		}},
 	})
 }
@@ -74,7 +73,7 @@ func still() string {
 
 // label is a row's kind and variant, in two fixed columns.
 func (m model) label(kind, variant string) string {
-	return m.th.Accent.Render(fmt.Sprintf("%-11s", kind)) + m.th.Muted.Render(fmt.Sprintf("%-14s", variant))
+	return m.sh.Theme().Accent.Render(fmt.Sprintf("%-11s", kind)) + m.sh.Theme().Muted.Render(fmt.Sprintf("%-14s", variant))
 }
 
 func main() {

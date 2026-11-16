@@ -25,23 +25,21 @@ var faq = []accordion.Section{
 
 type model struct {
 	sh  shell.Shell
-	th  theme.Resolved
 	acc accordion.Model
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	acc := accordion.New(faq)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fill("faq")),
-		Theme:   th,
+		Base:    theme.Mint(),
 		Title:   "accordion",
 		Actions: []shell.Action{shell.Custom("↑/↓", "move", nil, shell.DisplayOnly()), shell.Custom("enter", "open/close", nil, shell.DisplayOnly()), shell.Quit()},
 	})
-	return model{sh: sh, th: th, acc: acc}
+	return model{sh: sh, acc: acc}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -54,7 +52,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	return m.sh.View(map[string]shell.Pane{
-		"faq": {Title: "faq", Body: func(r layout.Rect) string { return m.acc.SetWidth(r.W).View(m.th) }},
+		"faq": {Title: "faq", Body: func(r layout.Rect) string { return m.acc.SetWidth(r.W).View(m.sh.Theme()) }},
 	})
 }
 

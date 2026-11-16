@@ -25,15 +25,13 @@ type (
 
 type model struct {
 	sh shell.Shell
-	th theme.Resolved
 	sw stopwatch.Model
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("stopwatch")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "stopwatch",
 		Actions: []shell.Action{
 			shell.Custom("space", "start/stop", shell.Send(toggleMsg{})),
@@ -42,14 +40,14 @@ func newModel() model {
 		},
 	})
 	sw := stopwatch.New().WithEvery(time.Second / 10).WithFormat(tenths)
-	return model{sh: sh, th: th, sw: sw}
+	return model{sh: sh, sw: sw}
 }
 
 // tenths writes d to a tenth of a second, so the width never jumps between
 // "900ms" and "1s" as time.Duration's own String would.
 func tenths(d time.Duration) string { return fmt.Sprintf("%.1fs", d.Seconds()) }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -72,10 +70,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) body(r layout.Rect) string {
+	th := m.sh.Theme()
 	out := []string{
-		draw.Heading("Elapsed", m.th.Section, r.W),
+		draw.Heading("Elapsed", th.Section, r.W),
 		"",
-		"  " + m.th.Dim.Render("elapsed ") + m.sw.View(m.th),
+		"  " + th.Dim.Render("elapsed ") + m.sw.View(th),
 	}
 	return strings.Join(out, "\n")
 }

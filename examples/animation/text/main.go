@@ -35,7 +35,6 @@ func (p page) Actions(shell.Context) []shell.Action { return p.actions }
 
 type model struct {
 	sh    shell.Shell
-	th    theme.Resolved
 	clock animation.Clock // drives the timed rows of every tab
 
 	ty typed
@@ -45,10 +44,9 @@ type model struct {
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fill("main")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "text",
 		Tabs: []shell.Tab{
 			page{"typed", []shell.Action{
@@ -77,8 +75,9 @@ func newModel() model {
 		},
 		Actions: []shell.Action{shell.ChangeTab(), shell.Quit()},
 	})
+	th := sh.Theme()
 	return model{
-		sh: sh, th: th, clock: animation.NewClock(),
+		sh: sh, clock: animation.NewClock(),
 		ty: newTyped(),
 		ro: newRolls(th),
 		tx: newTexts(th),
@@ -87,7 +86,7 @@ func newModel() model {
 }
 
 // Init starts the loops as soon as the program runs.
-func (m model) Init() tea.Cmd { return func() tea.Msg { return startMsg{} } }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), func() tea.Msg { return startMsg{} }) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -188,17 +187,18 @@ func (m model) moving() bool {
 }
 
 func (m model) View() tea.View {
+	th := m.sh.Theme()
 	return m.sh.View(map[string]shell.Pane{
 		"main": {Title: "every text", Right: still(), Body: func(layout.Rect) string {
 			switch m.sh.ActiveTab() {
 			case 1:
-				return m.ro.rows(m.th, m.label)
+				return m.ro.rows(th, m.label)
 			case 2:
-				return m.tx.rows(m.th, m.label)
+				return m.tx.rows(th, m.label)
 			case 3:
-				return m.wd.rows(m.th, m.label)
+				return m.wd.rows(th, m.label)
 			}
-			return m.ty.rows(m.th, m.label)
+			return m.ty.rows(th, m.label)
 		}},
 	})
 }
@@ -213,7 +213,7 @@ func still() string {
 
 // label is a row's kind and variant, in two fixed columns.
 func (m model) label(kind, variant string) string {
-	return m.th.Accent.Render(fmt.Sprintf("%-11s", kind)) + m.th.Muted.Render(fmt.Sprintf("%-14s", variant))
+	return m.sh.Theme().Accent.Render(fmt.Sprintf("%-11s", kind)) + m.sh.Theme().Muted.Render(fmt.Sprintf("%-14s", variant))
 }
 
 func main() {

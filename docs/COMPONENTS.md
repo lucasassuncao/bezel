@@ -44,7 +44,7 @@ A header over two columns, each pane printing the rect it was given. The columns
 
 Source: [`examples/frame/theme/main.go`](../examples/frame/theme/main.go)
 
-Every colour role and a list drawn with it. `n` and `p` step through a few presets, and `SetTheme` swaps them on the running shell. [THEME.md](THEME.md) explains the roles, the presets and a theme of your own.
+Every colour role and a list drawn with it. `n` and `p` step through a few presets, and `SetBase` swaps them on the running shell. [THEME.md](THEME.md) explains the roles, the presets and a theme of your own.
 
 ![theme](recordings/frame/theme.gif)
 

@@ -31,22 +31,21 @@ const labelWidth = 10
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	fields []input.Model
 	focus  int
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("input")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "input",
 		Actions: []shell.Action{
 			// q would be text here, so esc quits instead.
 			shell.Quit(shell.WithKey("esc", "ctrl+c")),
 		},
 	})
+	th := sh.Theme()
 	name := input.New(th).WithPlaceholder("who is deploying").
 		WithValidate(func(s string) error {
 			if strings.TrimSpace(s) == "" {
@@ -59,10 +58,10 @@ func newModel() model {
 	when := input.New(th).WithFormat("9999-99-99 99:99")
 	fields := []input.Model{name, command, password, when}
 	fields[0], _ = fields[0].Focus()
-	return model{sh: sh, th: th, fields: fields}
+	return model{sh: sh, fields: fields}
 }
 
-func (m model) Init() tea.Cmd { return m.fields[0].Blink() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.fields[0].Blink()) }
 
 // move gives the focus to the field d away, wrapping around.
 func (m model) move(d int) (model, tea.Cmd) {
@@ -114,12 +113,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) body(r layout.Rect) string {
+	th := m.sh.Theme()
 	w := max(r.W-labelWidth-2, 4)
 	var out []string
 	for i, f := range m.fields {
-		label := m.th.Dim.Render(fmt.Sprintf("%-*s", labelWidth, labels[i]))
+		label := th.Dim.Render(fmt.Sprintf("%-*s", labelWidth, labels[i]))
 		if i == m.focus {
-			label = m.th.Accent.Render(fmt.Sprintf("%-*s", labelWidth, labels[i]))
+			label = th.Accent.Render(fmt.Sprintf("%-*s", labelWidth, labels[i]))
 		}
 		fw := w
 		if i == 1 {
@@ -127,11 +127,11 @@ func (m model) body(r layout.Rect) string {
 		}
 		out = append(out, " "+label+f.SetWidth(fw).View())
 		if err := f.Err(); err != nil && i != m.focus {
-			out = append(out, " "+strings.Repeat(" ", labelWidth)+m.th.Danger.Render(err.Error()))
+			out = append(out, " "+strings.Repeat(" ", labelWidth)+th.Danger.Render(err.Error()))
 		}
 		out = append(out, "")
 	}
-	out = append(out, " "+m.th.Muted.Render("↑/↓ move · tab completes · enter submits · esc quits"))
+	out = append(out, " "+th.Muted.Render("↑/↓ move · tab completes · enter submits · esc quits"))
 	return strings.Join(out, "\n")
 }
 

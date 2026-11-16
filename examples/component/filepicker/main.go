@@ -23,17 +23,15 @@ type permsMsg struct{}
 
 type model struct {
 	sh    shell.Shell
-	th    theme.Resolved
 	fp    filepicker.Model
 	perms bool
 	root  string
 }
 
 func newModel(dir string) model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("files")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "filepicker",
 		Actions: []shell.Action{
 			shell.Custom("↑/↓", "move", nil, shell.DisplayOnly()),
@@ -43,10 +41,10 @@ func newModel(dir string) model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, fp: filepicker.New(dir), root: dir}
+	return model{sh: sh, fp: filepicker.New(dir), root: dir}
 }
 
-func (m model) Init() tea.Cmd { return m.fp.Init() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.fp.Init()) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if size, ok := msg.(tea.WindowSizeMsg); ok {
@@ -78,7 +76,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	return m.sh.View(map[string]shell.Pane{
-		"files": {Title: m.fp.Dir(), Body: func(r layout.Rect) string { return m.fp.SetHeight(r.H).View(m.th) }},
+		"files": {Title: m.fp.Dir(), Body: func(r layout.Rect) string { return m.fp.SetHeight(r.H).View(m.sh.Theme()) }},
 	})
 }
 

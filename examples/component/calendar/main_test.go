@@ -24,7 +24,7 @@ func frame(t *testing.T, m tea.Model, msg tea.Msg) (tea.Model, string) {
 
 func TestCalendarMovesAndChooses(t *testing.T) {
 	var m tea.Model = newModel()
-	require.Nil(t, m.Init())
+	require.NotNil(t, m.Init(), "the shell asks for the terminal's background")
 	m, out := frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 16})
 	t.Log("\n" + out)
 	require.Contains(t, out, "November 2026")

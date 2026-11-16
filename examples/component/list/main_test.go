@@ -58,7 +58,7 @@ func TestListFilterTakesEveryKey(t *testing.T) {
 
 func TestListTurnsASpinnerOnABusyRow(t *testing.T) {
 	var m tea.Model = newModel()
-	require.Nil(t, m.Init(), "no row starts busy")
+	require.NotNil(t, m.Init(), "the shell asks for the terminal's background")
 	m, out := frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
 	require.NotContains(t, out, "⠋")
 

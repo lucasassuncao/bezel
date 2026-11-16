@@ -35,15 +35,13 @@ type createMsg struct{}
 
 type model struct {
 	sh   shell.Shell
-	th   theme.Resolved
 	form form.Form
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("form")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "form",
 		Actions: []shell.Action{
 			shell.Custom("tab", "next field", nil, shell.DisplayOnly()),
@@ -51,6 +49,7 @@ func newModel() model {
 			shell.Custom("ctrl+c", "quit", nil, shell.DisplayOnly()),
 		},
 	})
+	th := sh.Theme()
 	f := form.New(th,
 		form.NewInput("Name").WithPlaceholder("my-project").WithWidth(28),
 		form.NewSelect("Image", []string{"ubuntu", "debian", "alpine"}).
@@ -64,14 +63,14 @@ func newModel() model {
 		form.NewCheckbox("Forward port 3000"),
 		form.NewButton("Create", func() tea.Msg { return createMsg{} }),
 	)
-	return model{sh: sh, th: th, form: f}
+	return model{sh: sh, form: f}
 }
 
 // start is the day the date field opens on, fixed so the recording holds still.
 var start = time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC)
 
 // Init starts the caret blinking in the input the form opens on.
-func (m model) Init() tea.Cmd { return m.form.Init() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), m.form.Init()) }
 
 // summary is what Create reports: every value the form holds.
 func (m model) summary() string {

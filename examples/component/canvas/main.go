@@ -45,17 +45,15 @@ var planets = []planet{
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	n      int
 	zoom   float64 // the half-height of the view, in the system's units
 	paused bool
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Fill("sky"),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "canvas",
 		Actions: []shell.Action{
 			shell.Custom("space", "pause", shell.Send(pauseMsg{})),
@@ -64,10 +62,10 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, zoom: 13}
+	return model{sh: sh, zoom: 13}
 }
 
-func (m model) Init() tea.Cmd { return tick() }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), tick()) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -130,7 +128,7 @@ func (m model) sky(r layout.Rect) string {
 	// A dot is about as wide as it is tall, so x spans what the width gives.
 	half := m.zoom * float64(r.W*2) / float64(max(r.H*4, 1))
 	c := canvas.New(-half, half, -m.zoom, m.zoom).SetWidth(r.W).SetHeight(r.H).Draw(shapes(m.n)...)
-	return c.View(m.th)
+	return c.View(m.sh.Theme())
 }
 
 func (m model) View() tea.View {

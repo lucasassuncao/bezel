@@ -50,7 +50,9 @@ func TestTimerSaysWhenTimeIsUp(t *testing.T) {
 func TestTimerSpaceStopsIt(t *testing.T) {
 	var m tea.Model = newModel()
 	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
-	m, _ = m.Update(m.Init()())
+	for _, cmd := range m.Init()().(tea.BatchMsg) {
+		m, _ = m.Update(cmd())
+	}
 	require.True(t, m.(model).tm.Running(), "Init starts it")
 	m = key(t, m, "space")
 	require.False(t, m.(model).tm.Running())

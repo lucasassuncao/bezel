@@ -41,16 +41,14 @@ type toggleBusyMsg struct{}
 
 type model struct {
 	sh     shell.Shell
-	th     theme.Resolved
 	list   list.Model[food]
 	chosen *food
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fixed("list", layout.Ratio(1, 2)), layout.Fill("detail")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "list",
 		Actions: []shell.Action{
 			shell.Move(),
@@ -61,11 +59,11 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, list: list.New(rows()).WithMotion(120 * time.Millisecond).WithMulti(true)}
+	return model{sh: sh, list: list.New(rows()).WithMotion(120 * time.Millisecond).WithMulti(true)}
 }
 
-// Init has nothing to start: a spinner turns only once b marks a row busy.
-func (m model) Init() tea.Cmd { return nil }
+// Init only asks for the background: a spinner turns once b marks a row busy.
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 // toList hands a message to the list and reads what it did; the Cmd it
 // returns starts the cursor gliding to where the key moved it.
@@ -95,16 +93,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) detail() string {
-	out := m.th.Dim.Render("enter shows the row's payload")
+	th := m.sh.Theme()
+	out := th.Dim.Render("enter shows the row's payload")
 	if m.chosen != nil {
-		out = fmt.Sprintf("%s\n\n%d kcal per 100 g", m.th.Accent.Render(m.chosen.name), m.chosen.calories)
+		out = fmt.Sprintf("%s\n\n%d kcal per 100 g", th.Accent.Render(m.chosen.name), m.chosen.calories)
 	}
 	var names []string
 	for _, r := range m.list.Checked() {
 		names = append(names, r.Label)
 	}
 	if len(names) > 0 {
-		out += "\n\n" + m.th.Dim.Render("checked: ") + strings.Join(names, ", ")
+		out += "\n\n" + th.Dim.Render("checked: ") + strings.Join(names, ", ")
 	}
 	return out
 }
@@ -114,7 +113,7 @@ func (m model) View() tea.View {
 	l := m.list.SetHeight(m.sh.Inner("list").H)
 	return m.sh.View(map[string]shell.Pane{
 		"list": {Title: "food", Bottom: fmt.Sprintf("%d checked", len(l.Checked())), Scroll: l.Scroll(), Body: func(layout.Rect) string {
-			return l.View(m.th)
+			return l.View(m.sh.Theme())
 		}},
 		"detail": {Title: "payload", Body: func(layout.Rect) string { return m.detail() }},
 	})

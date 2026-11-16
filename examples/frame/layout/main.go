@@ -24,11 +24,9 @@ type model struct {
 	sh           shell.Shell
 	realW, realH int
 	narrow       bool
-	th           theme.Resolved
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(
 			layout.Fixed("header", layout.Lines(3)),
@@ -37,7 +35,7 @@ func newModel() model {
 				layout.Fill("main"),
 			).Collapse(72, "main").Resizable(),
 		),
-		Theme: th,
+		Base:  theme.Mint(),
 		Title: "layout",
 		Mouse: true,
 		Actions: []shell.Action{
@@ -48,10 +46,10 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th}
+	return model{sh: sh}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 // resize hands the shell the width to draw at: the real one or narrowWidth.
 // VHS cannot resize a terminal mid-recording, so this stands in for it.

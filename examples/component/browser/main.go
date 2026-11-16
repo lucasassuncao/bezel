@@ -43,15 +43,13 @@ var recipes = []browser.Item{
 
 type model struct {
 	sh      shell.Shell
-	th      theme.Resolved
 	browser browser.Model
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fixed("list", layout.Ratio(1, 3), layout.Min(20)), layout.Fill("preview")),
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "browser",
 		Actions: []shell.Action{
 			shell.Move(),
@@ -60,10 +58,10 @@ func newModel() model {
 			shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, browser: browser.New(recipes)}
+	return model{sh: sh, browser: browser.New(recipes)}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result
@@ -95,7 +93,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	return m.sh.View(map[string]shell.Pane{
-		"list":    {Title: "recipes", Body: func(r layout.Rect) string { return m.browser.SetListHeight(r.H).ListView(m.th) }},
+		"list":    {Title: "recipes", Body: func(r layout.Rect) string { return m.browser.SetListHeight(r.H).ListView(m.sh.Theme()) }},
 		"preview": {Title: "recipe", Body: func(r layout.Rect) string { return m.browser.SetPreviewHeight(r.H).PreviewView() }},
 	})
 }

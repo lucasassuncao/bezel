@@ -44,13 +44,11 @@ type (
 
 type model struct {
 	sh    shell.Shell
-	th    theme.Resolved
 	tabs  []tab
 	lists []list.Model[int] // one a tab, so each keeps its cursor
 }
 
 func newModel() model {
-	th := theme.Resolve(theme.Mint(), true)
 	tabs := []tab{
 		{name: "files", items: []string{"main.go", "go.mod", "README.md", "Makefile"}},
 		{name: "notes", items: []string{"ideas", "todo", "meeting"}},
@@ -68,17 +66,17 @@ func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fixed("list", layout.Ratio(1, 3), layout.Min(24)), layout.Fill("detail")),
 		Tabs:   shTabs,
-		Theme:  th,
+		Base:   theme.Mint(),
 		Title:  "shell",
 		Mouse:  true, // Screen turns it on; tabs, panes and dialogs then take clicks
 		Actions: []shell.Action{
 			shell.Help(), shell.ChangeTab(), shell.Move(), shell.Quit(),
 		},
 	})
-	return model{sh: sh, th: th, tabs: tabs, lists: lists}
+	return model{sh: sh, tabs: tabs, lists: lists}
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return m.sh.Init() }
 
 // selected is the item under the active tab's cursor.
 func (m model) selected() string {
@@ -108,7 +106,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case askMsg:
 		item := m.selected()
 		yes := func() tea.Msg { return deletedMsg{item} }
-		return m, overlay.Open(overlay.NewConfirm("Delete", item, yes, m.th).WithKind(draw.Danger))
+		return m, overlay.Open(overlay.NewConfirm("Delete", item, yes, m.sh.Theme()).WithKind(draw.Danger))
 	case deletedMsg:
 		m.sh, cmd = m.sh.SetStatus("deleted "+msg.item, shell.OK, 2*time.Second)
 		return m, cmd
@@ -131,7 +129,7 @@ func (m model) View() tea.View {
 	at := m.sh.ActiveTab()
 	l := m.lists[at].SetHeight(m.sh.Inner("list").H)
 	return m.sh.View(map[string]shell.Pane{
-		"list": {Title: m.tabs[at].name, Body: func(layout.Rect) string { return l.View(m.th) }},
+		"list": {Title: m.tabs[at].name, Body: func(layout.Rect) string { return l.View(m.sh.Theme()) }},
 		"detail": {Title: "detail", Body: func(r layout.Rect) string {
 			return fmt.Sprintf("selected: %s\nfocus: %s\npane: %dx%d", m.selected(), m.sh.Focused(), r.W, r.H)
 		}},

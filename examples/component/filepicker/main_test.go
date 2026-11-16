@@ -31,7 +31,9 @@ func sized(t *testing.T) tea.Model {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module x"), 0o600))
 	require.NoError(t, os.Mkdir(filepath.Join(dir, "docs"), 0o750))
 	var m tea.Model = newModel(dir)
-	m, _ = m.Update(m.Init()())
+	for _, cmd := range m.Init()().(tea.BatchMsg) {
+		m, _ = m.Update(cmd())
+	}
 	m, _ = frame(t, m, tea.WindowSizeMsg{Width: 80, Height: 24})
 	return m
 }
