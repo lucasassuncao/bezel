@@ -95,13 +95,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case openMsg:
-		o := m.modal()
-		m.sh = m.sh.Push(o)
-		// Push takes no command: a dialog with something to start, the prompt's
-		// caret or the picker's listing, gets its Init once it is on top.
-		if in, ok := o.(overlay.Initer); ok {
-			return m, in.Init()
-		}
+		// Open, not Push: the shell themes the dialog, then starts what it
+		// has to start (the prompt's caret, the picker's listing).
+		return m, overlay.Open(m.modal())
 	case doneMsg:
 		m.sh, cmd = m.sh.SetStatus(msg.text, shell.OK, 3*time.Second)
 		return m, cmd
