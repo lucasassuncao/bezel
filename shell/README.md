@@ -13,7 +13,9 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
 ## Index
 
 - [func Check\(actions ...Action\) error](<#Check>)
+- [func Copy\(text, done, failed string\) tea.Cmd](<#Copy>)
 - [func IsStatusExpiry\(msg tea.Msg\) bool](<#IsStatusExpiry>)
+- [func Notify\(text string, level Level\) tea.Cmd](<#Notify>)
 - [func Send\(msg tea.Msg\) func\(ActionContext\) tea.Cmd](<#Send>)
 - [type Action](<#Action>)
   - [func ChangePane\(opts ...Option\) Action](<#ChangePane>)
@@ -32,8 +34,10 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
 - [type ClickMsg](<#ClickMsg>)
 - [type Config](<#Config>)
 - [type Context](<#Context>)
+- [type CopyMsg](<#CopyMsg>)
 - [type FocusMsg](<#FocusMsg>)
 - [type Level](<#Level>)
+- [type NotifyMsg](<#NotifyMsg>)
 - [type Option](<#Option>)
   - [func Arg\(placeholder string\) Option](<#Arg>)
   - [func DisplayOnly\(\) Option](<#DisplayOnly>)
@@ -108,14 +112,32 @@ func Check(actions ...Action) error
 
 Check reports every key two actions share, display\-only ones included. Apps call it in a test over each screen's set; at runtime the first match runs.
 
+<a name="Copy"></a>
+## func [Copy](<https://github.com/lucasassuncao/bezel/blob/main/shell/copy.go#L40>)
+
+```go
+func Copy(text, done, failed string) tea.Cmd
+```
+
+Copy is Shell.Copy as a command, for a model that does not hold the shell.
+
 <a name="IsStatusExpiry"></a>
-## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L234>)
+## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L254>)
 
 ```go
 func IsStatusExpiry(msg tea.Msg) bool
 ```
 
 IsStatusExpiry reports a status timer's message, or a toast's frame, for a harness that must not feed timers back into the loop.
+
+<a name="Notify"></a>
+## func [Notify](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L230>)
+
+```go
+func Notify(text string, level Level) tea.Cmd
+```
+
+Notify is SetStatus as a command, for a model that does not hold the shell: text shows at level for Config.StatusTTL.
 
 <a name="Send"></a>
 ## func [Send](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L145>)
@@ -331,6 +353,15 @@ type Context struct {
 }
 ```
 
+<a name="CopyMsg"></a>
+## type [CopyMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/copy.go#L37>)
+
+CopyMsg asks the shell for a clipboard write. Copy sends it.
+
+```go
+type CopyMsg struct{ Text, Done, Failed string }
+```
+
 <a name="FocusMsg"></a>
 ## type [FocusMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/shell.go#L198>)
 
@@ -357,6 +388,18 @@ const (
     OK
     Error
 )
+```
+
+<a name="NotifyMsg"></a>
+## type [NotifyMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L223-L226>)
+
+NotifyMsg asks the shell for a status. Notify sends it; a test reads the one a handler returned.
+
+```go
+type NotifyMsg struct {
+    Text  string
+    Level Level
+}
 ```
 
 <a name="Option"></a>
@@ -549,7 +592,7 @@ func (s Shell) CheckPanes(panes map[string]Pane) error
 CheckPanes reports every name in panes that the layout has no pane for: a typo View would drop without a word. Apps call it in a test, as Check for keys; a layout pane missing from panes is fine, it gives its space back.
 
 <a name="Shell.ClearInput"></a>
-### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L259>)
+### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L279>)
 
 ```go
 func (s Shell) ClearInput() Shell
@@ -558,7 +601,7 @@ func (s Shell) ClearInput() Shell
 ClearInput takes the input off the status row and gives the keys back.
 
 <a name="Shell.ClearStatus"></a>
-### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L243>)
+### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L263>)
 
 ```go
 func (s Shell) ClearStatus() Shell
@@ -585,7 +628,7 @@ func (s Shell) Context() Context
 Context is what the shell hands tabs and actions about where the user is.
 
 <a name="Shell.Copy"></a>
-### func \(Shell\) [Copy](<https://github.com/lucasassuncao/bezel/blob/main/shell/copy.go#L25>)
+### func \(Shell\) [Copy](<https://github.com/lucasassuncao/bezel/blob/main/shell/copy.go#L26>)
 
 ```go
 func (s Shell) Copy(text, done, failed string) tea.Cmd
@@ -639,7 +682,7 @@ func (s Shell) Inner(name string) layout.Rect
 Inner is the rect a pane's Body draws into: Rect less the border and padding. Size the pane's models by it before they take a message; the zero Rect when the pane is not on screen.
 
 <a name="Shell.Input"></a>
-### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L266>)
+### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L286>)
 
 ```go
 func (s Shell) Input() (input.Model, bool)
@@ -756,7 +799,7 @@ func (s Shell) SetFocus(name string) Shell
 SetFocus moves focus to a leaf of the layout. Unknown names are ignored, and a leaf the layout dropped hands focus to one on screen.
 
 <a name="Shell.SetInput"></a>
-### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L252>)
+### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L272>)
 
 ```go
 func (s Shell) SetInput(m input.Model) Shell
@@ -783,7 +826,7 @@ func (s Shell) SetLegendLines(n int) Shell
 SetLegendLines changes how many rows the legend keeps, 1 or more.
 
 <a name="Shell.SetStatus"></a>
-### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L194>)
+### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L201>)
 
 ```go
 func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, tea.Cmd)
@@ -864,7 +907,7 @@ func (s Shell) Status() string
 Status is the banner text currently set, empty when none.
 
 <a name="Shell.StatusExpiry"></a>
-### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L230>)
+### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L250>)
 
 ```go
 func (s Shell) StatusExpiry() tea.Msg
@@ -873,7 +916,7 @@ func (s Shell) StatusExpiry() tea.Msg
 StatusExpiry is the message that would clear the current status, for a test harness that drops timers and delivers them itself.
 
 <a name="Shell.StatusLevel"></a>
-### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L226>)
+### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L246>)
 
 ```go
 func (s Shell) StatusLevel() Level

@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/internal/clip"
 )
@@ -30,6 +31,14 @@ func (s Shell) Copy(text, done, failed string) tea.Cmd {
 		}
 		return copiedMsg{done: done, failed: failed, err: err}
 	})
+}
+
+// CopyMsg asks the shell for a clipboard write. Copy sends it.
+type CopyMsg struct{ Text, Done, Failed string }
+
+// Copy is Shell.Copy as a command, for a model that does not hold the shell.
+func Copy(text, done, failed string) tea.Cmd {
+	return bezel.Emit(CopyMsg{Text: text, Done: done, Failed: failed})
 }
 
 // copied shows how a copy went.

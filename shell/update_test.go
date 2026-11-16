@@ -88,6 +88,34 @@ func TestStatusExpiresOnlyForItsOwnTick(t *testing.T) {
 	require.Equal(t, "", s.status)
 }
 
+// Notify is the status as a command, for a model that does not hold the shell.
+func TestNotifyShowsTheStatusUntilTheConfigsTTL(t *testing.T) {
+	c := actionConfig()
+	c.StatusTTL = time.Nanosecond
+	s := sized(New(c))
+
+	cmd := Notify("saved", OK)
+	require.Equal(t, NotifyMsg{Text: "saved", Level: OK}, cmd())
+
+	s, r := s.Update(cmd())
+	require.True(t, r.Handled)
+	require.Equal(t, "saved", s.Status())
+	require.Equal(t, OK, s.StatusLevel())
+
+	require.NotNil(t, r.Cmd, "the timer that clears it")
+	s, _ = s.Update(r.Cmd())
+	require.Empty(t, s.Status(), "gone after Config.StatusTTL")
+}
+
+// A dialog's answer is where many statuses come from, so one reaches the
+// shell with the dialog still open.
+func TestNotifyReachesTheShellPastAnOpenDialog(t *testing.T) {
+	s := sizedShell().Push(overlay.NewText("About", "bezel"))
+	s, r := s.Update(Notify("saved", OK)())
+	require.True(t, r.Handled)
+	require.Equal(t, "saved", s.Status())
+}
+
 func TestStatusInputTakesTheKeys(t *testing.T) {
 	in, _ := input.New(theme.Resolved{}).Focus()
 	s := newShell().SetInput(in)

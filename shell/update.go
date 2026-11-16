@@ -89,6 +89,13 @@ func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 		s.toasts, r = s.toasts.Update(m.Msg)
 		return s, true, toastCmd(r.Cmd)
 
+	case NotifyMsg:
+		next, cmd := s.SetStatus(m.Text, m.Level, s.cfg.StatusTTL)
+		return next, true, cmd
+
+	case CopyMsg:
+		return s, true, s.Copy(m.Text, m.Done, m.Failed)
+
 	case copiedMsg:
 		next, cmd := s.copied(m)
 		return next, true, cmd
@@ -209,6 +216,19 @@ func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, te
 	}
 	seq := s.statusSeq
 	return s, tea.Batch(shown, tea.Tick(ttl, func(time.Time) tea.Msg { return statusExpiredMsg{seq: seq} }))
+}
+
+// NotifyMsg asks the shell for a status. Notify sends it; a test reads the
+// one a handler returned.
+type NotifyMsg struct {
+	Text  string
+	Level Level
+}
+
+// Notify is SetStatus as a command, for a model that does not hold the shell:
+// text shows at level for Config.StatusTTL.
+func Notify(text string, level Level) tea.Cmd {
+	return bezel.Emit(NotifyMsg{Text: text, Level: level})
 }
 
 // toastKind is the toast that reports a status at level.

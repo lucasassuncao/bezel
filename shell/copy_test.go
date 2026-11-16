@@ -29,6 +29,19 @@ func TestCopyWritesTheTextAndSaysDone(t *testing.T) {
 	require.Equal(t, OK, s.StatusLevel())
 }
 
+// Copy the command is Shell.Copy for a model that does not hold the shell.
+func TestTheCopyCommandWritesThroughTheShell(t *testing.T) {
+	var got string
+	s := sized(New(clipConfig(func(text string) error { got = text; return nil })))
+
+	s, r := s.Update(Copy("kv/app/db", "copied: kv/app/db", "copy path")())
+	require.True(t, r.Handled)
+	s = run(t, s, func() any { return r.Cmd() })
+
+	require.Equal(t, "kv/app/db", got)
+	require.Equal(t, "copied: kv/app/db", s.Status())
+}
+
 func TestCopyReportsTheFailureInTheAppsWords(t *testing.T) {
 	s := sized(New(clipConfig(func(string) error { return errors.New("xclip: not found") })))
 
