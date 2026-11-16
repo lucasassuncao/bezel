@@ -5,6 +5,8 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel"
 )
 
 func TestRowsReadsAVerticalTurn(t *testing.T) {
@@ -23,4 +25,12 @@ func TestRowsReadsAVerticalTurn(t *testing.T) {
 		require.Equal(t, c.rows, rows)
 		require.Equal(t, c.ok, ok)
 	}
+}
+
+func TestUnwrapIsTheTurnAShellsWheelMsgCarries(t *testing.T) {
+	turn := tea.MouseWheelMsg{Button: tea.MouseWheelDown}
+	require.Equal(t, turn, Unwrap(bezel.WheelMsg{Pane: "list", MouseWheelMsg: turn}))
+	require.Equal(t, turn, Unwrap(turn))
+	key := tea.KeyPressMsg{Code: tea.KeyDown}
+	require.Equal(t, key, Unwrap(key), "anything else as it came")
 }

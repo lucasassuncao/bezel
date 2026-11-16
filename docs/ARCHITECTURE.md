@@ -63,7 +63,7 @@ Plumbing more than one folder needs and no app should depend on. Go lets only th
 | `clip` | the system clipboard, read as the paste a terminal sends and written off the event loop | `input`, `textbox`, `themebrowser`, `shell` |
 | `fuzzy` | a query matched by its letters in order, scored so the best match ranks first | `list`, `table`, `themebrowser`, the `:` palette |
 | `braille` | a grid of braille cells, two dots by four, coloured by what lit them last, with text over the dots | `chart`, `canvas` |
-| `wheel` | a mouse wheel turn read as rows, shift and sideways turns left to panning | `list`, `table`, `tree`, `filepicker`, `accordion`, `textbox`, `paginator` |
+| `wheel` | a mouse wheel turn read as rows, shift and sideways turns left to panning | `list`, `table`, `tree`, `filepicker`, `accordion`, `textbox`, `paginator`, `viewport` |
 
 A public type can still come from here: `animation.FrameMsg` and `animation.Ease` are aliases of `frames` types, so every package names one type while the run behind it stays private.
 
@@ -71,7 +71,7 @@ A public type can still come from here: `animation.FrameMsg` and `animation.Ease
 
 From the bottom up, each layer imports only the ones below it:
 
-0. the root `bezel`: `Result`, `Model` and `ClickMsg`, importing only bubbletea
+0. the root `bezel`: `Result`, `Model`, `ClickMsg` and `WheelMsg`, importing only bubbletea
 1. `internal/`
 2. motion: `animation/` (with `text` and `scene`), then `effect/` on it; they import nothing from bezel but `internal/` and the root
 3. the foundation: `layout`, `key`, `draw`, `legend`, `theme`

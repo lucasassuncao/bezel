@@ -14,6 +14,7 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/internal/wheel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/legend"
@@ -409,6 +410,7 @@ func (m Model) Scroll() layout.Scroll {
 // Update scrolls and pans on its keys and the mouse wheel; the command is
 // always nil. A scroll key is Handled even at the end of the text.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	msg = wheel.Unwrap(msg)
 	var r bezel.Result
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:

@@ -260,3 +260,10 @@ func TestALineBreakInACellKeepsTheTableToItsHeight(t *testing.T) {
 	out := m.View(th)
 	require.Len(t, strings.Split(out, "\n"), 3, "%q", ansi.Strip(out))
 }
+
+func TestAShellsWheelMsgMovesTheCursor(t *testing.T) {
+	turn := bezel.WheelMsg{MouseWheelMsg: tea.MouseWheelMsg{Button: tea.MouseWheelDown}}
+	m, r := New(pkgCols, pkgs(10)).SetHeight(5).Update(turn)
+	require.True(t, r.Handled)
+	require.Equal(t, 1, m.Cursor())
+}

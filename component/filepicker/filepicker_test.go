@@ -272,3 +272,11 @@ func TestAClickMovesTheCursorAndASecondPicks(t *testing.T) {
 	_, r = m.Update(clickAt(9))
 	require.False(t, r.Handled)
 }
+
+func TestAShellsWheelMsgMovesTheCursor(t *testing.T) {
+	m := New(tree(t))
+	m = load(t, m, m.Init())
+	m, r := m.Update(bezel.WheelMsg{MouseWheelMsg: tea.MouseWheelMsg{Button: tea.MouseWheelDown}})
+	require.True(t, r.Handled)
+	require.Equal(t, "main.go", filepath.Base(m.Highlighted()))
+}

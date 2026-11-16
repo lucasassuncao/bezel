@@ -593,3 +593,10 @@ func TestANarrowFieldKeepsItsGutterWithinTheWidth(t *testing.T) {
 		require.LessOrEqual(t, ansi.StringWidth(row), 5, "%q", ansi.Strip(row))
 	}
 }
+
+func TestAShellsWheelMsgScrollsTheText(t *testing.T) {
+	m := focused("one\ntwo\nthree\nfour\nfive\nsix").SetWidth(40).SetHeight(2).MoveTo(0, 0)
+	m, r := m.Update(bezel.WheelMsg{MouseWheelMsg: tea.MouseWheelMsg{Button: tea.MouseWheelDown}})
+	require.True(t, r.Handled)
+	require.NotContains(t, ansi.Strip(m.View()), "one")
+}

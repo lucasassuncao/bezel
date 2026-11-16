@@ -176,6 +176,7 @@ func (m Model) ItemsOnPage(n int) int {
 // first and last page, on the wheel, and to the dot a click lands on. A
 // change reports a [Paged]; any other message comes back unhandled.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	msg = wheel.Unwrap(msg)
 	before := m.page
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:

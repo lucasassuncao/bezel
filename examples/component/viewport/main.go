@@ -115,9 +115,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.vp = m.vp.PrevHighlight()
 	case wrapMsg:
 		m.vp = m.vp.SetWrap(!m.vp.Wrap())
-	case tea.KeyPressMsg:
-		m.vp, _ = m.vp.Update(msg)
-	case tea.MouseWheelMsg:
+	case tea.KeyPressMsg, shell.WheelMsg: // one pane: the wheel is always its
 		m.vp, _ = m.vp.Update(msg)
 	}
 	return m, nil

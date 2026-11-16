@@ -56,6 +56,7 @@ func newModel() model {
 		Layout: layout.Rows(layout.Fill("log"), layout.Fill("json")),
 		Base:   theme.Mint(),
 		Title:  "log pane",
+		Mouse:  true, // the wheel scrolls the pane under the pointer
 		Actions: []shell.Action{
 			shell.ChangePane(),
 			shell.Scroll(),
@@ -103,7 +104,7 @@ func (m model) emit(n int) tea.Msg {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// While filtering every key is text for the filter, tab and q included.
 	if k, ok := msg.(tea.KeyPressMsg); ok && m.focused().Filtering() {
-		return m.toFocused(k)
+		return m.toPane(m.sh.Focused(), k)
 	}
 	var r bezel.Result
 	if m.sh, r = m.sh.Update(msg); r.Handled {
@@ -118,8 +119,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case step:
 		return m, m.next(msg.n)
-	case tea.KeyPressMsg, tea.MouseWheelMsg:
-		return m.toFocused(msg)
+	case tea.KeyPressMsg:
+		return m.toPane(m.sh.Focused(), msg)
+	case shell.WheelMsg: // the pane under the pointer, focused or not
+		return m.toPane(msg.Pane, msg)
 	}
 	// Lines: each pane takes only its own feed's.
 	var rj bezel.Result
@@ -136,13 +139,13 @@ func (m model) focused() logger.Pane {
 	return m.pane
 }
 
-// toFocused hands msg to the focused pane.
-func (m model) toFocused(msg tea.Msg) (tea.Model, tea.Cmd) {
-	p, r := m.focused().Update(msg)
-	if m.sh.Focused() == "json" {
-		m.json = p
+// toPane hands msg to the pane called name.
+func (m model) toPane(name string, msg tea.Msg) (tea.Model, tea.Cmd) {
+	var r bezel.Result
+	if name == "json" {
+		m.json, r = m.json.Update(msg)
 	} else {
-		m.pane = p
+		m.pane, r = m.pane.Update(msg)
 	}
 	return m, r.Cmd
 }

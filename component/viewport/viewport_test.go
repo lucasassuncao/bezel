@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/layout"
@@ -349,4 +350,11 @@ func TestTopLineCountsWrappedRows(t *testing.T) {
 	require.Equal(t, [2]int{3, 1}, [2]int{line, part}, "two rows a line")
 	m = m.SetLines(strings.Split(strings.Repeat("0123456789\n", 8), "\n")).SetTopLine(line-2, part)
 	require.Equal(t, 3, m.YOffset(), "two lines gone above: four rows up")
+}
+
+func TestAShellsWheelMsgScrollsTheText(t *testing.T) {
+	m := sized(numbered(40), 20, 10)
+	got, r := m.Update(bezel.WheelMsg{MouseWheelMsg: tea.MouseWheelMsg{Button: tea.MouseWheelDown}})
+	require.True(t, r.Handled)
+	require.Equal(t, 3, got.YOffset())
 }

@@ -554,3 +554,10 @@ func TestTheWheelMovesTheCursor(t *testing.T) {
 	_, r = m.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown, Mod: tea.ModShift})
 	require.False(t, r.Handled, "shift pans, which a list does not")
 }
+
+func TestAShellsWheelMsgMovesTheCursor(t *testing.T) {
+	m, r := bigList(10).Update(bezel.WheelMsg{MouseWheelMsg: tea.MouseWheelMsg{Button: tea.MouseWheelDown}})
+	require.True(t, r.Handled)
+	row, _ := m.Selected()
+	require.Equal(t, 1, row.Value)
+}

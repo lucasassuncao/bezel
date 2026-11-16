@@ -590,6 +590,7 @@ func (m Model) TerminalCursor() *tea.Cursor {
 // Update edits on a key or a paste while focused, and flips the caret on its
 // own BlinkMsg. A key it has no use for leaves it as it was, with no command.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	msg = wheel.Unwrap(msg)
 	m = m.ready()
 	if c, ok := msg.(bezel.ClickMsg); ok {
 		msg = c.MouseClickMsg

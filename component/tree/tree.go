@@ -353,6 +353,7 @@ func (m Model[N]) SetNode(idx int, mut func(*N)) Model[N] {
 // spinner's frames. Opening or closing a parent reports an [Expanded] or a
 // [Collapsed]; any other message comes back unhandled and unchanged.
 func (m Model[N]) Update(msg tea.Msg) (Model[N], bezel.Result) {
+	msg = wheel.Unwrap(msg)
 	var ev any
 	var handled bool
 	switch msg := msg.(type) {

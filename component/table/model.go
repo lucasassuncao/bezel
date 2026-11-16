@@ -273,6 +273,7 @@ func (m Model[T]) SetHeight(h int) Model[T] {
 // the Busy spinner's frames. Choosing a row reports a [Chosen], checking one
 // a [Toggled], sorting a [Sorted]; any other message comes back unhandled.
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
+	msg = wheel.Unwrap(msg)
 	var chosen, handled bool
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:

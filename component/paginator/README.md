@@ -129,7 +129,7 @@ func (m Model) ItemsOnPage(n int) int
 ItemsOnPage is how many of n items the current page shows.
 
 <a name="Model.Legend"></a>
-### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L213>)
+### func \(Model\) [Legend](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L214>)
 
 ```go
 func (m Model) Legend() []legend.Entry
@@ -237,7 +237,7 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result)
 Update turns the page on Prev and Next, which are its keys even on the first and last page, on the wheel, and to the dot a click lands on. A change reports a [Paged](<#Paged>); any other message comes back unhandled.
 
 <a name="Model.View"></a>
-### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L218>)
+### func \(Model\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/paginator/paginator.go#L219>)
 
 ```go
 func (m Model) View(th theme.Resolved) string

@@ -207,3 +207,9 @@ func TestTickAsksForFramesOnlyWhileASectionMoves(t *testing.T) {
 	m, _ = m.Advance(time.Unix(11, 0))
 	require.Nil(t, m.Tick(), "settled, the frames stop")
 }
+
+func TestAShellsWheelMsgMovesTheCursor(t *testing.T) {
+	m, r := New(sections()).Update(bezel.WheelMsg{MouseWheelMsg: tea.MouseWheelMsg{Button: tea.MouseWheelDown}})
+	require.True(t, r.Handled)
+	require.Equal(t, 1, m.Cursor())
+}

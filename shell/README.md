@@ -103,6 +103,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
 - [type StatusStyle](<#StatusStyle>)
 - [type Tab](<#Tab>)
   - [func NamedTab\(name string\) Tab](<#NamedTab>)
+- [type WheelMsg](<#WheelMsg>)
 
 
 <a name="Check"></a>
@@ -124,7 +125,7 @@ func Copy(text, done, failed string) tea.Cmd
 Copy is Shell.Copy as a command, for a model that does not hold the shell.
 
 <a name="IsStatusExpiry"></a>
-## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L254>)
+## func [IsStatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L251>)
 
 ```go
 func IsStatusExpiry(msg tea.Msg) bool
@@ -133,7 +134,7 @@ func IsStatusExpiry(msg tea.Msg) bool
 IsStatusExpiry reports a status timer's message, or a toast's frame, for a harness that must not feed timers back into the loop.
 
 <a name="Notify"></a>
-## func [Notify](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L230>)
+## func [Notify](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L227>)
 
 ```go
 func Notify(text string, level Level) tea.Cmd
@@ -402,7 +403,7 @@ const (
 ```
 
 <a name="NotifyMsg"></a>
-## type [NotifyMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L223-L226>)
+## type [NotifyMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L220-L223>)
 
 NotifyMsg asks the shell for a status. Notify sends it; a test reads the one a handler returned.
 
@@ -603,7 +604,7 @@ func (s Shell) CheckPanes(panes map[string]Pane) error
 CheckPanes reports every name in panes that the layout has no pane for: a typo View would drop without a word. Apps call it in a test, as Check for keys; a layout pane missing from panes is fine, it gives its space back.
 
 <a name="Shell.ClearInput"></a>
-### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L279>)
+### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L276>)
 
 ```go
 func (s Shell) ClearInput() Shell
@@ -612,7 +613,7 @@ func (s Shell) ClearInput() Shell
 ClearInput takes the input off the status row and gives the keys back.
 
 <a name="Shell.ClearStatus"></a>
-### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L263>)
+### func \(Shell\) [ClearStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L260>)
 
 ```go
 func (s Shell) ClearStatus() Shell
@@ -693,7 +694,7 @@ func (s Shell) Inner(name string) layout.Rect
 Inner is the rect a pane's Body draws into: Rect less the border and padding. Size the pane's models by it before they take a message; the zero Rect when the pane is not on screen.
 
 <a name="Shell.Input"></a>
-### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L286>)
+### func \(Shell\) [Input](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L283>)
 
 ```go
 func (s Shell) Input() (input.Model, bool)
@@ -711,16 +712,16 @@ func (s Shell) IsBusy() bool
 IsBusy reports whether Busy is in effect.
 
 <a name="Shell.Mouse"></a>
-### func \(Shell\) [Mouse](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L38>)
+### func \(Shell\) [Mouse](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L42>)
 
 ```go
 func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool)
 ```
 
-Mouse finds the pane under the pointer of msg and hands back msg moved into that pane's body, for the wheel or a drag; a click comes as a ClickMsg instead. false when no pane is under the pointer.
+Mouse finds the pane under the pointer of msg and hands back msg moved into that pane's body, for a drag or a release; a click comes as a ClickMsg and a wheel turn as a WheelMsg. false when no pane is under the pointer.
 
 <a name="Shell.MouseIn"></a>
-### func \(Shell\) [MouseIn](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L49>)
+### func \(Shell\) [MouseIn](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L53>)
 
 ```go
 func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg
@@ -747,7 +748,7 @@ func (s Shell) OpenCommands() Shell
 OpenCommands opens the palette over the declared named actions, for an app that decides itself when ":" means commands and when it is text. Its caret blinks from the first key on; the Commands action starts it at once.
 
 <a name="Shell.PaneAt"></a>
-### func \(Shell\) [PaneAt](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L19>)
+### func \(Shell\) [PaneAt](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L23>)
 
 ```go
 func (s Shell) PaneAt(x, y int) (string, bool)
@@ -810,7 +811,7 @@ func (s Shell) SetFocus(name string) Shell
 SetFocus moves focus to a leaf of the layout. Unknown names are ignored, and a leaf the layout dropped hands focus to one on screen.
 
 <a name="Shell.SetInput"></a>
-### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L272>)
+### func \(Shell\) [SetInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L269>)
 
 ```go
 func (s Shell) SetInput(m input.Model) Shell
@@ -837,7 +838,7 @@ func (s Shell) SetLegendLines(n int) Shell
 SetLegendLines changes how many rows the legend keeps, 1 or more.
 
 <a name="Shell.SetStatus"></a>
-### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L201>)
+### func \(Shell\) [SetStatus](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L198>)
 
 ```go
 func (s Shell) SetStatus(text string, level Level, ttl time.Duration) (Shell, tea.Cmd)
@@ -918,7 +919,7 @@ func (s Shell) Status() string
 Status is the banner text currently set, empty when none.
 
 <a name="Shell.StatusExpiry"></a>
-### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L250>)
+### func \(Shell\) [StatusExpiry](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L247>)
 
 ```go
 func (s Shell) StatusExpiry() tea.Msg
@@ -927,7 +928,7 @@ func (s Shell) StatusExpiry() tea.Msg
 StatusExpiry is the message that would clear the current status, for a test harness that drops timers and delivers them itself.
 
 <a name="Shell.StatusLevel"></a>
-### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L246>)
+### func \(Shell\) [StatusLevel](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L243>)
 
 ```go
 func (s Shell) StatusLevel() Level
@@ -960,7 +961,7 @@ TopOverlay is the modal that gets the keys, or nil.
 func (s Shell) Update(msg tea.Msg) (Shell, bezel.Result)
 ```
 
-Update takes what is the shell's: resize, status ticks, overlays, the status input, help, tabs, focus and left clicks, a pane's coming back as a ClickMsg. A resize or a background answer stays unhandled: the app's models need it too.
+Update takes what is the shell's: resize, status ticks, overlays, the status input, help, tabs, focus, left clicks and the wheel, a pane's coming back as a ClickMsg or WheelMsg. A resize or a background answer stays unhandled.
 
 <a name="Shell.View"></a>
 ### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L167>)
@@ -1013,6 +1014,15 @@ func NamedTab(name string) Tab
 ```
 
 NamedTab is a tab with a name and nothing else: no status, no keys of its own. For an app whose screens differ only in what their panes draw.
+
+<a name="WheelMsg"></a>
+## type [WheelMsg](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L19>)
+
+WheelMsg is a wheel turn over a pane, moved into the cells of its body. The focus stays where it was. It is bezel.WheelMsg, which the components take.
+
+```go
+type WheelMsg = bezel.WheelMsg
+```
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 

@@ -34,3 +34,9 @@ func TestEmitHandsBackTheMessageItWasGiven(t *testing.T) {
 	type savedMsg struct{ path string }
 	require.Equal(t, savedMsg{"notes.txt"}, Emit(savedMsg{"notes.txt"})())
 }
+
+func TestWheelMsgCarriesThePaneAndTheTurn(t *testing.T) {
+	w := WheelMsg{Pane: "list", MouseWheelMsg: tea.MouseWheelMsg{Button: tea.MouseWheelDown}}
+	require.Equal(t, "list", w.Pane)
+	require.Equal(t, tea.MouseWheelDown, w.Button)
+}

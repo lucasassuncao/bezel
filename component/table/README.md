@@ -418,7 +418,7 @@ func (m Model[T]) SetSort(col int, desc bool) Model[T]
 SetSort sorts the rows by column col, the last first when desc, and keeps them sorted through SetItems; a col out of range leaves them as given.
 
 <a name="Model[T].SetWidth"></a>
-### func \(Model\[T\]\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L447>)
+### func \(Model\[T\]\) [SetWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L448>)
 
 ```go
 func (m Model[T]) SetWidth(w int) Model[T]
@@ -454,7 +454,7 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result)
 Update takes the table's keys unless blurred, a bezel.ClickMsg on a row and the Busy spinner's frames. Choosing a row reports a [Chosen](<#Chosen>), checking one a [Toggled](<#Toggled>), sorting a [Sorted](<#Sorted>); any other message comes back unhandled.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L455>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/table/model.go#L456>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved) string

@@ -130,3 +130,28 @@ func TestShellClickMsgIsBezelClickMsg(t *testing.T) {
 	pane := func(c bezel.ClickMsg) string { return c.Pane }
 	require.Equal(t, "list", pane(ClickMsg{Pane: "list"}))
 }
+
+func TestAWheelTurnOverAPaneComesAsAWheelMsg(t *testing.T) {
+	s := sizedShell()
+	inner := draw.InnerRect(s.Rect("detail"))
+	next, r := s.Update(tea.MouseWheelMsg{X: inner.X + 3, Y: inner.Y + 2, Button: tea.MouseWheelDown})
+	require.True(t, r.Handled)
+	require.Equal(t, "list", next.Focused(), "the wheel scrolls what is under it and leaves the focus")
+	turn := tea.MouseWheelMsg{X: 3, Y: 2, Button: tea.MouseWheelDown}
+	require.Equal(t, WheelMsg{Pane: "detail", MouseWheelMsg: turn}, r.Cmd(), "in the pane's body cells")
+
+	_, r = s.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
+	require.False(t, r.Handled, "the header is no pane: the turn is the app's as it came")
+}
+
+func TestAWheelTurnWithADialogOpenIsTheApps(t *testing.T) {
+	s := sizedShell().Push(overlay.NewAlert(draw.Info, "Saved", "done"))
+	list := s.Rect("list")
+	_, r := s.Update(tea.MouseWheelMsg{X: list.X + 1, Y: list.Y + 1, Button: tea.MouseWheelDown})
+	require.False(t, r.Handled, "the dialog covers the panes")
+}
+
+func TestShellWheelMsgIsBezelWheelMsg(t *testing.T) {
+	pane := func(w bezel.WheelMsg) string { return w.Pane }
+	require.Equal(t, "list", pane(WheelMsg{Pane: "list"}))
+}

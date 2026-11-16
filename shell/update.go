@@ -30,8 +30,8 @@ func toastCmd(cmd tea.Cmd) tea.Cmd {
 }
 
 // Update takes what is the shell's: resize, status ticks, overlays, the status
-// input, help, tabs, focus and left clicks, a pane's coming back as a ClickMsg.
-// A resize or a background answer stays unhandled: the app's models need it too.
+// input, help, tabs, focus, left clicks and the wheel, a pane's coming back as
+// a ClickMsg or WheelMsg. A resize or a background answer stays unhandled.
 func (s Shell) Update(msg tea.Msg) (Shell, bezel.Result) {
 	s = s.ready()
 	next, handled, cmd := s.update(msg)
@@ -56,12 +56,9 @@ var _ bezel.Model[Shell] = Shell{}
 
 func (s Shell) update(msg tea.Msg) (Shell, bool, tea.Cmd) {
 	switch m := msg.(type) {
-	case tea.MouseClickMsg, tea.MouseMotionMsg, tea.MouseReleaseMsg:
-		if next, cmd, ok := s.mouseResize(m.(tea.MouseMsg)); ok {
+	case tea.MouseMsg:
+		if next, ok, cmd := s.mouse(m); ok {
 			return next, true, cmd
-		}
-		if c, ok := m.(tea.MouseClickMsg); ok && c.Button == tea.MouseLeft {
-			return s.click(c)
 		}
 
 	case animation.FrameMsg:

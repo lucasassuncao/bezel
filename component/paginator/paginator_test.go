@@ -145,3 +145,9 @@ func TestTheWheelAndAClickOnADotTurnThePage(t *testing.T) {
 	_, r = m.WithDisplay(Numbers).Update(bezel.ClickMsg{MouseClickMsg: tea.MouseClickMsg{X: 0, Button: tea.MouseLeft}})
 	require.False(t, r.Handled, "numbers have no dot to aim at")
 }
+
+func TestAShellsWheelMsgTurnsThePage(t *testing.T) {
+	m := New(10).SetItems(50).WithDisplay(Dots)
+	_, r := m.Update(bezel.WheelMsg{MouseWheelMsg: tea.MouseWheelMsg{Button: tea.MouseWheelDown}})
+	require.Equal(t, Paged{Page: 1}, r.Event)
+}

@@ -395,6 +395,7 @@ func (m Model[T]) picked() bool {
 // frames. Choosing a row reports a [Chosen], checking one a [Toggled]; a move
 // with motion returns the list's Tick. Anything else comes back unhandled.
 func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result) {
+	msg = wheel.Unwrap(msg)
 	var chosen, handled bool
 	before := m.mo.run.ID
 	switch msg := msg.(type) {

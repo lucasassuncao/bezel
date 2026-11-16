@@ -14,6 +14,10 @@ import (
 // border. It is bezel.ClickMsg, which the components take as it comes.
 type ClickMsg = bezel.ClickMsg
 
+// WheelMsg is a wheel turn over a pane, moved into the cells of its body. The
+// focus stays where it was. It is bezel.WheelMsg, which the components take.
+type WheelMsg = bezel.WheelMsg
+
 // PaneAt is the pane drawn at the screen cell (x, y), border included, and
 // false over the chrome, a gap or an open dialog, which covers the panes.
 func (s Shell) PaneAt(x, y int) (string, bool) {
@@ -33,8 +37,8 @@ func (s Shell) PaneAt(x, y int) (string, bool) {
 }
 
 // Mouse finds the pane under the pointer of msg and hands back msg moved
-// into that pane's body, for the wheel or a drag; a click comes as a
-// ClickMsg instead. false when no pane is under the pointer.
+// into that pane's body, for a drag or a release; a click comes as a ClickMsg
+// and a wheel turn as a WheelMsg. false when no pane is under the pointer.
 func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool) {
 	at := msg.Mouse()
 	pane, ok := s.PaneAt(at.X, at.Y)
@@ -61,6 +65,32 @@ func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg {
 		return tea.MouseMotionMsg(m)
 	}
 	return msg
+}
+
+// mouse is the shell's part of the mouse: an edge it drags, a left click, a
+// wheel turn over a pane. false leaves the message to the app as it came.
+func (s Shell) mouse(msg tea.MouseMsg) (Shell, bool, tea.Cmd) {
+	if w, ok := msg.(tea.MouseWheelMsg); ok {
+		return s.wheel(w)
+	}
+	if next, cmd, ok := s.mouseResize(msg); ok {
+		return next, true, cmd
+	}
+	if c, ok := msg.(tea.MouseClickMsg); ok && c.Button == tea.MouseLeft {
+		return s.click(c)
+	}
+	return s, false, nil
+}
+
+// wheel hands a turn over a pane to the app as a WheelMsg. Over the chrome or
+// an open dialog it is the app's as it came.
+func (s Shell) wheel(w tea.MouseWheelMsg) (Shell, bool, tea.Cmd) {
+	pane, ok := s.PaneAt(w.X, w.Y)
+	if !ok {
+		return s, false, nil
+	}
+	turn := s.MouseIn(pane, w).(tea.MouseWheelMsg)
+	return s, true, bezel.Emit(WheelMsg{Pane: pane, MouseWheelMsg: turn})
 }
 
 // click is the shell's part of a left click: an open dialog's, a tab's, or

@@ -28,3 +28,10 @@ type ClickMsg struct {
 	Pane string
 	tea.MouseClickMsg
 }
+
+// WheelMsg is a wheel turn the shell sends to the app, already in the
+// coordinates of the pane's body. Pane names the pane under the pointer.
+type WheelMsg struct {
+	Pane string
+	tea.MouseWheelMsg
+}

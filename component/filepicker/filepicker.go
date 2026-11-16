@@ -312,6 +312,7 @@ func (m Model) allows(name string) bool {
 // Update takes the picker's own listings and its keys, reporting [Chosen]
 // when enter or a click picked something; Picked says so too.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	msg = wheel.Unwrap(msg)
 	next, cmd := m.update(msg)
 	r := bezel.Result{Handled: m.handles(msg), Cmd: cmd}
 	if path, ok := next.Picked(); ok {

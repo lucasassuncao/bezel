@@ -307,7 +307,7 @@ func (m Model[T]) Update(msg tea.Msg) (Model[T], bezel.Result)
 Update takes the list's keys, a bezel.ClickMsg on a row and its own frames. Choosing a row reports a [Chosen](<#Chosen>), checking one a [Toggled](<#Toggled>); a move with motion returns the list's Tick. Anything else comes back unhandled.
 
 <a name="Model[T].View"></a>
-### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L678>)
+### func \(Model\[T\]\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/list/list.go#L679>)
 
 ```go
 func (m Model[T]) View(th theme.Resolved) string

@@ -178,6 +178,7 @@ func (m Model) Advance(now time.Time) (Model, bool) {
 // Update moves the cursor and toggles on keys, takes a click on a heading as
 // that toggle, and slides the sections on their own frames.
 func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
+	msg = wheel.Unwrap(msg)
 	if c, ok := msg.(bezel.ClickMsg); ok {
 		i, heading := m.sectionAt(c.Y)
 		if i < 0 {

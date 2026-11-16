@@ -209,9 +209,18 @@ The components move the cursor to the row clicked, and on the row already under 
 
 A press on the border between two panes of a `Resizable` box is no click: the shell holds that edge and moves it with the pointer until the button is released. The `:` palette's rule works the same way: dragging it makes the list taller or shorter, and the palette reopens at that height.
 
-A click is all `ClickMsg` carries. The rest of the mouse reaches the app as it came, and two methods move it into a pane:
+The wheel comes the same way. A turn over a pane is a `shell.WheelMsg`: it names the pane under the pointer, focused or not, and the focus stays where it was.
 
-- **`Mouse(msg)`** finds the pane under the pointer and moves `msg` into its body: the wheel over a [`viewport`](../component/viewport), which scrolls on `tea.MouseWheelMsg`.
+```go
+case shell.WheelMsg:
+	if msg.Pane == "log" {
+		m.log, r = m.log.Update(msg) // a viewport scrolls three lines a notch
+	}
+```
+
+A click and a turn are all the shell sends. The rest of the mouse reaches the app as it came: a drag, a release, a turn over the header or with a dialog open. Two methods move it into a pane:
+
+- **`Mouse(msg)`** finds the pane under the pointer and moves `msg` into its body.
 - **`MouseIn(pane, msg)`** moves `msg` into a pane wherever the pointer is: a drag that began in a [`textbox`](../component/textbox) and left it still moves its caret.
 
 A dialog of the app's own takes clicks by implementing `overlay.Clicker`: `Click(x, y, body)`, with `x` and `y` counted from the top left of what its `View` drew.
@@ -297,4 +306,4 @@ next, _ = next.Update(bezeltest.Key("d"))
 - An animation asks for frames with `Tick`; a test hands it its own with `FrameAt(time)`, so no test waits on a clock. `animation.Record` plays one to its end as text. See [ANIMATIONS.md](ANIMATIONS.md).
 - Set `BEZEL_NO_MOTION=1` in a test that only cares where things land, and clear it in `TestMain` when a CI sets `TERM=dumb`.
 - `shell.Check` over each screen's actions catches two keys bound twice.
-- A click on a pane comes back in `Result.Cmd`: call it for the `shell.ClickMsg`, and feed that to the app.
+- A click on a pane comes back in `Result.Cmd`: call it for the `shell.ClickMsg`, and feed that to the app. A wheel turn does the same with a `shell.WheelMsg`.

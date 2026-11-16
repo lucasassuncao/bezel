@@ -2,9 +2,9 @@
 // tabs, focus, overlays, the status row and the key legend. The app draws what
 // goes inside the panes, with components, effects and animations in one theme.
 //
-// The package itself holds only [Result], [Model] and [ClickMsg], the types
-// every Update shares, and [Emit], the command that sends a message. The work
-// is in its subpackages.
+// The package itself holds only [Result], [Model], [ClickMsg] and [WheelMsg],
+// the types every Update shares, and [Emit], the command that sends a message.
+// The work is in its subpackages.
 //
 // # The frame
 //

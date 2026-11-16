@@ -466,3 +466,10 @@ func TestTheWheelMovesTheCursor(t *testing.T) {
 	require.True(t, r.Handled)
 	require.Equal(t, m.Move(1).Cursor(), down.Cursor())
 }
+
+func TestAShellsWheelMsgMovesTheCursor(t *testing.T) {
+	m := newTree(10)
+	down, r := m.Update(bezel.WheelMsg{MouseWheelMsg: tea.MouseWheelMsg{Button: tea.MouseWheelDown}})
+	require.True(t, r.Handled)
+	require.Equal(t, m.Move(1).Cursor(), down.Cursor())
+}
