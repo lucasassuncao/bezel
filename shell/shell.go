@@ -174,14 +174,16 @@ func New(cfg Config) Shell {
 	}
 }
 
-// Init asks the terminal for its background while the shell follows Base, so
-// the answer resolves it light or dark; nil with a fixed Theme. The app's
-// Init returns it.
+// Init asks the terminal for its background while the shell follows Base, and
+// turns the spinner of a shell that New's caller already made Busy; nil when
+// neither. The app's Init returns it.
 func (s Shell) Init() tea.Cmd {
-	if s.ready().adaptive {
-		return tea.RequestBackgroundColor
+	s = s.ready()
+	var ask tea.Cmd
+	if s.adaptive {
+		ask = tea.RequestBackgroundColor
 	}
-	return nil
+	return tea.Batch(ask, s.spin.Tick())
 }
 
 // ready is s, or for the zero Shell the one New(Config{}) builds, so a host

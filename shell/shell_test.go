@@ -362,3 +362,31 @@ func TestNamedTabAnswersOnlyForItsName(t *testing.T) {
 	s := sized(newShell(tab, NamedTab("memory")))
 	require.Contains(t, view(s), "memory", "the strip prints each name")
 }
+
+// A shell made busy while it is built has no Update to hand Busy's command
+// to: Init starts the spinner instead.
+func TestInitStartsTheSpinnerOfAShellAlreadyBusy(t *testing.T) {
+	s := busyShell()
+	require.Nil(t, s.Init(), "idle, with a fixed theme: nothing to start")
+
+	s, _ = s.Busy("collecting")
+	cmd := s.Init()
+	require.NotNil(t, cmd)
+	before := s.SpinnerFrame()
+	s, r := s.Update(cmd())
+	require.True(t, r.Handled)
+	require.NotEqual(t, before, s.SpinnerFrame(), "Init's frame turns the spinner")
+}
+
+// An app that still runs Busy's own command gets one loop, not two.
+func TestInitAndBusysOwnCommandTurnTheSpinnerOnce(t *testing.T) {
+	s := busyShell()
+	s, own := s.Busy("collecting")
+	first, second := s.Init()(), own()
+
+	s, r := s.Update(first)
+	require.NotNil(t, r.Cmd)
+	_, r = s.Update(second)
+	require.True(t, r.Handled)
+	require.Nil(t, r.Cmd, "the second frame lands spent")
+}

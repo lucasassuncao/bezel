@@ -5,8 +5,8 @@ import (
 )
 
 // Busy shows a spinner and text on the status row until Idle, which an empty
-// text also is. A banner set meanwhile shows over it until it expires. The
-// command starts the spinner; nil when it is already spinning.
+// text also is; a banner set meanwhile shows over it. The command starts the
+// spinner, nil when it already turns; before the program runs, Init does.
 func (s Shell) Busy(text string) (Shell, tea.Cmd) {
 	s = s.ready()
 	if text == "" {
