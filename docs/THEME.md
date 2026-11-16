@@ -100,7 +100,14 @@ Everything not set comes from `Mint`, and what `Mint` leaves empty from the adap
 func (m model) Init() tea.Cmd { return m.sh.Init() }
 ```
 
-The answer can come after the first frame, so the shell starts from dark and switches once. It still hands the answer on (`Handled` false), for a component that took the theme in its constructor and wants `SetTheme(m.sh.Theme())`. A component that takes the theme in `View` needs nothing.
+The answer can come after the first frame, so the shell starts from dark and switches once. It still hands the answer on (`Handled` false). A component that takes the theme in `View` needs nothing. One that took it in its constructor keeps the dark theme until the app gives it the new one:
+
+```go
+case tea.BackgroundColorMsg: // the shell has re-resolved already
+	m.name = m.name.SetTheme(m.sh.Theme())
+```
+
+Those are `input`, `textbox`, `tags`, `cursor`, `form`, `wizard` and `logger.Pane`, each with a `SetTheme`. A theme with a background of its own, like `Mint`, looks the same on both, so only one without, such as `theme.Default()`, shows the difference. Lines a `logger.Pane` already holds keep their colours.
 
 `SetBase(t)` switches to another theme and keeps following the terminal. `Config.Theme` or `SetTheme(resolved)` fix the styles instead: the shell no longer asks or re-resolves, for an app that builds its own `Resolved`.
 

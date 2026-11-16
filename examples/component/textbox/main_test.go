@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"strings"
 	"testing"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/lucasassuncao/bezel/bezeltest"
 	"github.com/lucasassuncao/bezel/draw"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // frame sends msg and renders; every row must be exactly 80 columns wide.
@@ -56,4 +58,15 @@ func TestTextboxSelectsWithTheMouse(t *testing.T) {
 	require.Equal(t, "# notes", m.(model).ta.SelectedText())
 	m, _ = m.Update(bezeltest.Key("x"))
 	require.True(t, strings.HasPrefix(m.(model).ta.Value(), "x\n"), "typing replaced the selection")
+}
+
+// On theme.Default the shell re-resolves when the terminal answers light;
+// the component took its theme in the constructor, so the app hands it on.
+func TestTextboxFollowsALightTerminal(t *testing.T) {
+	var m tea.Model = newModel()
+	m, _ = m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	m = func(g model) model { g.sh = g.sh.SetBase(theme.Default()); return g }(m.(model))
+	before := m.(model).ta.View()
+	next, _ := m.Update(tea.BackgroundColorMsg{Color: color.White})
+	require.NotEqual(t, before, next.(model).ta.View())
 }

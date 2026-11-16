@@ -59,6 +59,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case tea.BackgroundColorMsg: // the shell re-themed; each cursor kept its constructor's
+		for i := range m.cursors {
+			m.cursors[i] = m.cursors[i].SetTheme(m.sh.Theme())
+		}
+		return m, nil
 	case cursor.BlinkMsg:
 		var cmds []tea.Cmd
 		for i := range m.cursors {

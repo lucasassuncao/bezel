@@ -57,6 +57,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.fit(), r.Cmd
 	}
 	switch msg := msg.(type) {
+	case tea.BackgroundColorMsg: // the shell re-themed; the text area kept its constructor's
+		m.ta = m.ta.SetTheme(m.sh.Theme())
+		return m, nil
 	case countMsg:
 		text := fmt.Sprintf("%d lines, %d characters", m.ta.LineCount(), len(m.ta.Value()))
 		var cmd tea.Cmd

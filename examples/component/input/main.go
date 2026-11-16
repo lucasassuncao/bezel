@@ -92,6 +92,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
+	if _, ok := msg.(tea.BackgroundColorMsg); ok { // the shell re-themed; each field kept its constructor's
+		for i := range m.fields {
+			m.fields[i] = m.fields[i].SetTheme(m.sh.Theme())
+		}
+		return m, nil
+	}
 	if k, ok := msg.(tea.KeyPressMsg); ok {
 		switch k.String() {
 		case "up":

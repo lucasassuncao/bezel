@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"strings"
 	"testing"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // frame sends msg and renders; every row must be exactly 80 columns wide.
@@ -76,4 +78,14 @@ func TestInputQuitsOnEsc(t *testing.T) {
 	_, cmd := m.Update(bezeltest.Key("esc"))
 	require.NotNil(t, cmd)
 	require.Equal(t, tea.Quit(), cmd())
+}
+
+// On theme.Default the shell re-resolves when the terminal answers light;
+// the component took its theme in the constructor, so the app hands it on.
+func TestInputFollowsALightTerminal(t *testing.T) {
+	m := newModel()
+	m.sh = m.sh.SetBase(theme.Default())
+	before := m.fields[0].View()
+	next, _ := m.Update(tea.BackgroundColorMsg{Color: color.White})
+	require.NotEqual(t, before, next.(model).fields[0].View())
 }

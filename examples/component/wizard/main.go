@@ -107,6 +107,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.sh, r = m.sh.Update(msg); r.Handled {
 		return m, r.Cmd
 	}
+	if _, ok := msg.(tea.BackgroundColorMsg); ok { // the shell re-themed; the wizard kept its constructor's
+		m.wiz = m.wiz.SetTheme(m.sh.Theme())
+		return m, nil
+	}
 	return m.wizard(msg)
 }
 

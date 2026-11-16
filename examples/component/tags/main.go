@@ -82,6 +82,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, r.Cmd
 	}
 	m.sh, r = m.sh.Update(msg)
+	if _, ok := msg.(tea.BackgroundColorMsg); ok { // the shell re-themed; the field kept its constructor's
+		m.tg = m.tg.SetTheme(m.sh.Theme())
+	}
 	return m, r.Cmd
 }
 

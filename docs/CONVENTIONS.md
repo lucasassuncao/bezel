@@ -78,6 +78,7 @@ Where the theme goes depends on who calls `View`. If bezel does, the component k
 | the shell | `Config.Base`, resolved light or dark on the answer `Init` asks for, `SetBase` to change; or `Config.Theme`/`SetTheme` for fixed styles. Either repaints open dialogs | `shell` |
 
 - A dialog that reports something is tinted with `WithKind(draw.Danger)`; `Alert` takes its `draw.Kind` in the constructor. A Kind's colour is fixed (blue, green, yellow, red), the same under every theme and whatever `WithStyles` does; a dialog with no Kind keeps the theme's look.
+- A component that keeps the theme from its constructor has a `SetTheme`, and the app calls it with `m.sh.Theme()` on `tea.BackgroundColorMsg`, which the shell hands on after re-resolving ([THEME.md](THEME.md#light-and-dark)).
 - `draw`, `legend` and `overlay.Box` take raw lipgloss styles: `theme` imports them, so they cannot import it.
 - The caret's blink pace travels with the theme (`Resolved.CaretBlink`), so tests shrink it there, not in a package variable.
 

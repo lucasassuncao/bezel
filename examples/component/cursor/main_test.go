@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"strings"
 	"testing"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // frame sends msg and renders; every row must be exactly 80 columns wide. A
@@ -56,4 +58,14 @@ func TestCursorMCyclesTheFocusedMode(t *testing.T) {
 	m = key(t, m, "m")
 	_, out := frame(t, m, nil)
 	require.Equal(t, 2, strings.Count(out, "steady"), "the first row moved on to steady")
+}
+
+// On theme.Default the shell re-resolves when the terminal answers light;
+// the component took its theme in the constructor, so the app hands it on.
+func TestCursorsFollowALightTerminal(t *testing.T) {
+	m := newModel()
+	m.sh = m.sh.SetBase(theme.Default())
+	before := m.cursors[0].View()
+	next, _ := m.Update(tea.BackgroundColorMsg{Color: color.White})
+	require.NotEqual(t, before, next.(model).cursors[0].View())
 }

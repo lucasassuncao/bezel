@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"strings"
 	"testing"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 // frame sends msg and renders; every row must be exactly 80 columns wide.
@@ -85,4 +87,14 @@ func TestFormSelectDescribesItsOptions(t *testing.T) {
 	_, out := frame(t, m, nil)
 	t.Log("\n" + out)
 	require.Contains(t, out, "alpine  small, musl libc")
+}
+
+// On theme.Default the shell re-resolves when the terminal answers light;
+// the component took its theme in the constructor, so the app hands it on.
+func TestFormFollowsALightTerminal(t *testing.T) {
+	m := newModel()
+	m.sh = m.sh.SetBase(theme.Default())
+	before := m.form.SetWidth(60).View()
+	next, _ := m.Update(tea.BackgroundColorMsg{Color: color.White})
+	require.NotEqual(t, before, next.(model).form.SetWidth(60).View())
 }
