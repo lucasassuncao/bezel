@@ -136,7 +136,7 @@ Then the list is sized, before it takes anything. It needs to know how many rows
 ```go
 case askAddMsg:
 	ask := overlay.NewPrompt("New task", func(title string) tea.Cmd {
-		return func() tea.Msg { return addMsg{title: title} }
+		return bezel.Emit(addMsg{title: title})
 	}, m.sh.Theme()).WithValidate(func(typed string) error {
 		if strings.TrimSpace(typed) == "" {
 			return errors.New("a task needs a title")
@@ -151,14 +151,14 @@ case addMsg:
 	return m, cmd
 ```
 
-`overlay.Open` is a command: the shell pushes the dialog, which takes every key until `enter` or `esc`. `WithValidate` refuses an empty title. On `enter` the prompt runs the function it was given, which sends `addMsg`, and the app adds the task and says so on the status row for two seconds.
+`overlay.Open` is a command: the shell pushes the dialog, which takes every key until `enter` or `esc`. `WithValidate` refuses an empty title. On `enter` the prompt runs the function it was given. `bezel.Emit(msg)` is the command that sends a message, here `addMsg`, and the app adds the task and says so on the status row for two seconds.
 
 Deleting asks first, the same way, with a confirm drawn in the danger colour:
 
 ```go
 case askDropMsg:
 	if i, ok := m.current(); ok {
-		yes := func() tea.Msg { return dropMsg{} }
+		yes := bezel.Emit(dropMsg{})
 		ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.sh.Theme()).WithKind(draw.Danger)
 		return m, overlay.Open(ask)
 	}

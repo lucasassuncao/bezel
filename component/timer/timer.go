@@ -136,7 +136,7 @@ func (m Model) Update(msg tea.Msg) (Model, bezel.Result) {
 	}
 	m.running = false
 	out := TimeoutMsg{ID: m.id}
-	return m, bezel.Result{Handled: true, Cmd: func() tea.Msg { return out }}
+	return m, bezel.Result{Handled: true, Cmd: bezel.Emit(out)}
 }
 
 // Left is the time left.

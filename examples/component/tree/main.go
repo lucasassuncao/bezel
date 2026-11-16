@@ -70,7 +70,7 @@ func actions() []shell.Action {
 		shell.Custom("←/→", "collapse/expand", nil, shell.DisplayOnly()),
 		shell.Custom("space", "busy", shell.Send(toggleBusyMsg{})),
 		shell.Command("reveal", "open the way to a path", func(ctx shell.ActionContext) tea.Cmd {
-			return func() tea.Msg { return revealMsg{strings.TrimSpace(ctx.Arg)} }
+			return bezel.Emit(revealMsg{strings.TrimSpace(ctx.Arg)})
 		}, shell.Arg("path")),
 		shell.Quit(),
 	}

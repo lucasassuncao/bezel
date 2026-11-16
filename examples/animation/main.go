@@ -160,7 +160,7 @@ func newModel() model {
 }
 
 // Init starts the race as soon as the program runs.
-func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), func() tea.Msg { return startMsg{} }) }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), bezel.Emit(startMsg{})) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result

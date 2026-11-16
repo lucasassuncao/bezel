@@ -83,7 +83,7 @@ func (s Shell) click(c tea.MouseClickMsg) (Shell, bool, tea.Cmd) {
 		return s, false, nil
 	}
 	clicked := ClickMsg{Pane: pane, MouseClickMsg: s.MouseIn(pane, c).(tea.MouseClickMsg)}
-	send := func() tea.Msg { return clicked }
+	send := bezel.Emit(clicked)
 	if pane == s.Focused() || !slices.Contains(focusRing(s.cfg.Layout), pane) {
 		return s, true, send
 	}

@@ -3,6 +3,7 @@ package shell
 import (
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/key"
 )
 
@@ -71,7 +72,7 @@ func (s Shell) focused(from string, next Shell) (Shell, tea.Cmd) {
 	if to == from {
 		return next, nil
 	}
-	return next, func() tea.Msg { return FocusMsg{From: from, To: to} }
+	return next, bezel.Emit(FocusMsg{From: from, To: to})
 }
 
 // backward reports a cycle walking back: fired by any key after the first.

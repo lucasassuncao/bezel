@@ -35,10 +35,10 @@ func actions() []shell.Action {
 	return []shell.Action{
 		shell.Commands(), shell.Move(), shell.Quit(),
 		shell.Command("goto", "move to an item", func(ctx shell.ActionContext) tea.Cmd {
-			return func() tea.Msg { return gotoMsg{ctx.Arg} }
+			return bezel.Emit(gotoMsg{ctx.Arg})
 		}, shell.Arg("item")),
 		shell.Command("theme", "switch the theme", func(ctx shell.ActionContext) tea.Cmd {
-			return func() tea.Msg { return themeMsg{ctx.Arg} }
+			return bezel.Emit(themeMsg{ctx.Arg})
 		}, shell.Arg("name")),
 		shell.Command("clear", "move back to the top", shell.Send(clearMsg{})),
 		shell.Command("delete", "delete the item", shell.Send(clearMsg{}), shell.Needs("write")),

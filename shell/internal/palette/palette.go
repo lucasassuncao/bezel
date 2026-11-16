@@ -319,7 +319,7 @@ func (m Model) run() (overlay.Overlay, bezel.Result) {
 	return m, bezel.Result{Handled: true, Cmd: finish(DoneMsg{Cmd: cmd})}
 }
 
-func finish(d DoneMsg) tea.Cmd { return func() tea.Msg { return d } }
+func finish(d DoneMsg) tea.Cmd { return bezel.Emit(d) }
 
 // chosen is the pick when there is one, else what the line resolves to.
 func (m Model) chosen() (Item, string, error) {

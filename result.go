@@ -13,6 +13,10 @@ type Result struct {
 	Cmd tea.Cmd
 }
 
+// Emit is the command that hands msg to the program's Update: what a
+// dialog's answer, a form's button or an Init returns to say something happened.
+func Emit(msg tea.Msg) tea.Cmd { return func() tea.Msg { return msg } }
+
 // Model is the one shape of Update: the changed copy and a [Result].
 type Model[T any] interface {
 	Update(tea.Msg) (T, Result)

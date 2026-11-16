@@ -54,7 +54,7 @@ func newModel() model {
 }
 
 // Init starts the spinners the way space does.
-func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), func() tea.Msg { return toggleMsg{} }) }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), bezel.Emit(toggleMsg{})) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result

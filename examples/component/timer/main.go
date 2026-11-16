@@ -50,7 +50,7 @@ func newModel() model {
 func tenths(d time.Duration) string { return fmt.Sprintf("%.1fs", d.Seconds()) }
 
 // Init starts the countdown the way r does.
-func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), func() tea.Msg { return restartMsg{} }) }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), bezel.Emit(restartMsg{})) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result

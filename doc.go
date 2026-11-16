@@ -3,7 +3,8 @@
 // goes inside the panes, with components, effects and animations in one theme.
 //
 // The package itself holds only [Result], [Model] and [ClickMsg], the types
-// every Update shares. The work is in its subpackages.
+// every Update shares, and [Emit], the command that sends a message. The work
+// is in its subpackages.
 //
 // # The frame
 //

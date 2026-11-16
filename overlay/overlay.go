@@ -68,10 +68,10 @@ type CloseMsg struct{}
 type PushMsg struct{ Overlay Overlay }
 
 // Close is the command an overlay returns to dismiss itself.
-func Close() tea.Cmd { return func() tea.Msg { return CloseMsg{} } }
+func Close() tea.Cmd { return bezel.Emit(CloseMsg{}) }
 
 // Open is the command that pushes o on top of the stack.
-func Open(o Overlay) tea.Cmd { return func() tea.Msg { return PushMsg{Overlay: o} } }
+func Open(o Overlay) tea.Cmd { return bezel.Emit(PushMsg{Overlay: o}) }
 
 // TopMsg carries an overlay's own answer back to the top overlay. Other
 // non-key messages pass an open modal by: they are the app's.

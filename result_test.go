@@ -29,3 +29,8 @@ func TestClickMsgCarriesThePaneAndTheCell(t *testing.T) {
 	c := ClickMsg{Pane: "list", MouseClickMsg: tea.MouseClickMsg{X: 2, Y: 3}}
 	require.Equal(t, 3, c.Y)
 }
+
+func TestEmitHandsBackTheMessageItWasGiven(t *testing.T) {
+	type savedMsg struct{ path string }
+	require.Equal(t, savedMsg{"notes.txt"}, Emit(savedMsg{"notes.txt"})())
+}

@@ -57,9 +57,6 @@ func newModel() model {
 	return model{sh: sh}
 }
 
-// done is the command a modal runs on its answer: a status for the app.
-func done(text string) tea.Cmd { return func() tea.Msg { return doneMsg{text} } }
-
 func (m model) modal() overlay.Overlay {
 	th := m.sh.Theme()
 	switch kinds[m.cursor] {
@@ -68,9 +65,9 @@ func (m model) modal() overlay.Overlay {
 			"91% of /var is in use.", th)
 	case "Confirm":
 		return overlay.NewConfirm("Delete notes.txt?", "It cannot be restored.",
-			done("deleted notes.txt"), th).WithKind(draw.Danger)
+			bezel.Emit(doneMsg{"deleted notes.txt"}), th).WithKind(draw.Danger)
 	case "Prompt":
-		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return done("created " + v) }, th).
+		return overlay.NewPrompt("New file", func(v string) tea.Cmd { return bezel.Emit(doneMsg{"created " + v}) }, th).
 			WithLabel("name").
 			WithValidate(func(s string) error {
 				if strings.TrimSpace(s) == "" {
@@ -81,7 +78,7 @@ func (m model) modal() overlay.Overlay {
 	case "Pager":
 		return overlay.NewPager("go test ./...", testLog(), th)
 	case "FilePicker":
-		return overlay.NewFilePicker("Open a file", ".", func(path string) tea.Cmd { return done("picked " + filepath.Base(path)) },
+		return overlay.NewFilePicker("Open a file", ".", func(path string) tea.Cmd { return bezel.Emit(doneMsg{"picked " + filepath.Base(path)}) },
 			th)
 	default:
 		return overlay.NewHelp([]overlay.HelpSection{

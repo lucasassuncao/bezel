@@ -78,7 +78,7 @@ func newModel() model {
 }
 
 // Init plays the first effect, the diff and the loading panel at once.
-func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), func() tea.Msg { return startMsg{} }) }
+func (m model) Init() tea.Cmd { return tea.Batch(m.sh.Init(), bezel.Emit(startMsg{})) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var r bezel.Result

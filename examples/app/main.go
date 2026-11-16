@@ -106,7 +106,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case askAddMsg:
 		ask := overlay.NewPrompt("New task", func(title string) tea.Cmd {
-			return func() tea.Msg { return addMsg{title: title} }
+			return bezel.Emit(addMsg{title: title})
 		}, m.sh.Theme()).WithValidate(func(typed string) error {
 			if strings.TrimSpace(typed) == "" {
 				return errors.New("a task needs a title")
@@ -127,7 +127,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case askDropMsg:
 		if i, ok := m.current(); ok {
-			yes := func() tea.Msg { return dropMsg{} }
+			yes := bezel.Emit(dropMsg{})
 			ask := overlay.NewConfirm("Delete task", m.tasks[i].title, yes, m.sh.Theme()).WithKind(draw.Danger)
 			return m, overlay.Open(ask)
 		}

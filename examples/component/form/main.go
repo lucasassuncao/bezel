@@ -61,7 +61,7 @@ func newModel() model {
 		form.NewTags("Labels").WithSuggestions([]string{"api", "web", "worker"}).WithPlaceholder("enter adds"),
 		form.NewToggle("Docker"),
 		form.NewCheckbox("Forward port 3000"),
-		form.NewButton("Create", func() tea.Msg { return createMsg{} }),
+		form.NewButton("Create", bezel.Emit(createMsg{})),
 	)
 	return model{sh: sh, form: f}
 }

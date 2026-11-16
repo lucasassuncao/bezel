@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/key"
 	"github.com/lucasassuncao/bezel/legend"
 )
@@ -142,7 +143,7 @@ func Command(name, desc string, run func(ActionContext) tea.Cmd, opts ...Option)
 // Send is a run that emits msg, for value models: the app handles msg in its
 // own Update instead of closing over a copy of itself.
 func Send(msg tea.Msg) func(ActionContext) tea.Cmd {
-	return func(ActionContext) tea.Cmd { return func() tea.Msg { return msg } }
+	return func(ActionContext) tea.Cmd { return bezel.Emit(msg) }
 }
 
 // Named puts the action in the palette as :name.

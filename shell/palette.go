@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/overlay"
 	"github.com/lucasassuncao/bezel/shell/internal/palette"
 )
@@ -35,7 +36,7 @@ func (s Shell) paletteItems() []palette.Item {
 			Name: ac.name, Arg: ac.arg, Key: key, Desc: ac.desc,
 			Available: s.available(a),
 			Run: func(arg string) tea.Cmd {
-				return func() tea.Msg { return runMsg{action: a, arg: arg} }
+				return bezel.Emit(runMsg{action: a, arg: arg})
 			},
 		})
 	}
