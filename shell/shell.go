@@ -48,6 +48,16 @@ type Tab interface {
 	Actions(ctx Context) []Action
 }
 
+// NamedTab is a tab with a name and nothing else: no status, no keys of its
+// own. For an app whose screens differ only in what their panes draw.
+func NamedTab(name string) Tab { return namedTab(name) }
+
+type namedTab string
+
+func (t namedTab) Name() string           { return string(t) }
+func (namedTab) Status(Context) string    { return "" }
+func (namedTab) Actions(Context) []Action { return nil }
+
 // Config is everything a Shell needs up front.
 type Config struct {
 	Layout layout.Node

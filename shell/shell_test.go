@@ -352,3 +352,13 @@ func TestTheBackgroundAnswerReachesAnOpenDialog(t *testing.T) {
 	light := theme.Resolve(theme.Default(), false)
 	require.Equal(t, overlay.NewText("t", "body").SetTheme(light).View(body), s.TopOverlay().View(body))
 }
+
+func TestNamedTabAnswersOnlyForItsName(t *testing.T) {
+	tab := NamedTab("cpu")
+	require.Equal(t, "cpu", tab.Name())
+	require.Empty(t, tab.Status(Context{}))
+	require.Empty(t, tab.Actions(Context{}))
+
+	s := sized(newShell(tab, NamedTab("memory")))
+	require.Contains(t, view(s), "memory", "the strip prints each name")
+}
