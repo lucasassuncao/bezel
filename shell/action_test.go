@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/key"
+	"github.com/lucasassuncao/bezel/legend"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -134,4 +135,43 @@ func TestSectionGroupsTheHelpUnderItsOwnHeadings(t *testing.T) {
 		at = i
 	}
 	require.Contains(t, ansi.Strip(s.render(demoPanes())), "save", "the legend is not changed")
+}
+
+func TestFromLegendPrintsEachEntryAsItCame(t *testing.T) {
+	entries := []legend.Entry{
+		legend.New("↑/↓", "move"),
+		{Help: key.Help{Key: "d", Desc: "delete"}, Needs: "write", Group: 1},
+	}
+	acts := FromLegend(entries)
+	require.Len(t, acts, 2)
+	require.Equal(t, entries[0], acts[0].Entry())
+	require.Equal(t, entries[1], acts[1].Entry())
+}
+
+func TestFromLegendLeavesTheKeysToTheApp(t *testing.T) {
+	c := actionConfig()
+	c.Actions = FromLegend([]legend.Entry{legend.New("d", "delete")})
+	s := sized(New(c))
+	require.Contains(t, view(s), "delete")
+
+	_, r := s.Update(press("d"))
+	require.False(t, r.Handled, "the component that owns d still gets it")
+}
+
+func TestFromLegendSkipsWhatHasNothingToPrint(t *testing.T) {
+	acts := FromLegend([]legend.Entry{
+		{Help: key.Help{Desc: "no key"}},
+		{Help: key.Help{Key: "x", Desc: "off"}, Disabled: true},
+		legend.New("enter", "open"),
+	})
+	require.Len(t, acts, 1)
+	require.Equal(t, "open", acts[0].Entry().Help.Desc)
+}
+
+func TestFromLegendGivesEveryActionItsOptions(t *testing.T) {
+	acts := FromLegend([]legend.Entry{legend.New("↑/↓", "move"), legend.New("enter", "open")}, Group(1))
+	require.Len(t, acts, 2)
+	for _, a := range acts {
+		require.Equal(t, 1, a.Entry().Group)
+	}
 }

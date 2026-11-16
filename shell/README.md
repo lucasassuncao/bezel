@@ -23,6 +23,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func Command\(name, desc string, run func\(ActionContext\) tea.Cmd, opts ...Option\) Action](<#Command>)
   - [func Commands\(opts ...Option\) Action](<#Commands>)
   - [func Custom\(keys, desc string, run func\(ActionContext\) tea.Cmd, opts ...Option\) Action](<#Custom>)
+  - [func FromLegend\(entries \[\]legend.Entry, opts ...Option\) \[\]Action](<#FromLegend>)
   - [func Help\(opts ...Option\) Action](<#Help>)
   - [func Move\(opts ...Option\) Action](<#Move>)
   - [func Quit\(opts ...Option\) Action](<#Quit>)
@@ -104,7 +105,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
 
 
 <a name="Check"></a>
-## func [Check](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L210>)
+## func [Check](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L228>)
 
 ```go
 func Check(actions ...Action) error
@@ -140,7 +141,7 @@ func Notify(text string, level Level) tea.Cmd
 Notify is SetStatus as a command, for a model that does not hold the shell: text shows at level for Config.StatusTTL.
 
 <a name="Send"></a>
-## func [Send](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L145>)
+## func [Send](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L163>)
 
 ```go
 func Send(msg tea.Msg) func(ActionContext) tea.Cmd
@@ -205,6 +206,15 @@ func Custom(keys, desc string, run func(ActionContext) tea.Cmd, opts ...Option) 
 ```
 
 Custom is an app key: keys is bound literally and printed as is. Use WithKey for several keys under one label \("←/→"\).
+
+<a name="FromLegend"></a>
+### func [FromLegend](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L146>)
+
+```go
+func FromLegend(entries []legend.Entry, opts ...Option) []Action
+```
+
+FromLegend is entries as display\-only actions, each taking opts: the keys of the component in focus, from its Legend\(\), printed and left to it. A disabled entry, or one without a key, is skipped.
 
 <a name="Help"></a>
 ### func [Help](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L96>)
@@ -412,7 +422,7 @@ type Option func(*action)
 ```
 
 <a name="Arg"></a>
-### func [Arg](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L153>)
+### func [Arg](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L171>)
 
 ```go
 func Arg(placeholder string) Option
@@ -421,7 +431,7 @@ func Arg(placeholder string) Option
 Arg makes the palette show ":name \<placeholder\>" and pass what follows.
 
 <a name="DisplayOnly"></a>
-### func [DisplayOnly](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L182>)
+### func [DisplayOnly](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L200>)
 
 ```go
 func DisplayOnly() Option
@@ -430,7 +440,7 @@ func DisplayOnly() Option
 DisplayOnly prints the action but never handles its key, so the key reaches the focused component that owns it, as Move does for the arrows.
 
 <a name="Group"></a>
-### func [Group](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L160>)
+### func [Group](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L178>)
 
 ```go
 func Group(n int) Option
@@ -439,7 +449,7 @@ func Group(n int) Option
 Group puts the action in legend row group n: each group starts a new row while Config.LegendLines allows. Ungrouped actions are group 0.
 
 <a name="HelpOnly"></a>
-### func [HelpOnly](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L186>)
+### func [HelpOnly](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L204>)
 
 ```go
 func HelpOnly() Option
@@ -448,7 +458,7 @@ func HelpOnly() Option
 HelpOnly lists the action in Help but not in the legend: a key the user looks up rather than reads on every screen. It still runs.
 
 <a name="KeyHint"></a>
-### func [KeyHint](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L178>)
+### func [KeyHint](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L196>)
 
 ```go
 func KeyHint(k string) Option
@@ -457,7 +467,7 @@ func KeyHint(k string) Option
 KeyHint prints k beside the command in the palette without binding it or listing it in the legend: for an app that still routes that key itself.
 
 <a name="Named"></a>
-### func [Named](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L150>)
+### func [Named](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L168>)
 
 ```go
 func Named(name string) Option
@@ -466,7 +476,7 @@ func Named(name string) Option
 Named puts the action in the palette as :name.
 
 <a name="Needs"></a>
-### func [Needs](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L156>)
+### func [Needs](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L174>)
 
 ```go
 func Needs(c Capability) Option
@@ -475,7 +485,7 @@ func Needs(c Capability) Option
 Needs drops the action where the session refuses c.
 
 <a name="RunWith"></a>
-### func [RunWith](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L195>)
+### func [RunWith](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L213>)
 
 ```go
 func RunWith(run func(ActionContext) tea.Cmd) Option
@@ -484,7 +494,7 @@ func RunWith(run func(ActionContext) tea.Cmd) Option
 RunWith replaces what the action does, keeping its key, text and rank: a Quit that asks first, a ChangePane that moves the app's own focus.
 
 <a name="Section"></a>
-### func [Section](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L191>)
+### func [Section](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L209>)
 
 ```go
 func Section(name string) Option
@@ -493,7 +503,7 @@ func Section(name string) Option
 Section lists the action in Help under its own heading, name, after the screen's keys; actions that share a name share the section, in the order they first appear. The legend is not changed.
 
 <a name="When"></a>
-### func [When](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L163>)
+### func [When](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L181>)
 
 ```go
 func When(f func(Context) bool) Option
@@ -502,7 +512,7 @@ func When(f func(Context) bool) Option
 When keeps the action only while f reports true.
 
 <a name="WithKey"></a>
-### func [WithKey](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L167>)
+### func [WithKey](<https://github.com/lucasassuncao/bezel/blob/main/shell/action.go#L185>)
 
 ```go
 func WithKey(keys ...string) Option

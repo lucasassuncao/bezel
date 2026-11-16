@@ -140,6 +140,24 @@ func Command(name, desc string, run func(ActionContext) tea.Cmd, opts ...Option)
 	return build(&action{kind: kindCustom, desc: desc, name: name, run: run}, opts)
 }
 
+// FromLegend is entries as display-only actions, each taking opts: the keys
+// of the component in focus, from its Legend(), printed and left to it. A
+// disabled entry, or one without a key, is skipped.
+func FromLegend(entries []legend.Entry, opts ...Option) []Action {
+	out := make([]Action, 0, len(entries))
+	for _, e := range entries {
+		if e.Disabled || e.Help.Key == "" {
+			continue
+		}
+		a := &action{
+			kind: kindCustom, keys: []string{e.Help.Key}, label: e.Help.Key, desc: e.Help.Desc,
+			needs: e.Needs, group: e.Group, display: true,
+		}
+		out = append(out, build(a, opts))
+	}
+	return out
+}
+
 // Send is a run that emits msg, for value models: the app handles msg in its
 // own Update instead of closing over a copy of itself.
 func Send(msg tea.Msg) func(ActionContext) tea.Cmd {
