@@ -95,6 +95,8 @@ func (t filesTab) Actions(shell.Context) []shell.Action {
 
 `Status` is the text on the status row while the tab shows; `Actions` are its keys, added to `Config.Actions`. Both run several times a frame, so they stay cheap and change nothing. A tab is read as given: when it changes, the app hands it back with `SetTabs`.
 
+A screen with no status and no keys of its own needs no type: `shell.NamedTab("files")` is a tab with only its name.
+
 `ChangeTab` moves between tabs on `tab` and `shift+tab`; `SetTab(i)` moves from code, and `ActiveTab()` says where the user is. When the tabs are wider than the screen the strip scrolls to keep the active one in sight, with `‹` and `›` where more are hidden.
 
 ## Actions
@@ -109,6 +111,7 @@ An `Action` is one key, defined once: the shell dispatches it, prints it in the 
 | `Resize()` | `ctrl+shift+←/→/↑/↓` | narrows, widens, shortens or heightens the focused pane, in the innermost `Resizable` box of that axis; with the `:` palette open, `↑/↓` shorten or heighten the palette |
 | `ResetSizes()` | `=` | gives every `Resizable` box its declared sizes again, and the palette its `Config.PaletteLines` |
 | `Move()`, `Scroll()` | `↑/↓` | listed only: the focused component owns the arrows |
+| `FromLegend(entries)` | each entry's | listed only: a component's keys, as its `Legend()` gives them |
 | `Commands()` | `:` | opens the command palette |
 | `Quit()` | `q`, `ctrl+c` | quits; `ctrl+c` works even with a dialog open or a line being typed |
 | `Custom(keys, desc, run)` | `keys` | the app's own |
@@ -130,6 +133,15 @@ Options shape an action without a new constructor:
 | `Section(name)` | lists it in `Help` under its own heading, after the screen's keys: `Section("document")` on save, undo and reload |
 | `RunWith(run)` | keeps the key and text and replaces what it does: a `Quit` that asks first |
 | `KeyHint(k)` | prints a key beside the command in the palette without binding it |
+
+A component already knows its keys, and `Legend()` lists them for where it is: a list's `esc` only while it filters. `FromLegend` prints them without the app spelling each one out, and leaves the keys to the component:
+
+```go
+keys := shell.FromLegend(m.list.Legend(), shell.Section("navigation"))
+m.sh = m.sh.SetActions(append(keys, shell.Help(), shell.Quit())...)
+```
+
+Options after the entries go to every one of them.
 
 `shell.Check(actions...)` reports two actions on one key. Call it in a test over each screen's set: at run time the first match wins silently.
 
@@ -208,7 +220,7 @@ A dialog of the app's own takes clicks by implementing `overlay.Clicker`: `Click
 
 ```go
 case saveMsg:
-	m.sh, cmd = m.sh.SetStatus("saved", shell.OK, 2*time.Second)
+	return m, shell.Notify("saved", shell.OK)
 case indexMsg:
 	m.sh, cmd = m.sh.Busy("indexing") // a spinner until Idle
 	return m, tea.Batch(cmd, index())
@@ -218,12 +230,13 @@ case indexedMsg:
 
 The row under the panes says what is happening:
 
-- `SetStatus(text, level, ttl)` shows a message, `shell.Info`, `shell.OK` or `shell.Error`, and clears it after `ttl`, unless a newer one replaced it.
-- `Busy(text)` shows a spinner beside the text until `Idle()`: work in progress.
+- `shell.Notify(text, level)` is a command that shows a message, `shell.Info`, `shell.OK` or `shell.Error`, and clears it after `Config.StatusTTL`, five seconds unless set. Any model returns it, the one that holds the shell or a tab's own.
+- `SetStatus(text, level, ttl)` does it on the shell at hand, for a message with its own `ttl`: zero keeps it until the next one.
+- `Busy(text)` shows a spinner beside the text until `Idle()`: work in progress. A shell made busy while the app is built starts its spinner from `m.sh.Init()`.
 - With nothing set, it shows the active tab's `Status`.
 - `SetInput(m)` puts an [`input`](../component/input) on the row for a one-line answer; `Input()` reads it back after `Update`.
 
-`Copy(text, done, failed)` writes to the clipboard and reports the result on the row.
+`shell.Copy(text, done, failed)` is the command that writes to the clipboard and reports the result on the row.
 
 `StatusStyle` in the `Config` says where these messages show. `shell.StatusBar`, the default, is the row above. With `shell.Toast` each one slides into the top right corner as a [`toast`](../component/toast), and the row gives its line back to the panes: it shows only while a line is typed on it, the palette's or `SetInput`'s, while `Busy` runs, or while the tab's `Status` has text. `Status()` still reads the newest message.
 

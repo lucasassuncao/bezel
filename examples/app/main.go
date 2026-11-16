@@ -9,7 +9,6 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"time"
 
 	tea "charm.land/bubbletea/v2"
 
@@ -102,7 +101,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	// The list scrolls by how many rows its pane shows.
 	m.list = m.list.SetHeight(m.sh.Inner("tasks").H)
-	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case askAddMsg:
 		ask := overlay.NewPrompt("New task", func(title string) tea.Cmd {
@@ -116,9 +114,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, overlay.Open(ask)
 	case addMsg:
 		m.tasks = append(slices.Clone(m.tasks), task{title: strings.TrimSpace(msg.title)})
-		m = m.refresh()
-		m.sh, cmd = m.sh.SetStatus("added "+msg.title, shell.OK, 2*time.Second)
-		return m, cmd
+		return m.refresh(), shell.Notify("added "+msg.title, shell.OK)
 	case toggleMsg:
 		if i, ok := m.current(); ok {
 			m.tasks = slices.Clone(m.tasks)
@@ -135,9 +131,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if i, ok := m.current(); ok {
 			title := m.tasks[i].title
 			m.tasks = slices.Delete(slices.Clone(m.tasks), i, i+1)
-			m = m.refresh()
-			m.sh, cmd = m.sh.SetStatus("deleted "+title, shell.OK, 2*time.Second)
-			return m, cmd
+			return m.refresh(), shell.Notify("deleted "+title, shell.OK)
 		}
 	case tea.KeyPressMsg:
 		// Every key no action took is the list's: the arrows, home and end.

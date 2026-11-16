@@ -146,12 +146,10 @@ case askAddMsg:
 	return m, overlay.Open(ask)
 case addMsg:
 	m.tasks = append(slices.Clone(m.tasks), task{title: strings.TrimSpace(msg.title)})
-	m = m.refresh()
-	m.sh, cmd = m.sh.SetStatus("added "+msg.title, shell.OK, 2*time.Second)
-	return m, cmd
+	return m.refresh(), shell.Notify("added "+msg.title, shell.OK)
 ```
 
-`overlay.Open` is a command: the shell pushes the dialog, which takes every key until `enter` or `esc`. `WithValidate` refuses an empty title. On `enter` the prompt runs the function it was given. `bezel.Emit(msg)` is the command that sends a message, here `addMsg`, and the app adds the task and says so on the status row for two seconds.
+`overlay.Open` is a command: the shell pushes the dialog, which takes every key until `enter` or `esc`. `WithValidate` refuses an empty title. On `enter` the prompt runs the function it was given. `bezel.Emit(msg)` is the command that sends a message, here `addMsg`, and the app adds the task. `shell.Notify` is a command too: the shell shows the text on the status row for a few seconds.
 
 Deleting asks first, the same way, with a confirm drawn in the danger colour:
 
