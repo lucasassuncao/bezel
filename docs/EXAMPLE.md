@@ -178,8 +178,10 @@ A key no action took reaches the app, which hands it to the list: the arrows, `h
 ## 8. View: the panes
 
 ```go
-func (m model) View() tea.View {
-	return m.sh.View(map[string]shell.Pane{
+func (m model) View() tea.View { return m.sh.View(m.panes()) }
+
+func (m model) panes() map[string]shell.Pane {
+	return map[string]shell.Pane{
 		"tasks": {
 			Title:  "tasks",
 			Bottom: fmt.Sprintf("%d/%d done", m.doneCount(), len(m.tasks)),
@@ -187,11 +189,13 @@ func (m model) View() tea.View {
 			Body:   func(layout.Rect) string { return m.list.View(m.sh.Theme()) },
 		},
 		"detail": {Title: "detail", Body: m.detail},
-	})
+	}
 }
 ```
 
 The app hands the shell one `Pane` per leaf of the layout. A pane has a title, text for the bottom edge, a scrollbar from the list, and a `Body`: a function the shell calls with the rect inside the border, once it knows the size. The shell draws everything else, including the header, the borders, the focus, the status row and the legend.
+
+The panes are a method of their own so a test can check their names. A pane the layout has no leaf for is dropped without a word, so a typo in `"detail"` would only show as a missing pane; [the test below](#testing-it) catches it.
 
 The detail pane draws the task under the cursor, and a [`progress`](../component/progress) line for the whole list:
 
@@ -248,6 +252,15 @@ func TestDeleteAsksFirst(t *testing.T) {
 ```
 
 `press` sends a [`bezeltest.Key`](../bezeltest) and feeds back whatever the commands it starts send, skipping the timers. The test file has it in full.
+
+One more test checks the pane names against the layout, the way `shell.Check` checks the keys:
+
+```go
+func TestEveryPaneIsInTheLayout(t *testing.T) {
+	m := newModel(false)
+	require.NoError(t, m.sh.CheckPanes(m.panes()))
+}
+```
 
 ## Where next
 

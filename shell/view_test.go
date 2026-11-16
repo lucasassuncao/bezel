@@ -97,6 +97,17 @@ func TestAMissingPaneVanishesAndItsSpaceIsReused(t *testing.T) {
 	require.NotContains(t, ansi.Strip(s.render(panes)), "Detail")
 }
 
+func TestCheckPanesPassesTheLayoutsOwnNames(t *testing.T) {
+	require.NoError(t, newShell().CheckPanes(demoPanes()))
+	require.NoError(t, newShell().CheckPanes(map[string]Pane{"list": {}}), "a pane left out gives its space back")
+}
+
+func TestCheckPanesNamesEveryPaneTheLayoutLacks(t *testing.T) {
+	err := newShell().CheckPanes(map[string]Pane{"list": {}, "side": {}, "detial": {}})
+	require.EqualError(t, err, `pane "detial" is not in the layout (list, detail)`+"\n"+
+		`pane "side" is not in the layout (list, detail)`)
+}
+
 func TestOverlayFloatsOverThePanes(t *testing.T) {
 	s := newShell()
 	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 24})

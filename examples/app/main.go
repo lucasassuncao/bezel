@@ -178,8 +178,11 @@ func (m model) detail(r layout.Rect) string {
 	}, "\n")
 }
 
-func (m model) View() tea.View {
-	return m.sh.View(map[string]shell.Pane{
+func (m model) View() tea.View { return m.sh.View(m.panes()) }
+
+// panes is what View draws, apart so a test can check its names.
+func (m model) panes() map[string]shell.Pane {
+	return map[string]shell.Pane{
 		"tasks": {
 			Title:  "tasks",
 			Bottom: fmt.Sprintf("%d/%d done", m.doneCount(), len(m.tasks)),
@@ -187,7 +190,7 @@ func (m model) View() tea.View {
 			Body:   func(layout.Rect) string { return m.list.View(m.sh.Theme()) },
 		},
 		"detail": {Title: "detail", Body: m.detail},
-	})
+	}
 }
 
 func main() {

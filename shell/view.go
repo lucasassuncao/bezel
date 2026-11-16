@@ -1,7 +1,10 @@
 package shell
 
 import (
+	"errors"
+	"fmt"
 	"image/color"
+	"maps"
 	"slices"
 	"strings"
 
@@ -132,6 +135,20 @@ type Pane struct {
 	Scroll layout.Scroll // a scrollbar's thumb down the right edge, from list.Scroll and the like
 	Accent color.Color   // the edges' colour, focused or not; nil keeps the theme's
 	Body   func(inner layout.Rect) string
+}
+
+// CheckPanes reports every name in panes that the layout has no pane for: a
+// typo View would drop without a word. Apps call it in a test, as Check for
+// keys; a layout pane missing from panes is fine, it gives its space back.
+func (s Shell) CheckPanes(panes map[string]Pane) error {
+	names := paneOrder(s.ready().cfg.Layout)
+	var errs []error
+	for _, name := range slices.Sorted(maps.Keys(panes)) {
+		if !slices.Contains(names, name) {
+			errs = append(errs, fmt.Errorf("pane %q is not in the layout (%s)", name, strings.Join(names, ", ")))
+		}
+	}
+	return errors.Join(errs...)
 }
 
 // withPresent re-resolves the layout for exactly these panes. View uses it so

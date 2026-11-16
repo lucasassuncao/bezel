@@ -53,6 +53,7 @@ Package shell is the drawer an app embeds: it owns the terminal size, tabs, focu
   - [func \(s Shell\) ActiveTab\(\) int](<#Shell.ActiveTab>)
   - [func \(s Shell\) Body\(\) layout.Rect](<#Shell.Body>)
   - [func \(s Shell\) Busy\(text string\) \(Shell, tea.Cmd\)](<#Shell.Busy>)
+  - [func \(s Shell\) CheckPanes\(panes map\[string\]Pane\) error](<#Shell.CheckPanes>)
   - [func \(s Shell\) ClearInput\(\) Shell](<#Shell.ClearInput>)
   - [func \(s Shell\) ClearStatus\(\) Shell](<#Shell.ClearStatus>)
   - [func \(s Shell\) CommandLine\(\) \(string, bool\)](<#Shell.CommandLine>)
@@ -467,7 +468,7 @@ func WithKey(keys ...string) Option
 WithKey rebinds the action. A prebuilt, or a Command that had no key, prints the first key; a custom keeps the label it was given.
 
 <a name="Pane"></a>
-## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L128-L135>)
+## type [Pane](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L131-L138>)
 
 Pane is what the app hands the shell for one leaf: a title for the border and a body drawn into the inner rect the shell computed.
 
@@ -521,7 +522,7 @@ func (s Shell) ActiveTab() int
 ActiveTab is the index of the tab on screen.
 
 <a name="Shell.Body"></a>
-### func \(Shell\) [Body](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L19>)
+### func \(Shell\) [Body](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L22>)
 
 ```go
 func (s Shell) Body() layout.Rect
@@ -537,6 +538,15 @@ func (s Shell) Busy(text string) (Shell, tea.Cmd)
 ```
 
 Busy shows a spinner and text on the status row until Idle, which an empty text also is. A banner set meanwhile shows over it until it expires. The command starts the spinner; nil when it is already spinning.
+
+<a name="Shell.CheckPanes"></a>
+### func \(Shell\) [CheckPanes](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L143>)
+
+```go
+func (s Shell) CheckPanes(panes map[string]Pane) error
+```
+
+CheckPanes reports every name in panes that the layout has no pane for: a typo View would drop without a word. Apps call it in a test, as Check for keys; a layout pane missing from panes is fine, it gives its space back.
 
 <a name="Shell.ClearInput"></a>
 ### func \(Shell\) [ClearInput](<https://github.com/lucasassuncao/bezel/blob/main/shell/update.go#L259>)
@@ -620,7 +630,7 @@ func (s Shell) Init() tea.Cmd
 Init asks the terminal for its background while the shell follows Base, so the answer resolves it light or dark; nil with a fixed Theme. The app's Init returns it.
 
 <a name="Shell.Inner"></a>
-### func \(Shell\) [Inner](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L28>)
+### func \(Shell\) [Inner](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L31>)
 
 ```go
 func (s Shell) Inner(name string) layout.Rect
@@ -899,7 +909,7 @@ func (s Shell) Update(msg tea.Msg) (Shell, bezel.Result)
 Update takes what is the shell's: resize, status ticks, overlays, the status input, help, tabs, focus and left clicks, a pane's coming back as a ClickMsg. A resize or a background answer stays unhandled: the app's models need it too.
 
 <a name="Shell.View"></a>
-### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L150>)
+### func \(Shell\) [View](<https://github.com/lucasassuncao/bezel/blob/main/shell/view.go#L167>)
 
 ```go
 func (s Shell) View(panes map[string]Pane) tea.View

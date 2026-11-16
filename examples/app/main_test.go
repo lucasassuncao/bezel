@@ -73,6 +73,11 @@ func TestDemoRendersAtCommonSizes(t *testing.T) {
 	require.NotContains(t, narrow, "state", "the detail collapsed away")
 }
 
+func TestEveryPaneIsInTheLayout(t *testing.T) {
+	m := newModel(false)
+	require.NoError(t, m.sh.CheckPanes(m.panes()))
+}
+
 func TestSpaceMarksTheTaskDone(t *testing.T) {
 	m := press(press(sized(t, false), "down"), "space")
 	require.Contains(t, ansi.Strip(m.View().Content), "2/4 done")

@@ -51,7 +51,7 @@ func (m model) View() tea.View {
 
 1. **`shell.Config`** describes the screen once: the layout of the panes, the theme, the title, the tabs and the keys that work everywhere.
 2. **`Update`** passes every message to the shell first. If `Handled` is true, the shell used it (a key bound to an action, or a dialog that is open) and you return. If it's false, the message is yours. A resize is both: the shell lays out the panes and still hands it on. Before a model takes a message, size it with `m.sh.Inner(name)`, the space inside that pane's border, the same rect its `Body` gets.
-3. **`View`** gives the shell one `Pane` per pane in the layout: a title and a `Body` function that draws into the space the shell worked out. Leave a pane out of the map and the others take its space.
+3. **`View`** gives the shell one `Pane` per pane in the layout: a title and a `Body` function that draws into the space the shell worked out. Leave a pane out of the map and the others take its space. A name the layout lacks is dropped without a word, so a test runs `m.sh.CheckPanes(panes)` to catch the typo.
 4. **`Init`** returns `m.sh.Init()`, which asks the terminal for its background colour. The shell resolves `Base` for the answer, [light or dark](THEME.md#light-and-dark), and hands the answer on too.
 
 Like every bezel model, the shell is a value: a method that changes it returns a new copy, and you keep that copy in your model.
