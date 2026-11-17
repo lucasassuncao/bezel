@@ -409,3 +409,5 @@ vhs docs/recordings/component/list.tape
 ```
 
 From the root, always: `Output` resolves against the working directory, not against the tape. Without the font, VHS falls back to another monospace and the recording drifts from the others.
+
+The text gallery also takes `--text <kind>`, which shows that kind alone, and has one small GIF for each under a `solo` folder beside its tapes: `docs/recordings/animation/text/solo/burn.gif` is `--text burn` in a 620 px frame. Each tape builds the program and starts it with the flag off camera, as the others do.

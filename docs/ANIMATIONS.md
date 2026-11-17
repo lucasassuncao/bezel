@@ -14,6 +14,7 @@ Every one of them takes the same `animation.FrameMsg`, so one screen can mix the
 ```sh
 go run ./examples/animation        # values, curves, points, physics, data, choreography
 go run ./examples/animation/text   # text, typed, rolled, marked and arriving
+go run ./examples/animation/text --text burn   # one kind on its own
 go run ./examples/animation/scene  # the scenes, one at a time
 ```
 
@@ -147,52 +148,54 @@ The [`animation/text`](../animation/text) package animates a line of text and dr
 
 ![typed](recordings/animation/text/typed.gif)
 
-| Kind | What it does |
-| --- | --- |
-| `Typewriter` | reveals text a grapheme at a time |
-| `Marquee` | scrolls text wider than its room round and round |
-| `Shake` | sways a block side to side, its width kept: a refusal without words |
+| Kind | What it does | |
+| --- | --- | --- |
+| `Typewriter` | reveals text a grapheme at a time | ![typewriter](recordings/animation/text/solo/typewriter.gif) |
+| `Marquee` | scrolls text wider than its room round and round | ![marquee](recordings/animation/text/solo/marquee.gif) |
+| `Shake` | sways a block side to side, its width kept: a refusal without words | ![shake](recordings/animation/text/solo/shake.gif) |
 
 ### Lit and rolled
 
 ![roll](recordings/animation/text/roll.gif)
 
-| Kind | What it does |
-| --- | --- |
-| `Shimmer` | sweeps a glow across text, over and over: a placeholder while something loads |
-| `Scramble` | shows text as noise that settles from the left; the noise depends only on the frame's time |
-| `Odometer` | rolls a number digit by digit, the right-hand digits spinning most; `To` rolls on to the next value |
-| `Gradient` | spreads colours round a text and lets them flow along it |
+| Kind | What it does | |
+| --- | --- | --- |
+| `Shimmer` | sweeps a glow across text, over and over: a placeholder while something loads | ![shimmer](recordings/animation/text/solo/shimmer.gif) |
+| `Scramble` | shows text as noise that settles from the left; the noise depends only on the frame's time | ![scramble](recordings/animation/text/solo/scramble.gif) |
+| `Odometer` | rolls a number digit by digit, the right-hand digits spinning most; `To` rolls on to the next value | ![odometer](recordings/animation/text/solo/odometer.gif) |
+| `Gradient` | spreads colours round a text and lets them flow along it | ![gradient](recordings/animation/text/solo/gradient.gif) |
 
 ### Marked and moved
 
 ![mark](recordings/animation/text/mark.gif)
 
-| Kind | What it does |
-| --- | --- |
-| `Wave` | bobs a line letter by letter, a wave passing along it, on 2·amp+1 rows |
-| `Rainbow` | spreads the colour wheel along text and turns it; `WithTone` matches a theme's accent |
-| `Decrypt` | turns each letter through the flaps of a departures board until it lands, the leftmost first |
-| `Caret`, `Ellipsis` | a blinking cursor, and dots that grow and start over; both keep their width |
-| `Ticker` | a number that rolls to each new value in the colour of its direction, then settles |
-| `Highlight`, `Strike` | a marker run under text, a line drawn through it; both stay |
-| `Rise` | a word that floats up off its place and fades: "copied!", "+1" |
+| Kind | What it does | |
+| --- | --- | --- |
+| `Wave` | bobs a line letter by letter, a wave passing along it, on 2·amp+1 rows | ![wave](recordings/animation/text/solo/wave.gif) |
+| `Rainbow` | spreads the colour wheel along text and turns it; `WithTone` matches a theme's accent | ![rainbow](recordings/animation/text/solo/rainbow.gif) |
+| `Decrypt` | turns each letter through the flaps of a departures board until it lands, the leftmost first | ![decrypt](recordings/animation/text/solo/decrypt.gif) |
+| `Caret`, `Ellipsis` | a blinking cursor, and dots that grow and start over; both keep their width | ![caret](recordings/animation/text/solo/caret.gif) ![ellipsis](recordings/animation/text/solo/ellipsis.gif) |
+| `Ticker` | a number that rolls to each new value in the colour of its direction, then settles | ![ticker](recordings/animation/text/solo/ticker.gif) |
+| `Highlight`, `Strike` | a marker run under text, a line drawn through it; both stay | ![highlight](recordings/animation/text/solo/highlight.gif) ![strike](recordings/animation/text/solo/strike.gif) |
+| `Rise` | a word that floats up off its place and fades: "copied!", "+1" | ![rise](recordings/animation/text/solo/rise.gif) |
 
 ### Arriving and leaving
 
 ![arrive](recordings/animation/text/arrive.gif)
 
-| Kind | What it does |
-| --- | --- |
-| `Stream` | shows text pushed in pieces at a steady pace, speeding up when it falls behind: an answer streamed from a model |
-| `Morph` | turns one text into another, taking out what the new one lacks and then putting in what it adds |
-| `Typist` | types like a person: unevenly, slower after a full stop, now and then a key beside the right one taken back |
-| `Flip` | turns over each letter that changes, left to right, like the cards of a scoreboard |
-| `Neon` | lights text like a sign: steady, with a stutter now and then and one weak letter that flickers more |
-| `Burn` | sets text alight from the left, each letter flaring and falling to ash |
-| `Fall` | drops the letters of a word from above, each at its own moment, landing with a bounce |
+| Kind | What it does | |
+| --- | --- | --- |
+| `Stream` | shows text pushed in pieces at a steady pace, speeding up when it falls behind: an answer streamed from a model | ![stream](recordings/animation/text/solo/stream.gif) |
+| `Morph` | turns one text into another, taking out what the new one lacks and then putting in what it adds | ![morph](recordings/animation/text/solo/morph.gif) |
+| `Typist` | types like a person: unevenly, slower after a full stop, now and then a key beside the right one taken back | ![typist](recordings/animation/text/solo/typist.gif) |
+| `Flip` | turns over each letter that changes, left to right, like the cards of a scoreboard | ![flip](recordings/animation/text/solo/flip.gif) |
+| `Neon` | lights text like a sign: steady, with a stutter now and then and one weak letter that flickers more | ![neon](recordings/animation/text/solo/neon.gif) |
+| `Burn` | sets text alight from the left, each letter flaring and falling to ash | ![burn](recordings/animation/text/solo/burn.gif) |
+| `Fall` | drops the letters of a word from above, each at its own moment, landing with a bounce | ![fall](recordings/animation/text/solo/fall.gif) |
 
-`Big(s)` draws text in a block font three rows tall, for a countdown or a score; `Big(flip.View())` is a scoreboard clock.
+`Big(s)` draws text in a block font three rows tall, for a countdown or a score; `Big(flip.View())` is a scoreboard clock:
+
+![big](recordings/animation/text/solo/big.gif)
 
 The timed ones take `WithEase`, `WithDelay`, `WithRepeat` and, all but `Shake`, `WithYoyo`, as the [motion](#motion) kinds do:
 
