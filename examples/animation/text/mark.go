@@ -119,27 +119,33 @@ func (x texts) moving() bool {
 	return x.decrypt.Active() || x.ticker.Active() || x.mark.Active() || x.strike.Active() || x.rise.Active()
 }
 
-// rows is the tab's body: a row for each, three for the wave and the rise.
-func (x texts) rows(th theme.Resolved, label func(kind, variant string) string) string {
-	var rows []string
+// blocks are the tab's kinds: a row for each, three for the wave and the rise.
+func (x texts) blocks(th theme.Resolved, label func(kind, variant string) string) []block {
+	var wave, rise []string
 	for i, line := range strings.Split(x.wave.View(), "\n") {
 		kind, variant := "", ""
 		if i == 1 {
 			kind, variant = "wave", "forever"
 		}
-		rows = append(rows, label(kind, variant)+th.Info.Render(line))
+		wave = append(wave, label(kind, variant)+th.Info.Render(line))
 	}
-	rows = append(rows,
-		label("rainbow", "turns forever")+x.rainbow.View(),
-		label("decrypt", "d lands")+th.Bold.Render(x.decrypt.View()),
-		label("caret", "blinks")+"Name: "+th.Bold.Render("lucas")+th.Accent.Render(x.caret.View()),
-		label("ellipsis", "grows")+"Saving"+x.ellipsis.View(),
-		label("ticker", "t moves")+th.Muted.Render("$")+x.ticker.View(),
-		label("highlight", "l marks")+x.mark.View(),
-		label("strike", "k crosses")+x.strike.View(),
-	)
 	for _, line := range strings.Split(x.rise.View(), "\n") {
-		rows = append(rows, label("", "")+line)
+		rise = append(rise, label("", "")+line)
 	}
-	return strings.Join(append(rows, label("rise", "c copies")+th.Accent.Render("[ copy link ]")), "\n")
+	rise = append(rise, label("rise", "c copies")+th.Accent.Render("[ copy link ]"))
+	return []block{
+		{"wave", wave},
+		one("rainbow", label("rainbow", "turns forever")+x.rainbow.View()),
+		one("decrypt", label("decrypt", "d lands")+th.Bold.Render(x.decrypt.View())),
+		one("caret", label("caret", "blinks")+"Name: "+th.Bold.Render("lucas")+th.Accent.Render(x.caret.View())),
+		one("ellipsis", label("ellipsis", "grows")+"Saving"+x.ellipsis.View()),
+		one("ticker", label("ticker", "t moves")+th.Muted.Render("$")+x.ticker.View()),
+		one("highlight", label("highlight", "l marks")+x.mark.View()),
+		one("strike", label("strike", "k crosses")+x.strike.View()),
+		{"rise", rise},
+	}
+}
+
+func (x texts) rows(th theme.Resolved, label func(kind, variant string) string) string {
+	return join(x.blocks(th, label))
 }

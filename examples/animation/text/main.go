@@ -4,6 +4,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"image/color"
 	"os"
@@ -217,7 +218,18 @@ func (m model) label(kind, variant string) string {
 }
 
 func main() {
-	if _, err := tea.NewProgram(newModel()).Run(); err != nil {
+	kind := flag.String("text", "", "show only this kind, as a recording does")
+	flag.Parse()
+	var m tea.Model = newModel()
+	if *kind != "" {
+		s, err := newSolo(*kind)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+		}
+		m = s
+	}
+	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

@@ -132,37 +132,43 @@ func (w words) moving() bool {
 	return w.morph.Active() || w.typist.Active() || w.flip.Active() || w.burn.Active() || w.fall.Active()
 }
 
-// rows is the tab's body: a row for each, three for the big clock and the fall.
-func (w words) rows(th theme.Resolved, label func(kind, variant string) string) string {
+// blocks are the tab's kinds: a row for each, three for the big clock and the fall.
+func (w words) blocks(th theme.Resolved, label func(kind, variant string) string) []block {
 	tail := w.stream.View()
 	if over := ansi.StringWidth(tail) - 50; over > 0 {
 		tail = "…" + ansi.Cut(tail, over+1, ansi.StringWidth(tail))
 	}
-	rows := []string{
-		label("stream", "s more") + th.Bold.Render(tail),
-		label("morph", "m changes") + th.Success.Render(w.morph.View()),
-		label("typist", "y retypes") + w.typist.View(),
-		label("flip", "f turns") + th.Accent.Render(w.flip.View()),
-		label("neon", "flickers") + w.neon.View(),
-		label("burn", "b burns") + w.burnt(),
-		"",
-	}
+	var big, fall []string
 	for i, line := range strings.Split(text.Big(w.flip.View()), "\n") {
 		kind, variant := "", ""
 		if i == 1 {
 			kind, variant = "big", "f turns"
 		}
-		rows = append(rows, label(kind, variant)+th.Accent.Render(line))
+		big = append(big, label(kind, variant)+th.Accent.Render(line))
 	}
-	rows = append(rows, "")
 	for i, line := range strings.Split(w.fall.View(), "\n") {
 		kind, variant := "", ""
 		if i == 2 {
 			kind, variant = "fall", "a drops"
 		}
-		rows = append(rows, label(kind, variant)+th.Bold.Render(line))
+		fall = append(fall, label(kind, variant)+th.Bold.Render(line))
 	}
-	return strings.Join(rows, "\n")
+	return []block{
+		one("stream", label("stream", "s more")+th.Bold.Render(tail)),
+		one("morph", label("morph", "m changes")+th.Success.Render(w.morph.View())),
+		one("typist", label("typist", "y retypes")+w.typist.View()),
+		one("flip", label("flip", "f turns")+th.Accent.Render(w.flip.View())),
+		one("neon", label("neon", "flickers")+w.neon.View()),
+		one("burn", label("burn", "b burns")+w.burnt()),
+		one("", ""),
+		{"big", big},
+		one("", ""),
+		{"fall", fall},
+	}
+}
+
+func (w words) rows(th theme.Resolved, label func(kind, variant string) string) string {
+	return join(w.blocks(th, label))
 }
 
 // burnt is the message, whole until it is set alight.

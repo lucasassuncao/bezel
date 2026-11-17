@@ -1,7 +1,6 @@
 package main
 
 import (
-	"strings"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -70,11 +69,15 @@ func (y typed) advance(at time.Time) typed {
 
 func (y typed) moving() bool { return y.typewriter.Active() || y.shake.Active() }
 
-// rows is the tab's body, a row for each.
+// blocks are the tab's kinds, a row for each.
+func (y typed) blocks(th theme.Resolved, label func(kind, variant string) string) []block {
+	return []block{
+		one("typewriter", label("typewriter", "t types")+th.Bold.Render(y.typewriter.View())),
+		one("marquee", label("marquee", "30 cells")+th.Muted.Render("[")+y.marquee.View()+th.Muted.Render("]")),
+		one("shake", label("shake", "s refuses")+th.Danger.Render(y.shake.View(password))),
+	}
+}
+
 func (y typed) rows(th theme.Resolved, label func(kind, variant string) string) string {
-	return strings.Join([]string{
-		label("typewriter", "t types") + th.Bold.Render(y.typewriter.View()),
-		label("marquee", "30 cells") + th.Muted.Render("[") + y.marquee.View() + th.Muted.Render("]"),
-		label("shake", "s refuses") + th.Danger.Render(y.shake.View(password)),
-	}, "\n")
+	return join(y.blocks(th, label))
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"image/color"
-	"strings"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -84,13 +83,16 @@ func (e rolls) moving() bool {
 	return e.scramble.Active() || e.odometer.Active()
 }
 
-// rows is the tab's body, labelled as the first tab's is.
-func (e rolls) rows(th theme.Resolved, label func(kind, variant string) string) string {
-	rows := []string{
-		label("shimmer", "sweep forever") + e.shimmer.View(),
-		label("scramble", "x settles") + th.Bold.Render(e.scramble.View()),
-		label("odometer", "o rolls on") + th.Bold.Render(e.odometer.View()),
-		label("gradient", "flows forever") + e.gradient.View(),
+// blocks are the tab's kinds, labelled as the first tab's are.
+func (e rolls) blocks(th theme.Resolved, label func(kind, variant string) string) []block {
+	return []block{
+		one("shimmer", label("shimmer", "sweep forever")+e.shimmer.View()),
+		one("scramble", label("scramble", "x settles")+th.Bold.Render(e.scramble.View())),
+		one("odometer", label("odometer", "o rolls on")+th.Bold.Render(e.odometer.View())),
+		one("gradient", label("gradient", "flows forever")+e.gradient.View()),
 	}
-	return strings.Join(rows, "\n")
+}
+
+func (e rolls) rows(th theme.Resolved, label func(kind, variant string) string) string {
+	return join(e.blocks(th, label))
 }
