@@ -44,8 +44,8 @@ go run github.com/lucasassuncao/bezel/examples/app@latest
   </tr>
   <tr>
     <td><a href="docs/FRAME.md"><img src="docs/recordings/frame/overlay.gif" alt="dialogs"></a></td>
-    <td><a href="docs/FRAME.md"><img src="docs/recordings/frame/palette.gif" alt="command palette"></a></td>
     <td><a href="docs/THEME.md"><img src="docs/recordings/frame/theme.gif" alt="themes"></a></td>
+    <td><a href="docs/FRAME.md"><img src="docs/recordings/frame/palette.gif" alt="command palette"></a></td>
   </tr>
   <tr>
     <td><a href="docs/COMPONENTS.md"><img src="docs/recordings/component/canvas.gif" alt="canvas"></a></td>

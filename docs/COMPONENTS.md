@@ -410,7 +410,7 @@ vhs docs/recordings/component/list.tape
 
 From the root, always: `Output` resolves against the working directory, not against the tape. Without the font, VHS falls back to another monospace and the recording drifts from the others.
 
-Each gallery also takes a flag that shows one item alone, `--text`, `--scene`, `--effect` and `--animation`, and has one small GIF for each item under a `solo` folder beside its tapes: `docs/recordings/animation/text/solo/burn.gif` is `--text burn` in a 620 px frame. Each tape builds the program and starts it with the flag off camera, as the others do. A wrong name lists the right ones.
+Each gallery also takes a flag that shows one item alone, `--text`, `--scene`, `--effect` and `--animation`, and has one small GIF for each item under a `solo` folder beside its tapes: `docs/recordings/animation/text/solo/burn.gif` is `--text burn` in a 620 px frame. Each tape builds the program and starts it with the flag off camera, as the others do. A wrong name lists the right ones. The alone view prints no legend, a recording has no use for one: `r` still plays the item again where it has a replay, and `q` quits.
 
 The effect tapes also set `BEZEL_MOTION` off camera, between 0.2 and 0.75, so each effect plays in slow motion: the shortest last 300 ms and pass in a blink at full speed. The pause after each `r` is the effect's length over that speed.
 
