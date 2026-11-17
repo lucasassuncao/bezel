@@ -1,6 +1,6 @@
 # Packages
 
-Every package in bezel, grouped by what it is for. Each one also has a `README.md` generated from its doc comments, and its API on [pkg.go.dev](https://pkg.go.dev/github.com/lucasassuncao/bezel).
+Every package in bezel, grouped by what it is for. Each one but `bezeltest` also has a `README.md` generated from its doc comments, and its API on [pkg.go.dev](https://pkg.go.dev/github.com/lucasassuncao/bezel).
 
 **The frame**, at the root: what every screen is built in.
 
@@ -38,7 +38,7 @@ Every package in bezel, grouped by what it is for. Each one also has a `README.m
 - [`canvas`](../component/canvas): free drawing in braille: lines, boxes, circles, points and labels in your own units.
 - [`icon`](../component/icon): state marks (✓ ✗ ● ○) in Unicode or ASCII.
 - [`toast`](../component/toast): notices that slide into a corner, stack and leave on their own.
-- [`inline`](../component/inline): a yes/no question, any form field asked on its own, and a progress bar for CLIs that print logs.
+- [`inline`](../component/inline): a yes/no question and any form field asked on its own, for CLIs that print logs.
 - [`logger`](../component/logger): a `slog.Handler` that hangs every attribute under its message as a tree and wraps long values without cutting them, and `Pane`, a log panel that follows the end as lines arrive and filters them with `/`.
 - [`themebrowser`](../component/themebrowser): the preset table behind a `--list-themes` flag.
 

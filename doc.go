@@ -75,7 +75,7 @@
 //     when time is up.
 //   - [github.com/lucasassuncao/bezel/component/stopwatch]: time counted up,
 //     paused and reset.
-//   - [github.com/lucasassuncao/bezel/component/chart]: area, spark, bar,
+//   - [github.com/lucasassuncao/bezel/component/chart]: area, spark, line, bar,
 //     heat and donut charts of a run of numbers.
 //   - [github.com/lucasassuncao/bezel/component/canvas]: free drawing in
 //     braille: lines, boxes, circles, points and labels in your own units.

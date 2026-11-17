@@ -54,7 +54,7 @@ go run github.com/lucasassuncao/bezel/examples/app@latest
   </tr>
 </table>
 
-Every package has its own example and recording in [COMPONENTS.md](docs/COMPONENTS.md), [EFFECTS.md](docs/EFFECTS.md) and [ANIMATIONS.md](docs/ANIMATIONS.md).
+Every package has its own example and, but for `bezeltest`, a recording in [COMPONENTS.md](docs/COMPONENTS.md), [EFFECTS.md](docs/EFFECTS.md) and [ANIMATIONS.md](docs/ANIMATIONS.md).
 
 ## Quickstart
 

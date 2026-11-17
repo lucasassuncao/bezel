@@ -41,7 +41,7 @@ m.list = m.list.SetHeight(m.sh.Inner("items").H) // before the list takes msg
 
 A size is never a constructor parameter nor an argument of `View`: it comes through `SetHeight`/`SetWidth` once the terminal says how big it is. A model not sized yet draws nothing. One rule covers every way a pane changes size (a resize, a dragged edge, a collapse): size a pane's models from `m.sh.Inner(name)` before they take a message. A layout that changes without a message (`SetLayout`) sizes again after the change.
 
-Sized this way: `list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`, `logger.Pane`; `input`, `tags`, `breadcrumb` and `wizard` take a width only; `browser` has `SetListHeight` and `SetPreviewHeight`.
+Sized this way: `list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`, `canvas`, `logger.Pane`; `input`, `tags`, `breadcrumb` and `wizard` take a width only; `browser` has `SetListHeight` and `SetPreviewHeight`.
 
 ### Getters and errors
 
@@ -73,7 +73,7 @@ Where the theme goes depends on who calls `View`. If bezel does, the component k
 | bezel (a fixed interface, or a field that needs the theme before drawing) | constructor, last parameter | `textbox`, `input`, `tags`, `cursor`, `logger` |
 | bezel, for a dialog | nowhere: `Push`, `Open` and the stack's `SetTheme` hand it the stack's theme, the shell's (`overlay.Themer`) | `overlay` |
 | bezel, for a form's controls | `form.New(th, fields...)`, first because the fields are variadic; `wizard.New(th, pages...)` repaints each page's form the same way | `form`, `wizard` |
-| the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `calendar`, `breadcrumb`, `timer`, `stopwatch`, `viewport`, `accordion`, `filepicker`, `progress.Model` |
+| the app | `View(th, ...)` | `list`, `tree`, `browser`, `table.Model`, `spinner`, `paginator`, `calendar`, `breadcrumb`, `timer`, `stopwatch`, `viewport`, `accordion`, `filepicker`, `progress.Model`, `canvas` |
 | nobody: a plain function | after the data | `progress.Bar` and siblings, `chart`, `inline`, `icon.Set.Render` |
 | the shell | `Config.Base`, resolved light or dark on the answer `Init` asks for, `SetBase` to change; or `Config.Theme`/`SetTheme` for fixed styles. Either repaints open dialogs | `shell` |
 
@@ -101,7 +101,7 @@ Each package is in one class, and a non-themable one says so in its doc comment:
 
 | Class | The app can | Packages |
 | --- | --- | --- |
-| Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `calendar`, `breadcrumb`, `input`, `tags`, `textbox`, `form`, `wizard`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, every `overlay` dialog but `Alert` |
+| Themable | switch the theme and use `WithStyles` | `list`, `tree`, `table`, `browser`, `accordion`, `calendar`, `breadcrumb`, `input`, `tags`, `textbox`, `form`, `wizard`, `cursor`, `filepicker`, `logger`, `paginator`, `progress.Model`, `spinner`, `stopwatch`, `timer`, `viewport`, `canvas`, every `overlay` dialog but `Alert` |
 | Theme only | switch the theme (a plain function keeps no edit) | `chart`, `progress.Bar` and siblings, `inline`, `icon.Set.Render` |
 | Non-themable | nothing: the colours mean something, or are arguments | `overlay.Alert` and any `Kind` tint, `toast` (its `draw.Kind` colours are fixed), `animation` and subpackages, `effect`, `themebrowser` |
 

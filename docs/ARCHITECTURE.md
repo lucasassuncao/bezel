@@ -30,7 +30,7 @@ The packages at the root are the ones every app touches: `shell` to embed, `them
 
 What an app creates and draws inside a pane: `list`, `paginator`, `calendar`, `breadcrumb`, `tree`, `table`, `viewport`, `browser`, `filepicker`, `accordion`, `form`, `wizard`, `input`, `tags`, `textbox`, `cursor`, `progress`, `spinner`, `timer`, `stopwatch`, `chart`, `canvas`, `icon` and `toast`, and the three that print into a terminal instead of taking it over, `inline`, `logger` and `themebrowser`.
 
-A component imports the foundation, the motion packages and, where it is made of others, other components: `form` holds `input`s, `wizard` pages `form`s, `inline` asks a `form` field and draws a `progress` bar, `themebrowser` is a `table`, `progress` moves on an `animation.Spring`. A motion type stays inside: no stable component shows one in its API, since `animation` and `effect` are experimental. A component never imports the frame, so any of them works in a pane, in a dialog or in a program without a shell. That is also why the shell cannot click a list for the app: it finds the pane under the pointer and sends a `ClickMsg`, and the app, which holds the list, hands it on. `overlay.FilePicker` is the one dialog built on a component, `filepicker`. `component/` is a folder, not a package: each component is its own package, `component/list` imported as `list`.
+A component imports the foundation, the motion packages and, where it is made of others, other components: `form` holds `input`s, `wizard` pages `form`s, `inline` asks a `form` field, `themebrowser` is a `table`, `progress` moves on an `animation.Spring`. A motion type stays inside: no stable component shows one in its API, since `animation` and `effect` are experimental. A component never imports the frame, so any of them works in a pane, in a dialog or in a program without a shell. That is also why the shell cannot click a list for the app: it finds the pane under the pointer and sends a `ClickMsg`, and the app, which holds the list, hands it on. A dialog is built on a component the same way: `overlay.FilePicker` on `filepicker`, `Prompt` on `input`, `Pager` on `viewport`. `component/` is a folder, not a package: each component is its own package, `component/list` imported as `list`.
 
 ## effect/
 
@@ -40,7 +40,7 @@ It is a folder of its own, not part of `animation`, because it is a different ki
 
 ## animation/
 
-Values that move on frames that arrive as messages: tweens, springs, fades, points and physics, the easing curves, and the `Clock` that drives several at once. The core imports nothing from bezel but `internal/frames`, so an app can animate its own drawing without anything else.
+Values that move on frames that arrive as messages: tweens, springs, fades, points and physics, the easing curves, and the `Clock` that drives several at once. The core imports nothing from bezel but the root and `internal/`, so an app can animate its own drawing without anything else.
 
 Two subpackages animate something more specific, and live under it because they are animations themselves:
 
@@ -61,7 +61,7 @@ Plumbing more than one folder needs and no app should depend on. Go lets only th
 | `hue` | colours turned round the HSL wheel | `effect`, `animation/text` |
 | `edit` | a line of graphemes with a caret, the editing `input` and `textbox` share, the caret's blink and the text a filter types | `input`, `textbox`, `cursor`, `viewport`, `list`, `table`, `tree`, `logger`, `form`, `animation/text` |
 | `clip` | the system clipboard, read as the paste a terminal sends and written off the event loop | `input`, `textbox`, `themebrowser`, `shell` |
-| `fuzzy` | a query matched by its letters in order, scored so the best match ranks first | `list`, `table`, `themebrowser`, the `:` palette |
+| `fuzzy` | a query matched by its letters in order, scored so the best match ranks first | `list`, `table`, `form`, `themebrowser`, the `:` palette |
 | `braille` | a grid of braille cells, two dots by four, coloured by what lit them last, with text over the dots | `chart`, `canvas` |
 | `wheel` | a mouse wheel turn read as rows, shift and sideways turns left to panning | `list`, `table`, `tree`, `filepicker`, `accordion`, `textbox`, `paginator`, `viewport` |
 
