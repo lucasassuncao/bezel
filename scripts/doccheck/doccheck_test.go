@@ -1,6 +1,7 @@
 package doccheck
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -22,6 +23,19 @@ func TestTheGuidesMatchTheAPI(t *testing.T) {
 	}
 }
 
+// A component missing from the list would have its snippets pass unchecked.
+func TestComponentsNamesEveryPackageUnderComponent(t *testing.T) {
+	entries, err := os.ReadDir("../../component")
+	require.NoError(t, err)
+	var dirs []string
+	for _, e := range entries {
+		if e.IsDir() {
+			dirs = append(dirs, e.Name())
+		}
+	}
+	require.ElementsMatch(t, dirs, components)
+}
+
 // A snippet that names something bezel does not have is caught; one that
 // only leaves its own names undeclared is not.
 func TestCheckTellsTheAPIFromTheSnippetsOwnNames(t *testing.T) {
@@ -29,6 +43,7 @@ func TestCheckTellsTheAPIFromTheSnippetsOwnNames(t *testing.T) {
 	require.NoError(t, err)
 	stale := "```go\nth := theme.Resolve(theme.Gruvbox(), true)\n```\n"
 	require.Len(t, c.Check(stale), 1)
+	require.Len(t, c.Check("```go\nwizard.NoSuchThing()\n```\n"), 1)
 	own := "```go\nfunc (m model) View() tea.View { return m.sh.View(nil) }\n```\n"
 	require.Empty(t, c.Check(own))
 }

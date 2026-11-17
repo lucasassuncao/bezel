@@ -43,9 +43,9 @@ var imports = map[string]string{
 
 // components are the packages under component/, each imported by its name.
 var components = []string{
-	"accordion", "browser", "chart", "cursor", "filepicker", "form", "icon", "inline", "input", "list",
-	"logger", "paginator", "progress", "spinner", "stopwatch", "table", "textbox", "themebrowser",
-	"timer", "toast", "tree", "viewport",
+	"accordion", "breadcrumb", "browser", "calendar", "canvas", "chart", "cursor", "filepicker", "form",
+	"icon", "inline", "input", "list", "logger", "paginator", "progress", "spinner", "stopwatch", "table",
+	"tags", "textbox", "themebrowser", "timer", "toast", "tree", "viewport", "wizard",
 }
 
 // ours are the names a problem must mention to be about bezel's API.
