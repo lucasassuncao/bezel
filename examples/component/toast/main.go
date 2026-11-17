@@ -34,7 +34,7 @@ func push(text string, kind draw.Kind) func(shell.ActionContext) tea.Cmd {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("doc")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "toast",
 		Actions: []shell.Action{
 			shell.Custom("s", "saved", push("Saved notes.md", draw.Success)),

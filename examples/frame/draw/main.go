@@ -28,7 +28,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fill("draw")),
-		Base:    theme.Mint(),
+		Base:    theme.Plain(),
 		Title:   "draw",
 		Actions: []shell.Action{shell.Scroll(), shell.Quit()},
 	})

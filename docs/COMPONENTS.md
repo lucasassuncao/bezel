@@ -402,7 +402,7 @@ The frame's own keys are not a struct. Each one is a [`shell.Action`](FRAME.md#a
 
 ## Recording
 
-The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the four that print into the terminal rather than take it over, `inline`, `ask`, `logger` and `themebrowser`, run behind a `clear` so their command line never shows. The galleries, of animation, text, scenes and effects, have a tape per tab, and `ask` one per field, under `recordings/component/ask`. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
+The tapes live in `docs/recordings`, beside the GIFs they make, and are written for Windows: each sets `Set Shell "powershell"`, builds a `.exe` off camera and deletes it when done. Every example also starts and quits off camera, so its GIF opens and loops on the program; the four that print into the terminal rather than take it over, `inline`, `ask`, `logger` and `themebrowser`, run behind a `clear` so their command line never shows. The galleries, of animation, text, scenes and effects, have a tape for each item, under their `solo` folder, and `ask` one per field, under `recordings/component/ask`. They draw 1000 px wide in JetBrainsMono Nerd Font at 16px, so GitHub shows them close to full size, and 640 px tall unless the example needs another height. With [VHS](https://github.com/charmbracelet/vhs), `ttyd` and `ffmpeg` on the `PATH` and the font installed, from the repository root:
 
 ```sh
 vhs docs/recordings/component/list.tape
@@ -410,4 +410,8 @@ vhs docs/recordings/component/list.tape
 
 From the root, always: `Output` resolves against the working directory, not against the tape. Without the font, VHS falls back to another monospace and the recording drifts from the others.
 
-The text gallery also takes `--text <kind>`, which shows that kind alone, and has one small GIF for each under a `solo` folder beside its tapes: `docs/recordings/animation/text/solo/burn.gif` is `--text burn` in a 620 px frame. Each tape builds the program and starts it with the flag off camera, as the others do.
+Each gallery also takes a flag that shows one item alone, `--text`, `--scene`, `--effect` and `--animation`, and has one small GIF for each item under a `solo` folder beside its tapes: `docs/recordings/animation/text/solo/burn.gif` is `--text burn` in a 620 px frame. Each tape builds the program and starts it with the flag off camera, as the others do. A wrong name lists the right ones.
+
+The effect tapes also set `BEZEL_MOTION` off camera, between 0.2 and 0.75, so each effect plays in slow motion: the shortest last 300 ms and pass in a blink at full speed. The pause after each `r` is the effect's length over that speed.
+
+Every tape sets the same terminal: a black background and Windows Terminal's Campbell colours, so the programs use `theme.Plain()` and show the terminal's own colours. The one recording with other colours is the theme browser's. The effect, animation, scene and text galleries use `look.Plain()` from `examples/internal/look` instead: the same sixteen colours as RGB, because an effect can only mix a colour it has numbers for, and an ANSI one has none.

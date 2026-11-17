@@ -108,6 +108,13 @@ func (p pops) rows(th theme.Resolved, label func(kind, variant string) string) s
 		rows = append(rows, label(kind, variant)+line)
 	}
 	rows = append(rows, "")
+	rows = append(rows, p.raceRows(th, label)...)
+	return strings.Join(append(rows, "", label("squash", "d drops")+p.squashed(th)), "\n")
+}
+
+// raceRows is the race, a row for each racer, in the order they stand.
+func (p pops) raceRows(th theme.Resolved, label func(kind, variant string) string) []string {
+	var rows []string
 	standing := p.race.Racers()
 	slices.SortStableFunc(standing, func(a, b animation.Racer) int { return cmp.Compare(a.Place, b.Place) })
 	for i, r := range standing {
@@ -119,7 +126,27 @@ func (p pops) rows(th theme.Resolved, label func(kind, variant string) string) s
 		rows = append(rows, label(kind, variant)+fmt.Sprintf("%-6s", r.Label)+
 			th.Series[slices.Index(racers, r.Label)%len(th.Series)].Render(strings.Repeat("█", n))+th.Muted.Render(fmt.Sprintf(" %2.0f", r.Value)))
 	}
-	return strings.Join(append(rows, "", label("squash", "d drops")+p.squashed(th)), "\n")
+	return rows
+}
+
+// blocks are the tab's kinds, the burst and the donut apart as a solo draws them.
+func (p pops) blocks(th theme.Resolved, label func(kind, variant string) string) []chunk {
+	of := func(kind, variant, drawn string) chunk {
+		b := chunk{kind: kind}
+		for i, line := range strings.Split(drawn, "\n") {
+			if i > 0 {
+				variant = ""
+			}
+			b.lines = append(b.lines, label(kind, variant)+line)
+		}
+		return b
+	}
+	return []chunk{
+		of("burst", "x pops", p.field(th)),
+		of("donut", "o sweeps", chart.Donut(p.donut.Value(), 1, ring, th)),
+		{"race", p.raceRows(th, label)},
+		one("squash", label("squash", "d drops")+p.squashed(th)),
+	}
 }
 
 // field is the burst's sparks on a dark field, brighter the more life left.

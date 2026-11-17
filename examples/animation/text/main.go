@@ -14,9 +14,9 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/examples/internal/look"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // black is the gallery's dark background, what the rise and the neon fade towards.
@@ -47,7 +47,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fill("main")),
-		Base:   theme.Mint(),
+		Base:   look.Plain(),
 		Title:  "text",
 		Tabs: []shell.Tab{
 			page{"typed", []shell.Action{

@@ -58,7 +58,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fixed("filter", layout.Lines(3)), layout.Fill("packages")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "tags",
 		Actions: []shell.Action{
 			shell.Custom("enter", "add", nil, shell.DisplayOnly()),

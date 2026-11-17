@@ -3,6 +3,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"image/color"
 	"os"
@@ -11,9 +12,9 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/examples/internal/look"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // black is the gallery's dark background, what the scenes fade towards.
@@ -27,7 +28,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fill("main")),
-		Base:   theme.Mint(),
+		Base:   look.Plain(),
 		Title:  "scene",
 		Actions: []shell.Action{
 			shell.Custom("n", "next scene", shell.Send(sceneMsg{})),
@@ -77,7 +78,18 @@ func (m model) label(kind, variant string) string {
 }
 
 func main() {
-	if _, err := tea.NewProgram(newModel()).Run(); err != nil {
+	name := flag.String("scene", "", "show only this scene, as a recording does")
+	flag.Parse()
+	var m tea.Model = newModel()
+	if *name != "" {
+		s, err := newSolo(*name)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+		}
+		m = s
+	}
+	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

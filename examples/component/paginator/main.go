@@ -31,7 +31,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("paginator")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "paginator",
 		Actions: []shell.Action{
 			shell.Custom("←/→", "page", nil, shell.DisplayOnly()),

@@ -30,7 +30,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fixed("calendar", layout.Lines(calendar.Width+4)), layout.Fill("day")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "calendar",
 		Mouse:  true,
 		Actions: []shell.Action{

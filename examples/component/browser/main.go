@@ -49,7 +49,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fixed("list", layout.Ratio(1, 3), layout.Min(20)), layout.Fill("preview")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "browser",
 		Actions: []shell.Action{
 			shell.Move(),

@@ -4,6 +4,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"slices"
@@ -16,9 +17,9 @@ import (
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/component/progress"
+	"github.com/lucasassuncao/bezel/examples/internal/look"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 // hintsHeight is the open pane, borders included.
@@ -100,7 +101,7 @@ func shape(h int) layout.Node {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: shape(0),
-		Base:   theme.Mint(),
+		Base:   look.Plain(),
 		Title:  "animation",
 		Tabs: []shell.Tab{
 			page{"basics", []shell.Action{
@@ -371,9 +372,11 @@ func (m model) View() tea.View {
 }
 
 // gallery is one row per animation, its kind and variant on the left.
-func (m model) gallery() string {
-	label := m.label
-	var rows []string
+func (m model) gallery() string { return join(m.basicBlocks(m.label)) }
+
+// basicBlocks are the first tab's kinds, a row for each and two for the springs.
+func (m model) basicBlocks(label func(kind, variant string) string) []chunk {
+	var easing []string
 	for i, e := range eases {
 		kind := ""
 		if i == 0 {
@@ -383,20 +386,19 @@ func (m model) gallery() string {
 		if i < len(m.bars) {
 			cur = m.bars[i].Value()
 		}
-		rows = append(rows, label(kind, e.name)+m.bar(cur))
+		easing = append(easing, label(kind, e.name)+m.bar(cur))
 	}
-	rows = append(rows, "",
-		label("spring", "steady")+m.spring(m.steady),
-		label("", "bouncy")+m.spring(m.bouncy),
-		"",
-		label("float", "sub-cell")+progress.Smooth(int(m.smooth.Value()*1000), 1000, track, m.sh.Theme()),
-		label("count-up", "ease out")+m.sh.Theme().Bold.Render(thousands(m.count.Value())+" files"),
-		label("fade", "accent→muted")+lipgloss.NewStyle().Foreground(m.fade.Value()).Render(saved),
-		"",
-		label("pulse", "yoyo forever")+lipgloss.NewStyle().Foreground(m.pulse.Value()).Render("● waiting for the server"),
-		label("cascade", "120ms apart")+m.blocks(),
-	)
-	return strings.Join(rows, "\n")
+	springs := []string{label("spring", "steady") + m.spring(m.steady), label("", "bouncy") + m.spring(m.bouncy)}
+	return []chunk{
+		{"easing", easing}, one("", ""),
+		{"spring", springs}, one("", ""),
+		one("float", label("float", "sub-cell")+progress.Smooth(int(m.smooth.Value()*1000), 1000, track, m.sh.Theme())),
+		one("count-up", label("count-up", "ease out")+m.sh.Theme().Bold.Render(thousands(m.count.Value())+" files")),
+		one("fade", label("fade", "accent→muted")+lipgloss.NewStyle().Foreground(m.fade.Value()).Render(saved)),
+		one("", ""),
+		one("pulse", label("pulse", "yoyo forever")+lipgloss.NewStyle().Foreground(m.pulse.Value()).Render("● waiting for the server")),
+		one("cascade", label("cascade", "120ms apart")+m.blocks()),
+	}
 }
 
 // bar is cur of track cells filled.
@@ -423,7 +425,18 @@ func thousands(n int) string {
 }
 
 func main() {
-	if _, err := tea.NewProgram(newModel()).Run(); err != nil {
+	name := flag.String("animation", "", "show only this animation, as a recording does")
+	flag.Parse()
+	var m tea.Model = newModel()
+	if *name != "" {
+		s, err := newSolo(*name)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+		}
+		m = s
+	}
+	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

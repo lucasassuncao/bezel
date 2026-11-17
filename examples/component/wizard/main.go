@@ -35,7 +35,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("wizard")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "wizard",
 		Actions: []shell.Action{
 			shell.Custom("tab", "next field", nil, shell.DisplayOnly()),

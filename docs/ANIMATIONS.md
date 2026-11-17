@@ -13,9 +13,11 @@ Every one of them takes the same `animation.FrameMsg`, so one screen can mix the
 
 ```sh
 go run ./examples/animation        # values, curves, points, physics, data, choreography
+go run ./examples/animation --animation spring   # one animation on its own
 go run ./examples/animation/text   # text, typed, rolled, marked and arriving
 go run ./examples/animation/text --text burn   # one kind on its own
 go run ./examples/animation/scene  # the scenes, one at a time
+go run ./examples/animation/scene --scene rain   # one scene on its own
 ```
 
 `tab` turns the page; each tab keeps its own keys, listed at the foot of the screen.
@@ -71,8 +73,6 @@ The [`animation`](../animation) package moves values: a number, a colour, a poin
 
 ### Values
 
-![basics](recordings/animation/basics.gif)
-
 | Kind | What it moves |
 | --- | --- |
 | `Tween`, `Float` | a whole number or a fraction from one value to another: a panel's height, a bar drawn in eighths |
@@ -80,11 +80,43 @@ The [`animation`](../animation) package moves values: a number, a colour, a poin
 | `Fade` | a colour from one to another; `Blend` mixes two at any point |
 | `Move`, `Follow` | ease or spring a `Point` on both axes |
 
-The move tab plays the points beside a `Path`, below.
-
-![move](recordings/animation/move.gif)
-
 Every timed one takes `WithDelay` and `WithRepeat`, `animation.Forever` for no end, and `WithYoyo`, which runs every other pass back. Delays chain one animation after another: the gallery's cascade is six tweens, each delayed a little more than the one before. A pulse is a `Fade` with `WithYoyo(true).WithRepeat(animation.Forever)`.
+
+#### Easing
+
+![easing](recordings/animation/solo/easing.gif)
+
+#### Spring
+
+![spring](recordings/animation/solo/spring.gif)
+
+#### Float
+
+![float](recordings/animation/solo/float.gif)
+
+#### Count-up
+
+![count-up](recordings/animation/solo/count-up.gif)
+
+#### Fade
+
+![fade](recordings/animation/solo/fade.gif)
+
+#### Pulse
+
+![pulse](recordings/animation/solo/pulse.gif)
+
+#### Cascade
+
+![cascade](recordings/animation/solo/cascade.gif)
+
+#### Move and Follow
+
+![point](recordings/animation/solo/point.gif)
+
+#### Path
+
+![path](recordings/animation/solo/path.gif)
 
 ### Curves
 
@@ -100,8 +132,6 @@ Every curve starts at exactly 0 and ends at exactly 1. `Back` and `Elastic` leav
 
 ### Physics
 
-![motion](recordings/animation/motion.gif)
-
 | Kind | What it does |
 | --- | --- |
 | `Drop` | falls under gravity and bounces, each hop lower and quicker, until it settles |
@@ -113,19 +143,69 @@ Every curve starts at exactly 0 and ends at exactly 1. `Back` and `Elastic` leav
 
 `Drop.Shape()` is the squash and stretch to draw a dropped thing with: tall while it falls fast, wide and flat as it lands, round at rest. The pop tab draws a `Burst`, the squash, and the two below.
 
-![pop](recordings/animation/pop.gif)
+#### Drop
+
+![drop](recordings/animation/solo/drop.gif)
+
+#### Pendulum
+
+![pendulum](recordings/animation/solo/pendulum.gif)
+
+#### Orbit
+
+![orbit](recordings/animation/solo/orbit.gif)
+
+#### Flock
+
+![flock](recordings/animation/solo/flock.gif)
+
+#### Rubber
+
+![rubber](recordings/animation/solo/rubber.gif)
+
+#### Burst
+
+![burst](recordings/animation/solo/burst.gif)
+
+#### Squash
+
+![squash](recordings/animation/solo/squash.gif)
 
 ### Charts that move
-
-![data](recordings/animation/data.gif)
 
 A `Series` animates the values a chart draws: `Grow` raises them all from zero, `Draw` reveals them from the left, and `Push` adds one at the right that rises while the oldest drops off. `Heat` moves a grid of values cell by cell for `chart.Heat`, and a `Spring` carries the needle of `progress.Gauge`.
 
 A `Race` moves a set of bars to new values and new places together, one that overtakes another sliding past it: sort its `Racers` by `Place` to draw them. `chart.Donut` draws a share as a ring filled clockwise from the top; carry the share on a `Float` and it sweeps.
 
-### Choreography
+#### Bars
 
-![flow](recordings/animation/flow.gif)
+![bars](recordings/animation/solo/bars.gif)
+
+#### Spark
+
+![spark](recordings/animation/solo/spark.gif)
+
+#### Area
+
+![area](recordings/animation/solo/area.gif)
+
+#### Gauge
+
+![gauge](recordings/animation/solo/gauge.gif)
+
+#### Heat
+
+![heat](recordings/animation/solo/heat.gif)
+
+#### Donut
+
+![donut](recordings/animation/solo/donut.gif)
+
+#### Race
+
+![race](recordings/animation/solo/race.gif)
+
+### Choreography
 
 A `Timeline` plays several named values on one clock, so a sequence needs no delays worked out by hand. `Step` moves one value, `Seq` plays spans one after another, `Par` together, `Stagger` together a gap apart, and `Gap` waits:
 
@@ -140,60 +220,154 @@ tl := animation.NewTimeline(animation.Seq(
 
 `Cascade(gap, items...)` does the same for animations built apart, delaying each a gap more than the one before. `Keyframes` moves one value through several stops, each with the curve that leads into it, and `Path` carries a `Point` along a line of points at an even speed; `Bezier` makes the points of a curve for it.
 
+#### Timeline
+
+![timeline](recordings/animation/solo/timeline.gif)
+
+#### Keyframes
+
+![keyframes](recordings/animation/solo/keyframes.gif)
+
 ## Text
 
 The [`animation/text`](../animation/text) package animates a line of text and draws it with `View`, its width kept wherever the text would jump.
 
 ### Typed and scrolled
 
-![typed](recordings/animation/text/typed.gif)
+| Kind | What it does |
+| --- | --- |
+| `Typewriter` | reveals text a grapheme at a time |
+| `Marquee` | scrolls text wider than its room round and round |
+| `Shake` | sways a block side to side, its width kept: a refusal without words |
 
-| Kind | What it does | |
-| --- | --- | --- |
-| `Typewriter` | reveals text a grapheme at a time | ![typewriter](recordings/animation/text/solo/typewriter.gif) |
-| `Marquee` | scrolls text wider than its room round and round | ![marquee](recordings/animation/text/solo/marquee.gif) |
-| `Shake` | sways a block side to side, its width kept: a refusal without words | ![shake](recordings/animation/text/solo/shake.gif) |
+#### Typewriter
+
+![typewriter](recordings/animation/text/solo/typewriter.gif)
+
+#### Marquee
+
+![marquee](recordings/animation/text/solo/marquee.gif)
+
+#### Shake
+
+![shake](recordings/animation/text/solo/shake.gif)
 
 ### Lit and rolled
 
-![roll](recordings/animation/text/roll.gif)
+| Kind | What it does |
+| --- | --- |
+| `Shimmer` | sweeps a glow across text, over and over: a placeholder while something loads |
+| `Scramble` | shows text as noise that settles from the left; the noise depends only on the frame's time |
+| `Odometer` | rolls a number digit by digit, the right-hand digits spinning most; `To` rolls on to the next value |
+| `Gradient` | spreads colours round a text and lets them flow along it |
 
-| Kind | What it does | |
-| --- | --- | --- |
-| `Shimmer` | sweeps a glow across text, over and over: a placeholder while something loads | ![shimmer](recordings/animation/text/solo/shimmer.gif) |
-| `Scramble` | shows text as noise that settles from the left; the noise depends only on the frame's time | ![scramble](recordings/animation/text/solo/scramble.gif) |
-| `Odometer` | rolls a number digit by digit, the right-hand digits spinning most; `To` rolls on to the next value | ![odometer](recordings/animation/text/solo/odometer.gif) |
-| `Gradient` | spreads colours round a text and lets them flow along it | ![gradient](recordings/animation/text/solo/gradient.gif) |
+#### Shimmer
+
+![shimmer](recordings/animation/text/solo/shimmer.gif)
+
+#### Scramble
+
+![scramble](recordings/animation/text/solo/scramble.gif)
+
+#### Odometer
+
+![odometer](recordings/animation/text/solo/odometer.gif)
+
+#### Gradient
+
+![gradient](recordings/animation/text/solo/gradient.gif)
 
 ### Marked and moved
 
-![mark](recordings/animation/text/mark.gif)
+| Kind | What it does |
+| --- | --- |
+| `Wave` | bobs a line letter by letter, a wave passing along it, on 2·amp+1 rows |
+| `Rainbow` | spreads the colour wheel along text and turns it; `WithTone` matches a theme's accent |
+| `Decrypt` | turns each letter through the flaps of a departures board until it lands, the leftmost first |
+| `Caret`, `Ellipsis` | a blinking cursor, and dots that grow and start over; both keep their width |
+| `Ticker` | a number that rolls to each new value in the colour of its direction, then settles |
+| `Highlight`, `Strike` | a marker run under text, a line drawn through it; both stay |
+| `Rise` | a word that floats up off its place and fades: "copied!", "+1" |
 
-| Kind | What it does | |
-| --- | --- | --- |
-| `Wave` | bobs a line letter by letter, a wave passing along it, on 2·amp+1 rows | ![wave](recordings/animation/text/solo/wave.gif) |
-| `Rainbow` | spreads the colour wheel along text and turns it; `WithTone` matches a theme's accent | ![rainbow](recordings/animation/text/solo/rainbow.gif) |
-| `Decrypt` | turns each letter through the flaps of a departures board until it lands, the leftmost first | ![decrypt](recordings/animation/text/solo/decrypt.gif) |
-| `Caret`, `Ellipsis` | a blinking cursor, and dots that grow and start over; both keep their width | ![caret](recordings/animation/text/solo/caret.gif) ![ellipsis](recordings/animation/text/solo/ellipsis.gif) |
-| `Ticker` | a number that rolls to each new value in the colour of its direction, then settles | ![ticker](recordings/animation/text/solo/ticker.gif) |
-| `Highlight`, `Strike` | a marker run under text, a line drawn through it; both stay | ![highlight](recordings/animation/text/solo/highlight.gif) ![strike](recordings/animation/text/solo/strike.gif) |
-| `Rise` | a word that floats up off its place and fades: "copied!", "+1" | ![rise](recordings/animation/text/solo/rise.gif) |
+#### Wave
+
+![wave](recordings/animation/text/solo/wave.gif)
+
+#### Rainbow
+
+![rainbow](recordings/animation/text/solo/rainbow.gif)
+
+#### Decrypt
+
+![decrypt](recordings/animation/text/solo/decrypt.gif)
+
+#### Caret
+
+![caret](recordings/animation/text/solo/caret.gif)
+
+#### Ellipsis
+
+![ellipsis](recordings/animation/text/solo/ellipsis.gif)
+
+#### Ticker
+
+![ticker](recordings/animation/text/solo/ticker.gif)
+
+#### Highlight
+
+![highlight](recordings/animation/text/solo/highlight.gif)
+
+#### Strike
+
+![strike](recordings/animation/text/solo/strike.gif)
+
+#### Rise
+
+![rise](recordings/animation/text/solo/rise.gif)
 
 ### Arriving and leaving
 
-![arrive](recordings/animation/text/arrive.gif)
+| Kind | What it does |
+| --- | --- |
+| `Stream` | shows text pushed in pieces at a steady pace, speeding up when it falls behind: an answer streamed from a model |
+| `Morph` | turns one text into another, taking out what the new one lacks and then putting in what it adds |
+| `Typist` | types like a person: unevenly, slower after a full stop, now and then a key beside the right one taken back |
+| `Flip` | turns over each letter that changes, left to right, like the cards of a scoreboard |
+| `Neon` | lights text like a sign: steady, with a stutter now and then and one weak letter that flickers more |
+| `Burn` | sets text alight from the left, each letter flaring and falling to ash |
+| `Fall` | drops the letters of a word from above, each at its own moment, landing with a bounce |
 
-| Kind | What it does | |
-| --- | --- | --- |
-| `Stream` | shows text pushed in pieces at a steady pace, speeding up when it falls behind: an answer streamed from a model | ![stream](recordings/animation/text/solo/stream.gif) |
-| `Morph` | turns one text into another, taking out what the new one lacks and then putting in what it adds | ![morph](recordings/animation/text/solo/morph.gif) |
-| `Typist` | types like a person: unevenly, slower after a full stop, now and then a key beside the right one taken back | ![typist](recordings/animation/text/solo/typist.gif) |
-| `Flip` | turns over each letter that changes, left to right, like the cards of a scoreboard | ![flip](recordings/animation/text/solo/flip.gif) |
-| `Neon` | lights text like a sign: steady, with a stutter now and then and one weak letter that flickers more | ![neon](recordings/animation/text/solo/neon.gif) |
-| `Burn` | sets text alight from the left, each letter flaring and falling to ash | ![burn](recordings/animation/text/solo/burn.gif) |
-| `Fall` | drops the letters of a word from above, each at its own moment, landing with a bounce | ![fall](recordings/animation/text/solo/fall.gif) |
+`Big(s)` draws text in a block font three rows tall, for a countdown or a score; `Big(flip.View())` is a scoreboard clock.
 
-`Big(s)` draws text in a block font three rows tall, for a countdown or a score; `Big(flip.View())` is a scoreboard clock:
+#### Stream
+
+![stream](recordings/animation/text/solo/stream.gif)
+
+#### Morph
+
+![morph](recordings/animation/text/solo/morph.gif)
+
+#### Typist
+
+![typist](recordings/animation/text/solo/typist.gif)
+
+#### Flip
+
+![flip](recordings/animation/text/solo/flip.gif)
+
+#### Neon
+
+![neon](recordings/animation/text/solo/neon.gif)
+
+#### Burn
+
+![burn](recordings/animation/text/solo/burn.gif)
+
+#### Fall
+
+![fall](recordings/animation/text/solo/fall.gif)
+
+#### Big
 
 ![big](recordings/animation/text/solo/big.gif)
 
@@ -205,9 +379,55 @@ text.NewTypewriter("Saved.", 400*time.Millisecond).WithYoyo(true).WithRepeat(1)
 
 ## Scenes
 
-![scene](recordings/animation/scene.gif)
-
 The [`animation/scene`](../animation/scene) package draws a `Scene` from the time alone, at any size, for as long as it lives: `Rain`, `Snow`, `Confetti`, `Fireworks`, `Starfield`, `Static`, `Plasma`, `Fire`, `Aurora`, `Bubbles`, `Sea` and `Life`, Conway's game on a board as large as the scene, each in the colours it is given.
+
+### Rain
+
+![rain](recordings/animation/scene/solo/rain.gif)
+
+### Snow
+
+![snow](recordings/animation/scene/solo/snow.gif)
+
+### Confetti
+
+![confetti](recordings/animation/scene/solo/confetti.gif)
+
+### Fireworks
+
+![fireworks](recordings/animation/scene/solo/fireworks.gif)
+
+### Starfield
+
+![starfield](recordings/animation/scene/solo/starfield.gif)
+
+### Static
+
+![static](recordings/animation/scene/solo/static.gif)
+
+### Plasma
+
+![plasma](recordings/animation/scene/solo/plasma.gif)
+
+### Fire
+
+![fire](recordings/animation/scene/solo/fire.gif)
+
+### Aurora
+
+![aurora](recordings/animation/scene/solo/aurora.gif)
+
+### Bubbles
+
+![bubbles](recordings/animation/scene/solo/bubbles.gif)
+
+### Sea
+
+![sea](recordings/animation/scene/solo/sea.gif)
+
+### Life
+
+![life](recordings/animation/scene/solo/life.gif)
 
 `View(w, h)` draws it on its own; `Under(block)` draws it behind a block, which hides it wherever the block draws something:
 

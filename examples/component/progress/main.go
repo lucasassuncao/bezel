@@ -45,7 +45,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("progress")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "progress",
 		Actions: []shell.Action{
 			shell.Custom("r", "restart", shell.Send(restartMsg{})),

@@ -54,7 +54,7 @@ func newModel() model {
 			layout.Fill("load"),
 			layout.Fixed("services", layout.Ratio(2, 5), layout.Min(34)),
 		),
-		Base:  theme.Mint(),
+		Base:  theme.Plain(),
 		Title: "chart",
 		Actions: []shell.Action{
 			shell.Custom("space", "pause", shell.Send(pauseMsg{})),

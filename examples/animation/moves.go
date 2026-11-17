@@ -66,7 +66,12 @@ func (v moves) moving() bool { return v.move.Active() || v.follow.Active() || v.
 
 // rows is the tab's body: the points' field, then the route.
 func (v moves) rows(th theme.Resolved, label func(kind, variant string) string) string {
-	var rows []string
+	return join(v.blocks(th, label))
+}
+
+// blocks are the tab's kinds: the points' field, then the route.
+func (v moves) blocks(th theme.Resolved, label func(kind, variant string) string) []chunk {
+	var point, path []string
 	for y, line := range v.points(th) {
 		kind, variant := "", ""
 		switch y {
@@ -77,9 +82,8 @@ func (v moves) rows(th theme.Resolved, label func(kind, variant string) string) 
 		case 2:
 			variant = "○ sprung"
 		}
-		rows = append(rows, label(kind, variant)+line)
+		point = append(point, label(kind, variant)+line)
 	}
-	rows = append(rows, "")
 	px, py := v.path.Value().Round()
 	for y := range routeH {
 		var b strings.Builder
@@ -97,9 +101,9 @@ func (v moves) rows(th theme.Resolved, label func(kind, variant string) string) 
 		case routeH/2 + 1:
 			variant = "p again"
 		}
-		rows = append(rows, label(kind, variant)+b.String())
+		path = append(path, label(kind, variant)+b.String())
 	}
-	return strings.Join(rows, "\n")
+	return []chunk{{"point", point}, one("", ""), {"path", path}}
 }
 
 // points is the field, a row each, with the eased point over the sprung one

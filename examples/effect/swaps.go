@@ -66,15 +66,20 @@ func (s swaps) moving() bool { return s.t.Active() }
 
 func (s swaps) rows(th theme.Resolved, label func(kind, variant string) string) string {
 	rows := []string{label("transition", swapKinds[s.kind].name) + th.Muted.Render("n next · r again"), ""}
+	indent := label("", "")
+	for _, line := range strings.Split(s.stage(th), "\n") {
+		rows = append(rows, indent+line)
+	}
+	return strings.Join(rows, "\n")
+}
+
+// stage is the two cards as the transition carries one into the other.
+func (s swaps) stage(th theme.Resolved) string {
 	from, to := settingsCard(th), inboxCard(th)
 	if s.flipped {
 		from, to = to, from
 	}
-	indent := label("", "")
-	for _, line := range strings.Split(s.t.Apply(from, to), "\n") {
-		rows = append(rows, indent+line)
-	}
-	return strings.Join(rows, "\n")
+	return s.t.Apply(from, to)
 }
 
 // swapCard is a bordered card of one size, so the two swap cell for cell.
@@ -83,22 +88,26 @@ func swapCard(border lipgloss.Style, lines ...string) string {
 		Width(32).Height(len(lines)).Padding(0, 1).Render(strings.Join(lines, "\n"))
 }
 
+// The cards differ in colour and every line has one: a transition blends
+// colours, and the terminal's default has none to blend, so it would cut.
 func inboxCard(th theme.Resolved) string {
+	text := lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Text))
 	return swapCard(th.Accent,
 		th.Accent.Bold(true).Render("Inbox"),
-		"● Build passed on main",
-		"● 3 new comments",
+		text.Render("● Build passed on main"),
+		text.Render("● 3 new comments"),
 		th.Muted.Render("○ Weekly digest"),
 		th.Muted.Render("○ Release notes"),
 	)
 }
 
 func settingsCard(th theme.Resolved) string {
+	text := lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Text))
 	return swapCard(th.Info,
 		th.Info.Bold(true).Render("Settings"),
-		"Theme        "+th.Bold.Render("mint"),
-		"Motion       "+th.Bold.Render("on"),
-		"Confirm save "+th.Bold.Render("yes"),
+		text.Render("Theme        ")+th.Bold.Render("mint"),
+		text.Render("Motion       ")+th.Bold.Render("on"),
+		text.Render("Confirm save ")+th.Bold.Render("yes"),
 		th.Muted.Render("esc closes"),
 	)
 }

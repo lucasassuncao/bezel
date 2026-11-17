@@ -24,7 +24,7 @@ func newModel() model {
 	return model{
 		sh: shell.New(shell.Config{
 			Title: "fruit",
-			Base:  theme.Mint(),
+			Base:  theme.Plain(),
 			Layout: layout.Columns(
 				layout.Fixed("list", layout.Ratio(1, 3), layout.Min(20)),
 				layout.Fill("detail"),

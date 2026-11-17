@@ -38,7 +38,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("input")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "input",
 		Actions: []shell.Action{
 			// q would be text here, so esc quits instead.

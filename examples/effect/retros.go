@@ -97,7 +97,7 @@ func (r retros) moving() bool { return r.effect.Active() }
 func (r retros) rows(th theme.Resolved, label func(kind, variant string) string) string {
 	rows := []string{label("retro", retroKinds[r.kind].name) + th.Muted.Render("e next · r again"), ""}
 	indent := label("", "")
-	for _, line := range strings.Split(r.effect.Apply(retroCard(th)), "\n") {
+	for _, line := range strings.Split(r.stage(th), "\n") {
 		rows = append(rows, indent+line)
 	}
 	rows = append(rows, "")
@@ -117,6 +117,9 @@ func (r retros) rows(th theme.Resolved, label func(kind, variant string) string)
 	}
 	return strings.Join(rows, "\n")
 }
+
+// stage is the card as the effect shows it.
+func (r retros) stage(th theme.Resolved) string { return r.effect.Apply(retroCard(th)) }
 
 // retroCard is what the retro effects play on.
 func retroCard(th theme.Resolved) string {

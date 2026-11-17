@@ -54,7 +54,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fill("log"), layout.Fill("json")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "log pane",
 		Mouse:  true, // the wheel scrolls the pane under the pointer
 		Actions: []shell.Action{

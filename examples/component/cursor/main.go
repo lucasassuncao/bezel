@@ -32,7 +32,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("cursor")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "cursor",
 		Actions: []shell.Action{
 			shell.Custom("tab", "next cursor", shell.Send(nextMsg{})),

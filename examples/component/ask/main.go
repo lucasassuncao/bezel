@@ -91,7 +91,7 @@ func run(w io.Writer, name string, th theme.Resolved, opts ...tea.ProgramOption)
 }
 
 func main() {
-	th := theme.Resolve(theme.Mint(), true)
+	th := theme.Resolve(theme.Plain(), true)
 	name := ""
 	if len(os.Args) > 1 {
 		name = os.Args[1]

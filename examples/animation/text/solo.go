@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/examples/internal/look"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
 	"github.com/lucasassuncao/bezel/theme"
@@ -105,7 +106,7 @@ func newSolo(kind string) (solo, error) {
 	}
 	sh := shell.New(shell.Config{
 		Layout:  layout.Rows(layout.Fill("main")),
-		Base:    theme.Mint(),
+		Base:    look.Plain(),
 		Title:   "text",
 		Actions: acts,
 	})

@@ -49,7 +49,7 @@ func newModel(readOnly bool) model {
 			layout.Fixed("tasks", layout.Ratio(1, 2), layout.Min(30)),
 			layout.Fill("detail").Info(),
 		).Collapse(70, "tasks"),
-		Base:     theme.Mint(),
+		Base:     theme.Plain(),
 		Title:    "tasks",
 		Subtitle: "a bezel demo",
 		Can:      func(c shell.Capability) bool { return c != "write" || !readOnly },

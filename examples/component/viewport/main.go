@@ -64,7 +64,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("log")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "viewport",
 		Actions: []shell.Action{
 			shell.Custom("↑/↓", "scroll", nil, shell.DisplayOnly()),

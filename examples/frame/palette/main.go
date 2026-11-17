@@ -48,7 +48,7 @@ func actions() []shell.Action {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fill("items")),
-		Base:    theme.Mint(),
+		Base:    theme.Plain(),
 		Title:   "palette",
 		Can:     func(c shell.Capability) bool { return c != "write" },
 		Actions: actions(),

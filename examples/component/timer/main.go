@@ -33,7 +33,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("timer")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "timer",
 		Actions: []shell.Action{
 			shell.Custom("space", "stop/resume", shell.Send(toggleMsg{})),

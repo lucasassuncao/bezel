@@ -66,7 +66,7 @@ func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fixed("list", layout.Ratio(1, 3), layout.Min(24)), layout.Fill("detail")),
 		Tabs:   shTabs,
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "shell",
 		Mouse:  true, // Screen turns it on; tabs, panes and dialogs then take clicks
 		Actions: []shell.Action{

@@ -4,6 +4,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -12,9 +13,9 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
+	"github.com/lucasassuncao/bezel/examples/internal/look"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/shell"
-	"github.com/lucasassuncao/bezel/theme"
 )
 
 type startMsg struct{}
@@ -42,7 +43,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fill("main")),
-		Base:   theme.Mint(),
+		Base:   look.Plain(),
 		Title:  "effect",
 		Tabs: []shell.Tab{
 			page{"draw", []shell.Action{
@@ -200,7 +201,18 @@ func (m model) label(kind, variant string) string {
 }
 
 func main() {
-	if _, err := tea.NewProgram(newModel()).Run(); err != nil {
+	name := flag.String("effect", "", "show only this effect, as a recording does")
+	flag.Parse()
+	var m tea.Model = newModel()
+	if *name != "" {
+		s, err := newSolo(*name)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+		}
+		m = s
+	}
+	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

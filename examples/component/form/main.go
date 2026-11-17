@@ -41,7 +41,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("form")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "form",
 		Actions: []shell.Action{
 			shell.Custom("tab", "next field", nil, shell.DisplayOnly()),

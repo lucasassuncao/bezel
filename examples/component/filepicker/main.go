@@ -31,7 +31,7 @@ type model struct {
 func newModel(dir string) model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("files")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "filepicker",
 		Actions: []shell.Action{
 			shell.Custom("↑/↓", "move", nil, shell.DisplayOnly()),

@@ -79,7 +79,7 @@ func actions() []shell.Action {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fixed("tree", layout.Ratio(1, 2)), layout.Fill("detail")),
-		Base:    theme.Mint(),
+		Base:    theme.Plain(),
 		Title:   "tree",
 		Actions: actions(),
 	})

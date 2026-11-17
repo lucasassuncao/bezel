@@ -77,6 +77,11 @@ func (c curves) moving() bool {
 // rows is the tab's body: the way they are played in the kind column, then a
 // track per curve with its start and end marked.
 func (c curves) rows(th theme.Resolved, label func(kind, variant string) string) string {
+	return join(c.blocks(th, label))
+}
+
+// blocks are the tab's kinds: the race of the curves.
+func (c curves) blocks(th theme.Resolved, label func(kind, variant string) string) []chunk {
 	rows := make([]string, len(family))
 	for i, f := range family {
 		kind := ""
@@ -92,7 +97,7 @@ func (c curves) rows(th theme.Resolved, label func(kind, variant string) string)
 		}
 		rows[i] = label(kind, f.name) + dotOn(th, v)
 	}
-	return strings.Join(rows, "\n")
+	return []chunk{{"curves", rows}}
 }
 
 // dotOn is a track with the dot v of the way from its start mark to its end

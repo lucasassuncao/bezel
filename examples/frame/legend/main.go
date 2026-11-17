@@ -53,7 +53,7 @@ func newModel() model {
 	canWrite := new(bool)
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("main")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "legend",
 		Can:    func(c shell.Capability) bool { return c != write || *canWrite },
 		// One row, so the cut and its count show even on a wide terminal.

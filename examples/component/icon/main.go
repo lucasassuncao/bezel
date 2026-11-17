@@ -48,7 +48,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("icons")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "icon",
 		Actions: []shell.Action{
 			shell.Custom("a", "swap set", shell.Send(swapMsg{})),

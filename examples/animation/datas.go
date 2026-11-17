@@ -111,23 +111,30 @@ func (d datas) moving() bool {
 }
 
 func (d datas) rows(th theme.Resolved, label func(kind, variant string) string) string {
+	return join(d.blocks(th, label))
+}
+
+// blocks are the tab's kinds, each chart labelled on its first row.
+func (d datas) blocks(th theme.Resolved, label func(kind, variant string) string) []chunk {
 	var bars []chart.Bar
 	for i, v := range d.bars.Values() {
 		bars = append(bars, chart.Bar{Label: barNames[i], Value: v, Text: " "})
 	}
-	var rows []string
-	add := func(kind, variant, block string) {
-		for i, line := range strings.Split(block, "\n") {
+	of := func(kind, variant, drawn string) chunk {
+		b := chunk{kind: kind}
+		for i, line := range strings.Split(drawn, "\n") {
 			if i > 0 {
 				kind, variant = "", ""
 			}
-			rows = append(rows, label(kind, variant)+line)
+			b.lines = append(b.lines, label(kind, variant)+line)
 		}
+		return b
 	}
-	add("bars", "g grow", chart.Bars(bars, 100, chartWidth, th))
-	add("spark", "p pushes", chart.Spark(d.spark.Values(), 100, chartWidth, th))
-	add("area", "g draws", chart.Area(d.area.Values(), 100, chartWidth, 3, th))
-	add("gauge", "n springs", progress.Gauge(d.gauge.Value(), 100, chartWidth, th))
-	add("heat", "w warms", chart.Heat(d.heat.Values(), 10, th))
-	return strings.Join(rows, "\n")
+	return []chunk{
+		of("bars", "g grow", chart.Bars(bars, 100, chartWidth, th)),
+		of("spark", "p pushes", chart.Spark(d.spark.Values(), 100, chartWidth, th)),
+		of("area", "g draws", chart.Area(d.area.Values(), 100, chartWidth, 3, th)),
+		of("gauge", "n springs", progress.Gauge(d.gauge.Value(), 100, chartWidth, th)),
+		of("heat", "w warms", chart.Heat(d.heat.Values(), 10, th)),
+	}
 }

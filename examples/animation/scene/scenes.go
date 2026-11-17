@@ -71,14 +71,18 @@ func (s scenes) update(msg tea.Msg) (scenes, tea.Cmd) {
 	return s, r.Cmd
 }
 
-// rows is a line naming the scene, then the scene w×h with a title over it.
+// under is the scene w×h with a title over it.
+func (s scenes) under(th theme.Resolved, w, h int) string {
+	badge := lipgloss.NewStyle().Background(black).Foreground(th.Bold.GetForeground()).Padding(0, 2).
+		Render("bezel ✦ " + sceneKinds[s.kind].name)
+	return s.scene.Under(lipgloss.Place(w, h, lipgloss.Center, lipgloss.Center, badge))
+}
+
+// rows is a line naming the scene, then the scene under its title.
 func (s scenes) rows(th theme.Resolved, label func(kind, variant string) string, w, h int) string {
 	head := label("scene", sceneKinds[s.kind].name) + th.Muted.Render("n next")
 	if w <= 0 || h <= 1 {
 		return head
 	}
-	badge := lipgloss.NewStyle().Background(black).Foreground(th.Bold.GetForeground()).Padding(0, 2).
-		Render("bezel ✦ " + sceneKinds[s.kind].name)
-	over := lipgloss.Place(w, h-1, lipgloss.Center, lipgloss.Center, badge)
-	return head + "\n" + s.scene.Under(over)
+	return head + "\n" + s.under(th, w, h-1)
 }

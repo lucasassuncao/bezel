@@ -35,7 +35,7 @@ func newModel() model {
 				layout.Fill("main"),
 			).Collapse(72, "main").Resizable(),
 		),
-		Base:  theme.Mint(),
+		Base:  theme.Plain(),
 		Title: "layout",
 		Mouse: true,
 		Actions: []shell.Action{

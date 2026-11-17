@@ -110,11 +110,14 @@ func (d drawing) rows(th theme.Resolved, label func(kind, variant string) string
 		"",
 	}
 	indent := label("", "")
-	for _, line := range strings.Split(d.effect.Apply(card(th)), "\n") {
+	for _, line := range strings.Split(d.stage(th), "\n") {
 		rows = append(rows, indent+line)
 	}
 	return strings.Join(rows, "\n")
 }
+
+// stage is the card as the effect shows it.
+func (d drawing) stage(th theme.Resolved) string { return d.effect.Apply(card(th)) }
 
 // card is what the effects play on: a bordered box of text in a few colours.
 func card(th theme.Resolved) string {

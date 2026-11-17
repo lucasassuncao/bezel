@@ -91,27 +91,34 @@ func (p physics) advance(at time.Time) physics {
 func (p physics) moving() bool { return p.drop.Active() || p.flock.Active() || p.rubber.Active() }
 
 func (p physics) rows(th theme.Resolved, label func(kind, variant string) string) string {
-	rows := []string{
-		label("drop", "d again") + p.dropped(th),
-		label("pendulum", "forever") + p.swung(th),
-		"",
-	}
+	return join(p.blocks(th, label))
+}
+
+// blocks are the tab's kinds, a row for each but the orbit and the flock.
+func (p physics) blocks(th theme.Resolved, label func(kind, variant string) string) []chunk {
+	var orbit, flock []string
 	for y, line := range p.orbiting(th) {
 		kind, variant := "", ""
 		if y == sky/2 {
 			kind, variant = "orbit", "near over far"
 		}
-		rows = append(rows, label(kind, variant)+line)
+		orbit = append(orbit, label(kind, variant)+line)
 	}
-	rows = append(rows, "")
 	for y, line := range p.flocking(th) {
 		kind, variant := "", ""
 		if y == 0 {
 			kind, variant = "flock", "f flies"
 		}
-		rows = append(rows, label(kind, variant)+line)
+		flock = append(flock, label(kind, variant)+line)
 	}
-	return strings.Join(append(rows, "", label("rubber", "b stretches")+p.stretched(th)), "\n")
+	return []chunk{
+		one("drop", label("drop", "d again")+p.dropped(th)),
+		one("pendulum", label("pendulum", "forever")+p.swung(th)),
+		one("", ""),
+		{"orbit", orbit}, one("", ""),
+		{"flock", flock}, one("", ""),
+		one("rubber", label("rubber", "b stretches")+p.stretched(th)),
+	}
 }
 
 // dropped is the track with the ball where it is and the floor at the end.

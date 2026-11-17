@@ -56,6 +56,11 @@ func (f flows) moving() bool { return f.tl.Active() || f.keys.Active() }
 
 // rows is the tab's body: the staggered bars, then the dial.
 func (f flows) rows(th theme.Resolved, label func(kind, variant string) string) string {
+	return join(f.blocks(th, label))
+}
+
+// blocks are the tab's kinds: the staggered bars, then the dial.
+func (f flows) blocks(th theme.Resolved, label func(kind, variant string) string) []chunk {
 	var rows []string
 	for i := range lanes {
 		kind, variant := "", ""
@@ -74,7 +79,8 @@ func (f flows) rows(th theme.Resolved, label func(kind, variant string) string) 
 		rows = append(rows, label(kind, variant)+style.Render(strings.Repeat("█", cur))+th.Muted.Render(strings.Repeat("░", track-cur)))
 	}
 	at := min(max(int(math.Round(f.keys.Value())), 0), track-1)
-	rows = append(rows, "",
-		label("keyframes", "4 stops")+th.Muted.Render(strings.Repeat("·", at))+th.Accent.Render("●")+th.Muted.Render(strings.Repeat("·", track-1-at)))
-	return strings.Join(rows, "\n")
+	return []chunk{
+		{"timeline", rows}, one("", ""),
+		one("keyframes", label("keyframes", "4 stops")+th.Muted.Render(strings.Repeat("·", at))+th.Accent.Render("●")+th.Muted.Render(strings.Repeat("·", track-1-at))),
+	}
 }

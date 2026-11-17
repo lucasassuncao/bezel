@@ -39,7 +39,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("spinner")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "spinner",
 		Actions: []shell.Action{
 			shell.Custom("space", "stop/start", shell.Send(toggleMsg{})),

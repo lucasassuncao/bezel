@@ -32,7 +32,7 @@ func newModel() model {
 	acc := accordion.New(faq)
 	sh := shell.New(shell.Config{
 		Layout:  layout.Columns(layout.Fill("faq")),
-		Base:    theme.Mint(),
+		Base:    theme.Plain(),
 		Title:   "accordion",
 		Actions: []shell.Action{shell.Custom("↑/↓", "move", nil, shell.DisplayOnly()), shell.Custom("enter", "open/close", nil, shell.DisplayOnly()), shell.Quit()},
 	})

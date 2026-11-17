@@ -42,7 +42,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Rows(layout.Fixed("path", layout.Lines(3)), layout.Fill("entries")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "breadcrumb",
 		Mouse:  true,
 		Actions: []shell.Action{

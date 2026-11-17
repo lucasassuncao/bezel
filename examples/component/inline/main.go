@@ -50,7 +50,7 @@ func run(w io.Writer, th theme.Resolved, ask func(form.Select) (form.Select, err
 }
 
 func main() {
-	th := theme.Resolve(theme.Mint(), true)
+	th := theme.Resolve(theme.Plain(), true)
 	ask := func(s form.Select) (form.Select, error) { return inline.Ask(s, th) }
 	confirm := func(q string) (bool, error) { return inline.Confirm(q, th) }
 	if err := run(os.Stdout, th, ask, confirm, 120*time.Millisecond); err != nil {

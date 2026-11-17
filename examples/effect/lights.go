@@ -25,7 +25,7 @@ var lightKinds = []struct {
 }{
 	{"tint", func(th theme.Resolved) effect.Effect { return effect.Tint(th.Success.GetForeground(), play) }},
 	{"pulse", func(th theme.Resolved) effect.Effect {
-		return effect.Pulse(th.Accent.GetForeground(), 800*time.Millisecond).WithRepeat(2)
+		return effect.Pulse(th.Warning.GetForeground(), 800*time.Millisecond).WithRepeat(2)
 	}},
 	{"press", func(theme.Resolved) effect.Effect { return effect.Press(400 * time.Millisecond) }},
 	{"flash", func(th theme.Resolved) effect.Effect { return effect.Flash(th.Warning.GetForeground(), play) }},
@@ -42,7 +42,7 @@ var lightKinds = []struct {
 	{"melt", func(theme.Resolved) effect.Effect { return effect.Melt(nil, play).WithYoyo(true).WithRepeat(1) }},
 	{"enter", func(theme.Resolved) effect.Effect { return effect.Enter(black) }},
 	{"exit", func(theme.Resolved) effect.Effect { return effect.Exit(black).WithYoyo(true).WithRepeat(1) }},
-	{"attention", func(th theme.Resolved) effect.Effect { return effect.Attention(th.Accent.GetForeground()) }},
+	{"attention", func(th theme.Resolved) effect.Effect { return effect.Attention(th.Warning.GetForeground()) }},
 	{"success", func(th theme.Resolved) effect.Effect { return effect.Success(th.Success.GetForeground()) }},
 	{"failure", func(th theme.Resolved) effect.Effect { return effect.Failure(th.Danger.GetForeground()) }},
 }
@@ -107,7 +107,7 @@ func (l lights) moving() bool {
 func (l lights) rows(th theme.Resolved, label func(kind, variant string) string) string {
 	rows := []string{label("light", lightKinds[l.kind].name) + th.Muted.Render("e next · r again"), ""}
 	indent := label("", "")
-	for _, line := range strings.Split(l.effect.Apply(lightCard(th)), "\n") {
+	for _, line := range strings.Split(l.stage(th), "\n") {
 		rows = append(rows, indent+line)
 	}
 	rows = append(rows, "")
@@ -126,6 +126,9 @@ func (l lights) rows(th theme.Resolved, label func(kind, variant string) string)
 	rows = append(rows, label("ghost", "dragged")+file+"   "+effect.Ghost(file, black, 0.35))
 	return strings.Join(rows, "\n")
 }
+
+// stage is the card as the light shows it.
+func (l lights) stage(th theme.Resolved) string { return l.effect.Apply(lightCard(th)) }
 
 // diffBlock is the change as a unified diff, or the code put back by undo.
 func (l lights) diffBlock(th theme.Resolved) string {
@@ -146,12 +149,13 @@ func (l lights) diffBlock(th theme.Resolved) string {
 	return l.added.Apply(l.removed.Apply(code))
 }
 
-// lightCard is what the lights play on.
+// lightCard is what the lights play on. Every line has a colour of its own: a
+// light cannot mix with the terminal's default, so plain text would not move.
 func lightCard(th theme.Resolved) string {
 	body := strings.Join([]string{
 		th.Accent.Bold(true).Render("bezel ✦ light"),
-		"Every cell keeps its place;",
-		"only its colour moves.",
+		lipgloss.NewStyle().Foreground(lipgloss.Color(th.Colors.Text)).Render("Every cell keeps its place;"),
+		th.Dim.Render("only its colour moves."),
 	}, "\n")
 	return lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(th.Accent.GetForeground()).
 		Padding(0, 1).Render(body)

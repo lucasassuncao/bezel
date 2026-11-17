@@ -28,7 +28,7 @@ type model struct {
 func newModel() model {
 	sh := shell.New(shell.Config{
 		Layout: layout.Columns(layout.Fill("text")),
-		Base:   theme.Mint(),
+		Base:   theme.Plain(),
 		Title:  "textbox",
 		Mouse:  true,
 		Actions: []shell.Action{
