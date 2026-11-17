@@ -218,6 +218,14 @@ case shell.WheelMsg:
 	}
 ```
 
+A turn over a pane comes back `Handled`, with the command that delivers the `WheelMsg`. An app that passes every mouse message to `sh.Update` and takes `Handled` to mean "an edge moved" would lay the screen out again on every notch, so it keeps the wheel out of that path:
+
+```go
+if _, wheel := msg.(tea.MouseWheelMsg); wheel {
+	return m, nil
+}
+```
+
 A click and a turn are all the shell sends. The rest of the mouse reaches the app as it came: a drag, a release, a turn over the header or with a dialog open. Two methods move it into a pane:
 
 - **`Mouse(msg)`** finds the pane under the pointer and moves `msg` into its body.
