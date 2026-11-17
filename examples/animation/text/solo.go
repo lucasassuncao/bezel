@@ -100,15 +100,17 @@ func newSolo(kind string) (solo, error) {
 	if !ok {
 		return solo{}, fmt.Errorf("no text kind %q; try one of: %s", kind, strings.Join(m.kinds(), ", "))
 	}
-	acts := []shell.Action{shell.Quit()}
+	// The keys run but none is printed: a recording has no use for a legend.
+	acts := []shell.Action{shell.Quit(shell.HelpOnly())}
 	if msg, again := replay[kind]; again {
-		acts = []shell.Action{shell.Custom("r", "again", shell.Send(msg)), shell.Quit()}
+		acts = []shell.Action{shell.Custom("r", "again", shell.Send(msg), shell.HelpOnly()), shell.Quit(shell.HelpOnly())}
 	}
 	sh := shell.New(shell.Config{
-		Layout:  layout.Rows(layout.Fill("main")),
-		Base:    look.Plain(),
-		Title:   "text",
-		Actions: acts,
+		Layout:      layout.Rows(layout.Fill("main")),
+		Base:        look.Plain(),
+		Title:       "text",
+		Actions:     acts,
+		LegendLines: 1,
 	})
 	return solo{m: m, sh: sh, kind: kind, tab: tab}, nil
 }

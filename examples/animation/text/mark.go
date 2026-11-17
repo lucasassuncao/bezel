@@ -9,6 +9,7 @@ import (
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/animation/text"
+	"github.com/lucasassuncao/bezel/examples/internal/look"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -53,7 +54,7 @@ func newTexts(th theme.Resolved) texts {
 		caret:    text.NewCaret("▌", time.Second),
 		ellipsis: text.NewEllipsis(3, 1200*time.Millisecond),
 		decrypt:  text.NewDecrypt(boarding, 0),
-		ticker: text.NewTicker(prices[0], 900*time.Millisecond).WithBase(th.Bold.GetForeground()).
+		ticker: text.NewTicker(prices[0], 900*time.Millisecond).WithBase(look.Text(th)).
 			WithUp(th.Success.GetForeground()).WithDown(th.Danger.GetForeground()),
 		mark:   text.NewHighlight(searched, th.Accent.GetForeground(), 0),
 		strike: text.NewStrike(chore, 0).WithInk(th.Muted.GetForeground()),

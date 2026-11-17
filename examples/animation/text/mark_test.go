@@ -5,6 +5,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel/examples/internal/look"
+	"github.com/lucasassuncao/bezel/theme"
 )
 
 func TestTheTextTabShowsEveryRow(t *testing.T) {
@@ -27,4 +30,11 @@ func TestTextKeysPlayOnTheClock(t *testing.T) {
 	require.Contains(t, out, boarding)
 	require.Contains(t, out, "1302", "the ticker moved on to the next price")
 	require.False(t, m.(model).tx.moving())
+}
+
+// A ticker at rest is in its base colour; given none it is black, and the
+// digits vanish on a black terminal.
+func TestTheTickerAtRestCanBeSeen(t *testing.T) {
+	tk := newTexts(theme.Resolve(look.Plain(), true)).ticker
+	require.Greater(t, look.Brightest(tk.View()), 120)
 }

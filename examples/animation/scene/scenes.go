@@ -9,6 +9,7 @@ import (
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/animation"
 	"github.com/lucasassuncao/bezel/animation/scene"
+	"github.com/lucasassuncao/bezel/examples/internal/look"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -22,11 +23,11 @@ var sceneKinds = []struct {
 	{"rain", func(th theme.Resolved) scene.Scene {
 		return scene.Rain(th.Success.GetForeground(), animation.Blend(black, th.Success.GetForeground(), 0.6))
 	}},
-	{"snow", func(th theme.Resolved) scene.Scene { return scene.Snow(th.Bold.GetForeground()) }},
+	{"snow", func(th theme.Resolved) scene.Scene { return scene.Snow(look.Text(th)) }},
 	{"confetti", func(th theme.Resolved) scene.Scene { return scene.Confetti(seriesColors(th)...) }},
 	{"fireworks", func(th theme.Resolved) scene.Scene { return scene.Fireworks(seriesColors(th)...) }},
-	{"starfield", func(th theme.Resolved) scene.Scene { return scene.Starfield(th.Bold.GetForeground()) }},
-	{"static", func(th theme.Resolved) scene.Scene { return scene.Static(th.Bold.GetForeground()) }},
+	{"starfield", func(th theme.Resolved) scene.Scene { return scene.Starfield(look.Text(th)) }},
+	{"static", func(th theme.Resolved) scene.Scene { return scene.Static(look.Text(th)) }},
 	{"plasma", func(th theme.Resolved) scene.Scene {
 		return scene.Plasma(black, animation.Blend(black, th.Accent.GetForeground(), 0.6))
 	}},
@@ -36,7 +37,7 @@ var sceneKinds = []struct {
 	{"aurora", func(th theme.Resolved) scene.Scene { return scene.Aurora(seriesColors(th)[:3]...) }},
 	{"bubbles", func(th theme.Resolved) scene.Scene { return scene.Bubbles(th.Info.GetForeground()) }},
 	{"sea", func(th theme.Resolved) scene.Scene {
-		return scene.Sea(th.Bold.GetForeground(), animation.Blend(black, th.Info.GetForeground(), 0.5))
+		return scene.Sea(look.Text(th), animation.Blend(black, th.Info.GetForeground(), 0.5))
 	}},
 	{"life", func(th theme.Resolved) scene.Scene { return scene.Life(th.Success.GetForeground()) }},
 }
@@ -73,7 +74,7 @@ func (s scenes) update(msg tea.Msg) (scenes, tea.Cmd) {
 
 // under is the scene w×h with a title over it.
 func (s scenes) under(th theme.Resolved, w, h int) string {
-	badge := lipgloss.NewStyle().Background(black).Foreground(th.Bold.GetForeground()).Padding(0, 2).
+	badge := lipgloss.NewStyle().Background(black).Foreground(look.Text(th)).Padding(0, 2).
 		Render("bezel ✦ " + sceneKinds[s.kind].name)
 	return s.scene.Under(lipgloss.Place(w, h, lipgloss.Center, lipgloss.Center, badge))
 }

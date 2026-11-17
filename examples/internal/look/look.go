@@ -3,7 +3,15 @@
 // for, and theme.Plain leaves them to the terminal.
 package look
 
-import "github.com/lucasassuncao/bezel/theme"
+import (
+	"image/color"
+	"regexp"
+	"strconv"
+
+	"charm.land/lipgloss/v2"
+
+	"github.com/lucasassuncao/bezel/theme"
+)
 
 // Plain is theme.Plain with each ANSI colour as the RGB the recordings'
 // terminal shows for it, and no background: the terminal's own black stays.
@@ -20,4 +28,23 @@ func Plain() theme.Theme {
 		Info:      "#3A96DD", // ANSI cyan
 		Series:    [6]string{"#13A10E", "#3A96DD", "#C19C00", "#0037DA", "#881798", "#C50F1F"},
 	}}
+}
+
+// Text is the theme's text colour, for a scene or a light that wants a plain
+// colour. Bold's foreground is no colour at all, and a scene reads that as black.
+func Text(th theme.Resolved) color.Color { return lipgloss.Color(th.Colors.Text) }
+
+var truecolor = regexp.MustCompile(`[34]8;2;(\d+);(\d+);(\d+)`)
+
+// Brightest is the strongest channel of any colour s sets, 0 for none. A test
+// asks it whether something drawn in a colour can be seen on black.
+func Brightest(s string) int {
+	best := 0
+	for _, m := range truecolor.FindAllStringSubmatch(s, -1) {
+		for _, c := range m[1:] {
+			n, _ := strconv.Atoi(c)
+			best = max(best, n)
+		}
+	}
+	return best
 }

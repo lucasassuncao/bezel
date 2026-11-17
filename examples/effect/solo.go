@@ -105,15 +105,17 @@ func newSolo(name string) (solo, error) {
 			m.rt = m.rt.again(th)
 		}
 	}
-	acts := []shell.Action{shell.Quit()}
+	// The keys run but none is printed: a recording has no use for a legend.
+	acts := []shell.Action{shell.Quit(shell.HelpOnly())}
 	if found.again != nil {
-		acts = []shell.Action{shell.Custom("r", "again", shell.Send(found.again)), shell.Quit()}
+		acts = []shell.Action{shell.Custom("r", "again", shell.Send(found.again), shell.HelpOnly()), shell.Quit(shell.HelpOnly())}
 	}
 	sh := shell.New(shell.Config{
-		Layout:  layout.Rows(layout.Fill("main")),
-		Base:    look.Plain(),
-		Title:   "effect",
-		Actions: acts,
+		Layout:      layout.Rows(layout.Fill("main")),
+		Base:        look.Plain(),
+		Title:       "effect",
+		Actions:     acts,
+		LegendLines: 1,
 	})
 	return solo{m: m, sh: sh, k: *found}, nil
 }

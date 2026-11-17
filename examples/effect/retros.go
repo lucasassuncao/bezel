@@ -9,6 +9,7 @@ import (
 
 	"github.com/lucasassuncao/bezel"
 	"github.com/lucasassuncao/bezel/effect"
+	"github.com/lucasassuncao/bezel/examples/internal/look"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -24,8 +25,8 @@ var retroKinds = []struct {
 	make func(th theme.Resolved) effect.Effect
 }{
 	{"glitch", func(theme.Resolved) effect.Effect { return effect.Glitch(700 * time.Millisecond) }},
-	{"power off", func(th theme.Resolved) effect.Effect { return effect.PowerOff(th.Bold.GetForeground(), time.Second) }},
-	{"power on", func(th theme.Resolved) effect.Effect { return effect.PowerOn(th.Bold.GetForeground(), time.Second) }},
+	{"power off", func(th theme.Resolved) effect.Effect { return effect.PowerOff(look.Text(th), time.Second) }},
+	{"power on", func(th theme.Resolved) effect.Effect { return effect.PowerOn(look.Text(th), time.Second) }},
 	{"scanlines", func(theme.Resolved) effect.Effect { return effect.Scanlines(black, play).WithYoyo(true).WithRepeat(1) }},
 	{"pixelate", func(theme.Resolved) effect.Effect { return effect.Pixelate(time.Second) }},
 	{"iris in", func(theme.Resolved) effect.Effect { return effect.IrisIn(play) }},
@@ -56,8 +57,8 @@ func (r retros) next(th theme.Resolved) retros {
 
 // load starts the skeleton and the trace, or settles them when loading ends.
 func (r retros) load(th theme.Resolved) retros {
-	r.trace = effect.Trace(th.Accent.GetForeground(), 1500*time.Millisecond)
-	r.shape = effect.Skeleton(th.Muted.GetForeground(), th.Bold.GetForeground(), time.Second)
+	r.trace = effect.Trace(lipgloss.Color(th.Colors.Selection), 1500*time.Millisecond)
+	r.shape = effect.Skeleton(th.Muted.GetForeground(), look.Text(th), time.Second)
 	return r
 }
 

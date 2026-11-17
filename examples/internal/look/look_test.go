@@ -30,6 +30,24 @@ func TestPlainIsThemePlainAsRGB(t *testing.T) {
 	}
 }
 
+// A style with no colour answers black to RGBA, so Bold's foreground is no
+// text colour for a scene or a light; Text gives the theme's own.
+func TestTextIsTheThemesTextColourNotBlack(t *testing.T) {
+	for name, th := range map[string]theme.Theme{"look": Plain(), "mint": theme.Mint(), "plain": theme.Plain()} {
+		res := theme.Resolve(th, true)
+		r, g, b, _ := Text(res).RGBA()
+		require.NotZero(t, r+g+b, name)
+	}
+}
+
+// Brightest reads the strongest channel of any colour a styled string sets.
+func TestBrightestIsTheStrongestChannelInTheStyledText(t *testing.T) {
+	require.Equal(t, 0, Brightest("plain"))
+	require.Equal(t, 0, Brightest("\x1b[38;2;0;0;0mdark\x1b[m"))
+	require.Equal(t, 204, Brightest("\x1b[38;2;12;204;7mx\x1b[48;2;1;2;3my\x1b[m"))
+	require.Equal(t, 250, Brightest("\x1b[48;2;250;0;0mbg\x1b[m"))
+}
+
 // The terminal keeps its own background, so the recording shows its black.
 func TestPlainSetsNoBackground(t *testing.T) {
 	require.Empty(t, Plain().Colors.Background)

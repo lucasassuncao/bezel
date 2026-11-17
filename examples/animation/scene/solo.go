@@ -21,11 +21,13 @@ type solo struct {
 }
 
 func newSolo(name string) (solo, error) {
+	// The key runs but none is printed: a recording has no use for a legend.
 	sh := shell.New(shell.Config{
-		Layout:  layout.Rows(layout.Fill("main")),
-		Base:    look.Plain(),
-		Title:   "scene",
-		Actions: []shell.Action{shell.Quit()},
+		Layout:      layout.Rows(layout.Fill("main")),
+		Base:        look.Plain(),
+		Title:       "scene",
+		Actions:     []shell.Action{shell.Quit(shell.HelpOnly())},
+		LegendLines: 1,
 	})
 	sc := newScenes(sh.Theme())
 	for i, k := range sceneKinds {
