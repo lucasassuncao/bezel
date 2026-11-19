@@ -81,13 +81,17 @@ if m.reveal.Active() {
 
 ![desaturate](recordings/effect/solo/desaturate.gif)
 
-Most take a `Pattern`, the order the cells turn in: `Sweep`, `Radial`, `Diamond`, `Diagonal`, `Checker`, `Spiral`, `Wave`, `Noise`, or any of them `Inverted`. The cells turn in a soft band, so a front reads as a front.
+### Cascade
+
+![cascade](recordings/effect/solo/cascade.gif)
+
+Most take a `Pattern`, the order the cells turn in: `Sweep`, `Radial`, `RadialFrom(x, y)`, `Diamond`, `Diagonal`, `Checker`, `Spiral`, `Wave`, `Noise`, `Bayer` (an ordered dither), `Interlace` (the even rows, then the odd ones), `Columns` (each column top down from a moment of its own), or any of them `Inverted`. The cells turn in a soft band, so a front reads as a front.
 
 ```go
 effect.Coalesce(600 * time.Millisecond).WithPattern(effect.Radial())
 ```
 
-`Within(x, y, w, h)` keeps an effect to a part of the block, and `OnRows(rows...)` to whole rows, each turning as a block of its own; `Reverse()` plays an effect backwards, so one that brings a block in takes it away. Every effect takes the [curves](ANIMATIONS.md#curves) and the delay, repeat and yoyo options of the motion kinds.
+`Within(x, y, w, h)` keeps an effect to a part of the block, and `OnRows(rows...)` to whole rows, each turning as a block of its own. `WithStagger(gap)` starts each of those parts a gap after the one before, so a list comes in a row at a time; the cascade above is `SlideIn(Right, d).OnRows(0, 1, ...).WithStagger(70 * time.Millisecond)`. `Reverse()` plays an effect backwards, so one that brings a block in takes it away. Every effect takes the [curves](ANIMATIONS.md#curves) and the delay, repeat and yoyo options of the motion kinds.
 
 ## Light
 
@@ -103,6 +107,9 @@ Lights are effects that change colour and leave every cell in its place:
 | `Contrast` | sharpens the colours or washes them out |
 | `Hover` | brings the background to a colour and holds it; `Reverse` lets go |
 | `Melt` | lets the cells drip out of the block, tinted as they fall |
+| `Ripple` | sends a ring of light out from a cell, where a click landed |
+| `Shine` | passes a slanted band of light across the block once |
+| `Duotone` | recolours every cell between a dark and a light colour by how bright it is |
 
 The presets name what the app means rather than how it looks: `Enter`, `Exit`, `Attention`, `Success` and `Failure`. A screen asks for `effect.Attention(accent)` and gets two pulses.
 
@@ -148,6 +155,18 @@ On the light tab a diff plays with `Melt(red).OnRows(1)` over the removed line a
 
 ![melt](recordings/effect/solo/melt.gif)
 
+### Ripple
+
+![ripple](recordings/effect/solo/ripple.gif)
+
+### Shine
+
+![shine](recordings/effect/solo/shine.gif)
+
+### Duotone
+
+![duotone](recordings/effect/solo/duotone.gif)
+
 ### Enter
 
 ![enter](recordings/effect/solo/enter.gif)
@@ -183,6 +202,11 @@ On the light tab a diff plays with `Melt(red).OnRows(1)` over the removed line a
 | `IrisIn`, `IrisOut` | opens the block out of a point in its middle, or closes it down to one |
 | `Skeleton` | grey bars where the text is, a glow sweeping over them: the shape of what is still loading |
 | `Trace` | a light running round the block's edge with a fading tail: a panel at work |
+| `Decode` | columns of glyphs fall down the block and leave its own text behind |
+| `Flicker` | the block's light stutters now and then, as a failing tube |
+| `Warp` | the rows sway sideways along a travelling wave and lie straight again |
+| `Marching` | dashes march round the block's edge: a selection still held |
+| `Pour` | the block fills from the bottom up behind a rippling surface |
 
 ### Glitch
 
@@ -220,7 +244,27 @@ On the light tab a diff plays with `Melt(red).OnRows(1)` over the removed line a
 
 ![trace](recordings/effect/solo/trace.gif)
 
-`Skeleton` and `Trace` run until the app stops applying them. Keep a skeleton to the rows that hold text with `Within`, so the panel's border stays a border.
+### Decode
+
+![decode](recordings/effect/solo/decode.gif)
+
+### Flicker
+
+![flicker](recordings/effect/solo/flicker.gif)
+
+### Warp
+
+![warp](recordings/effect/solo/warp.gif)
+
+### Marching
+
+![marching](recordings/effect/solo/marching.gif)
+
+### Pour
+
+![pour](recordings/effect/solo/pour.gif)
+
+`Skeleton`, `Trace`, `Flicker` and `Marching` run until the app stops applying them. Keep a skeleton to the rows that hold text with `Within`, so the panel's border stays a border.
 
 ## From one block to the next
 
@@ -237,6 +281,12 @@ A `Transition` carries the screen from one block to another: `Apply(from, to)` e
 | `Iris` | the old block closes down to a point and the new one opens out of it |
 | `Blinds` | the screen turns over in slats, every row of a slat flipping at once |
 | `Stack` | the new block slides over the old, which sinks into the dark beneath it |
+| `Doors`, `Shut` | the old block parts down its middle like a lift's doors, or the new one closes over it from both sides |
+| `Comb` | the new block slides in row by row, every other row from the other side |
+| `Turn` | the screen turns over like a card, the old block narrowing to its middle and the new one widening out of it |
+| `Cube` | the two blocks turn like the faces of a cube, each darker the more it faces away |
+| `Peel` | the old block folds back from its corner, its back shaded, over the new one beneath |
+| `Static` | the old block turns to the snow of a lost signal, which settles into the new one |
 
 ### Push
 
@@ -281,3 +331,31 @@ A `Transition` carries the screen from one block to another: `Apply(from, to)` e
 ### Stack
 
 ![stack](recordings/effect/solo/stack.gif)
+
+### Doors
+
+![doors](recordings/effect/solo/doors.gif)
+
+### Shut
+
+![shut](recordings/effect/solo/shut.gif)
+
+### Comb
+
+![comb](recordings/effect/solo/comb.gif)
+
+### Turn
+
+![turn](recordings/effect/solo/turn.gif)
+
+### Cube
+
+![cube](recordings/effect/solo/cube.gif)
+
+### Peel
+
+![peel](recordings/effect/solo/peel.gif)
+
+### Static
+
+![static](recordings/effect/solo/static.gif)
