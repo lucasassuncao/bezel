@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"strings"
 	"time"
@@ -46,6 +47,9 @@ var effectKinds = []struct {
 	}},
 	{"hue shift", func(theme.Resolved) effect.Effect { return effect.HueShift(180, play).WithYoyo(true).WithRepeat(1) }},
 	{"desaturate", func(theme.Resolved) effect.Effect { return effect.Saturate(-1, play).WithYoyo(true).WithRepeat(1) }},
+	{"cascade", func(theme.Resolved) effect.Effect {
+		return effect.SlideIn(effect.Right, 450*time.Millisecond).OnRows(0, 1, 2, 3, 4, 5, 6, 7, 8).WithStagger(70 * time.Millisecond)
+	}},
 }
 
 // patterns are the orders the effect can reach the card's cells in; the
@@ -63,6 +67,10 @@ var patterns = []struct {
 	{"spiral", effect.Spiral(2)},
 	{"wave", effect.Wave()},
 	{"noise", effect.Noise(9)},
+	{"radial from", effect.RadialFrom(2, 1)},
+	{"bayer", effect.Bayer()},
+	{"interlace", effect.Interlace()},
+	{"columns", effect.Columns(4)},
 }
 
 // drawing is the first tab: one effect at a time on a card drawn by lipgloss.
@@ -101,7 +109,7 @@ func (d drawing) moving() bool { return d.effect.Active() }
 func (d drawing) rows(th theme.Resolved, label func(kind, variant string) string) string {
 	order := patterns[d.order].name
 	switch effectKinds[d.kind].name {
-	case "slide in", "slide out", "expand", "stretch":
+	case "slide in", "slide out", "expand", "stretch", "cascade":
 		order = "none: it moves whole"
 	}
 	rows := []string{
@@ -128,7 +136,7 @@ func card(th theme.Resolved) string {
 		"read back from its escape",
 		"codes and drawn again.",
 		"",
-		th.Success.Render("● ") + th.Info.Render("13 effects · 9 orders"),
+		th.Success.Render("● ") + th.Info.Render(fmt.Sprintf("%d effects · %d orders", len(effectKinds), len(patterns))),
 	}, "\n")
 	return lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).

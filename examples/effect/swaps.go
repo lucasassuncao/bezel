@@ -34,6 +34,13 @@ var swapKinds = []struct {
 	{"iris", func() effect.Transition { return effect.Iris(swapTime) }},
 	{"blinds", func() effect.Transition { return effect.Blinds(4, swapTime) }},
 	{"stack ←", func() effect.Transition { return effect.Stack(effect.Left, swapTime) }},
+	{"doors", func() effect.Transition { return effect.Doors(swapTime) }},
+	{"shut", func() effect.Transition { return effect.Shut(swapTime) }},
+	{"comb", func() effect.Transition { return effect.Comb(swapTime) }},
+	{"turn", func() effect.Transition { return effect.Turn(swapTime) }},
+	{"cube ←", func() effect.Transition { return effect.Cube(effect.Left, swapTime) }},
+	{"peel", func() effect.Transition { return effect.Peel(swapTime) }},
+	{"static", func() effect.Transition { return effect.Static(swapTime) }},
 }
 
 // swaps is the third tab: two cards, one carried into the other.

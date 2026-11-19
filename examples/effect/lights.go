@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"strings"
 	"time"
 
@@ -45,7 +46,20 @@ var lightKinds = []struct {
 	{"attention", func(th theme.Resolved) effect.Effect { return effect.Attention(th.Warning.GetForeground()) }},
 	{"success", func(th theme.Resolved) effect.Effect { return effect.Success(th.Success.GetForeground()) }},
 	{"failure", func(th theme.Resolved) effect.Effect { return effect.Failure(th.Danger.GetForeground()) }},
+	{"ripple", func(th theme.Resolved) effect.Effect { return effect.Ripple(4, 1, th.Accent.GetForeground(), play) }},
+	{"shine", func(th theme.Resolved) effect.Effect {
+		return effect.Shine(th.Warning.GetForeground(), 900*time.Millisecond)
+	}},
+	{"duotone", func(th theme.Resolved) effect.Effect {
+		return effect.Duotone(sepiaDark, sepiaLight, play).WithYoyo(true).WithRepeat(1)
+	}},
 }
+
+// sepiaDark and sepiaLight are the ends of the duotone, an old photograph's.
+var (
+	sepiaDark  = color.RGBA{50, 30, 10, 255}
+	sepiaLight = color.RGBA{240, 210, 160, 255}
+)
 
 // lights is the second tab: one light at a time on a card, a diff whose lines
 // come and go, and the ghost of a dragged file.
