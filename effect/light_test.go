@@ -1,6 +1,7 @@
 package effect
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -91,4 +92,37 @@ func TestStillLightsAreBornAtTheirEnd(t *testing.T) {
 	assert.Equal(t, white, fgAt(Tint(black, time.Second), whiteText))
 	assert.Equal(t, white, fgAt(Flash(black, time.Second), whiteText))
 	assert.False(t, Pulse(black, time.Second).Active())
+}
+
+// darkRow is 30 cells of black text, for the lights that travel across a block.
+var darkRow = "\x1b[38;2;0;0;0m" + strings.Repeat("x", 30) + "\x1b[m"
+
+// brightestCell is the column of the brightest cell of row.
+func brightestCell(row []cells.Cell) int {
+	best, at := uint8(0), 0
+	for i, c := range row {
+		if r := toRGBA(c.Fg).R; r > best {
+			best, at = r, i
+		}
+	}
+	return at
+}
+
+func TestRippleWidensFromItsCell(t *testing.T) {
+	e := Ripple(0, 0, white, 100*ms).WithEase(animation.Linear)
+	early := brightestCell(cells.Parse(at(e, 0.2).Apply(darkRow))[0])
+	late := brightestCell(cells.Parse(at(e, 0.6).Apply(darkRow))[0])
+	assert.Less(t, early, late)
+	assert.Equal(t, cells.Parse(darkRow), cells.Parse(landed(t, e).Apply(darkRow)))
+	assert.Equal(t, cells.Parse(darkRow), cells.Parse(e.Apply(darkRow)), "nothing before the first frame")
+}
+
+func TestShinePassesOnceSlanted(t *testing.T) {
+	e := Shine(white, 100*ms).WithEase(animation.Linear)
+	early := brightestCell(cells.Parse(at(e, 0.3).Apply(darkRow))[0])
+	late := brightestCell(cells.Parse(at(e, 0.7).Apply(darkRow))[0])
+	assert.Less(t, early, late, "left to right")
+	two := cells.Parse(at(e, 0.5).Apply(darkRow + "\n" + darkRow))
+	assert.Less(t, brightestCell(two[1]), brightestCell(two[0]), "the band leans like /")
+	assert.Equal(t, cells.Parse(darkRow), cells.Parse(landed(t, e).Apply(darkRow)))
 }

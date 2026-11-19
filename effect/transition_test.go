@@ -107,6 +107,8 @@ func BenchmarkTransitionFrame(b *testing.B) {
 		"push": Push(Left, 100*ms), "cover": Cover(Up, 100*ms), "crossfade": CrossFade(100 * ms),
 		"wipe": Wipe(Radial(), 100*ms), "zoom": Zoom(100 * ms), "shuffle": Shuffle(100 * ms),
 		"iris": Iris(100 * ms), "blinds": Blinds(6, 100*ms), "stack": Stack(Left, 100*ms),
+		"doors": Doors(100 * ms), "comb": Comb(100 * ms), "turn": Turn(100 * ms), "cube": Cube(Left, 100*ms),
+		"peel": Peel(100 * ms), "static": Static(100 * ms),
 	} {
 		mid := tHalf(tr)
 		b.Run(name, func(b *testing.B) {

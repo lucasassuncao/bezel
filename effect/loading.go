@@ -39,6 +39,33 @@ func Trace(c color.Color, dur time.Duration) Effect {
 	return e
 }
 
+// Marching runs dashes of c round the block's outer edge, a dash and a gap
+// further on every dur: a selection still held. It runs until it is no longer
+// applied; WithRepeat gives it an end. Still, the dashes stand where they start.
+func Marching(c color.Color, dur time.Duration) Effect {
+	e := newEffect(marching, nil, dur)
+	e.tint = c
+	e.run.Ease, e.run.Repeat = animation.Linear, animation.Forever
+	return e
+}
+
+// marchDash is how many cells long a marching edge's dashes are, and its gaps.
+const marchDash = 2
+
+// marched is c in the dashes' colour when it sits on the edge under a dash.
+func (e Effect) marched(c cells.Cell, x, y, w, h int) cells.Cell {
+	idx, ok := edgeIndex(x, y, w, h)
+	if !ok {
+		return c
+	}
+	period := 2 * marchDash
+	step := int(e.p * float64(period))
+	if ((idx-step)%period+period)%period < marchDash {
+		c.Fg = e.tint
+	}
+	return c
+}
+
 // skeleton is c as a bar, lit by how near the glow it sits at x.
 func (e Effect) skeleton(c cells.Cell, q float64, x, w int) cells.Cell {
 	if strings.TrimSpace(c.Text) == "" {

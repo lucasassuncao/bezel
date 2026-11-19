@@ -73,11 +73,53 @@ func Melt(c color.Color, dur time.Duration) Effect {
 	return e
 }
 
+// Ripple sends a ring of c out across the block from the cell at x, y, fading
+// as it widens: where a click landed, a ClickMsg's X and Y.
+func Ripple(x, y int, c color.Color, dur time.Duration) Effect {
+	e := newLight(ripple, c, 0.8, dur)
+	e.spot = rect{x: x, y: y, w: 1, h: 1}
+	e.run.Ease = animation.Out(animation.Quad)
+	return e
+}
+
+// Shine passes a slanted band of c across the block once, the colours either
+// side of it kept: a button that just became ready, an item that is new.
+func Shine(c color.Color, dur time.Duration) Effect { return newLight(shine, c, 0.75, dur) }
+
 // WithStrength sets how far a light goes, in [0,1]: the share of c a tint,
-// pulse, flash, spotlight or vignette reaches at its height.
+// pulse, flash, spotlight, vignette, ripple, shine or flicker reaches at its height.
 func (e Effect) WithStrength(k float64) Effect {
 	e.amount = min(max(k, 0), 1)
 	return e
+}
+
+// rippleBand is the width of a ripple's ring, as a share of the farthest a
+// cell can be from where it starts.
+const rippleBand = 0.18
+
+// shineBand is how many columns either side of its middle a shine's band lights.
+const shineBand = 4.0
+
+// rippled is c lit by how near it sits to the ring, which fades as it widens.
+func (e Effect) rippled(c cells.Cell, q float64, x, y, w, h int) cells.Cell {
+	if q <= 0 || q >= 1 {
+		return c
+	}
+	ring := q * (1 + rippleBand)
+	lit := max(0, 1-math.Abs(distFrom(e.spot.x, e.spot.y, x, y, w, h)-ring)/rippleBand)
+	return tinted(c, e.tint, 1-e.amount*lit*(1-0.6*q))
+}
+
+// shone is c lit by how near it sits to the band, slanted like / and
+// travelling from the top left corner to the bottom right.
+func (e Effect) shone(c cells.Cell, q float64, x, y, w, h int) cells.Cell {
+	if q <= 0 || q >= 1 {
+		return c
+	}
+	far := float64(w-1) + 2*float64(h-1)
+	mid := q*(far+2*shineBand) - shineBand
+	lit := max(0, 1-math.Abs(float64(x)+2*float64(y)-mid)/shineBand)
+	return tinted(c, e.tint, 1-e.amount*lit)
 }
 
 // turnAt is c, at x, y of a w×h block, turned q of the way: the lights that
@@ -90,6 +132,14 @@ func (e Effect) turnAt(c cells.Cell, q float64, x, y, w, h int) cells.Cell {
 		return e.skeleton(c, q, x, w)
 	case trace:
 		return e.traced(c, q, x, y, w, h)
+	case marching:
+		return e.marched(c, x, y, w, h)
+	case ripple:
+		return e.rippled(c, q, x, y, w, h)
+	case shine:
+		return e.shone(c, q, x, y, w, h)
+	case decode:
+		return e.decoded(c, q, x, y, w)
 	case spotlight:
 		if e.spot.holds(x, y) {
 			return c
@@ -113,6 +163,8 @@ func (e Effect) light(c cells.Cell, q float64) cells.Cell {
 		return tinted(c, e.tint, 1-e.amount*math.Sin(math.Pi*q))
 	case flash:
 		return tinted(c, e.tint, 1-e.amount*(1-q))
+	case flicker:
+		return tinted(c, e.tint, 1-e.amount*e.stutter())
 	case invert:
 		if q > 0.15 && q < 0.85 {
 			c.Attrs ^= cells.Reverse

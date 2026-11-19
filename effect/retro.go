@@ -45,6 +45,94 @@ func PowerOn(glow color.Color, dur time.Duration) Effect { return PowerOff(glow,
 // screen, and leaves them darkened. Reverse lifts them.
 func Scanlines(dim color.Color, dur time.Duration) Effect { return newLight(scanlines, dim, 0.35, dur) }
 
+// Decode drops columns of glyphs in c down the block, each column from a
+// moment of its own, and leaves the block's own text settled behind them.
+func Decode(c color.Color, dur time.Duration) Effect {
+	e := newEffect(decode, Columns(1), dur)
+	e.tint = c
+	e.run.Ease = animation.Linear
+	return e
+}
+
+// Flicker dims the block towards dim now and then, a stutter at a time, as a
+// failing tube: a link that dropped, a service unwell. It runs until it is no
+// longer applied; WithRepeat gives it an end.
+func Flicker(dim color.Color, dur time.Duration) Effect {
+	e := newLight(flicker, dim, 0.8, dur)
+	e.run.Ease, e.run.Repeat = animation.Linear, animation.Forever
+	return e
+}
+
+// Warp sways the rows sideways along a travelling wave, worst halfway, and
+// lays them straight again: heat over a road, a memory.
+func Warp(dur time.Duration) Effect {
+	e := newEffect(warp, nil, dur)
+	e.run.Ease = animation.Linear
+	return e
+}
+
+// decodeGlyphs are what a decode's columns show as they fall, and decodeSlots
+// how many times over its run a falling glyph changes.
+const (
+	decodeGlyphs = "0123456789ABCDEF<>/\\|=+*#%&@$?"
+	decodeSlots  = 30
+)
+
+// decoded is c blank until its column reaches it, then a glyph in the rain's
+// colour that settles into c; the newest glyph of a column, its head, is bold.
+func (e Effect) decoded(c cells.Cell, q float64, x, y, w int) cells.Cell {
+	switch {
+	case q <= 0:
+		return blank(c)
+	case q >= 1:
+		return c
+	}
+	k := uint64(max(y*w+x, 0))*decodeSlots + uint64(e.p*decodeSlots) // #nosec G115 -- clamped to zero or more
+	glyph := string(decodeGlyphs[noise.Hash(33, k)%uint64(len(decodeGlyphs))])
+	own := c.Fg
+	if own == nil {
+		own = e.tint
+	}
+	out := cells.Cell{Text: glyph + strings.Repeat(" ", c.Width-1), Width: c.Width, Fg: animation.Blend(e.tint, own, q*q), Bg: c.Bg}
+	if q < 0.2 {
+		out.Attrs = cells.Bold
+	}
+	return out
+}
+
+// flickerSlots is how many times over one run a flicker rolls for a stutter.
+const flickerSlots = 24
+
+// stutter is how far a flicker has dimmed the block now, 0 for fully lit.
+func (e Effect) stutter() float64 {
+	if !e.Active() {
+		return 0
+	}
+	slot := uint64(e.p * flickerSlots)
+	if noise.Unit(noise.Hash(41, slot)) > 0.18 {
+		return 0
+	}
+	return 0.45 + 0.55*noise.Unit(noise.Hash(42, slot))
+}
+
+// warpReach is how many columns a warped row sways at most, warpRows how many
+// rows one wave spans, and warpTurns how many waves pass over a run.
+const (
+	warpReach = 2.0
+	warpRows  = 6.0
+	warpTurns = 2.0
+)
+
+// warp is g with each row moved sideways along the wave at p, which swells
+// to halfway and dies away, the block's size kept.
+func (e Effect) warp(g cells.Grid, w int, p float64) cells.Grid {
+	force := math.Sin(math.Pi * p)
+	for y, row := range g {
+		g[y] = shift(row, round(warpReach*force*math.Sin(2*math.Pi*(float64(y)/warpRows+p*warpTurns))), w)
+	}
+	return g
+}
+
 // glitch is g torn at raw progress raw.
 func (e Effect) glitch(g cells.Grid, w int, raw float64) cells.Grid {
 	if raw <= 0 || raw >= 1 {

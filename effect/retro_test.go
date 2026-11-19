@@ -1,6 +1,7 @@
 package effect
 
 import (
+	"image/color"
 	"strings"
 	"testing"
 	"time"
@@ -86,4 +87,53 @@ func TestStillRetroEffectsShowTheirEnd(t *testing.T) {
 // A row past the block crops to an empty grid; the band must not read row -1.
 func TestPowerOffOnARowPastTheBlockLeavesItAlone(t *testing.T) {
 	assert.NotPanics(t, func() { at(PowerOff(white, time.Second).OnRows(9), 0.3).Apply(screen) })
+}
+
+func TestDecodeFallsAndSettles(t *testing.T) {
+	e := Decode(color.RGBA{0, 255, 0, 255}, 400*ms)
+	assert.Equal(t, strings.Repeat(" ", 8), strings.Split(ansi.Strip(e.Apply(screen)), "\n")[0], "nothing has fallen yet")
+	mid := at(e, 0.5).Apply(screen)
+	sized(t, mid, 8, 5)
+	assert.NotEqual(t, screen, ansi.Strip(mid))
+	head := false
+	for _, row := range cells.Parse(mid) {
+		for _, c := range row {
+			head = head || c.Attrs&cells.Bold != 0
+		}
+	}
+	assert.True(t, head, "a falling column has a bold head")
+	assert.Equal(t, screen, ansi.Strip(landed(t, e).Apply(screen)))
+}
+
+func TestFlickerStuttersNowAndThen(t *testing.T) {
+	e := Flicker(black, 2400*ms)
+	lit, dimmed := 0, 0
+	for i := range 48 {
+		if fgAt(at(e, float64(i)/48), whiteText) == white {
+			lit++
+		} else {
+			dimmed++
+		}
+	}
+	assert.Greater(t, lit, dimmed, "lit most of the time")
+	assert.Positive(t, dimmed, "but not all of it")
+	assert.True(t, at(e, 0.5).Active(), "it runs until it is no longer applied")
+}
+
+func TestWarpSwaysTheRowsAndLaysThemStraight(t *testing.T) {
+	e := Warp(400 * ms)
+	moved := false
+	for p := 0.05; p < 1; p += 0.05 {
+		out := ansi.Strip(at(e, p).Apply(screen))
+		sized(t, out, 8, 5)
+		moved = moved || out != screen
+	}
+	assert.True(t, moved)
+	assert.Equal(t, screen, ansi.Strip(landed(t, e).Apply(screen)))
+}
+
+func TestStillFlickerAndDecodeShowTheBlock(t *testing.T) {
+	t.Setenv("BEZEL_NO_MOTION", "1")
+	assert.Equal(t, white, fgAt(Flicker(black, time.Second), whiteText))
+	assert.Equal(t, screen, ansi.Strip(Decode(white, time.Second).Apply(screen)))
 }

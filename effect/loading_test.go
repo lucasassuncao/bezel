@@ -24,16 +24,7 @@ func TestSkeletonsGlowMoves(t *testing.T) {
 	row := strings.Repeat("x", 30)
 	early := cells.Parse(at(e, 0.3).Apply(row))[0]
 	late := cells.Parse(at(e, 0.7).Apply(row))[0]
-	brightest := func(cs []cells.Cell) int {
-		best, at := uint8(0), 0
-		for i, c := range cs {
-			if r := toRGBA(c.Fg).R; r > best {
-				best, at = r, i
-			}
-		}
-		return at
-	}
-	assert.Less(t, brightest(early), brightest(late))
+	assert.Less(t, brightestCell(early), brightestCell(late))
 }
 
 func TestTraceLightsOnlyTheEdge(t *testing.T) {
@@ -61,4 +52,24 @@ func TestStillLoadingEffectsHoldStill(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	assert.Equal(t, "▒▒", ansi.Strip(Skeleton(grey, white, time.Second).Apply("ab")))
 	assert.Equal(t, "ab", Trace(white, time.Second).Apply("ab"))
+}
+
+func TestMarchingDashesMoveRoundTheEdge(t *testing.T) {
+	box := "\x1b[38;2;80;80;80m┌────┐\n│ab  │\n└────┘\x1b[m"
+	dashes := func(e Effect) string {
+		var b strings.Builder
+		for _, c := range cells.Parse(e.Apply(box))[0] {
+			if toRGBA(c.Fg).G == 255 {
+				b.WriteString("x")
+			} else {
+				b.WriteString(".")
+			}
+		}
+		return b.String()
+	}
+	e := Marching(color.RGBA{0, 255, 0, 255}, 400*ms)
+	assert.Equal(t, "xx..xx", dashes(at(e, 0)))
+	assert.Equal(t, ".xx..x", dashes(at(e, 0.25)), "a cell on, clockwise")
+	assert.Equal(t, uint8(80), toRGBA(cells.Parse(at(e, 0.25).Apply(box))[1][1].Fg).G, "inside is never dashed")
+	assert.True(t, at(e, 0.5).Active(), "it marches until it is no longer applied")
 }

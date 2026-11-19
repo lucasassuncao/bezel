@@ -62,3 +62,12 @@ func TestStillGeometryShowsItsEnd(t *testing.T) {
 	assert.Equal(t, "abcd", Expand(white, time.Second).Apply("abcd"))
 	assert.Equal(t, "abcd", Stretch(Right, white, time.Second).Apply("abcd"))
 }
+
+func TestPourFillsFromTheBottom(t *testing.T) {
+	e := Pour(white, 400*ms).WithEase(animation.Linear)
+	assert.Equal(t, strings.Repeat(" ", 8), strings.Split(ansi.Strip(e.Apply(screen)), "\n")[4], "nothing has risen yet")
+	rows := strings.Split(ansi.Strip(at(e, 0.5).Apply(screen)), "\n")
+	assert.Equal(t, "6789ABCD", rows[4], "the bottom row is under the surface")
+	assert.Equal(t, strings.Repeat(" ", 8), rows[0], "the top one not yet")
+	assert.Equal(t, screen, ansi.Strip(landed(t, e).Apply(screen)))
+}

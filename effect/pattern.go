@@ -62,6 +62,25 @@ func Radial() Pattern {
 	}
 }
 
+// RadialFrom reaches the cells in a widening circle from the cell at x, y:
+// where a click landed, a ClickMsg's X and Y.
+func RadialFrom(x, y int) Pattern {
+	return func(cx, cy, w, h int) float64 { return distFrom(x, y, cx, cy, w, h) }
+}
+
+// distFrom is how far the cell at x, y sits from the one at x0, y0, rows
+// doubled, as a share of the farthest corner of the w×h block from x0, y0.
+func distFrom(x0, y0, x, y, w, h int) float64 {
+	far := 0.0
+	for _, c := range [][2]int{{0, 0}, {w - 1, 0}, {0, h - 1}, {w - 1, h - 1}} {
+		far = max(far, math.Hypot(float64(c[0]-x0), 2*float64(c[1]-y0)))
+	}
+	if far == 0 {
+		return 0
+	}
+	return min(math.Hypot(float64(x-x0), 2*float64(y-y0))/far, 1)
+}
+
 // Diamond reaches the cells in a widening diamond from the middle.
 func Diamond() Pattern {
 	return func(x, y, w, h int) float64 {
@@ -114,6 +133,34 @@ func Noise(seed uint64) Pattern {
 	return func(x, y, w, _ int) float64 {
 		k := uint64(max(y*w+x, 0)) // #nosec G115 -- clamped to zero or more
 		return noise.Unit(noise.Hash(seed, k))
+	}
+}
+
+// bayer is the 4×4 ordered dither matrix, the order its 16 cells light in.
+var bayer = [4][4]float64{{0, 8, 2, 10}, {12, 4, 14, 6}, {3, 11, 1, 9}, {15, 7, 13, 5}}
+
+// Bayer reaches the cells in an ordered dither, a fine even grain that thickens:
+// a dissolve as an old game drew one.
+func Bayer() Pattern {
+	return func(x, y, _, _ int) float64 { return bayer[y%4][x%4] / 15 }
+}
+
+// Interlace reaches the even rows first, top to bottom, then the odd ones.
+func Interlace() Pattern {
+	return func(_, y, _, h int) float64 {
+		if y%2 == 0 {
+			return 0.45 * share(y/2, (h+1)/2)
+		}
+		return 0.55 + 0.45*share(y/2, h/2)
+	}
+}
+
+// Columns reaches each column from the top down, each starting at a moment of
+// its own, the same for the same seed: rain running down a window.
+func Columns(seed uint64) Pattern {
+	return func(x, y, _, h int) float64 {
+		start := noise.Unit(noise.Hash(seed, uint64(max(x, 0)))) // #nosec G115 -- clamped to zero or more
+		return 0.5*start + 0.5*share(y, h)
 	}
 }
 

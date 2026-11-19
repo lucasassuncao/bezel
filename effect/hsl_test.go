@@ -31,3 +31,12 @@ func TestColourEffectsLeaveTheTerminalsOwnAlone(t *testing.T) {
 	assert.Equal(t, "plain", landed(t, HueShift(90, 100*ms)).Apply("plain"))
 	assert.Equal(t, "plain", landed(t, Saturate(-1, 100*ms)).Apply("plain"))
 }
+
+func TestDuotoneMapsBrightnessBetweenItsEnds(t *testing.T) {
+	dark, light := color.RGBA{40, 20, 0, 255}, color.RGBA{240, 200, 140, 255}
+	e := Duotone(dark, light, 100*ms)
+	assert.Equal(t, light, fgAt(landed(t, e), whiteText), "white goes to the light end")
+	assert.Equal(t, dark, fgAt(landed(t, e), "\x1b[38;2;0;0;0mx\x1b[m"), "black to the dark end")
+	assert.Equal(t, white, fgAt(landed(t, e.Reverse()), whiteText), "reversed, it lifts")
+	assert.Equal(t, "plain", landed(t, e).Apply("plain"))
+}

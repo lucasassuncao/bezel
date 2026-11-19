@@ -26,6 +26,13 @@ const (
 	irisSwap
 	blinds
 	stack
+	doors
+	shut
+	comb
+	turnSwap
+	cube
+	peel
+	static
 )
 
 // Transition carries a screen from one block to the next: the old one pushed
@@ -144,6 +151,22 @@ func (t Transition) Apply(from, to string) string {
 		t.blinded(cv, a, b, h, p)
 	case stack:
 		t.stacked(cv, a, b, w, h, p)
+	case doors:
+		draw(cv, b, 0, 0)
+		halves(cv, a, w, round(p*float64((w+1)/2)))
+	case shut:
+		draw(cv, a, 0, 0)
+		halves(cv, b, w, round((1-p)*float64((w+1)/2)))
+	case comb:
+		combed(cv, a, b, w, p)
+	case turnSwap:
+		turned(cv, a, b, w, h, p)
+	case cube:
+		t.cubed(cv, a, b, w, h, p)
+	case peel:
+		peeled(cv, a, b, w, h, p)
+	case static:
+		snowed(cv, a, b, w, h, p)
 	}
 	return cv.String()
 }

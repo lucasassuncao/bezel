@@ -30,6 +30,47 @@ func Stretch(d Direction, edge color.Color, dur time.Duration) Effect {
 	return e
 }
 
+// Pour fills the block from the bottom up, its cells rising into sight behind
+// a rippling surface drawn in c, in eighths of a cell.
+func Pour(c color.Color, dur time.Duration) Effect {
+	e := newEffect(pour, nil, dur)
+	e.tint = c
+	return e
+}
+
+// pourSwell is how far, in rows, a pour's surface rises and falls along it,
+// and pourWave how many columns one swell spans.
+const (
+	pourSwell = 0.6
+	pourWave  = 12.0
+)
+
+// pour is g shown beneath a surface p of the way up, the cell the surface
+// crosses drawn as an eighth block.
+func (e Effect) pour(g cells.Grid, w, h int, p float64) cells.Grid {
+	if p >= 1 {
+		return g
+	}
+	cv := cells.NewCanvas(w, h)
+	for y, row := range g {
+		below := float64(h - 1 - y) // the rows beneath this one
+		x := 0
+		for _, c := range row {
+			level := p*(float64(h)+2*pourSwell) - pourSwell + pourSwell*math.Sin(2*math.Pi*(float64(x)/pourWave+2*p))
+			switch {
+			case level >= below+1:
+				cv.Put(x, y, c)
+			case level > below:
+				if n := int((level - below) * 8); n > 0 {
+					cv.Put(x, y, cells.Cell{Text: strings.Repeat(fromBottom[min(n, 7)-1], c.Width), Width: c.Width, Fg: e.tint})
+				}
+			}
+			x += c.Width
+		}
+	}
+	return cv.Grid()
+}
+
 // explode is g with each cell flown from its place by how far it has turned:
 // away from the middle, a little off line, faster as it goes.
 func (e Effect) explode(g cells.Grid, w, h int, p float64) cells.Grid {

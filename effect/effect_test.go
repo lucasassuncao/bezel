@@ -102,6 +102,28 @@ func TestEvolveStepsThroughShades(t *testing.T) {
 	assert.Equal(t, "ab cd", landed(t, e).Apply("ab cd"))
 }
 
+// A staggered part starts a gap after the one before and the run grows to
+// let the last one finish: halfway through, the first row is in, the last not.
+func TestWithStaggerStartsEachPartLater(t *testing.T) {
+	e := Coalesce(100*ms).WithEase(animation.Linear).WithPattern(nil).OnRows(0, 1, 2).WithStagger(50 * ms)
+	assert.Equal(t, 200*ms, e.run.Dur)
+	block := "ab\ncd\nef"
+	out := strings.Split(ansi.Strip(at(e, 0.6).Apply(block)), "\n")
+	assert.Equal(t, []string{"ab", "cd", "  "}, out)
+	assert.Equal(t, block, ansi.Strip(landed(t, e).Apply(block)))
+}
+
+func TestStaggerFitsMasksGivenAfterIt(t *testing.T) {
+	e := FadeIn(black, 100*ms).WithStagger(30*ms).OnRows(0, 1, 2, 3)
+	assert.Equal(t, 190*ms, e.run.Dur)
+}
+
+func TestStillStaggerShowsEveryPartAtItsEnd(t *testing.T) {
+	t.Setenv("BEZEL_NO_MOTION", "1")
+	e := Coalesce(time.Second).OnRows(0, 1).WithStagger(time.Second)
+	assert.Equal(t, "ab\ncd", ansi.Strip(e.Apply("ab\ncd")))
+}
+
 // Whatever the effect and the moment, a block keeps its size.
 func TestEveryEffectKeepsTheBlocksSize(t *testing.T) {
 	block := "\x1b[1mbold\x1b[m 日本\nsecond"
@@ -109,6 +131,9 @@ func TestEveryEffectKeepsTheBlocksSize(t *testing.T) {
 	for _, e := range []Effect{
 		FadeIn(black, 100*ms), FadeOut(black, 100*ms), Dissolve(100 * ms), Coalesce(100 * ms),
 		SweepIn(white, 100*ms), SlideIn(Left, 100*ms), SlideOut(Up, 100*ms), Evolve(100 * ms),
+		Ripple(3, 1, white, 100*ms), Shine(white, 100*ms), Duotone(black, white, 100*ms), Decode(white, 100*ms),
+		Flicker(black, 100*ms), Warp(100 * ms), Marching(white, 100*ms), Pour(white, 100*ms),
+		SlideIn(Right, 60*ms).OnRows(0, 1).WithStagger(40 * ms),
 	} {
 		e, _ = e.Update(e.FrameAt(start))
 		for d := time.Duration(0); d <= 100*ms; d += 10 * ms {
@@ -183,6 +208,8 @@ func BenchmarkEffectFrame(b *testing.B) {
 		"melt": Melt(white, 100*ms), "tint": Tint(white, 100*ms), "spotlight": Spotlight(10, 5, 40, 10, black, 100*ms),
 		"glitch": Glitch(100 * ms), "powerOff": PowerOff(white, 100*ms), "iris": IrisIn(100 * ms), "pixelate": Pixelate(100 * ms),
 		"skeleton": Skeleton(black, white, 100*ms), "wave": Dissolve(100 * ms).WithPattern(Wave()),
+		"ripple": Ripple(60, 20, white, 100*ms), "shine": Shine(white, 100*ms), "decode": Decode(white, 100*ms),
+		"warp": Warp(100 * ms), "pour": Pour(white, 100*ms), "duotone": Duotone(black, white, 100*ms),
 	} {
 		mid := halfway(e)
 		b.Run(name, func(b *testing.B) {

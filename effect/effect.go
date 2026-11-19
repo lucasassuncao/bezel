@@ -57,6 +57,14 @@ const (
 	pixelate
 	skeleton
 	trace
+	ripple
+	shine
+	duotone
+	decode
+	flicker
+	warp
+	marching
+	pour
 )
 
 // Effect changes a block that is already drawn, cell by cell: a pane that
@@ -66,11 +74,13 @@ type Effect struct {
 	kind     effectKind
 	pattern  Pattern // nil reaches every cell at once
 	tint     color.Color
-	base     color.Color // a hover's background where a cell has none
+	base     color.Color // a hover's background where a cell has none, a duotone's dark end
 	dir      Direction
-	amount   float64 // degrees for a hue shift, the change for a saturation, a light's strength
-	spot     rect    // the lit part of a spotlight
-	masks    []rect  // the parts of the block it changes; none is all of it
+	amount   float64       // degrees for a hue shift, the change for a saturation, a light's strength
+	spot     rect          // the lit part of a spotlight, the cell a ripple starts from
+	masks    []rect        // the parts of the block it changes; none is all of it
+	stagger  time.Duration // how much later each mask starts than the one before
+	dur      time.Duration // one mask's run, the run itself without a stagger
 	reversed bool
 	p        float64 // raw progress: 0 before the first frame, 1 at the end
 	run      frames.Run
@@ -79,7 +89,7 @@ type Effect struct {
 var _ bezel.Model[Effect] = Effect{}
 
 func newEffect(kind effectKind, pattern Pattern, dur time.Duration) Effect {
-	e := Effect{kind: kind, pattern: pattern, run: frames.NewRun(dur)}
+	e := Effect{kind: kind, pattern: pattern, dur: dur, run: frames.NewRun(dur)}
 	if !e.Active() {
 		e.p = 1 // Still, or no time: born where it would end
 	}
@@ -169,10 +179,10 @@ func (e Effect) Apply(block string) string {
 	if len(e.masks) == 0 {
 		return e.applyGrid(g).String()
 	}
-	for _, r := range e.masks {
+	for i, r := range e.masks {
 		// A mask past the block's last row crops to nothing to turn.
 		if sub := crop(g, r); len(sub) > 0 {
-			g = paste(g, e.applyGrid(sub), r)
+			g = paste(g, e.part(i).applyGrid(sub), r)
 		}
 	}
 	return g.String()
@@ -205,6 +215,10 @@ func (e Effect) applyGrid(g cells.Grid) cells.Grid {
 		return e.iris(g, w, h, p)
 	case pixelate:
 		return e.pixelate(g, w, h, p)
+	case warp:
+		return e.warp(g, w, p)
+	case pour:
+		return e.pour(g, w, h, p)
 	}
 	for y, row := range g {
 		x := 0
@@ -220,7 +234,7 @@ func (e Effect) applyGrid(g cells.Grid) cells.Grid {
 // of 0 or less runs to the block's right or bottom edge. It may be given again.
 func (e Effect) Within(x, y, w, h int) Effect {
 	e.masks = append(slices.Clone(e.masks), rect{x: x, y: y, w: w, h: h})
-	return e
+	return e.fit()
 }
 
 // OnRows keeps e to whole rows of the block: the lines a diff added, the
@@ -229,6 +243,31 @@ func (e Effect) OnRows(rows ...int) Effect {
 	for _, r := range rows {
 		e = e.Within(0, r, 0, 1)
 	}
+	return e
+}
+
+// WithStagger starts each part Within or OnRows gave gap after the one before,
+// so a list comes in a row at a time. The run grows to let the last one finish.
+func (e Effect) WithStagger(gap time.Duration) Effect {
+	e.stagger = max(gap, 0)
+	return e.fit()
+}
+
+// fit is e with its run long enough for every staggered part to play out.
+func (e Effect) fit() Effect {
+	if e.run.Active() {
+		e.run.Dur = e.dur + e.stagger*time.Duration(max(len(e.masks)-1, 0))
+	}
+	return e
+}
+
+// part is e as its i-th mask sees it: started i gaps late, over its own length.
+func (e Effect) part(i int) Effect {
+	if e.stagger <= 0 || e.dur <= 0 {
+		return e
+	}
+	total := float64(e.dur + e.stagger*time.Duration(len(e.masks)-1))
+	e.p = min(max((e.p*total-float64(e.stagger)*float64(i))/float64(e.dur), 0), 1)
 	return e
 }
 
@@ -279,6 +318,8 @@ func (e Effect) turn(c cells.Cell, q float64) cells.Cell {
 		c.Fg, c.Bg = hue.Shift(c.Fg, e.amount*q), hue.Shift(c.Bg, e.amount*q)
 	case saturate:
 		c.Fg, c.Bg = hue.Saturate(c.Fg, 1+e.amount*q), hue.Saturate(c.Bg, 1+e.amount*q)
+	case duotone:
+		c.Fg, c.Bg = e.toned(c.Fg, q), e.toned(c.Bg, q)
 	}
 	return c
 }

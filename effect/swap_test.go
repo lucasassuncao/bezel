@@ -18,10 +18,15 @@ const (
 
 // swapAt is t played to p of its run, over the two screens.
 func swapAt(t Transition, p float64) string {
+	return ansi.Strip(swapAtOf(t, p, oldScreen, newScreen))
+}
+
+// swapAtOf is t played to p of its run, over from and to.
+func swapAtOf(t Transition, p float64, from, to string) string {
 	start := time.Unix(10, 0)
 	t, _ = t.Advance(start)
 	t, _ = t.Advance(start.Add(time.Duration(p * float64(t.run.Dur))))
-	return ansi.Strip(t.Apply(oldScreen, newScreen))
+	return t.Apply(from, to)
 }
 
 func TestIrisClosesTheOldAndOpensTheNew(t *testing.T) {
@@ -56,6 +61,41 @@ func TestStackSinksTheOldBlockUnderTheNew(t *testing.T) {
 func TestStillSwapsShowTheNewBlock(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	for _, tr := range []Transition{Iris(time.Second), Blinds(3, time.Second), Stack(Up, time.Second)} {
+		assert.Equal(t, newScreen, ansi.Strip(tr.Apply(oldScreen, newScreen)))
+	}
+}
+
+func TestDoorsPartTheOldBlockDownTheMiddle(t *testing.T) {
+	assert.Equal(t, "abbbba", strings.Split(swapAt(Doors(400*ms), 0.5), "\n")[0])
+	assert.Equal(t, newScreen, swapAt(Doors(400*ms), 1))
+}
+
+func TestShutClosesTheNewBlockOverTheOld(t *testing.T) {
+	assert.Equal(t, "baaaab", strings.Split(swapAt(Shut(400*ms), 0.5), "\n")[0])
+	assert.Equal(t, newScreen, swapAt(Shut(400*ms), 1))
+}
+
+func TestCombSlidesEveryOtherRowFromTheOtherSide(t *testing.T) {
+	rows := strings.Split(swapAt(Comb(400*ms), 0.5), "\n")
+	assert.Equal(t, []string{"aaabbb", "bbbaaa", "aaabbb", "bbbaaa"}, rows)
+	assert.Equal(t, newScreen, swapAt(Comb(400*ms), 1))
+}
+
+func TestStaticSnowsTheOldAwayAndSettlesIntoTheNew(t *testing.T) {
+	early, mid, late := swapAt(Static(400*ms), 0.25), swapAt(Static(400*ms), 0.5), swapAt(Static(400*ms), 0.75)
+	assert.Contains(t, early, "a")
+	assert.NotContains(t, early, "b")
+	assert.NotContains(t, mid, "a", "halfway it is all snow")
+	assert.NotContains(t, mid, "b")
+	assert.Contains(t, late, "b")
+	assert.NotContains(t, late, "a")
+	assert.Equal(t, newScreen, swapAt(Static(400*ms), 1))
+}
+
+func TestStillNewSwapsShowTheNewBlock(t *testing.T) {
+	t.Setenv("BEZEL_NO_MOTION", "1")
+	for _, tr := range []Transition{Doors(time.Second), Shut(time.Second), Comb(time.Second), Static(time.Second),
+		Turn(time.Second), Cube(Left, time.Second), Peel(time.Second)} {
 		assert.Equal(t, newScreen, ansi.Strip(tr.Apply(oldScreen, newScreen)))
 	}
 }
