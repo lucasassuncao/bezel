@@ -22,7 +22,7 @@ m.list = m.list.SetRows(reloaded) // SetX: a live change, after something happen
 ```
 
 - **`NewX(required..., th)`** takes only what the component cannot work without, the theme last when it takes one. It returns only the value; a command to start it comes from `Init()`.
-- **`WithX`** is everything optional. A switch takes its state, `WithWrap(on bool)`, so an app can pass a setting it read. An argument most callers would pass as `nil`, `""`, `0` or `false` is a `With`, and so is each of two same-typed parameters in a row: `text.NewTicker(v, dur).WithUp(c).WithDown(c)` cannot be swapped by mistake.
+- **`WithX`** is everything optional. A switch takes its state, `WithWrap(on bool)`, so an app can pass a setting it read. An argument most callers would pass as `nil`, `""`, `0` or `false` is a `With`, and so is each of two same-typed parameters in a row: `text.NewTicker(v, dur).WithUp(c).WithDown(c)` cannot be swapped by mistake. Two required texts that read in order stay positional: a dialog's title then its text, `overlay.NewConfirm(title, message, onYes)`, and a legend entry's keys then what they do, `legend.New(keys, desc)`.
 - **`SetX`** changes a live model: `SetRows`, `SetTheme`, `SetStatus`. What can change live has only the `Set`, never a `With` doing the same.
 - **An action that starts something returns its command with the value**: `m.in, cmd = m.in.Focus()`, and so `Start()`, `Toggle()`, `Push(...)`, `SetPercent(p)`, `Busy(text)`. The command is the blink, the tick or the frames the action needs; run it, or nothing moves.
 - **A variant is named, not built**: a preset of a shared type is a bare name, `spinner.Dot()`, `effect.Wipe(...)`, `theme.Mint()`.
@@ -40,6 +40,8 @@ m.list = m.list.SetHeight(m.sh.Inner("items").H) // before the list takes msg
 ```
 
 A size is never a constructor parameter nor an argument of `View`: it comes through `SetHeight`/`SetWidth` once the terminal says how big it is. A model not sized yet draws nothing. One rule covers every way a pane changes size (a resize, a dragged edge, a collapse): size a pane's models from `m.sh.Inner(name)` before they take a message. A layout that changes without a message (`SetLayout`) sizes again after the change.
+
+The one exception is a form's controls: the `form` draws each one, never the app, so a control's `View(focused, labelW, width)` takes the width of the label column and of the row, which the form works out from all its fields at once.
 
 Sized this way: `list`, `tree`, `table.Model`, `viewport`, `filepicker`, `accordion`, `form`, `textbox`, `progress`, `canvas`, `logger.Pane`; `input`, `tags`, `breadcrumb` and `wizard` take a width only; `browser` has `SetListHeight` and `SetPreviewHeight`.
 
@@ -165,7 +167,7 @@ legend.FromBindings([]key.Binding{m.keys.Up, m.keys.Enter})
 
 - Bindings live in `Keys` (`XKeys` when a package has several components); `WithKeys` replaces them. `form.Keys` serves the form and all its controls.
 - `Update` matches with `key.Matches`, never a key string, and `Legend()` is built from the same bindings, so the legend lists exactly what the component answers to. It follows state: a list's esc shows only while filtering.
-- No `DefaultKeys` binds a letter. Vim's letters are the opt-in `VimKeys()` preset; a field you type into has none.
+- No `DefaultKeys` binds a letter. Vim's letters are the opt-in `VimKeys()` preset; a field you type into has none. A dialog's letters are not vim's: `DefaultConfirmKeys` answers `y`/`n`, and `q` closes the confirm, the help and the pager, as it does in a terminal pager.
 - A pair that reads as one entry gives its help to the first binding (`Up` as "↑/↓") and none to the second.
 - Esc belongs to the overlay stack, which closes the top dialog before the dialog sees the key.
 
