@@ -89,7 +89,7 @@ func Contains(query, text string) bool
 Contains is the filter's default match: the record's text holds the query, in any case.
 
 <a name="ReplaceAttr"></a>
-## func [ReplaceAttr](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L342>)
+## func [ReplaceAttr](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L349>)
 
 ```go
 func ReplaceAttr(groups []string, a slog.Attr) slog.Attr
@@ -98,9 +98,9 @@ func ReplaceAttr(groups []string, a slog.Attr) slog.Attr
 ReplaceAttr names LevelTrace "TRACE" in slog's own handlers, which print "DEBUG\-4": set it as slog.HandlerOptions.ReplaceAttr for \-\-json.
 
 <a name="Handler"></a>
-## type [Handler](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L57-L69>)
+## type [Handler](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L58-L70>)
 
-Handler is the slog.Handler; slog.New\(logger.New\(os.Stderr, th\)\) is a logger. Every copy writes through the same lock, so lines never interleave.
+Handler is the slog.Handler; slog.New\(logger.New\(os.Stderr, th\)\) is a logger. Every copy writes through the same lock, so lines never interleave. A zero Handler, never built with New, drops every record.
 
 ```go
 type Handler struct {
@@ -109,7 +109,7 @@ type Handler struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L87>)
+### func [New](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L88>)
 
 ```go
 func New(w io.Writer, th theme.Resolved) Handler
@@ -118,7 +118,7 @@ func New(w io.Writer, th theme.Resolved) Handler
 New prints to w in th's colours from slog.LevelInfo up. On a terminal it draws in colour and wraps at the terminal's width; anywhere else it writes plain text, one line per value.
 
 <a name="Handler.Enabled"></a>
-### func \(Handler\) [Enabled](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L151>)
+### func \(Handler\) [Enabled](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L155>)
 
 ```go
 func (h Handler) Enabled(_ context.Context, l slog.Level) bool
@@ -127,7 +127,7 @@ func (h Handler) Enabled(_ context.Context, l slog.Level) bool
 Enabled reports whether l is at or above the level set.
 
 <a name="Handler.Handle"></a>
-### func \(Handler\) [Handle](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L179>)
+### func \(Handler\) [Handle](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L183>)
 
 ```go
 func (h Handler) Handle(_ context.Context, r slog.Record) error
@@ -136,7 +136,7 @@ func (h Handler) Handle(_ context.Context, r slog.Record) error
 Handle writes r: its head line, then its attributes as a tree.
 
 <a name="Handler.WithAttrs"></a>
-### func \(Handler\) [WithAttrs](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L159>)
+### func \(Handler\) [WithAttrs](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L163>)
 
 ```go
 func (h Handler) WithAttrs(attrs []slog.Attr) slog.Handler
@@ -145,7 +145,7 @@ func (h Handler) WithAttrs(attrs []slog.Attr) slog.Handler
 WithAttrs adds attrs to every record, inside the groups open so far.
 
 <a name="Handler.WithCaller"></a>
-### func \(Handler\) [WithCaller](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L120>)
+### func \(Handler\) [WithCaller](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L121>)
 
 ```go
 func (h Handler) WithCaller(on bool) Handler
@@ -154,7 +154,7 @@ func (h Handler) WithCaller(on bool) Handler
 WithCaller ends the message with the file and line that logged it.
 
 <a name="Handler.WithColor"></a>
-### func \(Handler\) [WithColor](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L127>)
+### func \(Handler\) [WithColor](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L128>)
 
 ```go
 func (h Handler) WithColor(on bool) Handler
@@ -163,7 +163,7 @@ func (h Handler) WithColor(on bool) Handler
 WithColor turns colour on or off, whatever w is. Off also strips the colour a message carries, so a log file stays plain text.
 
 <a name="Handler.WithGroup"></a>
-### func \(Handler\) [WithGroup](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L170>)
+### func \(Handler\) [WithGroup](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L174>)
 
 ```go
 func (h Handler) WithGroup(name string) slog.Handler
@@ -172,7 +172,7 @@ func (h Handler) WithGroup(name string) slog.Handler
 WithGroup nests every attribute added from now on under name.
 
 <a name="Handler.WithIcons"></a>
-### func \(Handler\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L133>)
+### func \(Handler\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L134>)
 
 ```go
 func (h Handler) WithIcons(set icon.Set) Handler
@@ -181,7 +181,7 @@ func (h Handler) WithIcons(set icon.Set) Handler
 WithIcons draws the tree with set's branches, ASCII for a dumb terminal.
 
 <a name="Handler.WithLevel"></a>
-### func \(Handler\) [WithLevel](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L102>)
+### func \(Handler\) [WithLevel](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L103>)
 
 ```go
 func (h Handler) WithLevel(l slog.Leveler) Handler
@@ -190,7 +190,7 @@ func (h Handler) WithLevel(l slog.Leveler) Handler
 WithLevel sets the lowest level printed; a \*slog.LevelVar changes it live, and nil is slog.LevelInfo, as in slog.HandlerOptions.
 
 <a name="Handler.WithStyles"></a>
-### func \(Handler\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L140>)
+### func \(Handler\) [WithStyles](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L141>)
 
 ```go
 func (h Handler) WithStyles(edit func(Styles) Styles) Handler
@@ -199,7 +199,7 @@ func (h Handler) WithStyles(edit func(Styles) Styles) Handler
 WithStyles edits the default styles; a second call replaces the first edit, and nil goes back to the defaults.
 
 <a name="Handler.WithTimeFormat"></a>
-### func \(Handler\) [WithTimeFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L114>)
+### func \(Handler\) [WithTimeFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L115>)
 
 ```go
 func (h Handler) WithTimeFormat(layout string) Handler
@@ -208,7 +208,7 @@ func (h Handler) WithTimeFormat(layout string) Handler
 WithTimeFormat lays out the time with a time.Format layout; "" leaves it out.
 
 <a name="Handler.WithWidth"></a>
-### func \(Handler\) [WithWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L108>)
+### func \(Handler\) [WithWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/logger/logger.go#L109>)
 
 ```go
 func (h Handler) WithWidth(n int) Handler

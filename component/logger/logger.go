@@ -53,7 +53,8 @@ func DefaultStyles(th theme.Resolved) Styles {
 }
 
 // Handler is the slog.Handler; slog.New(logger.New(os.Stderr, th)) is a logger.
-// Every copy writes through the same lock, so lines never interleave.
+// Every copy writes through the same lock, so lines never interleave. A zero
+// Handler, never built with New, drops every record.
 type Handler struct {
 	out     *output
 	th      *theme.Resolved // shared by every copy and never written
@@ -139,6 +140,9 @@ func (h Handler) WithIcons(set icon.Set) Handler {
 // and nil goes back to the defaults.
 func (h Handler) WithStyles(edit func(Styles) Styles) Handler {
 	h.edit = edit
+	if h.th == nil {
+		return h // never built: it draws nothing to style
+	}
 	st := DefaultStyles(*h.th)
 	if edit != nil {
 		st = edit(st)
@@ -157,7 +161,7 @@ func (h Handler) Enabled(_ context.Context, l slog.Level) bool {
 
 // WithAttrs adds attrs to every record, inside the groups open so far.
 func (h Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	if len(attrs) == 0 {
+	if len(attrs) == 0 || h.out == nil {
 		return h
 	}
 	h.scopes = append([]scope(nil), h.scopes...)
@@ -177,6 +181,9 @@ func (h Handler) WithGroup(name string) slog.Handler {
 
 // Handle writes r: its head line, then its attributes as a tree.
 func (h Handler) Handle(_ context.Context, r slog.Record) error {
+	if h.out == nil {
+		return nil // never built with New: nowhere to write
+	}
 	width := h.lineWidth()
 	var b strings.Builder
 	indent := h.head(&b, r, width)

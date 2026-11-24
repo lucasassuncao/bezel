@@ -243,3 +243,12 @@ func TestANilStylesEditKeepsTheDefaults(t *testing.T) {
 	h, _ := newTest()
 	require.NotPanics(t, func() { h.WithStyles(nil) })
 }
+
+// A Handler held before New, in a struct say, has nowhere to write: it drops.
+func TestAZeroHandlerDropsEveryRecord(t *testing.T) {
+	var h Handler
+	require.NotPanics(t, func() {
+		styled := h.WithStyles(func(s Styles) Styles { return s })
+		slog.New(styled).With("k", "v").WithGroup("g").Info("hi", "n", 1)
+	})
+}
