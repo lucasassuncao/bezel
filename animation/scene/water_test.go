@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/internal/cells"
 )
@@ -17,12 +17,12 @@ func TestBubblesRiseAndPopAtTheTop(t *testing.T) {
 			popped = true
 		}
 	}
-	assert.True(t, popped)
+	require.True(t, popped)
 }
 
 func TestTheSeaFillsTheBottomUnderFoam(t *testing.T) {
 	g := cells.Parse(playedFor(Sea(white, grey), 1).View(30, 10))
-	assert.NotNil(t, g[9][0].Bg, "the bottom row is water")
-	assert.Nil(t, g[0][0].Bg, "the top is sky")
-	assert.Contains(t, ansi.Strip(playedFor(Sea(white, grey), 1).View(30, 10)), "~")
+	require.NotNil(t, g[9][0].Bg, "the bottom row is water")
+	require.Nil(t, g[0][0].Bg, "the top is sky")
+	require.Contains(t, ansi.Strip(playedFor(Sea(white, grey), 1).View(30, 10)), "~")
 }

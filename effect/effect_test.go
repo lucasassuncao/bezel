@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
@@ -40,14 +39,14 @@ func landed(t *testing.T, e Effect) Effect {
 
 func TestFadeInRisesFromItsColour(t *testing.T) {
 	e := FadeIn(black, 100*ms).WithEase(animation.Linear)
-	assert.Equal(t, black, toRGBA(cells.Parse(e.Apply(whiteText))[0][0].Fg), "before its first frame it is all from")
+	require.Equal(t, black, toRGBA(cells.Parse(e.Apply(whiteText))[0][0].Fg), "before its first frame it is all from")
 	mid := cells.Parse(halfway(e).Apply(whiteText))[0][0].Fg
-	assert.Equal(t, grey, toRGBA(mid))
-	assert.Equal(t, cells.Parse(whiteText), cells.Parse(landed(t, e).Apply(whiteText)))
+	require.Equal(t, grey, toRGBA(mid))
+	require.Equal(t, cells.Parse(whiteText), cells.Parse(landed(t, e).Apply(whiteText)))
 }
 
 func TestFadeOutSinksIntoItsColour(t *testing.T) {
-	assert.Equal(t, black, toRGBA(cells.Parse(landed(t, FadeOut(black, 100*ms)).Apply(whiteText))[0][0].Fg))
+	require.Equal(t, black, toRGBA(cells.Parse(landed(t, FadeOut(black, 100*ms)).Apply(whiteText))[0][0].Fg))
 }
 
 // A sweep pattern dissolves the left half first; at the end only blanks are
@@ -56,72 +55,72 @@ func TestDissolveFollowsItsPattern(t *testing.T) {
 	block := "abcdefgh"
 	e := Dissolve(100 * ms).WithEase(animation.Linear).WithPattern(Sweep(Right))
 	mid := halfway(e).Apply(block)
-	assert.True(t, strings.HasPrefix(mid, "   "), "%q", mid)
-	assert.True(t, strings.HasSuffix(mid, "fgh"), "%q", mid)
-	assert.Equal(t, "        ", landed(t, e).Apply(block))
+	require.True(t, strings.HasPrefix(mid, "   "), "%q", mid)
+	require.True(t, strings.HasSuffix(mid, "fgh"), "%q", mid)
+	require.Equal(t, "        ", landed(t, e).Apply(block))
 }
 
 func TestCoalesceGathersTheBlock(t *testing.T) {
 	block := "abcdefghij\nklmnopqrst"
 	e := Coalesce(100 * ms).WithEase(animation.Linear)
-	assert.Equal(t, strings.Repeat(" ", 10)+"\n"+strings.Repeat(" ", 10), e.Apply(block))
+	require.Equal(t, strings.Repeat(" ", 10)+"\n"+strings.Repeat(" ", 10), e.Apply(block))
 	shown := strings.Count(halfway(e).Apply(block), " ")
-	assert.True(t, shown > 0 && shown < 20, "half gathered: %d blanks", shown)
-	assert.Equal(t, block, landed(t, e).Apply(block))
+	require.True(t, shown > 0 && shown < 20, "half gathered: %d blanks", shown)
+	require.Equal(t, block, landed(t, e).Apply(block))
 }
 
 func TestSweepInRevealsBehindAGlow(t *testing.T) {
 	e := SweepIn(black, 100*ms).WithEase(animation.Linear)
 	mid := cells.Parse(halfway(e).Apply("\x1b[38;2;255;255;255m" + strings.Repeat("x", 20) + "\x1b[m"))[0]
-	assert.Equal(t, white, toRGBA(mid[0].Fg), "behind the glow the text is its own")
-	assert.Equal(t, " ", mid[19].Text, "ahead of the glow nothing shows yet")
+	require.Equal(t, white, toRGBA(mid[0].Fg), "behind the glow the text is its own")
+	require.Equal(t, " ", mid[19].Text, "ahead of the glow nothing shows yet")
 	tinted := false
 	for _, c := range mid {
 		if c.Text == "x" && toRGBA(c.Fg) != white {
 			tinted = true
 		}
 	}
-	assert.True(t, tinted, "the front is tinted")
+	require.True(t, tinted, "the front is tinted")
 }
 
 func TestSlideInComesFromItsEdge(t *testing.T) {
 	e := SlideIn(Right, 100*ms).WithEase(animation.Linear)
-	assert.Equal(t, "    ", e.Apply("abcd"))
-	assert.Equal(t, "cd  ", halfway(e).Apply("abcd"), "half way in from the left")
-	assert.Equal(t, "abcd", landed(t, e).Apply("abcd"))
-	assert.Equal(t, "cd\n  ", halfway(SlideIn(Down, 100*ms).WithEase(animation.Linear)).Apply("ab\ncd"), "the bottom half shows first")
-	assert.Equal(t, "    ", landed(t, SlideOut(Left, 100*ms)).Apply("abcd"))
+	require.Equal(t, "    ", e.Apply("abcd"))
+	require.Equal(t, "cd  ", halfway(e).Apply("abcd"), "half way in from the left")
+	require.Equal(t, "abcd", landed(t, e).Apply("abcd"))
+	require.Equal(t, "cd\n  ", halfway(SlideIn(Down, 100*ms).WithEase(animation.Linear)).Apply("ab\ncd"), "the bottom half shows first")
+	require.Equal(t, "    ", landed(t, SlideOut(Left, 100*ms)).Apply("abcd"))
 }
 
 func TestEvolveStepsThroughShades(t *testing.T) {
 	e := Evolve(100 * ms).WithEase(animation.Linear).WithPattern(nil)
 	mid := halfway(e).Apply("ab cd")
-	assert.Equal(t, 5, ansi.StringWidth(mid))
-	assert.Contains(t, "░▒▓█", string([]rune(mid)[0]))
-	assert.Equal(t, " ", string([]rune(mid)[2]), "a blank stays blank")
-	assert.Equal(t, "ab cd", landed(t, e).Apply("ab cd"))
+	require.Equal(t, 5, ansi.StringWidth(mid))
+	require.Contains(t, "░▒▓█", string([]rune(mid)[0]))
+	require.Equal(t, " ", string([]rune(mid)[2]), "a blank stays blank")
+	require.Equal(t, "ab cd", landed(t, e).Apply("ab cd"))
 }
 
 // A staggered part starts a gap after the one before and the run grows to
 // let the last one finish: halfway through, the first row is in, the last not.
 func TestWithStaggerStartsEachPartLater(t *testing.T) {
 	e := Coalesce(100*ms).WithEase(animation.Linear).WithPattern(nil).OnRows(0, 1, 2).WithStagger(50 * ms)
-	assert.Equal(t, 200*ms, e.run.Dur)
+	require.Equal(t, 200*ms, e.run.Dur)
 	block := "ab\ncd\nef"
 	out := strings.Split(ansi.Strip(at(e, 0.6).Apply(block)), "\n")
-	assert.Equal(t, []string{"ab", "cd", "  "}, out)
-	assert.Equal(t, block, ansi.Strip(landed(t, e).Apply(block)))
+	require.Equal(t, []string{"ab", "cd", "  "}, out)
+	require.Equal(t, block, ansi.Strip(landed(t, e).Apply(block)))
 }
 
 func TestStaggerFitsMasksGivenAfterIt(t *testing.T) {
 	e := FadeIn(black, 100*ms).WithStagger(30*ms).OnRows(0, 1, 2, 3)
-	assert.Equal(t, 190*ms, e.run.Dur)
+	require.Equal(t, 190*ms, e.run.Dur)
 }
 
 func TestStillStaggerShowsEveryPartAtItsEnd(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	e := Coalesce(time.Second).OnRows(0, 1).WithStagger(time.Second)
-	assert.Equal(t, "ab\ncd", ansi.Strip(e.Apply("ab\ncd")))
+	require.Equal(t, "ab\ncd", ansi.Strip(e.Apply("ab\ncd")))
 }
 
 // Whatever the effect and the moment, a block keeps its size.
@@ -141,7 +140,7 @@ func TestEveryEffectKeepsTheBlocksSize(t *testing.T) {
 			lines := strings.Split(e.Apply(block), "\n")
 			require.Len(t, lines, 2)
 			for _, l := range lines {
-				assert.LessOrEqual(t, ansi.StringWidth(l), 9)
+				require.LessOrEqual(t, ansi.StringWidth(l), 9)
 			}
 		}
 	}
@@ -149,9 +148,9 @@ func TestEveryEffectKeepsTheBlocksSize(t *testing.T) {
 
 func TestStillEffectsShowTheirEnd(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
-	assert.Equal(t, "abcd", Coalesce(time.Second).Apply("abcd"))
-	assert.Equal(t, "    ", Dissolve(time.Second).Apply("abcd"))
-	assert.False(t, SlideIn(Right, time.Second).Active())
+	require.Equal(t, "abcd", Coalesce(time.Second).Apply("abcd"))
+	require.Equal(t, "    ", Dissolve(time.Second).Apply("abcd"))
+	require.False(t, SlideIn(Right, time.Second).Active())
 }
 
 // toRGBA is c as 8-bit RGBA, so colours read back from SGR compare by value.

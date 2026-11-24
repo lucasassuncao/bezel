@@ -11,7 +11,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
@@ -46,63 +45,63 @@ func opened(m Model, d time.Duration) Model {
 
 func TestASectionOpensALineAtATime(t *testing.T) {
 	m := New(sections())
-	assert.Equal(t, "▸ Install\n▸ Usage", ansi.Strip(m.SetWidth(20).View(th)))
+	require.Equal(t, "▸ Install\n▸ Usage", ansi.Strip(m.SetWidth(20).View(th)))
 	m, cmd := withCmd(m.Update(bezeltest.Key("enter")))
 	require.NotNil(t, cmd)
-	assert.True(t, m.IsOpen(0))
+	require.True(t, m.IsOpen(0))
 	half := ansi.Strip(opened(m, 100*time.Millisecond).SetWidth(20).View(th))
-	assert.Equal(t, "▾ Install\n  one\n  two\n▸ Usage", half)
+	require.Equal(t, "▾ Install\n  one\n  two\n▸ Usage", half)
 	full := opened(m, time.Second)
-	assert.False(t, full.Active())
-	assert.Len(t, strings.Split(full.SetWidth(20).View(th), "\n"), 6)
+	require.False(t, full.Active())
+	require.Len(t, strings.Split(full.SetWidth(20).View(th), "\n"), 6)
 }
 
 func TestASectionClosesFromWhereItIs(t *testing.T) {
 	m, _ := New(sections()).Toggle(0)
 	m = opened(m, 100*time.Millisecond)
 	m, _ = m.Toggle(0)
-	assert.False(t, m.IsOpen(0))
-	assert.InDelta(t, 0.5, m.folds[0].share(), 1e-9, "it starts closing from halfway")
+	require.False(t, m.IsOpen(0))
+	require.InDelta(t, 0.5, m.folds[0].share(), 1e-9, "it starts closing from halfway")
 	shut := opened(m, time.Second)
-	assert.Equal(t, "▸ Install\n▸ Usage", ansi.Strip(shut.SetWidth(20).View(th)))
+	require.Equal(t, "▸ Install\n▸ Usage", ansi.Strip(shut.SetWidth(20).View(th)))
 }
 
 func TestTheArrowsMoveTheCursor(t *testing.T) {
 	m := New(sections())
 	m, _ = m.Update(bezeltest.Key("down"))
 	m, _ = m.Update(bezeltest.Key("down"))
-	assert.Equal(t, 1, m.Cursor(), "clamped at the last")
+	require.Equal(t, 1, m.Cursor(), "clamped at the last")
 	m, _ = m.Update(bezeltest.Key("up"))
-	assert.Equal(t, 0, m.Cursor())
-	assert.NotEmpty(t, m.Legend())
+	require.Equal(t, 0, m.Cursor())
+	require.NotEmpty(t, m.Legend())
 }
 
 func TestAStillAccordionSnaps(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	m, cmd := New(sections()).WithDuration(time.Second).Toggle(1)
-	assert.Nil(t, cmd)
-	assert.Equal(t, "▸ Install\n▾ Usage\n  run it", ansi.Strip(m.SetWidth(20).View(th)))
+	require.Nil(t, cmd)
+	require.Equal(t, "▸ Install\n▾ Usage\n  run it", ansi.Strip(m.SetWidth(20).View(th)))
 	_, cmd = m.Toggle(9)
-	assert.Nil(t, cmd)
+	require.Nil(t, cmd)
 }
 
 func TestTheSectionsTakeOnlyTheirOwnFrames(t *testing.T) {
 	m, own := New(sections()).WithKeys(DefaultKeys()).Toggle(0)
 	_, other := New(sections()).Toggle(0)
 	_, cmd := withCmd(m.Update(other()))
-	assert.Nil(t, cmd)
+	require.Nil(t, cmd)
 	_, cmd = withCmd(m.Update(own()))
-	assert.NotNil(t, cmd)
+	require.NotNil(t, cmd)
 }
 
 func TestAdvanceSettlesEverySection(t *testing.T) {
 	m, _ := New(sections()).Toggle(0)
 	m, _ = m.Toggle(1)
 	m, done := m.Advance(time.Unix(10, 0))
-	assert.False(t, done)
+	require.False(t, done)
 	m, done = m.Advance(time.Unix(11, 0))
-	assert.True(t, done)
-	assert.True(t, m.IsOpen(0) && m.IsOpen(1))
+	require.True(t, done)
+	require.True(t, m.IsOpen(0) && m.IsOpen(1))
 }
 
 func TestWithStylesRecoloursTheHeadings(t *testing.T) {
@@ -115,19 +114,19 @@ func TestToggleAndMovesAreHandled(t *testing.T) {
 	m := New(sections())
 	for _, k := range []string{"enter", "down", "up"} {
 		_, r := m.Update(bezeltest.Key(k))
-		assert.True(t, r.Handled, k)
+		require.True(t, r.Handled, k)
 	}
 	_, r := m.Update(bezeltest.Key("x"))
-	assert.False(t, r.Handled)
+	require.False(t, r.Handled)
 }
 
 func TestOwnFrameIsHandledAndAnotherIsNot(t *testing.T) {
 	m, own := New(sections()).Toggle(0)
 	_, other := New(sections()).Toggle(0)
 	_, r := m.Update(own())
-	assert.True(t, r.Handled)
+	require.True(t, r.Handled)
 	_, r = m.Update(other())
-	assert.False(t, r.Handled)
+	require.False(t, r.Handled)
 }
 
 // withCmd keeps the command of an Update, for the tests that run it.

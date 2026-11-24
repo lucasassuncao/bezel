@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
@@ -59,21 +58,21 @@ func TestTheCursorGlidesThroughTheRowsBetween(t *testing.T) {
 		m, _ = m.Update(bezeltest.Key("down"))
 	}
 	require.NotNil(t, m.Tick(), "a move with motion asks for frames")
-	assert.Contains(t, marked(m.View(th)), "a", "it has not left yet")
+	require.Contains(t, marked(m.View(th)), "a", "it has not left yet")
 	mid := playTo(m, 50*ms)
-	assert.Contains(t, marked(mid.View(th)), "c", "halfway down")
+	require.Contains(t, marked(mid.View(th)), "c", "halfway down")
 	end := playTo(m, time.Second)
-	assert.False(t, end.Active())
-	assert.Contains(t, marked(end.View(th)), "e")
-	assert.Equal(t, "e", sel(end).Label, "the cursor itself is where it went at once")
+	require.False(t, end.Active())
+	require.Contains(t, marked(end.View(th)), "e")
+	require.Equal(t, "e", sel(end).Label, "the cursor itself is where it went at once")
 }
 
 func TestAListWithoutMotionJumps(t *testing.T) {
 	moving(t)
 	m := New(plainRows("a", "b")).SetHeight(2)
 	m, _ = m.Update(bezeltest.Key("down"))
-	assert.Nil(t, m.Tick())
-	assert.False(t, m.Active())
+	require.Nil(t, m.Tick())
+	require.False(t, m.Active())
 }
 
 func TestANewRowLightsUpAndALeavingRowFades(t *testing.T) {
@@ -84,11 +83,11 @@ func TestANewRowLightsUpAndALeavingRowFades(t *testing.T) {
 	require.NotNil(t, m.Tick())
 	out := playTo(m, 20*ms).View(th)
 	lines := strings.Split(ansi.Strip(out), "\n")
-	assert.Equal(t, []string{"▶ keep", "  old", "  new"}, lines, "the old row is still there, fading")
-	assert.Contains(t, out, ";9m", "and struck through")
-	assert.NotEqual(t, New(plainRows("keep", "new")).SetHeight(4).View(th), out, "the new row is lit")
+	require.Equal(t, []string{"▶ keep", "  old", "  new"}, lines, "the old row is still there, fading")
+	require.Contains(t, out, ";9m", "and struck through")
+	require.NotEqual(t, New(plainRows("keep", "new")).SetHeight(4).View(th), out, "the new row is lit")
 	settled := playTo(m, time.Second).View(th)
-	assert.Equal(t, New(plainRows("keep", "new")).SetHeight(4).View(th), settled)
+	require.Equal(t, New(plainRows("keep", "new")).SetHeight(4).View(th), settled)
 }
 
 func TestAGhostNeverMakesTheListTaller(t *testing.T) {
@@ -97,7 +96,7 @@ func TestAGhostNeverMakesTheListTaller(t *testing.T) {
 	m := New(plainRows("a", "b", "c")).SetHeight(3).WithMotion(100 * ms)
 	m = m.SetRows(plainRows("a", "c", "d"))
 	out := playTo(m, 20*ms).View(th)
-	assert.Len(t, strings.Split(out, "\n"), 3)
+	require.Len(t, strings.Split(out, "\n"), 3)
 }
 
 func TestTheListTakesOnlyItsOwnFrames(t *testing.T) {
@@ -107,42 +106,42 @@ func TestTheListTakesOnlyItsOwnFrames(t *testing.T) {
 	other := New(plainRows("x", "y")).SetHeight(2).WithMotion(100 * ms)
 	other, _ = other.Update(bezeltest.Key("down"))
 	_, r := m.Update(other.FrameAt(time.Unix(1, 0)))
-	assert.Equal(t, bezel.Result{}, r)
+	require.Equal(t, bezel.Result{}, r)
 	_, r = m.Update(m.FrameAt(time.Unix(1, 0)))
-	assert.True(t, r.Handled)
-	assert.NotNil(t, r.Cmd)
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd)
 }
 
 func TestForeignFrameIsNotHandled(t *testing.T) {
 	moving(t)
 	m := New(plainRows("a", "b")).SetHeight(2).WithMotion(100 * ms)
 	_, r := m.Update(frames.NewMsg(time.Unix(1, 0), 999999, 0))
-	assert.False(t, r.Handled)
+	require.False(t, r.Handled)
 }
 
 func TestMotionStartsFromUpdate(t *testing.T) {
 	moving(t)
 	m := New(plainRows("a", "b")).SetHeight(2).WithMotion(100 * ms)
 	_, r := m.Update(bezeltest.Key("down"))
-	assert.NotNil(t, r.Cmd)
+	require.NotNil(t, r.Cmd)
 	_, r = New(plainRows("a", "b")).SetHeight(2).Update(bezeltest.Key("down"))
-	assert.Nil(t, r.Cmd)
+	require.Nil(t, r.Cmd)
 }
 
 func TestStillListsDoNotMove(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	m := New(plainRows("a", "b")).SetHeight(2).WithMotion(100 * ms)
 	m, _ = m.Update(bezeltest.Key("down"))
-	assert.False(t, m.Active())
-	assert.Nil(t, m.Tick())
-	assert.Contains(t, marked(m.View(theme.Resolve(theme.Plain(), true))), "b")
+	require.False(t, m.Active())
+	require.Nil(t, m.Tick())
+	require.Contains(t, marked(m.View(theme.Resolve(theme.Plain(), true))), "b")
 }
 
 func TestMixBlendsAndGivesWayToAMissingColour(t *testing.T) {
 	black, white := color.RGBA{0, 0, 0, 255}, color.RGBA{255, 255, 255, 255}
-	assert.Equal(t, color.RGBA{128, 128, 128, 255}, mix(black, white, 0.5))
-	assert.Equal(t, black, mix(black, nil, 0.2))
-	assert.Equal(t, white, mix(nil, white, 0.2))
+	require.Equal(t, color.RGBA{128, 128, 128, 255}, mix(black, white, 0.5))
+	require.Equal(t, black, mix(black, nil, 0.2))
+	require.Equal(t, white, mix(nil, white, 0.2))
 }
 
 // A click reads the rows as drawn, so the ghost above a row does not put it
@@ -152,10 +151,10 @@ func TestAClickLooksPastAGhost(t *testing.T) {
 	m := New(plainRows("keep", "old")).SetHeight(4).WithMotion(100 * ms)
 	m = playTo(m.SetRows(plainRows("keep", "new")), 20*ms) // "keep", the ghost, "new"
 	m, r := m.Update(click(1))
-	assert.False(t, r.Handled, "the ghost is no row")
-	assert.Equal(t, 0, m.win.Cursor)
+	require.False(t, r.Handled, "the ghost is no row")
+	require.Equal(t, 0, m.win.Cursor)
 	m, _ = m.Update(click(2))
-	assert.Equal(t, "new", sel(m).Label)
+	require.Equal(t, "new", sel(m).Label)
 }
 
 func TestForeignKeyMidGlideReturnsZeroResult(t *testing.T) {
@@ -164,7 +163,7 @@ func TestForeignKeyMidGlideReturnsZeroResult(t *testing.T) {
 	m, _ = m.Update(bezeltest.Key("down"))
 	require.True(t, m.Active())
 	_, r := m.Update(bezeltest.Key("x"))
-	assert.Equal(t, bezel.Result{}, r)
+	require.Equal(t, bezel.Result{}, r)
 }
 
 func TestNoOpKeyMidGlideDoesNotRetick(t *testing.T) {
@@ -173,10 +172,10 @@ func TestNoOpKeyMidGlideDoesNotRetick(t *testing.T) {
 	m, _ = m.Update(bezeltest.Key("down"))
 	m, _ = m.Update(bezeltest.Key("end"))
 	_, r := m.Update(bezeltest.Key("end"))
-	assert.True(t, r.Handled)
-	assert.Nil(t, r.Cmd, "nothing moved, so no second frame chain")
+	require.True(t, r.Handled)
+	require.Nil(t, r.Cmd, "nothing moved, so no second frame chain")
 	_, r = m.Update(click(2))
-	assert.Nil(t, r.Cmd, "a click on the cursor row chooses, it does not move")
+	require.Nil(t, r.Cmd, "a click on the cursor row chooses, it does not move")
 }
 
 func TestAMoveDuringAGlideReplacesItsRun(t *testing.T) {
@@ -186,8 +185,8 @@ func TestAMoveDuringAGlideReplacesItsRun(t *testing.T) {
 	require.True(t, m.Active())
 	old := m.FrameAt(time.Unix(10, 0))
 	m, r := m.Update(bezeltest.Key("down"))
-	assert.True(t, r.Handled)
-	assert.NotNil(t, r.Cmd, "the new run asks for its own frames")
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd, "the new run asks for its own frames")
 	_, r = m.Update(old)
-	assert.Equal(t, bezel.Result{}, r, "a frame of the replaced run is foreign")
+	require.Equal(t, bezel.Result{}, r, "a frame of the replaced run is foreign")
 }

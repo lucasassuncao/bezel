@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
@@ -43,23 +42,23 @@ func TestSceneScenesFillTheirSizeAndMove(t *testing.T) {
 	} {
 		first := playedFor(a, 1).View(40, 12)
 		w, h := size(t, first)
-		assert.Equal(t, 40, w, name)
-		assert.Equal(t, 12, h, name)
-		assert.NotEqual(t, first, playedFor(a, 2.5).View(40, 12), name)
-		assert.True(t, a.Active(), name)
+		require.Equal(t, 40, w, name)
+		require.Equal(t, 12, h, name)
+		require.NotEqual(t, first, playedFor(a, 2.5).View(40, 12), name)
+		require.True(t, a.Active(), name)
 	}
 }
 
 func TestSceneIsAFunctionOfTime(t *testing.T) {
 	a := Rain(white, grey)
-	assert.Equal(t, playedFor(a, 3).View(30, 8), playedFor(a, 3).View(30, 8))
+	require.Equal(t, playedFor(a, 3).View(30, 8), playedFor(a, 3).View(30, 8))
 }
 
 func TestSceneUnderKeepsTheBlockOnTop(t *testing.T) {
 	out := playedFor(Static(white), 1).Under("hello\n     ")
 	lines := strings.Split(ansi.Strip(out), "\n")
-	assert.Equal(t, "hello", lines[0])
-	assert.Len(t, lines, 2)
+	require.Equal(t, "hello", lines[0])
+	require.Len(t, lines, 2)
 }
 
 // A block with no width, as an app draws before its first resize, has no
@@ -95,17 +94,17 @@ func allScenes() map[string]Scene {
 func TestScenePlaysOnItsOwnFrames(t *testing.T) {
 	a := Snow(white)
 	a, res := a.Update(a.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, res.Cmd)
+	require.NotNil(t, res.Cmd)
 	a, done := a.Advance(time.Unix(100, 0))
-	assert.False(t, done, "a scene never ends on its own")
-	assert.Equal(t, "", a.View(0, 3))
+	require.False(t, done, "a scene never ends on its own")
+	require.Equal(t, "", a.View(0, 3))
 }
 
 func TestStillSceneHoldsItsFirstFrame(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	a := Starfield(white)
-	assert.False(t, a.Active())
-	assert.Equal(t, a.View(20, 5), playedFor(a, 5).View(20, 5))
+	require.False(t, a.Active())
+	require.Equal(t, a.View(20, 5), playedFor(a, 5).View(20, 5))
 }
 
 var (

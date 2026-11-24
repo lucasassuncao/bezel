@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,11 +22,11 @@ func TestSeqPlaysStepsOneAfterAnother(t *testing.T) {
 	))
 	start := time.Unix(10, 0)
 	mid := playTo(tl, start, 50*ms)
-	assert.InDelta(t, 5, mid.Value("a"), 1e-9)
-	assert.InDelta(t, 0, mid.Value("b"), 1e-9, "b waits for a")
+	require.InDelta(t, 5, mid.Value("a"), 1e-9)
+	require.InDelta(t, 0, mid.Value("b"), 1e-9, "b waits for a")
 	late := playTo(tl, start, 150*ms)
-	assert.InDelta(t, 10, late.Value("a"), 1e-9)
-	assert.InDelta(t, 5, late.Value("b"), 1e-9)
+	require.InDelta(t, 10, late.Value("a"), 1e-9)
+	require.InDelta(t, 5, late.Value("b"), 1e-9)
 }
 
 func TestParAndStaggerOverlap(t *testing.T) {
@@ -37,10 +36,10 @@ func TestParAndStaggerOverlap(t *testing.T) {
 		Step("b", 0, 1, 100*ms).WithEase(Linear),
 	))
 	got := playTo(tl, time.Unix(10, 0), 75*ms)
-	assert.InDelta(t, 0.75, got.Value("a"), 1e-9)
-	assert.InDelta(t, 0.25, got.Value("b"), 1e-9)
-	assert.Equal(t, 150*ms, tl.span.length)
-	assert.Equal(t, 100*ms, Par(Step("a", 0, 1, 100*ms), Step("b", 0, 1, 40*ms)).length)
+	require.InDelta(t, 0.75, got.Value("a"), 1e-9)
+	require.InDelta(t, 0.25, got.Value("b"), 1e-9)
+	require.Equal(t, 150*ms, tl.span.length)
+	require.Equal(t, 100*ms, Par(Step("a", 0, 1, 100*ms), Step("b", 0, 1, 40*ms)).length)
 }
 
 func TestALaterStepOfTheSameNameTakesOver(t *testing.T) {
@@ -51,8 +50,8 @@ func TestALaterStepOfTheSameNameTakesOver(t *testing.T) {
 		Step("x", 10, 0, 100*ms).WithEase(Linear),
 	))
 	start := time.Unix(10, 0)
-	assert.InDelta(t, 10, playTo(tl, start, 120*ms).Value("x"), 1e-9, "held through the gap")
-	assert.InDelta(t, 5, playTo(tl, start, 200*ms).Value("x"), 1e-9)
+	require.InDelta(t, 10, playTo(tl, start, 120*ms).Value("x"), 1e-9, "held through the gap")
+	require.InDelta(t, 5, playTo(tl, start, 200*ms).Value("x"), 1e-9)
 }
 
 func TestATimelineEndsAtItsLastValues(t *testing.T) {
@@ -61,20 +60,20 @@ func TestATimelineEndsAtItsLastValues(t *testing.T) {
 	start := time.Unix(10, 0)
 	tl, _ = tl.Advance(start)
 	tl, done := tl.Advance(start.Add(time.Second))
-	assert.True(t, done)
-	assert.False(t, tl.Active())
-	assert.InDelta(t, 4, tl.Value("x"), 1e-9)
-	assert.Equal(t, 1.0, tl.Progress("x"))
-	assert.Zero(t, tl.Value("missing"))
+	require.True(t, done)
+	require.False(t, tl.Active())
+	require.InDelta(t, 4, tl.Value("x"), 1e-9)
+	require.Equal(t, 1.0, tl.Progress("x"))
+	require.Zero(t, tl.Value("missing"))
 }
 
 func TestAStillTimelineIsBornAtItsEnd(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	tl := NewTimeline(Seq(Step("x", 0, 3, 100*ms), Step("y", 1, 2, 100*ms)))
-	assert.False(t, tl.Active())
-	assert.Nil(t, tl.Tick())
-	assert.InDelta(t, 3, tl.Value("x"), 1e-9)
-	assert.InDelta(t, 2, tl.Value("y"), 1e-9)
+	require.False(t, tl.Active())
+	require.Nil(t, tl.Tick())
+	require.InDelta(t, 3, tl.Value("x"), 1e-9)
+	require.InDelta(t, 2, tl.Value("y"), 1e-9)
 }
 
 func TestATimelineTakesOnlyItsOwnFrames(t *testing.T) {
@@ -82,18 +81,18 @@ func TestATimelineTakesOnlyItsOwnFrames(t *testing.T) {
 	tl := NewTimeline(Step("x", 0, 1, 100*ms))
 	other := NewTimeline(Step("x", 0, 1, 100*ms))
 	_, res := tl.Update(other.FrameAt(time.Unix(10, 0)))
-	assert.Nil(t, res.Cmd)
+	require.Nil(t, res.Cmd)
 	next, res := tl.Update(tl.FrameAt(time.Unix(10, 0)))
 	require.NotNil(t, res.Cmd)
-	assert.True(t, next.Active())
+	require.True(t, next.Active())
 }
 
 func TestATimelineRepeatsAndYoyos(t *testing.T) {
 	moving(t)
 	tl := NewTimeline(Step("x", 0, 10, 100*ms).WithEase(Linear)).WithYoyo(true).WithRepeat(Forever)
 	got := playTo(tl, time.Unix(10, 0), 150*ms)
-	assert.True(t, got.Active())
-	assert.InDelta(t, 5, got.Value("x"), 1e-6, "on its way back")
+	require.True(t, got.Active())
+	require.InDelta(t, 5, got.Value("x"), 1e-6, "on its way back")
 }
 
 func TestCascadeDelaysEachMore(t *testing.T) {
@@ -105,7 +104,7 @@ func TestCascadeDelaysEachMore(t *testing.T) {
 		fs[i], _ = fs[i].Advance(start)
 		fs[i], _ = fs[i].Advance(start.Add(150 * ms))
 	}
-	assert.Equal(t, 1.0, fs[0].cur)
-	assert.Greater(t, fs[1].cur, 0.0)
-	assert.Equal(t, 0.0, fs[2].cur, "the third has not started")
+	require.Equal(t, 1.0, fs[0].cur)
+	require.Greater(t, fs[1].cur, 0.0)
+	require.Equal(t, 0.0, fs[2].cur, "the third has not started")
 }

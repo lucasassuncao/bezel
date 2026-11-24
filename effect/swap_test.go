@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/internal/cells"
 )
@@ -32,18 +32,18 @@ func swapAtOf(t Transition, p float64, from, to string) string {
 func TestIrisClosesTheOldAndOpensTheNew(t *testing.T) {
 	tr := Iris(400 * ms)
 	closing := swapAt(tr, 0.25)
-	assert.Contains(t, closing, "a")
-	assert.NotContains(t, closing, "b")
+	require.Contains(t, closing, "a")
+	require.NotContains(t, closing, "b")
 	opening := swapAt(tr, 0.75)
-	assert.Contains(t, opening, "b")
-	assert.NotContains(t, opening, "a")
-	assert.Equal(t, newScreen, swapAt(tr, 1))
+	require.Contains(t, opening, "b")
+	require.NotContains(t, opening, "a")
+	require.Equal(t, newScreen, swapAt(tr, 1))
 }
 
 func TestBlindsTurnEverySlatAtOnce(t *testing.T) {
 	rows := strings.Split(swapAt(Blinds(2, 400*ms), 0.5), "\n")
-	assert.Equal(t, []string{"bbbbbb", "aaaaaa", "bbbbbb", "aaaaaa"}, rows, "the top row of each slat has turned")
-	assert.Equal(t, newScreen, swapAt(Blinds(2, 400*ms), 1))
+	require.Equal(t, []string{"bbbbbb", "aaaaaa", "bbbbbb", "aaaaaa"}, rows, "the top row of each slat has turned")
+	require.Equal(t, newScreen, swapAt(Blinds(2, 400*ms), 1))
 }
 
 func TestStackSinksTheOldBlockUnderTheNew(t *testing.T) {
@@ -53,49 +53,49 @@ func TestStackSinksTheOldBlockUnderTheNew(t *testing.T) {
 	tr, _ = tr.Advance(start.Add(200 * ms))
 	lit := "\x1b[38;2;200;200;200m" + oldScreen + "\x1b[m"
 	g := cells.Parse(tr.Apply(lit, newScreen))
-	assert.Equal(t, "a", g[0][0].Text, "the old block still shows where the new has not reached")
-	assert.Less(t, toRGBA(g[0][0].Fg).R, uint8(200), "and it has sunk")
-	assert.Equal(t, "b", g[0][5].Text)
+	require.Equal(t, "a", g[0][0].Text, "the old block still shows where the new has not reached")
+	require.Less(t, toRGBA(g[0][0].Fg).R, uint8(200), "and it has sunk")
+	require.Equal(t, "b", g[0][5].Text)
 }
 
 func TestStillSwapsShowTheNewBlock(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	for _, tr := range []Transition{Iris(time.Second), Blinds(3, time.Second), Stack(Up, time.Second)} {
-		assert.Equal(t, newScreen, ansi.Strip(tr.Apply(oldScreen, newScreen)))
+		require.Equal(t, newScreen, ansi.Strip(tr.Apply(oldScreen, newScreen)))
 	}
 }
 
 func TestDoorsPartTheOldBlockDownTheMiddle(t *testing.T) {
-	assert.Equal(t, "abbbba", strings.Split(swapAt(Doors(400*ms), 0.5), "\n")[0])
-	assert.Equal(t, newScreen, swapAt(Doors(400*ms), 1))
+	require.Equal(t, "abbbba", strings.Split(swapAt(Doors(400*ms), 0.5), "\n")[0])
+	require.Equal(t, newScreen, swapAt(Doors(400*ms), 1))
 }
 
 func TestShutClosesTheNewBlockOverTheOld(t *testing.T) {
-	assert.Equal(t, "baaaab", strings.Split(swapAt(Shut(400*ms), 0.5), "\n")[0])
-	assert.Equal(t, newScreen, swapAt(Shut(400*ms), 1))
+	require.Equal(t, "baaaab", strings.Split(swapAt(Shut(400*ms), 0.5), "\n")[0])
+	require.Equal(t, newScreen, swapAt(Shut(400*ms), 1))
 }
 
 func TestCombSlidesEveryOtherRowFromTheOtherSide(t *testing.T) {
 	rows := strings.Split(swapAt(Comb(400*ms), 0.5), "\n")
-	assert.Equal(t, []string{"aaabbb", "bbbaaa", "aaabbb", "bbbaaa"}, rows)
-	assert.Equal(t, newScreen, swapAt(Comb(400*ms), 1))
+	require.Equal(t, []string{"aaabbb", "bbbaaa", "aaabbb", "bbbaaa"}, rows)
+	require.Equal(t, newScreen, swapAt(Comb(400*ms), 1))
 }
 
 func TestStaticSnowsTheOldAwayAndSettlesIntoTheNew(t *testing.T) {
 	early, mid, late := swapAt(Static(400*ms), 0.25), swapAt(Static(400*ms), 0.5), swapAt(Static(400*ms), 0.75)
-	assert.Contains(t, early, "a")
-	assert.NotContains(t, early, "b")
-	assert.NotContains(t, mid, "a", "halfway it is all snow")
-	assert.NotContains(t, mid, "b")
-	assert.Contains(t, late, "b")
-	assert.NotContains(t, late, "a")
-	assert.Equal(t, newScreen, swapAt(Static(400*ms), 1))
+	require.Contains(t, early, "a")
+	require.NotContains(t, early, "b")
+	require.NotContains(t, mid, "a", "halfway it is all snow")
+	require.NotContains(t, mid, "b")
+	require.Contains(t, late, "b")
+	require.NotContains(t, late, "a")
+	require.Equal(t, newScreen, swapAt(Static(400*ms), 1))
 }
 
 func TestStillNewSwapsShowTheNewBlock(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	for _, tr := range []Transition{Doors(time.Second), Shut(time.Second), Comb(time.Second), Static(time.Second),
 		Turn(time.Second), Cube(Left, time.Second), Peel(time.Second)} {
-		assert.Equal(t, newScreen, ansi.Strip(tr.Apply(oldScreen, newScreen)))
+		require.Equal(t, newScreen, ansi.Strip(tr.Apply(oldScreen, newScreen)))
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,13 +12,13 @@ func TestAStreamRevealsAtItsPace(t *testing.T) {
 	require.NotNil(t, cmd)
 	start := time.Unix(10, 0)
 	s, _ = s.Advance(start)
-	assert.Equal(t, "", s.View())
+	require.Equal(t, "", s.View())
 	s, _ = s.Advance(start.Add(30 * ms))
-	assert.Equal(t, "hel", s.View())
+	require.Equal(t, "hel", s.View())
 	s, done := s.Advance(start.Add(time.Second))
-	assert.True(t, done)
-	assert.Equal(t, "hello", s.View())
-	assert.Nil(t, s.Tick(), "caught up, it asks for no frame")
+	require.True(t, done)
+	require.Equal(t, "hello", s.View())
+	require.Nil(t, s.Tick(), "caught up, it asks for no frame")
 }
 
 func TestAZeroStreamRevealsAtTheDefaultPace(t *testing.T) {
@@ -43,12 +42,12 @@ func TestAClockSteppingBackRevealsNothingMore(t *testing.T) {
 func TestAPushWhileRevealingJoinsTheQueue(t *testing.T) {
 	s, _ := NewStream(10 * ms).Push("ab")
 	s, cmd := s.Push("cd")
-	assert.Nil(t, cmd, "already running: no second chain of frames")
-	assert.Equal(t, 4, s.Behind())
+	require.Nil(t, cmd, "already running: no second chain of frames")
+	require.Equal(t, 4, s.Behind())
 	start := time.Unix(10, 0)
 	s, _ = s.Advance(start)
 	s, _ = s.Advance(start.Add(time.Second))
-	assert.Equal(t, "abcd", s.View())
+	require.Equal(t, "abcd", s.View())
 }
 
 func TestAStreamFarBehindSpeedsUp(t *testing.T) {
@@ -60,27 +59,27 @@ func TestAStreamFarBehindSpeedsUp(t *testing.T) {
 	start := time.Unix(10, 0)
 	s, _ = s.Advance(start)
 	s, _ = s.Advance(start.Add(100 * ms))
-	assert.Greater(t, len(s.View()), 10, "more than one a step: it is catching up")
+	require.Greater(t, len(s.View()), 10, "more than one a step: it is catching up")
 }
 
 func TestAStreamTakesOnlyItsOwnFrames(t *testing.T) {
 	s, _ := NewStream(10 * ms).Push("abc")
 	other, _ := NewStream(10 * ms).Push("xyz")
 	_, res := s.Update(other.FrameAt(time.Unix(10, 0)))
-	assert.Nil(t, res.Cmd)
+	require.Nil(t, res.Cmd)
 	s, res = s.Update(s.FrameAt(time.Unix(10, 0)))
-	assert.NotNil(t, res.Cmd)
-	assert.True(t, s.Active())
+	require.NotNil(t, res.Cmd)
+	require.True(t, s.Active())
 }
 
 func TestSkipShowsEverythingAndStillShowsAtOnce(t *testing.T) {
 	s, _ := NewStream(10 * ms).Push("abc")
 	s = s.Skip()
-	assert.Equal(t, "abc", s.View())
-	assert.False(t, s.Active())
+	require.Equal(t, "abc", s.View())
+	require.False(t, s.Active())
 
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	still, cmd := NewStream(0).Push("now")
-	assert.Nil(t, cmd)
-	assert.Equal(t, "now", still.View())
+	require.Nil(t, cmd)
+	require.Equal(t, "now", still.View())
 }

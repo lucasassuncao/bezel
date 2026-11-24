@@ -8,7 +8,6 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/theme"
@@ -50,9 +49,9 @@ func TestConfirmAnswers(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			c := press(newConfirm("Proceed?", th), tc.keys...)
-			assert.True(t, c.done)
-			assert.Equal(t, tc.yes, c.yes)
-			assert.Equal(t, tc.aborted, c.aborted)
+			require.True(t, c.done)
+			require.Equal(t, tc.yes, c.yes)
+			require.Equal(t, tc.aborted, c.aborted)
 		})
 	}
 }
@@ -60,17 +59,17 @@ func TestConfirmAnswers(t *testing.T) {
 func TestConfirmIgnoresVimKeys(t *testing.T) {
 	for _, k := range []string{"h", "l"} {
 		c := press(newConfirm("Proceed?", th), k, "enter")
-		assert.False(t, c.yes, "%s does not toggle; the default No stands", k)
+		require.False(t, c.yes, "%s does not toggle; the default No stands", k)
 	}
 }
 
 func TestConfirmHintNamesItsKeys(t *testing.T) {
-	assert.Contains(t, ansi.Strip(newConfirm("Proceed?", th).View().Content), "←/→ choose · y/n answer · enter confirm · esc cancel")
+	require.Contains(t, ansi.Strip(newConfirm("Proceed?", th).View().Content), "←/→ choose · y/n answer · enter confirm · esc cancel")
 }
 
 func TestConfirmViewShowsAnswerWhenDone(t *testing.T) {
 	c := press(newConfirm("Proceed?", th), "y")
-	assert.Equal(t, "Proceed? Yes\n", ansi.Strip(c.View().Content))
+	require.Equal(t, "Proceed? Yes\n", ansi.Strip(c.View().Content))
 }
 
 // run answers Confirm through opts instead of a terminal.
@@ -83,12 +82,12 @@ func run(t *testing.T, opts ...tea.ProgramOption) (bool, error) {
 func TestConfirmReadsTheAnswerFromTheGivenInput(t *testing.T) {
 	yes, err := run(t, tea.WithInput(strings.NewReader("y")))
 	require.NoError(t, err)
-	assert.True(t, yes)
+	require.True(t, yes)
 }
 
 func TestConfirmReturnsErrAbortedOnEsc(t *testing.T) {
 	_, err := run(t, tea.WithInput(strings.NewReader("\x1b")))
-	assert.ErrorIs(t, err, ErrAborted)
+	require.ErrorIs(t, err, ErrAborted)
 }
 
 func TestConfirmStopsWhenTheContextIsCancelled(t *testing.T) {
@@ -97,5 +96,5 @@ func TestConfirmStopsWhenTheContextIsCancelled(t *testing.T) {
 	pr, pw := io.Pipe()
 	t.Cleanup(func() { _ = pw.Close() })
 	_, err := run(t, tea.WithInput(pr), tea.WithContext(ctx))
-	assert.ErrorIs(t, err, tea.ErrProgramKilled)
+	require.ErrorIs(t, err, tea.ErrProgramKilled)
 }

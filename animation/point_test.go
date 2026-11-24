@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
@@ -15,12 +14,12 @@ func TestMoveEasesAPointAlongBothAxes(t *testing.T) {
 	m := NewMove(Point{0, 0}, Point{10, 4}, 100*ms).WithEase(Linear)
 	m, _ = m.Update(m.FrameAt(start))
 	m, _ = m.Update(m.FrameAt(start.Add(50 * ms)))
-	assert.Equal(t, Point{5, 2}, m.cur)
+	require.Equal(t, Point{5, 2}, m.cur)
 	m, res := m.Update(m.FrameAt(start.Add(time.Second)))
-	assert.Nil(t, res.Cmd)
-	assert.Equal(t, Point{10, 4}, m.cur)
+	require.Nil(t, res.Cmd)
+	require.Equal(t, Point{10, 4}, m.cur)
 	x, y := m.cur.Round()
-	assert.Equal(t, [2]int{10, 4}, [2]int{x, y})
+	require.Equal(t, [2]int{10, 4}, [2]int{x, y})
 }
 
 func TestFollowSpringsAPointOnOneClock(t *testing.T) {
@@ -33,17 +32,17 @@ func TestFollowSpringsAPointOnOneClock(t *testing.T) {
 		f, res = f.Update(f.FrameAt(at))
 		at = at.Add(Frame)
 	}
-	assert.Equal(t, Point{10, 5}, f.Value())
-	assert.False(t, f.Active())
+	require.Equal(t, Point{10, 5}, f.Value())
+	require.False(t, f.Active())
 
 	_, cmd = f.To(Point{10, 5})
-	assert.Nil(t, cmd, "already there")
+	require.Nil(t, cmd, "already there")
 }
 
 func TestStillPointsJump(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
-	assert.Equal(t, Point{3, 4}, NewMove(Point{}, Point{3, 4}, time.Second).cur)
+	require.Equal(t, Point{3, 4}, NewMove(Point{}, Point{3, 4}, time.Second).cur)
 	f, cmd := NewFollow(Point{}).To(Point{3, 4})
-	assert.Nil(t, cmd)
-	assert.Equal(t, Point{3, 4}, f.Value())
+	require.Nil(t, cmd)
+	require.Equal(t, Point{3, 4}, f.Value())
 }

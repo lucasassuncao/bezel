@@ -5,19 +5,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func showFloat(f Float) string { return fmt.Sprintf("%.1f", f.cur) }
 
 func TestRecordKeepsEveryFrameToTheEnd(t *testing.T) {
 	frames := Record(NewFloat(0, 1, 50*time.Millisecond).WithEase(Linear), showFloat, time.Second)
-	assert.Equal(t, "0.0", frames[0])
-	assert.Equal(t, "1.0", frames[len(frames)-1])
-	assert.Less(t, len(frames), 10, "it stops when the animation ends")
+	require.Equal(t, "0.0", frames[0])
+	require.Equal(t, "1.0", frames[len(frames)-1])
+	require.Less(t, len(frames), 10, "it stops when the animation ends")
 }
 
 func TestRecordStopsAtItsLimit(t *testing.T) {
 	frames := Record(NewFloat(0, 1, 50*time.Millisecond).WithRepeat(Forever), showFloat, 5*Frame)
-	assert.Len(t, frames, 6)
+	require.Len(t, frames, 6)
 }

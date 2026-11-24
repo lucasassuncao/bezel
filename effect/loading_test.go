@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/internal/cells"
 )
@@ -15,8 +15,8 @@ import (
 func TestSkeletonDrawsBarsWhereTheTextIs(t *testing.T) {
 	e := Skeleton(grey, white, 400*ms)
 	out := ansi.Strip(at(e, 0.5).Apply("ab cd\n  e  "))
-	assert.Equal(t, "▒▒ ▒▒\n  ▒  ", out)
-	assert.True(t, at(e, 0.5).Active(), "it sweeps until it is no longer applied")
+	require.Equal(t, "▒▒ ▒▒\n  ▒  ", out)
+	require.True(t, at(e, 0.5).Active(), "it sweeps until it is no longer applied")
 }
 
 func TestSkeletonsGlowMoves(t *testing.T) {
@@ -24,14 +24,14 @@ func TestSkeletonsGlowMoves(t *testing.T) {
 	row := strings.Repeat("x", 30)
 	early := cells.Parse(at(e, 0.3).Apply(row))[0]
 	late := cells.Parse(at(e, 0.7).Apply(row))[0]
-	assert.Less(t, brightestCell(early), brightestCell(late))
+	require.Less(t, brightestCell(early), brightestCell(late))
 }
 
 func TestTraceLightsOnlyTheEdge(t *testing.T) {
 	box := "\x1b[38;2;80;80;80m┌──┐\n│ab│\n└──┘\x1b[m"
 	g := cells.Parse(at(Trace(color.RGBA{0, 255, 0, 255}, 400*ms), 0.05).Apply(box))
-	assert.Greater(t, toRGBA(g[0][0].Fg).G, uint8(80), "the corner the light starts from")
-	assert.Equal(t, uint8(80), toRGBA(g[1][1].Fg).G, "inside is never lit")
+	require.Greater(t, toRGBA(g[0][0].Fg).G, uint8(80), "the corner the light starts from")
+	require.Equal(t, uint8(80), toRGBA(g[1][1].Fg).G, "inside is never lit")
 	sized(t, Trace(white, 400*ms).Apply(box), 4, 3)
 }
 
@@ -40,18 +40,18 @@ func TestEdgeIndexGoesClockwise(t *testing.T) {
 	last := -1
 	for _, p := range order {
 		i, ok := edgeIndex(p.x, p.y, 4, 3)
-		assert.True(t, ok)
-		assert.Greater(t, i, last)
+		require.True(t, ok)
+		require.Greater(t, i, last)
 		last = i
 	}
 	_, inside := edgeIndex(1, 1, 4, 3)
-	assert.False(t, inside)
+	require.False(t, inside)
 }
 
 func TestStillLoadingEffectsHoldStill(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
-	assert.Equal(t, "▒▒", ansi.Strip(Skeleton(grey, white, time.Second).Apply("ab")))
-	assert.Equal(t, "ab", Trace(white, time.Second).Apply("ab"))
+	require.Equal(t, "▒▒", ansi.Strip(Skeleton(grey, white, time.Second).Apply("ab")))
+	require.Equal(t, "ab", Trace(white, time.Second).Apply("ab"))
 }
 
 func TestMarchingDashesMoveRoundTheEdge(t *testing.T) {
@@ -68,8 +68,8 @@ func TestMarchingDashesMoveRoundTheEdge(t *testing.T) {
 		return b.String()
 	}
 	e := Marching(color.RGBA{0, 255, 0, 255}, 400*ms)
-	assert.Equal(t, "xx..xx", dashes(at(e, 0)))
-	assert.Equal(t, ".xx..x", dashes(at(e, 0.25)), "a cell on, clockwise")
-	assert.Equal(t, uint8(80), toRGBA(cells.Parse(at(e, 0.25).Apply(box))[1][1].Fg).G, "inside is never dashed")
-	assert.True(t, at(e, 0.5).Active(), "it marches until it is no longer applied")
+	require.Equal(t, "xx..xx", dashes(at(e, 0)))
+	require.Equal(t, ".xx..x", dashes(at(e, 0.25)), "a cell on, clockwise")
+	require.Equal(t, uint8(80), toRGBA(cells.Parse(at(e, 0.25).Apply(box))[1][1].Fg).G, "inside is never dashed")
+	require.True(t, at(e, 0.5).Active(), "it marches until it is no longer applied")
 }

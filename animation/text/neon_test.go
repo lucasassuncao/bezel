@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var pink = color.RGBA{255, 60, 160, 255}
@@ -19,14 +19,14 @@ func TestNeonIsMostlyLitAndSometimesFlickers(t *testing.T) {
 	flickers := 0
 	for d := time.Duration(0); d < 10*time.Second; d += neonSlot {
 		next, done := n.Advance(start.Add(d))
-		assert.False(t, done, "a sign burns until it is replaced")
-		assert.Equal(t, "OPEN", ansi.Strip(next.View()))
+		require.False(t, done, "a sign burns until it is replaced")
+		require.Equal(t, "OPEN", ansi.Strip(next.View()))
 		if next.View() != steady {
 			flickers++
 		}
 	}
-	assert.Greater(t, flickers, 0)
-	assert.Less(t, flickers, 100, "flickering is the exception")
+	require.Greater(t, flickers, 0)
+	require.Less(t, flickers, 100, "flickering is the exception")
 }
 
 func TestNeonFlickersTheSameWayForTheSameSeed(t *testing.T) {
@@ -36,22 +36,22 @@ func TestNeonFlickersTheSameWayForTheSameSeed(t *testing.T) {
 	for d := time.Duration(0); d < time.Second; d += neonSlot {
 		a, _ = a.Advance(start.Add(d))
 		b, _ = b.Advance(start.Add(d))
-		assert.Equal(t, a.View(), b.View())
+		require.Equal(t, a.View(), b.View())
 	}
 }
 
 func TestStillNeonNeverFlickers(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	n := NewNeon("ON", pink, black)
-	assert.False(t, n.Active())
-	assert.Equal(t, 1.0, n.lit(0))
-	assert.Equal(t, 1.0, n.lit(1))
+	require.False(t, n.Active())
+	require.Equal(t, 1.0, n.lit(0))
+	require.Equal(t, 1.0, n.lit(1))
 }
 
 func TestNeonTakesOnlyItsOwnFrames(t *testing.T) {
 	n := NewNeon("ON", pink, black)
 	_, res := n.Update(NewNeon("X", pink, black).FrameAt(time.Unix(1, 0)))
-	assert.Nil(t, res.Cmd)
+	require.Nil(t, res.Cmd)
 	_, res = n.Update(n.FrameAt(time.Unix(1, 0)))
-	assert.NotNil(t, res.Cmd)
+	require.NotNil(t, res.Cmd)
 }

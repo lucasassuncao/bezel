@@ -9,7 +9,6 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/bezeltest"
@@ -153,13 +152,13 @@ func askRun[F form.Field](t *testing.T, f F, opts ...tea.ProgramOption) (F, erro
 func TestAskReadsTheAnswerFromTheGivenInput(t *testing.T) {
 	got, err := askRun(t, images(), tea.WithInput(strings.NewReader("\x1b[B\r")))
 	require.NoError(t, err)
-	assert.Equal(t, "debian", got.Value())
+	require.Equal(t, "debian", got.Value())
 }
 
 func TestAskReturnsErrAbortedOnEsc(t *testing.T) {
 	got, err := askRun(t, form.NewInput("Name").WithValue("x"), tea.WithInput(strings.NewReader("\x1b")))
-	assert.ErrorIs(t, err, ErrAborted)
-	assert.Equal(t, "x", got.Value(), "the field comes back as it was left")
+	require.ErrorIs(t, err, ErrAborted)
+	require.Equal(t, "x", got.Value(), "the field comes back as it was left")
 }
 
 func TestAskStopsWhenTheContextIsCancelled(t *testing.T) {
@@ -168,5 +167,5 @@ func TestAskStopsWhenTheContextIsCancelled(t *testing.T) {
 	pr, pw := io.Pipe()
 	t.Cleanup(func() { _ = pw.Close() })
 	_, err := askRun(t, images(), tea.WithInput(pr), tea.WithContext(ctx))
-	assert.ErrorIs(t, err, tea.ErrProgramKilled)
+	require.ErrorIs(t, err, tea.ErrProgramKilled)
 }

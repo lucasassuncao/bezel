@@ -10,7 +10,6 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
@@ -32,26 +31,26 @@ func TestAToastSlidesInStaysAndLeaves(t *testing.T) {
 	require.NotNil(t, cmd)
 	start := time.Unix(10, 0)
 	m, _ = m.Advance(start)
-	assert.Equal(t, 21, m.offset(m.items[0]), "it arrives from beyond the edge")
+	require.Equal(t, 21, m.offset(m.items[0]), "it arrives from beyond the edge")
 	m, _ = m.Advance(start.Add(500 * ms))
-	assert.Equal(t, 0, m.offset(m.items[0]), "in place")
-	assert.Contains(t, ansi.Strip(m.View()), "saved")
+	require.Equal(t, 0, m.offset(m.items[0]), "in place")
+	require.Contains(t, ansi.Strip(m.View()), "saved")
 	leaving, _ := m.Advance(start.Add(900 * ms))
-	assert.Positive(t, leaving.offset(leaving.items[0]))
+	require.Positive(t, leaving.offset(leaving.items[0]))
 	gone, _ := m.Advance(start.Add(1100 * ms))
-	assert.Zero(t, gone.Len())
+	require.Zero(t, gone.Len())
 }
 
 func TestToastsStackNewestFirst(t *testing.T) {
 	m, _ := New().WithWidth(20).Push("first", draw.Info)
 	m, cmd := m.Push("second", draw.Danger)
-	assert.Nil(t, cmd, "one chain of frames serves the stack")
+	require.Nil(t, cmd, "one chain of frames serves the stack")
 	m, _ = m.Advance(time.Unix(10, 0))
 	m, _ = m.Advance(time.Unix(11, 0))
 	out := ansi.Strip(m.View())
-	assert.Less(t, strings.Index(out, "second"), strings.Index(out, "first"))
+	require.Less(t, strings.Index(out, "second"), strings.Index(out, "first"))
 	for _, l := range strings.Split(out, "\n") {
-		assert.Equal(t, 20, ansi.StringWidth(l))
+		require.Equal(t, 20, ansi.StringWidth(l))
 	}
 }
 
@@ -62,11 +61,11 @@ func TestOverDrawsOnTheTopRightCorner(t *testing.T) {
 	m, _ = m.Advance(time.Unix(11, 0))
 	lines := strings.Split(ansi.Strip(m.Over(screen)), "\n")
 	require.Len(t, lines, 8)
-	assert.Equal(t, strings.Repeat(".", 40), lines[0], "a row is left above it")
-	assert.True(t, strings.HasSuffix(lines[2], "│ hi           │."), "%q", lines[2])
-	assert.True(t, strings.HasPrefix(lines[2], "......."), "the screen shows beside it")
+	require.Equal(t, strings.Repeat(".", 40), lines[0], "a row is left above it")
+	require.True(t, strings.HasSuffix(lines[2], "│ hi           │."), "%q", lines[2])
+	require.True(t, strings.HasPrefix(lines[2], "......."), "the screen shows beside it")
 	for _, l := range lines {
-		assert.Equal(t, 40, ansi.StringWidth(l))
+		require.Equal(t, 40, ansi.StringWidth(l))
 	}
 }
 
@@ -74,12 +73,12 @@ func TestTheStackTakesOnlyItsOwnFrames(t *testing.T) {
 	m, _ := New().Push("a", draw.Info)
 	other, _ := New().Push("b", draw.Info)
 	_, cmd := withCmd(m.Update(other.FrameAt(time.Unix(1, 0))))
-	assert.Nil(t, cmd)
+	require.Nil(t, cmd)
 	m, cmd = withCmd(m.Update(m.FrameAt(time.Unix(1, 0))))
-	assert.NotNil(t, cmd)
+	require.NotNil(t, cmd)
 	m, cmd = withCmd(m.Update(m.FrameAt(time.Unix(30, 0))))
-	assert.Nil(t, cmd, "every toast is gone: no more frames")
-	assert.Zero(t, m.Len())
+	require.Nil(t, cmd, "every toast is gone: no more frames")
+	require.Zero(t, m.Len())
 }
 
 func TestStillToastsDoNotSlideAndStillExpire(t *testing.T) {
@@ -87,33 +86,33 @@ func TestStillToastsDoNotSlideAndStillExpire(t *testing.T) {
 	m, cmd := New().WithTTL(10*ms).Push("now", draw.Warning)
 	require.NotNil(t, cmd)
 	now, _ := m.Advance(time.Unix(10, 0))
-	assert.Equal(t, 0, now.offset(now.items[0]))
+	require.Equal(t, 0, now.offset(now.items[0]))
 	m, _ = m.Update(cmd())
-	assert.Zero(t, m.Len())
+	require.Zero(t, m.Len())
 }
 
 // With motion off no frame ever stamps a toast, and it still shows.
 func TestAStillToastShowsWithoutAFrame(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	m, _ := New().Push("saved", draw.Success)
-	assert.Contains(t, ansi.Strip(m.View()), "saved")
+	require.Contains(t, ansi.Strip(m.View()), "saved")
 }
 
 func TestAZeroToastWorks(t *testing.T) {
 	var m Model
 	m, cmd := m.Push("x", draw.Info)
-	assert.NotNil(t, cmd)
-	assert.Equal(t, 1, m.Len())
+	require.NotNil(t, cmd)
+	require.Equal(t, 1, m.Len())
 }
 
 func TestOwnFrameIsHandledAndAnotherIsNot(t *testing.T) {
 	m, _ := New().Push("a", draw.Info)
 	other, _ := New().Push("b", draw.Info)
 	_, r := m.Update(m.FrameAt(time.Unix(1, 0)))
-	assert.True(t, r.Handled)
-	assert.NotNil(t, r.Cmd)
+	require.True(t, r.Handled)
+	require.NotNil(t, r.Cmd)
 	_, r = m.Update(other.FrameAt(time.Unix(1, 0)))
-	assert.False(t, r.Handled)
+	require.False(t, r.Handled)
 }
 
 // withCmd keeps the command of an Update, for the tests that run it.
