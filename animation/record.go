@@ -11,6 +11,9 @@ type advancer[T any] interface {
 // frame every Frame, and keeps what view draws of each: an animation as text,
 // for a test that checks it frame by frame or a recording built from it.
 func Record[T advancer[T]](a T, view func(T) string, limit time.Duration) []string {
+	if view == nil {
+		return nil // nothing to keep of each frame
+	}
 	start := time.Unix(1_000_000, 0)
 	var frames []string
 	for at := time.Duration(0); at <= limit; at += Frame {

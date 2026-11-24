@@ -1403,7 +1403,7 @@ type Stack struct {
 ```
 
 <a name="Stack.Click"></a>
-### func \(Stack\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L250>)
+### func \(Stack\) [Click](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L255>)
 
 ```go
 func (s Stack) Click(x, y int, body layout.Rect) (Stack, bezel.Result)
@@ -1475,7 +1475,7 @@ func (s Stack) Update(msg tea.Msg) (Stack, bezel.Result)
 Update routes msg to the top overlay. Handled is false only when the stack is empty and msg is not a stack message.
 
 <a name="Stack.View"></a>
-### func \(Stack\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L226>)
+### func \(Stack\) [View](<https://github.com/lucasassuncao/bezel/blob/main/overlay/overlay.go#L231>)
 
 ```go
 func (s Stack) View(body layout.Rect, background string) string

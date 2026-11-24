@@ -214,6 +214,21 @@ func TestPushingNilLeavesTheStackAlone(t *testing.T) {
 	require.NotPanics(t, func() { _ = s.View(layout.Rect{W: 40, H: 10}, "base") })
 }
 
+// lost hands back nil from Update and Click, a mistake an app's dialog can make.
+type lost struct{ fake }
+
+func (l *lost) Update(tea.Msg) (Overlay, bezel.Result)              { return nil, bezel.Result{} }
+func (l *lost) Click(int, int, layout.Rect) (Overlay, bezel.Result) { return nil, bezel.Result{} }
+
+func TestANilFromTheTopKeepsTheTop(t *testing.T) {
+	top := &lost{}
+	s, _ := Stack{}.Push(top).Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
+	require.Equal(t, Overlay(top), s.Top())
+	s, _ = s.Click(0, 0, clickBody)
+	require.Equal(t, Overlay(top), s.Top())
+	require.NotPanics(t, func() { _ = s.View(clickBody, "base") })
+}
+
 var clickBody = layout.Rect{X: 0, Y: 2, W: 60, H: 20}
 
 // cellOf is the screen cell where text first shows in the stack's view.

@@ -214,7 +214,12 @@ func (s Stack) Update(msg tea.Msg) (Stack, bezel.Result) {
 
 var _ bezel.Model[Stack] = Stack{}
 
+// replaceTop puts o where the top was; a nil o, which a custom Update may
+// return by mistake, leaves the old top, as Push leaves a nil out.
 func (s Stack) replaceTop(o Overlay) Stack {
+	if o == nil {
+		return s
+	}
 	items := make([]Overlay, len(s.items))
 	copy(items, s.items)
 	items[len(items)-1] = o

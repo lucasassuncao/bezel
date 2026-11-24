@@ -47,6 +47,15 @@ func TestMouseMovesTheMessageIntoThePanesBody(t *testing.T) {
 	require.IsType(t, tea.MouseReleaseMsg{}, release)
 }
 
+func TestANilMouseMessageIsInNoPane(t *testing.T) {
+	s := sizedShell()
+	pane, msg, ok := s.Mouse(nil)
+	require.False(t, ok)
+	require.Empty(t, pane)
+	require.Nil(t, msg)
+	require.Nil(t, s.MouseIn("detail", nil))
+}
+
 func TestADialogCoversThePanes(t *testing.T) {
 	s := sizedShell().Push(overlay.NewAlert(draw.Info, "x", "y"))
 	r := s.Rect("list")

@@ -721,7 +721,7 @@ func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool)
 Mouse finds the pane under the pointer of msg and hands back msg moved into that pane's body, for a drag or a release; a click comes as a ClickMsg and a wheel turn as a WheelMsg. false when no pane is under the pointer.
 
 <a name="Shell.MouseIn"></a>
-### func \(Shell\) [MouseIn](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L53>)
+### func \(Shell\) [MouseIn](<https://github.com/lucasassuncao/bezel/blob/main/shell/mouse.go#L56>)
 
 ```go
 func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg

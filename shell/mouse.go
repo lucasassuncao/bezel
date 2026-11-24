@@ -40,6 +40,9 @@ func (s Shell) PaneAt(x, y int) (string, bool) {
 // into that pane's body, for a drag or a release; a click comes as a ClickMsg
 // and a wheel turn as a WheelMsg. false when no pane is under the pointer.
 func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool) {
+	if msg == nil {
+		return "", nil, false // no pointer, no pane
+	}
 	at := msg.Mouse()
 	pane, ok := s.PaneAt(at.X, at.Y)
 	if !ok {
@@ -51,6 +54,9 @@ func (s Shell) Mouse(msg tea.MouseMsg) (string, tea.MouseMsg, bool) {
 // MouseIn is msg moved into pane's body wherever the pointer is, for a drag
 // that began in the pane and left it: the cell may then fall outside.
 func (s Shell) MouseIn(pane string, msg tea.MouseMsg) tea.MouseMsg {
+	if msg == nil {
+		return nil
+	}
 	inner := draw.InnerRect(s.Rect(pane))
 	m := msg.Mouse()
 	m.X, m.Y = m.X-inner.X, m.Y-inner.Y
