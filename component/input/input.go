@@ -299,12 +299,13 @@ func (m Model) check() Model {
 // SetSuggestions offers to complete the text with any of list it starts,
 // matched case-blind: the rest of one shows muted after the caret.
 func (m Model) SetSuggestions(list []string) Model {
+	shown := m.CurrentSuggestion() // the old matches index the old list
 	m.suggestions = slices.Clone(list)
 	m.lower = make([]string, len(list))
 	for i, s := range list {
 		m.lower[i] = strings.ToLower(s)
 	}
-	return m.match()
+	return m.matchKeeping(shown)
 }
 
 // SetSuggestions replaces the list after something happened, a directory
@@ -332,8 +333,10 @@ func (m Model) CurrentSuggestion() string {
 
 // match finds the suggestions the text starts, keeping the one shown when
 // it still matches.
-func (m Model) match() Model {
-	shown := m.CurrentSuggestion()
+func (m Model) match() Model { return m.matchKeeping(m.CurrentSuggestion()) }
+
+// matchKeeping is match keeping shown, read before the list changed.
+func (m Model) matchKeeping(shown string) Model {
 	m.matches, m.pick = nil, 0
 	v := strings.ToLower(m.line.String())
 	if v == "" {

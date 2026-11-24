@@ -231,6 +231,21 @@ func TestASuggestionShowsTheRestAndTabTakesIt(t *testing.T) {
 	require.Empty(t, m.MatchedSuggestions(), "a whole suggestion has nothing to add")
 }
 
+func TestANewShorterListReplacesTheSuggestionShown(t *testing.T) {
+	m := run(focused().SetSuggestions([]string{"api", "bin", "cmd", "docs"}), typed("d"))
+	require.Equal(t, "docs", m.CurrentSuggestion())
+	m = m.SetSuggestions([]string{"deploy", "dist"})
+	require.Equal(t, "deploy", m.CurrentSuggestion())
+	require.Empty(t, m.SetSuggestions(nil).CurrentSuggestion(), "nil clears them")
+}
+
+func TestANewListKeepsTheSuggestionShownWhenItStillMatches(t *testing.T) {
+	m := run(focused().SetSuggestions([]string{"commit", "cherry-pick"}), typed("c"), press('n', tea.ModCtrl))
+	require.Equal(t, "cherry-pick", m.CurrentSuggestion())
+	m = m.SetSuggestions([]string{"cherry-pick", "clone", "commit"})
+	require.Equal(t, "cherry-pick", m.CurrentSuggestion())
+}
+
 func TestWithoutAMatchTabIsLeftToTheHost(t *testing.T) {
 	m := focused().SetSuggestions([]string{"commit"}).SetValue("x")
 	got, cmd := withCmd(m.Update(press(tea.KeyTab, 0)))
