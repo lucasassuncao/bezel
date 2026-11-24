@@ -386,7 +386,7 @@ func Pixelate(dur time.Duration) Effect
 Pixelate coarsens the block into squares of colour, coarsest halfway, and sharpens it again: a screen being changed, a thing being redacted.
 
 <a name="Pour"></a>
-### func [Pour](<https://github.com/lucasassuncao/bezel/blob/main/effect/geometry.go#L35>)
+### func [Pour](<https://github.com/lucasassuncao/bezel/blob/main/effect/geometry.go#L38>)
 
 ```go
 func Pour(c color.Color, dur time.Duration) Effect

@@ -55,6 +55,15 @@ func TestStretchFillsFromAnEdge(t *testing.T) {
 	require.Equal(t, "abcdefgh", landed(t, e).Apply("abcdefgh"))
 }
 
+// A Direction past the four reads as Right, as Sweep reads it.
+func TestStretchReadsAnUnknownDirectionAsRight(t *testing.T) {
+	e := Stretch(Direction(8), white, 100*ms).WithEase(animation.Linear)
+	start := time.Unix(1000, 0)
+	e, _ = e.Update(e.FrameAt(start))
+	e, _ = e.Update(e.FrameAt(start.Add(55 * ms)))
+	require.Equal(t, "abcd▍   ", ansi.Strip(e.Apply("abcdefgh")))
+}
+
 func TestStillGeometryShowsItsEnd(t *testing.T) {
 	t.Setenv("BEZEL_NO_MOTION", "1")
 	require.Equal(t, "    ", Explode(time.Second).Apply("abcd"))

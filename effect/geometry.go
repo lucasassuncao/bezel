@@ -25,6 +25,9 @@ func Expand(edge color.Color, dur time.Duration) Effect {
 // Stretch fills the block in from an edge travelling d, its front cell drawn
 // in eighths of a block in edge, so the fill moves smoother than a cell.
 func Stretch(d Direction, edge color.Color, dur time.Duration) Effect {
+	if d < Right || d > Up {
+		d = Right // as Sweep reads one past the four
+	}
 	e := newEffect(stretch, nil, dur)
 	e.dir, e.tint = d, edge
 	return e
