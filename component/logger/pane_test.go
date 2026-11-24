@@ -199,6 +199,24 @@ func TestPaneFilterPaintsItsMatches(t *testing.T) {
 	require.Nil(t, matches("İ", "i"), "lower case changes the length")
 }
 
+// While nothing drains the pane, before the program runs or after it quits,
+// its feed holds only what the limit would keep.
+func TestPaneFeedHoldsOnlyItsLimitWhileNotDrained(t *testing.T) {
+	p := sized(NewPane(paneTheme()).WithLimit(3))
+	log := slog.New(p.Handler().WithTimeFormat(""))
+	for i := range 1000 {
+		log.Info(fmt.Sprintf("line %d", i))
+	}
+	held := 0
+	for _, r := range p.feed.pending {
+		held += len(r)
+	}
+	require.Equal(t, 3, held)
+	p, _ = p.Update(p.Init()())
+	require.Equal(t, 3, p.Len())
+	require.Contains(t, ansi.Strip(p.Lines()[0]), "line 997")
+}
+
 func TestPaneLimitCutsIntoTheOldestRecord(t *testing.T) {
 	p := deployed().WithLimit(2)
 	require.Equal(t, 2, p.Len())

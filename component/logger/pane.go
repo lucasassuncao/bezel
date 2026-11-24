@@ -118,7 +118,19 @@ func VimPaneKeys() PaneKeys {
 type feed struct {
 	mu      sync.Mutex
 	pending [][]string
+	lines   int // in pending
+	limit   int // the pane's, so what it would trim never piles up here
 	wake    chan struct{}
+}
+
+// setLimit is what the feed holds at most while nothing drains it.
+func (f *feed) setLimit(n int) {
+	if f == nil {
+		return
+	}
+	f.mu.Lock()
+	f.limit = n
+	f.mu.Unlock()
 }
 
 // paneLines is the message that carries the records a feed gathered.
@@ -132,7 +144,7 @@ type paneLines struct {
 func NewPane(th theme.Resolved) Pane {
 	p := Pane{
 		vp:   viewport.New().SetWrap(true),
-		feed: &feed{wake: make(chan struct{}, 1)},
+		feed: &feed{wake: make(chan struct{}, 1), limit: DefaultLimit},
 		th:   th, keys: DefaultPaneKeys(), limit: DefaultLimit, follow: true,
 	}
 	return p.restyle()
@@ -141,6 +153,7 @@ func NewPane(th theme.Resolved) Pane {
 // WithLimit keeps the last n lines, dropping the oldest; n below 1 is 1.
 func (p Pane) WithLimit(n int) Pane {
 	p.limit = max(n, 1)
+	p.feed.setLimit(p.limit) // the copies share the feed, and so its limit
 	return p.trim().show()
 }
 
@@ -211,6 +224,13 @@ func (f *feed) Write(b []byte) (int, error) {
 	lines := strings.Split(strings.TrimSuffix(string(b), "\n"), "\n")
 	f.mu.Lock()
 	f.pending = append(f.pending, lines)
+	f.lines += len(lines)
+	// Records the pane would trim on arrival go now, so an undrained feed stays small.
+	for f.limit > 0 && len(f.pending) > 1 && f.lines-len(f.pending[0]) >= f.limit {
+		f.lines -= len(f.pending[0])
+		f.pending[0] = nil
+		f.pending = f.pending[1:]
+	}
 	f.mu.Unlock()
 	select {
 	case f.wake <- struct{}{}:
@@ -233,7 +253,7 @@ func (p Pane) listen() tea.Cmd {
 			<-f.wake
 			f.mu.Lock()
 			recs := f.pending
-			f.pending = nil
+			f.pending, f.lines = nil, 0
 			f.mu.Unlock()
 			if len(recs) > 0 {
 				return paneLines{feed: f, recs: recs}
