@@ -39,9 +39,12 @@ func (d Date) WithFormat(layout string) Date {
 }
 
 // WithCalendar sets up the calendar that opens: its range, first weekday,
-// today or keys. The day stays the field's own.
+// today or keys; nil leaves it as it was. The day stays the field's own.
 func (d Date) WithCalendar(edit func(calendar.Model) calendar.Model) Date {
-	d.cal = edit(d.cal).SetDay(d.day)
+	if edit != nil {
+		d.cal = edit(d.cal)
+	}
+	d.cal = d.cal.SetDay(d.day)
 	d.day, _ = d.cal.Selected()
 	return d
 }

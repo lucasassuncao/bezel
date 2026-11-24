@@ -49,3 +49,10 @@ func TestDateWithFormatAndCalendar(t *testing.T) {
 		WithCalendar(func(c calendar.Model) calendar.Model { return c.WithRange(lo, time.Time{}) })
 	require.Equal(t, "10/11/2026", d.Value(), "held within the range")
 }
+
+func TestDateWithANilCalendarEditKeepsTheCalendar(t *testing.T) {
+	day := time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC)
+	d := NewDate("Start", day).WithCalendar(nil)
+	require.Equal(t, day, d.Day())
+	require.Equal(t, NewDate("Start", day).View(true, 5, 40), d.View(true, 5, 40))
+}

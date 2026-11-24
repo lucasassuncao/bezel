@@ -366,7 +366,7 @@ func NewDate(label string, day time.Time) Date
 NewDate offers a day, starting on day and written as 2006\-01\-02.
 
 <a name="Date.Blur"></a>
-### func \(Date\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L73>)
+### func \(Date\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L76>)
 
 ```go
 func (d Date) Blur() Field
@@ -375,7 +375,7 @@ func (d Date) Blur() Field
 
 
 <a name="Date.Day"></a>
-### func \(Date\) [Day](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L63>)
+### func \(Date\) [Day](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L66>)
 
 ```go
 func (d Date) Day() time.Time
@@ -384,7 +384,7 @@ func (d Date) Day() time.Time
 Day is the chosen day, at midnight.
 
 <a name="Date.Focus"></a>
-### func \(Date\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L71>)
+### func \(Date\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L74>)
 
 ```go
 func (d Date) Focus() (Field, tea.Cmd)
@@ -393,7 +393,7 @@ func (d Date) Focus() (Field, tea.Cmd)
 
 
 <a name="Date.Holding"></a>
-### func \(Date\) [Holding](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L70>)
+### func \(Date\) [Holding](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L73>)
 
 ```go
 func (d Date) Holding() bool
@@ -402,7 +402,7 @@ func (d Date) Holding() bool
 Holding reports whether the calendar is open, keeping tab and esc from the form.
 
 <a name="Date.Label"></a>
-### func \(Date\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L67>)
+### func \(Date\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L70>)
 
 ```go
 func (d Date) Label() string
@@ -411,7 +411,7 @@ func (d Date) Label() string
 
 
 <a name="Date.Update"></a>
-### func \(Date\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L80>)
+### func \(Date\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L83>)
 
 ```go
 func (d Date) Update(msg tea.Msg) (Field, bezel.Result)
@@ -420,7 +420,7 @@ func (d Date) Update(msg tea.Msg) (Field, bezel.Result)
 Update opens on Press; while open, Press or the calendar's enter picks the day under its cursor, Close closes, and the rest moves the calendar.
 
 <a name="Date.Value"></a>
-### func \(Date\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L66>)
+### func \(Date\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L69>)
 
 ```go
 func (d Date) Value() string
@@ -429,7 +429,7 @@ func (d Date) Value() string
 Value is the chosen day in the field's format.
 
 <a name="Date.View"></a>
-### func \(Date\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L109>)
+### func \(Date\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L112>)
 
 ```go
 func (d Date) View(focused bool, labelW, width int) string
@@ -444,7 +444,7 @@ func (d Date) View(focused bool, labelW, width int) string
 func (d Date) WithCalendar(edit func(calendar.Model) calendar.Model) Date
 ```
 
-WithCalendar sets up the calendar that opens: its range, first weekday, today or keys. The day stays the field's own.
+WithCalendar sets up the calendar that opens: its range, first weekday, today or keys; nil leaves it as it was. The day stays the field's own.
 
 <a name="Date.WithFormat"></a>
 ### func \(Date\) [WithFormat](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L36>)
@@ -456,7 +456,7 @@ func (d Date) WithFormat(layout string) Date
 WithFormat writes the day with a time.Format layout.
 
 <a name="Date.WithKeys"></a>
-### func \(Date\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L50>)
+### func \(Date\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/date.go#L53>)
 
 ```go
 func (d Date) WithKeys(k Keys) Date
