@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -125,4 +126,13 @@ func FuzzBreadcrumbStaysInItsWidth(f *testing.F) {
 		m := New(path).SetWidth(w).SetCursor(cursor)
 		require.LessOrEqual(t, ansi.StringWidth(m.View(th)), w)
 	})
+}
+
+// A part from data, a path segment say, may hold a carriage return, bad UTF-8
+// or a cut escape: drawn, each moves the row away from what was measured.
+func TestAPartDrawsOnlyWhatItMeasured(t *testing.T) {
+	for _, bad := range []string{"ab\rX", "a\xffb", "a\x1b]0;t", "two\nlines"} {
+		got := New([]string{"root", bad, "leaf"}).SetWidth(40).View(th)
+		require.Equal(t, draw.Clean(draw.OneLine(got)), got, "%q", bad)
+	}
 }

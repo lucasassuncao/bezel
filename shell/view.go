@@ -224,7 +224,7 @@ func (s Shell) headerLines() []string {
 		header := s.cfg.Header(s.Context(), s.width)
 		lines := make([]string, len(header))
 		for i, l := range header {
-			lines[i] = draw.Fit(l, s.width)
+			lines[i] = draw.Fit(draw.Clean(l), s.width)
 		}
 		return lines
 	}

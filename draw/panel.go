@@ -47,13 +47,13 @@ func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string {
 	innerW := r.W - 2
 	e := st.edge()
 
-	label := st.Title.Render(" " + OneLine(edges.Title) + " ")
+	label := st.Title.Render(" " + oneRow(edges.Title) + " ")
 	if maxLabel := innerW - 1; ansi.StringWidth(label) > maxLabel {
 		label = ansi.Truncate(label, maxLabel, "… ")
 	}
 	tail := ""
 	if edges.Right != "" {
-		tail = st.Right.Render(" " + OneLine(edges.Right) + " ")
+		tail = st.Right.Render(" " + oneRow(edges.Right) + " ")
 	}
 	top := st.Border.Render(e.TopLeft+e.Top) + label
 	if fill := innerW - 2 - ansi.StringWidth(label) - ansi.StringWidth(tail); tail != "" && fill > 0 {
@@ -81,9 +81,9 @@ func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string {
 		if i >= pos && i < pos+size {
 			edge = thumb
 		}
-		rows = append(rows, left+" "+Fit(ExpandTabs(line), content.W)+" "+edge)
+		rows = append(rows, left+" "+Fit(ExpandTabs(Clean(line)), content.W)+" "+edge)
 	}
-	rows = append(rows, bottomEdge(innerW, OneLine(edges.Bottom), e, st))
+	rows = append(rows, bottomEdge(innerW, oneRow(edges.Bottom), e, st))
 	return strings.Join(rows, "\n")
 }
 

@@ -32,12 +32,12 @@ func Fit(cols []Column, rows [][]string, width int) []int {
 func natural(cols []Column, rows [][]string) []int {
 	widths := make([]int, len(cols))
 	for i, c := range cols {
-		widths[i] = draw.Width(c.Title)
+		widths[i] = draw.Width(show(c.Title))
 	}
 	for _, r := range rows {
 		for i := range cols {
 			if i < len(r) {
-				widths[i] = max(widths[i], draw.Width(r[i]))
+				widths[i] = max(widths[i], draw.Width(show(r[i])))
 			}
 		}
 	}
@@ -97,7 +97,7 @@ func Row(widths []int, cells []string) string {
 	for i, w := range widths {
 		cell := ""
 		if i < len(cells) {
-			cell = draw.OneLine(cells[i])
+			cell = show(cells[i])
 		}
 		if i == len(widths)-1 {
 			parts[i] = draw.Truncate(cell, w)
@@ -116,3 +116,7 @@ func Titles(cols []Column, widths []int) string {
 	}
 	return Row(widths, titles)
 }
+
+// show is a cell as a row draws it: on one line, and without what would
+// shift the row on screen.
+func show(cell string) string { return draw.Clean(draw.OneLine(cell)) }

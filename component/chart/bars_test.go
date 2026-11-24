@@ -8,6 +8,8 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel/draw"
 )
 
 func barLines(bars []Bar, top float64, width int) []string {
@@ -64,4 +66,15 @@ func TestBarsOfNothing(t *testing.T) {
 // A value that is not a number, as 0/0, draws no bar and never panics.
 func TestBarsTakeANaNAsNothing(t *testing.T) {
 	require.Equal(t, []string{"x       NaN"}, barLines([]Bar{{Label: "x", Value: math.NaN()}}, 10, 11))
+}
+
+// A chart is printed as it is, and a label is data: a service's name must not
+// be able to set the clipboard, clear the screen or rewrite its row.
+func TestABarLabelPrintsNoCommands(t *testing.T) {
+	evil := "api \x1b]52;c;aGk=\x07 \x1b[2J\r x"
+	for _, width := range []int{8, 60} {
+		out := Bars([]Bar{{Label: evil, Value: 3}, {Label: "two\nlines", Value: 1}}, 5, width, th())
+		require.Equal(t, draw.Clean(out), out)
+		require.Len(t, strings.Split(out, "\n"), 2, "a bar is one row")
+	}
 }

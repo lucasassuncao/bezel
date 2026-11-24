@@ -265,7 +265,7 @@ func (m Model) label(i int) string {
 	if i < 0 {
 		return ellipsis
 	}
-	return m.parts[i]
+	return draw.Clean(draw.OneLine(m.parts[i])) // measured and drawn alike
 }
 
 // partAt is the part drawn at cell x of View, -1 for a separator, the

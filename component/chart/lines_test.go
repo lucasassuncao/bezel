@@ -7,6 +7,8 @@ import (
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lucasassuncao/bezel/draw"
 )
 
 func lineRows(lines []Line, lo, hi float64, w, h int) []string {
@@ -67,4 +69,12 @@ func trimmed(rows []string) []string {
 		out[i] = strings.TrimRight(r, " ")
 	}
 	return out
+}
+
+// The key under the lines names each one from data: it may not carry a
+// command to the terminal.
+func TestALineLabelPrintsNoCommands(t *testing.T) {
+	evil := "p99 \x1b]52;c;aGk=\x07 \x1b[2J\r"
+	out := Lines([]Line{{Label: evil, Values: []float64{1, 2, 3}}}, 0, 3, 30, 6, th())
+	require.Equal(t, draw.Clean(out), out)
 }

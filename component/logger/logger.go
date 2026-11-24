@@ -19,6 +19,7 @@ import (
 	"github.com/charmbracelet/x/term"
 
 	"github.com/lucasassuncao/bezel/component/icon"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -214,7 +215,7 @@ func (h Handler) head(b *strings.Builder, r slog.Record, width int) int {
 	b.WriteString(h.paint(st, name) + strings.Repeat(" ", 6-len(name)))
 	indent += 6
 
-	msg := r.Message
+	msg := draw.Clean(r.Message) // from data, on its way to a terminal
 	if !h.color {
 		msg = ansi.Strip(msg)
 	}
@@ -293,18 +294,19 @@ func (h Handler) tree(b *strings.Builder, attrs []slog.Attr, lead string, leadW,
 		branch := lead + h.paint(h.st.Branch, h.icons.Connector(last))
 		under := lead + h.paint(h.st.Branch, h.icons.Indent(last))
 		underW := leadW + ansi.StringWidth(h.icons.Indent(last))
+		key := draw.Clean(draw.OneLine(a.Key))
 		if a.Value.Kind() == slog.KindGroup {
-			b.WriteString(branch + h.paint(h.st.Key, a.Key) + "\n")
+			b.WriteString(branch + h.paint(h.st.Key, key) + "\n")
 			h.tree(b, a.Value.Group(), under, underW, width)
 			continue
 		}
-		keyW := ansi.StringWidth(a.Key) + 1
+		keyW := ansi.StringWidth(key) + 1
 		room := 0
 		if width > 0 {
 			room = width - underW - keyW
 		}
 		lines := wrap(h.value(a.Value), room)
-		b.WriteString(branch + h.paint(h.st.Key, a.Key) + h.paint(h.st.Equals, "=") + lines[0] + "\n")
+		b.WriteString(branch + h.paint(h.st.Key, key) + h.paint(h.st.Equals, "=") + lines[0] + "\n")
 		pad := under + strings.Repeat(" ", keyW)
 		for _, l := range lines[1:] {
 			b.WriteString(pad + l + "\n")
@@ -321,7 +323,7 @@ func (h Handler) value(v slog.Value) string {
 		}
 		return v.Time().Format(layout)
 	}
-	return ansi.Strip(v.String())
+	return ansi.Strip(draw.Clean(v.String()))
 }
 
 func (h Handler) paint(st lipgloss.Style, s string) string {

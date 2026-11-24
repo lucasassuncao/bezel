@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/charmbracelet/x/ansi"
 )
 
 // Sanitize renders server-supplied text so drawing it can only draw: OSC 52
@@ -37,6 +39,60 @@ func Sanitize(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// Clean is s with only what a terminal draws: text, line breaks, tabs,
+// colours and links. Other controls and escapes go, and those cut short with
+// what they swallowed; bad UTF-8 is U+FFFD, the one cell a terminal draws.
+func Clean(s string) string {
+	s = strings.ToValidUTF8(s, "�")
+	var b strings.Builder
+	start := 0 // the first byte not yet copied to b
+	for i := 0; i < len(s); {
+		c := s[i]
+		c1 := c == 0xc2 && i+1 < len(s) && s[i+1] <= 0x9f // U+0080 to U+009F
+		if (c >= 0x20 && c != 0x7f && !c1) || c == '\t' || c == '\n' {
+			i++
+			continue
+		}
+		n, keep := 1, false
+		switch {
+		case c1:
+			n = 2
+		case c == 0x1b:
+			n, keep = escape(s[i:])
+		}
+		if !keep {
+			b.WriteString(s[start:i])
+			start = i + n
+		}
+		i += n
+	}
+	if start == 0 {
+		return s
+	}
+	b.WriteString(s[start:])
+	return strings.ToValidUTF8(b.String(), "�")
+}
+
+// escape is how many bytes the escape at the start of s takes, and whether it
+// is a whole colour or link, the only escapes Clean keeps.
+func escape(s string) (int, bool) {
+	p := ansi.GetParser()
+	defer ansi.PutParser(p)
+	seq, _, n, state := ansi.DecodeSequence(s, ansi.NormalState, p)
+	cmd := p.Command()
+	if state != ansi.NormalState || !whole(seq) {
+		return n, false
+	}
+	return n, ansi.HasCsiPrefix(seq) && cmd == 'm' || ansi.HasOscPrefix(seq) && cmd == 8
+}
+
+// whole reports whether seq, decoded on its own, ends complete: the decoder
+// hands back an escape cut short by a control character as if it were one.
+func whole(seq string) bool {
+	_, _, n, st := ansi.DecodeSequence(seq, ansi.NormalState, nil)
+	return n == len(seq) && st == ansi.NormalState
 }
 
 // SanitizeLines handles legitimately multi-line text - a policy, a role's

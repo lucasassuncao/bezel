@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -39,5 +40,17 @@ func TestBoxClipsToTheBodyAndSaysHowMuchIsMissing(t *testing.T) {
 	require.Contains(t, ansi.Strip(got), "more lines")
 	for _, r := range rows {
 		require.LessOrEqual(t, ansi.StringWidth(r), 40)
+	}
+}
+
+// Every dialog frames its lines here, and a title or message from data may
+// hold what Clean drops: drawn, it would move the dialog's right edge.
+func TestBoxDrawsOnlyWhatItMeasured(t *testing.T) {
+	body := layout.Rect{W: 60, H: 20}
+	for _, bad := range []string{"ab\rX", "a\xffb", "a\x1b_Gf=1", "a\x1b[38;2;1"} {
+		out := Box([]string{lipgloss.NewStyle().Bold(true).Render(bad), bad}, body, lipgloss.NewStyle().Border(lipgloss.RoundedBorder()))
+		for _, l := range strings.Split(out, "\n") {
+			require.Equal(t, draw.Clean(l), l, "%q", bad)
+		}
 	}
 }

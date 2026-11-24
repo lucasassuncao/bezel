@@ -95,7 +95,7 @@ func lineKey(lines []Line, styles []lipgloss.Style) string {
 	parts := make([]string, 0, len(lines))
 	for i, l := range lines {
 		if l.Label != "" {
-			parts = append(parts, styles[i].Render("●")+" "+l.Label)
+			parts = append(parts, styles[i].Render("●")+" "+draw.Clean(draw.OneLine(l.Label)))
 		}
 	}
 	return strings.Join(parts, "  ")

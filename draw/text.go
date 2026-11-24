@@ -40,13 +40,14 @@ func Fit(s string, width int) string {
 	return Pad(Truncate(s, width), width)
 }
 
-// Wrap folds plain text into rows of at most width cells, breaking after
-// spaces and hyphens, cutting a word wider than a row; a rune wider than a row
-// gets one alone. Newlines stay; style the rows after, as styles do not re-open.
+// Wrap folds plain text, after Clean, into rows of at most width cells:
+// newlines stay, breaks fall after spaces and hyphens, a word or rune wider
+// than a row is cut or gets one alone. Style rows after: styles do not re-open.
 func Wrap(s string, width int) []string {
 	if s == "" {
 		return nil
 	}
+	s = Clean(s)
 	if width <= 0 {
 		return strings.Split(s, "\n")
 	}
@@ -178,3 +179,7 @@ func OneLine(s string) string {
 		return r
 	}, s)
 }
+
+// oneRow is text from the app or its data as the chrome draws it: one row,
+// with nothing in it that would draw other than measured.
+func oneRow(s string) string { return Clean(OneLine(s)) }

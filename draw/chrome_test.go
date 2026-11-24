@@ -98,3 +98,19 @@ func TestADividerWithATabKeepsItsWidth(t *testing.T) {
 	out := Divider(12, "a\tb\tc", DividerStyle{Label: lipgloss.NewStyle().Bold(true)})
 	require.Equal(t, 12, ansi.StringWidth(out), "%q", ansi.Strip(out))
 }
+
+// Titles, tab names, a status and a divider's label come from the app and
+// its data; none may carry what Clean drops into the row.
+func TestChromeDrawsOnlyWhatItMeasured(t *testing.T) {
+	st := ChromeStyle{Title: lipgloss.NewStyle().Bold(true), Tab: lipgloss.NewStyle().Underline(true)}
+	for _, bad := range []string{"ab\rX", "a\xffb", "a\x1b_Gf=1", "a\x1b[38;2;1", "a\bb"} {
+		for _, row := range []string{
+			Header(40, bad, bad, bad, st),
+			Tabs(40, []string{bad, "two"}, 0, st),
+			StatusLine(40, bad, lipgloss.NewStyle().Bold(true)),
+			Divider(40, bad, DividerStyle{}),
+		} {
+			require.Equal(t, Clean(row), row, "%q", bad)
+		}
+	}
+}

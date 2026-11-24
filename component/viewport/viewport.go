@@ -5,8 +5,6 @@ package viewport
 import (
 	"slices"
 	"strings"
-	"unicode"
-	"unicode/utf8"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -175,7 +173,7 @@ func (m Model) SetLines(lines []string) Model {
 	for _, l := range lines {
 		l = strings.ReplaceAll(strings.ReplaceAll(l, "\r\n", "\n"), "\r", "\n")
 		for _, part := range strings.Split(l, "\n") {
-			out = append(out, clean(draw.ExpandTabs(part)))
+			out = append(out, draw.Clean(draw.ExpandTabs(part)))
 		}
 	}
 	m.lines = out
@@ -187,36 +185,6 @@ func (m Model) SetLines(lines []string) Model {
 	m.y = min(max(m.y, 0), m.last())
 	m.x = min(max(m.x, 0), m.maxX())
 	return m
-}
-
-// clean drops a control character standing alone and an escape sequence the
-// line cuts off, which would swallow what follows; bad UTF-8 becomes U+FFFD.
-func clean(s string) string {
-	if isNarrow(s) {
-		return s
-	}
-	s = strings.ToValidUTF8(s, "�")
-	var b strings.Builder
-	var state byte
-	for len(s) > 0 {
-		seq, _, n, next := ansi.DecodeSequence(s, state, nil)
-		r, size := utf8.DecodeRuneInString(seq)
-		if lone := size == len(seq) && unicode.IsControl(r); !lone && next == byte(ansi.NormalState) && whole(seq) {
-			b.WriteString(seq)
-		}
-		s, state = s[n:], next
-	}
-	return b.String()
-}
-
-// whole reports whether seq, decoded on its own, ends complete: the decoder
-// hands back an escape cut short by a control character as if it were one.
-func whole(seq string) bool {
-	if !strings.HasPrefix(seq, "\x1b") {
-		return true
-	}
-	_, _, n, st := ansi.DecodeSequence(seq, byte(ansi.NormalState), nil)
-	return n == len(seq) && st == byte(ansi.NormalState)
 }
 
 // SetWidth is the viewport's width in cells, the gutter included; the line

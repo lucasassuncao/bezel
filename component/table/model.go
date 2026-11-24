@@ -485,7 +485,11 @@ func (m Model[T]) View(th theme.Resolved) string {
 			lead = st.Cursor.Render(marker)
 		}
 		if i == w.Cursor && !m.blur {
-			cells = cursorCells(m.markCell(cells, widths, st.Cell), st.Cursor)
+			shown := make([]string, len(cells))
+			for c, text := range cells {
+				shown[c] = show(text) // painted before Row could clean it
+			}
+			cells = cursorCells(m.markCell(shown, widths, st.Cell), st.Cursor)
 		}
 		lines = append(lines, lead+m.box(rows[i], st)+Row(widths, cells))
 	}

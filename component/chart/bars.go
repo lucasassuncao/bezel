@@ -37,7 +37,7 @@ func Bars(bars []Bar, top float64, width int, th theme.Resolved, opts ...Option)
 	}
 	labelW, textW := 0, 0
 	for _, b := range bars {
-		labelW = max(labelW, draw.Width(b.Label))
+		labelW = max(labelW, draw.Width(label(b)))
 		textW = max(textW, draw.Width(b.text()))
 	}
 	labelW = min(labelW, width/3)
@@ -47,14 +47,14 @@ func Bars(bars []Bar, top float64, width int, th theme.Resolved, opts ...Option)
 	for i, b := range bars {
 		text := strings.Repeat(" ", textW-draw.Width(b.text())) + b.text()
 		if barW < 1 {
-			rows[i] = draw.Fit(draw.Fit(b.Label, labelW)+" "+text, width)
+			rows[i] = draw.Fit(draw.Fit(label(b), labelW)+" "+text, width)
 			continue
 		}
 		fill := st
 		if b.Style != nil {
 			fill = *b.Style
 		}
-		rows[i] = draw.Fit(b.Label, labelW) + " " + bar(b.Value, top, barW, fill) + " " + text
+		rows[i] = draw.Fit(label(b), labelW) + " " + bar(b.Value, top, barW, fill) + " " + text
 	}
 	return strings.Join(rows, "\n")
 }
@@ -83,3 +83,6 @@ func bar(v, top float64, width int, st lipgloss.Style) string {
 	}
 	return out + strings.Repeat(" ", width-draw.Width(cells))
 }
+
+// label is b's label as its row draws it: one row, and only what draws.
+func label(b Bar) string { return draw.Clean(draw.OneLine(b.Label)) }

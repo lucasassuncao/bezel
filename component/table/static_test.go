@@ -26,3 +26,12 @@ func TestStaticShrinksTheFlexColumnToTheWidth(t *testing.T) {
 func TestStaticWithNoRowsIsTheHeader(t *testing.T) {
 	require.Equal(t, "NAME", ansi.Strip(Static([]Column{{Title: "NAME"}}, nil, 0, th)))
 }
+
+// Static is printed straight to the terminal: a cell from data must not be
+// able to set the clipboard or clear the screen.
+func TestStaticPrintsNoCommandsFromItsCells(t *testing.T) {
+	out := Static([]Column{{Title: "name\x1b]0;t\x07"}}, [][]string{{"pod \x1b]52;c;aGk=\x07 \x1b[2J\r"}}, 80, th)
+	require.NotContains(t, out, "\x1b]")
+	require.NotContains(t, out, "\x1b[2J")
+	require.NotContains(t, out, "\r")
+}

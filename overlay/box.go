@@ -29,7 +29,7 @@ func BoxWidth(lines []string, body layout.Rect, inner int, style lipgloss.Style)
 	clipped := make([]string, 0, len(lines))
 	for _, line := range lines {
 		for _, part := range strings.Split(line, "\n") {
-			clipped = append(clipped, draw.Truncate(part, inner))
+			clipped = append(clipped, draw.Truncate(draw.Clean(part), inner))
 		}
 	}
 	// The frame is border and padding both; the cut spares the last line, which

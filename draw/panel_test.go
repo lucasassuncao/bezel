@@ -123,3 +123,15 @@ func TestALineBreakOnAnEdgeKeepsThePanelsHeight(t *testing.T) {
 func TestATabInTheBodyNeverReachesTheTerminal(t *testing.T) {
 	require.NotContains(t, Panel(layout.Rect{W: 12, H: 3}, Edges{}, "a\tb", PanelStyle{}), "\t")
 }
+
+// Text from data may hold a carriage return, bad UTF-8 or a colour cut short;
+// each would shift the row on screen, so none of it reaches a panel's rows.
+func TestPanelDrawsOnlyWhatItMeasured(t *testing.T) {
+	for _, bad := range []string{"abc\rXY", "a\xffb", "a\x1b]0;title", "a\x1b[38;2;1", "a\x1b"} {
+		got := Panel(layout.Rect{W: 20, H: 4}, Edges{Title: bad, Right: bad, Bottom: bad}, bad+"\nnext", PanelStyle{Border: lipgloss.NewStyle().Bold(true)})
+		for _, l := range strings.Split(got, "\n") {
+			require.Equal(t, Clean(l), l, "%q drew %q", bad, l)
+			require.Equal(t, 20, ansi.StringWidth(l), "%q drew %q", bad, l)
+		}
+	}
+}

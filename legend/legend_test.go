@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/key"
 )
 
@@ -250,4 +251,15 @@ func appText(ss ...string) bool {
 		}
 	}
 	return true
+}
+
+// A key's help can come from data, a command's name say: it must not carry
+// what would draw the legend row other than measured.
+func TestAnEntryDrawsOnlyWhatItMeasured(t *testing.T) {
+	for _, bad := range []string{"ab\rX", "a\xffb", "a\x1b_Gf=1", "two\nlines"} {
+		e := []Entry{New(bad, bad), New("q", "quit")}
+		for _, row := range append(Pack(e, 60, 2, "", Style{}), HintLine(e, Style{})) {
+			require.Equal(t, draw.Clean(draw.OneLine(row)), row, "%q", bad)
+		}
+	}
 }

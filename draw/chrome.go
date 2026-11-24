@@ -22,13 +22,13 @@ type ChromeStyle struct {
 // Header is one row: title and subtitle on the left, right pinned to the far
 // edge, the whole thing cut to width and line breaks drawn as spaces.
 func Header(width int, title, subtitle, right string, st ChromeStyle) string {
-	left := st.Title.Render(OneLine(title))
+	left := st.Title.Render(oneRow(title))
 	if subtitle != "" {
-		left += st.Info.Render(" · " + OneLine(subtitle))
+		left += st.Info.Render(" · " + oneRow(subtitle))
 	}
 	rightR := ""
 	if right != "" {
-		rightR = st.Info.Render(OneLine(right))
+		rightR = st.Info.Render(oneRow(right))
 	}
 	gap := max(0, width-ansi.StringWidth(left)-ansi.StringWidth(rightR))
 	return Fit(left+strings.Repeat(" ", gap)+rightR, width)
@@ -62,7 +62,7 @@ func TabAt(width int, names []string, active int, st ChromeStyle, x int) int {
 func tabParts(names []string, active int, st ChromeStyle) []string {
 	parts := make([]string, len(names))
 	for i, n := range names {
-		n = OneLine(n)
+		n = oneRow(n)
 		if i == active {
 			parts[i] = st.TabActive.Render(" " + n + " ")
 		} else {
@@ -134,14 +134,14 @@ func Divider(width int, label string, st DividerStyle) string {
 	// Measured rendered: a style with padding takes cells the raw label does not.
 	room := width - lead - 2
 	pad := ansi.StringWidth(st.Label.Render("x")) - 1
-	styled := st.Label.Render(Truncate(ExpandTabs(label), max(1, room-pad)))
+	styled := st.Label.Render(Truncate(ExpandTabs(Clean(label)), max(1, room-pad)))
 	rest := max(0, room-ansi.StringWidth(styled))
 	return st.Line.Render(strings.Repeat("─", lead)+" ") + styled + st.Line.Render(" "+strings.Repeat("─", rest))
 }
 
 // StatusLine is one row of text in a style, exactly width cells.
 func StatusLine(width int, text string, style lipgloss.Style) string {
-	return Fit(style.Render(OneLine(text)), width)
+	return Fit(style.Render(oneRow(text)), width)
 }
 
 // EmptyState centres a message, and a hint under it, inside r.

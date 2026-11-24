@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel/component/icon"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/theme"
 )
 
@@ -251,4 +252,16 @@ func TestAZeroHandlerDropsEveryRecord(t *testing.T) {
 		styled := h.WithStyles(func(s Styles) Styles { return s })
 		slog.New(styled).With("k", "v").WithGroup("g").Info("hi", "n", 1)
 	})
+}
+
+// A record carries data, an API's error say, straight to the terminal: it may
+// colour the line but never set the clipboard, clear the screen or rewrite it.
+func TestARecordCarriesNoCommandsToTheTerminal(t *testing.T) {
+	evil := "x \x1b]52;c;aGk=\x07 \x1b[2J \r \x07 \x1b]0;t"
+	for _, color := range []bool{false, true} {
+		var buf bytes.Buffer
+		l := slog.New(New(&buf, theme.Resolve(theme.Plain(), true)).WithColor(color).WithWidth(200))
+		l.Info(evil, evil, evil, "group", slog.GroupValue(slog.String(evil, evil)))
+		require.Equal(t, draw.Clean(buf.String()), buf.String(), "color %v", color)
+	}
 }

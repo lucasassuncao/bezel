@@ -16,6 +16,7 @@ Package draw renders the frame: text fitting, panels, header, tabs, status and o
 - [func BlockSize\(s string\) \(width, height int\)](<#BlockSize>)
 - [func Button\(label string, st ButtonStyle, focused bool\) string](<#Button>)
 - [func Card\(r layout.Rect, title, body, footer string, st PanelStyle\) string](<#Card>)
+- [func Clean\(s string\) string](<#Clean>)
 - [func Composite\(fg, bg string, x, y int\) string](<#Composite>)
 - [func CompositeCenter\(fg, bg string\) string](<#CompositeCenter>)
 - [func Cut\(s string, width int\) string](<#Cut>)
@@ -68,7 +69,7 @@ const TabStop = 4
 ```
 
 <a name="BlockSize"></a>
-## func [BlockSize](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L75>)
+## func [BlockSize](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L76>)
 
 ```go
 func BlockSize(s string) (width, height int)
@@ -94,6 +95,15 @@ func Card(r layout.Rect, title, body, footer string, st PanelStyle) string
 
 Card is a Panel whose last row is footer, set off from the body by a rule: a block of facts with what can be done about them underneath.
 
+<a name="Clean"></a>
+## func [Clean](<https://github.com/lucasassuncao/bezel/blob/main/draw/safe.go#L47>)
+
+```go
+func Clean(s string) string
+```
+
+Clean is s with only what a terminal draws: text, line breaks, tabs, colours and links. Other controls and escapes go, and those cut short with what they swallowed; bad UTF\-8 is U\+FFFD, the one cell a terminal draws.
+
 <a name="Composite"></a>
 ## func [Composite](<https://github.com/lucasassuncao/bezel/blob/main/draw/composite.go#L12>)
 
@@ -113,7 +123,7 @@ func CompositeCenter(fg, bg string) string
 CompositeCenter centres fg over bg.
 
 <a name="Cut"></a>
-## func [Cut](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L159>)
+## func [Cut](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L160>)
 
 ```go
 func Cut(s string, width int) string
@@ -140,7 +150,7 @@ func EmptyState(r layout.Rect, message, hint string, st ChromeStyle) string
 EmptyState centres a message, and a hint under it, inside r.
 
 <a name="ExpandTabs"></a>
-## func [ExpandTabs](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L135>)
+## func [ExpandTabs](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L136>)
 
 ```go
 func ExpandTabs(s string) string
@@ -158,7 +168,7 @@ func Fit(s string, width int) string
 Fit makes s exactly width cells: cut when longer, padded when shorter.
 
 <a name="FitBlock"></a>
-## func [FitBlock](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L93>)
+## func [FitBlock](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L94>)
 
 ```go
 func FitBlock(s string, width, height int) string
@@ -167,7 +177,7 @@ func FitBlock(s string, width, height int) string
 FitBlock cuts a block to height rows and width cells per row. A too\-wide line would wrap inside lipgloss and push a border down, so cut first.
 
 <a name="Gutter"></a>
-## func [Gutter](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L117>)
+## func [Gutter](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L118>)
 
 ```go
 func Gutter(n int, style lipgloss.Style) string
@@ -185,7 +195,7 @@ func Header(width int, title, subtitle, right string, st ChromeStyle) string
 Header is one row: title and subtitle on the left, right pinned to the far edge, the whole thing cut to width and line breaks drawn as spaces.
 
 <a name="Heading"></a>
-## func [Heading](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L167>)
+## func [Heading](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L168>)
 
 ```go
 func Heading(name string, style lipgloss.Style, width int) string
@@ -194,7 +204,7 @@ func Heading(name string, style lipgloss.Style, width int) string
 Heading is a block heading inside a pane, upper\-cased and cut to width.
 
 <a name="InnerRect"></a>
-## func [InnerRect](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L109>)
+## func [InnerRect](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L110>)
 
 ```go
 func InnerRect(r layout.Rect) layout.Rect
@@ -221,7 +231,7 @@ func More(n, indent int, st lipgloss.Style) string
 More is the row a scrolled list shows in place of its last while n rows hide below, set in indent cells to line up with the rows' text.
 
 <a name="NumberLines"></a>
-## func [NumberLines](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L121>)
+## func [NumberLines](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L122>)
 
 ```go
 func NumberLines(s string, style lipgloss.Style) string
@@ -230,7 +240,7 @@ func NumberLines(s string, style lipgloss.Style) string
 NumberLines prefixes every line of s with its 1\-based Gutter, before any scrolling, so the numbers stay absolute.
 
 <a name="OneLine"></a>
-## func [OneLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L173>)
+## func [OneLine](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L174>)
 
 ```go
 func OneLine(s string) string
@@ -248,7 +258,7 @@ func Pad(s string, width int) string
 Pad fills s out to width cells.
 
 <a name="PadHeight"></a>
-## func [PadHeight](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L84>)
+## func [PadHeight](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L85>)
 
 ```go
 func PadHeight(s string, height int) string
@@ -266,7 +276,7 @@ func Panel(r layout.Rect, edges Edges, body string, st PanelStyle) string
 Panel draws a box exactly r.W by r.H with edges drawn into its border. Below three rows only the top edge is drawn; below four columns nothing is.
 
 <a name="Sanitize"></a>
-## func [Sanitize](<https://github.com/lucasassuncao/bezel/blob/main/draw/safe.go#L12>)
+## func [Sanitize](<https://github.com/lucasassuncao/bezel/blob/main/draw/safe.go#L14>)
 
 ```go
 func Sanitize(s string) string
@@ -275,7 +285,7 @@ func Sanitize(s string) string
 Sanitize renders server\-supplied text so drawing it can only draw: OSC 52 sets the clipboard, CSI forges a confirmation modal, bidi \(CVE\-2021\-42574\) reorders a line. Rendering only \- the clipboard still sees the real bytes.
 
 <a name="SanitizeLines"></a>
-## func [SanitizeLines](<https://github.com/lucasassuncao/bezel/blob/main/draw/safe.go#L45>)
+## func [SanitizeLines](<https://github.com/lucasassuncao/bezel/blob/main/draw/safe.go#L101>)
 
 ```go
 func SanitizeLines(s string) []string
@@ -320,7 +330,7 @@ func Truncate(s string, width int) string
 Truncate cuts s to width cells with an ellipsis. width \<= 0 leaves s alone.
 
 <a name="Width"></a>
-## func [Width](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L156>)
+## func [Width](<https://github.com/lucasassuncao/bezel/blob/main/draw/text.go#L157>)
 
 ```go
 func Width(s string) int
@@ -335,7 +345,7 @@ Width is how many cells s takes on screen, escapes ignored.
 func Wrap(s string, width int) []string
 ```
 
-Wrap folds plain text into rows of at most width cells, breaking after spaces and hyphens, cutting a word wider than a row; a rune wider than a row gets one alone. Newlines stay; style the rows after, as styles do not re\-open.
+Wrap folds plain text, after Clean, into rows of at most width cells: newlines stay, breaks fall after spaces and hyphens, a word or rune wider than a row is cut or gets one alone. Style rows after: styles do not re\-open.
 
 <a name="ButtonStyle"></a>
 ## type [ButtonStyle](<https://github.com/lucasassuncao/bezel/blob/main/draw/widgets.go#L21-L23>)

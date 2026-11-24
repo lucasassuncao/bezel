@@ -357,3 +357,13 @@ func TestInnerIsTheRectBodyGets(t *testing.T) {
 	require.Equal(t, draw.InnerRect(s.Rect("detail")), s.Inner("detail"))
 	require.Equal(t, layout.Rect{}, s.Inner("nowhere"))
 }
+
+// A header row from the app is data like a pane's body: a carriage return in
+// it would wipe the row's start on screen.
+func TestAnAppHeaderDrawsOnlyWhatItMeasured(t *testing.T) {
+	s := New(Config{Layout: twoPane(), Theme: theme.Resolve(theme.Plain(), true),
+		Header: func(Context, int) []string { return []string{"abc\rXY \xff"} }})
+	s, _ = s.Update(tea.WindowSizeMsg{Width: 80, Height: 20})
+	row := strings.Split(s.View(demoPanes()).Content, "\n")[0]
+	require.Equal(t, draw.Clean(row), row)
+}

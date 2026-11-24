@@ -149,3 +149,13 @@ func TestWrapAtOneCellBreaksAfterAWideRune(t *testing.T) {
 	require.Equal(t, []string{"a", "b", "世", "a", "b"}, Wrap("ab世ab", 1))
 	require.Equal(t, []string{"世", "世", "", "x"}, Wrap("世世\n\nx", 1), "a real blank line stays")
 }
+
+// Wrap measures each row to fold it, so a row must not carry what would draw
+// wider or narrower than measured: a carriage return, bad UTF-8, a cut escape.
+func TestWrapDrawsOnlyWhatItMeasured(t *testing.T) {
+	for _, s := range []string{"ab\rX tail", "a\xffb tail", "a\x1b]0;t tail", "line\r\nnext"} {
+		for _, row := range Wrap(s, 4) {
+			require.Equal(t, Clean(row), row, "%q", s)
+		}
+	}
+}

@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
+	"github.com/lucasassuncao/bezel/draw"
 	"github.com/lucasassuncao/bezel/layout"
 	"github.com/lucasassuncao/bezel/theme"
 )
@@ -266,4 +267,15 @@ func TestAShellsWheelMsgMovesTheCursor(t *testing.T) {
 	m, r := New(pkgCols, pkgs(10)).SetHeight(5).Update(turn)
 	require.True(t, r.Handled)
 	require.Equal(t, 1, m.Cursor())
+}
+
+// The cursor's row paints its cells before Row lays them out: it must not
+// carry what Row would have dropped.
+func TestTheCursorRowDrawsOnlyWhatItMeasured(t *testing.T) {
+	for _, bad := range []string{"ab\rX", "a\xffb", "a\x1b]0;t"} {
+		m := New([]Column{{Title: "a", Flex: true}, {Title: "b"}}, []Item[int]{{Cells: []string{bad, bad}}}).WithCells(true).SetWidth(30).SetHeight(4)
+		for _, l := range strings.Split(m.View(th), "\n") {
+			require.Equal(t, draw.Clean(l), l, "%q", bad)
+		}
+	}
 }

@@ -86,3 +86,14 @@ func BenchmarkFit(b *testing.B) {
 		_ = Fit(cols, rows, 60)
 	}
 }
+
+// A cell from data may hold a carriage return, bad UTF-8 or a colour cut
+// short: drawn as they are, each shifts the row and the columns after it.
+func TestRowDrawsOnlyWhatItMeasured(t *testing.T) {
+	for _, bad := range []string{"ab\rX", "a\xffb", "a\x1b]0;t", "a\x1b[38;2;1"} {
+		widths := Fit(cols, [][]string{{bad, bad, bad}}, 60)
+		for _, row := range []string{Row(widths, []string{bad, bad, bad}), Titles([]Column{{Title: bad}, {Title: bad}}, widths)} {
+			require.Equal(t, draw.Clean(row), row, "%q", bad)
+		}
+	}
+}

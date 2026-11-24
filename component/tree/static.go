@@ -20,7 +20,8 @@ func Static(branches []Branch, th theme.Resolved) string {
 	var walk func(bs []Branch, depth int)
 	walk = func(bs []Branch, depth int) {
 		for _, b := range bs {
-			rows = append(rows, row{text: b.Text, depth: depth, leaf: len(b.Children) == 0})
+			text := draw.Clean(draw.OneLine(b.Text)) // printed as it is, one row
+			rows = append(rows, row{text: text, depth: depth, leaf: len(b.Children) == 0})
 			walk(b.Children, depth+1)
 		}
 	}

@@ -77,7 +77,7 @@ func (s Style) groupSep(fallback string) string {
 }
 
 func (s Style) pair(e Entry) string {
-	return s.Key.Render(s.key(e.Help.Key)) + " " + s.Text.Render(e.Help.Desc)
+	return s.Key.Render(s.key(drawn(e.Help.Key))) + " " + s.Text.Render(drawn(e.Help.Desc))
 }
 
 func (s Style) key(k string) string {
@@ -239,3 +239,7 @@ func FromBindings(bs []key.Binding) []Entry {
 	}
 	return out
 }
+
+// drawn is a key or its description as a row draws it: on one line, and
+// without what would draw it other than measured.
+func drawn(s string) string { return draw.Clean(draw.OneLine(s)) }
