@@ -4,14 +4,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/lucasassuncao/bezel"
 )
 
 func TestTweenAtEndpointsAndMidpoint(t *testing.T) {
-	is := assert.New(t)
+	is := require.New(t)
 
 	start := time.Now()
 	tw := Tween{from: 0, to: 12, start: start, dur: 100 * time.Millisecond}
@@ -38,7 +37,7 @@ func TestTweenAtEndpointsAndMidpoint(t *testing.T) {
 // plain lerp: the eased curve starts slow, so the first quarter of the time
 // covers noticeably less than a quarter of the distance.
 func TestTweenEasesRatherThanInterpolatesLinearly(t *testing.T) {
-	is := assert.New(t)
+	is := require.New(t)
 	start := time.Now()
 	tw := Tween{from: 0, to: 100, start: start, dur: 100 * time.Millisecond}
 
@@ -50,7 +49,7 @@ func TestTweenEasesRatherThanInterpolatesLinearly(t *testing.T) {
 }
 
 func TestZeroTweenIsInactive(t *testing.T) {
-	is := assert.New(t)
+	is := require.New(t)
 	var tw Tween
 	is.False(tw.Active(), "the zero tween is inactive")
 	_, done := tw.At(time.Now())
@@ -58,7 +57,7 @@ func TestZeroTweenIsInactive(t *testing.T) {
 }
 
 func TestNewDeclinesWhenPointless(t *testing.T) {
-	is := assert.New(t)
+	is := require.New(t)
 	is.False(NewTween(0, 10, 0).Active(), "duration 0 means no animation")
 	is.False(NewTween(7, 7, time.Second).Active(), "no distance means no animation")
 	is.True(NewTween(0, 10, time.Second).Active(), "a real move animates")
@@ -71,7 +70,7 @@ func TestNewDeclinesWhenPointless(t *testing.T) {
 // rows, so stutter is a height frozen for frames, then a multi-row lurch.
 // Spans cover the hint panel from a 24-row terminal (floored at 5) to 60 rows.
 func TestCurveDoesNotStallOrLurch(t *testing.T) {
-	is := assert.New(t)
+	is := require.New(t)
 
 	const dur = 180 * time.Millisecond
 	frames := int(dur / Frame)
@@ -127,21 +126,21 @@ func TestAdvanceReturnsTheSampledTween(t *testing.T) {
 	tw := Tween{from: 0, to: 10, cur: 0, start: start, dur: 100 * time.Millisecond}
 
 	next, done := tw.Advance(start.Add(time.Second))
-	assert.True(t, done)
-	assert.Equal(t, 10, next.cur)
-	assert.Equal(t, 0, tw.cur, "the receiver changed")
+	require.True(t, done)
+	require.Equal(t, 10, next.cur)
+	require.Equal(t, 0, tw.cur, "the receiver changed")
 }
 
 // New reads no clock: time reaches a tween only through the frames it gets.
 func TestNewLeavesTheClockToTheFirstFrame(t *testing.T) {
 	tw := NewTween(0, 10, 100*time.Millisecond)
-	assert.True(t, tw.start.IsZero())
+	require.True(t, tw.start.IsZero())
 
 	at := time.Unix(1000, 0)
 	tw, done := tw.Advance(at)
-	assert.False(t, done)
-	assert.Equal(t, 0, tw.cur, "the first frame shows the start value")
-	assert.Equal(t, at, tw.start)
+	require.False(t, done)
+	require.Equal(t, 0, tw.cur, "the first frame shows the start value")
+	require.Equal(t, at, tw.start)
 }
 
 func TestUpdateFollowsItsOwnFramesUntilItLands(t *testing.T) {
@@ -149,13 +148,13 @@ func TestUpdateFollowsItsOwnFramesUntilItLands(t *testing.T) {
 	tw := NewTween(0, 10, 100*time.Millisecond)
 
 	tw, res := tw.Update(tw.FrameAt(start))
-	assert.NotNil(t, res.Cmd, "an unfinished tween asks for the next frame")
+	require.NotNil(t, res.Cmd, "an unfinished tween asks for the next frame")
 	tw, res = tw.Update(tw.FrameAt(start.Add(50 * time.Millisecond)))
-	assert.Equal(t, 5, tw.cur)
-	assert.NotNil(t, res.Cmd)
+	require.Equal(t, 5, tw.cur)
+	require.NotNil(t, res.Cmd)
 	tw, res = tw.Update(tw.FrameAt(start.Add(100 * time.Millisecond)))
-	assert.Equal(t, 10, tw.cur)
-	assert.Nil(t, res.Cmd, "a tween that landed stops its clock")
+	require.Equal(t, 10, tw.cur)
+	require.Nil(t, res.Cmd, "a tween that landed stops its clock")
 }
 
 // A tween replaced mid-flight still has a frame on its way: the new one must not take it.
@@ -164,21 +163,21 @@ func TestUpdateIgnoresAnotherTweensFrames(t *testing.T) {
 	old, tw := NewTween(0, 10, time.Second), NewTween(0, 10, time.Second)
 
 	next, res := tw.Update(old.FrameAt(start))
-	assert.Nil(t, res.Cmd)
-	assert.Equal(t, tw, next)
+	require.Nil(t, res.Cmd)
+	require.Equal(t, tw, next)
 
 	var zero Tween
-	assert.Nil(t, zero.Tick(), "nothing to animate, no clock")
+	require.Nil(t, zero.Tick(), "nothing to animate, no clock")
 	next, res = zero.Update(old.FrameAt(start))
-	assert.Nil(t, res.Cmd)
-	assert.Equal(t, zero, next)
+	require.Nil(t, res.Cmd)
+	require.Equal(t, zero, next)
 }
 
 func TestTickDeliversAFrameForThisTween(t *testing.T) {
 	tw := NewTween(0, 10, time.Second)
 	next, res := tw.Update(tw.Tick()())
-	assert.False(t, next.start.IsZero(), "the tick's frame started the clock")
-	assert.NotNil(t, res.Cmd)
+	require.False(t, next.start.IsZero(), "the tick's frame started the clock")
+	require.NotNil(t, res.Cmd)
 }
 
 // Landing ends the tween: Active turns false and no further frame is asked.
@@ -187,14 +186,14 @@ func TestALandedTweenIsInactiveAtItsEnd(t *testing.T) {
 	tw := NewTween(0, 10, 100*time.Millisecond)
 	tw, _ = tw.Update(tw.FrameAt(start))
 	tw, _ = tw.Update(tw.FrameAt(start.Add(time.Second)))
-	assert.False(t, tw.Active())
-	assert.Nil(t, tw.Tick())
-	assert.Equal(t, 10, tw.cur)
+	require.False(t, tw.Active())
+	require.Nil(t, tw.Tick())
+	require.Equal(t, 10, tw.cur)
 
 	next, _ := NewTween(0, 10, 100*time.Millisecond).Advance(start)
 	next, done := next.Advance(start.Add(time.Second))
-	assert.True(t, done)
-	assert.False(t, next.Active(), "Advance lands it too")
+	require.True(t, done)
+	require.False(t, next.Active(), "Advance lands it too")
 }
 
 // Tick called twice sends two frames for one step; the tween takes one.
@@ -203,10 +202,10 @@ func TestASecondClockIsDropped(t *testing.T) {
 	tw := NewTween(0, 10, time.Second)
 	first, second := tw.FrameAt(start), tw.FrameAt(start)
 	tw, res := tw.Update(first)
-	assert.NotNil(t, res.Cmd)
+	require.NotNil(t, res.Cmd)
 	next, res := tw.Update(second)
-	assert.Nil(t, res.Cmd, "the twin frame starts no second clock")
-	assert.Equal(t, tw, next)
+	require.Nil(t, res.Cmd, "the twin frame starts no second clock")
+	require.Equal(t, tw, next)
 }
 
 var frame0 = time.Unix(0, 0)
@@ -222,4 +221,20 @@ func TestForeignFrameIsNotHandled(t *testing.T) {
 	a, b := NewTween(0, 1, time.Second), NewTween(0, 1, time.Second)
 	_, r := a.Update(b.FrameAt(frame0))
 	require.Equal(t, bezel.Result{}, r)
+}
+
+// Tween, the int one, takes the same three; a yoyo once round lands where it began.
+func TestTweenTakesDelayRepeatAndYoyo(t *testing.T) {
+	moving(t)
+	start := time.Unix(1000, 0)
+	tw := NewTween(0, 10, 100*ms).WithEase(Linear).WithDelay(100 * ms).WithYoyo(true).WithRepeat(1)
+	tw, _ = tw.Update(tw.FrameAt(start))
+	tw, _ = tw.Update(tw.FrameAt(start.Add(150 * ms)))
+	require.Equal(t, 5, tw.cur)
+	tw, _ = tw.Update(tw.FrameAt(start.Add(250 * ms)))
+	require.Equal(t, 5, tw.cur, "half way back")
+	tw, res := tw.Update(tw.FrameAt(start.Add(time.Second)))
+	require.Nil(t, res.Cmd)
+	require.False(t, tw.Active())
+	require.Equal(t, 0, tw.cur)
 }
