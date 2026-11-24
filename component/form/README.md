@@ -918,7 +918,7 @@ func (m MultiSelect) WithKeys(k Keys) MultiSelect
 WithKeys rebinds the field: Press opens it and keeps the checks, Up and Down move, Check and CheckAll check, Erase edits the filter, Close puts them back.
 
 <a name="Number"></a>
-## type [Number](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L63-L69>)
+## type [Number](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L64-L70>)
 
 Number is a number typed or stepped: Up and Down move it a step within its range, digits, '.' and '\-' type it, and leaving the field settles it.
 
@@ -929,7 +929,7 @@ type Number struct {
 ```
 
 <a name="NewNumber"></a>
-### func [NewNumber](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L72>)
+### func [NewNumber](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L73>)
 
 ```go
 func NewNumber(label string, value float64) Number
@@ -938,7 +938,7 @@ func NewNumber(label string, value float64) Number
 NewNumber offers value, stepping by 1 with no bounds.
 
 <a name="Number.Blur"></a>
-### func \(Number\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L113>)
+### func \(Number\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L114>)
 
 ```go
 func (n Number) Blur() Field
@@ -947,7 +947,7 @@ func (n Number) Blur() Field
 Blur settles what was typed: held within the range, or back to the last number when it does not parse.
 
 <a name="Number.Focus"></a>
-### func \(Number\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L109>)
+### func \(Number\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L110>)
 
 ```go
 func (n Number) Focus() (Field, tea.Cmd)
@@ -956,7 +956,7 @@ func (n Number) Focus() (Field, tea.Cmd)
 
 
 <a name="Number.Label"></a>
-### func \(Number\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L107>)
+### func \(Number\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L108>)
 
 ```go
 func (n Number) Label() string
@@ -965,7 +965,7 @@ func (n Number) Label() string
 
 
 <a name="Number.Update"></a>
-### func \(Number\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L119>)
+### func \(Number\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L120>)
 
 ```go
 func (n Number) Update(msg tea.Msg) (Field, bezel.Result)
@@ -974,7 +974,7 @@ func (n Number) Update(msg tea.Msg) (Field, bezel.Result)
 Update steps on Up and Down and takes a typed digit, '.', '\-' or Erase.
 
 <a name="Number.Value"></a>
-### func \(Number\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L106>)
+### func \(Number\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L107>)
 
 ```go
 func (n Number) Value() float64
@@ -983,7 +983,7 @@ func (n Number) Value() float64
 Value is the number, the last one that parsed while text is typed.
 
 <a name="Number.View"></a>
-### func \(Number\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L150>)
+### func \(Number\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L151>)
 
 ```go
 func (n Number) View(focused bool, labelW, width int) string
@@ -992,7 +992,7 @@ func (n Number) View(focused bool, labelW, width int) string
 
 
 <a name="Number.WithKeys"></a>
-### func \(Number\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L93>)
+### func \(Number\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L94>)
 
 ```go
 func (n Number) WithKeys(k Keys) Number
@@ -1001,7 +1001,7 @@ func (n Number) WithKeys(k Keys) Number
 WithKeys rebinds the field: Up and Down step, Erase takes a character.
 
 <a name="Number.WithRange"></a>
-### func \(Number\) [WithRange](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L78>)
+### func \(Number\) [WithRange](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L79>)
 
 ```go
 func (n Number) WithRange(lo, hi float64) Number
@@ -1010,7 +1010,7 @@ func (n Number) WithRange(lo, hi float64) Number
 WithRange keeps the value from lo to hi, both included.
 
 <a name="Number.WithStep"></a>
-### func \(Number\) [WithStep](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L86>)
+### func \(Number\) [WithStep](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L87>)
 
 ```go
 func (n Number) WithStep(step float64) Number
@@ -1257,7 +1257,7 @@ func (s Select) WithSelected(i int) Select
 WithSelected chooses the option at i, clamped in range.
 
 <a name="Slider"></a>
-## type [Slider](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L160-L167>)
+## type [Slider](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L161-L168>)
 
 Slider is a value along a bar: Left and Right move it a step within its range, from 0 to 100 until WithRange says otherwise.
 
@@ -1268,7 +1268,7 @@ type Slider struct {
 ```
 
 <a name="NewSlider"></a>
-### func [NewSlider](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L170>)
+### func [NewSlider](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L174>)
 
 ```go
 func NewSlider(label string, value float64) Slider
@@ -1277,7 +1277,7 @@ func NewSlider(label string, value float64) Slider
 NewSlider offers value from 0 to 100, stepping by 1 on a bar 20 cells wide.
 
 <a name="Slider.Blur"></a>
-### func \(Slider\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L218>)
+### func \(Slider\) [Blur](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L222>)
 
 ```go
 func (s Slider) Blur() Field
@@ -1286,7 +1286,7 @@ func (s Slider) Blur() Field
 
 
 <a name="Slider.Focus"></a>
-### func \(Slider\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L217>)
+### func \(Slider\) [Focus](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L221>)
 
 ```go
 func (s Slider) Focus() (Field, tea.Cmd)
@@ -1295,7 +1295,7 @@ func (s Slider) Focus() (Field, tea.Cmd)
 
 
 <a name="Slider.Label"></a>
-### func \(Slider\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L216>)
+### func \(Slider\) [Label](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L220>)
 
 ```go
 func (s Slider) Label() string
@@ -1304,7 +1304,7 @@ func (s Slider) Label() string
 
 
 <a name="Slider.Update"></a>
-### func \(Slider\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L221>)
+### func \(Slider\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L225>)
 
 ```go
 func (s Slider) Update(msg tea.Msg) (Field, bezel.Result)
@@ -1313,7 +1313,7 @@ func (s Slider) Update(msg tea.Msg) (Field, bezel.Result)
 Update moves a step on Left and Right, which are its keys even at the ends.
 
 <a name="Slider.Value"></a>
-### func \(Slider\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L215>)
+### func \(Slider\) [Value](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L219>)
 
 ```go
 func (s Slider) Value() float64
@@ -1322,7 +1322,7 @@ func (s Slider) Value() float64
 Value is where the slider stands.
 
 <a name="Slider.View"></a>
-### func \(Slider\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L234>)
+### func \(Slider\) [View](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L238>)
 
 ```go
 func (s Slider) View(focused bool, labelW, width int) string
@@ -1331,7 +1331,7 @@ func (s Slider) View(focused bool, labelW, width int) string
 View is the bar, filled up to a knob where the value stands, then the value.
 
 <a name="Slider.WithIcons"></a>
-### func \(Slider\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L196>)
+### func \(Slider\) [WithIcons](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L200>)
 
 ```go
 func (s Slider) WithIcons(set icon.Set) Slider
@@ -1340,7 +1340,7 @@ func (s Slider) WithIcons(set icon.Set) Slider
 WithIcons draws the bar from set instead of icon.FromEnv's.
 
 <a name="Slider.WithKeys"></a>
-### func \(Slider\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L202>)
+### func \(Slider\) [WithKeys](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L206>)
 
 ```go
 func (s Slider) WithKeys(k Keys) Slider
@@ -1349,7 +1349,7 @@ func (s Slider) WithKeys(k Keys) Slider
 WithKeys rebinds the slider: Left and Right move it.
 
 <a name="Slider.WithRange"></a>
-### func \(Slider\) [WithRange](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L177>)
+### func \(Slider\) [WithRange](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L181>)
 
 ```go
 func (s Slider) WithRange(lo, hi float64) Slider
@@ -1358,7 +1358,7 @@ func (s Slider) WithRange(lo, hi float64) Slider
 WithRange keeps the value from lo to hi, both included.
 
 <a name="Slider.WithStep"></a>
-### func \(Slider\) [WithStep](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L184>)
+### func \(Slider\) [WithStep](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L188>)
 
 ```go
 func (s Slider) WithStep(step float64) Slider
@@ -1367,7 +1367,7 @@ func (s Slider) WithStep(step float64) Slider
 WithStep moves the value step at a time and writes it with step's decimals; a step not above zero is 1.
 
 <a name="Slider.WithWidth"></a>
-### func \(Slider\) [WithWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L190>)
+### func \(Slider\) [WithWidth](<https://github.com/lucasassuncao/bezel/blob/main/component/form/number.go#L194>)
 
 ```go
 func (s Slider) WithWidth(n int) Slider

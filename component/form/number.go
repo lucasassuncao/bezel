@@ -1,6 +1,7 @@
 package form
 
 import (
+	"cmp"
 	"math"
 	"strconv"
 	"strings"
@@ -166,11 +167,14 @@ type Slider struct {
 	keys  Keys
 }
 
+// sliderWidth is a Slider's bar unless WithWidth says otherwise.
+const sliderWidth = 20
+
 // NewSlider offers value from 0 to 100, stepping by 1 on a bar 20 cells wide.
 func NewSlider(label string, value float64) Slider {
 	sc := scale{lo: 0, hi: 100, step: 1}
 	sc.v = sc.clamp(value) // NaN keeps the 0 it starts from
-	return Slider{label: label, sc: sc, width: 20, set: icon.FromEnv(), keys: DefaultKeys()}
+	return Slider{label: label, sc: sc, width: sliderWidth, set: icon.FromEnv(), keys: DefaultKeys()}
 }
 
 // WithRange keeps the value from lo to hi, both included.
@@ -233,14 +237,15 @@ func (s Slider) Update(msg tea.Msg) (Field, bezel.Result) {
 // View is the bar, filled up to a knob where the value stands, then the value.
 func (s Slider) View(focused bool, labelW, width int) string {
 	st := styles(s.st)
+	barW := cmp.Or(s.width, sliderWidth) // a Slider never built has none
 	at := 0
 	// An endless range has no middle: Inf over Inf is NaN, and the knob stays left.
 	if span := s.sc.hi - s.sc.lo; span > 0 {
-		if f := math.Round((s.sc.v - s.sc.lo) / span * float64(s.width-1)); !math.IsNaN(f) {
-			at = int(min(max(f, 0), float64(s.width-1)))
+		if f := math.Round((s.sc.v - s.sc.lo) / span * float64(barW-1)); !math.IsNaN(f) {
+			at = int(min(max(f, 0), float64(barW-1)))
 		}
 	}
 	bar := st.Chosen.Render(strings.Repeat(s.set.Line, at)+s.set.Running) +
-		st.Edge.Render(strings.Repeat(s.set.Line, s.width-1-at))
+		st.Edge.Render(strings.Repeat(s.set.Line, barW-1-at))
 	return row(st, focused, s.label, labelW, width, bar+" "+s.sc.String())
 }

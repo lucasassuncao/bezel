@@ -55,6 +55,12 @@ func TestTheLegendFollowsTheField(t *testing.T) {
 	require.Equal(t, "←/→", f.Legend()[2].Help.Key)
 }
 
+// A Slider held before it was built draws as a new one does, 20 cells wide.
+func TestAZeroSliderDrawsAsANewOne(t *testing.T) {
+	want := NewSlider("", 0).WithIcons(icon.ASCII()).View(false, 0, 40)
+	require.Equal(t, want, Slider{}.WithIcons(icon.ASCII()).View(false, 0, 40))
+}
+
 // NaN or an endless range leaves no place for the knob; the bar still draws.
 func TestASliderWithoutAPlaceForItsKnobStillDraws(t *testing.T) {
 	for name, s := range map[string]Slider{
