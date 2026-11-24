@@ -22,6 +22,24 @@ func TestAStreamRevealsAtItsPace(t *testing.T) {
 	assert.Nil(t, s.Tick(), "caught up, it asks for no frame")
 }
 
+func TestAZeroStreamRevealsAtTheDefaultPace(t *testing.T) {
+	var s Stream
+	s, _ = s.Push("hello")
+	start := time.Unix(10, 0)
+	s, _ = s.Advance(start)
+	s, _ = s.Advance(start.Add(30 * ms))
+	require.Equal(t, "hel", s.View())
+}
+
+func TestAClockSteppingBackRevealsNothingMore(t *testing.T) {
+	s, _ := NewStream(10 * ms).Push("hello")
+	start := time.Unix(10, 0)
+	s, _ = s.Advance(start)
+	s, _ = s.Advance(start.Add(20 * ms))
+	s, _ = s.Advance(start.Add(-time.Second))
+	require.Equal(t, "he", s.View())
+}
+
 func TestAPushWhileRevealingJoinsTheQueue(t *testing.T) {
 	s, _ := NewStream(10 * ms).Push("ab")
 	s, cmd := s.Push("cd")

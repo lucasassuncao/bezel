@@ -1806,7 +1806,7 @@ type Stream struct {
 ```
 
 <a name="NewStream"></a>
-### func [NewStream](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L37>)
+### func [NewStream](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L40>)
 
 ```go
 func NewStream(perChar time.Duration) Stream
@@ -1815,7 +1815,7 @@ func NewStream(perChar time.Duration) Stream
 NewStream reveals what it is pushed at one grapheme per perChar, 10ms when perChar is not positive.
 
 <a name="Stream.Active"></a>
-### func \(Stream\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L77>)
+### func \(Stream\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L80>)
 
 ```go
 func (s Stream) Active() bool
@@ -1824,7 +1824,7 @@ func (s Stream) Active() bool
 Active reports whether s is still revealing.
 
 <a name="Stream.Advance"></a>
-### func \(Stream\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L104>)
+### func \(Stream\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L107>)
 
 ```go
 func (s Stream) Advance(now time.Time) (Stream, bool)
@@ -1833,7 +1833,7 @@ func (s Stream) Advance(now time.Time) (Stream, bool)
 Advance is s at now, and whether it caught up.
 
 <a name="Stream.Behind"></a>
-### func \(Stream\) [Behind](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L74>)
+### func \(Stream\) [Behind](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L77>)
 
 ```go
 func (s Stream) Behind() int
@@ -1842,7 +1842,7 @@ func (s Stream) Behind() int
 Behind is how many graphemes have arrived but are not shown yet.
 
 <a name="Stream.FrameAt"></a>
-### func \(Stream\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L88>)
+### func \(Stream\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L91>)
 
 ```go
 func (s Stream) FrameAt(at time.Time) animation.FrameMsg
@@ -1851,7 +1851,7 @@ func (s Stream) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is s's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Stream.Push"></a>
-### func \(Stream\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L46>)
+### func \(Stream\) [Push](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L49>)
 
 ```go
 func (s Stream) Push(text string) (Stream, tea.Cmd)
@@ -1860,7 +1860,7 @@ func (s Stream) Push(text string) (Stream, tea.Cmd)
 Push adds text to the end and starts revealing it if the stream had caught up. With motion Still it shows at once.
 
 <a name="Stream.Skip"></a>
-### func \(Stream\) [Skip](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L64>)
+### func \(Stream\) [Skip](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L67>)
 
 ```go
 func (s Stream) Skip() Stream
@@ -1869,7 +1869,7 @@ func (s Stream) Skip() Stream
 Skip shows everything pushed so far at once.
 
 <a name="Stream.Tick"></a>
-### func \(Stream\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L80>)
+### func \(Stream\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L83>)
 
 ```go
 func (s Stream) Tick() tea.Cmd
@@ -1878,7 +1878,7 @@ func (s Stream) Tick() tea.Cmd
 Tick is the command for s's next frame, nil once it caught up.
 
 <a name="Stream.Update"></a>
-### func \(Stream\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L91>)
+### func \(Stream\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L94>)
 
 ```go
 func (s Stream) Update(msg tea.Msg) (Stream, bezel.Result)
@@ -1887,7 +1887,7 @@ func (s Stream) Update(msg tea.Msg) (Stream, bezel.Result)
 Update reveals on its own frames and asks for the next until it caught up.
 
 <a name="Stream.View"></a>
-### func \(Stream\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L71>)
+### func \(Stream\) [View](<https://github.com/lucasassuncao/bezel/blob/main/animation/text/stream.go#L74>)
 
 ```go
 func (s Stream) View() string

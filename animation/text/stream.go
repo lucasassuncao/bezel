@@ -32,11 +32,14 @@ type Stream struct {
 
 var _ bezel.Model[Stream] = Stream{}
 
+// defaultPerChar is the pace of a Stream given none, or never built.
+const defaultPerChar = 10 * time.Millisecond
+
 // NewStream reveals what it is pushed at one grapheme per perChar, 10ms when
 // perChar is not positive.
 func NewStream(perChar time.Duration) Stream {
 	if perChar <= 0 {
-		perChar = 10 * time.Millisecond
+		perChar = defaultPerChar
 	}
 	return Stream{perChar: perChar, id: frames.NextID()}
 }
@@ -53,7 +56,7 @@ func (s Stream) Push(text string) (Stream, tea.Cmd) {
 		return s, nil
 	}
 	if s.id == 0 { // a Stream never built with NewStream
-		s.id = frames.NextID()
+		s.id, s.perChar = frames.NextID(), defaultPerChar
 	}
 	s.running, s.last = true, time.Time{}
 	s.tag++
@@ -107,7 +110,8 @@ func (s Stream) Advance(now time.Time) (Stream, bool) {
 	}
 	if !s.last.IsZero() {
 		speed := 1 + float64(s.Behind())/catchUp
-		s.credit += speed * float64(frames.Paced(now.Sub(s.last))) / float64(s.perChar)
+		elapsed := max(frames.Paced(now.Sub(s.last)), 0) // a host clock may step back
+		s.credit += speed * float64(elapsed) / float64(s.perChar)
 	}
 	s.last = now
 	n := min(int(s.credit), s.Behind())
