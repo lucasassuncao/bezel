@@ -67,6 +67,9 @@ func (a Scene) View(w, h int) string {
 func (a Scene) Under(block string) string {
 	g := cells.Parse(block)
 	w, h := g.Width(), len(g)
+	if w <= 0 || h <= 0 {
+		return block // no room for the scene, as in View
+	}
 	cv := cells.NewCanvas(w, h)
 	a.paint(cv, w, h)
 	for y, row := range g {
@@ -147,6 +150,6 @@ func (a Scene) Advance(now time.Time) (Scene, bool) {
 		return a, true
 	}
 	a.run, _ = a.run.Advance(now)
-	a.t = frames.Paced(now.Sub(a.run.Start)).Seconds()
+	a.t = max(frames.Paced(now.Sub(a.run.Start)), 0).Seconds() // a host clock may step back
 	return a, false
 }

@@ -62,6 +62,36 @@ func TestSceneUnderKeepsTheBlockOnTop(t *testing.T) {
 	assert.Len(t, lines, 2)
 }
 
+// A block with no width, as an app draws before its first resize, has no
+// room for a scene: it comes back as it was.
+func TestSceneUnderABlockWithNoWidthIsTheBlock(t *testing.T) {
+	for name, a := range allScenes() {
+		for _, block := range []string{"", "\n\n"} {
+			require.Equal(t, block, playedFor(a, 1).Under(block), name)
+		}
+	}
+}
+
+// A host clock that steps back before the first frame holds the scene there.
+func TestSceneHeldAtItsFirstFrameWhenTheClockStepsBack(t *testing.T) {
+	for name, a := range allScenes() {
+		start := time.Unix(1000, 0)
+		back, _ := a.Advance(start)
+		back, _ = back.Advance(start.Add(-3 * time.Second))
+		require.Equal(t, playedFor(a, 0).View(40, 10), back.View(40, 10), name)
+	}
+}
+
+// allScenes is one of each scene.
+func allScenes() map[string]Scene {
+	return map[string]Scene{
+		"rain": Rain(white, grey), "snow": Snow(white), "confetti": Confetti(white, black),
+		"fireworks": Fireworks(white), "stars": Starfield(white), "static": Static(white), "plasma": Plasma(black, white),
+		"fire": Fire(white, grey), "aurora": Aurora(white, grey), "bubbles": Bubbles(white), "sea": Sea(white, grey),
+		"life": Life(white),
+	}
+}
+
 func TestScenePlaysOnItsOwnFrames(t *testing.T) {
 	a := Snow(white)
 	a, res := a.Update(a.FrameAt(time.Unix(1, 0)))

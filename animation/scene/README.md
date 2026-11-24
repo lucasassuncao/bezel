@@ -154,7 +154,7 @@ func Static(c color.Color) Scene
 Static is the snow of a television with no signal, in c.
 
 <a name="Scene.Active"></a>
-### func \(Scene\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L123>)
+### func \(Scene\) [Active](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L126>)
 
 ```go
 func (a Scene) Active() bool
@@ -163,7 +163,7 @@ func (a Scene) Active() bool
 Active reports whether the scene is still playing.
 
 <a name="Scene.Advance"></a>
-### func \(Scene\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L145>)
+### func \(Scene\) [Advance](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L148>)
 
 ```go
 func (a Scene) Advance(now time.Time) (Scene, bool)
@@ -172,7 +172,7 @@ func (a Scene) Advance(now time.Time) (Scene, bool)
 Advance is a at now; a scene never ends on its own, so done is false while it plays.
 
 <a name="Scene.FrameAt"></a>
-### func \(Scene\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L129>)
+### func \(Scene\) [FrameAt](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L132>)
 
 ```go
 func (a Scene) FrameAt(at time.Time) animation.FrameMsg
@@ -181,7 +181,7 @@ func (a Scene) FrameAt(at time.Time) animation.FrameMsg
 FrameAt is a's frame for at, for a test or a host that delivers frames itself.
 
 <a name="Scene.Tick"></a>
-### func \(Scene\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L126>)
+### func \(Scene\) [Tick](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L129>)
 
 ```go
 func (a Scene) Tick() tea.Cmd
@@ -199,7 +199,7 @@ func (a Scene) Under(block string) string
 Under is the scene with block on top of it: every cell of block that draws something, a grapheme or a background, hides the scene there.
 
 <a name="Scene.Update"></a>
-### func \(Scene\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L132>)
+### func \(Scene\) [Update](<https://github.com/lucasassuncao/bezel/blob/main/animation/scene/scene.go#L135>)
 
 ```go
 func (a Scene) Update(msg tea.Msg) (Scene, bezel.Result)
