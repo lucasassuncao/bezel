@@ -28,7 +28,7 @@ func NewCanvas(w, h int) Canvas {
 // Put places c at x, y, clearing any cell it lands on; one that would not fit
 // whole is left out.
 func (cv Canvas) Put(x, y int, c Cell) {
-	if y < 0 || y >= cv.h || x < 0 || x+c.Width > cv.w {
+	if y < 0 || y >= cv.h || x < 0 || x > cv.w-c.Width { // x+Width could wrap round
 		return
 	}
 	row := cv.slots[y]

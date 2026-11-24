@@ -1,6 +1,7 @@
 package cells
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -22,6 +23,15 @@ func TestACellPutOverAWideOneClearsIt(t *testing.T) {
 func TestACellThatWouldNotFitIsLeftOut(t *testing.T) {
 	cv := NewCanvas(2, 1)
 	cv.Put(1, 0, Cell{Text: "界", Width: 2})
+	require.Equal(t, "  ", cv.Grid().String())
+}
+
+// A column past any canvas, as int(math.Inf(1)) may give, is left out too:
+// x plus the cell's width must not wrap round to fit.
+func TestACellFarPastTheEdgeIsLeftOut(t *testing.T) {
+	cv := NewCanvas(2, 1)
+	cv.Put(math.MaxInt, 0, Cell{Text: "x", Width: 1})
+	cv.Put(math.MaxInt, 0, Cell{Text: "界", Width: 2})
 	require.Equal(t, "  ", cv.Grid().String())
 }
 
